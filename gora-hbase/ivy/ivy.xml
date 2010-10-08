@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+
+<ivy-module version="2.0">
+    <info 
+      organisation="org.gora"
+      module="gora-hbase"
+      status="integration"/>
+
+  <configurations>
+    <include file="${project.dir}/ivy/ivy-configurations.xml"/>
+  </configurations>
+  
+  <publications>
+    <artifact name="gora-hbase" conf="compile"/>
+    <artifact name="gora-hbase-test" conf="test"/>
+  </publications>
+
+  <dependencies>
+    <!-- conf="*->@" means every conf is mapped to the conf of the same name of the artifact-->
+    <dependency org="org.gora" name="gora-core" rev="latest.integration" changing="true" conf="*->@"/> 
+    <dependency org="org.jdom" name="jdom" rev="1.1" conf="*->master"/>
+
+    <!-- test dependencies -->
+    <dependency org="org.apache.hadoop" name="hadoop-test" rev="0.20.2" conf="test->default"/>
+
+  </dependencies>
+    
+</ivy-module>
+

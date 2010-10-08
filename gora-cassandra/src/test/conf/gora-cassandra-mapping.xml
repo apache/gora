@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<gora-orm>
+
+  <class name="org.gora.examples.generated.Employee" keyClass="java.lang.String" keyspace="Employee">
+    <field name="name" path="info:nm"/>
+    <field name="dateOfBirth" path="info:db"/>
+    <field name="ssn" path="info:sn"/>
+    <field name="salary" path="info:sl"/>
+  </class>
+
+  <class name="org.gora.examples.generated.WebPage" keyClass="java.lang.String" keyspace="WebPage">
+    <field name="url" path="c:u"/>
+    <field name="content" path="p:cnt:c"/>
+    <field name="parsedContent" path="p:parsedContent"/>
+    <field name="outlinks" path="p:outlinks"/>
+    <field name="metadata" path="c:mt"/>
+  </class>
+
+  <class name="org.gora.examples.generated.TokenDatum" keyClass="java.lang.String" keyspace="TokenDatum">
+    <field name="count" path="common:count"/>
+  </class>
+
+</gora-orm>

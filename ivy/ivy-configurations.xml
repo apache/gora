@@ -1,0 +1,4 @@
+<configurations>
+  <conf name="compile" visibility="public" />
+  <conf name="test" visibility="public" extends="compile"/>
+</configurations>

@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+
+<ivy-module version="2.0">
+    <info 
+      organisation="org.gora"
+      module="gora-cassandra"
+      status="integration"/>
+
+  <configurations>
+    <include file="${project.dir}/ivy/ivy-configurations.xml"/>
+  </configurations>
+  
+  <publications>
+    <artifact name="gora-cassandra" conf="compile"/>
+    <artifact name="gora-cassandra-test" conf="test"/>
+  </publications>
+
+  <dependencies>
+    <!-- conf="*->@" means every conf is mapped to the conf of the same name of the artifact-->
+    <dependency org="org.gora" name="gora-core" rev="latest.integration" changing="true" conf="*->@"/> 
+    <dependency org="org.jdom" name="jdom" rev="1.1" conf="*->master"/>
+
+    <dependency org="org.slf4j" name="slf4j-jdk14" rev="1.5.8" conf="*->master"/>
+    <dependency org="org.slf4j" name="slf4j-api" rev="1.5.8" conf="*->master"/>
+
+    <dependency org="com.google.guava" name="guava" rev="r06"/>
+
+    <!-- test dependencies -->
+
+  </dependencies>
+    
+</ivy-module>
+

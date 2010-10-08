@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+
+<ivy-module version="2.0">
+    <info 
+      organisation="org.gora"
+      module="gora-core"
+      status="integration"/>
+
+  <configurations>
+    <include file="${project.dir}/ivy/ivy-configurations.xml"/>
+  </configurations>
+
+  <publications defaultconf="compile">
+    <artifact name="gora-core" conf="compile"/>
+    <artifact name="gora-core-test" conf="test"/>
+  </publications>
+
+  <dependencies>
+
+    <dependency org="commons-logging" name="commons-logging" rev="1.1.1" conf="*->default"/>
+    <dependency org="log4j" name="log4j" rev="1.2.15" conf="*->master"/>
+    <dependency org="commons-lang" name="commons-lang" rev="2.5"/>
+    
+    <dependency org="org.apache.hadoop" name="hadoop-core" rev="0.20.2" conf="*->default">
+      <exclude org="hsqldb" name="hsqldb"/>
+      <exclude org="net.sf.kosmosfs" name="kfs"/>
+      <exclude org="net.java.dev.jets3t" name="jets3t"/>
+      <exclude org="org.eclipse.jdt" name="core"/>
+      <exclude org="org.mortbay.jetty" name="jsp-*"/>
+    </dependency>
+    <dependency org="org.apache.hadoop" name="avro" rev="1.3.2" conf="*->default">
+      <exclude org="ant" name="ant"/>
+    </dependency>
+
+    <!-- test dependencies -->
+    <dependency org="org.apache.hadoop" name="hadoop-test" rev="0.20.2" conf="test->master"/>
+    <dependency org="junit" name="junit" rev="4.6" conf="test->default"/>
+
+  </dependencies>
+</ivy-module>
+

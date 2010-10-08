@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<gora-orm>
+
+  <table name="Employee"> <!-- optional descriptors for tables -->
+    <family name="info"/> <!-- This can also have params like compression, bloom filters -->
+  </table>
+
+  <table name="WebPage">
+    <family name="common"/>
+    <family name="content"/>
+    <family name="parsedContent"/>
+    <family name="outlinks"/>
+  </table>
+
+  <class name="org.gora.examples.generated.Employee" keyClass="java.lang.String" table="Employee">
+    <field name="name" family="info" qualifier="nm"/>
+    <field name="dateOfBirth" family="info" qualifier="db"/>
+    <field name="ssn" family="info" qualifier="sn"/>
+    <field name="salary" family="info" qualifier="sl"/>
+  </class>
+
+  <class name="org.gora.examples.generated.WebPage" keyClass="java.lang.String" table="WebPage">
+    <field name="url" family="common" qualifier="u"/>
+    <field name="content" family="content"/>
+    <field name="parsedContent" family="parsedContent"/>
+    <field name="outlinks" family="outlinks"/>
+    <field name="metadata" family="common" qualifier="metadata"/>
+  </class>
+
+
+  <class name="org.gora.examples.generated.TokenDatum" keyClass="java.lang.String">
+    <field name="count" family="common" qualifier="count"/>
+  </class>
+
+</gora-orm>

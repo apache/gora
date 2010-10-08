@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+
+<ivy-module version="2.0">
+    <info 
+      organisation="org.gora"
+      module="gora-sql"
+      status="integration"/>
+
+  <configurations>
+    <include file="${project.dir}/ivy/ivy-configurations.xml"/>
+  </configurations>
+  
+  <publications>
+    <artifact name="gora-sql" conf="compile"/>
+    <artifact name="gora-sql-test" conf="test"/>
+  </publications>
+
+  <dependencies>
+    <!-- conf="*->@" means every conf is mapped to the conf of the same name of the artifact-->
+    <dependency org="org.gora" name="gora-core" rev="latest.integration" changing="true" conf="*->@"/> 
+    <dependency org="org.jdom" name="jdom" rev="1.1" conf="*->master"/>
+    <dependency org="com.healthmarketscience.sqlbuilder" name="sqlbuilder" rev="2.0.6" conf="*->default"/>
+
+    <!-- test dependencies -->
+    <dependency org="org.hsqldb" name="hsqldb" rev="2.0.0" conf="test->default"/>
+
+  </dependencies>
+    
+</ivy-module>
+

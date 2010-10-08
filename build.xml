@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="gora" default="publish-local-all" 
+  xmlns:ivy="antlib:org.apache.ivy.ant">
+  
+  <property name="project.dir" value="${basedir}"/>
+
+  <!-- Load all the default properties, and any the user wants    -->
+  <!-- to contribute (without having to type -D or edit this file -->
+  <property file="${user.home}/build.properties" />
+  <property file="${basedir}/build.properties" />
+  <property file="${basedir}/default.properties" />
+  
+  <!-- setup ivy default configuration with some custom info -->
+  <property name="ivy.file" value="ivy.xml" />
+  <property name="ivy.version" value="2.1.0" />
+  <property name="ivy.dir" value="${basedir}/ivy" />
+  <property name="project.ivy.dir" value="${project.dir}/ivy" />
+  <property name="ivy.jar" location="${project.ivy.dir}/ivy-${ivy.version}.jar" />
+  <property name="ivy.repo.url" value="http://repo2.maven.org/maven2/org/apache/ivy/ivy/${ivy.version}/ivy-${ivy.version}.jar" />
+
+  <property name="ivy.local.default.root" value="${ivy.default.ivy.user.dir}/local" />
+  <property name="ivy.local.default.ivy.pattern" value="[organisation]/[module]/[revision]/[type]s/[artifact].[ext]" />
+  <property name="ivy.local.default.artifact.pattern" value="[organisation]/[module]/[revision]/[type]s/[artifact].[ext]" />
+
+  <property name="ivy.shared.default.root" value="${ivy.default.ivy.user.dir}/shared" />
+  <property name="ivy.shared.default.ivy.pattern" value="[organisation]/[module]/[revision]/[type]s/[artifact].[ext]" />
+  <property name="ivy.shared.default.artifact.pattern" value="[organisation]/[module]/[revision]/[type]s/[artifact].[ext]" />
+
+  <!-- target: init  ================================================ -->
+  <target name="init" depends="ivy-init">
+    <chmod dir="bin" perm="ugo+rx" includes="*.sh, gora"/>
+  </target>
+
+  <!-- target: -buildlist  ================================================ -->    
+  <target name="-buildlist" depends="init">
+    <ivy:buildlist reference="build-path" ivyfilepath="ivy/${ivy.file}">
+      <fileset dir="." includes="**/build.xml" excludes="build.xml"/>
+    </ivy:buildlist>
+  </target>
+  
+  <target name="compile" depends="-buildlist">
+    <subant target="compile" buildpathref="build-path" />
+  </target>
+
+  <target name="jar" depends="-buildlist">
+    <subant target="jar" buildpathref="build-path" />
+  </target>
+
+  <target name="jar-snapshot" depends="-buildlist, jar" description="copies the jar files to append timestamp to artifact name">
+    <subant target="jar-snapshot" buildpathref="build-path" />
+  </target>
+
+  <target name="compile-test" depends="publish-local-all-test">
+  </target>
+
+  <target name="test-jar" depends="publish-local-all-test"/>
+
+  <target name="test-jar-snapshot" depends="test-jar" description="copies the jar files to append timestamp to artifact name">
+    <subant target="test-jar-snapshot" buildpathref="build-path" />
+  </target>
+
+  <target name="test" depends="publish-local-all-test">
+    <subant target="test" buildpathref="build-path" />
+  </target>
+
+  <!-- ================================================================== -->
+  <!-- Publish Targets                                                    --> 
+  <!-- ================================================================== -->
+
+  <!-- target: publish-local-all  ========================================== --> 
+  <target name="publish-local-all" depends="-buildlist"
+                           description="publish the projects to local ivy repo">
+    <subant target="publish-local" buildpathref="build-path" />
+  </target>
+  
+  <!-- target: publish-local-all-test  ===================================== --> 
+  <target name="publish-local-all-test" depends="-buildlist"
+                           description="publish the projects test jars to local ivy repo">
+    <subant target="publish-local-test" buildpathref="build-path" />
+  </target>
+
+  <!-- target: publish-all  ================================================ -->
+  <target name="publish-all" depends="-buildlist" 
+  			description="compile, jar and publish all projects in the right order">
+    <subant target="publish" buildpathref="build-path" />
+  </target>
+
+  <!-- ================================================================== -->
+  <!-- Clean Targets                                                      --> 
+  <!-- ================================================================== -->
+
+  <!-- target: clean-all  ================================================ -->
+  <target name="clean-all" depends="-buildlist" description="clean all projects">
+    <subant target="clean" buildpathref="build-path" />
+  </target>
+
+  <!-- target: clean  ================================================ -->  
+  <target name="clean" depends="clean-all" 
+  			description="clean all projects">
+  </target>
+
+  <!-- target: clean-cache  ================================================ -->  
+  <target name="clean-cache" depends="" 
+  			description="delete ivy cache">
+    <ivy:cleancache />
+  </target>
+  
+  <!-- ================================================================== -->
+  <!-- Ivy Targets                                                        --> 
+  <!-- ================================================================== -->
+  
+  <!-- target: ivy-init  ================================================ -->
+  <target name="ivy-init" depends="ivy-probe-antlib, ivy-init-antlib">
+    <ivy:settings file="${project.ivy.dir}/ivysettings.xml" />
+  </target>
+  
+  <!-- target: ivy-probe-antlib  ======================================== -->
+  <target name="ivy-probe-antlib">
+    <condition property="ivy.found">
+      <typefound uri="antlib:org.apache.ivy.ant" name="cleancache" />
+    </condition>
+  </target>
+
+  <!-- target: ivy-download  ============================================ -->
+  <target name="ivy-download" description="Download ivy">
+    <available file="${ivy.jar}" property="ivy.jar.found"/>
+    <antcall target="-ivy-download-unchecked"/>
+  </target>
+
+  <!-- target: ivy-download-unchecked  ================================== -->
+  <target name="-ivy-download-unchecked" unless="ivy.jar.found">
+    <get src="${ivy.repo.url}" dest="${ivy.jar}" usetimestamp="true" />
+  </target>
+
+  <!-- target: ivy-init-antlib  ========================================= -->
+  <target name="ivy-init-antlib" depends="ivy-download" unless="ivy.found">
+    <typedef uri="antlib:org.apache.ivy.ant" onerror="fail" loaderRef="ivyLoader">
+      <classpath>
+        <pathelement location="${ivy.jar}" />
+      </classpath>
+    </typedef>
+    <fail>
+      <condition>
+        <not>
+          <typefound uri="antlib:org.apache.ivy.ant" name="cleancache" />
+        </not>
+      </condition>
+      You need Apache Ivy 2.0 or later from http://ant.apache.org/
+      It could not be loaded from ${ivy.repo.url}
+    </fail>
+  </target>
+  
+</project>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<gora-orm>
+  <class name="org.gora.examples.generated.Employee" keyClass="java.lang.String" table="Employee">
+    <primarykey column="id" length="16"/>
+    <field name="name" column="name" length="128"/>
+    <field name="dateOfBirth" column="dateOfBirth"/>
+    <field name="ssn" column="ssn" jdbc-type="VARCHAR_IGNORECASE" length="16"/> <!-- jdbc-type is HSQLDB specific for testing -->
+    <field name="salary" column="salary"/>
+  </class>
+
+  <class name="org.gora.examples.generated.WebPage" keyClass="java.lang.String" table="WebPage">
+    <primarykey column="id" length="128"/>
+    <field name="url" column="url" length="128" primarykey="true"/>
+    <field name="content" column="content"/>
+    <field name="parsedContent" column="parsedContent"/>
+    <field name="outlinks" column="outlinks"/>
+    <field name="metadata" column="metadata"/>
+  </class>
+
+<!--
+<table name="TokenDatum" keyClass="java.lang.String" persistentClass="org.gora.examples.generated.TokenDatum">
+  <description>
+    <family name="common"/>
+  </description>
+  <fields>
+    <field name="count" family="common" qualifier="count"/>
+  </fields>
+</table>
+-->
+</gora-orm>
+

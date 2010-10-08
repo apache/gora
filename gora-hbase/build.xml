@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="gora-hbase" default="compile">
+  <property name="project.dir" value="${basedir}/.."/>
+
+  <import file="${project.dir}/build-common.xml"/>
+</project>
