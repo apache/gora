@@ -6,6 +6,7 @@
 .git
 .svn
 build
+lib
 **/lib/*.jar
 ivy/ivy*.jar
 /conf/*-site.xml
