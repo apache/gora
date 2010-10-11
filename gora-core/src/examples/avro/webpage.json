@@ -1,7 +1,7 @@
 {
   "type": "record",
   "name": "WebPage",
-  "namespace": "org.gora.examples.generated",
+  "namespace": "org.apache.gora.examples.generated",
   "fields" : [
     {"name": "url", "type": "string"},
     {"name": "content", "type": "bytes"},
@@ -10,7 +10,7 @@
     {"name": "metadata", "type": {
       "name": "Metadata",
       "type": "record",
-      "namespace": "org.gora.examples.generated",
+      "namespace": "org.apache.gora.examples.generated",
       "fields": [
         {"name": "version", "type": "int"},
         {"name": "data", "type": {"type": "map", "values": "string"}}

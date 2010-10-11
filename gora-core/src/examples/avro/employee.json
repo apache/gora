@@ -1,7 +1,7 @@
   {
     "type": "record",
     "name": "Employee",
-    "namespace": "org.gora.examples.generated",
+    "namespace": "org.apache.gora.examples.generated",
     "fields" : [
       {"name": "name", "type": "string"},
       {"name": "dateOfBirth", "type": "long"},

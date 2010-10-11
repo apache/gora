@@ -3,3 +3,5 @@ Gora Change Log
 Trunk (unreleased changes)
 
 *  INFRA-3038. Initial import of code.
+
+*  GORA-1. Organize source code for Apache. (enis)

@@ -1,15 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!--
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+
 <gora-orm>
 
-  <class name="org.gora.examples.generated.Employee" keyClass="java.lang.String" keyspace="Employee">
+  <class name="org.apache.gora.examples.generated.Employee" keyClass="java.lang.String" keyspace="Employee">
     <field name="name" path="info:nm"/>
     <field name="dateOfBirth" path="info:db"/>
     <field name="ssn" path="info:sn"/>
     <field name="salary" path="info:sl"/>
   </class>
 
-  <class name="org.gora.examples.generated.WebPage" keyClass="java.lang.String" keyspace="WebPage">
+  <class name="org.apache.gora.examples.generated.WebPage" keyClass="java.lang.String" keyspace="WebPage">
     <field name="url" path="c:u"/>
     <field name="content" path="p:cnt:c"/>
     <field name="parsedContent" path="p:parsedContent"/>
@@ -17,7 +34,7 @@
     <field name="metadata" path="c:mt"/>
   </class>
 
-  <class name="org.gora.examples.generated.TokenDatum" keyClass="java.lang.String" keyspace="TokenDatum">
+  <class name="org.apache.gora.examples.generated.TokenDatum" keyClass="java.lang.String" keyspace="TokenDatum">
     <field name="count" path="common:count"/>
   </class>
 
