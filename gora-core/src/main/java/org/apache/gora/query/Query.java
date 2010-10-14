@@ -26,14 +26,14 @@ import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.io.Writable;
 
 /**
- * A query to a data store to retrive objects. Queries are constructed by 
+ * A query to a data store to retrieve objects. Queries are constructed by 
  * the DataStore implementation via {@link DataStore#newQuery()}.
  */
 public interface Query<K, T extends Persistent> extends Writable, Configurable {
 
   /**
    * Sets the dataStore of this query. Under normal operation, this call 
-   * is not necassary and it is potentially dangereous. So use this 
+   * is not necessary and it is potentially dangerous. So use this 
    * method only if you know what you are doing.
    * @param dataStore the dataStore of the query
    */

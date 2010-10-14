@@ -23,7 +23,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Reducer;
 
 /**
- * Optional base class for gora based {@link Reducer}s.
+ * Optional base class for Gora based {@link Reducer}s.
  */
 public class GoraReducer<K1, V1, K2, V2 extends Persistent>
 extends Reducer<K1, V1, K2, V2> {
