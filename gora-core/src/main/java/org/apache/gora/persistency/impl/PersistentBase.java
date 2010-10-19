@@ -58,8 +58,8 @@ public abstract class PersistentBase implements Persistent {
 
   /** Subclasses should call this function for all the persistable fields
    * in the class to register them.
-   * @param field the name of the field
-   * @param index the index of the field
+   * @param clazz the Persistent class
+   * @param fields the name of the fields of the class
    */
   protected static void registerFields(Class<?> clazz, String... fields) {
     FIELDS.put(clazz, fields);

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<!DOCTYPE document PUBLIC "-//APACHE//DTD Documentation V2.0//EN" "http://forrest.apache.org/dtd/document-v20.dtd">
+<document>
+  <header>
+    <title>Gora Core Module</title>
+  </header>
+  <body>
+
+
+  <section>
+    <title> Introduction </title>
+    <p> This is the main entry point for Gora documentation. Here are some pointers for further info:</p>
+
+    <p><ul>
+      <li>First if you haven't already done so, make sure to check the <a href="site:quickstart">quick start guide</a>. </li>
+      <li>Information about gora modules can be found at the <a href="#Gora+Modules">section below</a>. </li>
+      <li>You can also take a look at the <a href="ext:api/index"> API</a> documentation which 
+    contains the javadoc for all of the modules combined. </li>
+      <li>You can find how to configure gora in <a href="site:gora-conf"> Gora Configuration</a>. </li>
+    </ul></p>
+  </section>
+
+
+  <section> 
+    <title>Gora Modules </title>
+    <p> Gora source code is organized in a modular architecture. The 
+    <b>gora-core</b> module is the main module which contains the core of 
+    the code. All other modules depend on the gora-core module. Each data 
+    store backend in Gora resides in it's own module. The documentation for 
+    the specific module can be found at the module's documentation directory. 
+    </p>
+
+    <p> It is wise so start with going over the documentation for the gora-core 
+    module and then the specific data store module(s) you want to use. The 
+    following modules are implemented in gora. </p>
+
+   <p> <ul>
+     <li> <b><a href="site:gora-core">gora-core</a></b>: Module containing core functionality </li>
+     <li> <b><a href="site:gora-cassandra">gora-cassandra</a></b>: Module for Apache Cassandra backend </li>
+     <li> <b><a href="site:gora-hbase">gora-hbase</a></b>: Module for Apache HBase backend </li>
+     <li> <b><a href="site:gora-sql">gora-sql</a></b>: Module for SQL database backends </li>
+   </ul></p>
+
+  </section>
+
+  </body>
+</document>

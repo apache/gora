@@ -19,8 +19,31 @@
 
 <project name="gora" default="publish-local-all" 
   xmlns:ivy="antlib:org.apache.ivy.ant">
-  
+
+  <property name="year" value="2010" />
   <property name="project.dir" value="${basedir}"/>
+  <property name="version" value="0.1" />
+  <property name="final.name" value="${ant.project.name}-${version}" />
+
+  <property name="dist.base.dir" value="${basedir}/dist"/>
+  <property name="dist.dir" value="${dist.base.dir}/${final.name}"/>
+
+  <property name="build.dir" value="${basedir}/build" />
+  <property name="docs.dir" value="${basedir}/docs" />
+  <property name="build.docs" value="${build.dir}/docs" />  
+  <property name="build.javadoc" value="${build.docs}/api/" />
+  <property name="javadoc.link.java" value="http://java.sun.com/javase/6/docs/api/" />
+  <property name="javadoc.link.hadoop" value="http://hadoop.apache.org/common/docs/r0.20.2/api/" />
+  <property name="javadoc.link.avro" value="http://avro.apache.org/docs/1.3.3/api/java/" />
+  <property name="build.javadoc.timestamp" value="${build.javadoc}/index.html" />
+
+  <!-- module directories -->
+  <property name="src.dir" value="src/main/java" />
+  <property name="conf.dir" value="conf" />
+  <property name="lib.dir" value="lib" />
+  <property name="lib-ext.dir" value="lib-ext" />
+  <property name="build.classes.dir" value="build/classes" />
+
 
   <!-- Load all the default properties, and any the user wants    -->
   <!-- to contribute (without having to type -D or edit this file -->
@@ -52,7 +75,7 @@
   <!-- target: -buildlist  ================================================ -->    
   <target name="-buildlist" depends="init">
     <ivy:buildlist reference="build-path" ivyfilepath="ivy/${ivy.file}">
-      <fileset dir="." includes="**/build.xml" excludes="build.xml"/>
+      <fileset dir="." includes="*/build.xml" excludes="build.xml"/>
     </ivy:buildlist>
   </target>
   
@@ -79,6 +102,164 @@
 
   <target name="test" depends="publish-local-all-test">
     <subant target="test" buildpathref="build-path" />
+  </target>
+
+  <!-- ================================================================== -->
+  <!-- Documentation                                                      -->
+  <!-- ================================================================== -->
+
+  <path id="classpath">
+    <dirset dir=".">
+      <include name="*/${build.classes.dir}"/>
+      <include name="*/${conf.dir}"/>
+    </dirset>    
+
+    <fileset dir=".">
+      <include name="**/*.jar" />
+    </fileset>
+  </path>
+
+  <target name="javadoc-uptodate" depends="compile">
+    <uptodate property="javadoc.is.uptodate">
+      <srcfiles dir="${project.dir}/gora-core/${src.dir}">
+        <include name="**/*.java" />
+        <include name="**/*.html" />
+      </srcfiles>
+      <mapper type="merge" to="${build.javadoc.timestamp}" />
+    </uptodate>
+  </target>
+ 
+  <target name="javadoc" description="Generate javadoc" depends="javadoc-uptodate"
+       unless="javadoc.is.uptodate">
+    <mkdir dir="${build.javadoc}"/>
+    <javadoc
+      overview="gora-core/${src.dir}/overview.html"
+      destdir="${build.javadoc}"
+      author="true"
+      version="true"
+      use="true"
+      windowtitle="Apache Gora API"
+      doctitle="Apache Gora API"
+      bottom="Copyright &amp;copy; ${year} The Apache Software Foundation">
+
+      <packageset dir="gora-core/src/main/java"/>
+      <packageset dir="gora-cassandra/src/main/java"/>
+      <packageset dir="gora-hbase/src/main/java"/>
+      <packageset dir="gora-sql/src/main/java"/>
+      
+      <link href="${javadoc.link.java}"/>
+      <link href="${javadoc.link.avro}"/>
+      <link href="${javadoc.link.hadoop}"/>
+      
+      <classpath refid="classpath"/>
+
+      <group title="Core" packages="org.apache.gora.*"/>
+      <group title="Cassandra Module" packages="org.apache.gora.cassandra.*"/>
+      <group title="HBase Module" packages="org.apache.gora.hbase.*"/>
+      <group title="Sql Module" packages="org.apache.gora.sql.*"/>
+
+    </javadoc>
+  </target>
+
+  <target name="docs" depends="forrest.check, javadoc" description="Generate forrest-based documentation. To use, specify -Dforrest.home=&lt;base of Apache Forrest installation&gt; on the command line." if="forrest.home">
+    <exec dir="${docs.dir}" executable="${forrest.home}/bin/forrest" failonerror="true">
+      <arg value="-Dforrest.validate.xdocs.failonerror=false"/>
+      <arg value="-Dproject.build-dir=${build.docs}"/>
+    </exec>
+
+    <copy todir="${build.docs}/site/api/" includeEmptyDirs="false">
+      <fileset dir="${build.javadoc}"/>
+    </copy>
+    
+  </target>
+
+  <target name="forrest.check" unless="forrest.home">
+    <fail message="'forrest.home' is not defined. Please pass -Dforrest.home=&lt;base of Apache Forrest installation&gt; to Ant on the command-line." />
+  </target>
+
+  <!-- ================================================================== -->
+  <!-- Distribution                                                       -->
+  <!-- ================================================================== -->
+  <target name="package" depends="-buildlist, test-jar"
+	  description="Build distribution">
+
+    <subant target="package" buildpathref="build-path" />
+
+    <mkdir dir="${dist.dir}"/>
+    <mkdir dir="${dist.dir}/bin"/>
+    <mkdir dir="${dist.dir}/docs"/>
+    <mkdir dir="${dist.dir}/docs/api"/>
+    
+    <copy todir="${dist.dir}/bin">
+      <fileset dir="bin"/>
+    </copy>
+
+    <copy todir="${dist.dir}/conf">
+      <fileset dir="${conf.dir}" excludes="**/*.template"/>
+    </copy>
+
+    <copy todir="${dist.dir}/ivy">
+      <fileset dir="ivy">
+        <exclude name="ivy*.jar"/>
+      </fileset>
+    </copy>
+
+    <copy todir="${dist.dir}">
+      <fileset dir=".">
+        <include name="*.txt" />
+        <include name="*.xml" />
+      </fileset>
+    </copy>
+
+    <copy todir="${dist.dir}/docs">
+      <fileset dir="${build.docs}/site"/>
+    </copy>
+
+    <chmod perm="ugo+x" type="file" parallel="false">
+        <fileset dir="${dist.dir}/bin"/>
+    </chmod>
+
+    <!-- modules -->
+    <copy todir="${dist.dir}/gora-core">
+      <fileset dir="gora-core/build/gora-core"/>
+    </copy>
+    <copy todir="${dist.dir}/gora-cassandra">
+      <fileset dir="gora-cassandra/build/gora-cassandra"/>
+    </copy>
+    <copy todir="${dist.dir}/gora-hbase">
+      <fileset dir="gora-hbase/build/gora-hbase"/>
+    </copy>
+    <copy todir="${dist.dir}/gora-sql">
+      <fileset dir="gora-sql/build/gora-sql"/>
+    </copy>
+  </target>
+
+  <macrodef name="macro_tar" description="Worker Macro for tar">
+    <attribute name="param.destfile"/>
+    <element name="param.listofitems"/>
+    <sequential>
+      <tar compression="gzip" longfile="gnu"
+      destfile="@{param.destfile}">
+      <param.listofitems/>
+      </tar>
+    </sequential>
+  </macrodef>
+
+  <!-- ================================================================== -->
+  <!-- Make release tarball                                               -->
+  <!-- ================================================================== -->
+  <target name="tar" depends="package" description="Make release tarball">
+    <macro_tar param.destfile="${dist.base.dir}/${final.name}.tar.gz">
+      <param.listofitems>
+        <tarfileset dir="${dist.base.dir}" mode="664">
+          <exclude name="${final.name}/bin/*" />
+          <include name="${final.name}/**" />
+        </tarfileset>
+        <tarfileset dir="${dist.base.dir}" mode="755">
+          <include name="${final.name}/bin/*" />
+        </tarfileset>
+      </param.listofitems>
+    </macro_tar>
   </target>
 
   <!-- ================================================================== -->
@@ -115,12 +296,21 @@
   <!-- target: clean  ================================================ -->  
   <target name="clean" depends="clean-all" 
   			description="clean all projects">
+    <delete includeemptydirs="true" dir="${dist.base.dir}"/>
+    <delete includeemptydirs="true" dir="${build.dir}"/>
   </target>
 
   <!-- target: clean-cache  ================================================ -->  
   <target name="clean-cache" depends="" 
   			description="delete ivy cache">
     <ivy:cleancache />
+  </target>
+
+  <!-- ================================================================== -->
+  <!-- target: clean-docs                                                -->
+  <!-- ================================================================== -->
+  <target name="clean-docs">
+    <delete dir="${build.docs}"/>
   </target>
   
   <!-- ================================================================== -->

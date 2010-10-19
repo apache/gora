@@ -13,17 +13,3 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-*~
-.classpath
-.externalToolBuilders
-.project
-.settings
-.git
-.svn
-build
-dist
-lib
-**/lib/*.jar
-ivy/ivy*.jar
-/conf/*-site.xml
-**/conf/*-site.xml

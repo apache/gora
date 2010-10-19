@@ -19,9 +19,10 @@
 
 <project name="gora-common" xmlns:ivy="antlib:org.apache.ivy.ant">
 
+  <property name="name" value="${ant.project.name}" />
   <property name="version" value="0.1" />
   <property name="final.name" value="${ant.project.name}-${version}" />
-  <property name="year" value="2008" />
+  <property name="year" value="2010" />
   <property name="module.version.target" value="${version}" />
   <property name="module.name" value="${ant.project.name}-${version}"/>
 	
@@ -40,8 +41,8 @@
   <property name="conf.dir" value="${basedir}/conf" />
   <property name="jar.file" value="${build.dir}/${module.name}.jar" />
   <property name="job.file" value="${build.dir}/${module.name}.job" />
-  <property name="dist.dir" value="${build.dir}/${final.name}" />
-  
+  <property name="dist.dir" value="${build.dir}/${name}" />
+
   <property name="examples.src.dir" value="${basedir}/src/examples/java" />
   <property name="examples.build.dir" value="${build.dir}/examples" />
   <property name="examples.build.classes.dir" value="${examples.build.dir}/classes" />
@@ -129,7 +130,8 @@
         optimize="${javac.optimize}"
         target="${javac.version}"
         source="${javac.version}"
-        deprecation="${javac.deprecation}">
+        deprecation="${javac.deprecation}"
+        includeAntRuntime="yes">
       <classpath refid="classpath"/>
     </javac>
   </target>
@@ -147,7 +149,8 @@
         optimize="${javac.optimize}"
         target="${javac.version}"
         source="${javac.version}"
-        deprecation="${javac.deprecation}">
+        deprecation="${javac.deprecation}"
+        includeAntRuntime="yes">
       <classpath refid="classpath"/>
     </javac>
   </target>
@@ -165,7 +168,8 @@
          optimize="${javac.optimize}"
          target="${javac.version}"
          source="${javac.version}"
-         deprecation="${javac.deprecation}">
+         deprecation="${javac.deprecation}"
+         includeAntRuntime="yes">
       <classpath refid="test.classpath"/>
     </javac>
   </target>
@@ -266,6 +270,62 @@
       </batchtest>
     </junit>
     <fail if="tests.failed">Tests failed!</fail>
+  </target>
+
+  <!-- ================================================================== -->
+  <!-- D I S T R I B U T I O N                                            -->
+  <!-- ================================================================== -->
+  <target name="package" depends="compile, jar, test-jar"
+	  description="Build distribution">
+    <mkdir dir="${dist.dir}"/>
+    <mkdir dir="${dist.dir}/lib"/>
+
+    <copy todir="${dist.dir}/lib" includeEmptyDirs="false">
+      <fileset dir="lib"/>
+    </copy>
+
+    <copy todir="${dist.dir}">
+      <fileset file="${jar.file}"/>
+      <fileset file="${test.jar.file}"/>
+    </copy>
+    
+    <copy todir="${dist.dir}/conf">
+      <fileset dir="${conf.dir}" excludes="**/*.template"/>
+    </copy>
+
+    <copy todir="${dist.dir}/ivy">
+      <fileset dir="ivy"/>
+    </copy>
+
+    <copy todir="${dist.dir}">
+      <fileset dir=".">
+        <include name="*.txt" />
+      </fileset>
+    </copy>
+
+    <copy todir="${dist.dir}/src" includeEmptyDirs="true">
+      <fileset dir="src" excludes="**/*.template"/>
+    </copy>
+  	
+    <copy todir="${dist.dir}/" file="build.xml"/>
+
+  </target>
+
+  <!-- ================================================================== -->
+  <!-- Make release tarball                                               -->
+  <!-- ================================================================== -->
+  <target name="tar" depends="package" description="Make release tarball">
+    <macro_tar param.destfile="${build.dir}/${final.name}.tar.gz">
+      <param.listofitems>
+        <tarfileset dir="${build.dir}" mode="664">
+          <exclude name="${name}/bin/*" />
+          <include name="${name}/**" />
+        </tarfileset>
+        <tarfileset dir="${build.dir}" mode="755">
+          <include name="${name}/bin/*" />
+        </tarfileset>
+      </param.listofitems>
+    </macro_tar>
   </target>
 
   <!-- ================================================================== -->
