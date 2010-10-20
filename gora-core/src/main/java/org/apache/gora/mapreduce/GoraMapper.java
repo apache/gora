@@ -27,7 +27,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Partitioner;
 
 /**
- * Optional base class for gora based {@link Mapper}s.
+ * Optional base class for Gora based {@link Mapper}s.
  */
 public class GoraMapper<K1, V1 extends Persistent, K2, V2>
 extends Mapper<K1, V1, K2, V2> {

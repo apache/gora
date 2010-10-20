@@ -27,7 +27,7 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.Path;
 
 /*
- * Copied from Avro trunk, when 1.4 is released and gora switches to it
+ * Copied from Avro trunk, when 1.4 is released and Gora switches to it
  * remove this file
  */
 

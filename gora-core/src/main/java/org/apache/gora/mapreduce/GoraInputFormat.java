@@ -39,7 +39,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 /**
- * {@link InputFormat} to fetch the input from gora data stores. The
+ * {@link InputFormat} to fetch the input from Gora data stores. The
  * query to fetch the items from the datastore should be prepared and
  * set via {@link #setQuery(Job, Query)}, before submitting the job.
  *
