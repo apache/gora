@@ -26,8 +26,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.store.impl.DataStoreBase;
+import org.apache.gora.util.GoraException;
 import org.apache.gora.util.ReflectionUtils;
-import org.apache.hadoop.util.StringUtils;
 
 /**
  * A Factory for {@link DataStore}s. DataStoreFactory instances are thread-safe.
@@ -83,19 +83,20 @@ public class DataStoreFactory {
 
   public static <D extends DataStore<K,T>, K, T extends Persistent>
   D createDataStore(Class<D> dataStoreClass
-      , Class<K> keyClass, Class<T> persistent) {
+      , Class<K> keyClass, Class<T> persistent) throws GoraException {
     return createDataStore(dataStoreClass, keyClass, persistent, properties);
   }
 
   public static <D extends DataStore<K,T>, K, T extends Persistent>
-  D createDataStore(Class<D> dataStoreClass
-      , Class<K> keyClass, Class<T> persistent, String schemaName) {
+  D createDataStore(Class<D> dataStoreClass , Class<K> keyClass, 
+      Class<T> persistent, String schemaName) throws GoraException {
     return createDataStore(dataStoreClass, keyClass, persistent, properties, schemaName);
   }
 
   public static <D extends DataStore<K,T>, K, T extends Persistent>
   D createDataStore(Class<D> dataStoreClass, Class<K> keyClass
-      , Class<T> persistent, Properties properties, String schemaName) {
+      , Class<T> persistent, Properties properties, String schemaName) 
+  throws GoraException {
     try {
       setDefaultSchemaName(properties, schemaName);
       D dataStore =
@@ -103,22 +104,24 @@ public class DataStoreFactory {
       initializeDataStore(dataStore, keyClass, persistent, properties);
       return dataStore;
 
-    } catch (Exception ex) {
-      log.error(StringUtils.stringifyException(ex));
-      return null;
+    } catch (GoraException ex) {
+      throw ex;
+    } catch(Exception ex) {
+      throw new GoraException(ex);
     }
   }
 
   public static <D extends DataStore<K,T>, K, T extends Persistent>
   D createDataStore(Class<D> dataStoreClass
-      , Class<K> keyClass, Class<T> persistent, Properties properties) {
+      , Class<K> keyClass, Class<T> persistent, Properties properties) 
+  throws GoraException {
     return createDataStore(dataStoreClass, keyClass, persistent, properties, null);
   }
 
   @SuppressWarnings("unchecked")
   public static <D extends DataStore<K,T>, K, T extends Persistent>
   D getDataStore( Class<D> dataStoreClass, Class<K> keyClass,
-      Class<T> persistentClass) {
+      Class<T> persistentClass) throws GoraException {
     int hash = getDataStoreKey(dataStoreClass, keyClass, persistentClass);
 
     D dataStore = (D) dataStores.get(hash);
@@ -133,30 +136,37 @@ public class DataStoreFactory {
   @SuppressWarnings("unchecked")
   public static synchronized <K, T extends Persistent> DataStore<K, T> getDataStore(
       String dataStoreClass, Class<K> keyClass, Class<T> persistentClass)
-      throws ClassNotFoundException {
-
-    Class<? extends DataStore<K,T>> c
+      throws GoraException {
+    try {
+      Class<? extends DataStore<K,T>> c
         = (Class<? extends DataStore<K, T>>) Class.forName(dataStoreClass);
-    return getDataStore(c, keyClass, persistentClass);
+      return getDataStore(c, keyClass, persistentClass);
+    } catch(GoraException ex) {
+      throw ex;
+    } catch (Exception ex) {
+      throw new GoraException(ex);
+    }
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
   public static synchronized DataStore getDataStore(
       String dataStoreClass, String keyClass, String persistentClass)
-    throws ClassNotFoundException {
+    throws GoraException {
 
-    Class k = Class.forName(keyClass);
-    Class p = Class.forName(persistentClass);
-    return getDataStore(dataStoreClass, k, p);
+    try {
+      Class k = Class.forName(keyClass);
+      Class p = Class.forName(persistentClass);
+      return getDataStore(dataStoreClass, k, p);
+    } catch(GoraException ex) {
+      throw ex;
+    } catch (Exception ex) {
+      throw new GoraException(ex);
+    }
   }
 
   public static <K, T extends Persistent> DataStore<K, T> getDataStore(
-      Class<K> keyClass, Class<T> persistent) {
-    try {
-      return getDataStore(defaultDataStoreClass, keyClass, persistent);
-    } catch (ClassNotFoundException ex) {
-      return null;
-    }
+      Class<K> keyClass, Class<T> persistent) throws GoraException {
+    return getDataStore(defaultDataStoreClass, keyClass, persistent);
   }
 
   private static int getDataStoreKey(

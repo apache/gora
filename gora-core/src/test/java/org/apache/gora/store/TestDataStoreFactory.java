@@ -25,8 +25,7 @@ import junit.framework.Assert;
 import org.apache.gora.avro.store.DataFileAvroStore;
 import org.apache.gora.mock.persistency.MockPersistent;
 import org.apache.gora.mock.store.MockDataStore;
-import org.apache.gora.store.DataStore;
-import org.apache.gora.store.DataStoreFactory;
+import org.apache.gora.util.GoraException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,14 +36,14 @@ public class TestDataStoreFactory {
   }
 
   @Test
-  public void testGetDataStore() throws ClassNotFoundException {
+  public void testGetDataStore() throws GoraException {
     DataStore<?,?> dataStore = DataStoreFactory.getDataStore("org.apache.gora.mock.store.MockDataStore"
         , String.class, MockPersistent.class);
     Assert.assertNotNull(dataStore);
   }
   
   @Test
-  public void testGetClasses() throws ClassNotFoundException {
+  public void testGetClasses() throws GoraException {
     DataStore<?,?> dataStore = DataStoreFactory.getDataStore("org.apache.gora.mock.store.MockDataStore"
         , String.class, MockPersistent.class);
     Assert.assertNotNull(dataStore);
@@ -53,14 +52,14 @@ public class TestDataStoreFactory {
   }
   
   @Test
-  public void testGetDataStore2() throws ClassNotFoundException {
+  public void testGetDataStore2() throws GoraException {
     DataStore<?,?> dataStore = DataStoreFactory.getDataStore(MockDataStore.class
         , String.class, MockPersistent.class);
     Assert.assertNotNull(dataStore);
   }
   
   @Test
-  public void testGetDataStore3() throws ClassNotFoundException {
+  public void testGetDataStore3() throws GoraException {
     DataStore<?,?> dataStore1 = DataStoreFactory.getDataStore("org.apache.gora.mock.store.MockDataStore"
         , Object.class, MockPersistent.class);
     DataStore<?,?> dataStore2 = DataStoreFactory.getDataStore("org.apache.gora.mock.store.MockDataStore"
@@ -73,7 +72,7 @@ public class TestDataStoreFactory {
   }
   
   @Test
-  public void testReadProperties() {
+  public void testReadProperties() throws GoraException{
     //indirect testing
     DataStore<?,?> dataStore = DataStoreFactory.getDataStore(String.class, MockPersistent.class);
     Assert.assertNotNull(dataStore);

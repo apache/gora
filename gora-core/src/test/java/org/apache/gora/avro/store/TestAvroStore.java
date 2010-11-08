@@ -26,7 +26,6 @@ import java.io.IOException;
 
 import junit.framework.Assert;
 
-import org.apache.gora.avro.store.AvroStore;
 import org.apache.gora.avro.store.AvroStore.CodecType;
 import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.examples.generated.WebPage;
@@ -35,6 +34,7 @@ import org.apache.gora.query.Result;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.DataStoreTestUtil;
+import org.apache.gora.util.GoraException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.junit.After;
@@ -69,8 +69,8 @@ public class TestAvroStore {
   }
 
   @SuppressWarnings("unchecked")
-  protected AvroStore<String, Employee> createEmployeeDataStore() {
-    return (AvroStore<String, Employee>) DataStoreFactory.getDataStore(
+  protected AvroStore<String, Employee> createEmployeeDataStore() throws GoraException {
+    return DataStoreFactory.getDataStore(
         AvroStore.class, String.class, Employee.class);
   }
 

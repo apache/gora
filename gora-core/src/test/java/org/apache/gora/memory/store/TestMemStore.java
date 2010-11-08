@@ -24,6 +24,7 @@ import org.apache.gora.memory.store.MemStore;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.DataStoreTestBase;
+import org.apache.gora.util.GoraException;
 
 /**
  * Test case for {@link MemStore}.
@@ -32,13 +33,13 @@ public class TestMemStore extends DataStoreTestBase {
 
   @SuppressWarnings("unchecked")
   @Override
-  protected DataStore<String, Employee> createEmployeeDataStore() {
+  protected DataStore<String, Employee> createEmployeeDataStore() throws GoraException {
     return DataStoreFactory.getDataStore(MemStore.class, String.class, Employee.class);
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  protected DataStore<String, WebPage> createWebPageDataStore() {
+  protected DataStore<String, WebPage> createWebPageDataStore() throws GoraException {
     return DataStoreFactory.getDataStore(MemStore.class, String.class, WebPage.class);
   }
 }

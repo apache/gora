@@ -8,3 +8,6 @@ Trunk (unreleased changes)
 
 *  GORA-6. Add methods that take dataStoreClass instead of data store instance 
    to Gora{Input|Output}Format and Gora{Mapper|Reducer}. (enis)
+
+*  GORA-7. DataStoreFactory.createDataStore() should throw exceptions on 
+   failure. (enis)

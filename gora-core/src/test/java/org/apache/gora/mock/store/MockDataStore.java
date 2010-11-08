@@ -30,6 +30,7 @@ import org.apache.gora.query.Result;
 import org.apache.gora.query.impl.PartitionQueryImpl;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.impl.DataStoreBase;
+import org.apache.gora.util.GoraException;
 
 public class MockDataStore extends DataStoreBase<String, MockPersistent> {
 
@@ -37,9 +38,14 @@ public class MockDataStore extends DataStoreBase<String, MockPersistent> {
   public static final String[] LOCATIONS = {"foo1", "foo2", "foo3", "foo4", "foo1"};
 
   public static MockDataStore get() {
-    MockDataStore dataStore = DataStoreFactory.getDataStore(MockDataStore.class
-        , String.class, MockPersistent.class);
-    return dataStore;
+    MockDataStore dataStore;
+    try {
+      dataStore = DataStoreFactory.getDataStore(MockDataStore.class
+          , String.class, MockPersistent.class);
+      return dataStore;
+    } catch (GoraException ex) {
+      throw new RuntimeException(ex);
+    }
   }
 
   public MockDataStore() { }

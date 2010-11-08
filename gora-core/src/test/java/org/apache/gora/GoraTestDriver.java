@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
+import org.apache.gora.util.GoraException;
 
 /**
  * GoraTestDriver is a helper class for third party tests.
@@ -99,7 +100,7 @@ public class GoraTestDriver {
 
   @SuppressWarnings("unchecked")
   public<K, T extends Persistent> DataStore<K,T>
-    createDataStore(Class<K> keyClass, Class<T> persistentClass) {
+    createDataStore(Class<K> keyClass, Class<T> persistentClass) throws GoraException {
     setProperties(DataStoreFactory.properties);
     DataStore<K,T> dataStore = DataStoreFactory.createDataStore(
         (Class<? extends DataStore<K,T>>)dataStoreClass, keyClass, persistentClass);
