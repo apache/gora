@@ -33,6 +33,14 @@ import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
+/**
+ * {@link OutputFormat} for Hadoop jobs that want to store the job outputs 
+ * to a Gora store. 
+ * <p>
+ * Hadoop jobs can be either configured through static 
+ * <code>setOutput()</code> methods, or if the job is not map-only from {@link GoraReducer}.
+ * @see GoraReducer 
+ */
 public class GoraOutputFormat<K, T extends Persistent>
   extends OutputFormat<K, T> {
 
@@ -105,14 +113,22 @@ public class GoraOutputFormat<K, T extends Persistent>
    */
   public static <K, V extends Persistent> void setOutput(Job job,
       DataStore<K,V> dataStore, boolean reuseObjects) {
-    setOutput(job, dataStore.getKeyClass(), dataStore.getPersistentClass(),
-        dataStore.getClass(), reuseObjects);
+    setOutput(job, dataStore.getClass(), dataStore.getKeyClass()
+        , dataStore.getPersistentClass(), reuseObjects);
   }
 
+  /**
+   * Sets the output parameters for the job 
+   * @param job the job to set the properties for
+   * @param dataStoreClass the datastore class
+   * @param keyClass output key class
+   * @param persistentClass output value class
+   * @param reuseObjects whether to reuse objects in serialization
+   */
   @SuppressWarnings("rawtypes")
   public static <K, V extends Persistent> void setOutput(Job job,
-      Class<K> keyClass, Class<V> persistentClass,
       Class<? extends DataStore> dataStoreClass,
+      Class<K> keyClass, Class<V> persistentClass,
       boolean reuseObjects) {
 
     Configuration conf = job.getConfiguration();
@@ -120,6 +136,8 @@ public class GoraOutputFormat<K, T extends Persistent>
     GoraMapReduceUtils.setIOSerializations(conf, reuseObjects);
 
     job.setOutputFormatClass(GoraOutputFormat.class);
+    job.setOutputKeyClass(keyClass);
+    job.setOutputValueClass(persistentClass);
     conf.setClass(GoraOutputFormat.DATA_STORE_CLASS, dataStoreClass,
         DataStore.class);
     conf.setClass(GoraOutputFormat.OUTPUT_KEY_CLASS, keyClass, Object.class);

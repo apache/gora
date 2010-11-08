@@ -26,6 +26,7 @@ import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.FileSplitPartitionQuery;
 import org.apache.gora.store.DataStore;
+import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.FileBackedDataStore;
 import org.apache.gora.util.IOUtils;
 import org.apache.hadoop.conf.Configurable;
@@ -45,6 +46,11 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
  *
  * <p> The {@link InputSplit}s are prepared from the {@link PartitionQuery}s
  * obtained by calling {@link DataStore#getPartitions(Query)}.
+ * <p>
+ * Hadoop jobs can be either configured through static 
+ * <code>setInput()</code> methods, or from {@link GoraMapper}.
+ * 
+ * @see GoraMapper
  */
 public class GoraInputFormat<K, T extends Persistent>
   extends InputFormat<K, T> implements Configurable {
@@ -149,5 +155,28 @@ public class GoraInputFormat<K, T extends Persistent>
 
     job.setInputFormatClass(GoraInputFormat.class);
     GoraInputFormat.setQuery(job, query);
+  }
+  
+  /**
+   * Sets the input parameters for the job
+   * @param job the job to set the properties for
+   * @param query the query to get the inputs from
+   * @param dataStoreClass the datastore class
+   * @param inKeyClass Map input key class
+   * @param inValueClass Map input value class
+   * @param reuseObjects whether to reuse objects in serialization
+   * @throws IOException
+   */
+  public static <K1, V1 extends Persistent> void setInput(
+      Job job, 
+      Class<? extends DataStore<K1,V1>> dataStoreClass, 
+      Class<K1> inKeyClass, 
+      Class<V1> inValueClass,
+      boolean reuseObjects)
+  throws IOException {
+
+    DataStore<K1,V1> store = DataStoreFactory.getDataStore(dataStoreClass
+        , inKeyClass, inValueClass);
+    setInput(job, store.newQuery(), store, reuseObjects);
   }
 }

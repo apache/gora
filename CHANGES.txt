@@ -5,3 +5,6 @@ Trunk (unreleased changes)
 *  INFRA-3038. Initial import of code.
 
 *  GORA-1. Organize source code for Apache. (enis)
+
+*  GORA-6. Add methods that take dataStoreClass instead of data store instance 
+   to Gora{Input|Output}Format and Gora{Mapper|Reducer}. (enis)
