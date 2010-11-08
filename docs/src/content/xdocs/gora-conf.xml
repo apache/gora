@@ -48,12 +48,12 @@ Data store implementation in Gora distribution include:</p>
 <p><br/><table>
   <caption>DataStore implementations</caption>
   <tr><th align="left">DataStore Implementation</th> <th align="left">Full Class Name</th> <th align="left">Module Name</th> <th align="left">Explanation</th></tr>
-  <tr><td>AvroStore</td> <td>org.gora.avro.store.AvroStore</td> <td>gora-core</td> <td>An adapter DataStore for binary-compatible Avro serializations. AvroDataStore supports Binary and JSON serializations. </td></tr>
-  <tr><td>DataFileAvroStore</td> <td>org.gora.avro.store.DataFileAvroStore</td> <td>gora-core</td> <td>DataFileAvroStore is file based store which uses Avro's DataFile{Writer,Reader}'s as a backend. This datastore supports mapreduce.</td></tr>
-  <tr><td>HBaseStore</td> <td>org.gora.hbase.store.HBaseStore</td> <td><a href="site:gora-hbase">gora-hbase</a></td> <td> DataStore for <a href="ext:hbase">HBase</a>. </td></tr>
-  <tr><td>CassandraStore</td> <td>org.gora.cassandra.store.CasssandraStore</td> <td><a href="site:gora-cassandra">gora-cassandra</a></td> <td> DataStore for <a href="ext:cassandra">Cassandra</a>. </td></tr>
-  <tr><td>SqlStore</td> <td>org.gora.sql.store.SqlStore</td> <td><a href="site:gora-sql">gora-sql</a></td> <td> A DataStore implementation for RDBMS with a SQL interface. SqlStore uses JDBC drivers to communicate with the DB. Mysql and Hsqldb are supported for now.</td></tr>
-  <tr><td>MemStore</td> <td>org.gora.memory.store.MemStore</td> <td>gora-core</td> <td> Memory based DataStore implementation for tests. </td></tr>
+  <tr><td>AvroStore</td> <td>org.apache.gora.avro.store.AvroStore</td> <td>gora-core</td> <td>An adapter DataStore for binary-compatible Avro serializations. AvroDataStore supports Binary and JSON serializations. </td></tr>
+  <tr><td>DataFileAvroStore</td> <td>org.apache.gora.avro.store.DataFileAvroStore</td> <td>gora-core</td> <td>DataFileAvroStore is file based store which uses Avro's DataFile{Writer,Reader}'s as a backend. This datastore supports mapreduce.</td></tr>
+  <tr><td>HBaseStore</td> <td>org.apache.gora.hbase.store.HBaseStore</td> <td><a href="site:gora-hbase">gora-hbase</a></td> <td> DataStore for <a href="ext:hbase">HBase</a>. </td></tr>
+  <tr><td>CassandraStore</td> <td>org.apache.gora.cassandra.store.CasssandraStore</td> <td><a href="site:gora-cassandra">gora-cassandra</a></td> <td> DataStore for <a href="ext:cassandra">Cassandra</a>. </td></tr>
+  <tr><td>SqlStore</td> <td>org.apache.gora.sql.store.SqlStore</td> <td><a href="site:gora-sql">gora-sql</a></td> <td> A DataStore implementation for RDBMS with a SQL interface. SqlStore uses JDBC drivers to communicate with the DB. Mysql and Hsqldb are supported for now.</td></tr>
+  <tr><td>MemStore</td> <td>org.apache.gora.memory.store.MemStore</td> <td>gora-core</td> <td> Memory based DataStore implementation for tests. </td></tr>
 </table><br/></p>
 
 <p>Some of the properties can be customized per datastore. The format of these 
