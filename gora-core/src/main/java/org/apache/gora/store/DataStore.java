@@ -113,7 +113,10 @@ public interface DataStore<K, T extends Persistent> extends Closeable,
   public abstract boolean schemaExists() throws IOException;
 
   /**
-   * Returns a new instance of the key object.
+   * Returns a new instance of the key object. If the object cannot be instantiated 
+   * (it the class is a Java primitive wrapper, or does not have no-arg 
+   * constructor) it throws an exception. Only use this function if you can 
+   * make sure that the key class has a no-arg constructor.   
    * @return a new instance of the key object.
    */
   public abstract K newKey() throws IOException;

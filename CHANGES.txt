@@ -11,3 +11,5 @@ Trunk (unreleased changes)
 
 *  GORA-7. DataStoreFactory.createDataStore() should throw exceptions on 
    failure. (enis)
+
+*  GORA-15. Primitive types cannot be used as keys in DataStore. (enis)

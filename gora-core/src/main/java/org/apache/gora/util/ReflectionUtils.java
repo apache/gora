@@ -43,6 +43,26 @@ public class ReflectionUtils {
   }
   
   /**
+   * Returns whether the class defines an empty argument constructor.
+   */
+  public static boolean hasConstructor(Class<?> clazz) 
+  throws SecurityException, NoSuchMethodException {
+    if(clazz == null) {
+      throw new IllegalArgumentException("class cannot be null");
+    }
+    Constructor<?>[] consts = clazz.getConstructors();
+
+    boolean found = false;
+    for(Constructor<?> cons : consts) {
+      if(cons.getParameterTypes().length == 0) {
+        found = true;
+      }
+    }
+
+    return found;
+  }
+
+  /**
    * Constructs a new instance of the class using the no-arg constructor.
    * @param clazz the class of the object
    * @return a new instance of the object

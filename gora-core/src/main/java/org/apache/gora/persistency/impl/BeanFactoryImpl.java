@@ -46,8 +46,10 @@ public class BeanFactoryImpl<K, T extends Persistent> implements BeanFactory<K, 
     this.persistentClass = persistentClass;
     
     try {
-      this.keyConstructor = ReflectionUtils.getConstructor(keyClass);
-      this.key = keyConstructor.newInstance(ReflectionUtils.EMPTY_OBJECT_ARRAY);
+      if(ReflectionUtils.hasConstructor(keyClass)) {
+        this.keyConstructor = ReflectionUtils.getConstructor(keyClass);
+        this.key = keyConstructor.newInstance(ReflectionUtils.EMPTY_OBJECT_ARRAY);
+      }
       this.persistent = ReflectionUtils.newInstance(persistentClass);
     } catch (Exception ex) {
       throw new RuntimeException(ex);
@@ -61,6 +63,9 @@ public class BeanFactoryImpl<K, T extends Persistent> implements BeanFactory<K, 
   public K newKey() throws Exception {
     if(isKeyPersistent)
       return (K)((Persistent)key).newInstance(new StateManagerImpl());
+    else if(keyConstructor == null) {
+      throw new RuntimeException("Key class does not have a no-arg constructor");
+    }
     else
       return keyConstructor.newInstance(ReflectionUtils.EMPTY_OBJECT_ARRAY);
   }
