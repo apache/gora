@@ -1,0 +1,10 @@
+{
+  "type": "record",
+  "name": "MetricDatum",
+  "namespace": "org.apache.gora.tutorial.log.generated",
+  "fields" : [
+    {"name": "metricDimension", "type": "string"},
+    {"name": "timestamp", "type": "long"},
+    {"name": "metric", "type" : "long"}
+  ]
+}

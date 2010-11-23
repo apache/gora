@@ -13,3 +13,5 @@ Trunk (unreleased changes)
    failure. (enis)
 
 *  GORA-15. Primitive types cannot be used as keys in DataStore. (enis)
+
+*  GORA-16. Create a tutorial for Gora. (enis)

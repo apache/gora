@@ -38,7 +38,6 @@ public class GoraMapper<K1, V1 extends Persistent, K2, V2>
    * include a specific subset, use one of the overloaded methods which takes
    * query parameter.
    * @param job the job to set the properties for
-   * @param query the query to get the inputs from
    * @param dataStoreClass the datastore class
    * @param inKeyClass Map input key class
    * @param inValueClass Map input value class
@@ -80,7 +79,6 @@ public class GoraMapper<K1, V1 extends Persistent, K2, V2>
    * include a specific subset, use one of the overloaded methods which takes
    * query parameter.
    * @param job the job to set the properties for
-   * @param query the query to get the inputs from
    * @param dataStoreClass the datastore class
    * @param inKeyClass Map input key class
    * @param inValueClass Map input value class

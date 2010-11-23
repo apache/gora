@@ -115,7 +115,11 @@
       <fileset dir="${conf.dir}" includes="**/*.template"/>
       <mapper type="glob" from="*.template" to="*"/>
     </copy>
+    
+    <antcall target="init-module"/>
   </target>
+
+  <target name="init-module" description="Modules can override this for post-init scripting"/>
 
   <!-- ====================================================== -->
   <!-- target: compile                                        -->
@@ -134,8 +138,12 @@
         includeAntRuntime="yes">
       <classpath refid="classpath"/>
     </javac>
+    
+    <antcall target="compile-module"/>
   </target>
 
+  <target name="compile-module" description="Modules can override this for post-compile scripting"/>
+  
   <!-- ====================================================== -->
   <!-- target: compile-examples                               -->
   <!-- ====================================================== -->

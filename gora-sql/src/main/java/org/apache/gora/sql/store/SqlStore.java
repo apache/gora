@@ -191,7 +191,9 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
         }
         connection.close();
       } catch (SQLException ex) {
-        throw new IOException(ex);
+        if(!ex.getMessage().contains("closed")) {
+          throw new IOException(ex); 
+        }
       }
     }
   }

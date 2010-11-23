@@ -42,6 +42,7 @@ See http://forrest.apache.org/docs/linking.html for more info
   <docs label="Documentation">
     <overview   label="Overview"           href="index.html" />
     <quickstart label="Quick Start"        href="quickstart.html" />
+    <tutorial   label="Gora Tutorial"      href="tutorial.html" />
     <gora-conf  label="Gora Configuration" href="gora-conf.html" />
     <gora-core  label="gora-core"          href="gora-core.html" />
     <gora-cassandra  label="gora-cassandra" href="gora-cassandra.html" />
@@ -55,6 +56,7 @@ See http://forrest.apache.org/docs/linking.html for more info
     <wiki     href="https://cwiki.apache.org/confluence/display/GORA/Index" />
     <issues   href="http://issues.apache.org/jira/browse/GORA"/>
     <vcs      href="http://incubator.apache.org/gora/version_control.html" />
+    <devmail  href="http://incubator.apache.org/gora/mailing_lists.html"/>
 
     <gora     href="http://incubator.apache.org/gora/"/>
     <avro     href="http://avro.apache.org/"/>
@@ -71,7 +73,47 @@ See http://forrest.apache.org/docs/linking.html for more info
       <index href="index.html" />
       <org href="org/">
         <apache href="apache/">
-          <gora href="gora/"/>
+          <gora href="gora/">
+            <mapreduce href="mapreduce/">
+              <gorainputformat href="GoraInputFormat.html">
+              </gorainputformat>
+              <goraoutputformat href="GoraOutputFormat.html">
+              </goraoutputformat>
+              <goramapper href="GoraMapper.html">
+                <initmapperjob href="#initMapperJob(org.apache.hadoop.mapreduce.Job,%20org.gora.store.DataStore,%20java.lang.Class,%20java.lang.Class,%20java.lang.Class,%20boolean)"/>
+              </goramapper>
+              <gorareducer href="GoraReducer.html">
+                <initreducerjob href="#initReducerJob(org.apache.hadoop.mapreduce.Job,%20org.apache.gora.store.DataStore,%20java.lang.Class)"/>
+              </gorareducer>
+              <persistentserialization href="PersistentSerialization.html"/>
+              <stringserialization href="StringSerialization.html"/>
+            </mapreduce>
+            <persistency href="persistency/">
+              <persistent href="Persistent.html"/>
+            </persistency>
+            <query href="query/">
+              <query href="Query.html">
+                <execute href="#execute()"/>
+              </query>
+              <result href="Result.html">
+                <getkey href="#getKey()"/>
+                <get href="#get()"/>
+                <next href="#next()"/>
+              </result>
+            </query>
+            <store href="store/">
+              <datastore href="DataStore.html">
+                <close href="#close()"/>
+                <delete href="#delete(K)"/>
+                <deletebyquery href="#deleteByQuery(org.gora.query.Query)"/>
+                <flush href="#flush()"/>
+                <put href="#put(K,T)"/>
+                <get href="#get(K)"/>
+                <newquery href="#newQuery()"/>
+              </datastore>
+              <datastorefactory href="DataStoreFactory.html"/>
+            </store>
+          </gora>
         </apache>
       </org>
     </api>

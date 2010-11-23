@@ -45,6 +45,8 @@ if [ $# = 0 ]; then
   echo "where COMMAND is one of:"
   echo "  compile                    Run Compiler"
   echo "  specificcompiler           Run Avro Specific Compiler"
+  echo "  logmanager                 Run the tutorial log manager"
+  echo "  loganalytics               Run the tutorial log analytics"
   echo " or"
   echo " MODULE CLASSNAME   run the class named CLASSNAME in module MODULE"
   echo "Most commands print help when invoked w/o parameters."
@@ -109,6 +111,12 @@ if [ "$COMMAND" = "compile" ] ; then
 elif [ "$COMMAND" = "specificcompiler" ] ; then
   CLASS=org.apache.avro.specific.SpecificCompiler
   MODULE=gora-core
+elif [ "$COMMAND" = "logmanager" ] ; then
+  CLASS=org.apache.gora.tutorial.log.LogManager
+  MODULE=gora-tutorial
+elif [ "$COMMAND" = "loganalytics" ] ; then
+  CLASS=org.apache.gora.tutorial.log.LogAnalytics
+  MODULE=gora-tutorial
 else
   MODULE="$COMMAND"
   CLASS=$1

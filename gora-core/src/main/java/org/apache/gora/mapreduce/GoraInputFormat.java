@@ -160,7 +160,6 @@ public class GoraInputFormat<K, T extends Persistent>
   /**
    * Sets the input parameters for the job
    * @param job the job to set the properties for
-   * @param query the query to get the inputs from
    * @param dataStoreClass the datastore class
    * @param inKeyClass Map input key class
    * @param inValueClass Map input value class
