@@ -15,3 +15,5 @@ Trunk (unreleased changes)
 *  GORA-15. Primitive types cannot be used as keys in DataStore. (enis)
 
 *  GORA-16. Create a tutorial for Gora. (enis)
+
+*  GORA-21. Commons-lang needs a configuration in gora-core/ivy/ivy.xml (jnioche)
