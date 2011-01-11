@@ -90,19 +90,7 @@ public class GoraOutputFormat<K, T extends Persistent>
 
     setOutputPath(store, context);
 
-    return new RecordWriter<K, T>() {
-      @Override
-      public void close(TaskAttemptContext context) throws IOException,
-          InterruptedException {
-        store.close();
-      }
-
-      @Override
-      public void write(K key, T value)
-      throws IOException, InterruptedException {
-        store.put(key, value);
-      }
-    };
+    return new GoraRecordWriter(store, context);
   }
 
   /**

@@ -17,3 +17,5 @@ Trunk (unreleased changes)
 *  GORA-16. Create a tutorial for Gora. (enis)
 
 *  GORA-21. Commons-lang needs a configuration in gora-core/ivy/ivy.xml (jnioche)
+
+*  GORA-20. Flush datastore regularly (Alexis Detreglode via jnioche)
