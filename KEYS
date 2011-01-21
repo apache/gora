@@ -1,0 +1,76 @@
+This file contains the PGP keys of various Apache developers.
+Please don't use them for email unless you have to. Their main
+purpose is code signing.
+
+Apache users: pgp < KEYS
+Apache developers:
+        (pgpk -ll <your name> && pgpk -xa <your name>) >> this file.
+      or
+        (gpg --fingerprint --list-sigs <your name>
+             && gpg --armor --export <your name>) >> this file.
+
+Apache developers: please ensure that your key is also available via the
+PGP keyservers (such as pgpkeys.mit.edu).
+
+
+----------------------------------------------------------------
+
+pub   4096R/3592721E 2011-01-21
+      Key fingerprint = A0BF C76E F6A5 6F2C DC3D  0E2C EDF4 C958 3592 721E
+uid                  Henry Saputra (CODE SIGNING KEY) <hsaputra@apache.org>
+sig 3        3592721E 2011-01-21  Henry Saputra (CODE SIGNING KEY) <hsaputra@apache.org>
+sub   4096R/C318E93E 2011-01-21
+sig          3592721E 2011-01-21  Henry Saputra (CODE SIGNING KEY) <hsaputra@apache.org>
+
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Version: GnuPG/MacGPG2 v2.0.16 (Darwin)
+
+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
+3oNyQDFEI+qH9ZUbnPI=
+=MpN5
+-----END PGP PUBLIC KEY BLOCK-----
