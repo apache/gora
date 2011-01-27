@@ -83,7 +83,7 @@ public class GoraInputFormat<K, T extends Persistent>
       ((GoraInputSplit)split).getQuery();
 
     setInputPath(partitionQuery, context);
-    return new GoraRecordReader<K, T>(partitionQuery);
+    return new GoraRecordReader<K, T>(partitionQuery, context);
   }
 
   @Override

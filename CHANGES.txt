@@ -19,3 +19,6 @@ Trunk (unreleased changes)
 *  GORA-21. Commons-lang needs a configuration in gora-core/ivy/ivy.xml (jnioche)
 
 *  GORA-20. Flush datastore regularly (Alexis Detreglode via jnioche)
+
+*  GORA-23. Limit result set in store reads (Alexis Detreglode via hsaputra)
+

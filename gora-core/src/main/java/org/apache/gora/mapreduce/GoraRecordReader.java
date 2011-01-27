@@ -23,21 +23,43 @@ import java.io.IOException;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An adapter for Result to Hadoop RecordReader.
  */
-public class GoraRecordReader<K, T extends Persistent> 
-extends RecordReader<K,T> {
+public class GoraRecordReader<K, T extends Persistent> extends RecordReader<K,T> {
+  public static final Logger LOG = LoggerFactory.getLogger(GoraRecordReader.class);
+
+  private static final String BUFFER_LIMIT_READ_NAME = "gora.buffer.read.limit";
+  private static final int BUFFER_LIMIT_READ_VALUE = 10000;
 
   protected Query<K,T> query;
   protected Result<K,T> result;
   
-  public GoraRecordReader(Query<K,T> query) {
+  private GoraRecordCounter counter = new GoraRecordCounter();
+  
+  public GoraRecordReader(Query<K,T> query, TaskAttemptContext context) {
     this.query = query;
+
+    Configuration configuration = context.getConfiguration();
+    int recordsMax = configuration.getInt(BUFFER_LIMIT_READ_NAME, BUFFER_LIMIT_READ_VALUE);
+    
+    // Check if result set will at least contain 2 rows
+    if (recordsMax <= 1) {
+      LOG.info("Limit " + recordsMax + " changed to " + BUFFER_LIMIT_READ_VALUE);
+      recordsMax = BUFFER_LIMIT_READ_VALUE;
+    }
+    
+    counter.setRecordsMax(recordsMax);
+    LOG.info("gora.buffer.read.limit = " + recordsMax);
+    
+    this.query.setLimit(recordsMax);
   }
 
   public void executeQuery() throws IOException {
@@ -65,11 +87,24 @@ extends RecordReader<K,T> {
 
   @Override
   public boolean nextKeyValue() throws IOException, InterruptedException {
-    if(this.result == null) {
+    if (counter.isModulo()) {
+      boolean firstBatch = (this.result == null);
+      if (! firstBatch) {
+        this.query.setStartKey(this.result.getKey());
+        if (this.query.getLimit() == counter.getRecordsMax()) {
+          this.query.setLimit(counter.getRecordsMax() + 1);
+        }
+      }
       executeQuery();
+      
+      if (! firstBatch) {
+        // skip first result
+        this.result.next();
+      }
     }
     
-    return result.next();
+    counter.increment();
+    return this.result.next();
   }
 
   @Override

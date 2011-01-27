@@ -30,33 +30,23 @@ import org.slf4j.LoggerFactory;
 /**
  * Hadoop record writer that flushes the Gora datastore regularly.
  *
- * @param <K>
- * @param <T>
  */
 public class GoraRecordWriter<K, T> extends RecordWriter<K, T> {
   public static final Logger LOG = LoggerFactory.getLogger(GoraRecordWriter.class);
   
-  private static final String BUFFER_LIMIT_NAME = "gora.buffer.limit";
-  private static final int BUFFER_LIMIT_VALUE = 10000;
+  private static final String BUFFER_LIMIT_WRITE_NAME = "gora.buffer.write.limit";
+  private static final int BUFFER_LIMIT_WRITE_VALUE = 10000;
 
-  /**
-   * Count the number of records written to the datastore.
-   */
-  private int recordsNumber = 0;
-  
-  /**
-   * Define the flush frequency.
-   */
-  private int recordsMax;
-  
   private DataStore<K, Persistent> store;
+  private GoraRecordCounter counter = new GoraRecordCounter();
 
   public GoraRecordWriter(DataStore<K, Persistent> store, TaskAttemptContext context) {
     this.store = store;
     
     Configuration configuration = context.getConfiguration();
-    this.recordsMax = configuration.getInt(BUFFER_LIMIT_NAME, BUFFER_LIMIT_VALUE);
-    LOG.info("gora.buffer.limit = " + this.recordsMax);
+    int recordsMax = configuration.getInt(BUFFER_LIMIT_WRITE_NAME, BUFFER_LIMIT_WRITE_VALUE);
+    counter.setRecordsMax(recordsMax);
+    LOG.info("gora.buffer.write.limit = " + recordsMax);
   }
 
   @Override
@@ -69,9 +59,9 @@ public class GoraRecordWriter<K, T> extends RecordWriter<K, T> {
   public void write(K key, T value) throws IOException, InterruptedException {
     store.put(key, (Persistent) value);
     
-    ++this.recordsNumber;
-    if ((this.recordsNumber % recordsMax) == 0) {
-      LOG.info("Flushing the datastore after " + this.recordsNumber + " records");
+    counter.increment();
+    if (counter.isModulo()) {
+      LOG.info("Flushing the datastore after " + counter.getRecordsNumber() + " records");
       store.flush();
     }
   }
