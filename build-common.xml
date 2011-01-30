@@ -193,6 +193,7 @@
         <attribute name="Built-By" value="${user.name}"/>
         <attribute name="Build-Version" value="${version}" />
       </manifest>
+      <metainf dir="${project.dir}" includes="LICENSE.txt,NOTICE.txt" />
     </jar>
   </target>
 
@@ -209,6 +210,7 @@
         <attribute name="Built-By" value="${user.name}"/>
         <attribute name="Build-Version" value="${version}" />
       </manifest>
+      <metainf dir="${project.dir}" includes="LICENSE.txt,NOTICE.txt" />
     </jar>
   </target>
 
@@ -244,6 +246,7 @@
         <attribute name="Built-By" value="${user.name}" />
         <attribute name="Build-Version" value="${version}" />
       </manifest>
+      <metainf dir="${project.dir}" includes="LICENSE.txt,NOTICE.txt" />
     </jar>
   </target>
 
