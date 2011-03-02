@@ -1,6 +1,6 @@
 Gora Change Log
 
-Trunk (unreleased changes)
+0.1-incubating release:
 
 *  INFRA-3038. Initial import of code.
 

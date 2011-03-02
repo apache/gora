@@ -50,6 +50,7 @@
 
     <!-- test dependencies -->
     <dependency org="org.apache.hadoop" name="hadoop-test" rev="0.20.2" conf="test->master"/>
+    <dependency org="org.slf4j" name="slf4j-simple" rev="1.5.8" conf="test -> *,!sources,!javadoc"/>
     <dependency org="junit" name="junit" rev="4.6" conf="test->default"/>
 
   </dependencies>
