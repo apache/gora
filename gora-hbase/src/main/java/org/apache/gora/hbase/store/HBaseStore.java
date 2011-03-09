@@ -544,10 +544,9 @@ implements Configurable {
           String maxVersions = fieldElement.getAttributeValue("maxVersions");
           String timeToLive  = fieldElement.getAttributeValue("timeToLive");
           String inMemory    = fieldElement.getAttributeValue("inMemory");
-          String mapFileIndexInterval  = tableElement.getAttributeValue("mapFileIndexInterval");
 
           mapping.addColumnFamily(tableName, familyName, compression, blockCache, blockSize
-              , bloomFilter, maxVersions, timeToLive, inMemory, mapFileIndexInterval);
+              , bloomFilter, maxVersions, timeToLive, inMemory);
         }
       }
 
