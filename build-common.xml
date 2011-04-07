@@ -20,9 +20,9 @@
 <project name="gora-common" xmlns:ivy="antlib:org.apache.ivy.ant">
 
   <property name="name" value="${ant.project.name}" />
-  <property name="version" value="0.1-incubating" />
+  <property name="version" value="0.2-incubating" />
   <property name="final.name" value="${ant.project.name}-${version}" />
-  <property name="year" value="2010" />
+  <property name="year" value="2011" />
   <property name="module.version.target" value="${version}" />
   <property name="module.name" value="${ant.project.name}-${version}"/>
 	
