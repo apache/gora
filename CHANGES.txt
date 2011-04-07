@@ -1,6 +1,10 @@
 Gora Change Log
 
-Trunk (unreleased changes)
+Trunk (unreleased changes):
+
+* GORA-31. jersey-json dependency not in repositories currently in ivysettings.xml (Marsall Pierce via hsaputra)
+
+0.1-incubating release:
 
 *  INFRA-3038. Initial import of code.
 
