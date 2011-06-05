@@ -19,6 +19,13 @@
     limitations under the License.
     -->
     <modelVersion>4.0.0</modelVersion>
+    <!--  Apache parent gives us Nexus staging and other important release props -->
+    <parent>
+      <groupId>org.apache</groupId>
+      <artifactId>apache</artifactId>
+      <version>9</version>
+      <relativePath />
+    </parent>
 
     <groupId>org.apache.gora</groupId>
     <artifactId>apache-gora</artifactId>
@@ -86,7 +93,7 @@
     <modules>
         <module>gora-core</module>
         <module>gora-hbase</module>
-        <module>gora-cassandra</module>
+        <!-- <module>gora-cassandra</module>-->
         <module>gora-sql</module>
         <module>gora-tutorial</module>
     </modules>
