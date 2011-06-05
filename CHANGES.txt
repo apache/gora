@@ -2,6 +2,9 @@ Gora Change Log
 
 Trunk (unreleased changes):
 
+
+* GORA-29. Gora maven support (Ioannis Canellos via mattmann)
+
 * GORA-31. jersey-json dependency not in repositories currently in ivysettings.xml (Marsall Pierce via hsaputra)
 
 0.1-incubating release:
