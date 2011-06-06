@@ -19,7 +19,6 @@
     limitations under the License.
     -->
     <modelVersion>4.0.0</modelVersion>
-    <!--  Apache parent gives us Nexus staging and other important release props -->
     <parent>
       <groupId>org.apache</groupId>
       <artifactId>apache</artifactId>
@@ -28,7 +27,7 @@
     </parent>
 
     <groupId>org.apache.gora</groupId>
-    <artifactId>apache-gora</artifactId>
+    <artifactId>gora</artifactId>
     <packaging>pom</packaging>
     <version>0.1-incubating</version>
     <name>Apache Gora</name>
@@ -92,10 +91,10 @@
 
     <modules>
         <module>gora-core</module>
-        <module>gora-hbase</module>
-        <!-- <module>gora-cassandra</module>-->
+        <!--<module>gora-hbase</module>-->
+        <!--<module>gora-cassandra</module>-->
         <module>gora-sql</module>
-        <module>gora-tutorial</module>
+        <!--<module>gora-tutorial</module>-->
     </modules>
 
     <properties>
@@ -269,6 +268,10 @@
                     <exclusion>
                         <groupId>com.sun.jmx</groupId>
                         <artifactId>jmxri</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.jms</groupId>
+                        <artifactId>jms</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
