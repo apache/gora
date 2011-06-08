@@ -29,7 +29,7 @@ public interface Persistent extends SpecificRecord, Cloneable {
    * state of the object.
    * @return the StateManager of the object
    */
-  public StateManager getStateManager();
+  StateManager getStateManager();
 
   /**
    * Constructs a new instance of the object with the given StateManager.
@@ -38,149 +38,149 @@ public interface Persistent extends SpecificRecord, Cloneable {
    * of the object
    * @return a new instance of the object
    */
-  public Persistent newInstance(StateManager stateManager);
+  Persistent newInstance(StateManager stateManager);
 
   /**
    * Returns sorted field names of the object
    * @return the field names of the object as a String[]
    */
-  public String[] getFields();
+  String[] getFields();
   
   /**
    * Returns the field name with the given index
    * @param index the index of the field  
    * @return the name of the field
    */
-  public String getField(int index);
+  String getField(int index);
   
   /**
    * Returns the index of the field with the given name
    * @param field the name of the field
    * @return the index of the field
    */
-  public int getFieldIndex(String field);
+  int getFieldIndex(String field);
   
   /**
    * Clears the inner state of the object without any modification
    * to the actual data on the data store. This method should be called 
    * before re-using the object to hold the data for another result.  
    */
-  public void clear();
+  void clear();
   
   /**
    * Returns whether the object is newly constructed.
    * @return true if the object is newly constructed, false if
    * retrieved from a datastore. 
    */
-  public boolean isNew();
+  boolean isNew();
   
   /**
    * Sets the state of the object as new for persistency
    */
-  public void setNew();
+  void setNew();
   
   /**
    * Clears the new state 
    */
-  public void clearNew();
+  void clearNew();
   
   /**
    * Returns whether any of the fields of the object has been modified 
    * after construction or loading. 
    * @return whether any of the fields of the object has changed
    */
-  public boolean isDirty();
+  boolean isDirty();
   
   /**
    * Returns whether the field has been modified.
    * @param fieldIndex the offset of the field in the object
    * @return whether the field has been modified.
    */
-  public boolean isDirty(int fieldIndex);
+  boolean isDirty(int fieldIndex);
 
   /**
    * Returns whether the field has been modified.
    * @param field the name of the field
    * @return whether the field has been modified.
    */
-  public boolean isDirty(String field);
+  boolean isDirty(String field);
   
   /**
    * Sets all the fields of the object as dirty.
    */
-  public void setDirty();
+  void setDirty();
   
   /**
    * Sets the field as dirty.
    * @param fieldIndex the offset of the field in the object
    */
-  public void setDirty(int fieldIndex);
+  void setDirty(int fieldIndex);
  
   /**
    * Sets the field as dirty.
    * @param field the name of the field
    */
-  public void setDirty(String field);
+  void setDirty(String field);
   
   /**
    * Clears the field as dirty.
    * @param fieldIndex the offset of the field in the object
    */
-  public void clearDirty(int fieldIndex);
+  void clearDirty(int fieldIndex);
   
   /**
    * Clears the field as dirty.
    * @param field the name of the field
    */
-  public void clearDirty(String field);
+  void clearDirty(String field);
   
   /**
    * Clears the dirty state.
    */
-  public void clearDirty();
+  void clearDirty();
   
   /**
    * Returns whether the field has been loaded from the datastore. 
    * @param fieldIndex the offset of the field in the object
    * @return whether the field has been loaded 
    */
-  public boolean isReadable(int fieldIndex);
+  boolean isReadable(int fieldIndex);
 
   /**
    * Returns whether the field has been loaded from the datastore. 
    * @param field the name of the field
    * @return whether the field has been loaded 
    */
-  public boolean isReadable(String field);
+  boolean isReadable(String field);
   
   /**
    * Sets the field as readable.
    * @param fieldIndex the offset of the field in the object
    */
-  public void setReadable(int fieldIndex);
+  void setReadable(int fieldIndex);
 
   /**
    * Sets the field as readable.
    * @param field the name of the field
    */
-  public void setReadable(String field);
+  void setReadable(String field);
 
   /**
    * Clears the field as readable.
    * @param fieldIndex the offset of the field in the object
    */
-  public void clearReadable(int fieldIndex);
+  void clearReadable(int fieldIndex);
   
   /**
    * Sets the field as readable.
    * @param field the name of the field
    */
-  public void clearReadable(String field);
+  void clearReadable(String field);
   
   /**
    * Clears the readable state.
    */
-  public void clearReadable();
+  void clearReadable();
   
-  public Persistent clone();
+  Persistent clone();
 }

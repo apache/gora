@@ -33,6 +33,6 @@ public interface PartitionQuery<K, T extends Persistent> extends Query<K, T> {
    * Returns the locations on which this partial query will run locally.
    * @return the addresses of machines
    */
-  public String[] getLocations();
+  String[] getLocations();
   
 }

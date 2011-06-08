@@ -37,117 +37,81 @@ public interface Query<K, T extends Persistent> extends Writable, Configurable {
    * method only if you know what you are doing.
    * @param dataStore the dataStore of the query
    */
-  public abstract void setDataStore(DataStore<K,T> dataStore);
+  void setDataStore(DataStore<K,T> dataStore);
   
   /**
    * Returns the DataStore, that this Query is associated with.
    * @return the DataStore of the Query
    */
-  public abstract DataStore<K,T> getDataStore();
+  DataStore<K,T> getDataStore();
   
   /**
    * Executes the Query on the DataStore and returns the results.
    * @return the {@link Result} for the query.
    */
-  public abstract Result<K,T> execute() throws IOException;
+  Result<K,T> execute() throws IOException;
   
 //  /**
 //   * Compiles the query for performance and error checking. This 
 //   * method is an optional optimization for DataStore implementations.
 //   */
-//  public abstract void compile();
+//  void compile();
 //  
 //  /**
 //   * Sets the query string
 //   * @param queryString the query in String
 //   */
-//  public abstract void setQueryString(String queryString);
+//  void setQueryString(String queryString);
 //  
 //  /**
 //   * Returns the query string
 //   * @return the query as String
 //   */
-//  public abstract String getQueryString();
+//  String getQueryString();
 
   /* Dimension : fields */
-  public abstract void setFields(String... fieldNames);
+  void setFields(String... fieldNames);
 
-  public abstract String[] getFields();
+  String[] getFields();
 
   /* Dimension : key */ 
-  public abstract void setKey(K key);
+  void setKey(K key);
 
-  public abstract void setStartKey(K startKey);
+  void setStartKey(K startKey);
 
-  public abstract void setEndKey(K endKey);
+  void setEndKey(K endKey);
 
-  public abstract void setKeyRange(K startKey, K endKey);
+  void setKeyRange(K startKey, K endKey);
 
-  public abstract K getKey();
+  K getKey();
 
-  public abstract K getStartKey();
+  K getStartKey();
 
-  public abstract K getEndKey();
+  K getEndKey();
   
   /* Dimension : time */
-  public abstract void setTimestamp(long timestamp);
+  void setTimestamp(long timestamp);
 
-  public abstract void setStartTime(long startTime);
+  void setStartTime(long startTime);
 
-  public abstract void setEndTime(long endTime);
+  void setEndTime(long endTime);
 
-  public abstract void setTimeRange(long startTime, long endTime);
+  void setTimeRange(long startTime, long endTime);
 
-  public abstract long getTimestamp();
+  long getTimestamp();
 
-  public abstract long getStartTime();
+  long getStartTime();
 
-  public abstract long getEndTime();
-
-//  public abstract void setFilter(String filter);
-//  
-//  public abstract String getFilter();
+  long getEndTime();
   
   /**
    * Sets the maximum number of results to return.
    */
-  public abstract void setLimit(long limit);
+  void setLimit(long limit);
 
   /**
    * Returns the maximum number of results
    * @return the limit if it is set, otherwise a negative number
    */
-  public abstract long getLimit();
-
-  /* parameters */
-  /*
-  public abstract void setParam(int paramIndex, int value);
-  
-  public abstract void setParam(String paramName, int value);
-  
-  public abstract void setParam(int paramIndex, long value);
-  
-  public abstract void setParam(String paramName, long value);
-  
-  public abstract void setParam(int paramIndex, String value);
-  
-  public abstract void setParam(String paramName, String value);
-  
-  public abstract void setParam(int paramIndex, boolean value);
-  
-  public abstract void setParam(String paramName, boolean value);
-  
-  public abstract void setParam(int paramIndex, double value);
-  
-  public abstract void setParam(String paramName, double value);
-  
-  public abstract void setParam(int paramIndex, char value);
-  
-  public abstract void setParam(String paramName, char value);
-  
-  public abstract void setParam(int paramIndex, Date value);
-  
-  public abstract void setParam(String paramName, Date value);
-  */
-    
+  long getLimit();
 }

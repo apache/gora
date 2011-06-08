@@ -28,20 +28,20 @@ import org.apache.gora.persistency.Persistent;
  */
 public interface FileBackedDataStore<K, T extends Persistent> extends DataStore<K, T> {
 
-  public void setInputPath(String inputPath);
+  void setInputPath(String inputPath);
   
-  public void setOutputPath(String outputPath);
+  void setOutputPath(String outputPath);
   
-  public String getInputPath();
+  String getInputPath();
   
-  public String getOutputPath();
+  String getOutputPath();
   
-  public void setInputStream(InputStream inputStream);
+  void setInputStream(InputStream inputStream);
   
-  public void setOutputStream(OutputStream outputStream);
+  void setOutputStream(OutputStream outputStream);
 
-  public InputStream getInputStream();
+  InputStream getInputStream();
   
-  public OutputStream getOutputStream();
+  OutputStream getOutputStream();
   
 }

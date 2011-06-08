@@ -27,13 +27,13 @@ public interface BeanFactory<K, T extends Persistent> {
    * Constructs a new instance of the key class
    * @return a new instance of the key class
    */
-  public abstract K newKey() throws Exception;
+  K newKey() throws Exception;
 
   /**
    * Constructs a new instance of the Persistent class
-   * @return a new instance of the Peristent class
+   * @return a new instance of the Persistent class
    */
-  public abstract T newPersistent();
+  T newPersistent();
 
   /**
    * Returns an instance of the key object to be 
@@ -42,7 +42,7 @@ public interface BeanFactory<K, T extends Persistent> {
    * of the object should be assumed to be readable. 
    * @return a cached instance of the key object
    */
-  public abstract K getCachedKey();
+  K getCachedKey();
   
   /**
    * Returns an instance of the {@link Persistent} object to be 
@@ -51,18 +51,18 @@ public interface BeanFactory<K, T extends Persistent> {
    * of the object should be assumed to be readable. 
    * @return a cached instance of the Persistent object
    */
-  public abstract T getCachedPersistent();
+  T getCachedPersistent();
 
   /**
    * Returns the key class
    * @return the key class
    */
-  public abstract Class<K> getKeyClass();
+  Class<K> getKeyClass();
 
   /**
    * Returns the persistent class
    * @return the persistent class
    */
-  public abstract Class<T> getPersistentClass();
+  Class<T> getPersistentClass();
 
 }

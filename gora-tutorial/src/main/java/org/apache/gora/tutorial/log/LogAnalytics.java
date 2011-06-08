@@ -163,8 +163,7 @@ public class LogAnalytics extends Configured implements Tool {
     
     if(args.length > 0) {
       String dataStoreClass = args[0];
-      inStore = DataStoreFactory.getDataStore(dataStoreClass, 
-          Long.class, Pageview.class);
+      inStore = DataStoreFactory.getDataStore(dataStoreClass, Long.class, Pageview.class);
       if(args.length > 1) {
         dataStoreClass = args[1];
       }
