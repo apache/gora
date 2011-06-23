@@ -314,8 +314,9 @@ public class GoraCompiler {
           case INT:case LONG:case FLOAT:case DOUBLE:
           case BOOLEAN:case BYTES:case STRING: case ENUM: case RECORD:
             String unboxed = unbox(fieldSchema);
+            String fieldType = type(fieldSchema);
             line(1, "public "+unboxed+" get" +camelKey+"() {");
-            line(2, "return ("+type(field.schema())+") get("+i+");");
+            line(2, "return ("+fieldType+") get("+i+");");
             line(1, "}");
             line(1, "public void set"+camelKey+"("+unboxed+" value) {");
             line(2, "put("+i+", value);");
@@ -323,9 +324,9 @@ public class GoraCompiler {
             break;
           case ARRAY:
             unboxed = unbox(fieldSchema.getElementType());
-
-            line(1, "public GenericArray<"+unboxed+"> get"+camelKey+"() {");
-            line(2, "return (GenericArray<"+unboxed+">) get("+i+");");
+            fieldType = type(fieldSchema.getValueType());
+            line(1, "public GenericArray<"+fieldType+"> get"+camelKey+"() {");
+            line(2, "return (GenericArray<"+fieldType+">) get("+i+");");
             line(1, "}");
             line(1, "public void addTo"+camelKey+"("+unboxed+" element) {");
             line(2, "getStateManager().setDirty(this, "+i+");");
@@ -334,10 +335,11 @@ public class GoraCompiler {
             break;
           case MAP:
             unboxed = unbox(fieldSchema.getValueType());
-            line(1, "public Map<Utf8, "+unboxed+"> get"+camelKey+"() {");
-            line(2, "return (Map<Utf8, "+unboxed+">) get("+i+");");
+            fieldType = type(fieldSchema.getValueType());
+            line(1, "public Map<Utf8, "+fieldType+"> get"+camelKey+"() {");
+            line(2, "return (Map<Utf8, "+fieldType+">) get("+i+");");
             line(1, "}");
-            line(1, "public "+unboxed+" getFrom"+camelKey+"(Utf8 key) {");
+            line(1, "public "+fieldType+" getFrom"+camelKey+"(Utf8 key) {");
             line(2, "if ("+field.name()+" == null) { return null; }");
             line(2, "return "+field.name()+".get(key);");
             line(1, "}");
@@ -345,7 +347,7 @@ public class GoraCompiler {
             line(2, "getStateManager().setDirty(this, "+i+");");
             line(2, field.name()+".put(key, value);");
             line(1, "}");
-            line(1, "public "+unboxed+" removeFrom"+camelKey+"(Utf8 key) {");
+            line(1, "public "+fieldType+" removeFrom"+camelKey+"(Utf8 key) {");
             line(2, "if ("+field.name()+" == null) { return null; }");
             line(2, "getStateManager().setDirty(this, "+i+");");
             line(2, "return "+field.name()+".remove(key);");

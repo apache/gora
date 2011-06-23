@@ -2,6 +2,7 @@ Gora Change Log
 
 Trunk (unreleased changes):
 
+* GORA-32. Map type with long values generates non-compilable Java class (Yves Langisch)
 
 * GORA-29. Gora maven support (Ioannis Canellos via mattmann)
 
