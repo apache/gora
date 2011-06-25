@@ -23,7 +23,7 @@
     <groupId>org.apache.gora</groupId>
     <artifactId>apache-gora</artifactId>
     <packaging>pom</packaging>
-    <version>0.1.1-incubating</version>
+    <version>0.1.1-incubating-SNAPSHOT</version>
     <name>Apache Gora</name>
 
        <scm>
@@ -86,7 +86,7 @@
     <modules>
         <module>gora-core</module>
         <module>gora-hbase</module>
-        <module>gora-cassandra</module>
+        <!--<module>gora-cassandra</module>-->
         <module>gora-sql</module>
         <module>gora-tutorial</module>
     </modules>
