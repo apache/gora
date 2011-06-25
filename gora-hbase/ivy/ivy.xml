@@ -39,6 +39,9 @@
 
     <!-- test dependencies -->
     <dependency org="org.apache.hadoop" name="hadoop-test" rev="0.20.2" conf="test->default"/>
+    <dependency org="org.apache.hbase" name="hbase" rev="0.90.0" conf="*->default">
+        <exclude org="org.apache.thrift"/>
+    </dependency>
 
   </dependencies>
     

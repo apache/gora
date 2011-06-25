@@ -24,6 +24,7 @@ import java.util.Map;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.io.hfile.Compression.Algorithm;
+import org.apache.hadoop.hbase.regionserver.StoreFile.BloomType;
 import org.apache.hadoop.hbase.util.Bytes;
 
 /**
@@ -68,7 +69,7 @@ public class HBaseMapping {
   
   public void addColumnFamily(String tableName, String familyName
       , String compression, String blockCache, String blockSize, String bloomFilter
-      , String maxVersions, String timeToLive, String inMemory, String mapFileIndexInterval) {
+      , String maxVersions, String timeToLive, String inMemory) {
     
     HColumnDescriptor columnDescriptor = addColumnFamily(tableName, familyName);
     
@@ -79,15 +80,13 @@ public class HBaseMapping {
     if(blockSize != null)
       columnDescriptor.setBlocksize(Integer.parseInt(blockSize));
     if(bloomFilter != null)
-      columnDescriptor.setBloomfilter(Boolean.parseBoolean(bloomFilter));
+      columnDescriptor.setBloomFilterType(BloomType.valueOf(bloomFilter));
     if(maxVersions != null)
       columnDescriptor.setMaxVersions(Integer.parseInt(maxVersions));
     if(timeToLive != null)
       columnDescriptor.setTimeToLive(Integer.parseInt(timeToLive));
     if(inMemory != null)
       columnDescriptor.setInMemory(Boolean.parseBoolean(inMemory));
-    if(mapFileIndexInterval != null)
-      columnDescriptor.setMapFileIndexInterval(Integer.parseInt(mapFileIndexInterval));
     
     getTable(tableName).addFamily(columnDescriptor);
   }
