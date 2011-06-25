@@ -95,12 +95,19 @@
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
+            <exclusions> 
+             <exclusion>
+              <groupId>javax.jms</groupId>
+              <artifactId>jms</artifactId>
+             </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Testing Dependencies -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <dependency>

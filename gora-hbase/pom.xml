@@ -62,18 +62,20 @@
             <version>${project.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.gora</groupId>
-            <artifactId>gora-core</artifactId>
-            <version>${project.version}</version>
-            <classifier>tests</classifier>
-        </dependency>
-
         <!-- Hadoop Dependencies -->
         <dependency>
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase</artifactId>
+            <version>0.90.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.hbase</groupId>
+            <artifactId>hbase</artifactId>
+	    <version>0.90.0</version>
+            <classifier>tests</classifier>
+        </dependency>
+
 
         <dependency>
             <groupId>org.apache.hadoop</groupId>
@@ -100,6 +102,13 @@
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
+	     <exclusions>
+	       <exclusion>
+                <groupId>javax.jms</groupId>
+	        <artifactId>jms</artifactId>
+	      </exclusion>
+            </exclusions>
+
         </dependency>
 
         <!-- Testing Dependencies -->

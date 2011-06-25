@@ -63,13 +63,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.gora</groupId>
-            <artifactId>gora-core</artifactId>
-            <version>${project.version}</version>
-            <classifier>tests</classifier>
-        </dependency>
-
-        <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>avro</artifactId>
         </dependency>
@@ -98,6 +91,12 @@
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
+             <exclusions>
+               <exclusion>
+                <groupId>javax.jms</groupId>
+                <artifactId>jms</artifactId>
+              </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Testing Dependencies -->

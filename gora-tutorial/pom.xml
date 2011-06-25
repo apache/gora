@@ -66,7 +66,6 @@
             <groupId>org.apache.gora</groupId>
             <artifactId>gora-sql</artifactId>
             <version>${project.version}</version>
-            <classifier>tests</classifier>
         </dependency>
 
         <dependency>
