@@ -21,7 +21,7 @@
     <groupId>org.apache.gora</groupId>
     <artifactId>apache-gora</artifactId>
     <packaging>pom</packaging>
-    <version>0.1.2-incubating-SNAPSHOT</version>
+    <version>0.1.1-incubating-SNAPSHOT</version>
     <name>Apache Gora</name>
 
        <scm>
