@@ -1,5 +1,9 @@
 Gora Change Log
 
+0.1.1-incubating release:
+
+* GORA-25 Upgrade Gora-hbase to HBase 0.90.0 (ab via mattmann)
+
 0.1-incubating release:
 
 *  INFRA-3038. Initial import of code.

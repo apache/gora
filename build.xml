@@ -22,7 +22,7 @@
 
   <property name="year" value="2010" />
   <property name="project.dir" value="${basedir}"/>
-  <property name="version" value="0.1-incubating" />
+  <property name="version" value="0.1.1-incubating" />
   <property name="final.name" value="${ant.project.name}-${version}" />
 
   <property name="dist.base.dir" value="${basedir}/dist"/>
