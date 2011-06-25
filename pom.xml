@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <!--
     Licensed to the Apache Software Foundation (ASF) under one or more
     contributor license agreements.  See the NOTICE file distributed with
@@ -23,13 +21,13 @@
     <groupId>org.apache.gora</groupId>
     <artifactId>apache-gora</artifactId>
     <packaging>pom</packaging>
-    <version>0.1.1-incubating-SNAPSHOT</version>
+    <version>0.1.1-incubating</version>
     <name>Apache Gora</name>
 
        <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/gora/trunk/</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/gora/trunk/</developerConnection>
-        <url>http://svn.apache.org/viewvc/incubator/gora/trunk</url>
+        <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/gora/tags/0.1.1-incubating</connection>
+        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/gora/tags/0.1.1-incubating</developerConnection>
+        <url>http://svn.apache.org/viewvc/incubator/gora/tags/0.1.1-incubating</url>
       </scm>
 
     <build>
