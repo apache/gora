@@ -25,8 +25,8 @@
     <name>Apache Gora</name>
 
        <scm>
-        <connection>scm:svn:scm:svn:http://svn.apache.org/repos/asf/incubator/gora/tags/0.1.1-incubating</connection>
-        <developerConnection>scm:svn:scm:svn:http://svn.apache.org/repos/asf/incubator/gora/tags/0.1.1-incubating</developerConnection>
+        <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/gora/tags/0.1.1-incubating</connection>
+        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/gora/tags/0.1.1-incubating</developerConnection>
       </scm>
 
     <build>
