@@ -75,7 +75,7 @@
                 <artifactId>maven-release-plugin</artifactId>
                 <version>${maven-release-plugin.version}</version>
                 <configuration>
-                    <tagBase>scm:svn:http://svn.apache.org/repos/asf/incubator/gora/tags/</tagBase>
+                    <tagBase>https://svn.apache.org/repos/asf/incubator/gora/tags/</tagBase>
                 </configuration>
             </plugin>
         </plugins>
