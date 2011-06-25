@@ -128,12 +128,6 @@
             <artifactId>hadoop-test</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.hbase</groupId>
-            <artifactId>hbase</artifactId>
-            <classifier>tests</classifier>
-        </dependency>
-
     </dependencies>
 
 </project>
