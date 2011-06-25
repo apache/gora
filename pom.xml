@@ -28,7 +28,8 @@
 
        <scm>
         <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/gora/trunk/</connection>
-        <developerConnection>scm:svn:http://svn.apache.org/repos/asf/incubator/gora/trunk/</developerConnection>
+        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/gora/trunk/</developerConnection>
+        <url>http://svn.apache.org/viewvc/incubator/gora/trunk</url>
       </scm>
 
     <build>
