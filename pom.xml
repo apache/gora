@@ -37,6 +37,8 @@
       </scm>
 
     <build>
+        <testSourceDirectory>${basedir}/src/test/java</testSourceDirectory>
+        <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
