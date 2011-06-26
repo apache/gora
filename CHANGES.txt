@@ -31,3 +31,7 @@ Trunk (unreleased changes):
 *  GORA-23. Limit result set in store reads (Alexis Detreglode via hsaputra)
 
 *  GORA-25. Upgrade Gora-hbase to HBase 0.90.0 (ab)
+
+*  GORA-2. Create Gora web site (enis)
+
+*  GORA-5. Add champions and mentors to Gora website (hsaputra)
