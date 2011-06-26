@@ -27,13 +27,13 @@
     <groupId>org.apache.gora</groupId>
     <artifactId>gora</artifactId>
     <packaging>pom</packaging>
-    <version>0.1.1-incubating</version>
+    <version>0.1.2-incubating-SNAPSHOT</version>
     <name>Apache Gora</name>
 
        <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/gora/tags/0.1.1-incubating</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/gora/tags/0.1.1-incubating</developerConnection>
-        <url>http://svn.apache.org/viewvc/incubator/gora/tags/0.1.1-incubating</url>
+        <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/gora/branches/0.1.1-incubating/</connection>
+        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/gora/branches/0.1.1-incubating/</developerConnection>
+        <url>http://svn.apache.org/viewvc/incubator/gora/branches/0.1.1-incubating</url>
       </scm>
 
     <build>
