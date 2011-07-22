@@ -36,8 +36,8 @@ import org.slf4j.LoggerFactory;
 public class GoraRecordReader<K, T extends Persistent> extends RecordReader<K,T> {
   public static final Logger LOG = LoggerFactory.getLogger(GoraRecordReader.class);
 
-  private static final String BUFFER_LIMIT_READ_NAME = "gora.buffer.read.limit";
-  private static final int BUFFER_LIMIT_READ_VALUE = 10000;
+  public static final String BUFFER_LIMIT_READ_NAME = "gora.buffer.read.limit";
+  public static final int BUFFER_LIMIT_READ_VALUE = 10000;
 
   protected Query<K,T> query;
   protected Result<K,T> result;

@@ -22,7 +22,7 @@
       organisation="org.apache.gora"
       module="gora-cassandra"
       status="integration"/>
-
+      
   <configurations>
     <include file="${project.dir}/ivy/ivy-configurations.xml"/>
   </configurations>
@@ -32,15 +32,25 @@
     <artifact name="gora-cassandra-test" conf="test"/>
   </publications>
 
+  
   <dependencies>
     <!-- conf="*->@" means every conf is mapped to the conf of the same name of the artifact-->
-    <dependency org="org.apache.gora" name="gora-core" rev="latest.integration" changing="true" conf="*->@"/> 
-    <dependency org="org.jdom" name="jdom" rev="1.1" conf="*->master"/>
-
-    <dependency org="org.slf4j" name="slf4j-jdk14" rev="1.5.8" conf="*->master"/>
-    <dependency org="org.slf4j" name="slf4j-api" rev="1.5.8" conf="*->master"/>
-
-    <dependency org="com.google.guava" name="guava" rev="r06"/>
+    
+    <dependency org="org.apache.gora" name="gora-core" rev="latest.integration" changing="true" conf="*->@"/>
+    
+    <dependency org="org.jdom" name="jdom" rev="1.1">
+    	<exclude org="xerces" name="xercesImpl"/>
+    </dependency>
+    
+    <!--
+        <dependency org="org.apache.cassandra" name="apache-cassandra" rev="0.8.1"/>
+    	<dependency org="me.prettyprint" name="hector" rev="0.8.0-1"/>
+    -->
+    <dependency org="org.apache.cassandra" name="cassandra-thrift" rev="0.8.1"/>
+    <dependency org="com.ecyrd.speed4j" name="speed4j" rev="0.9" conf="*->*,!javadoc,!sources"/>
+    <dependency org="com.github.stephenc.high-scale-lib" name="high-scale-lib" rev="1.1.2" conf="*->*,!javadoc,!sources"/>
+    <dependency org="com.google.collections" name="google-collections" rev="1.0" conf="*->*,!javadoc,!sources"/>
+    <dependency org="com.google.guava" name="guava" rev="r09" conf="*->*,!javadoc,!sources"/>
 
     <!-- test dependencies -->
 
