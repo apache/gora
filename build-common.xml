@@ -347,7 +347,7 @@
     	
     <!-- the call to resolve is not mandatory, retrieve makes an implicit call if we don't -->
     <ivy:resolve file="${ivy.dir}/${ivy.file}" conf="compile" log="download-only"/>
-    <ivy:retrieve pattern="${lib.dir}/[artifact]-[revision].[ext]" symlink="true" log="quiet" conf="compile"/>
+    <ivy:retrieve pattern="${lib.dir}/[artifact]-[revision](-[classifier]).[ext]" symlink="true" log="quiet" conf="compile"/> 
 
     <!-- copy the libs in lib-ext, which are not ivy enabled, should change in the future -->
     <copy todir="${lib.dir}/" failonerror="false">
