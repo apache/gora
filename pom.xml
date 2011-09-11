@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <!--
+<!--
     Licensed to the Apache Software Foundation (ASF) under one or more
     contributor license agreements.  See the NOTICE file distributed with
     this work for additional information regarding copyright ownership.
@@ -15,290 +14,95 @@
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-    -->
-    <modelVersion>4.0.0</modelVersion>
-     <parent>
-       <groupId>org.apache</groupId>
-       <artifactId>apache</artifactId>
-       <version>9</version>
-       <relativePath />
-     </parent>
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.apache</groupId>
+		<artifactId>apache</artifactId>
+		<version>9</version>
+		<relativePath />
+	</parent>
 
-    <groupId>org.apache.gora</groupId>
-    <artifactId>gora</artifactId>
-    <packaging>pom</packaging>
-    <version>0.1.2-incubating-SNAPSHOT</version>
-    <name>Apache Gora</name>
+	<groupId>org.apache.gora</groupId>
+	<artifactId>gora</artifactId>
+	<packaging>pom</packaging>
+	<version>0.1.1-incubating-SNAPSHOT</version>
+	<name>Apache Gora</name>
 
-       <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/gora/branches/0.1.1-incubating/</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/gora/branches/0.1.1-incubating/</developerConnection>
-        <url>http://svn.apache.org/viewvc/incubator/gora/branches/0.1.1-incubating</url>
-      </scm>
+	<scm>
+		<connection>scm:svn:http://svn.apache.org/repos/asf/incubator/gora/branches/0.1.1-incubating/</connection>
+		<developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/gora/branches/0.1.1-incubating/</developerConnection>
+		<url>http://svn.apache.org/viewvc/incubator/gora/branches/0.1.1-incubating</url>
+	</scm>
 
-    <build>
-        <testSourceDirectory>${basedir}/src/test/java</testSourceDirectory>
-        <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven-compiler-plugin.version}</version>
-                <inherited>true</inherited>
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven-surfire-plugin.version}</version>
-                <inherited>true</inherited>
-                <configuration>
-                    <argLine>-Dhadoop.log.dir=${project.basedir}/build/test/logs/
-                        -Dtest.build.data=${project.basedir}/build/test/data
+	<build>
+		<testSourceDirectory>${basedir}/src/test/java</testSourceDirectory>
+		<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<inherited>true</inherited>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<inherited>true</inherited>
+				<configuration>
+					<argLine>-Dhadoop.log.dir=${project.basedir}/build/test/logs/
+						-Dtest.build.data=${project.basedir}/build/test/data
                     </argLine>
-                    <testFailureIgnore>true</testFailureIgnore>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>${maven-dependency-plugin.version}</version>
-                <inherited>true</inherited>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>lib</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.2</version>
-                <executions>
-                  <execution>
-                  <goals>
-                    <goal>test-jar</goal>
-                  </goals>
-                 </execution>
-               </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>${maven-release-plugin.version}</version>
-                <configuration>
-                    <tagBase>https://svn.apache.org/repos/asf/incubator/gora/tags/</tagBase>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+					<testFailureIgnore>true</testFailureIgnore>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<inherited>true</inherited>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>lib</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.2</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<configuration>
+					<tagBase>https://svn.apache.org/repos/asf/incubator/gora/tags/</tagBase>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
-    <modules>
-        <module>gora-core</module>
-        <module>gora-hbase</module>
-        <!--<module>gora-cassandra</module>-->
-        <module>gora-sql</module>
-        <module>gora-tutorial</module>
-    </modules>
-
-    <properties>
-        <osgi.version>4.2.0</osgi.version>
-        <!-- Hadoop Dependencies -->
-        <hadoop.version>0.20.2</hadoop.version>
-        <hbase.version>0.90.0</hbase.version>
-        <avro.version>1.3.2</avro.version>
-        <!-- Cassandra Dependencies -->
-        <cassandra.version>0.7.3</cassandra.version>
-        <libthrift.version>0.5.0</libthrift.version>
-        <!-- Misc Dependencies -->
-        <guava.version>r06</guava.version>
-        <commons-lang.version>2.5</commons-lang.version>
-        <jdom.version>1.1</jdom.version>
-        <sqlbuilder.version>2.0.6</sqlbuilder.version>
-        <hsqldb.version>2.0.0</hsqldb.version>
-        <mysql.version>5.1.13</mysql.version>
-        <!-- Logging Dependencies -->
-        <commons-logging.version>1.1.1</commons-logging.version>
-        <slf4j.version>1.5.8</slf4j.version>
-        <log4j.version>1.2.15</log4j.version>
-
-        <!-- Testing Dependencies -->
-        <junit.version>4.6</junit.version>
-
-        <!-- Maven Plugin Dependencies -->
-        <maven-compiler-plugin.version>2.0.2</maven-compiler-plugin.version>
-        <maven-resources-plugin.version>2.4.3</maven-resources-plugin.version>
-        <maven-jar-plugin.version>2.3.1</maven-jar-plugin.version>
-        <maven-dependency-plugin.version>2.1</maven-dependency-plugin.version>
-        <build-helper-maven-plugin.version>1.5</build-helper-maven-plugin.version>
-        <maven-surfire-plugin.version>2.3.1</maven-surfire-plugin.version>
-        <maven-release-plugin.version>2.1</maven-release-plugin.version>
-    </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <!-- Hadoop Dependencies -->
-            <dependency>
-                <groupId>org.apache.hadoop</groupId>
-                <artifactId>hadoop-core</artifactId>
-                <version>${hadoop.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>hsqldb</groupId>
-                        <artifactId>hsqldb</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>net.sf.kosmos</groupId>
-                        <artifactId>kfs</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>net.java.dev.jets3t</groupId>
-                        <artifactId>jets3t</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.eclipse.jdt</groupId>
-                        <artifactId>core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.mortbay.jetty</groupId>
-                        <artifactId>jsp-*</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.hadoop</groupId>
-                <artifactId>avro</artifactId>
-                <version>${avro.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>ant</groupId>
-                        <artifactId>ant</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.hbase</groupId>
-                <artifactId>hbase</artifactId>
-                <version>${hbase.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.hbase</groupId>
-                <artifactId>hbase</artifactId>
-                <version>${hbase.version}</version>
-                <classifier>tests</classifier>
-            </dependency>
-
-            <!-- Cassandra Dependencies -->
-            <dependency>
-                <groupId>org.apache.cassandra</groupId>
-                <artifactId>cassandra</artifactId>
-                <version>${cassandra.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.cassandra.deps</groupId>
-                <artifactId>libthrift</artifactId>
-                <version>${libthrift.version}</version>
-            </dependency>
-
-            <!-- Misc Dependencies -->
-            <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>${guava.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>commons-lang</groupId>
-                <artifactId>commons-lang</artifactId>
-                <version>${commons-lang.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jdom</groupId>
-                <artifactId>jdom</artifactId>
-                <version>${jdom.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.healthmarketscience.sqlbuilder</groupId>
-                <artifactId>sqlbuilder</artifactId>
-                <version>${sqlbuilder.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.hsqldb</groupId>
-                <artifactId>hsqldb</artifactId>
-                <version>${hsqldb.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
-                <version>${mysql.version}</version>
-            </dependency>
-
-            <!-- Logging Dependencies -->
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-simple</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-jdk14</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-                <version>${log4j.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.sun.jdmk</groupId>
-                        <artifactId>jmxtools</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.sun.jmx</groupId>
-                        <artifactId>jmxri</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <!-- Testing Dependencies -->
-            <dependency>
-                <groupId>org.apache.hadoop</groupId>
-                <artifactId>hadoop-test</artifactId>
-                <version>${hadoop.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
-            </dependency>
-
-        </dependencies>
-    </dependencyManagement>
-
+	<modules>
+		<module>gora-core</module>
+		<module>gora-hbase</module>
+		<module>gora-cassandra</module>
+		<module>gora-sql</module><!-- <module>gora-tutorial</module> -->
+	</modules>
 </project>
