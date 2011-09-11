@@ -35,6 +35,9 @@
   <dependencies>
     <!-- conf="*->@" means every conf is mapped to the conf of the same name of the artifact-->
     <dependency org="org.apache.gora" name="gora-core" rev="0.1.1-incubating" conf="*->*"/> 
+    <dependency org="org.apache.gora" name="gora-core" rev="0.1.1-incubating" conf="test->*">
+         <artifact name="gora-core-test" type="jar" ext="jar"/>
+    </dependency>
     <dependency org="org.jdom" name="jdom" rev="1.1" conf="*->master"/>
 
     <!-- test dependencies -->
