@@ -103,6 +103,7 @@
 		<module>gora-core</module>
 		<module>gora-hbase</module>
 		<module>gora-cassandra</module>
-		<module>gora-sql</module><!-- <module>gora-tutorial</module> -->
+		<module>gora-sql</module>
+		<module>gora-tutorial</module>
 	</modules>
 </project>
