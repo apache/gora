@@ -30,6 +30,7 @@ import org.apache.gora.hbase.store.HBaseStore;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.DataStoreTestBase;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTable;
@@ -40,22 +41,30 @@ import org.apache.hadoop.hbase.util.Bytes;
  */
 public class TestHBaseStore extends DataStoreTestBase {
 
+  private Configuration conf;
+  
   static {
     setTestDriver(new GoraHBaseTestDriver());
+  }
+  
+  @Override
+  public void setUp() throws Exception {
+    super.setUp();
+    conf = getTestDriver().getHbaseUtil().getConfiguration();
   }
     
   @Override
   protected DataStore<String, Employee> createEmployeeDataStore()
       throws IOException {
     return DataStoreFactory.createDataStore(HBaseStore.class, String.class, 
-        Employee.class);
+        Employee.class, conf);
   }
 
   @Override
   protected DataStore<String, WebPage> createWebPageDataStore()
       throws IOException {
     return DataStoreFactory.createDataStore(HBaseStore.class, String.class, 
-        WebPage.class);
+        WebPage.class, conf);
   }
 
   public GoraHBaseTestDriver getTestDriver() {

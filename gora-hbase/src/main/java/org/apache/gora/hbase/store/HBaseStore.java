@@ -106,9 +106,9 @@ implements Configurable {
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
       Properties properties) throws IOException {
     super.initialize(keyClass, persistentClass, properties);
-    this.conf = new HBaseConfiguration();
+    this.conf = HBaseConfiguration.create(getConf());
 
-    admin = new HBaseAdmin(new HBaseConfiguration(getConf()));
+    admin = new HBaseAdmin(this.conf);
 
     try {
       mapping = readMapping(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE));

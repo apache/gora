@@ -86,7 +86,7 @@ public class GoraOutputFormat<K, T extends Persistent>
     Class<K> keyClass = (Class<K>) conf.getClass(OUTPUT_KEY_CLASS, null);
     Class<T> rowClass = (Class<T>) conf.getClass(OUTPUT_VALUE_CLASS, null);
     final DataStore<K, T> store =
-      DataStoreFactory.createDataStore(dataStoreClass, keyClass, rowClass);
+      DataStoreFactory.createDataStore(dataStoreClass, keyClass, rowClass, context.getConfiguration());
 
     setOutputPath(store, context);
 

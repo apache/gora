@@ -124,14 +124,15 @@ public class QueryCounter<K, T extends Persistent> extends Configured implements
     Class<T> persistentClass = (Class<T>) Class.forName(args[1]);
 
     DataStore<K,T> dataStore;
+    Configuration conf = new Configuration();
 
     if(args.length > 2) {
       Class<? extends DataStore<K,T>> dataStoreClass
           = (Class<? extends DataStore<K, T>>) Class.forName(args[2]);
-      dataStore = DataStoreFactory.getDataStore(dataStoreClass, keyClass, persistentClass);
+      dataStore = DataStoreFactory.getDataStore(dataStoreClass, keyClass, persistentClass, conf);
     }
     else {
-      dataStore = DataStoreFactory.getDataStore(keyClass, persistentClass);
+      dataStore = DataStoreFactory.getDataStore(keyClass, persistentClass, conf);
     }
 
     long results = countQuery(dataStore);

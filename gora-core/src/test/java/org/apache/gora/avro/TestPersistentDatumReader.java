@@ -34,6 +34,7 @@ import org.apache.gora.query.Result;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.DataStoreTestUtil;
+import org.apache.hadoop.conf.Configuration;
 import org.junit.Test;
 
 /**
@@ -43,6 +44,7 @@ public class TestPersistentDatumReader {
 
   private PersistentDatumReader<WebPage> webPageDatumReader 
     = new PersistentDatumReader<WebPage>();
+  private Configuration conf = new Configuration();
   
   private void testClone(Persistent persistent) throws IOException {
     Persistent cloned = webPageDatumReader.clone(persistent, persistent.getSchema());
@@ -58,7 +60,7 @@ public class TestPersistentDatumReader {
   public void testCloneEmployee() throws Exception {
     @SuppressWarnings("unchecked")
     MemStore<String, Employee> store = DataStoreFactory.getDataStore(
-        MemStore.class, String.class, Employee.class);
+        MemStore.class, String.class, Employee.class, conf);
 
     Employee employee = DataStoreTestUtil.createEmployee(store);
     
@@ -86,7 +88,7 @@ public class TestPersistentDatumReader {
   public void testCloneWebPage() throws Exception {
     @SuppressWarnings("unchecked")
     DataStore<String, WebPage> store = DataStoreFactory.createDataStore(
-        MemStore.class, String.class, WebPage.class);
+        MemStore.class, String.class, WebPage.class, conf);
     WebPageDataCreator.createWebPageData(store);
 
     Query<String, WebPage> query = store.newQuery();

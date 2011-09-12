@@ -142,19 +142,19 @@ public class WordCount extends Configured implements Tool {
     
     DataStore<String,WebPage> inStore;
     DataStore<String, TokenDatum> outStore;
-    
+    Configuration conf = new Configuration();
     if(args.length > 0) {
       String dataStoreClass = args[0];
       inStore = DataStoreFactory.getDataStore(dataStoreClass, 
-          String.class, WebPage.class);
+          String.class, WebPage.class, conf);
       if(args.length > 1) {
         dataStoreClass = args[1];
       }
       outStore = DataStoreFactory.getDataStore(dataStoreClass, 
-          String.class, TokenDatum.class);
+          String.class, TokenDatum.class, conf);
     } else {
-      inStore = DataStoreFactory.getDataStore(String.class, WebPage.class);
-      outStore = DataStoreFactory.getDataStore(String.class, TokenDatum.class);
+      inStore = DataStoreFactory.getDataStore(String.class, WebPage.class, conf);
+      outStore = DataStoreFactory.getDataStore(String.class, TokenDatum.class, conf);
     }
     
     return wordCount(inStore, outStore);

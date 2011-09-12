@@ -32,6 +32,7 @@ import org.apache.gora.query.Result;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.tutorial.log.generated.Pageview;
+import org.apache.hadoop.conf.Configuration;
 
 /**
  * LogManager is the tutorial class to illustrate the basic 
@@ -68,7 +69,8 @@ public class LogManager {
     //Data store objects are created from a factory. It is necessary to 
     //provide the key and value class. The datastore class is optional, 
     //and if not specified it will be read from the properties file
-    dataStore = DataStoreFactory.getDataStore(Long.class, Pageview.class);
+    dataStore = DataStoreFactory.getDataStore(Long.class, Pageview.class,
+            new Configuration());
   }
   
   /**

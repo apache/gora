@@ -30,6 +30,7 @@ import org.apache.gora.examples.generated.Metadata;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
+import org.apache.hadoop.conf.Configuration;
 
 /**
  * Creates and stores some data to be used in the tests.
@@ -141,7 +142,7 @@ public class WebPageDataCreator {
     }
     
     DataStore<String,WebPage> store 
-      = DataStoreFactory.getDataStore(dataStoreClass, String.class, WebPage.class);
+      = DataStoreFactory.getDataStore(dataStoreClass, String.class, WebPage.class, new Configuration());
     createWebPageData(store);
     
     return 0;

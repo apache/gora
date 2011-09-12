@@ -27,6 +27,7 @@ import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.memory.store.MemStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.DataStoreTestUtil;
+import org.apache.hadoop.conf.Configuration;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -111,7 +112,7 @@ public class TestPersistentBase {
     //more tests for clone are in TestPersistentDatumReader
     @SuppressWarnings("unchecked")
     MemStore<String, Employee> store = DataStoreFactory.getDataStore(
-        MemStore.class, String.class, Employee.class);
+        MemStore.class, String.class, Employee.class, new Configuration());
 
     Employee employee = DataStoreTestUtil.createEmployee(store);
     

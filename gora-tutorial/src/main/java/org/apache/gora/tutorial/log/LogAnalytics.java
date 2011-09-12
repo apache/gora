@@ -28,6 +28,7 @@ import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.tutorial.log.generated.MetricDatum;
 import org.apache.gora.tutorial.log.generated.Pageview;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -160,18 +161,21 @@ public class LogAnalytics extends Configured implements Tool {
     
     DataStore<Long, Pageview> inStore;
     DataStore<String, MetricDatum> outStore;
-    
+    Configuration conf = new Configuration();    
+
     if(args.length > 0) {
       String dataStoreClass = args[0];
-      inStore = DataStoreFactory.getDataStore(dataStoreClass, Long.class, Pageview.class);
+      inStore = DataStoreFactory.
+          getDataStore(dataStoreClass, Long.class, Pageview.class, conf);
       if(args.length > 1) {
         dataStoreClass = args[1];
       }
-      outStore = DataStoreFactory.getDataStore(dataStoreClass, 
-          String.class, MetricDatum.class);
+      outStore = DataStoreFactory.
+          getDataStore(dataStoreClass, 
+			 String.class, MetricDatum.class, conf);
     } else {
-      inStore = DataStoreFactory.getDataStore(Long.class, Pageview.class);
-      outStore = DataStoreFactory.getDataStore(String.class, MetricDatum.class);
+	inStore = DataStoreFactory.getDataStore(Long.class, Pageview.class, conf);
+	outStore = DataStoreFactory.getDataStore(String.class, MetricDatum.class, conf);
     }
     
     Job job = createJob(inStore, outStore, 3);

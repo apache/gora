@@ -31,6 +31,7 @@ import org.apache.gora.query.impl.PartitionQueryImpl;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.GoraException;
+import org.apache.hadoop.conf.Configuration;
 
 public class MockDataStore extends DataStoreBase<String, MockPersistent> {
 
@@ -41,7 +42,7 @@ public class MockDataStore extends DataStoreBase<String, MockPersistent> {
     MockDataStore dataStore;
     try {
       dataStore = DataStoreFactory.getDataStore(MockDataStore.class
-          , String.class, MockPersistent.class);
+          , String.class, MockPersistent.class, new Configuration());
       return dataStore;
     } catch (GoraException ex) {
       throw new RuntimeException(ex);

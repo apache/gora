@@ -40,9 +40,9 @@ public class TestHBaseStoreMapReduce extends HBaseClusterTestCase{
   public void setUp() throws Exception {
     super.setUp();
     webPageStore = DataStoreFactory.getDataStore(
-        HBaseStore.class, String.class, WebPage.class);
+        HBaseStore.class, String.class, WebPage.class, conf);
     tokenStore = DataStoreFactory.getDataStore(HBaseStore.class, 
-        String.class, TokenDatum.class);
+        String.class, TokenDatum.class, conf);
   }
   
   @Override

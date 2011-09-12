@@ -175,7 +175,7 @@ public class GoraInputFormat<K, T extends Persistent>
   throws IOException {
 
     DataStore<K1,V1> store = DataStoreFactory.getDataStore(dataStoreClass
-        , inKeyClass, inValueClass);
+        , inKeyClass, inValueClass, job.getConfiguration());
     setInput(job, store.newQuery(), store, reuseObjects);
   }
 }

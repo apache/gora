@@ -32,6 +32,7 @@ import org.apache.gora.query.Result;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.DataStoreTestUtil;
 import org.apache.gora.util.TestIOUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.junit.Test;
 
 /** Test class for {@link PersistentSerialization}, {@link PersistentSerializer}
@@ -44,7 +45,7 @@ public class TestPersistentSerialization {
   public void testSerdeEmployee() throws Exception {
 
     MemStore<String, Employee> store = DataStoreFactory.getDataStore(
-        MemStore.class, String.class, Employee.class);
+        MemStore.class, String.class, Employee.class, new Configuration());
 
     Employee employee = DataStoreTestUtil.createEmployee(store);
 
@@ -73,7 +74,7 @@ public class TestPersistentSerialization {
   public void testSerdeWebPage() throws Exception {
 
     MemStore<String, WebPage> store = DataStoreFactory.getDataStore(
-        MemStore.class, String.class, WebPage.class);
+        MemStore.class, String.class, WebPage.class, new Configuration());
     WebPageDataCreator.createWebPageData(store);
 
     Result<String, WebPage> result = store.newQuery().execute();

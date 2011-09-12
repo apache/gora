@@ -71,7 +71,7 @@ public class TestAvroStore {
   @SuppressWarnings("unchecked")
   protected AvroStore<String, Employee> createEmployeeDataStore() throws GoraException {
     return DataStoreFactory.getDataStore(
-        AvroStore.class, String.class, Employee.class);
+        AvroStore.class, String.class, Employee.class, conf);
   }
 
   protected AvroStore<String, WebPage> createWebPageDataStore() {
