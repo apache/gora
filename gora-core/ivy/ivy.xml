@@ -35,7 +35,7 @@
 
     <dependency org="commons-logging" name="commons-logging" rev="1.1.1" conf="*->default"/>
     <dependency org="commons-lang" name="commons-lang" conf="*->default" rev="2.5"/>
-    <dependency org="log4j" name="log4j" rev="1.2.15" conf="*->master"/>
+    <dependency org="log4j" name="log4j" rev="1.2.15" conf="*->default"/>   
     
     <dependency org="org.apache.hadoop" name="hadoop-core" rev="0.20.2" conf="*->default">
       <exclude org="hsqldb" name="hsqldb"/>
