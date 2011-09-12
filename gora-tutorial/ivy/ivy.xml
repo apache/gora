@@ -23,16 +23,16 @@
       status="integration"/>
 
   <configurations>
-    <include file="${project.dir}/ivy/ivy-configurations.xml"/>
+    <include file="../../ivy/ivy-configurations.xml"/>
   </configurations>
 
   <publications defaultconf="compile">
     <artifact name="gora-tutorial" conf="compile"/>
   </publications>
-
+ 
   <dependencies>
-    <dependency org="org.apache.gora" name="gora-hbase" rev="latest.integration" changing="true" conf="*->@"/>
-    <dependency org="org.apache.gora" name="gora-sql" rev="latest.integration" changing="true" conf="*->@"/>
+    <dependency org="org.apache.gora" name="gora-hbase" rev="0.1.1-incubating" conf="*->*"/>
+    <dependency org="org.apache.gora" name="gora-sql" rev="0.1.1-incubating" conf="*->*"/>
     
     <!-- Uncomment below if you are using MySQL -->
     <!-- <dependency org="mysql" name="mysql-connector-java" rev="5.1.13" conf="*->default"/> -->

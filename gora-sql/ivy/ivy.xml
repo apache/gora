@@ -23,7 +23,7 @@
       status="integration"/>
 
   <configurations>
-    <include file="${project.dir}/ivy/ivy-configurations.xml"/>
+    <include file="../../ivy/ivy-configurations.xml"/>
   </configurations>
   
   <publications>
@@ -33,12 +33,15 @@
 
   <dependencies>
     <!-- conf="*->@" means every conf is mapped to the conf of the same name of the artifact-->
-    <dependency org="org.apache.gora" name="gora-core" rev="latest.integration" changing="true" conf="*->@"/> 
+    <dependency org="org.apache.gora" name="gora-core" rev="0.1.1-incubating" conf="*->*"/> 
+    <dependency org="org.apache.gora" name="gora-core" rev="0.1.1-incubating" conf="test->*">
+         <artifact name="gora-core-test" type="jar" ext="jar"/>
+    </dependency>    
     <dependency org="org.jdom" name="jdom" rev="1.1" conf="*->master"/>
     <dependency org="com.healthmarketscience.sqlbuilder" name="sqlbuilder" rev="2.0.6" conf="*->default"/>
 
     <!-- test dependencies -->
-    <dependency org="org.hsqldb" name="hsqldb" rev="2.0.0" conf="test->default"/>
+    <dependency org="org.hsqldb" name="hsqldb" rev="2.2.4" conf="test->default"/>
 
   </dependencies>
     
