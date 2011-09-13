@@ -2,6 +2,8 @@ Gora Change Log
 
 Trunk (unreleased changes):
 
+* GORA-12. Semantics of DataStore.delete* (ab via mattmann)
+
 * GORA-18. Configuration not found error breaks the build on trunk (ioannis via mattmann)
 
 * GORA-26. Configurable classes should pass around Configuration consistently (ab via mattmann)
