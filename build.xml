@@ -245,6 +245,16 @@
     </sequential>
   </macrodef>
 
+  <macrodef name="macro_zip" description="Worker Macro for zip">
+    <attribute name="param.destfile"/>
+    <element name="param.listofitems"/>
+    <sequential>
+      <zip destfile="@{param.destfile}">
+      <param.listofitems/>
+      </zip>
+    </sequential>
+  </macrodef>
+
   <!-- ================================================================== -->
   <!-- Make release tarball                                               -->
   <!-- ================================================================== -->
@@ -260,6 +270,23 @@
         </tarfileset>
       </param.listofitems>
     </macro_tar>
+  </target>
+
+  <!-- ================================================================== -->
+  <!-- Make release zipball                                               -->
+  <!-- ================================================================== -->
+  <target name="zip" depends="package" description="Make release zipball">
+    <macro_zip param.destfile="${dist.base.dir}/${final.name}.zip">
+      <param.listofitems>
+        <zipfileset dir="${dist.base.dir}">
+          <exclude name="${final.name}/bin/*" />
+          <include name="${final.name}/**" />
+        </zipfileset>
+        <zipfileset dir="${dist.base.dir}">
+          <include name="${final.name}/bin/*" />
+        </zipfileset>
+      </param.listofitems>
+    </macro_zip>
   </target>
 
   <!-- ================================================================== -->
