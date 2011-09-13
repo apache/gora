@@ -39,6 +39,10 @@ import org.apache.hadoop.io.Writable;
  * constructed by an instance of {@link DataStoreFactory}.
  *
  * <p> DataStores implementations should be thread safe.
+ * <p><a name="visibility"><b>Note:</b> Results of updates ({@link #put(Object, Persistent)},
+ * {@link #delete(Object)} and {@link #deleteByQuery(Query)} operations) are
+ * guaranteed to be visible to subsequent get / execute operations ONLY
+ * after a subsequent call to {@link #flush()}.
  * @param <K> the class of keys in the datastore
  * @param <T> the class of persistent objects in the datastore
  */
@@ -143,19 +147,23 @@ public interface DataStore<K, T extends Persistent> extends Closeable,
   T get(K key, String[] fields) throws IOException;
 
   /**
-   * Inserts the persistent object with the given key.
+   * Inserts the persistent object with the given key. If an 
+   * object with the same key already exists it will silently
+   * be replaced. See also the note on 
+   * <a href="#visibility">visibility</a>.
    */
   void put(K key, T obj) throws IOException;
 
   /**
    * Deletes the object with the given key
    * @param key the key of the object
-   * @return whether deleted the object successfuly
+   * @return whether the object was successfully deleted
    */
   boolean delete(K key) throws IOException;
 
   /**
    * Deletes all the objects matching the query.
+   * See also the note on <a href="#visibility">visibility</a>.
    * @param query matching records to this query will be deleted
    * @return number of deleted records
    */
@@ -186,7 +194,10 @@ public interface DataStore<K, T extends Persistent> extends Closeable,
     throws IOException;
 
   /**
-   * Forces the write caches to be flushed.
+   * Forces the write caches to be flushed. DataStore implementations may
+   * optimize their writing by deferring the actual put / delete operations
+   * until this moment.
+   * See also the note on <a href="#visibility">visibility</a>.
    */
   void flush() throws IOException;
 
@@ -202,6 +213,12 @@ public interface DataStore<K, T extends Persistent> extends Closeable,
    */
   BeanFactory<K,T> getBeanFactory();
 
+  /**
+   * Close the DataStore. This should release any resources held by the
+   * implementation, so that the instance is ready for GC.
+   * All other DataStore methods cannot be used after this
+   * method was called. Subsequent calls of this method are ignored.
+   */
   void close() throws IOException;
 
   Configuration getConf();

@@ -592,6 +592,7 @@ public class DataStoreTestUtil {
 
     assertNumResults(store.newQuery(), URLS.length);
     store.deleteByQuery(query);
+    store.flush();
     assertEmptyResults(store.newQuery());
 
 
@@ -603,6 +604,7 @@ public class DataStoreTestUtil {
 
     assertNumResults(store.newQuery(), URLS.length);
     store.deleteByQuery(query);
+    store.flush();
     assertEmptyResults(store.newQuery());
 
 
@@ -614,6 +616,7 @@ public class DataStoreTestUtil {
 
     assertNumResults(store.newQuery(), URLS.length);
     store.deleteByQuery(query);
+    store.flush();
     assertEmptyResults(store.newQuery());
 
 
@@ -624,6 +627,7 @@ public class DataStoreTestUtil {
 
     assertNumResults(store.newQuery(), URLS.length);
     store.deleteByQuery(query);
+    store.flush();
     assertNumResults(store.newQuery(), URLS.length - (NUM_KEYS+1));
 
     store.truncateSchema();
