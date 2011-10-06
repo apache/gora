@@ -2,6 +2,8 @@ Gora Change Log
 
 Trunk (unreleased changes):
 
+* GORA-45. Add dependency to 'clean-cache' ant target (Lewis John McGibbney via mattmann)
+
 * GORA-44. Ant build fails (Lakshmi Narasimhan via mattmann)
 
 * GORA-28. Merge back recent changes in 0.1-incubating to trunk (mattmann, ab)
