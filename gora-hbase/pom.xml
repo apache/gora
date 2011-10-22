@@ -30,6 +30,14 @@
 
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>
+        <testResources>
+          <testResource>
+            <directory>${project.basedir}/src/test/conf</directory>
+            <includes>
+              <include>**/*</include>
+            </includes>
+          </testResource>
+        </testResources>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -57,14 +65,12 @@
         <dependency>
             <groupId>org.apache.gora</groupId>
             <artifactId>gora-core</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.gora</groupId>
             <artifactId>gora-core</artifactId>
-            <version>${project.version}</version>
-            <type>test-jar</type>
+            <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
 
@@ -72,13 +78,11 @@
         <dependency>
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase</artifactId>
-            <version>0.90.0</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase</artifactId>
-	    <version>0.90.0</version>
             <classifier>tests</classifier>
         </dependency>
 
