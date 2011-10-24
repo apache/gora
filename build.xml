@@ -260,7 +260,7 @@
   <!-- ================================================================== -->
   <!-- Make release tarball                                               -->
   <!-- ================================================================== -->
-  <target name="tar" depends="package, docs" description="Make release tarball">
+  <target name="tar" depends="docs, package" description="Make release tarball">
     <macro_tar param.destfile="${dist.base.dir}/${final.name}.tar.gz">
       <param.listofitems>
         <tarfileset dir="${dist.base.dir}" mode="664">
