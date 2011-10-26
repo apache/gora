@@ -2,7 +2,9 @@ Gora Change Log
 
 Trunk (unreleased changes):
 
-* GORA-47&46. fix tar ant target & Add nightly target to build.xml respectively
+* GORA-48. HBaseStore initialization of table without configuration in constructor will throw Exception (Ferdy via lewismc)
+
+* GORA-47&46. fix tar ant target & Add nightly target to build.xml respectively (lewismc)
 
 * GORA-45. Add dependency to 'clean-cache' ant target (Lewis John McGibbney via mattmann)
 

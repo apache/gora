@@ -131,7 +131,7 @@ implements Configurable {
       createSchema();
     }
 
-    table = new HTable(mapping.getTableName());
+    table = new HTable(conf, mapping.getTableName());
   }
 
   @Override
