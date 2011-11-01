@@ -75,6 +75,7 @@ import org.jdom.input.SAXBuilder;
 
 /**
  * DataStore for HBase.
+ * <p> Note: HBaseStore is not yet thread-safe.
  *
  */
 public class HBaseStore<K, T extends Persistent> extends DataStoreBase<K, T>
