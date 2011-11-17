@@ -2,6 +2,8 @@ Gora Change Log
 
 Trunk (unreleased changes):
 
+* GORA-56 HBaseStore is not thread safe. (Ferdy via lewismc)
+
 * GORA-48. HBaseStore initialization of table without configuration in constructor will throw Exception (Ferdy via lewismc)
 
 * GORA-47&46. fix tar ant target & Add nightly target to build.xml respectively (lewismc)

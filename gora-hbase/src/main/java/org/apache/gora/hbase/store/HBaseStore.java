@@ -43,6 +43,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.gora.hbase.query.HBaseGetResult;
 import org.apache.gora.hbase.query.HBaseQuery;
 import org.apache.gora.hbase.query.HBaseScannerResult;
+import org.apache.gora.hbase.store.HBaseMapping.HBaseMappingBuilder;
 import org.apache.gora.hbase.util.HBaseByteInterface;
 import org.apache.gora.persistency.ListGenericArray;
 import org.apache.gora.persistency.Persistent;
@@ -62,7 +63,6 @@ import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
-import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
@@ -74,8 +74,7 @@ import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 
 /**
- * DataStore for HBase.
- * <p> Note: HBaseStore is not yet thread-safe.
+ * DataStore for HBase. Thread safe.
  *
  */
 public class HBaseStore<K, T extends Persistent> extends DataStoreBase<K, T>
@@ -89,15 +88,15 @@ implements Configurable {
   private static final String DEPRECATED_MAPPING_FILE = "hbase-mapping.xml";
   public static final String DEFAULT_MAPPING_FILE = "gora-hbase-mapping.xml";
 
-  private HBaseAdmin admin;
+  private volatile HBaseAdmin admin;
 
-  private HTable table;
+  private volatile HBaseTableConnection table;
 
-  private Configuration conf;
+  private volatile Configuration conf;
 
-  private boolean autoCreateSchema = true;
+  private final boolean autoCreateSchema = true;
 
-  private HBaseMapping mapping;
+  private volatile HBaseMapping mapping;
 
   public HBaseStore()  {
   }
@@ -131,7 +130,7 @@ implements Configurable {
       createSchema();
     }
 
-    table = new HTable(conf, mapping.getTableName());
+    table = new HBaseTableConnection(getConf(), mapping.getTableName(), true);
   }
 
   @Override
@@ -152,9 +151,6 @@ implements Configurable {
   @Override
   public void deleteSchema() throws IOException {
     if(!admin.tableExists(mapping.getTableName())) {
-      if(table != null) {
-        table.getWriteBuffer().clear();
-      }
       return;
     }
     admin.disableTable(mapping.getTableName());
@@ -521,7 +517,7 @@ implements Configurable {
   @SuppressWarnings("unchecked")
   private HBaseMapping readMapping(String filename) throws IOException {
 
-    HBaseMapping mapping = new HBaseMapping();
+    HBaseMappingBuilder mappingBuilder = new HBaseMappingBuilder();
 
     try {
       SAXBuilder builder = new SAXBuilder();
@@ -532,7 +528,7 @@ implements Configurable {
       List<Element> tableElements = root.getChildren("table");
       for(Element tableElement : tableElements) {
         String tableName = tableElement.getAttributeValue("name");
-        mapping.addTable(tableName);
+        mappingBuilder.addTable(tableName);
 
         List<Element> fieldElements = tableElement.getChildren("field");
         for(Element fieldElement : fieldElements) {
@@ -545,28 +541,33 @@ implements Configurable {
           String timeToLive  = fieldElement.getAttributeValue("timeToLive");
           String inMemory    = fieldElement.getAttributeValue("inMemory");
 
-          mapping.addColumnFamily(tableName, familyName, compression, blockCache, blockSize
-              , bloomFilter, maxVersions, timeToLive, inMemory);
+          mappingBuilder.addColumnFamily(tableName, familyName, compression, 
+              blockCache, blockSize, bloomFilter, maxVersions, timeToLive, 
+              inMemory);
         }
       }
 
       List<Element> classElements = root.getChildren("class");
       for(Element classElement: classElements) {
-        if(classElement.getAttributeValue("keyClass").equals(keyClass.getCanonicalName())
+        if(classElement.getAttributeValue("keyClass").equals(
+            keyClass.getCanonicalName())
             && classElement.getAttributeValue("name").equals(
                 persistentClass.getCanonicalName())) {
 
-          String tableName = getSchemaName(classElement.getAttributeValue("table"), persistentClass);
-          mapping.addTable(tableName);
-          mapping.setTableName(tableName);
+          String tableName = getSchemaName(
+              classElement.getAttributeValue("table"), persistentClass);
+          mappingBuilder.addTable(tableName);
+          mappingBuilder.setTableName(tableName);
 
           List<Element> fields = classElement.getChildren("field");
           for(Element field:fields) {
             String fieldName =  field.getAttributeValue("name");
             String family =  field.getAttributeValue("family");
             String qualifier = field.getAttributeValue("qualifier");
-            mapping.addField(fieldName, mapping.getTableName(), family, qualifier);
-            mapping.addColumnFamily(mapping.getTableName(), family);//implicit family definition
+            mappingBuilder.addField(fieldName, mappingBuilder.getTableName(), 
+                family, qualifier);
+            mappingBuilder.addColumnFamily(mappingBuilder.getTableName(), 
+                family);//implicit family definition
           }
 
           break;
@@ -578,14 +579,12 @@ implements Configurable {
       throw new IOException(ex);
     }
 
-    return mapping;
+    return mappingBuilder.build();
   }
 
   @Override
   public void close() throws IOException {
-    flush();
-    if(table != null)
-      table.close();
+    table.close();
   }
 
   @Override

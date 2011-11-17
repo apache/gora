@@ -24,24 +24,31 @@ import java.util.Arrays;
  */
 class HBaseColumn {
   
-  String tableName;
-  byte[] family;
-  byte[] qualifier;
+  final String tableName;
+  final byte[] family;
+  final byte[] qualifier;
   
   public HBaseColumn(String tableName, byte[] family, byte[] qualifier) {
     this.tableName = tableName;
-    this.family = family;
-    this.qualifier = qualifier;
+    this.family = family==null ? null : Arrays.copyOf(family, family.length);
+    this.qualifier = qualifier==null ? null : 
+      Arrays.copyOf(qualifier, qualifier.length);
   }
 
   public String getTableName() {
     return tableName;
   }
   
+  /**
+   * @return the family (internal array returned; do not modify)
+   */
   public byte[] getFamily() {
     return family;
   }
 
+  /**
+   * @return the qualifer (internal array returned; do not modify)
+   */
   public byte[] getQualifier() {
     return qualifier;
   }
