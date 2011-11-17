@@ -530,7 +530,7 @@ implements Configurable {
         String tableName = tableElement.getAttributeValue("name");
         mappingBuilder.addTable(tableName);
 
-        List<Element> fieldElements = tableElement.getChildren("field");
+        List<Element> fieldElements = tableElement.getChildren("family");
         for(Element fieldElement : fieldElements) {
           String familyName  = fieldElement.getAttributeValue("name");
           String compression = fieldElement.getAttributeValue("compression");
