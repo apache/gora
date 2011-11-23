@@ -2,6 +2,8 @@ Gora Change Log
 
 Trunk (unreleased changes):
 
+* GORA-43 Forward port 0.1.1 incubating Maven poms to trunk (lewismc)
+
 * GORA-57 HBaseStore does not correctly read family definitions (Ferdy via lewismc)
 
 * GORA-56 HBaseStore is not thread safe. (Ferdy via lewismc)
