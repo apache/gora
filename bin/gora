@@ -47,6 +47,7 @@ if [ $# = 0 ]; then
   echo "  specificcompiler           Run Avro Specific Compiler"
   echo "  logmanager                 Run the tutorial log manager"
   echo "  loganalytics               Run the tutorial log analytics"
+  echo "  junit         	     Run the given JUnit test"
   echo " or"
   echo " MODULE CLASSNAME   run the class named CLASSNAME in module MODULE"
   echo "Most commands print help when invoked w/o parameters."
@@ -117,6 +118,10 @@ elif [ "$COMMAND" = "logmanager" ] ; then
 elif [ "$COMMAND" = "loganalytics" ] ; then
   CLASS=org.apache.gora.tutorial.log.LogAnalytics
   MODULE=gora-tutorial
+elif [ "$COMMAND" = "junit" ] ; then
+  CLASSPATH=$CLASSPATH:target/test-classes/
+  MODULE=*
+  CLASS=junit.textui.TestRunner
 else
   MODULE="$COMMAND"
   CLASS=$1
