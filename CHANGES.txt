@@ -2,6 +2,8 @@ Gora Change Log
 
 Trunk (unreleased changes):
 
+* GORA-64 Query should document inclusiveness (Keith Turner via lewismc) 
+
 * GORA-52 Run JUnit tests from the command line (lewismc)
 
 * GORA-62 Run bin/gora commands after maven build (lewismc)

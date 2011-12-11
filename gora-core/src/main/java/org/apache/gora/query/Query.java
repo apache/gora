@@ -77,10 +77,28 @@ public interface Query<K, T extends Persistent> extends Writable, Configurable {
   /* Dimension : key */ 
   void setKey(K key);
 
+  /**
+   * 
+   * @param startKey
+   *          an inclusive start key
+   */
   void setStartKey(K startKey);
 
+  /**
+   * 
+   * @param endKey
+   *          an inclusive end key
+   */
   void setEndKey(K endKey);
 
+  /**
+   * Set the range of keys over which the query will execute.
+   * 
+   * @param startKey
+   *          an inclusive start key
+   * @param endKey
+   *          an inclusive end key
+   */
   void setKeyRange(K startKey, K endKey);
 
   K getKey();
