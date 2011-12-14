@@ -64,6 +64,7 @@
                     <argLine>-Dhadoop.log.dir=${project.basedir}/build/test/logs/
                         -Dtest.build.data=${project.basedir}/build/test/data
                     </argLine>
+                    <forkMode>always</forkMode>
                     <testFailureIgnore>true</testFailureIgnore>
                 </configuration>
             </plugin>
