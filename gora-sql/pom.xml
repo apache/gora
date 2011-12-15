@@ -35,6 +35,16 @@
         <testOutputDirectory>target/test-classes</testOutputDirectory>
         <testSourceDirectory>src/test/java</testSourceDirectory>
         <sourceDirectory>src/main/java</sourceDirectory>
+        <testResources>
+            <testResource>
+                <directory>src/test/conf</directory>
+                <includes>
+                    <include>
+                        **/*
+                    </include>
+                </includes>
+            </testResource>
+        </testResources>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -52,7 +62,36 @@
                             </sources>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>reserve-network-port</id>
+                        <goals>
+                            <goal>reserve-network-port</goal>
+                        </goals>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <portNames>
+                                <portName>hsqldb.port</portName>
+                            </portNames>
+                        </configuration>
+                    </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surfire-plugin.version}</version>
+                <inherited>true</inherited>
+                <configuration>
+                    <systemProperties>
+                        <test.build.data>${project.basedir}/target/tests/data/</test.build.data>
+                        <hsqldb.port>${hsqldb.port}</hsqldb.port>
+                    </systemProperties>
+                    <argLine>-Dhadoop.log.dir=${project.basedir}/build/test/logs/
+                        -Dtest.build.data=${project.basedir}/build/test/data
+                    </argLine>
+                    <forkMode>always</forkMode>
+                    <testFailureIgnore>true</testFailureIgnore>
+                </configuration>
             </plugin>
         </plugins>
     </build>

@@ -61,6 +61,9 @@
                 <version>${maven-surfire-plugin.version}</version>
                 <inherited>true</inherited>
                 <configuration>
+                    <systemProperties>
+                        <test.build.data>${project.basedir}/target/tests/data/</test.build.data>
+                    </systemProperties>
                     <argLine>-Dhadoop.log.dir=${project.basedir}/build/test/logs/
                         -Dtest.build.data=${project.basedir}/build/test/data
                     </argLine>
