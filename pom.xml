@@ -65,6 +65,7 @@
                         <hadoop.log.dir>${project.basedir}/target/test-logs/</hadoop.log.dir>
                         <test.build.data>${project.basedir}/target/test-data/</test.build.data>
                     </systemPropertyVariables>
+                    <argLine>-Xmx512m</argLine>
                     <forkMode>always</forkMode>
                     <testFailureIgnore>true</testFailureIgnore>
                 </configuration>
