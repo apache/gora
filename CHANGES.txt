@@ -2,6 +2,12 @@ Gora Change Log
 
 Trunk (unreleased changes):
 
+* GORA-55 Downgraded Slf4j dependency from 1.6.4 to 1.5.8 to remove multiple bindings available on classpath.
+
+* GORA-68 Added test.build.data System property so that test data can be stored under target. Added port reservation for gora-sql tests. Added mapping xml to the gora-sql test classpath (iocanel)
+
+* GORA-51 Added surefire plugin configuration to run the tests isolated (iocanel)
+
 * GORA-64 Query should document inclusiveness (Keith Turner via lewismc) 
 
 * GORA-52 Run JUnit tests from the command line (lewismc)
