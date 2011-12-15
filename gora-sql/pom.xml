@@ -82,13 +82,10 @@
                 <version>${maven-surfire-plugin.version}</version>
                 <inherited>true</inherited>
                 <configuration>
-                    <systemProperties>
-                        <test.build.data>${project.basedir}/target/tests/data/</test.build.data>
-                        <hsqldb.port>${hsqldb.port}</hsqldb.port>
-                    </systemProperties>
-                    <argLine>-Dhadoop.log.dir=${project.basedir}/build/test/logs/
-                        -Dtest.build.data=${project.basedir}/build/test/data
-                    </argLine>
+                    <systemPropertyVariables>
+                        <hadoop.log.dir>${project.basedir}/target/test-logs/</hadoop.log.dir>
+                        <test.build.data>${project.basedir}/target/test-data/</test.build.data>
+                    </systemPropertyVariables>
                     <forkMode>always</forkMode>
                     <testFailureIgnore>true</testFailureIgnore>
                 </configuration>

@@ -22,6 +22,7 @@
         <groupId>org.apache.gora</groupId>
         <artifactId>gora</artifactId>
         <version>0.2-SNAPSHOT</version>
+        <relativePath>../</relativePath>
     </parent>
     <artifactId>gora-core</artifactId>
     <packaging>jar</packaging>

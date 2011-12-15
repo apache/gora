@@ -39,7 +39,7 @@
     <build>
     	<directory>target</directory>
         <outputDirectory>${basedir}/target/classes</outputDirectory>
-        <finalName>${artifactId}-${version}</finalName>
+        <finalName>${project.artifactId}-${project.version}</finalName>
         <testOutputDirectory>${basedir}/target/test-classes</testOutputDirectory>
         <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
         <testSourceDirectory>${basedir}/src/test/java</testSourceDirectory>
@@ -61,12 +61,10 @@
                 <version>${maven-surfire-plugin.version}</version>
                 <inherited>true</inherited>
                 <configuration>
-                    <systemProperties>
-                        <test.build.data>${project.basedir}/target/tests/data/</test.build.data>
-                    </systemProperties>
-                    <argLine>-Dhadoop.log.dir=${project.basedir}/build/test/logs/
-                        -Dtest.build.data=${project.basedir}/build/test/data
-                    </argLine>
+                    <systemPropertyVariables>
+                        <hadoop.log.dir>${project.basedir}/target/test-logs/</hadoop.log.dir>
+                        <test.build.data>${project.basedir}/target/test-data/</test.build.data>
+                    </systemPropertyVariables>
                     <forkMode>always</forkMode>
                     <testFailureIgnore>true</testFailureIgnore>
                 </configuration>
@@ -140,7 +138,7 @@
         <xerces.version>2.9.1</xerces.version>
         <!-- Logging Dependencies -->
         <commons-logging.version>1.1.1</commons-logging.version>
-        <slf4j.version>1.5.8</slf4j.version>
+        <slf4j.version>1.6.4</slf4j.version>
         <log4j.version>1.2.16</log4j.version>
 
         <!-- Testing Dependencies -->
@@ -152,7 +150,7 @@
         <maven-jar-plugin.version>2.3.1</maven-jar-plugin.version>
         <maven-dependency-plugin.version>2.1</maven-dependency-plugin.version>
         <build-helper-maven-plugin.version>1.5</build-helper-maven-plugin.version>
-        <maven-surfire-plugin.version>2.3.1</maven-surfire-plugin.version>
+        <maven-surfire-plugin.version>2.11</maven-surfire-plugin.version>
         <maven-release-plugin.version>2.1</maven-release-plugin.version>
     </properties>
 
