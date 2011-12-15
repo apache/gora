@@ -137,6 +137,7 @@
         <sqlbuilder.version>2.0.10</sqlbuilder.version>
         <hsqldb.version>2.2.4</hsqldb.version>
         <mysql.version>5.1.18</mysql.version>
+        <xerces.version>2.9.1</xerces.version>
         <!-- Logging Dependencies -->
         <commons-logging.version>1.1.1</commons-logging.version>
         <slf4j.version>1.5.8</slf4j.version>
@@ -319,6 +320,12 @@
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
                 <version>${mysql.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>xerces</groupId>
+                <artifactId>xercesImpl</artifactId>
+                <version>${xerces.version}</version>
             </dependency>
 
             <!-- Logging Dependencies -->
