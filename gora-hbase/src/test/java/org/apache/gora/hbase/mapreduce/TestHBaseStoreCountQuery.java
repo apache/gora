@@ -24,16 +24,16 @@ import org.apache.gora.hbase.store.HBaseStore;
 import org.apache.gora.mapreduce.MapReduceTestUtils;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.hadoop.hbase.HBaseClusterTestCase;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 /**
  * Tests related to {@link HBaseStore} using mapreduce.
  */
-public class TestHBaseStoreMapReduce extends HBaseClusterTestCase{
+public class TestHBaseStoreCountQuery extends HBaseClusterTestCase{
 
   private HBaseStore<String, WebPage> webPageStore;
-  private HBaseStore<String, TokenDatum> tokenStore;
   
   @Before
   @Override
@@ -41,28 +41,22 @@ public class TestHBaseStoreMapReduce extends HBaseClusterTestCase{
     super.setUp();
     webPageStore = DataStoreFactory.getDataStore(
         HBaseStore.class, String.class, WebPage.class, conf);
-    tokenStore = DataStoreFactory.getDataStore(HBaseStore.class, 
-        String.class, TokenDatum.class, conf);
   }
-  
+
+  @After
   @Override
   public void tearDown() throws Exception {
-    super.tearDown();
     webPageStore.close();
+    super.tearDown();
   }
   
   @Test
   public void testCountQuery() throws Exception {
     MapReduceTestUtils.testCountQuery(webPageStore, conf);
   }
-  
-  @Test
-  public void testWordCount() throws Exception {
-    MapReduceTestUtils.testWordCount(conf, webPageStore, tokenStore);
-  }
-  
+
   public static void main(String[] args) throws Exception {
-   TestHBaseStoreMapReduce test =  new TestHBaseStoreMapReduce();
+   TestHBaseStoreCountQuery test =  new TestHBaseStoreCountQuery();
    test.setUp();
    test.testCountQuery();
   }
