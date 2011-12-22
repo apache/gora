@@ -160,7 +160,6 @@ public abstract class DataStoreTestBase {
   public void testSchemaExists() throws Exception {
     log.info("test method: testSchemaExists");
     DataStoreTestUtil.testSchemaExists(webPageStore);
-    assertSchemaExists("WebPage");
   }
 
   @Test
