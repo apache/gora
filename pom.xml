@@ -21,7 +21,6 @@
        <groupId>org.apache</groupId>
        <artifactId>apache</artifactId>
        <version>9</version>
-       <relativePath />
      </parent>
 
     <groupId>org.apache.gora</groupId>
@@ -107,6 +106,40 @@
                     <tagBase>https://svn.apache.org/repos/asf/incubator/gora/tags/</tagBase>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>${maven-bundle-plugin.version}</version>
+                <extensions>true</extensions>
+                <inherited>true</inherited>
+                <configuration>
+                    <instructions>
+                        <Bundle-Name>${project.name}</Bundle-Name>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Export-Package>${osgi.export}</Export-Package>
+                        <Import-Package>${osgi.import}</Import-Package>
+                        <DynamicImport-Package>${osgi.dynamic.import}</DynamicImport-Package>
+                        <Private-Package>${osgi.private}</Private-Package>
+                        <Require-Bundle>${osgi.bundles}</Require-Bundle>
+                        <Bundle-Activator>${osgi.activator}</Bundle-Activator>
+                    </instructions>
+                    <supportedProjectTypes>
+                        <supportedProjectType>jar</supportedProjectType>
+                        <supportedProjectType>war</supportedProjectType>
+                        <supportedProjectType>bundle</supportedProjectType>
+                    </supportedProjectTypes>
+                    <unpackBundle>true</unpackBundle>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>bundle-manifest</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>manifest</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -153,6 +186,7 @@
         <build-helper-maven-plugin.version>1.5</build-helper-maven-plugin.version>
         <maven-surfire-plugin.version>2.11</maven-surfire-plugin.version>
         <maven-release-plugin.version>2.1</maven-release-plugin.version>
+        <maven-bundle-plugin.version>2.3.6</maven-bundle-plugin.version>
     </properties>
 
     <dependencyManagement>

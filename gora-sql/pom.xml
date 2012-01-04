@@ -24,9 +24,14 @@
         <version>0.2-SNAPSHOT</version>
     </parent>
     <artifactId>gora-sql</artifactId>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
 
     <name>Apache Gora :: SQL</name>
+
+    <properties>
+        <osgi.import>*</osgi.import>
+        <osgi.export>org.apache.gora.sql*;version="${project.version}";-noimport:=true</osgi.export>
+    </properties>
 
     <build>
         <directory>target</directory>
@@ -116,10 +121,10 @@
             <artifactId>jdom</artifactId>
         </dependency>
 
-        <dependency>
+        <!--dependency>
             <groupId>com.healthmarketscience.sqlbuilder</groupId>
             <artifactId>sqlbuilder</artifactId>
-        </dependency>
+        </dependency-->
 
         <!-- Logging Dependencies -->
         <dependency>

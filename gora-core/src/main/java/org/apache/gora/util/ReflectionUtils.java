@@ -87,7 +87,7 @@ public class ReflectionUtils {
     if(classStr == null) {
       throw new IllegalArgumentException("class cannot be null");
     }
-    Class<?> clazz = Class.forName(classStr);
+    Class<?> clazz = ClassLoadingUtils.loadClass(classStr);
     return newInstance(clazz);
   }
   

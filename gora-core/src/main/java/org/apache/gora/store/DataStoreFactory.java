@@ -26,6 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.store.impl.DataStoreBase;
+import org.apache.gora.util.ClassLoadingUtils;
 import org.apache.gora.util.GoraException;
 import org.apache.gora.util.ReflectionUtils;
 import org.apache.hadoop.conf.Configurable;
@@ -159,8 +160,8 @@ public class DataStoreFactory {
     throws GoraException {
 
     try {
-      Class k = Class.forName(keyClass);
-      Class p = Class.forName(persistentClass);
+      Class k = ClassLoadingUtils.loadClass(keyClass);
+      Class p = ClassLoadingUtils.loadClass(persistentClass);
       return getDataStore(dataStoreClass, k, p, conf);
     } catch(GoraException ex) {
       throw ex;

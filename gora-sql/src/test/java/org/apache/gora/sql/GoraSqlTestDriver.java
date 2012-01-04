@@ -24,6 +24,7 @@ import java.util.Properties;
 
 import org.apache.gora.GoraTestDriver;
 import org.apache.gora.sql.store.SqlStore;
+import org.apache.gora.util.ClassLoadingUtils;
 import org.apache.hadoop.util.StringUtils;
 import org.hsqldb.Server;
 
@@ -99,7 +100,7 @@ public class GoraSqlTestDriver extends GoraTestDriver {
   private Connection createConnection(String driverClassName
       , String url) throws Exception {
 
-    Class.forName(driverClassName);
+    ClassLoadingUtils.loadClass(driverClassName);
     Connection connection = DriverManager.getConnection(url);
     connection.setAutoCommit(false);
     return connection;

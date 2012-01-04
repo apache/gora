@@ -65,6 +65,7 @@ import org.apache.gora.sql.util.SqlUtils;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.AvroUtils;
+import org.apache.gora.util.ClassLoadingUtils;
 import org.apache.gora.util.IOUtils;
 import org.apache.gora.util.StringUtils;
 import org.jdom.Document;
@@ -732,7 +733,7 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
     try {
       Connection connection = null;
 
-      Class.forName(jdbcDriverClass);
+      ClassLoadingUtils.loadClass(jdbcDriverClass);
       if(jdbcUsername == null || jdbcUsername.length() == 0) {
         connection = DriverManager.getConnection(jdbcUrl);
       } else {

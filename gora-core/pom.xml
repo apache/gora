@@ -25,9 +25,14 @@
         <relativePath>../</relativePath>
     </parent>
     <artifactId>gora-core</artifactId>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
 
     <name>Apache Gora :: Core</name>
+
+    <properties>
+        <osgi.import>*</osgi.import>
+        <osgi.export>org.apache.gora*;version="${project.version}";-noimport:=true</osgi.export>
+    </properties>
 
     <build>
         <directory>target</directory>

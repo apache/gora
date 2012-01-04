@@ -189,7 +189,7 @@ public class IOUtils {
   public static<T> T deserialize(Configuration conf, DataInput in
       , T obj , String objClass) throws IOException, ClassNotFoundException {
 
-    Class<T> c = (Class<T>) Class.forName(objClass);
+    Class<T> c = (Class<T>) ClassLoadingUtils.loadClass(objClass);
 
     return deserialize(conf, in, obj, c);
   }
@@ -233,7 +233,7 @@ public class IOUtils {
   public static<T> T deserialize(Configuration conf, DataInput in
       , T obj) throws IOException, ClassNotFoundException {
     String clazz = Text.readString(in);
-    Class<T> c = (Class<T>)Class.forName(clazz);
+    Class<T> c = (Class<T>)ClassLoadingUtils.loadClass(clazz);
     return deserialize(conf, in, obj, c);
   }
 
@@ -477,7 +477,7 @@ public class IOUtils {
     String classKey = dataKey + "._class";
     String className = conf.get(classKey);
     try {
-      T obj = (T) DefaultStringifier.load(conf, dataKey, Class.forName(className));
+      T obj = (T) DefaultStringifier.load(conf, dataKey, ClassLoadingUtils.loadClass(className));
       return obj;
     } catch (Exception ex) {
       throw new IOException(ex);

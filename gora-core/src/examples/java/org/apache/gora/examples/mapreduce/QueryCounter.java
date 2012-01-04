@@ -32,6 +32,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import org.apache.gora.util.ClassLoadingUtils;
 
 /**
  * Example Hadoop job to count the row of a gora {@link Query}.
@@ -120,8 +121,8 @@ public class QueryCounter<K, T extends Persistent> extends Configured implements
       return 1;
     }
 
-    Class<K> keyClass = (Class<K>) Class.forName(args[0]);
-    Class<T> persistentClass = (Class<T>) Class.forName(args[1]);
+    Class<K> keyClass = (Class<K>) ClassLoadingUtils.loadClass(args[0]);
+    Class<T> persistentClass = (Class<T>) ClassLoadingUtils.loadClass(args[1]);
 
     DataStore<K,T> dataStore;
     Configuration conf = new Configuration();

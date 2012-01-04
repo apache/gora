@@ -35,6 +35,7 @@ import org.apache.gora.persistency.impl.BeanFactoryImpl;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.util.AvroUtils;
+import org.apache.gora.util.ClassLoadingUtils;
 import org.apache.gora.util.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
@@ -173,8 +174,8 @@ public T get(K key) throws IOException {
   @SuppressWarnings("unchecked")
   public void readFields(DataInput in) throws IOException {
     try {
-      Class<K> keyClass = (Class<K>) Class.forName(Text.readString(in));
-      Class<T> persistentClass = (Class<T>)Class.forName(Text.readString(in));
+      Class<K> keyClass = (Class<K>) ClassLoadingUtils.loadClass(Text.readString(in));
+      Class<T> persistentClass = (Class<T>)ClassLoadingUtils.loadClass(Text.readString(in));
       initialize(keyClass, persistentClass, DataStoreFactory.properties);
 
     } catch (ClassNotFoundException ex) {

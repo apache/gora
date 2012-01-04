@@ -29,6 +29,7 @@ import org.apache.gora.persistency.Persistent;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.store.DataStore;
+import org.apache.gora.util.ClassLoadingUtils;
 import org.apache.gora.util.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
@@ -217,8 +218,7 @@ public String[] getFields() {
   public void readFields(DataInput in) throws IOException {
     String dataStoreClass = Text.readString(in);
     try {
-      dataStore = (DataStore<K, T>) ReflectionUtils.newInstance(
-          Class.forName(dataStoreClass), conf);
+      dataStore = (DataStore<K, T>) ReflectionUtils.newInstance(ClassLoadingUtils.loadClass(dataStoreClass), conf);
       dataStore.readFields(in);
     } catch (ClassNotFoundException ex) {
       throw new IOException(ex);
