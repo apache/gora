@@ -121,10 +121,10 @@
             <artifactId>jdom</artifactId>
         </dependency>
 
-        <!--dependency>
+        <dependency>
             <groupId>com.healthmarketscience.sqlbuilder</groupId>
             <artifactId>sqlbuilder</artifactId>
-        </dependency-->
+        </dependency>
 
         <!-- Logging Dependencies -->
         <dependency>
