@@ -2,6 +2,8 @@ Gora Change Log
 
 Trunk (unreleased changes):
 
+* GORA-66 testDeleteByQueryFields seems incorrect (Keith Turner via lewismc)
+
 * GORA-72 Made all artifacts proper OSGi bundles. Added ClassLoadingUtils which will fallback to thread context classloader if Class.forName fails. (iocanel)
 
 * GORA-55 Removed second assertion for schema existence, since schema is already deleted, Excluded ranged queries from the tests, since the tests assume end key to be inclussive while Hbase considers it exclusive. (iocanel)
