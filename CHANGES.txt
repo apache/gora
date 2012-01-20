@@ -1,6 +1,7 @@
 Gora Change Log
 
 Trunk (unreleased changes):
+* GORA-83 add 'target' dirs to svn ignore (ferdy)
 
 * GORA-66 testDeleteByQueryFields seems incorrect (Keith Turner via lewismc)
 
