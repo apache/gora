@@ -29,7 +29,6 @@ import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
-import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.OrderedRows;
 import me.prettyprint.hector.api.beans.OrderedSuperRows;
 import me.prettyprint.hector.api.beans.Row;
@@ -59,7 +58,7 @@ public class CassandraClient<K, T extends Persistent> {
   
   private CassandraMapping cassandraMapping = new CassandraMapping();
 
-  private Serializer<String> stringSerializer = new StringSerializer();
+  private StringSerializer stringSerializer = new StringSerializer();
   
   public void init() throws Exception {
     this.cassandraMapping.loadConfiguration();
@@ -137,7 +136,8 @@ public class CassandraClient<K, T extends Persistent> {
    * @param memberName the member name
    * @param value the member value
    */
-  public void addSubColumn(String key, String fieldName, String memberName, Object value) {
+  @SuppressWarnings("unchecked")
+public void addSubColumn(String key, String fieldName, String memberName, Object value) {
     if (value == null) {
       return;
     }
