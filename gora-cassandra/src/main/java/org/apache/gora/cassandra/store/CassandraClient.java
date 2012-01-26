@@ -82,7 +82,7 @@ public class CassandraClient<K, T extends Persistent> {
     if (keyspaceDefinition == null) {
       List<ColumnFamilyDefinition> columnFamilyDefinitions = this.cassandraMapping.getColumnFamilyDefinitions();      
       keyspaceDefinition = HFactory.createKeyspaceDefinition(this.cassandraMapping.getKeyspaceName(), "org.apache.cassandra.locator.SimpleStrategy", 1, columnFamilyDefinitions);      
-      this.cluster.addKeyspace(keyspaceDefinition);
+      this.cluster.addKeyspace(keyspaceDefinition, true);
       LOG.info("Keyspace '" + this.cassandraMapping.getKeyspaceName() + "' in cluster '" + this.cassandraMapping.getClusterName() + "' was created on host '" + this.cassandraMapping.getHostName() + "'");
       
       keyspaceDefinition = null;
