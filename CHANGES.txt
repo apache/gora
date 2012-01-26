@@ -1,6 +1,9 @@
 Gora Change Log
 
 Trunk (unreleased changes):
+
+* GORA-79 Block keyspace creation until the whole cassandra cluster converges to the new keyspace. (Patricio Echagüe vis lewismc)
+
 * GORA-83 add 'target' dirs to svn ignore (ferdy)
 
 * GORA-66 testDeleteByQueryFields seems incorrect (Keith Turner via lewismc)
