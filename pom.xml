@@ -30,9 +30,9 @@
     <name>Apache Gora</name>
 
        <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/incubator/gora/trunk</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/incubator/gora/trunk</developerConnection>
-        <url>http://svn.apache.org/viewvc/incubator/gora/trunk</url>
+        <connection>scm:svn:http://svn.apache.org/repos/asf/gora/trunk/</connection>
+        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/gora/trunk/</developerConnection>
+        <url>http://svn.apache.org/viewvc/gora/trunk/</url>
       </scm>
 
     <build>
@@ -103,7 +103,7 @@
                 <artifactId>maven-release-plugin</artifactId>
                 <version>${maven-release-plugin.version}</version>
                 <configuration>
-                    <tagBase>https://svn.apache.org/repos/asf/incubator/gora/tags/</tagBase>
+                    <tagBase>https://svn.apache.org/repos/asf/gora/tags/</tagBase>
                 </configuration>
             </plugin>
             <plugin>
