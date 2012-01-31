@@ -2,6 +2,8 @@ Gora Change Log
 
 Trunk (unreleased changes):
 
+* GORA-90 Create DOAP for Gora (lewismc)
+
 * GORA-79 Block keyspace creation until the whole cassandra cluster converges to the new keyspace. (Patricio Echagüe vis lewismc)
 
 * GORA-83 add 'target' dirs to svn ignore (ferdy)
