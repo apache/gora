@@ -89,10 +89,11 @@
              <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.2</version>
+                <version>${maven-jar-plugin.version}</version>
                 <executions>
                   <execution>
                   <goals>
+                    <goal>jar</goal>
                     <goal>test-jar</goal>
                   </goals>
                  </execution>
@@ -179,13 +180,13 @@
         <junit.version>4.10</junit.version>
 
         <!-- Maven Plugin Dependencies -->
-        <maven-compiler-plugin.version>2.0.2</maven-compiler-plugin.version>
-        <maven-resources-plugin.version>2.4.3</maven-resources-plugin.version>
-        <maven-jar-plugin.version>2.3.1</maven-jar-plugin.version>
-        <maven-dependency-plugin.version>2.1</maven-dependency-plugin.version>
-        <build-helper-maven-plugin.version>1.5</build-helper-maven-plugin.version>
-        <maven-surfire-plugin.version>2.11</maven-surfire-plugin.version>
-        <maven-release-plugin.version>2.1</maven-release-plugin.version>
+        <maven-compiler-plugin.version>2.3.2</maven-compiler-plugin.version>
+        <maven-resources-plugin.version>2.5</maven-resources-plugin.version>
+        <maven-jar-plugin.version>2.4</maven-jar-plugin.version>
+        <maven-dependency-plugin.version>2.4</maven-dependency-plugin.version>
+        <build-helper-maven-plugin.version>1.7</build-helper-maven-plugin.version>
+        <maven-surfire-plugin.version>2.12</maven-surfire-plugin.version>
+        <maven-release-plugin.version>2.2.2</maven-release-plugin.version>
         <maven-bundle-plugin.version>2.3.6</maven-bundle-plugin.version>
     </properties>
 
