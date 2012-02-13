@@ -40,6 +40,8 @@ import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.RangeSlicesQuery;
 import me.prettyprint.hector.api.query.RangeSuperSlicesQuery;
+import me.prettyprint.cassandra.model.ConfigurableConsistencyLevel;
+import me.prettyprint.hector.api.HConsistencyLevel;
 
 import org.apache.gora.cassandra.query.CassandraQuery;
 import org.apache.gora.mapreduce.GoraRecordReader;
@@ -75,6 +77,10 @@ public class CassandraClient<K, T extends Persistent> {
   
   /**
    * Check if keyspace already exists. If not, create it.
+   * In this method, we also utilise Hector's {@ConfigurableConsistencyLevel}
+   * logic. It is set by passing a ConfigurableConsistencyLevel object right 
+   * when the Keyspace is created. Currently consistency level is .ONE which 
+   * permits consistency to wait until one replica has responded. 
    */
   public void checkKeyspace() {
     // "describe keyspace <keyspaceName>;" query
@@ -85,6 +91,20 @@ public class CassandraClient<K, T extends Persistent> {
       this.cluster.addKeyspace(keyspaceDefinition, true);
       LOG.info("Keyspace '" + this.cassandraMapping.getKeyspaceName() + "' in cluster '" + this.cassandraMapping.getClusterName() + "' was created on host '" + this.cassandraMapping.getHostName() + "'");
       
+      // Create a customized Consistency Level
+      ConfigurableConsistencyLevel configurableConsistencyLevel = new ConfigurableConsistencyLevel();
+      Map<String, HConsistencyLevel> clmap = new HashMap<String, HConsistencyLevel>();
+
+      // Define CL.ONE for ColumnFamily "ColumnFamily"
+      clmap.put("ColumnFamily", HConsistencyLevel.ONE);
+
+      // In this we use CL.ONE for read and writes. But you can use different CLs if needed.
+      configurableConsistencyLevel.setReadCfConsistencyLevels(clmap);
+      configurableConsistencyLevel.setWriteCfConsistencyLevels(clmap);
+
+      // Then let the keyspace know
+      HFactory.createKeyspace("Keyspace", this.cluster, configurableConsistencyLevel);
+
       keyspaceDefinition = null;
     }
     

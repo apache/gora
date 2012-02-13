@@ -2,6 +2,9 @@ Gora Change Log
 
 Trunk (unreleased changes):
 
+* GORA-80 Implement functionality to define consistency used for Cassandra read and 
+write operations. (lewismc)
+
 * GORA-91 Ensure that Gora adheres to ASF branding requirements (lewismc)
 
 * GORA-90 Create DOAP for Gora (lewismc)
