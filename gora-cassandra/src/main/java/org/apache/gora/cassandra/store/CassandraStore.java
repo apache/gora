@@ -223,7 +223,14 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
   @Override
   public T get(K key, String[] fields) throws IOException {
     LOG.info("get " + key);
-    return null;
+    CassandraQuery<K,T> query = new CassandraQuery<K,T>();
+    query.setDataStore(this);
+    query.setKeyRange(key, key);
+    query.setFields(fields);
+    query.setLimit(1);
+    Result<K,T> result = execute(query);
+    boolean hasResult = result.next();
+    return hasResult ? result.get() : null;
   }
 
   @Override

@@ -137,8 +137,8 @@ implements DataStore<K, T> {
   }
 
   @Override
-public T get(K key) throws IOException {
-    return get(key, null);
+  public T get(K key) throws IOException {
+    return get(key, getFieldsToQuery(null));
   };
 
   /**
