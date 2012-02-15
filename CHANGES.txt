@@ -2,6 +2,10 @@ Gora Change Log
 
 Trunk (unreleased changes):
 
+* GORA-93 [gora-cassandra] Add implementation of CassandraStore.get(key) (Sujit Pal via lewismc)
+
+* GORA-58 Upgrade Gora-Cassandra to use Cassandra 1.0.2 (lewismc)
+
 * GORA-80 Implement functionality to define consistency used for Cassandra read and 
 write operations. (lewismc)
 
