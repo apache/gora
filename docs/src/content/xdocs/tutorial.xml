@@ -1175,7 +1175,7 @@ ROW                          COLUMN+CELL
     <p>The source code for the projects using Gora can also be checked out as a reference. <a href="ext:nutch">Apache Nutch</a> is 
     one of the first class users of Gora; so looking into how Nutch uses Gora is always a good idea.
     </p>
-    <p> Please feel free to grab our <a href="http://gora.apache.org/images/powered-by-gora.png">poweredBy</a> sticker and embedded it in anything backed by Apache Gora.
+    <p> Please feel free to grab our <a href="http://gora.apache.org/images/powered-by-gora.png">poweredBy</a> sticker and embedded it in anything backed by Apache Gora.</p>
   </section>
 
   <section>

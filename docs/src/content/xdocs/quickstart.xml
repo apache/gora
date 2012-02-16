@@ -33,7 +33,7 @@
 
   <section>
    <title> Download </title>
-   <p> First you need to check out the most stable Gora release through the official Apache Gora release page <a href="ext:releases">here</a>.</a>  
+   <p> First you need to check out the most stable Gora release through the official Apache Gora release page <a href="ext:releases">here</a>.</p>  
    <p>For those who would like to use a development version Gora or simply wish to work with the bleeding edge, instructions for how to check out the source code using svn or git can be found 
    <a href="ext:vcs">here</a>. 
    </p>
@@ -114,33 +114,33 @@
     to your project by adding the following lines to your <code>pom.xml</code> file: </p>
 
     <p>
-    <code>
-	<dependency>
-  		<groupId>org.apache.gora</groupId>
-  		<artifactId>gora-hbase</artifactId>
-  		<version>${version}</version>
-	</dependency>
-    </code><br/>
-    <code>
-	<dependency>
-  		<groupId>org.apache.gora</groupId>
-  		<artifactId>gora-cassandra</artifactId>
-  		<version>${version}</version>
-	</dependency>
-    </code><br/>
-    <code>
-	<dependency>
-  		<groupId>org.apache.gora</groupId>
-  		<artifactId>gora-sql</artifactId>
-  		<version>${version}</version>
-	</dependency>
-    </code>
+    <source>
+	&lt;dependency&gt;
+  		&lt;groupId>org.apache.gora&lt;/groupId&gt;
+  		&lt;artifactId>gora-hbase&lt;/artifactId&gt;
+  		&lt;version>${version}&lt;/version&gt;
+	&lt;/dependency&gt;
+    </source><br/>
+    <source>
+	&lt;dependency&gt;
+  		&lt;groupId>org.apache.gora&lt;/groupId&gt;
+  		&lt;artifactId>gora-cassandra&lt;/artifactId&gt;
+  		&lt;version>${version}&lt;/version&gt;
+	&lt;/dependency&gt;
+    </source><br/>
+    <source>
+	&lt;dependency&gt;
+  		&lt;groupId>org.apache.gora&lt;/groupId&gt;
+  		&lt;artifactId>gora-sql&lt;/artifactId&gt;
+  		&lt;version>${version}&lt;/version&gt;
+	&lt;/dependency&gt;
+    </source>
     </p>
 
     <p><b>N.B.</b> The <code>${version}</code> variable should be replaced by the most stable Gora release.</p>
     
     <p>Only add the modules <code>gora-hbase, gora-cassandra, gora-sql</code>
-    that you will use.
+    that you will use.</p>
   </section>
 
   <section>
