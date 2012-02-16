@@ -29,9 +29,9 @@
 
     <section>
       <title>Introduction</title>
-      <p>This is the official tutorial for Gora. For this tutorial, we 
-      will be implementing a system to store our web server logs in HBase,
-      and analyze the results using Hadoop and store the results either in HSQLDB or MySQL.</p>
+      <p>This is the official tutorial for Apache Gora. For this tutorial, we 
+      will be implementing a system to store our web server logs in Apache HBase,
+      and analyze the results using Apache Hadoop and store the results either in HSQLDB or MySQL.</p>
 
       <p> In this tutorial we will first look at how to set up the environment and 
       configure Gora and the data stores. Later, we will go over the data we will use and
@@ -43,9 +43,10 @@
 
     <section>
       <title>Introduction to Gora</title>
-      <p> Gora is an ORM framework for Column Stores such as Apache HBase, 
-      Apache Cassandra, and the like with support for SQL and Hadoop. Gora 
-      uses Apache Avro, which is a serialization framework. In Avro, the 
+      <p> The Apache Gora open source framework provides an in-memory data 
+      model and persistence for big data. Gora supports persisting to 
+      column stores, key value stores, document stores and RDBMSs, and 
+      analyzing the data with extensive Apache Hadoop MapReduce support. In Avro, the 
       beans to hold the data and RPC interfaces are defined using a JSON 
       schema. In mapping the data beans to data store specific settings, 
       Gora depends on mapping files, which are specific to each data store. 
@@ -117,7 +118,7 @@
 
   <p>Since gora-tutorial is a top level module of Gora, it depends on the directory
   structure imposed by Gora's main build scripts (<code>build.xml</code> and 
-  <code>build-common.xml</code>). Java source code resides in directory <code>
+  <code>build-common.xml</code> with Ivy and pom.xml for Maven). The Java source code resides in directory <code>
   src/main/java/</code>, avro schemas in <code>src/main/avro/</code>, and data in 
   <code>src/main/resources/</code>.</p>
   </section>
@@ -128,11 +129,12 @@
     store the logs. For those of you not familiar with HBase, it is a NoSQL
     column store with an architecture very similar to Google's BigTable. </p>
     <!-- TODO: Tutorial for SQL and Cassandra -->
-    <p> Unless you have already HBase setup, we will go over the steps at 
+    <p> If you don't already have already HBase setup, you can go over the steps at 
     <a href="http://hbase.apache.org/docs/r0.20.6/api/overview-summary.html#overview_description"> HBase Overview </a>
-    documentation. Gora uses HBase version 0.20.6, so download this version from 
+    documentation. Although Gora aims to support the most recent HBase versions, the above tutorial is 
+    specifically for HBase 0.20.6 (don't worry the principals are the same), so download a version from 
     <a href="http://hbase.apache.org/releases.html">HBase releases</a>. After extracting 
-    the file, cd to the hbase-0.20.6 directory and start the HBase server. </p> 
+    the file, cd to the hbase-${dist} directory and start the HBase server. </p> 
     <p><code>$ bin/start-hbase.sh</code> </p>
     <p> and make sure that HBase is available by using the Hbase shell. 
     <p><code>$ bin/hbase shell</code> </p>
@@ -849,8 +851,8 @@ org.apache.gora.tutorial.log.generated.Pageview@b513110a {
       <section>
       <title> Setting up the database </title>
       <p> First we need to download HSQL dependencies. For that, uncomment the following line 
-      from <code>gora-tutorial/ivy/ivy.xml</code>. MySQL users should uncomment the mysql  
-      dependency instead. </p>
+      from <code>gora-tutorial/ivy/ivy.xml</code> (if using Maven hsqldb should already be available). 
+      Ofcourse MySQL users should uncomment the mysql dependency instead. </p>
       <p><code>&lt;!--&lt;dependency org="org.hsqldb" name="hsqldb" rev="2.0.0" conf="*->default"/&gt;--&gt;
       </code></p>
 
@@ -1172,13 +1174,14 @@ ROW                          COLUMN+CELL
 
     <p>The source code for the projects using Gora can also be checked out as a reference. <a href="ext:nutch">Apache Nutch</a> is 
     one of the first class users of Gora; so looking into how Nutch uses Gora is always a good idea.
-    <!--TODO: give link to powered by page --></p>
+    </p>
+    <p> Please feel free to grab our <a href="http://gora.apache.org/images/powered-by-gora.png">poweredBy</a> sticker and embedded it in anything backed by Apache Gora.
   </section>
 
   <section>
     <title>Feedback</title>
     <p> At last, thanks for trying out Gora. If you find any bugs or you have suggestions for improvement, 
-    do not hesitate to give feedback on gora-dev <a href="ext:devmail">mailing list</a>. </p>
+    do not hesitate to give feedback on the dev@gora.apache.org <a href="ext:devmail">mailing list</a>. </p>
   </section>
 
   </body>  
