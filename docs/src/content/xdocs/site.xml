@@ -54,17 +54,19 @@ See http://forrest.apache.org/docs/linking.html for more info
   <external-refs>
 
     <wiki     href="https://cwiki.apache.org/confluence/display/GORA/Index" />
+    <releases href="http://gora.apache.org/releases.html"/>
     <issues   href="http://issues.apache.org/jira/browse/GORA"/>
-    <vcs      href="http://incubator.apache.org/gora/version_control.html" />
-    <devmail  href="http://incubator.apache.org/gora/mailing_lists.html"/>
+    <vcs      href="http://gora.apache.org/version_control.html" />
+    <devmail  href="http://gora.apache.org/mailing_lists.html"/>
 
-    <gora     href="http://incubator.apache.org/gora/"/>
+    <gora     href="http://gora.apache.org/"/>
     <avro     href="http://avro.apache.org/"/>
     <avrospec href="http://avro.apache.org/docs/current/spec.html"/>
     <hadoop   href="http://hadoop.apache.org/mapreduce/"/>
     <hdfs     href="http://hadoop.apache.org/hdfs/"/>
     <mapreduce      href="http://hadoop.apache.org/mapreduce/"/>
     <hbase    href="http://hbase.apache.org/"/>
+    <hector   href="http://hector-client.org/" />
     <cassandra    href="http://cassandra.apache.org/"/>
     <nutch     href="http://nutch.apache.org/"/>
     <sponsors href="http://www.apache.org/foundation/thanks.html"/>

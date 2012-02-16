@@ -28,7 +28,7 @@ which will be used to configure the chosen Forrest skin.
     no search box. @domain will enable sitesearch for the specific domain with google.
     In other words google will search the @domain for the query string.
   -->
-  <search name="Gora" domain="incubator.apache.org/gora/" provider="google" box-location="default"/>
+  <search name="Apache Gora" domain="gora.apache.org/" provider="google" box-location="default"/>
 <!-- Disable the print link? If enabled, invalid HTML 4.0.1 -->
   <disable-print-link>true</disable-print-link>
 <!-- Disable the PDF link? -->
@@ -58,18 +58,18 @@ which will be used to configure the chosen Forrest skin.
   <disable-font-script>true</disable-font-script>
 <!-- mandatory project logo
        default skin: renders it at the top -->
-  <project-name>Gora</project-name>
-  <project-description>Gora is an ORM framework for column stores such as Apache HBase and Apache Cassandra with a specific focus on Hadoop.</project-description>
-  <project-url>http://incubator.apache.org/gora/</project-url>
-  <project-logo>images/gora-logo.jpg</project-logo>
+  <project-name>Apache Gora</project-name>
+  <project-description>The Apache Gora open source framework provides an in-memory data model and persistence for big data. Gora supports persisting to column stores, key value stores, document stores and RDBMSs, and analyzing the data with extensive Apache Hadoop MapReduce support. </project-description>
+  <project-url>http://gora.apache.org/</project-url>
+  <project-logo>images/gora-logo.png</project-logo>
 <!-- Alternative static image:
   <project-logo>images/project-logo.gif</project-logo> -->
 <!-- optional group logo
        default skin: renders it at the top-left corner -->
-  <group-name>Apache Incubator</group-name>
-  <group-description></group-description>
-  <group-url>http://incubator.apache.org/</group-url>
-  <group-logo>http://incubator.apache.org/images/apache-incubator-logo.png</group-logo>
+  <group-name>Apache Software Foundation</group-name>
+  <group-description>The ASF is made up of nearly 100 top level projects that cover a wide range of technologies. Chances are if you are looking for a rewarding experience in Open Source, you are going to find it here.</group-description>
+  <group-url>http://apache.org/</group-url>
+  <group-logo>http://www.apache.org/images/asf-logo.gif</group-logo>
 <!-- Alternative static image:
   <group-logo>images/group-logo.gif</group-logo> -->
 <!-- optional host logo (e.g. sourceforge logo)
@@ -99,7 +99,7 @@ which will be used to configure the chosen Forrest skin.
   -->
   <trail>
     <link1 name="Apache" href="http://apache.org/"/>
-    <link2 name="Gora" href="http://incubator.apache.org/gora/"/>
+    <link2 name="Gora" href="http://gora.apache.org/"/>
     <link3 name="" href=""/>
   </trail>
 <!-- Configure the TOC, i.e. the Table of Contents.

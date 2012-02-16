@@ -33,34 +33,33 @@
 
   <section>
    <title> Download </title>
-   <p> Gora has not released a version yet, so you need to check out the source first. 
-   Instructions for how to check out the source code using svn or git can be found 
+   <p> First you need to check out the most stable Gora release through the official Apache Gora release page <a href="ext:releases">here</a>.</a>  
+   <p>For those who would like to use a development version Gora or simply wish to work with the bleeding edge, instructions for how to check out the source code using svn or git can be found 
    <a href="ext:vcs">here</a>. 
    </p>
   </section>
 
   <section>
-    <title> Compiling the project </title>
+    <title> Compiling the project (Maven users)</title>
     <p>Once you have the source code for Gora, you can compile the project using</p>
     <p>
     <code>
-      $ cd gora
+      $ cd gora 
     </code> <br/>
     <code>
-      $ ant
+      $ mvn clean compile
     </code>
     </p>
     <p> You can also compile individual modules by cd'ing to the module directory and 
-    runnint <code>ant</code> there. </p>
+    running <code>$ mvn clean compile</code> there. </p>
   </section>
 
   <section>
     <title> Setting up your project </title>
     <p>
-    Gora uses ivy to manage it's dependencies. However, since Gora has no
-    releases yet, Gora artifacts are not pushed to central maven repository 
-    or ivy repositories.</p>
-    <p> You can manage Gora dependency in a few ways. </p>
+    More recently Gora began using Maven to manage it's dependencies and build lifecycle. Stable Gora releases are available on the central maven repository 
+    or ivy repositories and Gora-SNAPSHOT OSGi bundle artifacts are now pushed to the Apache Nexus <a href="https://repository.apache.org/index.html#nexus-search;quick~gora">here</a>.</p>
+    <p> You can manage Gora dependencies in a few ways. </p>
 
     <section>
       <title> Using ivy to manage gora </title>
@@ -69,16 +68,18 @@
 
     <p>
     <code>
-      &lt;dependency org="org.apache.gora" name="gora-hbase" rev="0.1" conf="*-&gt;compile" changing="true"&gt;
+      &lt;dependency org="org.apache.gora" name="gora-hbase" rev="${version}" conf="*-&gt;compile" changing="true"&gt;
     </code><br/>
     <code>
-      &lt;dependency org="org.apache.gora" name="gora-cassandra" rev="0.1" conf="*-&gt;compile" changing="true"&gt;
+      &lt;dependency org="org.apache.gora" name="gora-cassandra" rev="${version}" conf="*-&gt;compile" changing="true"&gt;
     </code><br/>
     <code>
-      &lt;dependency org="org.apache.gora" name="gora-sql" rev="0.1" conf="*-&gt;compile" changing="true"&gt;
+      &lt;dependency org="org.apache.gora" name="gora-sql" rev="${version}" conf="*-&gt;compile" changing="true"&gt;
     </code>
     </p>
 
+    <p><b>N.B.</b> The <code>${version}</code> variable should be replaced by the most stable Gora release.</p>
+    
     <p>Only add the modules <code>gora-hbase, gora-cassandra, gora-sql</code>
     that you will use, and set the <code>conf</code> to point to the 
     configurations (of your project) that you want to depend on gora. The 
@@ -106,13 +107,40 @@
 
     <p>This forces gora to be built locally rather than look for it in other 
     repositories.</p>
+  </section>
+    <section>
+      <title> Using Maven to manage Gora </title>
+    <p>If your project however uses maven, then you can include gora dependencies
+    to your project by adding the following lines to your <code>pom.xml</code> file: </p>
 
-    <p>However in using ivy, some of Gora's dependencies can not be retrieved 
-    through ivy or maven. These external jars reside in directories under 
-    <code>gora-[modulename]/lib-ext/</code>. If you are adding gora-[modulename] 
-    to your <code>ivy.xml</code>, make sure that the modules dependencies are 
-    resolved by ivy/maven and include manually all of the external jars in 
-    <code>lib-ext</code> directory. </p>
+    <p>
+    <code>
+	<dependency>
+  		<groupId>org.apache.gora</groupId>
+  		<artifactId>gora-hbase</artifactId>
+  		<version>${version}</version>
+	</dependency>
+    </code><br/>
+    <code>
+	<dependency>
+  		<groupId>org.apache.gora</groupId>
+  		<artifactId>gora-cassandra</artifactId>
+  		<version>${version}</version>
+	</dependency>
+    </code><br/>
+    <code>
+	<dependency>
+  		<groupId>org.apache.gora</groupId>
+  		<artifactId>gora-sql</artifactId>
+  		<version>${version}</version>
+	</dependency>
+    </code>
+    </p>
+
+    <p><b>N.B.</b> The <code>${version}</code> variable should be replaced by the most stable Gora release.</p>
+    
+    <p>Only add the modules <code>gora-hbase, gora-cassandra, gora-sql</code>
+    that you will use.
   </section>
 
   <section>
