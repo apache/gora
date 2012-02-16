@@ -41,7 +41,7 @@ import org.junit.Test;
  * A base class for {@link DataStore} tests. This is just a convenience
  * class, which actually only uses {@link DataStoreTestUtil} methods to
  * run the tests. Not all test cases can extend this class (like TestHBaseStore),
- * so all test logic shuold reside in DataStoreTestUtil class.
+ * so all test logic should reside in DataStoreTestUtil class.
  */
 public abstract class DataStoreTestBase {
 
