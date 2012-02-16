@@ -52,7 +52,15 @@ import org.apache.gora.util.ByteUtils;
 import org.apache.gora.util.StringUtils;
 
 /**
- * Test utilities for DataStores
+ * Test utilities for DataStores. This utility class provides everything
+ * necessary for convenience tests in {@link DataStoreTestBase} to execute cleanly.
+ * The tests begin in a fairly trivial fashion getting progressively 
+ * more complex as we begin testing some more advanced features within the 
+ * Gora API. In addition to this class, the first place to look API
+ * functionality is at the examples directories under various Gora modules. 
+ * All the modules have a <gora-module>/src/examples/ directory under 
+ * which some example classes can be found. Especially, there are some 
+ * classes that are used for tests under <gora-core>/src/examples/
  */
 public class DataStoreTestUtil {
 
