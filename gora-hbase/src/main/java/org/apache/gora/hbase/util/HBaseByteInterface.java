@@ -18,15 +18,18 @@
 
 package org.apache.gora.hbase.util;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.io.BinaryDecoder;
 import org.apache.avro.io.BinaryEncoder;
+import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.avro.util.Utf8;
@@ -38,18 +41,53 @@ import org.apache.hadoop.hbase.util.Bytes;
  * conversions.
  */
 public class HBaseByteInterface {
+  /**
+   * Threadlocals maintaining reusable binary decoders and encoders.
+   */
+  public static final ThreadLocal<BinaryDecoder> decoders =
+      new ThreadLocal<BinaryDecoder>();
+  public static final ThreadLocal<BinaryEncoderWithStream> encoders =
+      new ThreadLocal<BinaryEncoderWithStream>();
+  
+  /**
+   * A BinaryEncoder that exposes the outputstream so that it can be reset
+   * every time. (This is a workaround to reuse BinaryEncoder and the buffers,
+   * normally provided be EncoderFactory, but this class does not exist yet 
+   * in the current Avro version).
+   */
+  public static final class BinaryEncoderWithStream extends BinaryEncoder {
+    public BinaryEncoderWithStream(OutputStream out) {
+      super(out);
+    }
+    
+    protected OutputStream getOut() {
+      return out;
+    }
+  }
+  
+  /*
+   * Create a threadlocal map for the datum readers and writers, because
+   * they are not thread safe, at least not before Avro 1.4.0 (See AVRO-650).
+   * When they are thread safe, it is possible to maintain a single reader and
+   * writer pair for every schema, instead of one for every thread.
+   */
+  
+  public static final ThreadLocal<Map<String, SpecificDatumReader<?>>> 
+    readerMaps = new ThreadLocal<Map<String, SpecificDatumReader<?>>>() {
+      protected Map<String,SpecificDatumReader<?>> initialValue() {
+        return new HashMap<String, SpecificDatumReader<?>>();
+      };
+  };
+  
+  public static final ThreadLocal<Map<String, SpecificDatumWriter<?>>> 
+    writerMaps = new ThreadLocal<Map<String, SpecificDatumWriter<?>>>() {
+      protected Map<String,SpecificDatumWriter<?>> initialValue() {
+        return new HashMap<String, SpecificDatumWriter<?>>();
+      };
+  };
 
-  public static final byte[] EMPTY_BYTES = new byte[0];
 
   @SuppressWarnings("rawtypes")
-  private static final SpecificDatumWriter writer =
-    new SpecificDatumWriter();
-
-  @SuppressWarnings("rawtypes")
-  private static final SpecificDatumReader reader =
-    new SpecificDatumReader();
-
-  @SuppressWarnings({ "unchecked", "deprecation" })
   public static Object fromBytes(Schema schema, byte[] val) throws IOException {
     Type type = schema.getType();
     switch (type) {
@@ -62,10 +100,22 @@ public class HBaseByteInterface {
     case DOUBLE:  return Bytes.toDouble(val);
     case BOOLEAN: return val[0] != 0;
     case RECORD:
-      // TODO: This is TOO SLOW... OPTIMIZE
-      reader.setSchema(schema);
-      reader.setExpected(schema);
-      BinaryDecoder decoder = new BinaryDecoder(new ByteArrayInputStream(val));
+      Map<String, SpecificDatumReader<?>> readerMap = readerMaps.get();
+      SpecificDatumReader<?> reader = readerMap.get(schema.getFullName());
+      if (reader == null) {
+        reader = new SpecificDatumReader(schema);     
+        readerMap.put(schema.getFullName(), reader);
+      }
+      
+      // initialize a decoder, possibly reusing previous one
+      BinaryDecoder decoderFromCache = decoders.get();
+      BinaryDecoder decoder=DecoderFactory.defaultFactory().
+          createBinaryDecoder(val, decoderFromCache);
+      // put in threadlocal cache if the initial get was empty
+      if (decoderFromCache==null) {
+        decoders.set(decoder);
+      }
+      
       return reader.read(null, decoder);
     default: throw new RuntimeException("Unknown type: "+type);
     }
@@ -121,7 +171,7 @@ public class HBaseByteInterface {
     throw new RuntimeException("Can't parse data as class: " + clazz);
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   public static byte[] toBytes(Object o, Schema schema) throws IOException {
     Type type = schema.getType();
     switch (type) {
@@ -134,10 +184,22 @@ public class HBaseByteInterface {
     case BOOLEAN: return (Boolean)o ? new byte[] {1} : new byte[] {0};
     case ENUM:    return new byte[] { (byte)((Enum<?>) o).ordinal() };
     case RECORD:
-      // TODO: This is TOO SLOW... OPTIMIZE
-      writer.setSchema(schema);
-      ByteArrayOutputStream os = new ByteArrayOutputStream();
-      BinaryEncoder encoder = new BinaryEncoder(os);
+      Map<String, SpecificDatumWriter<?>> writerMap = writerMaps.get();
+      SpecificDatumWriter writer = writerMap.get(schema.getFullName());
+      if (writer == null) {
+        writer = new SpecificDatumWriter(schema);
+        writerMap.put(schema.getFullName(),writer);
+      }
+      
+      BinaryEncoderWithStream encoder = encoders.get();
+      if (encoder == null) {
+        encoder = new BinaryEncoderWithStream(new ByteArrayOutputStream());
+        encoders.set(encoder);
+      }
+      //reset the buffers
+      ByteArrayOutputStream os = (ByteArrayOutputStream) encoder.getOut();
+      os.reset();
+      
       writer.write(o, encoder);
       encoder.flush();
       return os.toByteArray();
