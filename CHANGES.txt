@@ -1,6 +1,12 @@
+ =======================================================================
+ ==CHANGES.txt
+ =======================================================================
+
 Gora Change Log
 
 Trunk (unreleased changes):
+
+* GORA-82 Add missing license headers & RAT target to pom.xml (lewismc)
 
 * GORA-88 HBaseByteInterface not thread safe (ferdy)
 
