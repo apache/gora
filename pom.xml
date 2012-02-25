@@ -141,6 +141,32 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.rat</groupId>
+                <artifactId>apache-rat-plugin</artifactId>
+                <version>0.8</version>
+                <executions>
+                    	<execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    	</execution>
+                </executions>
+                <configuration>
+          	    <licenses>
+            	        <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
+              	            <licenseFamilyCategory>ASL20</licenseFamilyCategory>
+              	            <licenseFamilyName>Apache Software License, 2.0</licenseFamilyName>
+              	            <notes>Single licensed ASL v2.0</notes>
+              	            <patterns>
+                	        <pattern>Licensed to the Apache Software Foundation (ASF) under one
+                	        or more contributor license agreements.</pattern>
+              	            </patterns>
+            	        </license>
+                    </licenses>
+                 </configuration>
+            </plugin>
         </plugins>
     </build>
 
