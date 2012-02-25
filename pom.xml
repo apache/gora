@@ -141,19 +141,27 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.rat</groupId>
-                <artifactId>apache-rat-plugin</artifactId>
-                <version>0.8</version>
-                <executions>
-                    	<execution>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    	</execution>
-                </executions>
-                <configuration>
+         </plugins>
+    </build>
+    
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+            	    <plugin>
+                 	<groupId>org.apache.rat</groupId>
+                	<artifactId>apache-rat-plugin</artifactId>
+                	<version>0.8</version>
+                	<executions>
+                    	    <execution>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                    	    </execution>
+                        </executions>
+                    <configuration>
           	    <licenses>
             	        <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
               	            <licenseFamilyCategory>ASL20</licenseFamilyCategory>
@@ -165,10 +173,13 @@
               	            </patterns>
             	        </license>
                     </licenses>
-                 </configuration>
-            </plugin>
-        </plugins>
-    </build>
+                    <excludeSubProjects>false</excludeSubProjects>
+                    </configuration>
+                 </plugin>
+             </plugins>
+          </build>
+       </profile>
+    </profiles>
 
     <modules>
         <module>gora-core</module>
