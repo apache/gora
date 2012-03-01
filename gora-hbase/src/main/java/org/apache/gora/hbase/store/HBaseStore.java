@@ -130,17 +130,18 @@ implements Configurable {
       createSchema();
     }
 
-    table = new HBaseTableConnection(getConf(), mapping.getTableName(), true);
+    table = new HBaseTableConnection(getConf(), getSchemaName(), true);
   }
 
   @Override
   public String getSchemaName() {
+    //return the name of this table
     return mapping.getTableName();
   }
 
   @Override
   public void createSchema() throws IOException {
-    if(admin.tableExists(mapping.getTableName())) {
+    if(schemaExists()) {
       return;
     }
     HTableDescriptor tableDesc = mapping.getTable();
@@ -150,11 +151,11 @@ implements Configurable {
 
   @Override
   public void deleteSchema() throws IOException {
-    if(!admin.tableExists(mapping.getTableName())) {
+    if(!schemaExists()) {
       return;
     }
-    admin.disableTable(mapping.getTableName());
-    admin.deleteTable(mapping.getTableName());
+    admin.disableTable(getSchemaName());
+    admin.deleteTable(getSchemaName());
   }
 
   @Override
@@ -528,7 +529,6 @@ implements Configurable {
       List<Element> tableElements = root.getChildren("table");
       for(Element tableElement : tableElements) {
         String tableName = tableElement.getAttributeValue("name");
-        mappingBuilder.addTable(tableName);
 
         List<Element> fieldElements = tableElement.getChildren("family");
         for(Element fieldElement : fieldElements) {
@@ -540,8 +540,8 @@ implements Configurable {
           String maxVersions = fieldElement.getAttributeValue("maxVersions");
           String timeToLive  = fieldElement.getAttributeValue("timeToLive");
           String inMemory    = fieldElement.getAttributeValue("inMemory");
-
-          mappingBuilder.addColumnFamily(tableName, familyName, compression, 
+          
+          mappingBuilder.addFamilyProps(tableName, familyName, compression, 
               blockCache, blockSize, bloomFilter, maxVersions, timeToLive, 
               inMemory);
         }
@@ -554,22 +554,30 @@ implements Configurable {
             && classElement.getAttributeValue("name").equals(
                 persistentClass.getCanonicalName())) {
 
-          String tableName = getSchemaName(
-              classElement.getAttributeValue("table"), persistentClass);
-          mappingBuilder.addTable(tableName);
-          mappingBuilder.setTableName(tableName);
+          String tableNameFromMapping = classElement.getAttributeValue("table");
 
           List<Element> fields = classElement.getChildren("field");
           for(Element field:fields) {
             String fieldName =  field.getAttributeValue("name");
             String family =  field.getAttributeValue("family");
             String qualifier = field.getAttributeValue("qualifier");
-            mappingBuilder.addField(fieldName, mappingBuilder.getTableName(), 
-                family, qualifier);
-            mappingBuilder.addColumnFamily(mappingBuilder.getTableName(), 
-                family);//implicit family definition
+            mappingBuilder.addField(fieldName, family, qualifier);
+            mappingBuilder.addColumnFamily(tableNameFromMapping, family);
           }
+          
+          String tableName = getSchemaName(tableNameFromMapping, persistentClass);
+          
+          
+          if (!tableNameFromMapping.equals(tableName)) {
+            log.info("Keyclass and nameclass match but mismatching table names " 
+                + " mappingfile schema is '" + tableNameFromMapping 
+                + "' vs actual schema '" + tableName + "' , assuming they are the same.");
+            mappingBuilder.renameTable(tableNameFromMapping, tableName);
+          }
+          mappingBuilder.setTableName(tableName);
 
+          //we found a matching key and value class definition,
+          //do not continue on other class definitions
           break;
         }
       }
