@@ -555,6 +555,18 @@ implements Configurable {
                 persistentClass.getCanonicalName())) {
 
           String tableNameFromMapping = classElement.getAttributeValue("table");
+          String tableName = getSchemaName(tableNameFromMapping, persistentClass);
+          
+          //tableNameFromMapping could be null here
+          if (!tableName.equals(tableNameFromMapping)) {
+            log.info("Keyclass and nameclass match but mismatching table names " 
+                + " mappingfile schema is '" + tableNameFromMapping 
+                + "' vs actual schema '" + tableName + "' , assuming they are the same.");
+            if (tableNameFromMapping != null) {
+              mappingBuilder.renameTable(tableNameFromMapping, tableName);
+            }
+          }
+          mappingBuilder.setTableName(tableName);
 
           List<Element> fields = classElement.getChildren("field");
           for(Element field:fields) {
@@ -562,20 +574,11 @@ implements Configurable {
             String family =  field.getAttributeValue("family");
             String qualifier = field.getAttributeValue("qualifier");
             mappingBuilder.addField(fieldName, family, qualifier);
-            mappingBuilder.addColumnFamily(tableNameFromMapping, family);
+            mappingBuilder.addColumnFamily(tableName, family);
           }
           
-          String tableName = getSchemaName(tableNameFromMapping, persistentClass);
           
           
-          if (!tableNameFromMapping.equals(tableName)) {
-            log.info("Keyclass and nameclass match but mismatching table names " 
-                + " mappingfile schema is '" + tableNameFromMapping 
-                + "' vs actual schema '" + tableName + "' , assuming they are the same.");
-            mappingBuilder.renameTable(tableNameFromMapping, tableName);
-          }
-          mappingBuilder.setTableName(tableName);
-
           //we found a matching key and value class definition,
           //do not continue on other class definitions
           break;
