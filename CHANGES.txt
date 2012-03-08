@@ -6,6 +6,8 @@ Gora Change Log
 
 Trunk (unreleased changes):
 
+* GORA-74 Remove sqlbuilder library (lewismc)
+
 * GORA-101 HBaseStore should properly support multiple tables in the mapping file. (ferdy)
 
 * GORA-82 Add missing license headers & RAT target to pom.xml (lewismc)

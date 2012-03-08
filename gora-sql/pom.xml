@@ -139,11 +139,6 @@
             <artifactId>jdom</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.healthmarketscience.sqlbuilder</groupId>
-            <artifactId>sqlbuilder</artifactId>
-        </dependency>
-
         <!-- Logging Dependencies -->
         <dependency>
             <groupId>org.slf4j</groupId>
