@@ -204,7 +204,6 @@
         <guava.version>10.0.1</guava.version>
         <commons-lang.version>2.6</commons-lang.version>
         <jdom.version>1.1.2</jdom.version>
-        <sqlbuilder.version>2.0.10</sqlbuilder.version>
         <hsqldb.version>2.2.8</hsqldb.version>
         <mysql.version>5.1.18</mysql.version>
         <xerces.version>2.9.1</xerces.version>
@@ -373,12 +372,6 @@
                         <artifactId>maven-findbugs-plugin</artifactId>
                     </exclusion>
                 </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>com.healthmarketscience.sqlbuilder</groupId>
-                <artifactId>sqlbuilder</artifactId>
-                <version>${sqlbuilder.version}</version>
             </dependency>
 
             <dependency>
