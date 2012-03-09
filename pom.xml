@@ -20,7 +20,7 @@
      <parent>
        <groupId>org.apache</groupId>
        <artifactId>apache</artifactId>
-       <version>9</version>
+       <version>10</version>
      </parent>
 
     <groupId>org.apache.gora</groupId>
@@ -28,13 +28,175 @@
     <packaging>pom</packaging>
     <version>0.2-SNAPSHOT</version>
     <name>Apache Gora</name>
+    <description>The Apache Gora open source framework provides an in-memory data model and 
+    persistence for big data. Gora supports persisting to column stores, key value stores, 
+    document stores and RDBMSs, and analyzing the data with extensive Apache Hadoop MapReduce 
+    support. </description>
+    <url>http://gora.apache.org</url>
+    <inceptionYear>2010</inceptionYear>
+    
+  <developers>
+    <developer>
+      <id>ab</id>
+      <name>Andrzej Bialecki</name>
+      <email>ab [at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>ahart</id>
+      <name>Andrew Hart</name>
+      <email>ahart [at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>dogacan</id>
+      <name>Doğacan Güney</name>
+      <email>dogacan [at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>enis</id>
+      <name>Enis Soztutar</name>
+      <email>enis [at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>ferdy</id>
+      <name>Ferdy Galema</name>
+      <email>ferdy [at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>hsaputra</id>
+      <name>Henry Saputra</name>
+      <email>hsaputra [at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>iocanel</id>
+      <name>Ioannis Canellos</name>
+      <email>iocanel [at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>jnioche</id>
+      <name>Julien Nioche</name>
+      <email>jnioche[at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>kturner</id>
+      <name>Keith Turner</name>
+      <email>kturner [at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PPMC Member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>lewismc</id>
+      <name>Lewis John McGibbney</name>
+      <email>lewismc [at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+        <role>PMC Chair</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>mattmann</id>
+      <name>Chris Mattmann</name>
+      <email>mattmann [at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+        <role>Champion</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>sertan</id>
+      <name>Sertan Alkan</name>
+      <email>sertan [at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>woollard</id>
+      <name>Dave Woollard</name>
+      <email>woollard [at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+  </developers>
 
-       <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/gora/trunk/</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/gora/trunk/</developerConnection>
-        <url>http://svn.apache.org/viewvc/gora/trunk/</url>
-      </scm>
+  <mailingLists>
+    <mailingList>
+      <name>Dev Mailing List</name>
+      <post>dev[at]gora[dot]apache[dot]org</post>
+      <subscribe>dev-subscribe[at]gora[dot]apache[dot]org</subscribe>
+      <unsubscribe>dev-unsubscribe[at]gora[dot]apache[dot]org</unsubscribe>
+      <archive>http://mail-archives.apache.org/mod_mbox/gora-dev/</archive>
+    </mailingList>
 
+    <mailingList>
+      <name>User Mailing List</name>
+      <post>user[at]gora[dot]apache[dot]org</post>
+      <subscribe>user-subscribe[at]gora[dot]apache[dot]org</subscribe>
+      <unsubscribe>user-unsubscribe[at]gora[dot]apache[dot]org</unsubscribe>
+      <archive>http://mail-archives.apache.org/mod_mbox/gora-dev/</archive>
+    </mailingList>
+
+    <mailingList>
+      <name>Commits Mailing List</name>
+      <post>commits[at]gora[dot]apache[dot]org</post>
+      <subscribe>commits-subscribe[at]gora[dot]apache[dot]org</subscribe>
+      <unsubscribe>commits-unsubscribe[at]gora[dot]apache[dot]org</unsubscribe>
+      <archive>http://mail-archives.apache.org/mod_mbox/gora-commits</archive>
+    </mailingList>
+  </mailingLists>
+       
+  <scm>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/gora/trunk/</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/gora/trunk/</developerConnection>
+    <url>http://svn.apache.org/viewvc/gora/trunk/</url>
+  </scm>
+  <issueManagement>
+    <system>JIRA</system>
+    <url>https://issues.apache.org/jira/browse/GORA</url>
+  </issueManagement>
+  <ciManagement>
+    <system>Jenkins</system>
+    <url>https://builds.apache.org/job/Gora-trunk/</url>
+  </ciManagement>
+  
     <build>
     	<directory>target</directory>
         <outputDirectory>${basedir}/target/classes</outputDirectory>
@@ -145,23 +307,24 @@
     </build>
     
     <profiles>
-        <profile>
-            <id>release</id>
-            <build>
-                <plugins>
-            	    <plugin>
-                 	<groupId>org.apache.rat</groupId>
-                	<artifactId>apache-rat-plugin</artifactId>
-                	<version>0.8</version>
-                	<executions>
-                    	    <execution>
-                            <phase>verify</phase>
-                            <goals>
-                                <goal>check</goal>
-                            </goals>
-                    	    </execution>
-                        </executions>
-                    <configuration>
+      <profile>
+        <id>release</id>
+          <build>
+            <plugins>
+              <plugin>
+                <groupId>org.apache.rat</groupId>
+                <artifactId>apache-rat-plugin</artifactId>
+                <version>${apache-rat-plugin.version}</version>
+                <executions>
+                  <execution>
+                    <id>rat-verify</id>
+                    <phase>test</phase>
+                    <goals>
+                      <goal>check</goal>
+                    </goals>
+                  </execution>
+                </executions>
+                <configuration>
           	    <licenses>
             	        <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
               	            <licenseFamilyCategory>ASL20</licenseFamilyCategory>
@@ -174,9 +337,78 @@
             	        </license>
                     </licenses>
                     <excludeSubProjects>false</excludeSubProjects>
+                </configuration>
+              </plugin>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+            	<artifactId>maven-source-plugin</artifactId>
+            	<version>${maven-source-plugin.version}</version>
+            	<executions>
+              	  <execution>
+                  <id>attach-sources</id>
+                  <goals>
+                    <goal>jar-no-fork</goal>
+                  </goals>
+                  <configuration>
+                    <archive>
+                      <manifest>
+                        <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                      	<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                      </manifest>
+                      <manifestEntries>
+                        <Implementation-Build>${implementation.build}</Implementation-Build>
+                      	<Implementation-Build-Date>${maven.build.timestamp}</Implementation-Build-Date>
+                      	<X-Compile-Source-JDK>${javac.src.version}</X-Compile-Source-JDK>
+                      	<X-Compile-Target-JDK>${javac.target.version}</X-Compile-Target-JDK>
+                      </manifestEntries>
+                    </archive>
+                  </configuration>
+              	  </execution>
+            	</executions>
+              </plugin>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+            	<artifactId>maven-javadoc-plugin</artifactId>
+            	<version>${maven-javadoc-plugin.version}</version>
+            	<executions>
+                  <execution>
+                    <id>attach-javadocs</id>
+                    <goals>
+                      <goal>jar</goal>
+                    </goals>
+                    <configuration>
+                      <quiet>true</quiet>
+                      <archive>
+                        <manifest>
+                          <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                          <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                        <manifestEntries>
+                          <Implementation-Build>${implementation.build}</Implementation-Build>
+                          <Implementation-Build-Date>${maven.build.timestamp}</Implementation-Build-Date>
+                          <X-Compile-Source-JDK>${javac.src.version}</X-Compile-Source-JDK>
+                          <X-Compile-Target-JDK>${javac.target.version}</X-Compile-Target-JDK>
+                        </manifestEntries>
+                      </archive>
                     </configuration>
-                 </plugin>
-             </plugins>
+                  </execution>
+                </executions>
+              </plugin>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>maven-gpg-plugin.version</version>
+            	<executions>
+              	  <execution>
+                    <id>sign-artifacts</id>
+                    <phase>verify</phase>
+                    <goals>
+                      <goal>sign</goal>
+                    </goals>
+                  </execution>
+                </executions>
+              </plugin>
+            </plugins>
           </build>
        </profile>
     </profiles>
@@ -224,6 +456,10 @@
         <maven-surfire-plugin.version>2.12</maven-surfire-plugin.version>
         <maven-release-plugin.version>2.2.2</maven-release-plugin.version>
         <maven-bundle-plugin.version>2.3.7</maven-bundle-plugin.version>
+        <maven-source-plugin.version>2.1.2</maven-source-plugin.version>
+        <maven-javadoc-plugin.version>2.8.1</maven-javadoc-plugin.version>
+        <maven-gpg-plugin.version>1.4</maven-gpg-plugin.version>
+        <apache-rat-plugin.version>0.8</apache-rat-plugin.version>
     </properties>
 
     <dependencyManagement>

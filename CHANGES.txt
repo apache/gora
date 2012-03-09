@@ -6,6 +6,8 @@ Gora Change Log
 
 Trunk (unreleased changes):
 
+* GORA-** Update Gora parent pom to include maven release plugin targets, and update developer credentials.
+
 * GORA-74 Remove sqlbuilder library (lewismc)
 
 * GORA-101 HBaseStore should properly support multiple tables in the mapping file. (ferdy)
