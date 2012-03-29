@@ -5,6 +5,7 @@
 Gora Change Log
 
 Trunk (unreleased changes):
+* GORA-105 DataStoreFactory does not properly support multiple stores (ferdy)
 
 * GORA-** Update Gora parent pom to include maven release plugin targets, and update developer credentials.
 

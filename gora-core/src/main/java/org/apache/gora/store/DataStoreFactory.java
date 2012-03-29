@@ -19,7 +19,6 @@ package org.apache.gora.store;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -57,22 +56,41 @@ public class DataStoreFactory {
 
   public static final String MAPPING_FILE = "mapping.file";
 
-  public static final String SCHEMA_NAME = "schema.name";
+	public static final String SCHEMA_NAME = "schema.name";
 
-  private static String propertiesFile = GORA_DEFAULT_PROPERTIES_FILE;
-
-  private static String defaultDataStoreClass;
-
-  private static HashMap<Integer, DataStore<?,?>> dataStores;
-
-  public static Properties properties;
-
-  static {
-    dataStores = new HashMap<Integer, DataStore<?,?>>();
+  /**
+   * Do not use! Deprecated because it shares system wide state. 
+   * Use {@link #createProps()} instead.
+   */
+  @Deprecated()
+  public static final Properties properties = createProps();
+  
+  /**
+   * Creates a new {@link Properties}. It adds the default gora configuration
+   * resources. This properties object can be modified and used to instantiate
+   * store instances. It is recommended to use a properties object for a single
+   * store, because the properties object is passed on to store initialization
+   * methods that are able to store the properties as a field.   
+   * @return The new properties object.
+   */
+  public static Properties createProps() {
     try {
-      readProperties();
-    } catch (IOException ex) {
-      throw new RuntimeException(ex);
+    Properties properties = new Properties();
+      InputStream stream = DataStoreFactory.class.getClassLoader()
+        .getResourceAsStream(GORA_DEFAULT_PROPERTIES_FILE);
+      if(stream != null) {
+        try {
+          properties.load(stream);
+          return properties;
+        } finally {
+          stream.close();
+        }
+      } else {
+        log.warn(GORA_DEFAULT_PROPERTIES_FILE + " not found, properties will be empty.");
+      }
+      return properties;
+    } catch(Exception e) {
+      throw new RuntimeException(e);
     }
   }
 
@@ -84,18 +102,51 @@ public class DataStoreFactory {
     dataStore.initialize(keyClass, persistent, properties);
   }
 
+  /**
+   * Instantiate a new {@link DataStore}. Uses default properties. Uses 'null' schema.
+   * 
+   * @param dataStoreClass The datastore implementation class.
+   * @param keyClass The key class.
+   * @param persistent The value class.
+   * @param conf {@link Configuration} to be used be the store.
+   * @return A new store instance.
+   * @throws GoraException
+   */
   public static <D extends DataStore<K,T>, K, T extends Persistent>
   D createDataStore(Class<D> dataStoreClass
       , Class<K> keyClass, Class<T> persistent, Configuration conf) throws GoraException {
-    return createDataStore(dataStoreClass, keyClass, persistent, conf, properties);
+    return createDataStore(dataStoreClass, keyClass, persistent, conf, createProps(), null);
   }
 
+  /**
+   * Instantiate a new {@link DataStore}. Uses default properties.
+   * 
+   * @param dataStoreClass The datastore implementation class.
+   * @param keyClass The key class.
+   * @param persistent The value class.
+   * @param conf {@link Configuration} to be used be the store.
+   * @param schemaName A default schemaname that will be put on the properties.
+   * @return A new store instance.
+   * @throws GoraException
+   */
   public static <D extends DataStore<K,T>, K, T extends Persistent>
   D createDataStore(Class<D> dataStoreClass , Class<K> keyClass, 
       Class<T> persistent, Configuration conf, String schemaName) throws GoraException {
-    return createDataStore(dataStoreClass, keyClass, persistent, conf, properties, schemaName);
+    return createDataStore(dataStoreClass, keyClass, persistent, conf, createProps(), schemaName);
   }
 
+  /**
+   * Instantiate a new {@link DataStore}.
+   * 
+   * @param dataStoreClass The datastore implementation class.
+   * @param keyClass The key class.
+   * @param persistent The value class.
+   * @param conf {@link Configuration} to be used be the store.
+   * @param properties The properties to be used be the store.
+   * @param schemaName A default schemaname that will be put on the properties.
+   * @return A new store instance.
+   * @throws GoraException
+   */
   public static <D extends DataStore<K,T>, K, T extends Persistent>
   D createDataStore(Class<D> dataStoreClass, Class<K> keyClass
       , Class<T> persistent, Configuration conf, Properties properties, String schemaName) 
@@ -117,6 +168,17 @@ public class DataStoreFactory {
     }
   }
 
+  /**
+   * Instantiate a new {@link DataStore}. Uses 'null' schema.
+   * 
+   * @param dataStoreClass The datastore implementation class.
+   * @param keyClass The key class.
+   * @param persistent The value class.
+   * @param conf {@link Configuration} to be used be the store.
+   * @param properties The properties to be used be the store.
+   * @return A new store instance.
+   * @throws GoraException
+   */
   public static <D extends DataStore<K,T>, K, T extends Persistent>
   D createDataStore(Class<D> dataStoreClass
       , Class<K> keyClass, Class<T> persistent, Configuration conf, Properties properties) 
@@ -124,29 +186,41 @@ public class DataStoreFactory {
     return createDataStore(dataStoreClass, keyClass, persistent, conf, properties, null);
   }
 
-  @SuppressWarnings("unchecked")
+  /**
+   * Instantiate a new {@link DataStore}. Uses default properties. Uses 'null' schema.
+   * 
+   * @param dataStoreClass The datastore implementation class.
+   * @param keyClass The key class.
+   * @param persistent The value class.
+   * @param conf {@link Configuration} to be used be the store.
+   * @return A new store instance.
+   * @throws GoraException
+   */
   public static <D extends DataStore<K,T>, K, T extends Persistent>
   D getDataStore( Class<D> dataStoreClass, Class<K> keyClass,
       Class<T> persistentClass, Configuration conf) throws GoraException {
-    int hash = getDataStoreKey(dataStoreClass, keyClass, persistentClass);
 
-    D dataStore = (D) dataStores.get(hash);
-    if(dataStore == null) {
-      dataStore = createDataStore(dataStoreClass, keyClass, persistentClass,
-          conf, properties);
-      dataStores.put(hash, dataStore);
-    }
-    return dataStore;
+    return createDataStore(dataStoreClass, keyClass, persistentClass, conf, createProps(), null);
   }
 
+  /**
+   * Instantiate a new {@link DataStore}. Uses default properties. Uses 'null' schema.
+   * 
+   * @param dataStoreClass The datastore implementation class <i>as string</i>.
+   * @param keyClass The key class.
+   * @param persistent The value class.
+   * @param conf {@link Configuration} to be used be the store.
+   * @return A new store instance.
+   * @throws GoraException
+   */
   @SuppressWarnings("unchecked")
-  public static synchronized <K, T extends Persistent> DataStore<K, T> getDataStore(
+  public static <K, T extends Persistent> DataStore<K, T> getDataStore(
       String dataStoreClass, Class<K> keyClass, Class<T> persistentClass, Configuration conf)
       throws GoraException {
     try {
       Class<? extends DataStore<K,T>> c
         = (Class<? extends DataStore<K, T>>) Class.forName(dataStoreClass);
-      return getDataStore(c, keyClass, persistentClass, conf);
+      return createDataStore(c, keyClass, persistentClass, conf, createProps(), null);
     } catch(GoraException ex) {
       throw ex;
     } catch (Exception ex) {
@@ -154,15 +228,27 @@ public class DataStoreFactory {
     }
   }
 
-  @SuppressWarnings({ "unchecked", "rawtypes" })
-  public static synchronized DataStore getDataStore(
+  /**
+   * Instantiate a new {@link DataStore}. Uses default properties. Uses 'null' schema.
+   * 
+   * @param dataStoreClass The datastore implementation class <i>as string</i>.
+   * @param keyClass The key class <i>as string</i>.
+   * @param persistent The value class <i>as string</i>.
+   * @param conf {@link Configuration} to be used be the store.
+   * @return A new store instance.
+   * @throws GoraException
+   */
+  @SuppressWarnings({ "unchecked" })
+  public static <K, T extends Persistent> DataStore<K, T> getDataStore(
       String dataStoreClass, String keyClass, String persistentClass, Configuration conf)
     throws GoraException {
 
     try {
-      Class k = ClassLoadingUtils.loadClass(keyClass);
-      Class p = ClassLoadingUtils.loadClass(persistentClass);
-      return getDataStore(dataStoreClass, k, p, conf);
+      Class<? extends DataStore<K,T>> c
+          = (Class<? extends DataStore<K, T>>) Class.forName(dataStoreClass);
+      Class<K> k = (Class<K>) ClassLoadingUtils.loadClass(keyClass);
+      Class<T> p = (Class<T>) ClassLoadingUtils.loadClass(persistentClass);
+      return createDataStore(c, k, p, conf, createProps(), null);
     } catch(GoraException ex) {
       throw ex;
     } catch (Exception ex) {
@@ -170,37 +256,26 @@ public class DataStoreFactory {
     }
   }
 
+  /**
+   * Instantiate <i>the default</i> {@link DataStore}. Uses default properties. Uses 'null' schema.
+   * 
+   * @param keyClass The key class.
+   * @param persistent The value class.
+   * @param conf {@link Configuration} to be used be the store.
+   * @return A new store instance.
+   * @throws GoraException
+   */
+  @SuppressWarnings("unchecked")
   public static <K, T extends Persistent> DataStore<K, T> getDataStore(
       Class<K> keyClass, Class<T> persistent, Configuration conf) throws GoraException {
-    return getDataStore(defaultDataStoreClass, keyClass, persistent, conf);
-  }
-
-  private static int getDataStoreKey(
-      Class<?> dataStoreClass, Class<?> keyClass, Class<?> persistent) {
-
-    long hash = (((dataStoreClass.hashCode() * 27L)
-        + keyClass.hashCode()) * 31) + persistent.hashCode();
-
-    return (int)hash;
-  }
-
-  private static Properties readProperties() throws IOException {
-    Properties properties = new Properties();
-    if(propertiesFile != null) {
-      InputStream stream = DataStoreFactory.class.getClassLoader()
-        .getResourceAsStream(propertiesFile);
-      if(stream != null) {
-        try {
-          properties.load(stream);
-          setProperties(properties);
-          return properties;
-        } finally {
-          stream.close();
-        }
-      }
+    Properties createProps = createProps();
+    Class<? extends DataStore<K, T>> c;
+    try {
+      c = (Class<? extends DataStore<K, T>>) Class.forName(getDefaultDataStore(createProps));
+    } catch (Exception ex) {
+      throw new GoraException(ex);
     }
-    log.warn("Gora properties are not loaded!");
-    return null;
+    return createDataStore(c, keyClass, persistent, conf, createProps, null);
   }
 
   /**
@@ -292,9 +367,8 @@ public class DataStoreFactory {
     return findProperty(properties, store, MAPPING_FILE, defaultValue);
   }
 
-  private static void setProperties(Properties properties) {
-    defaultDataStoreClass = getProperty(properties, GORA_DEFAULT_DATASTORE_KEY);
-    DataStoreFactory.properties = properties;
+  private static String getDefaultDataStore(Properties properties) {
+    return getProperty(properties, GORA_DEFAULT_DATASTORE_KEY);
   }
 
   private static String getProperty(Properties properties, String key) {
@@ -313,37 +387,40 @@ public class DataStoreFactory {
   }
 
   /**
-   * Sets a property for all the datastores
+   * Set a property
    */
   private static void setProperty(Properties properties, String baseKey, String value) {
-    if(value != null)
+    if(value != null) {
       properties.setProperty(GORA_DATASTORE + baseKey, value);
+    }
   }
 
   /**
-   * Sets a property for the datastores of the given class
+   * Sets a property for the datastore of the given class
    */
   private static<D extends DataStore<K,T>, K, T extends Persistent>
-    void setProperty(Properties properties, Class<D> dataStoreClass, String baseKey, String value) {
+  void setProperty(Properties properties, Class<D> dataStoreClass, String baseKey, String value) {
     properties.setProperty(GORA+"."+org.apache.gora.util.StringUtils.getClassname(dataStoreClass)+"."+baseKey, value);
   }
 
   /**
-   * Gets the default schema name to be used by the datastore
+   * Gets the default schema name of a given store class 
    */
   public static String getDefaultSchemaName(Properties properties, DataStore<?,?> store) {
     return findProperty(properties, store, SCHEMA_NAME, null);
   }
 
   /**
-   * Sets the default schema name to be used by the datastores
+   * Sets the default schema name.
    */
   public static void setDefaultSchemaName(Properties properties, String schemaName) {
-    setProperty(properties, SCHEMA_NAME, schemaName);
+    if (schemaName != null) {
+      setProperty(properties, SCHEMA_NAME, schemaName);
+    }
   }
 
   /**
-   * Sets the default schema name to be used by the datastores of the given class
+   * Sets the default schema name to be used by the datastore of the given class
    */
   public static<D extends DataStore<K,T>, K, T extends Persistent>
   void setDefaultSchemaName(Properties properties, Class<D> dataStoreClass, String schemaName) {
