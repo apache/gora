@@ -58,12 +58,12 @@ public class TestAvroStore {
   @Before
   public void setUp() throws Exception {
     employeeStore = createEmployeeDataStore();
-    employeeStore.initialize(String.class, Employee.class, DataStoreFactory.properties);
+    employeeStore.initialize(String.class, Employee.class, DataStoreFactory.createProps());
     employeeStore.setOutputPath(EMPLOYEE_OUTPUT);
     employeeStore.setInputPath(EMPLOYEE_OUTPUT);
 
     webPageStore = new AvroStore<String, WebPage>();
-    webPageStore.initialize(String.class, WebPage.class, DataStoreFactory.properties);
+    webPageStore.initialize(String.class, WebPage.class, DataStoreFactory.createProps());
     webPageStore.setOutputPath(WEBPAGE_OUTPUT);
     webPageStore.setInputPath(WEBPAGE_OUTPUT);
   }

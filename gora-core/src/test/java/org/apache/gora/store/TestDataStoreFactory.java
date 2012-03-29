@@ -70,7 +70,7 @@ public class TestDataStoreFactory {
     DataStore<?,?> dataStore3 = DataStoreFactory.getDataStore("org.apache.gora.mock.store.MockDataStore"
         , String.class, MockPersistent.class, conf);
     
-    Assert.assertTrue(dataStore1 == dataStore2);
+    Assert.assertNotSame(dataStore1, dataStore2);
     Assert.assertNotSame(dataStore1, dataStore3);
   }
   
@@ -85,7 +85,7 @@ public class TestDataStoreFactory {
   
   @Test
   public void testFindProperty() {
-    Properties properties = DataStoreFactory.properties;
+    Properties properties = DataStoreFactory.createProps();
     
     DataStore<String, MockPersistent> store = new DataFileAvroStore<String,MockPersistent>();
     

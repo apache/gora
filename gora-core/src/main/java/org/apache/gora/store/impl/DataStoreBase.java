@@ -22,6 +22,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.apache.avro.Schema;
@@ -37,8 +38,11 @@ import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.util.AvroUtils;
 import org.apache.gora.util.ClassLoadingUtils;
 import org.apache.gora.util.StringUtils;
+import org.apache.gora.util.WritableUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.MapWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 
 /**
  * A Base class for {@link DataStore}s.
@@ -176,8 +180,8 @@ implements DataStore<K, T> {
     try {
       Class<K> keyClass = (Class<K>) ClassLoadingUtils.loadClass(Text.readString(in));
       Class<T> persistentClass = (Class<T>)ClassLoadingUtils.loadClass(Text.readString(in));
-      initialize(keyClass, persistentClass, DataStoreFactory.properties);
-
+      Properties props = WritableUtils.readProperties(in);
+      initialize(keyClass, persistentClass, props);
     } catch (ClassNotFoundException ex) {
       throw new IOException(ex);
     }
@@ -187,6 +191,7 @@ implements DataStore<K, T> {
   public void write(DataOutput out) throws IOException {
     Text.writeString(out, getKeyClass().getCanonicalName());
     Text.writeString(out, getPersistentClass().getCanonicalName());
+    WritableUtils.writeProperties(out, properties);
   }
 
   @Override
@@ -210,9 +215,11 @@ implements DataStore<K, T> {
   }
 
   /**
-   * Returns the name of the schema to use for the persistent class. If the mapping schema name is
-   * provided it is returned first, else the properties file is searched, and the default schema name is
-   * returned if found. Else, the class name, without the package, of the persistent class is returned.
+   * Returns the name of the schema to use for the persistent class. 
+   * 
+   * First the schema name in the defined properties is returned. If null then
+   * the provided mappingSchemaName is returned. If this is null too,
+   * the class name, without the package, of the persistent class is returned.
    * @param mappingSchemaName the name of the schema as read from the mapping file
    * @param persistentClass persistent class
    */

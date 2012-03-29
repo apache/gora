@@ -56,7 +56,7 @@ public class GoraTestDriver {
    * method annotated with org.junit.BeforeClass
    */
   public void setUpClass() throws Exception {
-    setProperties(DataStoreFactory.properties);
+    setProperties(DataStoreFactory.createProps());
   }
 
   /** Should be called once after the tests have finished, probably in the
@@ -103,7 +103,7 @@ public class GoraTestDriver {
   @SuppressWarnings("unchecked")
   public<K, T extends Persistent> DataStore<K,T>
     createDataStore(Class<K> keyClass, Class<T> persistentClass) throws GoraException {
-    setProperties(DataStoreFactory.properties);
+    setProperties(DataStoreFactory.createProps());
     DataStore<K,T> dataStore = DataStoreFactory.createDataStore(
         (Class<? extends DataStore<K,T>>)dataStoreClass, keyClass, persistentClass, conf);
     dataStores.add(dataStore);
