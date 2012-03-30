@@ -70,8 +70,10 @@ public abstract class DataStoreMapReduceTestBase extends HadoopTestCase {
     MapReduceTestUtils.testCountQuery(webPageStore, job);
   }
 
-  @Test
-  public void testWordCount() throws Exception {
-    MapReduceTestUtils.testCountQuery(webPageStore, job);
-  }
+ // TODO The correct implementation for this test need to be created
+ // and implemented. For a WIP and more details see GORA-104 
+ // @Test
+ // public void testWordCount() throws Exception {
+ //   MapReduceTestUtils.testCountQuery(webPageStore, job);
+ // }
 }
