@@ -5,9 +5,12 @@
 Gora Change Log
 
 Trunk (unreleased changes):
+
+* GORA-108 Change CassandraClient#init() to CassandraClient#initialize() for consistency with other Datastores. (lewismc)
+
 * GORA-105 DataStoreFactory does not properly support multiple stores (ferdy)
 
-* GORA-** Update Gora parent pom to include maven release plugin targets, and update developer credentials.
+* GORA-** Update Gora parent pom to include maven release plugin targets, and update developer credentials. (lewismc)
 
 * GORA-74 Remove sqlbuilder library (lewismc)
 

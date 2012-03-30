@@ -69,7 +69,7 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
   private Map<K, T> buffer = new LinkedHashMap<K, T>();
   
   public CassandraStore() throws Exception {
-    this.cassandraClient.init();
+    this.cassandraClient.initialize();
   }
 
   @Override
