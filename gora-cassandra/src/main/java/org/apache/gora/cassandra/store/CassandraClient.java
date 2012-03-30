@@ -62,7 +62,7 @@ public class CassandraClient<K, T extends Persistent> {
 
   private StringSerializer stringSerializer = new StringSerializer();
   
-  public void init() throws Exception {
+  public void initialize() throws Exception {
     this.cassandraMapping.loadConfiguration();
     this.cluster = HFactory.getOrCreateCluster(this.cassandraMapping.getClusterName(), new CassandraHostConfigurator(this.cassandraMapping.getHostName()));
     
