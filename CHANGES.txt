@@ -6,6 +6,8 @@ Gora Change Log
 
 Trunk (unreleased changes):
 
+* GORA-65 Initial checkin of gora accumulo datastore (kturner)
+
 * GORA-108 Change CassandraClient#init() to CassandraClient#initialize() for consistency with other Datastores. (lewismc)
 
 * GORA-105 DataStoreFactory does not properly support multiple stores (ferdy)
