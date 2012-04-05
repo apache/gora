@@ -27,6 +27,10 @@ import org.apache.hadoop.mapred.JobConf;
 import org.junit.Before;
 import org.junit.Test;
 
+// Slf4j logging imports
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * Base class for Mapreduce based tests. This is just a convenience
@@ -35,6 +39,7 @@ import org.junit.Test;
  */
 @SuppressWarnings("deprecation")
 public abstract class DataStoreMapReduceTestBase extends HadoopTestCase {
+  public static final Logger LOG = LoggerFactory.getLogger(DataStoreMapReduceTestBase.class);
 
   private DataStore<String, WebPage> webPageStore;
   private JobConf job;
@@ -51,13 +56,21 @@ public abstract class DataStoreMapReduceTestBase extends HadoopTestCase {
   @Override
   @Before
   public void setUp() throws Exception {
-    super.setUp();
-    webPageStore = createWebPageDataStore();
-    job = createJobConf();
-  }
+    LOG.info("Setting up Hadoop Test Case...");
+    try {
+      super.setUp();
+      webPageStore = createWebPageDataStore();
+      job = createJobConf();
+    } catch (Exception e) {
+      LOG.error("Hadoop Test Case set up failed", e);
+      // cleanup
+      tearDown();
+    }
+  } 
 
   @Override
   public void tearDown() throws Exception {
+    LOG.info("Tearing down Hadoop Test Case...");
     super.tearDown();
     webPageStore.close();
   }
@@ -74,6 +87,6 @@ public abstract class DataStoreMapReduceTestBase extends HadoopTestCase {
  // and implemented. For a WIP and more details see GORA-104 
  // @Test
  // public void testWordCount() throws Exception {
- //   MapReduceTestUtils.testCountQuery(webPageStore, job);
+ //   MapReduceTestUtils.testWordCount(job, tokenDatumStore, webPageStore);
  // }
 }
