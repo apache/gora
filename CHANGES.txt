@@ -6,6 +6,8 @@ Gora Change Log
 
 Trunk (unreleased changes):
 
+* GORA-76 Upgrade to Hadoop 1.0.1 (ferdy & lewismc)
+
 * GORA-65 Initial checkin of gora accumulo datastore (kturner)
 
 * GORA-108 Change CassandraClient#init() to CassandraClient#initialize() for consistency with other Datastores. (lewismc)
@@ -33,7 +35,7 @@ write operations. (lewismc)
 
 * GORA-90 Create DOAP for Gora (lewismc)
 
-* GORA-79 Block keyspace creation until the whole cassandra cluster converges to the new keyspace. (Patricio Echagüe vis lewismc)
+* GORA-79 Block keyspace creation until the whole cassandra cluster converges to the new keyspace. (Patricio Echagüe via lewismc)
 
 * GORA-83 add 'target' dirs to svn ignore (ferdy)
 
