@@ -6,6 +6,8 @@ Gora Change Log
 
 0.2 Release:
 
+* Make hbase autoflush default to false and make autoflush configurable rather than hardcoded (stack via lewismc)
+
 * GORA-76 Upgrade to Hadoop 1.0.1 (ferdy & lewismc)
 
 * GORA-65 Initial checkin of gora accumulo datastore (kturner)
