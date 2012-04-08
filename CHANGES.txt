@@ -4,7 +4,7 @@
 
 Gora Change Log
 
-Trunk (unreleased changes):
+0.2 Release:
 
 * GORA-76 Upgrade to Hadoop 1.0.1 (ferdy & lewismc)
 
