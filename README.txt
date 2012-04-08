@@ -1,8 +1,10 @@
-Gora Project
-============
+Apache Gora Project
+===================
  
-Gora is an ORM framework for column stores such as Apache HBase and
-Apache Cassandra with a specific focus on Hadoop. 
+The Apache Gora open source framework provides an in-memory data model 
+and persistence for big data. Gora supports persisting to column stores, 
+key value stores, document stores and RDBMSs, and analyzing the data 
+with extensive Apache Hadoop MapReduce support. 
 
 Why Gora?
 ---------
@@ -63,7 +65,7 @@ from current solutions in that:
 
  For the latest information about Gora, please visit our website at:
  
-   http://incubator.apache.org/gora/
+   http://gora.apache.org
  
 License
 -------
