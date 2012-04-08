@@ -21,13 +21,37 @@
     <parent>
         <groupId>org.apache.gora</groupId>
         <artifactId>gora</artifactId>
-        <version>0.2-SNAPSHOT</version>
+        <version>0.2</version>
         <relativePath>../</relativePath>
     </parent>
     <artifactId>gora-core</artifactId>
     <packaging>bundle</packaging>
 
     <name>Apache Gora :: Core</name>
+        <url>http://gora.apache.org</url>
+    <description>The Apache Gora open source framework provides an in-memory data model and 
+    persistence for big data. Gora supports persisting to column stores, key value stores, 
+    document stores and RDBMSs, and analyzing the data with extensive Apache Hadoop MapReduce 
+    support.</description>
+    <inceptionYear>2010</inceptionYear>
+    <organization>
+    	<name>The Apache Software Foundation</name>
+    	<url>http://www.apache.org/</url>
+    </organization>
+    <scm>
+    	<url>http://svn.apache.org/viewvc/gora/trunk/</url>
+    	<connection>scm:svn:http://svn.apache.org/repos/asf/gora/trunk/</connection>
+    	<developerConnection>scm:svn:https://svn.apache.org/repos/asf/gora/trunk/</developerConnection>
+    	<tag>https://svn.apache.org/repos/asf/gora/tags/</tag>
+    </scm>
+    <issueManagement>
+    	<system>JIRA</system>
+    	<url>https://issues.apache.org/jira/browse/GORA</url>
+    </issueManagement>
+    <ciManagement>
+    	<system>Jenkins</system>
+    	<url>https://builds.apache.org/job/Gora-trunk/</url>
+    </ciManagement>
 
     <properties>
         <osgi.import>*</osgi.import>
