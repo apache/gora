@@ -309,13 +309,11 @@
                 <artifactId>maven-release-plugin</artifactId>
                 <version>${maven-release-plugin.version}</version>
                 <configuration>
+                  <mavenExecutorId>forked-path</mavenExecutorId>
                   <tagBase>https://svn.apache.org/repos/asf/gora/tags</tagBase>
                   <useReleaseProfile>false</useReleaseProfile>
-                  <preparationGoals>clean install</preparationGoals>
-                  <goals>deploy</goals>
-                  <arguments>-Prelease,deploy</arguments>
+                  <arguments>-Papache-release,release</arguments>
                   <autoVersionSubmodules>true</autoVersionSubmodules>
-                  <skipTests>true</skipTests>
                 </configuration>
             </plugin>
             <plugin>
