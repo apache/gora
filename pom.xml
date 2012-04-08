@@ -315,6 +315,7 @@
                   <goals>deploy</goals>
                   <arguments>-Prelease,deploy</arguments>
                   <autoVersionSubmodules>true</autoVersionSubmodules>
+                  <skipTests>true</skipTests>
                 </configuration>
             </plugin>
             <plugin>
