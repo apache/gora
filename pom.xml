@@ -359,7 +359,7 @@
         <id>release</id>
           <build>
             <plugins>
-              <plugin>
+              <!-- 
                 <groupId>org.apache.rat</groupId>
                 <artifactId>apache-rat-plugin</artifactId>
                 <version>${apache-rat-plugin.version}</version>
@@ -395,7 +395,7 @@
                    <exclude>.gitignore/**/**</exclude>
                  </excludes>
                 </configuration>
-              </plugin>
+              </plugin-->
               <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
             	<artifactId>maven-source-plugin</artifactId>
