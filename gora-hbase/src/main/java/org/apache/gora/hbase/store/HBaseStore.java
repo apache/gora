@@ -130,7 +130,8 @@ implements Configurable {
       createSchema();
     }
 
-    table = new HBaseTableConnection(getConf(), getSchemaName(), true);
+    boolean autoflush = this.conf.getBoolean("hbase.client.autoflush.default", false);
+    table = new HBaseTableConnection(getConf(), getSchemaName(), autoflush);
   }
 
   @Override
