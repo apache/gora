@@ -5,6 +5,7 @@
 Gora Change Log
 
 0.2 Release:
+* GORA-115 Flushing HBaseStore should flush all HTable instances. (ferdy)
 
 * Make hbase autoflush default to false and make autoflush configurable rather than hardcoded (stack via lewismc)
 

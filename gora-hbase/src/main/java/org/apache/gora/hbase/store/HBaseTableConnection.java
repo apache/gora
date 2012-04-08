@@ -235,7 +235,9 @@ public class HBaseTableConnection implements HTableInterface{
 
   @Override
   public void flushCommits() throws IOException {
-    getTable().flushCommits();
+    for (HTable table : pool) {
+      table.flushCommits();
+    }
   }
 
   @Override
