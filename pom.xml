@@ -247,7 +247,45 @@
         <testOutputDirectory>${basedir}/target/test-classes</testOutputDirectory>
         <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
         <testSourceDirectory>${basedir}/src/test/java</testSourceDirectory>
-
+	<pluginManagement>
+	<plugins>
+	  <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <version>${maven-assembly-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>assembly</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <tarLongFileMode>gnu</tarLongFileMode>
+              <finalName>${assembly.finalName}</finalName>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-deploy-plugin</artifactId>
+            <version>${maven-deploy-plugin.version}</version>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-release-plugin</artifactId>
+            <version>${maven-release-plugin.version}</version>
+            <configuration>
+              <mavenExecutorId>forked-path</mavenExecutorId>
+              <tagBase>https://svn.apache.org/repos/asf/gora/tags</tagBase>
+              <useReleaseProfile>false</useReleaseProfile>
+              <arguments>-Papache-release,release</arguments>
+              <autoVersionSubmodules>true</autoVersionSubmodules>
+            </configuration>
+          </plugin>
+        </plugins>
+	</pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -255,8 +293,8 @@
                 <version>${maven-compiler-plugin.version}</version>
                 <inherited>true</inherited>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>${javac.source.version}</source>
+                    <target>${javac.target.version}</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -305,18 +343,6 @@
                </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>${maven-release-plugin.version}</version>
-                <configuration>
-                  <mavenExecutorId>forked-path</mavenExecutorId>
-                  <tagBase>https://svn.apache.org/repos/asf/gora/tags</tagBase>
-                  <useReleaseProfile>false</useReleaseProfile>
-                  <arguments>-Papache-release,release</arguments>
-                  <autoVersionSubmodules>true</autoVersionSubmodules>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <version>${maven-bundle-plugin.version}</version>
@@ -355,7 +381,7 @@
     
     <profiles>
       <profile>
-        <id>apache-release</id>
+        <id>release</id>
           <build>
             <plugins>
               <!-- 
@@ -396,33 +422,6 @@
                  </excludes>
                 </configuration>
               </plugin-->
-              <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>${maven-assembly-plugin.version}</version>
-                <executions>
-                  <execution>
-                    <id>assembly</id>
-                    <phase>package</phase>
-                    <goals>
-                      <goal>single</goal>
-                    </goals>
-                  </execution>
-                </executions>
-                <configuration>
-                  <tarLongFileMode>gnu</tarLongFileMode>
-                  <finalName>${assembly.finalName}</finalName>
-                </configuration>
-              </plugin>
-              <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>${maven-deploy-plugin.version}</version>
-                <configuration>
-                  <altDeploymentRepository>${deploy.altRepository}</altDeploymentRepository>
-                  <updateReleaseInfo>true</updateReleaseInfo>
-                </configuration>
-              </plugin>
               <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
             	<artifactId>maven-source-plugin</artifactId>
@@ -560,6 +559,7 @@
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ssZ</maven.build.timestamp.format>
         <skipTests>false</skipTests>
         <assembly.finalName>apache-${project.build.finalName}</assembly.finalName>
+        <downloads.url>http://www.apache.org/dist/gora</downloads.url>
     </properties>
 
     <dependencyManagement>
