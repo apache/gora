@@ -355,10 +355,11 @@
     
     <profiles>
       <profile>
-        <id>release</id>
+        <id>apache-release</id>
           <build>
             <plugins>
               <!-- 
+              <plugin>
                 <groupId>org.apache.rat</groupId>
                 <artifactId>apache-rat-plugin</artifactId>
                 <version>${apache-rat-plugin.version}</version>
