@@ -4,7 +4,9 @@
 
 Gora Change Log
 
-0.2 Release:
+0.2 Release: 20/04/2012
+Jira Release Report: https://issues.apache.org/jira/secure/ReleaseNote.jspa?projectId=12311172&version=12315541
+ 
 * GORA-115 Flushing HBaseStore should flush all HTable instances. (ferdy)
 
 * Make hbase autoflush default to false and make autoflush configurable rather than hardcoded (stack via lewismc)
