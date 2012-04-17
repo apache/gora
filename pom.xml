@@ -398,6 +398,33 @@
               </plugin-->
               <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>${maven-assembly-plugin.version}</version>
+                <executions>
+                  <execution>
+                    <id>assembly</id>
+                    <phase>package</phase>
+                    <goals>
+                      <goal>single</goal>
+                    </goals>
+                  </execution>
+                </executions>
+                <configuration>
+                  <tarLongFileMode>gnu</tarLongFileMode>
+                  <finalName>${assembly.finalName}</finalName>
+                </configuration>
+              </plugin>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>${maven-deploy-plugin.version}</version>
+                <configuration>
+                  <altDeploymentRepository>${deploy.altRepository}</altDeploymentRepository>
+                  <updateReleaseInfo>true</updateReleaseInfo>
+                </configuration>
+              </plugin>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
             	<artifactId>maven-source-plugin</artifactId>
             	<version>${maven-source-plugin.version}</version>
             	<executions>
@@ -523,6 +550,8 @@
         <maven-javadoc-plugin.version>2.8.1</maven-javadoc-plugin.version>
         <maven-gpg-plugin.version>1.4</maven-gpg-plugin.version>
         <apache-rat-plugin.version>0.8</apache-rat-plugin.version>
+        <maven-assembly-plugin.version>2.2.2</maven-assembly-plugin.version>
+        <maven-deploy-plugin.version>2.5</maven-deploy-plugin.version>
         
         <!-- General Properties -->
         <implementation.build>${scmBranch}@r${buildNumber}</implementation.build>
@@ -530,6 +559,7 @@
         <javac.target.version>1.6</javac.target.version>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ssZ</maven.build.timestamp.format>
         <skipTests>false</skipTests>
+        <assembly.finalName>apache-${project.build.finalName}</assembly.finalName>
     </properties>
 
     <dependencyManagement>
