@@ -34,4 +34,10 @@ public interface StatefulMap<K, V> extends Map<K, V> {
 
   void clearStates();
   
+  /**
+   * Reuse will clear the map completely with states. This is different
+   * from {@link #clear()} in that the latter only sets entries to deleted.
+   */
+  void reuse();
+  
 }

@@ -29,6 +29,7 @@ import org.apache.gora.avro.PersistentDatumReader;
 import org.apache.gora.persistency.ListGenericArray;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.StateManager;
+import org.apache.gora.persistency.StatefulHashMap;
 
 /**
  * Base classs implementing common functionality for Persistent
@@ -99,7 +100,15 @@ public abstract class PersistentBase implements Persistent {
 
     for(int i=0; i<getFields().length; i++) {
       switch(fields.get(i).schema().getType()) {
-        case MAP: if(get(i) != null) ((Map)get(i)).clear(); break;
+        case MAP: 
+          if(get(i) != null) {
+            if (get(i) instanceof StatefulHashMap) {
+              ((StatefulHashMap)get(i)).reuse(); 
+            } else {
+              ((Map)get(i)).clear();
+            }
+          }
+          break;
         case ARRAY:
           if(get(i) != null) {
             if(get(i) instanceof ListGenericArray) {
