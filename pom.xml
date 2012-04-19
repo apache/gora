@@ -491,6 +491,11 @@
                   </execution>
                 </executions>
               </plugin>
+              <plugin>
+        	<groupId>net.ju-n.maven.plugins</groupId>
+        	<artifactId>checksum-maven-plugin</artifactId>
+        	<version>${checksum-maven-plugin.version}</version>
+      </plugin>
             </plugins>
           </build>
        </profile>
@@ -503,6 +508,7 @@
         <module>gora-cassandra</module>
         <module>gora-sql</module>
         <module>gora-tutorial</module>
+        <module>sources-dist</module>
     </modules>
 
     <properties>
@@ -551,6 +557,7 @@
         <apache-rat-plugin.version>0.8</apache-rat-plugin.version>
         <maven-assembly-plugin.version>2.2.2</maven-assembly-plugin.version>
         <maven-deploy-plugin.version>2.5</maven-deploy-plugin.version>
+        <checksum-maven-plugin.version>1.0.1</checksum-maven-plugin.version>
         
         <!-- General Properties -->
         <implementation.build>${scmBranch}@r${buildNumber}</implementation.build>
