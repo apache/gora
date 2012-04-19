@@ -19,8 +19,10 @@
 package org.apache.gora.avro;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.WeakHashMap;
 
 import org.apache.avro.Schema;
@@ -141,6 +143,9 @@ public class PersistentDatumReader<T extends Persistent>
       for (i = 0; i < dirtyFields.length; i++) {
         if (dirtyFields[i]) {
           persistent.setDirty(i);
+        } 
+        else {
+          persistent.clearDirty(i);
         }
       }
       return record;
@@ -163,26 +168,32 @@ public class PersistentDatumReader<T extends Persistent>
   @SuppressWarnings("unchecked")
   protected Object readMap(Object old, Schema expected, ResolvingDecoder in)
       throws IOException {
-
     StatefulMap<Utf8, ?> map = (StatefulMap<Utf8, ?>) newMap(old, 0);
-    map.clearStates();
+    Map<Utf8, State> tempStates = null;
     if (readDirtyBits) {
+      tempStates = new HashMap<Utf8, State>();
       int size = in.readInt();
       for (int j = 0; j < size; j++) {
         Utf8 key = in.readString(null);
         State state = State.values()[in.readInt()];
-        map.putState(key, state);
+        tempStates.put(key, state);
       }
     }
-    return super.readMap(map, expected, in);
+    super.readMap(map, expected, in);
+    map.clearStates();
+    if (readDirtyBits) {
+      for (Entry<Utf8, State> entry : tempStates.entrySet()) {
+        map.putState(entry.getKey(), entry.getValue());
+      }
+    }
+    return map;
   }
 
   @Override
   @SuppressWarnings({ "rawtypes" })
   protected Object newMap(Object old, int size) {
     if (old instanceof StatefulHashMap) {
-      ((Map) old).clear();
-      ((StatefulHashMap)old).clearStates();
+      ((StatefulHashMap)old).reuse();
       return old;
     }
     return new StatefulHashMap<Object, Object>();

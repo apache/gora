@@ -29,31 +29,49 @@ public class StatefulHashMap<K, V> extends HashMap<K, V>
    */
   private Map<K, State> keyStates = new HashMap<K, State>();
 
+  /**
+   * Create an empty instance.
+   */
   public StatefulHashMap() {
     this(null);
   }
 
+  /**
+   * Create an instance with initial entries. These entries are added stateless;
+   * in other words the statemap will be clear after the construction.
+   * 
+   * @param m The map with initial entries.
+   */
   public StatefulHashMap(Map<K, V> m) {
     super();
     if (m == null) {
       return;
     }
-    super.putAll(m);
+    for (java.util.Map.Entry<K, V> entry : m.entrySet()) {
+      put(entry.getKey(), entry.getValue());
+    }
+    clearStates();
   }
   
   @Override
   public V put(K key, V value) {
-    keyStates.put(key, State.DIRTY);
-    return super.put(key, value);
+    keyStates.remove(key);
+    V old = super.put(key, value);
+    //if old value is different or null, set state to dirty
+    if (!value.equals(old)) {
+      keyStates.put(key, State.DIRTY);
+    }
+    return old;
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public V remove(Object key) {
-    if (keyStates.containsKey(key)) {
-      keyStates.put((K) key, State.DELETED);
-    }
-    return super.remove(key);
+    keyStates.put((K) key, State.DELETED);
+    return null;
+    // We do not remove the actual entry from the map.
+    // When we keep the entries, we can compare previous state to make Datastore
+    // puts more efficient. (In the case of new puts that are in fact unchanged)
   }
 
   @Override
@@ -65,10 +83,18 @@ public class StatefulHashMap<K, V> extends HashMap<K, V>
 
   @Override
   public void clear() {
+    // The problem with clear() is that we cannot delete entries that were not
+    // initially set on the input.  This means that for a clear() to fully
+    // reflect on a datastore you have to input the full map from the store.
+    // This is acceptable for now. Another way around this is to implement
+    // some sort of "clear marker" that indicates a map should be fully cleared,
+    // with respect to any possible new entries.
     for (Entry<K, V> e : entrySet()) {
       keyStates.put(e.getKey(), State.DELETED);
     }
-    super.clear();
+    // Do not actually clear the map, i.e. with super.clear()
+    // When we keep the entries, we can compare previous state to make Datastore
+    // puts more efficient. (In the case of new puts that are in fact unchanged)
   }
 
   public State getState(K key) {
@@ -94,5 +120,13 @@ public class StatefulHashMap<K, V> extends HashMap<K, V>
    */
   public Map<K, State> states() {
     return keyStates;
+  }
+
+  /* (non-Javadoc)
+   * @see org.apache.gora.persistency.StatefulMap#reuse()
+   */
+  public void reuse() {
+    super.clear();
+    clearStates();
   }
 }
