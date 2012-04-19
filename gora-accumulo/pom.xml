@@ -22,7 +22,7 @@
 	<parent>
 		<groupId>org.apache.gora</groupId>
 		<artifactId>gora</artifactId>
-		<version>0.2</version>
+		<version>0.3-SNAPSHOT</version>
 		<relativePath>../</relativePath>
 	</parent>
 	<artifactId>gora-accumulo</artifactId>
@@ -40,10 +40,9 @@
     	<url>http://www.apache.org/</url>
     </organization>
     <scm>
-    	<url>http://svn.apache.org/viewvc/gora/tags/gora-0.2/trunk</url>
-    	<connection>scm:svn:http://svn.apache.org/repos/asf/gora/tags/gora-0.2/trunk</connection>
-    	<developerConnection>scm:svn:https://svn.apache.org/repos/asf/gora/tags/gora-0.2/trunk</developerConnection>
-    	<tag>https://svn.apache.org/repos/asf/gora/tags/</tag>
+    	<url>http://svn.apache.org/viewvc/gora/trunk/</url>
+    	<connection>scm:svn:http://svn.apache.org/repos/asf/gora/trunk/</connection>
+    	<developerConnection>scm:svn:https://svn.apache.org/repos/asf/gora/trunk/</developerConnection>
     </scm>
     <issueManagement>
     	<system>JIRA</system>
