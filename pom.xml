@@ -265,6 +265,9 @@
             <configuration>
               <tarLongFileMode>gnu</tarLongFileMode>
               <finalName>${assembly.finalName}</finalName>
+              <descriptors>
+                <descriptor>sources-dist/src/main/assembly/src.xml</descriptor>
+              </descriptors>
             </configuration>
           </plugin>
           <plugin>
@@ -495,7 +498,7 @@
         	<groupId>net.ju-n.maven.plugins</groupId>
         	<artifactId>checksum-maven-plugin</artifactId>
         	<version>${checksum-maven-plugin.version}</version>
-      </plugin>
+      	      </plugin>
             </plugins>
           </build>
        </profile>
