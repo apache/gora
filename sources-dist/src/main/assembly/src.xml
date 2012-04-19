@@ -40,6 +40,8 @@
         <exclude>**/.*/</exclude>
         <!-- exclude all jars in lib directories -->
         <exclude>**/lib/*.jar</exclude>
+        <!-- exclude build directories -->
+        <exclude>**/build/</exclude>
       </excludes>
     </fileSet>
   </fileSets>
