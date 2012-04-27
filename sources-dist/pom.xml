@@ -38,9 +38,9 @@
     	<url>http://www.apache.org/</url>
     </organization>
     <scm>
-    	<url>http://svn.apache.org/viewvc/gora/trunk/</url>
-    	<connection>scm:svn:http://svn.apache.org/repos/asf/gora/trunk/</connection>
-    	<developerConnection>scm:svn:https://svn.apache.org/repos/asf/gora/trunk/</developerConnection>
+    	<url>http://svn.apache.org/viewvc/gora/trunk/sources-dist/</url>
+    	<connection>scm:svn:http://svn.apache.org/repos/asf/gora/trunk/sources-dist/</connection>
+    	<developerConnection>scm:svn:https://svn.apache.org/repos/asf/gora/trunk/sources-dist/</developerConnection>
     </scm>
     <issueManagement>
     	<system>JIRA</system>
