@@ -55,7 +55,7 @@
 	
     <properties>
         <osgi.import>*</osgi.import>
-        <osgi.export>org.apache.gora.cassandra*;version="${project.version}";-noimport:=true</osgi.export>
+        <osgi.export>org.apache.gora.accumulo*;version="${project.version}";-noimport:=true</osgi.export>
     </properties>
     
     <build>
