@@ -80,7 +80,7 @@ import org.jdom.input.SAXBuilder;
 public class HBaseStore<K, T extends Persistent> extends DataStoreBase<K, T>
 implements Configurable {
 
-  public static final Log log = LogFactory.getLog(HBaseStore.class);
+  public static final Log LOG = LogFactory.getLog(HBaseStore.class);
 
   public static final String PARSE_MAPPING_FILE_KEY = "gora.hbase.mapping.file";
 
@@ -91,8 +91,6 @@ implements Configurable {
   private volatile HBaseAdmin admin;
 
   private volatile HBaseTableConnection table;
-
-  private volatile Configuration conf;
 
   private final boolean autoCreateSchema = true;
 
@@ -114,12 +112,12 @@ implements Configurable {
     } catch (FileNotFoundException ex) {
       try {
         mapping = readMapping(getConf().get(PARSE_MAPPING_FILE_KEY, DEPRECATED_MAPPING_FILE));
-        log.warn(DEPRECATED_MAPPING_FILE + " is deprecated, please rename the file to "
+        LOG.warn(DEPRECATED_MAPPING_FILE + " is deprecated, please rename the file to "
             + DEFAULT_MAPPING_FILE);
       } catch (FileNotFoundException ex1) {
         throw ex; //throw the original exception
       } catch (Exception ex1) {
-        log.warn(DEPRECATED_MAPPING_FILE + " is deprecated, please rename the file to "
+        LOG.warn(DEPRECATED_MAPPING_FILE + " is deprecated, please rename the file to "
             + DEFAULT_MAPPING_FILE);
         throw new RuntimeException(ex1);
       }
@@ -560,7 +558,7 @@ implements Configurable {
           
           //tableNameFromMapping could be null here
           if (!tableName.equals(tableNameFromMapping)) {
-            log.info("Keyclass and nameclass match but mismatching table names " 
+            LOG.info("Keyclass and nameclass match but mismatching table names " 
                 + " mappingfile schema is '" + tableNameFromMapping 
                 + "' vs actual schema '" + tableName + "' , assuming they are the same.");
             if (tableNameFromMapping != null) {
