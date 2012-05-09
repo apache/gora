@@ -95,6 +95,10 @@ public class GoraRecordReader<K, T extends Persistent> extends RecordReader<K,T>
           this.query.setLimit(counter.getRecordsMax() + 1);
         }
       }
+      if (this.result != null) {
+        this.result.close();
+      }
+      
       executeQuery();
       
       if (! firstBatch) {
@@ -109,7 +113,9 @@ public class GoraRecordReader<K, T extends Persistent> extends RecordReader<K,T>
 
   @Override
   public void close() throws IOException {
-    result.close();
+    if (result != null) {
+      result.close();
+    }
   }
 
 }

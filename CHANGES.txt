@@ -10,6 +10,8 @@ Gora Change Log
 
 * GORA-123 Append correct submodule directories to SCM paths in submodule pom's (lewismc)
 
+* GORA-127 Result objects are not closed properly from GoraRecordReader. (enis)
+
 0.2 Release: 20/04/2012
 Jira Release Report: https://issues.apache.org/jira/secure/ReleaseNote.jspa?projectId=12311172&version=12315541
  
