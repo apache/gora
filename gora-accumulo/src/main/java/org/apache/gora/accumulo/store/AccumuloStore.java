@@ -691,6 +691,7 @@ public class AccumuloStore<K,T extends Persistent> extends DataStoreBase<K,T> {
       
       Map<String,Map<KeyExtent,List<Range>>> binnedRanges = new HashMap<String,Map<KeyExtent,List<Range>>>();
       
+      tl.invalidateCache();
       while (tl.binRanges(Collections.singletonList(createRange(query)), binnedRanges).size() > 0) {
         // TODO log?
         if (!Tables.exists(conn.getInstance(), Tables.getTableId(conn.getInstance(), mapping.tableName)))
@@ -698,6 +699,7 @@ public class AccumuloStore<K,T extends Persistent> extends DataStoreBase<K,T> {
         else if (Tables.getTableState(conn.getInstance(), Tables.getTableId(conn.getInstance(), mapping.tableName)) == TableState.OFFLINE)
           throw new TableOfflineException(conn.getInstance(), Tables.getTableId(conn.getInstance(), mapping.tableName));
         UtilWaitThread.sleep(100);
+        tl.invalidateCache();
       }
       
       List<PartitionQuery<K,T>> ret = new ArrayList<PartitionQuery<K,T>>();
