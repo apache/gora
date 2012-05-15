@@ -239,7 +239,7 @@ public class LogManager {
     if("-parse".equals(args[0])) {
       manager.parse(args[1]);
     } else if("-get".equals(args[0])) {
-        manager.get(Long.parseLong(args[1]));
+      manager.get(Long.parseLong(args[1]));
     } else if("-query".equals(args[0])) {
       if(args.length == 2) 
         manager.query(Long.parseLong(args[1]));
