@@ -321,7 +321,7 @@ public class Pageview extends PersistentBase {
     <section>
       <title> HBase mappings </title>
       <p> HBase mappings are stored at file named <code>gora-hbase-mappings.xml</code>. 
-      For this tutorial we will be using the file <code>gora-tutorial/conf/gora-sql-mappings.xml</code>.</p>
+      For this tutorial we will be using the file <code>gora-tutorial/conf/gora-hbase-mappings.xml</code>.</p>
       
       <!--  This is gora-sql-mapping.xml
  <source>
