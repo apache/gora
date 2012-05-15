@@ -191,7 +191,7 @@ public class DataStoreFactory {
    * 
    * @param dataStoreClass The datastore implementation class.
    * @param keyClass The key class.
-   * @param persistent The value class.
+   * @param persistentClass The value class.
    * @param conf {@link Configuration} to be used be the store.
    * @return A new store instance.
    * @throws GoraException
@@ -208,7 +208,7 @@ public class DataStoreFactory {
    * 
    * @param dataStoreClass The datastore implementation class <i>as string</i>.
    * @param keyClass The key class.
-   * @param persistent The value class.
+   * @param persistentClass The value class.
    * @param conf {@link Configuration} to be used be the store.
    * @return A new store instance.
    * @throws GoraException
@@ -233,7 +233,7 @@ public class DataStoreFactory {
    * 
    * @param dataStoreClass The datastore implementation class <i>as string</i>.
    * @param keyClass The key class <i>as string</i>.
-   * @param persistent The value class <i>as string</i>.
+   * @param persistentClass The value class <i>as string</i>.
    * @param conf {@link Configuration} to be used be the store.
    * @return A new store instance.
    * @throws GoraException
