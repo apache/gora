@@ -6,6 +6,8 @@ Gora Change Log
 
 0.3 (trunk) Current Development:
 
+* GORA-122 gora-accumulo/lib is not cleaned after mvn clean (lewismc)
+
 * GORA-133 & 63 GoraCompiler cannot compile array type & bin/compile-examples.sh does not work respectively (enis, Kazuomi Kashii via lewismc)
 
 * GORA-129 redundant conf field in HBaseStore (ferdy)
