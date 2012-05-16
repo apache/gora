@@ -324,7 +324,7 @@ public class GoraCompiler {
             break;
           case ARRAY:
             unboxed = unbox(fieldSchema.getElementType());
-            fieldType = type(fieldSchema.getValueType());
+            fieldType = type(fieldSchema.getElementType());
             line(1, "public GenericArray<"+fieldType+"> get"+camelKey+"() {");
             line(2, "return (GenericArray<"+fieldType+">) get("+i+");");
             line(1, "}");
