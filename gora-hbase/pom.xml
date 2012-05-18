@@ -52,7 +52,7 @@
     	<url>https://builds.apache.org/job/Gora-trunk/</url>
     </ciManagement>
 
-      <properties>
+    <properties>
         <osgi.import>*</osgi.import>
         <osgi.export>org.apache.gora.hbase*;version="${project.version}";-noimport:=true</osgi.export>
     </properties>
@@ -165,13 +165,12 @@
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
-	     <exclusions>
-	       <exclusion>
+	        <exclusions>
+	          <exclusion>
                 <groupId>javax.jms</groupId>
-	        <artifactId>jms</artifactId>
-	      </exclusion>
+	            <artifactId>jms</artifactId>
+	          </exclusion>
             </exclusions>
-
         </dependency>
 
         <!-- Testing Dependencies -->

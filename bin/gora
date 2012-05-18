@@ -82,6 +82,7 @@ if [ "$GORA_HEAPSIZE" != "" ]; then
 fi
 
 # CLASSPATH initially contains $GORA_CONF_DIR, or defaults to $GORA_HOME/conf
+CLASSPATH=${GORA_CONF_DIR:=$GORA_HOME/conf}
 CLASSPATH=${CLASSPATH}:$JAVA_HOME/lib/tools.jar
 
 # so that filenames w/ spaces are handled correctly in loops below
@@ -107,20 +108,24 @@ fi
 
 # figure out which class to run
 if [ "$COMMAND" = "compile" ] ; then
+  MODULE=gora-core
+  CLASSPATH=$CLASSPATH:$GORA_HOME/$MODULE/target/classes/
   CLASS=org.apache.gora.compiler.GoraCompiler
-  MODULE=gora-core
 elif [ "$COMMAND" = "specificcompiler" ] ; then
-  CLASS=org.apache.avro.specific.SpecificCompiler
   MODULE=gora-core
+  CLASSPATH=$CLASSPATH:$GORA_HOME/$MODULE/target/classes/
+  CLASS=org.apache.avro.specific.SpecificCompiler
 elif [ "$COMMAND" = "logmanager" ] ; then
+  MODULE=gora-tutorial
+  CLASSPATH=$CLASSPATH:$GORA_HOME/$MODULE/target/classes/
   CLASS=org.apache.gora.tutorial.log.LogManager
-  MODULE=gora-tutorial
 elif [ "$COMMAND" = "loganalytics" ] ; then
-  CLASS=org.apache.gora.tutorial.log.LogAnalytics
   MODULE=gora-tutorial
+  CLASS=org.apache.gora.tutorial.log.LogAnalytics
+  CLASSPATH=$CLASSPATH:$GORA_HOME/$MODULE/target/classes/
 elif [ "$COMMAND" = "junit" ] ; then
-  CLASSPATH=$CLASSPATH:target/test-classes/
   MODULE=*
+  CLASSPATH=$CLASSPATH:target/test-classes/
   CLASS=junit.textui.TestRunner
 else
   MODULE="$COMMAND"
@@ -133,15 +138,15 @@ for f in $GORA_HOME/$MODULE/lib/*.jar; do
   CLASSPATH=${CLASSPATH}:$f;
 done
 
-for f in $GORA_HOME/$MODULE/build/*.job; do
+for f in $GORA_HOME/$MODULE/target/*.jar; do
   CLASSPATH=${CLASSPATH}:$f;
 done
 
-CLASSPATH=$CLASSPATH:$GORA_HOME/$MODULE/target/classes
-CLASSPATH=${CLASSPATH}:$GORA_HOME/$MODULE/target/test/classes
+CLASSPATH=${CLASSPATH}:$GORA_HOME/$MODULE/target/classes/
+CLASSPATH=${CLASSPATH}:$GORA_HOME/$MODULE/target/test-classes/
 
-CLASSPATH=$CLASSPATH:$GORA_HOME/conf
-CLASSPATH=$CLASSPATH:$GORA_HOME/$MODULE/conf
+CLASSPATH=${CLASSPATH}:$GORA_HOME/conf
+CLASSPATH=${CLASSPATH}:$GORA_HOME/$MODULE/conf
 
 # run it
 exec "$JAVA" $JAVA_HEAP_MAX $JAVA_OPTS $GORA_OPTS -classpath "$CLASSPATH" $CLASS "$@"
