@@ -6,6 +6,8 @@ Gora Change Log
 
 0.3 (trunk) Current Development:
 
+* GORA-134 ListGenericArray's hashCode causes StackOverflowError (Kazuomi Kashii via lewismc)
+
 * GORA-95 Catch incorrect mapping configurations and implement sufficient logging in CassandraMapping. (lewismc)
 
 * GORA-** Commit to fix classloading for CLI execution (lewismc)
