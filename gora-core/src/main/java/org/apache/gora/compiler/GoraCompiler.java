@@ -32,12 +32,15 @@ import org.apache.avro.Schema;
 import org.apache.avro.Protocol.Message;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.specific.SpecificData;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /** Generate specific Java interfaces and classes for protocols and schemas. */
 public class GoraCompiler {
   private File dest;
   private Writer out;
   private Set<Schema> queue = new HashSet<Schema>();
+  private static final Log log = LogFactory.getLog(GoraCompiler.class);
 
   private GoraCompiler(File dest) {
     this.dest = dest;                             // root directory for output
@@ -58,6 +61,7 @@ public class GoraCompiler {
 
   /** Generates Java classes for a schema. */
   public static void compileSchema(File src, File dest) throws IOException {
+	log.info("Compiling " + src + " to " + dest );
     GoraCompiler compiler = new GoraCompiler(dest);
     compiler.enqueue(Schema.parse(src));          // enqueue types
     compiler.compile();                           // generate classes for types
@@ -442,7 +446,7 @@ public class GoraCompiler {
 
   public static void main(String[] args) throws Exception {
     if (args.length < 2) {
-      System.err.println("Usage: SpecificCompiler <schema file> <output dir>");
+      System.err.println("Usage: Compiler <schema file> <output dir>");
       System.exit(1);
     }
     compileSchema(new File(args[0]), new File(args[1]));

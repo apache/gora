@@ -45,7 +45,7 @@ import org.apache.hadoop.conf.Configuration;
  * <code>gora-tutorial/src/main/avro/pageview.json</code>.
  * 
  * <p>See the tutorial.html file in docs or go to the 
- * <a href="http://incubator.apache.org/gora/docs/current/tutorial.html"> 
+ * <a href="http://gora.apache.org/docs/current/tutorial.html"> 
  * web site</a>for more information.</p>
  */
 public class LogManager {
@@ -137,6 +137,7 @@ public class LogManager {
   
   /** Stores the pageview object with the given key */
   private void storePageview(long key, Pageview pageview) throws IOException {
+	log.info("Storing Pageview in: " + dataStore.toString());
     dataStore.put(key, pageview);
   }
   
