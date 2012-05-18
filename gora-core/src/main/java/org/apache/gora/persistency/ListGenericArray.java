@@ -83,7 +83,7 @@ public class ListGenericArray<T> implements GenericArray<T>
 
   @Override
   public int hashCode() {
-    return GenericData.get().hashCode(this, schema);
+    return this.list.hashCode();
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
