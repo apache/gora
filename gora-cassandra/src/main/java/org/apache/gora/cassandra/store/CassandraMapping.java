@@ -75,31 +75,75 @@ public class CassandraMapping {
   /**
    * Look up the column family from its name.
    */
-  private Map<String, BasicColumnFamilyDefinition> columnFamilyDefinitions = new HashMap<String, BasicColumnFamilyDefinition>();
+  private Map<String, BasicColumnFamilyDefinition> columnFamilyDefinitions = 
+		  new HashMap<String, BasicColumnFamilyDefinition>();
 
+  
+  /**
+   * Simply gets the Cassandra host name.
+   * @return hostName
+   */
   public String getHostName() {
     return this.hostName;
   }
-
+  
+  /**
+   * Simply gets the Cassandra cluster (the machines (nodes) 
+   * in a logical Cassandra instance) name.
+   * Clusters can contain multiple keyspaces. 
+   * @return clusterName
+   */
   public String getClusterName() {
     return this.clusterName;
   }
 
+  /**
+   * Simply gets the Cassandra namespace for ColumnFamilies, typically one per application
+   * @return
+   */
   public String getKeyspaceName() {
     return this.keyspaceName;
   }
 
-
+  /**
+   * Primary class for loading Cassandra configuration from the 'MAPPING_FILE'.
+   * 
+   * @throws JDOMException
+   * @throws IOException
+   */
   @SuppressWarnings("unchecked")
   public void loadConfiguration() throws JDOMException, IOException {
     SAXBuilder saxBuilder = new SAXBuilder();
     Document document = saxBuilder.build(getClass().getClassLoader().getResourceAsStream(MAPPING_FILE));
+    if (document == null) {
+      LOG.warn("Mapping file '" + MAPPING_FILE + "' could not be found!");
+    }
     Element root = document.getRootElement();
     
     Element keyspace = root.getChild(KEYSPACE_ELEMENT);
+    if (keyspace == null) {
+    	LOG.warn("Error locating Cassandra Keyspace element!");
+    } else {
+    	LOG.info("Located Cassandra Keyspace: '" + KEYSPACE_ELEMENT + "'");
+    }
     this.keyspaceName = keyspace.getAttributeValue(NAME_ATTRIBUTE);
+    if (this.keyspaceName == null) {
+    	LOG.warn("Error locating Cassandra Keyspace name attribute!");
+    } else {
+    	LOG.info("Located Cassandra Keyspace name: '" + NAME_ATTRIBUTE + "'");
+    }
     this.clusterName = keyspace.getAttributeValue(CLUSTER_ATTRIBUTE);
+    if (this.clusterName == null) {
+    	LOG.warn("Error locating Cassandra Keyspace cluster attribute!");
+    } else {
+    	LOG.info("Located Cassandra Keyspace cluster: '" + CLUSTER_ATTRIBUTE + "'");
+    }
     this.hostName = keyspace.getAttributeValue(HOST_ATTRIBUTE);
+    if (this.hostName == null) {
+    	LOG.warn("Error locating Cassandra Keyspace host attribute!");
+    } else {
+    	LOG.info("Located Cassandra Keyspace host: '" + HOST_ATTRIBUTE + "'");
+    }
     
     // load column family definitions
     List<Element> elements = keyspace.getChildren();
@@ -107,10 +151,16 @@ public class CassandraMapping {
       BasicColumnFamilyDefinition cfDef = new BasicColumnFamilyDefinition();
       
       String familyName = element.getAttributeValue(NAME_ATTRIBUTE);
-      
+      if (familyName == null) {
+      	LOG.warn("Error locating column family name attribute!");
+      } else {
+      	LOG.info("Located column family name: '" + NAME_ATTRIBUTE + "'");
+      }
       String superAttribute = element.getAttributeValue(SUPER_ATTRIBUTE);
       if (superAttribute != null) {
+    	LOG.info("Located super column family");
         this.superFamilies.add(familyName);
+        LOG.info("Added super column family: '" + familyName + "'");
         cfDef.setColumnType(ColumnType.SUPER);
         cfDef.setSubComparatorType(ComparatorType.UTF8TYPE);
       }
