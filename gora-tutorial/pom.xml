@@ -64,6 +64,14 @@
         <testOutputDirectory>target/test-classes</testOutputDirectory>
         <testSourceDirectory>src/test/java</testSourceDirectory>
         <sourceDirectory>src/main/java</sourceDirectory>
+        <resources>
+          <resource>
+            <directory>${basedir}/src/main/resources</directory>
+          </resource>
+          <resource>
+            <directory>${basedir}/conf</directory>
+          </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
