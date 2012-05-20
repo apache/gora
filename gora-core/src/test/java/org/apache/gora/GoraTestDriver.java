@@ -22,8 +22,8 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
@@ -38,7 +38,7 @@ import org.apache.hadoop.conf.Configuration;
  */
 public class GoraTestDriver {
 
-  protected static final Log log = LogFactory.getLog(GoraTestDriver.class);
+  protected static final Logger log = LoggerFactory.getLogger(GoraTestDriver.class);
 
   protected Class<? extends DataStore> dataStoreClass;
   protected Configuration conf = new Configuration();

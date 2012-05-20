@@ -20,8 +20,8 @@ package org.apache.gora.tutorial.log;
 import java.io.IOException;
 
 import org.apache.avro.util.Utf8;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.gora.mapreduce.GoraMapper;
 import org.apache.gora.mapreduce.GoraReducer;
 import org.apache.gora.store.DataStore;
@@ -48,7 +48,7 @@ import org.apache.hadoop.util.ToolRunner;
  */
 public class LogAnalytics extends Configured implements Tool {
 
-  private static final Log log = LogFactory.getLog(LogAnalytics.class);
+  private static final Logger log = LoggerFactory.getLogger(LogAnalytics.class);
   
   /** The number of miliseconds in a day */
   private static final long DAY_MILIS = 1000 * 60 * 60 * 24;

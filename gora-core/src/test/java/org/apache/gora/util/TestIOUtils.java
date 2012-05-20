@@ -31,8 +31,8 @@ import junit.framework.Assert;
 
 import org.apache.avro.ipc.ByteBufferInputStream;
 import org.apache.avro.ipc.ByteBufferOutputStream;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.gora.mapreduce.GoraMapReduceUtils;
 import org.apache.gora.util.IOUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -47,7 +47,7 @@ import org.junit.Test;
  */
 public class TestIOUtils {
 
-  public static final Log log = LogFactory.getLog(TestIOUtils.class);
+  public static final Logger log = LoggerFactory.getLogger(TestIOUtils.class);
   
   public static Configuration conf = new Configuration();
 

@@ -25,8 +25,8 @@ import java.text.SimpleDateFormat;
 import java.util.StringTokenizer;
 
 import org.apache.avro.util.Utf8;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.store.DataStore;
@@ -50,7 +50,7 @@ import org.apache.hadoop.conf.Configuration;
  */
 public class LogManager {
 
-  private static final Log log = LogFactory.getLog(LogManager.class);
+  private static final Logger log = LoggerFactory.getLogger(LogManager.class);
   
   private DataStore<Long, Pageview> dataStore; 
   
