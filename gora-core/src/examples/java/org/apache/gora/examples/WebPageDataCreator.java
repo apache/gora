@@ -24,8 +24,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import org.apache.avro.util.Utf8;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.gora.examples.generated.Metadata;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.store.DataStore;
@@ -37,7 +37,7 @@ import org.apache.hadoop.conf.Configuration;
  */
 public class WebPageDataCreator {
 
-  private static final Log log = LogFactory.getLog(WebPageDataCreator.class);
+  private static final Logger log = LoggerFactory.getLogger(WebPageDataCreator.class);
   
   public static final String[] URLS = {
     "http://foo.com/",

@@ -32,15 +32,15 @@ import org.apache.avro.Schema;
 import org.apache.avro.Protocol.Message;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.specific.SpecificData;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Generate specific Java interfaces and classes for protocols and schemas. */
 public class GoraCompiler {
   private File dest;
   private Writer out;
   private Set<Schema> queue = new HashSet<Schema>();
-  private static final Log log = LogFactory.getLog(GoraCompiler.class);
+  private static final Logger log = LoggerFactory.getLogger(GoraCompiler.class);
 
   private GoraCompiler(File dest) {
     this.dest = dest;                             // root directory for output

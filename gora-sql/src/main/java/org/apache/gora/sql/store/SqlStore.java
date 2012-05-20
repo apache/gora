@@ -45,8 +45,8 @@ import org.apache.avro.ipc.ByteBufferInputStream;
 import org.apache.avro.ipc.ByteBufferOutputStream;
 import org.apache.avro.specific.SpecificFixed;
 import org.apache.avro.util.Utf8;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.StateManager;
 import org.apache.gora.query.PartitionQuery;
@@ -112,7 +112,7 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
     }
   }
 
-  private static final Log log = LogFactory.getLog(SqlStore.class);
+  private static final Logger log = LoggerFactory.getLogger(SqlStore.class);
 
   /** The JDBC Driver class name */
   protected static final String DRIVER_CLASS_PROPERTY = "jdbc.driver";

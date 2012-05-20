@@ -38,8 +38,8 @@ import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericArray;
 import org.apache.avro.util.Utf8;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.gora.hbase.query.HBaseGetResult;
 import org.apache.gora.hbase.query.HBaseQuery;
 import org.apache.gora.hbase.query.HBaseScannerResult;
@@ -80,7 +80,7 @@ import org.jdom.input.SAXBuilder;
 public class HBaseStore<K, T extends Persistent> extends DataStoreBase<K, T>
 implements Configurable {
 
-  public static final Log LOG = LogFactory.getLog(HBaseStore.class);
+  public static final Logger LOG = LoggerFactory.getLogger(HBaseStore.class);
 
   public static final String PARSE_MAPPING_FILE_KEY = "gora.hbase.mapping.file";
 

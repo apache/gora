@@ -21,8 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.ClassLoadingUtils;
@@ -36,7 +36,7 @@ import org.apache.hadoop.conf.Configuration;
  */
 public class DataStoreFactory {
 
-  public static final Log log = LogFactory.getLog(DataStoreFactory.class);
+  public static final Logger log = LoggerFactory.getLogger(DataStoreFactory.class);
 
   public static final String GORA_DEFAULT_PROPERTIES_FILE = "gora.properties";
 

@@ -24,8 +24,8 @@ import java.nio.ByteBuffer;
 import junit.framework.Assert;
 
 import org.apache.avro.util.Utf8;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.gora.GoraTestDriver;
 import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.examples.generated.Metadata;
@@ -45,7 +45,7 @@ import org.junit.Test;
  */
 public abstract class DataStoreTestBase {
 
-  public static final Log log = LogFactory.getLog(DataStoreTestBase.class);
+  public static final Logger log = LoggerFactory.getLogger(DataStoreTestBase.class);
 
   protected static GoraTestDriver testDriver;
 

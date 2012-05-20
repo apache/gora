@@ -535,7 +535,6 @@
         <mysql.version>5.1.18</mysql.version>
         <xerces.version>2.9.1</xerces.version>
         <!-- Logging Dependencies -->
-        <commons-logging.version>1.1.1</commons-logging.version>
         <slf4j.version>1.5.8</slf4j.version>
         <log4j.version>1.2.16</log4j.version>
 
