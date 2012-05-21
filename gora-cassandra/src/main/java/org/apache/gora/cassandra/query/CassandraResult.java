@@ -36,7 +36,7 @@ public class CassandraResult<K, T extends Persistent> extends ResultBase<K, T> {
   
   private int rowNumber;
 
-  private CassandraResultSet cassandraResultSet;
+  private CassandraResultSet<K> cassandraResultSet;
   
   /**
    * Maps Cassandra columns to Avro fields.
@@ -63,10 +63,10 @@ public class CassandraResult<K, T extends Persistent> extends ResultBase<K, T> {
    */
   @SuppressWarnings("unchecked")
   private void updatePersistent() throws IOException {
-    CassandraRow cassandraRow = this.cassandraResultSet.get(this.rowNumber);
+    CassandraRow<K> cassandraRow = this.cassandraResultSet.get(this.rowNumber);
     
     // load key
-    this.key = (K) cassandraRow.getKey();
+    this.key = cassandraRow.getKey();
     
     // load value
     Schema schema = this.persistent.getSchema();
@@ -104,7 +104,7 @@ public class CassandraResult<K, T extends Persistent> extends ResultBase<K, T> {
     return (((float) this.rowNumber) / this.cassandraResultSet.size());
   }
 
-  public void setResultSet(CassandraResultSet cassandraResultSet) {
+  public void setResultSet(CassandraResultSet<K> cassandraResultSet) {
     this.cassandraResultSet = cassandraResultSet;
   }
   
