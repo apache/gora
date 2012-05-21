@@ -23,19 +23,19 @@ import java.util.ArrayList;
 /**
  * List of key value pairs representing a row, tagged by a key.
  */
-public class CassandraRow extends ArrayList<CassandraColumn> {
+public class CassandraRow<K> extends ArrayList<CassandraColumn> {
 
   /**
    * 
    */
   private static final long serialVersionUID = -7620939600192859652L;
-  private String key;
+  private K key;
 
-  public String getKey() {
+  public K getKey() {
     return this.key;
   }
 
-  public void setKey(String key) {
+  public void setKey(K key) {
     this.key = key;
   }
 

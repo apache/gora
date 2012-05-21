@@ -24,6 +24,11 @@ import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 
+import me.prettyprint.cassandra.serializers.FloatSerializer;
+import me.prettyprint.cassandra.serializers.DoubleSerializer;
+import me.prettyprint.cassandra.serializers.IntegerSerializer;
+import me.prettyprint.cassandra.serializers.LongSerializer;
+import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.beans.HColumn;
 
 import org.apache.avro.Schema;
@@ -46,7 +51,7 @@ public class CassandraSubColumn extends CassandraColumn {
   /**
    * Key-value pair containing the raw data.
    */
-  private HColumn<String, String> hColumn;
+  private HColumn<String, ByteBuffer> hColumn;
 
   public String getName() {
     return hColumn.getName();
@@ -60,28 +65,31 @@ public class CassandraSubColumn extends CassandraColumn {
     Field field = getField();
     Schema fieldSchema = field.schema();
     Type type = fieldSchema.getType();
-    String valueString = hColumn.getValue();
+    ByteBuffer valueByteBuffer = hColumn.getValue();
     Object value = null;
     
     switch (type) {
       case STRING:
-        value = new Utf8(valueString);
+        value = new Utf8(StringSerializer.get().fromByteBuffer(valueByteBuffer));
         break;
       case BYTES:
-        // convert string to bytebuffer
-        value = getByteBuffer(valueString);
+        value = valueByteBuffer;
         break;
       case INT:
-        value = Integer.parseInt(valueString);
+        value = IntegerSerializer.get().fromByteBuffer(valueByteBuffer);
         break;
       case LONG:
-        value = Long.parseLong(valueString);
+        value = LongSerializer.get().fromByteBuffer(valueByteBuffer);
         break;
       case FLOAT:
-        value = Float.parseFloat(valueString);
+        value = FloatSerializer.get().fromByteBuffer(valueByteBuffer);
+        break;
+      case DOUBLE:
+        value = DoubleSerializer.get().fromByteBuffer(valueByteBuffer);
         break;
       case ARRAY:
         // convert string to array
+        String valueString = StringSerializer.get().fromByteBuffer(valueByteBuffer);
         valueString = valueString.substring(1, valueString.length()-1);
         String[] elements = valueString.split(", ");
         
@@ -106,17 +114,7 @@ public class CassandraSubColumn extends CassandraColumn {
 
   }
 
-  public void setValue(HColumn<String, String> hColumn) {
+  public void setValue(HColumn<String, ByteBuffer> hColumn) {
     this.hColumn = hColumn;
-  }
-  
-  public static ByteBuffer getByteBuffer(String valueString) {
-    ByteBuffer byteBuffer = null;
-    try {
-      byteBuffer = charsetEncoder.encode(CharBuffer.wrap(valueString));
-    } catch (CharacterCodingException cce) {
-      LOG.warn("Unable to encode " + valueString + " into " + ENCODING);
-    }
-    return byteBuffer;
   }
 }

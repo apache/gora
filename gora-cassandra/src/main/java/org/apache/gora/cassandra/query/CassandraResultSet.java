@@ -24,7 +24,7 @@ import java.util.HashMap;
 /**
  * List data structure to keep the order coming from the Cassandra selects.
  */
-public class CassandraResultSet extends ArrayList<CassandraRow> {
+public class CassandraResultSet<K> extends ArrayList<CassandraRow<K>> {
 
   /**
    * 
@@ -34,9 +34,9 @@ public class CassandraResultSet extends ArrayList<CassandraRow> {
   /**
    * Maps keys to indices in the list.
    */
-  private HashMap<String, Integer> indexMap = new HashMap<String, Integer>();
+  private HashMap<K, Integer> indexMap = new HashMap<K, Integer>();
 
-  public CassandraRow getRow(String key) {
+  public CassandraRow<K> getRow(K key) {
     Integer integer = this.indexMap.get(key);
     if (integer == null) {
       return null;
@@ -45,7 +45,7 @@ public class CassandraResultSet extends ArrayList<CassandraRow> {
     return this.get(integer);
   }
 
-  public void putRow(String key, CassandraRow cassandraRow) {
+  public void putRow(K key, CassandraRow<K> cassandraRow) {
     this.add(cassandraRow);
     this.indexMap.put(key, this.size()-1);
   } 

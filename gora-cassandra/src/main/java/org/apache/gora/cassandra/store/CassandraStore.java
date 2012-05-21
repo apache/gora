@@ -19,10 +19,12 @@
 package org.apache.gora.cassandra.store;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import me.prettyprint.hector.api.beans.ColumnSlice;
@@ -69,7 +71,17 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
   private Map<K, T> buffer = new LinkedHashMap<K, T>();
   
   public CassandraStore() throws Exception {
-    this.cassandraClient.initialize();
+    // this.cassandraClient.initialize();
+  }
+
+  public void initialize(Class<K> keyClass, Class<T> persistent, Properties properties) throws IOException {
+    super.initialize(keyClass, persistent, properties);
+    try {
+      this.cassandraClient.initialize(keyClass);
+    }
+    catch (Exception e) {
+      throw new IOException(e.getMessage(), e);
+    }
   }
 
   @Override
@@ -139,22 +151,22 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
   private void addSubColumns(String family, CassandraQuery<K, T> cassandraQuery,
       CassandraResultSet cassandraResultSet) {
     // select family columns that are included in the query
-    List<Row<String, String, String>> rows = this.cassandraClient.execute(cassandraQuery, family);
+    List<Row<K, String, ByteBuffer>> rows = this.cassandraClient.execute(cassandraQuery, family);
     
-    for (Row<String, String, String> row : rows) {
-      String key = row.getKey();
+    for (Row<K, String, ByteBuffer> row : rows) {
+      K key = row.getKey();
       
       // find associated row in the resultset
-      CassandraRow cassandraRow = cassandraResultSet.getRow(key);
+      CassandraRow<K> cassandraRow = cassandraResultSet.getRow(key);
       if (cassandraRow == null) {
-        cassandraRow = new CassandraRow();
+        cassandraRow = new CassandraRow<K>();
         cassandraResultSet.putRow(key, cassandraRow);
         cassandraRow.setKey(key);
       }
       
-      ColumnSlice<String, String> columnSlice = row.getColumnSlice();
+      ColumnSlice<String, ByteBuffer> columnSlice = row.getColumnSlice();
       
-      for (HColumn<String, String> hColumn : columnSlice.getColumns()) {
+      for (HColumn<String, ByteBuffer> hColumn : columnSlice.getColumns()) {
         CassandraSubColumn cassandraSubColumn = new CassandraSubColumn();
         cassandraSubColumn.setValue(hColumn);
         cassandraSubColumn.setFamily(family);
@@ -167,18 +179,18 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
   private void addSuperColumns(String family, CassandraQuery<K, T> cassandraQuery, 
       CassandraResultSet cassandraResultSet) {
     
-    List<SuperRow<String, String, String, String>> superRows = this.cassandraClient.executeSuper(cassandraQuery, family);
-    for (SuperRow<String, String, String, String> superRow: superRows) {
-      String key = superRow.getKey();
-      CassandraRow cassandraRow = cassandraResultSet.getRow(key);
+    List<SuperRow<K, String, String, ByteBuffer>> superRows = this.cassandraClient.executeSuper(cassandraQuery, family);
+    for (SuperRow<K, String, String, ByteBuffer> superRow: superRows) {
+      K key = superRow.getKey();
+      CassandraRow<K> cassandraRow = cassandraResultSet.getRow(key);
       if (cassandraRow == null) {
         cassandraRow = new CassandraRow();
         cassandraResultSet.putRow(key, cassandraRow);
         cassandraRow.setKey(key);
       }
       
-      SuperSlice<String, String, String> superSlice = superRow.getSuperSlice();
-      for (HSuperColumn<String, String, String> hSuperColumn: superSlice.getSuperColumns()) {
+      SuperSlice<String, String, ByteBuffer> superSlice = superRow.getSuperSlice();
+      for (HSuperColumn<String, String, ByteBuffer> hSuperColumn: superSlice.getSuperColumns()) {
         CassandraSuperColumn cassandraSuperColumn = new CassandraSuperColumn();
         cassandraSuperColumn.setValue(hSuperColumn);
         cassandraSuperColumn.setFamily(family);
@@ -209,7 +221,7 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
       Schema schema = value.getSchema();
       for (Field field: schema.getFields()) {
         if (value.isDirty(field.pos())) {
-          addOrUpdateField((String) key, field, value.get(field.pos()));
+          addOrUpdateField(key, field, value.get(field.pos()));
         }
       }
     }
@@ -222,7 +234,6 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
 
   @Override
   public T get(K key, String[] fields) throws IOException {
-    LOG.info("get " + key);
     CassandraQuery<K,T> query = new CassandraQuery<K,T>();
     query.setDataStore(this);
     query.setKeyRange(key, key);
@@ -244,13 +255,14 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
 
   @Override
   public String getSchemaName() {
-    LOG.info("get schema name");
     return null;
   }
 
   @Override
   public Query<K, T> newQuery() {
-    return new CassandraQuery<K, T>(this);
+    Query<K,T> query = new CassandraQuery<K, T>(this);
+    query.setFields(getFieldsToQuery(null));
+    return query;
   }
 
   /**
@@ -298,24 +310,16 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
    * @param field   the Avro field representing a datum
    * @param value   the field value
    */
-  private void addOrUpdateField(String key, Field field, Object value) {
+  private void addOrUpdateField(K key, Field field, Object value) {
     Schema schema = field.schema();
     Type type = schema.getType();
-    //LOG.info(field.name() + " " + type.name());
     switch (type) {
       case STRING:
-        this.cassandraClient.addColumn(key, field.name(), value);
-        break;
       case INT:
-        this.cassandraClient.addColumn(key, field.name(), value);
-        break;
       case LONG:
-        this.cassandraClient.addColumn(key, field.name(), value);
-        break;
       case BYTES:
-        this.cassandraClient.addColumn(key, field.name(), value);
-        break;
       case FLOAT:
+      case DOUBLE:
         this.cassandraClient.addColumn(key, field.name(), value);
         break;
       case RECORD:
@@ -333,6 +337,9 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
                 }
               }
               
+              if (memberValue instanceof Utf8) {
+                memberValue = memberValue.toString();
+              }
               this.cassandraClient.addSubColumn(key, field.name(), member.name(), memberValue);
             }
           } else {
@@ -357,6 +364,9 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
                 }
               }
               
+              if (keyValue instanceof Utf8) {
+                keyValue = keyValue.toString();
+              }
               this.cassandraClient.addSubColumn(key, field.name(), mapKey.toString(), keyValue);              
             }
           } else {
