@@ -162,13 +162,13 @@ public class CassandraMapping {
         this.superFamilies.add(familyName);
         LOG.info("Added super column family: '" + familyName + "'");
         cfDef.setColumnType(ColumnType.SUPER);
-        cfDef.setSubComparatorType(ComparatorType.UTF8TYPE);
+        cfDef.setSubComparatorType(ComparatorType.BYTESTYPE);
       }
       
       cfDef.setKeyspaceName(this.keyspaceName);
       cfDef.setName(familyName);
-      cfDef.setComparatorType(ComparatorType.UTF8TYPE);
-      cfDef.setDefaultValidationClass(ComparatorType.UTF8TYPE.getClassName());
+      cfDef.setComparatorType(ComparatorType.BYTESTYPE);
+      cfDef.setDefaultValidationClass(ComparatorType.BYTESTYPE.getClassName());
       
       this.columnFamilyDefinitions.put(familyName, cfDef);
 
