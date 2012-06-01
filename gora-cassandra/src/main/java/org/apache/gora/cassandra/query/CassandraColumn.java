@@ -18,13 +18,29 @@
 
 package org.apache.gora.cassandra.query;
 
-import org.apache.avro.Schema.Field;
+import java.nio.ByteBuffer;
 
+import me.prettyprint.cassandra.serializers.FloatSerializer;
+import me.prettyprint.cassandra.serializers.DoubleSerializer;
+import me.prettyprint.cassandra.serializers.IntegerSerializer;
+import me.prettyprint.cassandra.serializers.LongSerializer;
+import me.prettyprint.cassandra.serializers.StringSerializer;
+
+import org.apache.avro.Schema;
+import org.apache.avro.Schema.Field;
+import org.apache.avro.Schema.Field;
+import org.apache.avro.Schema.Type;
+import org.apache.avro.generic.GenericArray;
+import org.apache.avro.util.Utf8;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents a unit of data: a key value pair tagged by a family name
  */
 public abstract class CassandraColumn {
+  public static final Logger LOG = LoggerFactory.getLogger(CassandraColumn.class);
+
   public static final int SUB = 0;
   public static final int SUPER = 1;
   
@@ -52,8 +68,37 @@ public abstract class CassandraColumn {
     return this.field;
   }
   
-  public abstract String getName();
+  public abstract ByteBuffer getName();
   public abstract Object getValue();
   
+
+  protected Object fromByteBuffer(Type type, ByteBuffer byteBuffer) {
+    Object value = null;
+    switch (type) {
+      case STRING:
+        value = new Utf8(StringSerializer.get().fromByteBuffer(byteBuffer));
+        break;
+      case BYTES:
+        value = byteBuffer;
+        break;
+      case INT:
+        value = IntegerSerializer.get().fromByteBuffer(byteBuffer);
+        break;
+      case LONG:
+        value = LongSerializer.get().fromByteBuffer(byteBuffer);
+        break;
+      case FLOAT:
+        value = FloatSerializer.get().fromByteBuffer(byteBuffer);
+        break;
+      case DOUBLE:
+        value = DoubleSerializer.get().fromByteBuffer(byteBuffer);
+        break;
+
+      default:
+        LOG.info("Type is not supported: " + type);
+
+    }
+    return value;
+  }
 
 }

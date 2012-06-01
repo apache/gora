@@ -51,9 +51,9 @@ public class CassandraSubColumn extends CassandraColumn {
   /**
    * Key-value pair containing the raw data.
    */
-  private HColumn<String, ByteBuffer> hColumn;
+  private HColumn<ByteBuffer, ByteBuffer> hColumn;
 
-  public String getName() {
+  public ByteBuffer getName() {
     return hColumn.getName();
   }
 
@@ -65,56 +65,35 @@ public class CassandraSubColumn extends CassandraColumn {
     Field field = getField();
     Schema fieldSchema = field.schema();
     Type type = fieldSchema.getType();
-    ByteBuffer valueByteBuffer = hColumn.getValue();
+    ByteBuffer byteBuffer = hColumn.getValue();
     Object value = null;
-    
-    switch (type) {
-      case STRING:
-        value = new Utf8(StringSerializer.get().fromByteBuffer(valueByteBuffer));
-        break;
-      case BYTES:
-        value = valueByteBuffer;
-        break;
-      case INT:
-        value = IntegerSerializer.get().fromByteBuffer(valueByteBuffer);
-        break;
-      case LONG:
-        value = LongSerializer.get().fromByteBuffer(valueByteBuffer);
-        break;
-      case FLOAT:
-        value = FloatSerializer.get().fromByteBuffer(valueByteBuffer);
-        break;
-      case DOUBLE:
-        value = DoubleSerializer.get().fromByteBuffer(valueByteBuffer);
-        break;
-      case ARRAY:
-        // convert string to array
-        String valueString = StringSerializer.get().fromByteBuffer(valueByteBuffer);
-        valueString = valueString.substring(1, valueString.length()-1);
-        String[] elements = valueString.split(", ");
-        
-        Type elementType = fieldSchema.getElementType().getType();
-        if (elementType == Schema.Type.STRING) {
-          // the array type is String
-          GenericArray<String> genericArray = new GenericData.Array<String>(elements.length, Schema.createArray(Schema.create(Schema.Type.STRING)));
-          for (String element: elements) {
-            genericArray.add(element);
-          }
-          
-          value = genericArray;
-        } else {
-          LOG.info("Element type not supported: " + elementType);
-        }
-        break;
-      default:
-        LOG.info("Type not supported: " + type);
-    }
-    
-    return value;
+    if (type == Type.ARRAY) {
+      // convert string to array
+      String valueString = StringSerializer.get().fromByteBuffer(byteBuffer);
+      valueString = valueString.substring(1, valueString.length()-1);
+      String[] elements = valueString.split(", ");
 
+      Type elementType = fieldSchema.getElementType().getType();
+      if (elementType == Schema.Type.STRING) {
+        // the array type is String
+        GenericArray<String> genericArray = new GenericData.Array<String>(elements.length, Schema.createArray(Schema.create(Schema.Type.STRING)));
+        for (String element: elements) {
+          genericArray.add(element);
+        }
+
+        value = genericArray;
+      } else {
+        LOG.info("Element type not supported: " + elementType);
+      }
+    }
+    else {
+      value = fromByteBuffer(type, byteBuffer);
+    }
+
+    return value;
   }
 
-  public void setValue(HColumn<String, ByteBuffer> hColumn) {
+  public void setValue(HColumn<ByteBuffer, ByteBuffer> hColumn) {
     this.hColumn = hColumn;
   }
 }
