@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import me.prettyprint.cassandra.serializers.StringSerializer;
+
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.gora.persistency.Persistent;
@@ -76,7 +78,7 @@ public class CassandraResult<K, T extends Persistent> extends ResultBase<K, T> {
       
       // get field name
       String family = cassandraColumn.getFamily();
-      String fieldName = this.reverseMap.get(family + ":" + cassandraColumn.getName());
+      String fieldName = this.reverseMap.get(family + ":" + StringSerializer.get().fromByteBuffer(cassandraColumn.getName()));
       
       // get field
       int pos = this.persistent.getFieldIndex(fieldName);

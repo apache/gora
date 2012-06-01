@@ -21,12 +21,15 @@ package org.apache.gora.cassandra.store;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import me.prettyprint.cassandra.serializers.IntegerSerializer;
+import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.beans.ColumnSlice;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
@@ -45,6 +48,7 @@ import org.apache.gora.cassandra.query.CassandraResultSet;
 import org.apache.gora.cassandra.query.CassandraRow;
 import org.apache.gora.cassandra.query.CassandraSubColumn;
 import org.apache.gora.cassandra.query.CassandraSuperColumn;
+import org.apache.gora.persistency.ListGenericArray;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.StatefulHashMap;
 import org.apache.gora.persistency.impl.PersistentBase;
@@ -131,29 +135,28 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
     
     // We query Cassandra keyspace by families.
     for (String family : familyMap.keySet()) {
+      if (family == null) {
+        continue;
+      }
       if (this.cassandraClient.isSuper(family)) {
         addSuperColumns(family, cassandraQuery, cassandraResultSet);
          
       } else {
         addSubColumns(family, cassandraQuery, cassandraResultSet);
-      
       }
-      
     }
     
     cassandraResult.setResultSet(cassandraResultSet);
     
-    
     return cassandraResult;
-
   }
 
   private void addSubColumns(String family, CassandraQuery<K, T> cassandraQuery,
       CassandraResultSet cassandraResultSet) {
     // select family columns that are included in the query
-    List<Row<K, String, ByteBuffer>> rows = this.cassandraClient.execute(cassandraQuery, family);
+    List<Row<K, ByteBuffer, ByteBuffer>> rows = this.cassandraClient.execute(cassandraQuery, family);
     
-    for (Row<K, String, ByteBuffer> row : rows) {
+    for (Row<K, ByteBuffer, ByteBuffer> row : rows) {
       K key = row.getKey();
       
       // find associated row in the resultset
@@ -164,9 +167,9 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
         cassandraRow.setKey(key);
       }
       
-      ColumnSlice<String, ByteBuffer> columnSlice = row.getColumnSlice();
+      ColumnSlice<ByteBuffer, ByteBuffer> columnSlice = row.getColumnSlice();
       
-      for (HColumn<String, ByteBuffer> hColumn : columnSlice.getColumns()) {
+      for (HColumn<ByteBuffer, ByteBuffer> hColumn : columnSlice.getColumns()) {
         CassandraSubColumn cassandraSubColumn = new CassandraSubColumn();
         cassandraSubColumn.setValue(hColumn);
         cassandraSubColumn.setFamily(family);
@@ -179,8 +182,8 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
   private void addSuperColumns(String family, CassandraQuery<K, T> cassandraQuery, 
       CassandraResultSet cassandraResultSet) {
     
-    List<SuperRow<K, String, String, ByteBuffer>> superRows = this.cassandraClient.executeSuper(cassandraQuery, family);
-    for (SuperRow<K, String, String, ByteBuffer> superRow: superRows) {
+    List<SuperRow<K, String, ByteBuffer, ByteBuffer>> superRows = this.cassandraClient.executeSuper(cassandraQuery, family);
+    for (SuperRow<K, String, ByteBuffer, ByteBuffer> superRow: superRows) {
       K key = superRow.getKey();
       CassandraRow<K> cassandraRow = cassandraResultSet.getRow(key);
       if (cassandraRow == null) {
@@ -189,8 +192,8 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
         cassandraRow.setKey(key);
       }
       
-      SuperSlice<String, String, ByteBuffer> superSlice = superRow.getSuperSlice();
-      for (HSuperColumn<String, String, ByteBuffer> hSuperColumn: superSlice.getSuperColumns()) {
+      SuperSlice<String, ByteBuffer, ByteBuffer> superSlice = superRow.getSuperSlice();
+      for (HSuperColumn<String, ByteBuffer, ByteBuffer> hSuperColumn: superSlice.getSuperColumns()) {
         CassandraSuperColumn cassandraSuperColumn = new CassandraSuperColumn();
         cassandraSuperColumn.setValue(hSuperColumn);
         cassandraSuperColumn.setFamily(family);
@@ -277,7 +280,7 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
       if (value.isDirty(field.pos())) {
         Object fieldValue = value.get(field.pos());
         
-        // check if field has a nested structure (map or record)
+        // check if field has a nested structure (array, map, or record)
         Schema fieldSchema = field.schema();
         Type type = fieldSchema.getType();
         switch(type) {
@@ -293,6 +296,16 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
             StatefulHashMap<?, ?> map = (StatefulHashMap<?, ?>) fieldValue;
             StatefulHashMap<?, ?> newMap = new StatefulHashMap(map);
             fieldValue = newMap;
+            break;
+          case ARRAY:
+            GenericArray array = (GenericArray) fieldValue;
+            Type elementType = fieldSchema.getElementType().getType();
+            GenericArray newArray = new ListGenericArray(Schema.create(elementType));
+            Iterator iter = array.iterator();
+            while (iter.hasNext()) {
+              newArray.add(iter.next());
+            }
+            fieldValue = newArray;
             break;
         }
         
@@ -340,7 +353,7 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
               if (memberValue instanceof Utf8) {
                 memberValue = memberValue.toString();
               }
-              this.cassandraClient.addSubColumn(key, field.name(), member.name(), memberValue);
+              this.cassandraClient.addSubColumn(key, field.name(), StringSerializer.get().toByteBuffer(member.name()), memberValue);
             }
           } else {
             LOG.info("Record not supported: " + value.toString());
@@ -367,10 +380,26 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
               if (keyValue instanceof Utf8) {
                 keyValue = keyValue.toString();
               }
-              this.cassandraClient.addSubColumn(key, field.name(), mapKey.toString(), keyValue);              
+              this.cassandraClient.addSubColumn(key, field.name(), StringSerializer.get().toByteBuffer(mapKey.toString()), keyValue);              
             }
           } else {
             LOG.info("Map not supported: " + value.toString());
+          }
+        }
+        break;
+      case ARRAY:
+        if (value != null) {
+          if (value instanceof GenericArray<?>) {
+            GenericArray<Object> array = (GenericArray<Object>) value;
+            int i= 0;
+            for (Object itemValue: array) {
+              if (itemValue instanceof Utf8) {
+                itemValue = itemValue.toString();
+              }
+              this.cassandraClient.addSubColumn(key, field.name(), IntegerSerializer.get().toByteBuffer(i++), itemValue);              
+            }
+          } else {
+            LOG.info("Array not supported: " + value.toString());
           }
         }
         break;

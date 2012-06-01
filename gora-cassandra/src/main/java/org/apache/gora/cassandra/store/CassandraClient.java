@@ -27,6 +27,7 @@ import java.util.Map;
 
 import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
 import me.prettyprint.cassandra.serializers.FloatSerializer;
+import me.prettyprint.cassandra.serializers.IntegerSerializer;
 import me.prettyprint.cassandra.serializers.DoubleSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.SerializerTypeInferer;
@@ -67,8 +68,6 @@ public class CassandraClient<K, T extends Persistent> {
   
   private CassandraMapping cassandraMapping = new CassandraMapping();
 
-  private StringSerializer stringSerializer = new StringSerializer();
-  private ByteBufferSerializer byteBufferSerializer = new ByteBufferSerializer();
   private Serializer<K> keySerializer;
   
   public void initialize(Class<K> keyClass) throws Exception {
@@ -118,7 +117,6 @@ public class CassandraClient<K, T extends Persistent> {
 
       keyspaceDefinition = null;
     }
-    
 
   }
   
@@ -141,44 +139,45 @@ public class CassandraClient<K, T extends Persistent> {
       return;
     }
 
-    ByteBuffer byteBuffer = null;
-    if (value instanceof ByteBuffer) {
-      byteBuffer = (ByteBuffer) value;
-    }
-    else if (value instanceof Utf8) {
-      byteBuffer = stringSerializer.toByteBuffer(((Utf8)value).toString());
-    }
-    else if (value instanceof Float) {
-      // workaround for hector-core-1.0-1.jar
-      // because SerializerTypeInferer.getSerializer(Float ) returns ObjectSerializer !?
-      byteBuffer = FloatSerializer.get().toByteBuffer((Float)value);
-    }
-    else if (value instanceof Double) {
-      // workaround for hector-core-1.0-1.jar
-      // because SerializerTypeInferer.getSerializer(Double ) returns ObjectSerializer !?
-      byteBuffer = DoubleSerializer.get().toByteBuffer((Double)value);
-    }
-    else {
-      byteBuffer = SerializerTypeInferer.getSerializer(value).toByteBuffer(value);
-    }
+    ByteBuffer byteBuffer = toByteBuffer(value);
     
     String columnFamily = this.cassandraMapping.getFamily(fieldName);
     String columnName = this.cassandraMapping.getColumn(fieldName);
     
-    this.mutator.insert(key, columnFamily, HFactory.createColumn(columnName, byteBuffer, stringSerializer, byteBufferSerializer));
+    this.mutator.insert(key, columnFamily, HFactory.createColumn(columnName, byteBuffer, StringSerializer.get(), ByteBufferSerializer.get()));
   }
 
   /**
    * Insert a member in a super column. This is used for map and record Avro types.
    * @param key the row key
    * @param fieldName the field name
-   * @param memberName the member name
+   * @param columnName the column name (the member name, or the index of array)
    * @param value the member value
    */
   @SuppressWarnings("unchecked")
-public void addSubColumn(K key, String fieldName, String memberName, Object value) {
+  public void addSubColumn(K key, String fieldName, ByteBuffer columnName, Object value) {
     if (value == null) {
       return;
+    }
+    
+    ByteBuffer byteBuffer = toByteBuffer(value);
+    
+    String columnFamily = this.cassandraMapping.getFamily(fieldName);
+    String superColumnName = this.cassandraMapping.getColumn(fieldName);
+    
+    this.mutator.insert(key, columnFamily, HFactory.createSuperColumn(superColumnName, Arrays.asList(HFactory.createColumn(columnName, byteBuffer, ByteBufferSerializer.get(), ByteBufferSerializer.get())), StringSerializer.get(), ByteBufferSerializer.get(), ByteBufferSerializer.get()));
+    
+  }
+
+  /**
+   * Serialize value to ByteBuffer.
+   * @param value the member value
+   * @return ByteBuffer object
+   */
+  @SuppressWarnings("unchecked")
+  public ByteBuffer toByteBuffer(Object value) {
+    if (value == null) {
+      return null;
     }
     
     ByteBuffer byteBuffer = null;
@@ -186,7 +185,7 @@ public void addSubColumn(K key, String fieldName, String memberName, Object valu
       byteBuffer = (ByteBuffer) value;
     }
     else if (value instanceof Utf8) {
-      byteBuffer = stringSerializer.toByteBuffer(((Utf8)value).toString());
+      byteBuffer = StringSerializer.get().toByteBuffer(((Utf8)value).toString());
     }
     else if (value instanceof Float) {
       // workaround for hector-core-1.0-1.jar
@@ -202,22 +201,22 @@ public void addSubColumn(K key, String fieldName, String memberName, Object valu
       byteBuffer = SerializerTypeInferer.getSerializer(value).toByteBuffer(value);
     }
     
-    String columnFamily = this.cassandraMapping.getFamily(fieldName);
-    String superColumnName = this.cassandraMapping.getColumn(fieldName);
-    
-    this.mutator.insert(key, columnFamily, HFactory.createSuperColumn(superColumnName, Arrays.asList(HFactory.createColumn(memberName, byteBuffer, stringSerializer, byteBufferSerializer)), this.stringSerializer, this.stringSerializer, this.byteBufferSerializer));
-    
+    return byteBuffer;
   }
-  
+
   /**
    * Select a family column in the keyspace.
    * @param cassandraQuery a wrapper of the query
    * @param family the family name to be queried
    * @return a list of family rows
    */
-  public List<Row<K, String, ByteBuffer>> execute(CassandraQuery<K, T> cassandraQuery, String family) {
+  public List<Row<K, ByteBuffer, ByteBuffer>> execute(CassandraQuery<K, T> cassandraQuery, String family) {
     
     String[] columnNames = cassandraQuery.getColumns(family);
+    ByteBuffer[] columnNameByteBuffers = new ByteBuffer[columnNames.length];
+    for (int i = 0; i < columnNames.length; i++) {
+      columnNameByteBuffers[i] = StringSerializer.get().toByteBuffer(columnNames[i]);
+    }
     Query<K, T> query = cassandraQuery.getQuery();
     int limit = (int) query.getLimit();
     if (limit < 1) {
@@ -226,16 +225,15 @@ public void addSubColumn(K key, String fieldName, String memberName, Object valu
     K startKey = query.getStartKey();
     K endKey = query.getEndKey();
     
-    RangeSlicesQuery<K, String, ByteBuffer> rangeSlicesQuery = HFactory.createRangeSlicesQuery(this.keyspace, this.keySerializer, stringSerializer, byteBufferSerializer);
+    RangeSlicesQuery<K, ByteBuffer, ByteBuffer> rangeSlicesQuery = HFactory.createRangeSlicesQuery(this.keyspace, this.keySerializer, ByteBufferSerializer.get(), ByteBufferSerializer.get());
     rangeSlicesQuery.setColumnFamily(family);
     rangeSlicesQuery.setKeys(startKey, endKey);
-    rangeSlicesQuery.setRange("", "", false, GoraRecordReader.BUFFER_LIMIT_READ_VALUE);
+    rangeSlicesQuery.setRange(ByteBuffer.wrap(new byte[0]), ByteBuffer.wrap(new byte[0]), false, GoraRecordReader.BUFFER_LIMIT_READ_VALUE);
     rangeSlicesQuery.setRowCount(limit);
-    rangeSlicesQuery.setColumnNames(columnNames);
+    rangeSlicesQuery.setColumnNames(columnNameByteBuffers);
     
-
-    QueryResult<OrderedRows<K, String, ByteBuffer>> queryResult = rangeSlicesQuery.execute();
-    OrderedRows<K, String, ByteBuffer> orderedRows = queryResult.get();
+    QueryResult<OrderedRows<K, ByteBuffer, ByteBuffer>> queryResult = rangeSlicesQuery.execute();
+    OrderedRows<K, ByteBuffer, ByteBuffer> orderedRows = queryResult.get();
     
     
     return orderedRows.getList();
@@ -290,7 +288,7 @@ public void addSubColumn(K key, String fieldName, String memberName, Object valu
     return this.cassandraMapping.isSuper(family);
   }
 
-  public List<SuperRow<K, String, String, ByteBuffer>> executeSuper(CassandraQuery<K, T> cassandraQuery, String family) {
+  public List<SuperRow<K, String, ByteBuffer, ByteBuffer>> executeSuper(CassandraQuery<K, T> cassandraQuery, String family) {
     String[] columnNames = cassandraQuery.getColumns(family);
     Query<K, T> query = cassandraQuery.getQuery();
     int limit = (int) query.getLimit();
@@ -300,7 +298,7 @@ public void addSubColumn(K key, String fieldName, String memberName, Object valu
     K startKey = query.getStartKey();
     K endKey = query.getEndKey();
     
-    RangeSuperSlicesQuery<K, String, String, ByteBuffer> rangeSuperSlicesQuery = HFactory.createRangeSuperSlicesQuery(this.keyspace, this.keySerializer, this.stringSerializer, this.stringSerializer, this.byteBufferSerializer);
+    RangeSuperSlicesQuery<K, String, ByteBuffer, ByteBuffer> rangeSuperSlicesQuery = HFactory.createRangeSuperSlicesQuery(this.keyspace, this.keySerializer, StringSerializer.get(), ByteBufferSerializer.get(), ByteBufferSerializer.get());
     rangeSuperSlicesQuery.setColumnFamily(family);    
     rangeSuperSlicesQuery.setKeys(startKey, endKey);
     rangeSuperSlicesQuery.setRange("", "", false, GoraRecordReader.BUFFER_LIMIT_READ_VALUE);
@@ -308,8 +306,8 @@ public void addSubColumn(K key, String fieldName, String memberName, Object valu
     rangeSuperSlicesQuery.setColumnNames(columnNames);
     
     
-    QueryResult<OrderedSuperRows<K, String, String, ByteBuffer>> queryResult = rangeSuperSlicesQuery.execute();
-    OrderedSuperRows<K, String, String, ByteBuffer> orderedRows = queryResult.get();
+    QueryResult<OrderedSuperRows<K, String, ByteBuffer, ByteBuffer>> queryResult = rangeSuperSlicesQuery.execute();
+    OrderedSuperRows<K, String, ByteBuffer, ByteBuffer> orderedRows = queryResult.get();
     return orderedRows.getList();
 
 

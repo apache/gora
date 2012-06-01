@@ -6,13 +6,15 @@ Gora Change Log
 
 0.3 (trunk) Current Development:
 
+* GORA-138 gora-cassandra array type support: Double fix for GORA-81 Replace CassandraStore#addOrUpdateField with TypeInferringSerializer to take advantage of when the value is already of type ByteBuffer. (Kazuomi Kashii via lewismc)
+
 * GORA-139  Creates Cassandra column family with BytesType for column value validator (and comparators), instead of UTF8Type (Kazuomi Kashii via lewismc)
 
 * GORA-131 gora-cassandra should support other key types than String (Kazuomi Kashii via lewismc)
 
 * GORA-132 Uses ByteBufferSerializer for column value to support various data types rather than StringSerializer (Kazuomi Kashii via lewismc)
 
-* GORA-77 Replace commons logging with Log4j (Renato Javier Marroquín Mogrovejo via lewismc)
+* GORA-77 Replace commons logging with Slf4j (Renato Javier Marroquín Mogrovejo via lewismc)
 
 * GORA-134 ListGenericArray's hashCode causes StackOverflowError (Kazuomi Kashii via lewismc)
 
