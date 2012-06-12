@@ -523,10 +523,9 @@
         <avro.version>1.3.3</avro.version>
         <cxf-rt-frontend-jaxrs.version>2.5.2</cxf-rt-frontend-jaxrs.version>
         <!-- Cassandra Dependencies -->
-        <cassandra.version>1.0.2</cassandra.version>
-        <cassandra.thrift.version>1.0.2</cassandra.thrift.version>
+        <cassandra.thrift.version>1.1.1</cassandra.thrift.version>
         <libthrift.version>0.7.0</libthrift.version>
-        <hector.version>1.0-1</hector.version>
+        <hector.version>1.0-4</hector.version>
         <!-- Misc Dependencies -->
         <guava.version>10.0.1</guava.version>
         <commons-lang.version>2.6</commons-lang.version>
@@ -698,12 +697,6 @@
             <!-- Cassandra Dependencies -->
             <dependency>
                 <groupId>org.apache.cassandra</groupId>
-                <artifactId>cassandra-all</artifactId>
-                <version>${cassandra.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.cassandra</groupId>
                 <artifactId>cassandra-thrift</artifactId>
                 <version>${cassandra.thrift.version}</version>
             </dependency>
@@ -777,6 +770,12 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-jdk14</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-log4j12</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
 
