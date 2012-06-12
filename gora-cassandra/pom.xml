@@ -120,11 +120,6 @@
         <!-- Cassandra Dependencies -->
         <dependency>
             <groupId>org.apache.cassandra</groupId>
-            <artifactId>cassandra-all</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.cassandra</groupId>
             <artifactId>cassandra-thrift</artifactId>
         </dependency>
 
@@ -147,13 +142,17 @@
 
         <!-- Logging Dependencies -->
         <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>avro</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-jdk14</artifactId>
+            <artifactId>slf4j-log4j12</artifactId>
         </dependency>
 
         <dependency>
