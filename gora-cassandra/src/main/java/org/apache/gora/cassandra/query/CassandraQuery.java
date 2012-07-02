@@ -22,11 +22,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.QueryBase;
 import org.apache.gora.store.DataStore;
 
-public class CassandraQuery<K, T extends Persistent> extends QueryBase<K, T> {
+public class CassandraQuery<K, T extends PersistentBase> extends QueryBase<K, T> {
 
   private Query<K, T> query;
   

@@ -26,16 +26,16 @@ import org.apache.avro.Schema.Field;
 import org.apache.avro.io.Encoder;
 import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.avro.util.Utf8;
-import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.State;
 import org.apache.gora.persistency.StateManager;
 import org.apache.gora.persistency.StatefulMap;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.util.IOUtils;
 
 /**
  * PersistentDatumWriter writes, fields' dirty and readable information.
  */
-public class PersistentDatumWriter<T extends Persistent>
+public class PersistentDatumWriter<T extends PersistentBase>
   extends SpecificDatumWriter<T> {
 
   private T persistent = null;

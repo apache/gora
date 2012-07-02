@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.gora.mapreduce.GoraMapReduceUtils;
-import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
@@ -46,7 +46,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 /**
  * Base implementations for {@link FileBackedDataStore} methods.
  */
-public abstract class FileBackedDataStoreBase<K, T extends Persistent>
+public abstract class FileBackedDataStoreBase<K, T extends PersistentBase>
   extends DataStoreBase<K, T> implements FileBackedDataStore<K, T> {
 
   protected long inputSize; //input size in bytes

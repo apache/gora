@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.FileSplitPartitionQuery;
@@ -52,7 +53,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
  * 
  * @see GoraMapper
  */
-public class GoraInputFormat<K, T extends Persistent>
+public class GoraInputFormat<K, T extends PersistentBase>
   extends InputFormat<K, T> implements Configurable {
 
   public static final String QUERY_KEY   = "gora.inputformat.query";

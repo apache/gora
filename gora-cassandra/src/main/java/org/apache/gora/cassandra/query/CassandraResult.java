@@ -27,13 +27,14 @@ import me.prettyprint.cassandra.serializers.StringSerializer;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.ResultBase;
 import org.apache.gora.store.DataStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CassandraResult<K, T extends Persistent> extends ResultBase<K, T> {
+public class CassandraResult<K, T extends PersistentBase> extends ResultBase<K, T> {
   public static final Logger LOG = LoggerFactory.getLogger(CassandraResult.class);
   
   private int rowNumber;

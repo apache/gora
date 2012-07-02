@@ -17,14 +17,14 @@
  */
 package org.apache.gora.sql.statement;
 
-import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.sql.store.SqlMapping;
 import org.apache.gora.sql.store.SqlStore;
 import org.apache.gora.sql.store.SqlStore.DBVendor;
 
 public class InsertUpdateStatementFactory {
 
-  public static <K, T extends Persistent>
+  public static <K, T extends PersistentBase>
   InsertUpdateStatement<K, T> createStatement(SqlStore<K, T> store,
       SqlMapping mapping, DBVendor dbVendor) {
     switch(dbVendor) {

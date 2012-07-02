@@ -23,6 +23,7 @@ import java.io.IOException;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.SeekableInput;
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.ResultBase;
 import org.apache.gora.store.DataStore;
@@ -30,7 +31,7 @@ import org.apache.gora.store.DataStore;
 /**
  * An Avro {@link DataFileReader} backed Result.
  */
-public class DataFileAvroResult<K, T extends Persistent> extends ResultBase<K, T> {
+public class DataFileAvroResult<K, T extends PersistentBase> extends ResultBase<K, T> {
 
   private SeekableInput in;
   private DataFileReader<T> reader;
@@ -58,9 +59,9 @@ public class DataFileAvroResult<K, T extends Persistent> extends ResultBase<K, T
 
   @Override
   public void close() throws IOException {
-    if(reader != null)
-      reader.close();
-    reader = null;
+	  if(reader != null)
+		  reader.close();
+	  reader = null;
   }
 
   @Override

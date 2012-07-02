@@ -68,7 +68,7 @@ public class DataStoreTestUtil {
   private static final int NUM_KEYS = 4;
 
   public static <K, T extends Persistent> void testNewPersistent(
-      DataStore<K,T> dataStore) throws IOException {
+      DataStore<K,T> dataStore) throws IOException, Exception {
 
     T obj1 = dataStore.newPersistent();
     T obj2 = dataStore.newPersistent();
@@ -81,7 +81,7 @@ public class DataStoreTestUtil {
   }
 
   public static <K> Employee createEmployee(
-      DataStore<K, Employee> dataStore) throws IOException {
+      DataStore<K, Employee> dataStore) throws IOException, Exception {
 
     Employee employee = dataStore.newPersistent();
     employee.setName(new Utf8("Random Joe"));
@@ -92,13 +92,13 @@ public class DataStoreTestUtil {
   }
 
   public static void testAutoCreateSchema(DataStore<String,Employee> dataStore)
-  throws IOException {
+  throws IOException, Exception {
     //should not throw exception
     dataStore.put("foo", createEmployee(dataStore));
   }
 
   public static void testCreateEmployeeSchema(DataStore<String, Employee> dataStore)
-  throws IOException {
+  throws IOException, Exception {
     dataStore.createSchema();
 
     //should not throw exception
@@ -106,7 +106,7 @@ public class DataStoreTestUtil {
   }
 
   public static void testTruncateSchema(DataStore<String, WebPage> dataStore)
-  throws IOException {
+  throws IOException, Exception {
     dataStore.createSchema();
     WebPageDataCreator.createWebPageData(dataStore);
     dataStore.truncateSchema();
@@ -115,7 +115,7 @@ public class DataStoreTestUtil {
   }
 
   public static void testDeleteSchema(DataStore<String, WebPage> dataStore)
-  throws IOException {
+  throws IOException, Exception {
     dataStore.createSchema();
     WebPageDataCreator.createWebPageData(dataStore);
     dataStore.deleteSchema();
@@ -125,7 +125,7 @@ public class DataStoreTestUtil {
   }
 
   public static<K, T extends Persistent> void testSchemaExists(
-      DataStore<K, T> dataStore) throws IOException {
+      DataStore<K, T> dataStore) throws IOException, Exception {
     dataStore.createSchema();
 
     Assert.assertTrue(dataStore.schemaExists());
@@ -135,7 +135,7 @@ public class DataStoreTestUtil {
   }
 
   public static void testGetEmployee(DataStore<String, Employee> dataStore)
-    throws IOException {
+    throws IOException, Exception {
     dataStore.createSchema();
     Employee employee = DataStoreTestUtil.createEmployee(dataStore);
     String ssn = employee.getSsn().toString();
@@ -148,13 +148,13 @@ public class DataStoreTestUtil {
   }
 
   public static void testGetEmployeeNonExisting(DataStore<String, Employee> dataStore)
-    throws IOException {
+    throws IOException, Exception {
     Employee employee = dataStore.get("_NON_EXISTING_SSN_FOR_EMPLOYEE_");
     Assert.assertNull(employee);
   }
 
   public static void testGetEmployeeWithFields(DataStore<String, Employee> dataStore)
-    throws IOException {
+    throws IOException, Exception {
     Employee employee = DataStoreTestUtil.createEmployee(dataStore);
     String ssn = employee.getSsn().toString();
     dataStore.put(ssn, employee);
@@ -176,14 +176,14 @@ public class DataStoreTestUtil {
   }
 
   public static Employee testPutEmployee(DataStore<String, Employee> dataStore)
-  throws IOException {
+  throws IOException, Exception {
     dataStore.createSchema();
     Employee employee = DataStoreTestUtil.createEmployee(dataStore);
     return employee;
   }
 
   public static void testEmptyUpdateEmployee(DataStore<String, Employee> dataStore)
-  throws IOException {
+  throws IOException, Exception {
     dataStore.createSchema();
     long ssn = 1234567890L;
     String ssnStr = Long.toString(ssn);
@@ -213,7 +213,7 @@ public class DataStoreTestUtil {
   }
 
   public static void testUpdateEmployee(DataStore<String, Employee> dataStore)
-  throws IOException {
+  throws IOException, Exception {
     dataStore.createSchema();
     long ssn = 1234567890L;
     long now = System.currentTimeMillis();
@@ -250,7 +250,7 @@ public class DataStoreTestUtil {
   }
 
   public static void testUpdateWebPage(DataStore<String, WebPage> dataStore)
-  throws IOException {
+  throws IOException, Exception {
     dataStore.createSchema();
 
     String[] urls = {"http://a.com/a", "http://b.com/b", "http://c.com/c",
@@ -332,7 +332,7 @@ public class DataStoreTestUtil {
     }
   }
 
-  public static void assertWebPage(WebPage page, int i) {
+  public static void assertWebPage(WebPage page, int i) throws Exception{
     Assert.assertNotNull(page);
 
     Assert.assertEquals(URLS[i], page.getUrl().toString());
@@ -364,7 +364,7 @@ public class DataStoreTestUtil {
   }
 
   private static void testGetWebPage(DataStore<String, WebPage> store, String[] fields)
-    throws IOException {
+    throws IOException, Exception {
     createWebPageData(store);
 
     for(int i=0; i<URLS.length; i++) {
@@ -373,17 +373,17 @@ public class DataStoreTestUtil {
     }
   }
 
-  public static void testGetWebPage(DataStore<String, WebPage> store) throws IOException {
+  public static void testGetWebPage(DataStore<String, WebPage> store) throws IOException, Exception {
     testGetWebPage(store, WebPage._ALL_FIELDS);
   }
 
   public static void testGetWebPageDefaultFields(DataStore<String, WebPage> store)
-  throws IOException {
+  throws IOException, Exception {
     testGetWebPage(store, null);
   }
 
   private static void testQueryWebPageSingleKey(DataStore<String, WebPage> store
-      , String[] fields) throws IOException {
+      , String[] fields) throws IOException, Exception {
 
     createWebPageData(store);
 
@@ -400,18 +400,18 @@ public class DataStoreTestUtil {
   }
 
   public static void testQueryWebPageSingleKey(DataStore<String, WebPage> store)
-  throws IOException {
+  throws IOException, Exception {
     testQueryWebPageSingleKey(store, WebPage._ALL_FIELDS);
   }
 
   public static void testQueryWebPageSingleKeyDefaultFields(
-      DataStore<String, WebPage> store) throws IOException {
+      DataStore<String, WebPage> store) throws IOException, Exception {
     testQueryWebPageSingleKey(store, null);
   }
 
   public static void testQueryWebPageKeyRange(DataStore<String, WebPage> store,
       boolean setStartKeys, boolean setEndKeys)
-  throws IOException {
+  throws IOException, Exception {
     createWebPageData(store);
 
     //create sorted set of urls
@@ -450,27 +450,27 @@ public class DataStoreTestUtil {
   }
 
   public static void testQueryWebPages(DataStore<String, WebPage> store)
-  throws IOException {
+  throws IOException, Exception {
     testQueryWebPageKeyRange(store, false, false);
   }
 
   public static void testQueryWebPageStartKey(DataStore<String, WebPage> store)
-  throws IOException {
+  throws IOException, Exception {
     testQueryWebPageKeyRange(store, true, false);
   }
 
   public static void testQueryWebPageEndKey(DataStore<String, WebPage> store)
-  throws IOException {
+  throws IOException, Exception {
     testQueryWebPageKeyRange(store, false, true);
   }
 
   public static void testQueryWebPageKeyRange(DataStore<String, WebPage> store)
-  throws IOException {
+  throws IOException, Exception {
     testQueryWebPageKeyRange(store, true, true);
   }
 
   public static void testQueryWebPageEmptyResults(DataStore<String, WebPage> store)
-    throws IOException {
+    throws IOException, Exception {
     createWebPageData(store);
 
     //query empty results
@@ -486,12 +486,12 @@ public class DataStoreTestUtil {
   }
 
   public static<K,T extends Persistent> void assertEmptyResults(Query<K, T> query)
-    throws IOException {
+    throws IOException, Exception {
     assertNumResults(query, 0);
   }
 
   public static<K,T extends Persistent> void assertNumResults(Query<K, T>query
-      , long numResults) throws IOException {
+      , long numResults) throws IOException, Exception {
     Result<K, T> result = query.execute();
     int actualNumResults = 0;
     while(result.next()) {
@@ -502,13 +502,13 @@ public class DataStoreTestUtil {
   }
 
   public static void testGetPartitions(DataStore<String, WebPage> store)
-  throws IOException {
+  throws IOException, Exception {
     createWebPageData(store);
     testGetPartitions(store, store.newQuery());
   }
 
   public static void testGetPartitions(DataStore<String, WebPage> store
-      , Query<String, WebPage> query) throws IOException {
+      , Query<String, WebPage> query) throws IOException, Exception {
     List<PartitionQuery<String, WebPage>> partitions = store.getPartitions(query);
 
     Assert.assertNotNull(partitions);
@@ -523,7 +523,7 @@ public class DataStoreTestUtil {
 
   public static void assertPartitions(DataStore<String, WebPage> store,
       Query<String, WebPage> query, List<PartitionQuery<String,WebPage>> partitions)
-  throws IOException {
+  throws IOException, Exception {
 
     int count = 0, partitionsCount = 0;
     Map<String, Integer> results = new HashMap<String, Integer>();
@@ -571,7 +571,7 @@ public class DataStoreTestUtil {
     }
   }
 
-  public static void testDelete(DataStore<String, WebPage> store) throws IOException {
+  public static void testDelete(DataStore<String, WebPage> store) throws IOException, Exception {
     WebPageDataCreator.createWebPageData(store);
     //delete one by one
 
@@ -589,7 +589,7 @@ public class DataStoreTestUtil {
   }
 
   public static void testDeleteByQuery(DataStore<String, WebPage> store)
-    throws IOException {
+    throws IOException, Exception {
 
     Query<String, WebPage> query;
 
@@ -643,7 +643,7 @@ public class DataStoreTestUtil {
   }
 
   public static void testDeleteByQueryFields(DataStore<String, WebPage> store)
-  throws IOException {
+  throws IOException, Exception {
 
     Query<String, WebPage> query;
 

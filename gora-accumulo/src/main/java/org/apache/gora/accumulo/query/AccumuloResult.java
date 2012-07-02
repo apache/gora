@@ -26,7 +26,7 @@ import org.apache.accumulo.core.data.ByteSequence;
 import org.apache.accumulo.core.data.Key;
 import org.apache.accumulo.core.data.Value;
 import org.apache.gora.accumulo.store.AccumuloStore;
-import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.ResultBase;
 import org.apache.gora.store.DataStore;
@@ -34,7 +34,7 @@ import org.apache.gora.store.DataStore;
 /**
  * 
  */
-public class AccumuloResult<K,T extends Persistent> extends ResultBase<K,T> {
+public class AccumuloResult<K,T extends PersistentBase> extends ResultBase<K,T> {
   
   private RowIterator iterator;
 

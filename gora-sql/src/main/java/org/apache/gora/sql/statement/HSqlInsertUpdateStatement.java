@@ -24,11 +24,12 @@ import java.sql.SQLException;
 import java.util.Map.Entry;
 
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.sql.store.Column;
 import org.apache.gora.sql.store.SqlMapping;
 import org.apache.gora.sql.store.SqlStore;
 
-public class HSqlInsertUpdateStatement<K, T extends Persistent>
+public class HSqlInsertUpdateStatement<K, T extends PersistentBase>
 extends InsertUpdateStatement<K, T> {
 
   public HSqlInsertUpdateStatement(SqlStore<K, T> store, SqlMapping mapping,

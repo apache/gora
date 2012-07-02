@@ -86,6 +86,7 @@ import org.apache.gora.persistency.State;
 import org.apache.gora.persistency.StateManager;
 import org.apache.gora.persistency.StatefulHashMap;
 import org.apache.gora.persistency.StatefulMap;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
@@ -101,7 +102,7 @@ import org.w3c.dom.NodeList;
 /**
  * 
  */
-public class AccumuloStore<K,T extends Persistent> extends DataStoreBase<K,T> {
+public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T> {
   
   protected static final String MOCK_PROPERTY = "accumulo.mock";
   protected static final String INSTANCE_NAME_PROPERTY = "accumulo.instance";

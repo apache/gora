@@ -27,6 +27,7 @@ import java.util.NavigableMap;
 import java.util.TreeMap;
 
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.persistency.impl.StateManagerImpl;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
@@ -40,9 +41,9 @@ import org.apache.gora.store.impl.DataStoreBase;
 /**
  * Memory based {@link DataStore} implementation for tests.
  */
-public class MemStore<K, T extends Persistent> extends DataStoreBase<K, T> {
+public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
-  public static class MemQuery<K, T extends Persistent> extends QueryBase<K, T> {
+  public static class MemQuery<K, T extends PersistentBase> extends QueryBase<K, T> {
     public MemQuery() {
       super(null);
     }
@@ -51,7 +52,7 @@ public class MemStore<K, T extends Persistent> extends DataStoreBase<K, T> {
     }
   }
 
-  public static class MemResult<K, T extends Persistent> extends ResultBase<K, T> {
+  public static class MemResult<K, T extends PersistentBase> extends ResultBase<K, T> {
     private NavigableMap<K, T> map;
     private Iterator<K> iterator;
     public MemResult(DataStore<K, T> dataStore, Query<K, T> query
@@ -60,7 +61,7 @@ public class MemStore<K, T extends Persistent> extends DataStoreBase<K, T> {
       this.map = map;
       iterator = map.navigableKeySet().iterator();
     }
-    @Override
+    //@Override
     public void close() throws IOException { }
     @Override
     public float getProgress() throws IOException {
@@ -97,15 +98,19 @@ public class MemStore<K, T extends Persistent> extends DataStoreBase<K, T> {
 
   @Override
   public long deleteByQuery(Query<K, T> query) throws IOException {
-    long deletedRows = 0;
-    Result<K,T> result = query.execute();
-
-    while(result.next()) {
-      if(delete(result.getKey()))
-        deletedRows++;
-    }
-
-    return 0;
+	try{
+		long deletedRows = 0;
+	    Result<K,T> result = query.execute();
+	
+	    while(result.next()) {
+	      if(delete(result.getKey()))
+	        deletedRows++;
+	    }
+	    return 0;
+	  }
+	catch(Exception e){
+		  return 0;
+	}
   }
 
   @Override
@@ -144,7 +149,7 @@ public class MemStore<K, T extends Persistent> extends DataStoreBase<K, T> {
     T newObj = (T) obj.newInstance(new StateManagerImpl());
     for(String field:fields) {
       int index = newObj.getFieldIndex(field);
-      newObj.put(index, obj.get(index));
+      ((PersistentBase)newObj).put(index, ((PersistentBase)obj).get(index));
     }
     return newObj;
   }
@@ -163,8 +168,7 @@ public class MemStore<K, T extends Persistent> extends DataStoreBase<K, T> {
   /**
    * Returns a single partition containing the original query
    */
-  public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query)
-      throws IOException {
+  public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query){
     List<PartitionQuery<K, T>> list = new ArrayList<PartitionQuery<K,T>>();
     list.add(new PartitionQueryImpl<K, T>(query));
     return list;

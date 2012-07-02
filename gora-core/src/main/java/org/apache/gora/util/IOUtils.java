@@ -43,6 +43,7 @@ import org.apache.avro.ipc.ByteBufferOutputStream;
 import org.apache.gora.avro.PersistentDatumReader;
 import org.apache.gora.avro.PersistentDatumWriter;
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DataInputBuffer;
 import org.apache.hadoop.io.DataOutputBuffer;
@@ -162,7 +163,7 @@ public class IOUtils {
   /**
    * Serializes the field object using the datumWriter.
    */
-  public static<T extends Persistent> void serialize(OutputStream os,
+  public static<T extends PersistentBase> void serialize(OutputStream os,
       PersistentDatumWriter<T> datumWriter, Schema schema, Object object)
       throws IOException {
 
@@ -174,7 +175,7 @@ public class IOUtils {
   /**
    * Serializes the field object using the datumWriter.
    */
-  public static<T extends Persistent> byte[] serialize(PersistentDatumWriter<T> datumWriter
+  public static<T extends PersistentBase> byte[] serialize(PersistentDatumWriter<T> datumWriter
       , Schema schema, Object object) throws IOException {
     ByteArrayOutputStream os = new ByteArrayOutputStream();
     serialize(os, datumWriter, schema, object);
@@ -252,7 +253,7 @@ public class IOUtils {
    * Deserializes the field object using the datumReader.
    */
   @SuppressWarnings("unchecked")
-  public static<K, T extends Persistent> K deserialize(InputStream is,
+  public static<K, T extends PersistentBase> K deserialize(InputStream is,
       PersistentDatumReader<T> datumReader, Schema schema, K object)
       throws IOException {
     decoder = DecoderFactory.defaultFactory().createBinaryDecoder(is, decoder);
@@ -263,7 +264,7 @@ public class IOUtils {
    * Deserializes the field object using the datumReader.
    */
   @SuppressWarnings("unchecked")
-  public static<K, T extends Persistent> K deserialize(byte[] bytes,
+  public static<K, T extends PersistentBase> K deserialize(byte[] bytes,
       PersistentDatumReader<T> datumReader, Schema schema, K object)
       throws IOException {
     decoder = DecoderFactory.defaultFactory().createBinaryDecoder(bytes, decoder);
@@ -274,7 +275,7 @@ public class IOUtils {
   /**
    * Serializes the field object using the datumWriter.
    */
-  public static<T extends Persistent> byte[] deserialize(PersistentDatumWriter<T> datumWriter
+  public static<T extends PersistentBase> byte[] deserialize(PersistentDatumWriter<T> datumWriter
       , Schema schema, Object object) throws IOException {
     ByteArrayOutputStream os = new ByteArrayOutputStream();
     serialize(os, datumWriter, schema, object);

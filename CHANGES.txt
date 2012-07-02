@@ -6,6 +6,8 @@ Gora Change Log
 
 0.3 (trunk) Current Development:
 
+* GORA-103 Datastore for gora dynamodb - phase 1 (Renato Javier Marroquín Mogrovejo via lewismc)
+
 * GORA-138 gora-cassandra array type support: Double fix for GORA-81 Replace CassandraStore#addOrUpdateField with TypeInferringSerializer to take advantage of when the value is already of type ByteBuffer. (Kazuomi Kashii via lewismc)
 
 * GORA-139  Creates Cassandra column family with BytesType for column value validator (and comparators), instead of UTF8Type (Kazuomi Kashii via lewismc)

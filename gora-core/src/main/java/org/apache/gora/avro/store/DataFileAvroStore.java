@@ -25,6 +25,7 @@ import org.apache.avro.file.DataFileWriter;
 import org.apache.gora.avro.mapreduce.FsInput;
 import org.apache.gora.avro.query.DataFileAvroResult;
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.query.impl.FileSplitPartitionQuery;
@@ -36,7 +37,7 @@ import org.apache.hadoop.fs.Path;
  * DataFile{Writer,Reader}'s as a backend. This datastore supports 
  * mapreduce.
  */
-public class DataFileAvroStore<K, T extends Persistent> extends AvroStore<K, T> {
+public class DataFileAvroStore<K, T extends PersistentBase> extends AvroStore<K, T> {
 
   public DataFileAvroStore() {
   }

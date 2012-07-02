@@ -21,7 +21,7 @@ package org.apache.gora.persistency;
 /**
  * BeanFactory's enable contruction of keys and Persistent objects. 
  */
-public interface BeanFactory<K, T extends Persistent> {
+public interface BeanFactory<K, T>{
 
   /**
    * Constructs a new instance of the key class

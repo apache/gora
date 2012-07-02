@@ -109,30 +109,35 @@ public class WebPageDataCreator {
   
   public static void createWebPageData(DataStore<String, WebPage> dataStore) 
   throws IOException {
-    WebPage page;
-    log.info("creating web page data");
-    
-    for(int i=0; i<URLS.length; i++) {
-      page = new WebPage();
-      page.setUrl(new Utf8(URLS[i]));
-      page.setContent(ByteBuffer.wrap(CONTENTS[i].getBytes()));
-      for(String token : CONTENTS[i].split(" ")) {
-        page.addToParsedContent(new Utf8(token));  
-      }
-      
-      for(int j=0; j<LINKS[i].length; j++) {
-        page.putToOutlinks(new Utf8(URLS[LINKS[i][j]]), new Utf8(ANCHORS[i][j]));
-      }
-      
-      Metadata metadata = new Metadata();
-      metadata.setVersion(1);
-      metadata.putToData(new Utf8("metakey"), new Utf8("metavalue"));
-      page.setMetadata(metadata);
-      
-      dataStore.put(URLS[i], page);
-    }
-    dataStore.flush();
-    log.info("finished creating web page data");
+	  try{
+	    WebPage page;
+	    log.info("creating web page data");
+	    
+	    for(int i=0; i<URLS.length; i++) {
+	      page = new WebPage();
+	      page.setUrl(new Utf8(URLS[i]));
+	      page.setContent(ByteBuffer.wrap(CONTENTS[i].getBytes()));
+	      for(String token : CONTENTS[i].split(" ")) {
+	        page.addToParsedContent(new Utf8(token));  
+	      }
+	      
+	      for(int j=0; j<LINKS[i].length; j++) {
+	        page.putToOutlinks(new Utf8(URLS[LINKS[i][j]]), new Utf8(ANCHORS[i][j]));
+	      }
+	      
+	      Metadata metadata = new Metadata();
+	      metadata.setVersion(1);
+	      metadata.putToData(new Utf8("metakey"), new Utf8("metavalue"));
+	      page.setMetadata(metadata);
+	      
+	      dataStore.put(URLS[i], page);
+	    }
+	    dataStore.flush();
+	    log.info("finished creating web page data");
+  	}
+ 	catch(Exception e){
+ 		log.info("error creating web page data");
+ 	}
   }
   
   public int run(String[] args) throws Exception {

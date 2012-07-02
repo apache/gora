@@ -23,6 +23,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
@@ -31,7 +32,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
  * Keeps a {@link FileSplit} to represent the partition boundaries.
  * FileSplitPartitionQuery is best used with existing {@link InputFormat}s.
  */
-public class FileSplitPartitionQuery<K, T extends Persistent>
+public class FileSplitPartitionQuery<K, T extends PersistentBase>
   extends PartitionQueryImpl<K,T> {
 
   private FileSplit split;

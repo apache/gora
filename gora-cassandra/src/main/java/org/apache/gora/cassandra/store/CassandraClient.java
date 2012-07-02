@@ -53,12 +53,13 @@ import org.apache.avro.util.Utf8;
 import org.apache.gora.cassandra.query.CassandraQuery;
 import org.apache.gora.mapreduce.GoraRecordReader;
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.util.ByteUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CassandraClient<K, T extends Persistent> {
+public class CassandraClient<K, T extends PersistentBase> {
   public static final Logger LOG = LoggerFactory.getLogger(CassandraClient.class);
   
   private Cluster cluster;

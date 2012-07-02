@@ -21,8 +21,10 @@ package org.apache.gora.mapreduce;
 import java.io.IOException;
 
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
+import org.apache.gora.query.impl.ResultBase;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
@@ -33,7 +35,7 @@ import org.slf4j.LoggerFactory;
 /**
  * An adapter for Result to Hadoop RecordReader.
  */
-public class GoraRecordReader<K, T extends Persistent> extends RecordReader<K,T> {
+public class GoraRecordReader<K, T extends PersistentBase> extends RecordReader<K,T> {
   public static final Logger LOG = LoggerFactory.getLogger(GoraRecordReader.class);
 
   public static final String BUFFER_LIMIT_READ_NAME = "gora.buffer.read.limit";
@@ -62,7 +64,7 @@ public class GoraRecordReader<K, T extends Persistent> extends RecordReader<K,T>
     this.query.setLimit(recordsMax);
   }
 
-  public void executeQuery() throws IOException {
+  public void executeQuery() throws IOException, Exception {
     this.result = query.execute();
   }
   
@@ -78,7 +80,12 @@ public class GoraRecordReader<K, T extends Persistent> extends RecordReader<K,T>
 
   @Override
   public float getProgress() throws IOException, InterruptedException {
-    return result.getProgress();
+    try{
+	  return result.getProgress();
+  	}
+ 	catch(Exception e){
+ 		return 0;
+ 	}
   }
 
   @Override
@@ -87,31 +94,36 @@ public class GoraRecordReader<K, T extends Persistent> extends RecordReader<K,T>
 
   @Override
   public boolean nextKeyValue() throws IOException, InterruptedException {
-    if (counter.isModulo()) {
-      boolean firstBatch = (this.result == null);
-      if (! firstBatch) {
-        this.query.setStartKey(this.result.getKey());
-        if (this.query.getLimit() == counter.getRecordsMax()) {
-          this.query.setLimit(counter.getRecordsMax() + 1);
-        }
-      }
-      if (this.result != null) {
-        this.result.close();
-      }
-      
-      executeQuery();
-      
-      if (! firstBatch) {
-        // skip first result
-        this.result.next();
-      }
-    }
-    
-    counter.increment();
-    return this.result.next();
+	  try{
+	    if (counter.isModulo()) {
+	      boolean firstBatch = (this.result == null);
+	      if (! firstBatch) {
+	        this.query.setStartKey(this.result.getKey());
+	        if (this.query.getLimit() == counter.getRecordsMax()) {
+	          this.query.setLimit(counter.getRecordsMax() + 1);
+	        }
+	      }
+	      if (this.result != null) {
+	        this.result.close();
+	      }
+	      
+	      executeQuery();
+	      
+	      if (! firstBatch) {
+	        // skip first result
+	        this.result.next();
+	      }
+	    }
+	    
+	    counter.increment();
+	    return this.result.next();
+	  }
+	  catch(Exception e){
+		return false;
+	  }
   }
 
-  @Override
+  //@Override
   public void close() throws IOException {
     if (result != null) {
       result.close();

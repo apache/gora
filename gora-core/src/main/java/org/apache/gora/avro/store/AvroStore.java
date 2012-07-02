@@ -35,7 +35,7 @@ import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.gora.avro.query.AvroQuery;
 import org.apache.gora.avro.query.AvroResult;
-import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.query.impl.FileSplitPartitionQuery;
@@ -50,7 +50,7 @@ import org.apache.hadoop.conf.Configuration;
  * AvroDataStore supports Binary and JSON serializations.
  * @param <T>
  */
-public class AvroStore<K, T extends Persistent>
+public class AvroStore<K, T extends PersistentBase>
   extends FileBackedDataStoreBase<K, T> implements Configurable {
 
   /** The property key specifying avro encoder/decoder type to use. Can take values

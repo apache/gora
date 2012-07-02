@@ -34,7 +34,7 @@ import org.apache.hadoop.conf.Configuration;
 /**
  * A Factory for {@link DataStore}s. DataStoreFactory instances are thread-safe.
  */
-public class DataStoreFactory {
+public class DataStoreFactory{
 
   public static final Logger log = LoggerFactory.getLogger(DataStoreFactory.class);
 
@@ -98,7 +98,7 @@ public class DataStoreFactory {
 
   private static <K, T extends Persistent> void initializeDataStore(
       DataStore<K, T> dataStore, Class<K> keyClass, Class<T> persistent,
-      Properties properties) throws IOException {
+      Properties properties) throws IOException, Exception {
     dataStore.initialize(keyClass, persistent, properties);
   }
 

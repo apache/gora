@@ -61,7 +61,7 @@ import org.apache.gora.store.impl.DataStoreBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T> {
+public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
   public static final Logger LOG = LoggerFactory.getLogger(CassandraStore.class);
   
   private CassandraClient<K, T>  cassandraClient = new CassandraClient<K, T>();
@@ -236,7 +236,7 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
   }
 
   @Override
-  public T get(K key, String[] fields) throws IOException {
+  public T get(K key, String[] fields) throws IOException, Exception {
     CassandraQuery<K,T> query = new CassandraQuery<K,T>();
     query.setDataStore(this);
     query.setKeyRange(key, key);
@@ -285,8 +285,8 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
         Type type = fieldSchema.getType();
         switch(type) {
           case RECORD:
-            Persistent persistent = (Persistent) fieldValue;
-            Persistent newRecord = persistent.newInstance(new StateManagerImpl());
+            PersistentBase persistent = (PersistentBase) fieldValue;
+            PersistentBase newRecord = (PersistentBase) persistent.newInstance(new StateManagerImpl());
             for (Field member: fieldSchema.getFields()) {
               newRecord.put(member.pos(), persistent.get(member.pos()));
             }

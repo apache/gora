@@ -21,7 +21,7 @@ package org.apache.gora.persistency;
 /**
  * StateManager manages objects state for persistency.
  */
-public interface StateManager {
+public interface StateManager{
 
   /**
    * If one state manager is allocated per persistent object, 

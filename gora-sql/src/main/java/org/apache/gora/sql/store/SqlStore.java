@@ -49,6 +49,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.StateManager;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
@@ -94,7 +95,7 @@ import org.jdom.input.SAXBuilder;
  * re-write as per GORA-86
  * Please see https://issues.apache.org/jira/browse/GORA-86
  */
-public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
+public class SqlStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
   /** The vendor of the DB */
   public static enum DBVendor {

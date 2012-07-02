@@ -116,7 +116,7 @@ public abstract class DataStoreTestBase {
   }
 
   @Test
-  public void testNewInstance() throws IOException {
+  public void testNewInstance() throws IOException, Exception {
     log.info("test method: testNewInstance");
     DataStoreTestUtil.testNewPersistent(employeeStore);
   }
@@ -151,7 +151,7 @@ public abstract class DataStoreTestBase {
   }
 
   @Test
-  public void testDeleteSchema() throws IOException {
+  public void testDeleteSchema() throws IOException, Exception {
     log.info("test method: testDeleteSchema");
     DataStoreTestUtil.testDeleteSchema(webPageStore);
   }
@@ -163,7 +163,7 @@ public abstract class DataStoreTestBase {
   }
 
   @Test
-  public void testPut() throws IOException {
+  public void testPut() throws IOException, Exception {
     log.info("test method: testPut");
     Employee employee = DataStoreTestUtil.testPutEmployee(employeeStore);
     assertPut(employee);
@@ -173,7 +173,7 @@ public abstract class DataStoreTestBase {
   }
 
   @Test
-  public void testPutNested() throws IOException {
+  public void testPutNested() throws IOException, Exception {
     log.info("test method: testPutNested");
 
     String revUrl = "foo.com:http/";
@@ -199,7 +199,7 @@ public abstract class DataStoreTestBase {
   }
 
   @Test
-  public void testPutArray() throws IOException {
+  public void testPutArray() throws IOException, Exception {
     log.info("test method: testPutArray");
     webPageStore.createSchema();
     WebPage page = webPageStore.newPersistent();
@@ -220,7 +220,7 @@ public abstract class DataStoreTestBase {
   }
 
   @Test
-  public void testPutBytes() throws IOException {
+  public void testPutBytes() throws IOException, Exception {
     log.info("test method: testPutBytes");
     webPageStore.createSchema();
     WebPage page = webPageStore.newPersistent();
@@ -239,7 +239,7 @@ public abstract class DataStoreTestBase {
   }
 
   @Test
-  public void testPutMap() throws IOException {
+  public void testPutMap() throws IOException, Exception {
     log.info("test method: testPutMap");
     webPageStore.createSchema();
 
@@ -259,108 +259,108 @@ public abstract class DataStoreTestBase {
   }
 
   @Test
-  public void testUpdate() throws IOException {
+  public void testUpdate() throws IOException, Exception {
     log.info("test method: testUpdate");
     DataStoreTestUtil.testUpdateEmployee(employeeStore);
     DataStoreTestUtil.testUpdateWebPage(webPageStore);
   }
 
-  public void testEmptyUpdate() throws IOException {
+  public void testEmptyUpdate() throws IOException, Exception {
     DataStoreTestUtil.testEmptyUpdateEmployee(employeeStore);
   }
 
   @Test
-  public void testGet() throws IOException {
+  public void testGet() throws IOException, Exception {
     log.info("test method: testGet");
     DataStoreTestUtil.testGetEmployee(employeeStore);
   }
 
   @Test
-  public void testGetWithFields() throws IOException {
+  public void testGetWithFields() throws IOException, Exception {
     log.info("test method: testGetWithFields");
     DataStoreTestUtil.testGetEmployeeWithFields(employeeStore);
   }
 
   @Test
-  public void testGetWebPage() throws IOException {
+  public void testGetWebPage() throws IOException, Exception {
     log.info("test method: testGetWebPage");
     DataStoreTestUtil.testGetWebPage(webPageStore);
   }
 
   @Test
-  public void testGetWebPageDefaultFields() throws IOException {
+  public void testGetWebPageDefaultFields() throws IOException, Exception {
     log.info("test method: testGetWebPageDefaultFields");
     DataStoreTestUtil.testGetWebPageDefaultFields(webPageStore);
   }
 
   @Test
-  public void testGetNonExisting() throws Exception {
+  public void testGetNonExisting() throws Exception, Exception {
     log.info("test method: testGetNonExisting");
     DataStoreTestUtil.testGetEmployeeNonExisting(employeeStore);
   }
 
  @Test
-  public void testQuery() throws IOException {
+  public void testQuery() throws IOException, Exception {
     log.info("test method: testQuery");
     DataStoreTestUtil.testQueryWebPages(webPageStore);
   }
 
   @Test
-  public void testQueryStartKey() throws IOException {
+  public void testQueryStartKey() throws IOException, Exception {
     log.info("test method: testQueryStartKey");
     DataStoreTestUtil.testQueryWebPageStartKey(webPageStore);
   }
 
   @Test
-  public void testQueryEndKey() throws IOException {
+  public void testQueryEndKey() throws IOException, Exception {
     log.info("test method: testQueryEndKey");
     DataStoreTestUtil.testQueryWebPageEndKey(webPageStore);
   }
 
   @Test
-  public void testQueryKeyRange() throws IOException {
+  public void testQueryKeyRange() throws IOException, Exception {
     log.info("test method: testQueryKetRange");
     DataStoreTestUtil.testQueryWebPageKeyRange(webPageStore);
   }
 
  @Test
-  public void testQueryWebPageSingleKey() throws IOException {
+  public void testQueryWebPageSingleKey() throws IOException, Exception {
    log.info("test method: testQueryWebPageSingleKey");
     DataStoreTestUtil.testQueryWebPageSingleKey(webPageStore);
   }
 
   @Test
-  public void testQueryWebPageSingleKeyDefaultFields() throws IOException {
+  public void testQueryWebPageSingleKeyDefaultFields() throws IOException, Exception {
     log.info("test method: testQuerySingleKeyDefaultFields");
     DataStoreTestUtil.testQueryWebPageSingleKeyDefaultFields(webPageStore);
   }
 
   @Test
-  public void testQueryWebPageQueryEmptyResults() throws IOException {
+  public void testQueryWebPageQueryEmptyResults() throws IOException, Exception {
     log.info("test method: testQueryEmptyResults");
     DataStoreTestUtil.testQueryWebPageEmptyResults(webPageStore);
   }
 
   @Test
-  public void testDelete() throws IOException {
+  public void testDelete() throws IOException, Exception {
     log.info("test method: testDelete");
     DataStoreTestUtil.testDelete(webPageStore);
   }
 
   @Test
-  public void testDeleteByQuery() throws IOException {
+  public void testDeleteByQuery() throws IOException, Exception {
     log.info("test method: testDeleteByQuery");
     DataStoreTestUtil.testDeleteByQuery(webPageStore);
   }
 
   @Test
-  public void testDeleteByQueryFields() throws IOException {
+  public void testDeleteByQueryFields() throws IOException, Exception {
     log.info("test method: testQueryByQueryFields");
     DataStoreTestUtil.testDeleteByQueryFields(webPageStore);
   }
 
   @Test
-  public void testGetPartitions() throws IOException {
+  public void testGetPartitions() throws IOException, Exception {
     log.info("test method: testGetPartitions");
     DataStoreTestUtil.testGetPartitions(webPageStore);
   }

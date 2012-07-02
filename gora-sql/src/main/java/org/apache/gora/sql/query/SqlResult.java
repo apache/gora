@@ -23,13 +23,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.ResultBase;
 import org.apache.gora.sql.store.SqlStore;
 import org.apache.gora.sql.util.SqlUtils;
 import org.apache.gora.store.DataStore;
 
-public class SqlResult<K, T extends Persistent> extends ResultBase<K, T> {
+public class SqlResult<K, T extends PersistentBase> extends ResultBase<K, T> {
 
   private ResultSet resultSet;
   private PreparedStatement statement;

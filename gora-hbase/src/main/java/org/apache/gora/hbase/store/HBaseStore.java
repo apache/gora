@@ -51,6 +51,7 @@ import org.apache.gora.persistency.State;
 import org.apache.gora.persistency.StateManager;
 import org.apache.gora.persistency.StatefulHashMap;
 import org.apache.gora.persistency.StatefulMap;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.PartitionQueryImpl;
@@ -77,7 +78,7 @@ import org.jdom.input.SAXBuilder;
  * DataStore for HBase. Thread safe.
  *
  */
-public class HBaseStore<K, T extends Persistent> extends DataStoreBase<K, T>
+public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
 implements Configurable {
 
   public static final Logger LOG = LoggerFactory.getLogger(HBaseStore.class);
@@ -262,7 +263,7 @@ implements Configurable {
   }
 
   @Override
-  public long deleteByQuery(Query<K, T> query) throws IOException {
+  public long deleteByQuery(Query<K, T> query) throws IOException, Exception {
 
     String[] fields = getFieldsToQuery(query.getFields());
     //find whether all fields are queried, which means that complete

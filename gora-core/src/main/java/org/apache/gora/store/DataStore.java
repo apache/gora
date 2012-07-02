@@ -17,9 +17,6 @@
  */
 package org.apache.gora.store;
 
-import java.io.Closeable;
-import java.io.DataInput;
-import java.io.DataOutput;
 import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
@@ -29,9 +26,6 @@ import org.apache.gora.persistency.Persistent;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
-import org.apache.hadoop.conf.Configurable;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.Writable;
 
 /**
  * DataStore handles actual object persistence. Objects can be persisted,
@@ -46,18 +40,17 @@ import org.apache.hadoop.io.Writable;
  * @param <K> the class of keys in the datastore
  * @param <T> the class of persistent objects in the datastore
  */
-public interface DataStore<K, T extends Persistent> extends Closeable,
-  Writable, Configurable {
+public interface DataStore<K, T> {
 
   /**
    * Initializes this DataStore.
    * @param keyClass the class of the keys
    * @param persistentClass the class of the persistent objects
    * @param properties extra metadata
-   * @throws IOException
+   * @throws Exception
    */
   void initialize(Class<K> keyClass, Class<T> persistentClass,
-      Properties properties) throws IOException;
+      Properties properties) throws Exception;
 
   /**
    * Sets the class of the keys
@@ -95,26 +88,26 @@ public interface DataStore<K, T extends Persistent> extends Closeable,
    * or the underlying data model does not support
    * or need this operation, the operation is ignored.
    */
-  void createSchema() throws IOException;
+  void createSchema() throws Exception;
 
   /**
    * Deletes the underlying schema or table (or similar) in the datastore
    * that holds the objects. This also deletes all the data associated with
    * the schema.
    */
-  void deleteSchema() throws IOException;
+  void deleteSchema() throws Exception;
 
   /**
    * Deletes all the data associated with the schema, but keeps the
    * schema (table or similar) intact.
    */
-  void truncateSchema() throws IOException;
+  void truncateSchema() throws Exception;
 
   /**
    * Returns whether the schema that holds the data exists in the datastore.
    * @return whether schema exists
    */
-  boolean schemaExists() throws IOException;
+  boolean schemaExists() throws Exception;
 
   /**
    * Returns a new instance of the key object. If the object cannot be instantiated 
@@ -123,20 +116,20 @@ public interface DataStore<K, T extends Persistent> extends Closeable,
    * make sure that the key class has a no-arg constructor.   
    * @return a new instance of the key object.
    */
-  K newKey() throws IOException;
+  K newKey() throws Exception;
 
   /**
    * Returns a new instance of the managed persistent object.
    * @return a new instance of the managed persistent object.
    */
-  T newPersistent() throws IOException;
+  T newPersistent() throws Exception;
 
   /**
    * Returns the object corresponding to the given key fetching all the fields.
    * @param key the key of the object
    * @return the Object corresponding to the key or null if it cannot be found
    */
-  T get(K key) throws IOException;
+  T get(K key) throws Exception;
 
   /**
    * Returns the object corresponding to the given key.
@@ -144,7 +137,7 @@ public interface DataStore<K, T extends Persistent> extends Closeable,
    * @param fields the fields required in the object. Pass null, to retrieve all fields
    * @return the Object corresponding to the key or null if it cannot be found
    */
-  T get(K key, String[] fields) throws IOException;
+  T get(K key, String[] fields) throws Exception;
 
   /**
    * Inserts the persistent object with the given key. If an 
@@ -152,14 +145,14 @@ public interface DataStore<K, T extends Persistent> extends Closeable,
    * be replaced. See also the note on 
    * <a href="#visibility">visibility</a>.
    */
-  void put(K key, T obj) throws IOException;
+  void put(K key, T obj) throws Exception;
 
   /**
    * Deletes the object with the given key
    * @param key the key of the object
    * @return whether the object was successfully deleted
    */
-  boolean delete(K key) throws IOException;
+  boolean delete(K key) throws Exception;
 
   /**
    * Deletes all the objects matching the query.
@@ -167,14 +160,14 @@ public interface DataStore<K, T extends Persistent> extends Closeable,
    * @param query matching records to this query will be deleted
    * @return number of deleted records
    */
-  long deleteByQuery(Query<K, T> query) throws IOException;
+  long deleteByQuery(Query<K, T> query) throws Exception;
 
   /**
    * Executes the given query and returns the results.
    * @param query the query to execute.
    * @return the results as a {@link Result} object.
    */
-  Result<K,T> execute(Query<K, T> query) throws IOException;
+  Result<K,T> execute(Query<K, T> query) throws Exception;
 
   /**
    * Constructs and returns a new Query.
@@ -189,9 +182,9 @@ public interface DataStore<K, T extends Persistent> extends Closeable,
    * is null, then the data store returns the partitions for the default query
    * (returning every object)
    * @return a List of PartitionQuery's
+   * @throws IOException 
    */
-  List<PartitionQuery<K,T>> getPartitions(Query<K,T> query)
-    throws IOException;
+  List<PartitionQuery<K,T>> getPartitions(Query<K,T> query) throws IOException;
 
   /**
    * Forces the write caches to be flushed. DataStore implementations may
@@ -199,7 +192,7 @@ public interface DataStore<K, T extends Persistent> extends Closeable,
    * until this moment.
    * See also the note on <a href="#visibility">visibility</a>.
    */
-  void flush() throws IOException;
+  void flush() throws Exception;
 
   /**
    * Sets the {@link BeanFactory} to use by the DataStore.
@@ -219,14 +212,10 @@ public interface DataStore<K, T extends Persistent> extends Closeable,
    * All other DataStore methods cannot be used after this
    * method was called. Subsequent calls of this method are ignored.
    */
-  void close() throws IOException;
+  void close()  throws IOException, InterruptedException, Exception;
 
-  Configuration getConf();
-
-  void setConf(Configuration conf);
-
-  void readFields(DataInput in) throws IOException;
-
-  void write(DataOutput out) throws IOException;
+  //void readFields() throws Exception;
+  
+  //void write() throws IOException;
 
 }

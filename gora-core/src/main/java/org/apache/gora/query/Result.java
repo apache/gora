@@ -18,10 +18,8 @@
 
 package org.apache.gora.query;
 
-import java.io.Closeable;
 import java.io.IOException;
 
-import org.apache.gora.persistency.Persistent;
 import org.apache.gora.store.DataStore;
 
 /**
@@ -29,7 +27,7 @@ import org.apache.gora.store.DataStore;
  * iterated by calling {@link #next()}, {@link #get()} 
  * and {@link #getKey()}. 
  */
-public interface Result<K,T extends Persistent> extends Closeable {
+public interface Result<K,T> {
 
   /**
    * Returns the DataStore, that this Result is associated with.
@@ -47,7 +45,7 @@ public interface Result<K,T extends Persistent> extends Closeable {
    * Advances to the next element and returns false if at end.
    * @return true if end is not reached yet
    */
-  boolean next() throws IOException;
+  boolean next() throws Exception, IOException;
   
   /**
    * Returns the current key.
@@ -82,9 +80,8 @@ public interface Result<K,T extends Persistent> extends Closeable {
   /**
    * Returns how far along the result has iterated, a value between 0 and 1.
    */
-  float getProgress() throws IOException;
-  
-  @Override
+  float getProgress() throws IOException, InterruptedException, Exception;
+
   void close() throws IOException;
   
 }
