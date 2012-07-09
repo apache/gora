@@ -78,7 +78,12 @@ public class HBaseTableConnection implements HTableInterface{
   private HTable getTable() throws IOException {
     HTable table = tables.get();
     if (table == null) {
-      table = new HTable(conf, tableName);
+      table = new HTable(conf, tableName) {
+        @Override
+        public synchronized void flushCommits() throws IOException {
+          super.flushCommits();
+        }
+      };
       table.setAutoFlush(autoflush);
       pool.add(table); //keep track
       tables.set(table);
