@@ -6,6 +6,8 @@ Gora Change Log
 
 0.3 (trunk) Current Development:
 
+* GORA-148 CassandraMapping supports only (first) keyspace and class in gora-cassandra-mapping.xml (kazk)
+
 * GORA-143 GoraCompiler needs to add "import FixedSize" statement for FIXED type (kazk)
 
 * GORA-147 fix threading issue caused by multiple threads trying to flush (ferdy)

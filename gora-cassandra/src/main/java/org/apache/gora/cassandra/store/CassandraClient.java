@@ -65,14 +65,19 @@ public class CassandraClient<K, T extends Persistent> {
   private Keyspace keyspace;
   private Mutator<K> mutator;
   private Class<K> keyClass;
+  private Class<T> persistentClass;
   
-  private CassandraMapping cassandraMapping = new CassandraMapping();
+  private CassandraMapping cassandraMapping = null;
 
   private Serializer<K> keySerializer;
   
-  public void initialize(Class<K> keyClass) throws Exception {
+  public void initialize(Class<K> keyClass, Class<T> persistentClass) throws Exception {
     this.keyClass = keyClass;
-    this.cassandraMapping.loadConfiguration();
+
+    // get cassandra mapping with persistent class
+    this.persistentClass = persistentClass;
+    this.cassandraMapping = CassandraMappingManager.getManager().get(persistentClass);
+
     this.cluster = HFactory.getOrCreateCluster(this.cassandraMapping.getClusterName(), new CassandraHostConfigurator(this.cassandraMapping.getHostName()));
     
     // add keyspace to cluster
