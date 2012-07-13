@@ -25,12 +25,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import me.prettyprint.cassandra.model.ConfigurableConsistencyLevel;
 import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
-import me.prettyprint.cassandra.serializers.FloatSerializer;
 import me.prettyprint.cassandra.serializers.IntegerSerializer;
-import me.prettyprint.cassandra.serializers.DoubleSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
-import me.prettyprint.cassandra.serializers.SerializerTypeInferer;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
@@ -45,12 +43,17 @@ import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.RangeSlicesQuery;
 import me.prettyprint.hector.api.query.RangeSuperSlicesQuery;
-import me.prettyprint.cassandra.model.ConfigurableConsistencyLevel;
 import me.prettyprint.hector.api.HConsistencyLevel;
 import me.prettyprint.hector.api.Serializer;
 
+import org.apache.avro.Schema;
+import org.apache.avro.Schema.Type;
+import org.apache.avro.generic.GenericArray;
 import org.apache.avro.util.Utf8;
 import org.apache.gora.cassandra.query.CassandraQuery;
+import org.apache.gora.cassandra.serializers.GenericArraySerializer;
+import org.apache.gora.cassandra.serializers.GoraSerializerTypeInferer;
+import org.apache.gora.cassandra.serializers.TypeUtils;
 import org.apache.gora.mapreduce.GoraRecordReader;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.query.Query;
@@ -86,7 +89,7 @@ public class CassandraClient<K, T extends Persistent> {
     // Just create a Keyspace object on the client side, corresponding to an already existing keyspace with already created column families.
     this.keyspace = HFactory.createKeyspace(this.cassandraMapping.getKeyspaceName(), this.cluster);
     
-    this.keySerializer = SerializerTypeInferer.getSerializer(keyClass);
+    this.keySerializer = GoraSerializerTypeInferer.getSerializer(keyClass);
     this.mutator = HFactory.createMutator(this.keyspace, this.keySerializer);
   }
   
@@ -148,8 +151,12 @@ public class CassandraClient<K, T extends Persistent> {
     
     String columnFamily = this.cassandraMapping.getFamily(fieldName);
     String columnName = this.cassandraMapping.getColumn(fieldName);
+    if (columnName == null) {
+      LOG.warn("Column name is null for field=" + fieldName + " with value=" + value.toString());
+      return;
+    }
     
-    this.mutator.insert(key, columnFamily, HFactory.createColumn(columnName, byteBuffer, StringSerializer.get(), ByteBufferSerializer.get()));
+    HectorUtils.insertColumn(mutator, key, columnFamily, columnName, byteBuffer);
   }
 
   /**
@@ -164,14 +171,43 @@ public class CassandraClient<K, T extends Persistent> {
     if (value == null) {
       return;
     }
-    
+
     ByteBuffer byteBuffer = toByteBuffer(value);
     
     String columnFamily = this.cassandraMapping.getFamily(fieldName);
     String superColumnName = this.cassandraMapping.getColumn(fieldName);
     
-    this.mutator.insert(key, columnFamily, HFactory.createSuperColumn(superColumnName, Arrays.asList(HFactory.createColumn(columnName, byteBuffer, ByteBufferSerializer.get(), ByteBufferSerializer.get())), StringSerializer.get(), ByteBufferSerializer.get(), ByteBufferSerializer.get()));
-    
+    HectorUtils.insertSubColumn(mutator, key, columnFamily, superColumnName, columnName, byteBuffer);
+  }
+
+  public void addSubColumn(K key, String fieldName, String columnName, Object value) {
+    addSubColumn(key, fieldName, StringSerializer.get().toByteBuffer(columnName), value);
+  }
+
+  public void addSubColumn(K key, String fieldName, Integer columnName, Object value) {
+    addSubColumn(key, fieldName, IntegerSerializer.get().toByteBuffer(columnName), value);
+  }
+
+
+  @SuppressWarnings("unchecked")
+  public void addGenericArray(K key, String fieldName, GenericArray array) {
+    if (isSuper( cassandraMapping.getFamily(fieldName) )) {
+      int i= 0;
+      for (Object itemValue: array) {
+
+        // TODO: hack, do not store empty arrays
+        if (itemValue instanceof GenericArray<?>) {
+          if (((GenericArray)itemValue).size() == 0) {
+            continue;
+          }
+        }
+
+        addSubColumn(key, fieldName, i++, itemValue);
+      }
+    }
+    else {
+      addColumn(key, fieldName, array);
+    }
   }
 
   /**
@@ -181,29 +217,17 @@ public class CassandraClient<K, T extends Persistent> {
    */
   @SuppressWarnings("unchecked")
   public ByteBuffer toByteBuffer(Object value) {
-    if (value == null) {
-      return null;
-    }
-    
     ByteBuffer byteBuffer = null;
-    if (value instanceof ByteBuffer) {
-      byteBuffer = (ByteBuffer) value;
-    }
-    else if (value instanceof Utf8) {
-      byteBuffer = StringSerializer.get().toByteBuffer(((Utf8)value).toString());
-    }
-    else if (value instanceof Float) {
-      // workaround for hector-core-1.0-1.jar
-      // because SerializerTypeInferer.getSerializer(Float ) returns ObjectSerializer !?
-      byteBuffer = FloatSerializer.get().toByteBuffer((Float)value);
-    }
-    else if (value instanceof Double) {
-      // workaround for hector-core-1.0-1.jar
-      // because SerializerTypeInferer.getSerializer(Double ) returns ObjectSerializer !?
-      byteBuffer = DoubleSerializer.get().toByteBuffer((Double)value);
+    Serializer serializer = GoraSerializerTypeInferer.getSerializer(value);
+    if (serializer == null) {
+      LOG.info("Serializer not found for: " + value.toString());
     }
     else {
-      byteBuffer = SerializerTypeInferer.getSerializer(value).toByteBuffer(value);
+      byteBuffer = serializer.toByteBuffer(value);
+    }
+
+    if (byteBuffer == null) {
+      LOG.info("value class=" + value.getClass().getName() + " value=" + value + " -> null");
     }
     
     return byteBuffer;
