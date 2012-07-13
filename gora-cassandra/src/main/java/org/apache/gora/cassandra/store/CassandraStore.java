@@ -81,7 +81,7 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
   public void initialize(Class<K> keyClass, Class<T> persistent, Properties properties) throws IOException {
     super.initialize(keyClass, persistent, properties);
     try {
-      this.cassandraClient.initialize(keyClass);
+      this.cassandraClient.initialize(keyClass, persistent);
     }
     catch (Exception e) {
       throw new IOException(e.getMessage(), e);
