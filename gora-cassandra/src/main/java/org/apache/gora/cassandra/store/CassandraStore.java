@@ -41,6 +41,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericArray;
+import org.apache.avro.specific.SpecificFixed;
 import org.apache.avro.util.Utf8;
 import org.apache.gora.cassandra.query.CassandraQuery;
 import org.apache.gora.cassandra.query.CassandraResult;
@@ -299,8 +300,7 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
             break;
           case ARRAY:
             GenericArray array = (GenericArray) fieldValue;
-            Type elementType = fieldSchema.getElementType().getType();
-            GenericArray newArray = new ListGenericArray(Schema.create(elementType));
+            ListGenericArray newArray = new ListGenericArray(fieldSchema.getElementType());
             Iterator iter = array.iterator();
             while (iter.hasNext()) {
               newArray.add(iter.next());
@@ -328,11 +328,13 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
     Type type = schema.getType();
     switch (type) {
       case STRING:
+      case BOOLEAN:
       case INT:
       case LONG:
       case BYTES:
       case FLOAT:
       case DOUBLE:
+      case FIXED:
         this.cassandraClient.addColumn(key, field.name(), value);
         break;
       case RECORD:
@@ -344,16 +346,12 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
               // TODO: hack, do not store empty arrays
               Object memberValue = persistentBase.get(member.pos());
               if (memberValue instanceof GenericArray<?>) {
-                GenericArray<String> array = (GenericArray<String>) memberValue;
-                if (array.size() == 0) {
+                if (((GenericArray)memberValue).size() == 0) {
                   continue;
                 }
               }
-              
-              if (memberValue instanceof Utf8) {
-                memberValue = memberValue.toString();
-              }
-              this.cassandraClient.addSubColumn(key, field.name(), StringSerializer.get().toByteBuffer(member.name()), memberValue);
+
+              this.cassandraClient.addSubColumn(key, field.name(), member.name(), memberValue);
             }
           } else {
             LOG.info("Record not supported: " + value.toString());
@@ -371,16 +369,12 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
               // TODO: hack, do not store empty arrays
               Object keyValue = map.get(mapKey);
               if (keyValue instanceof GenericArray<?>) {
-                GenericArray<String> array = (GenericArray<String>) keyValue;
-                if (array.size() == 0) {
+                if (((GenericArray)keyValue).size() == 0) {
                   continue;
                 }
               }
-              
-              if (keyValue instanceof Utf8) {
-                keyValue = keyValue.toString();
-              }
-              this.cassandraClient.addSubColumn(key, field.name(), StringSerializer.get().toByteBuffer(mapKey.toString()), keyValue);              
+
+              this.cassandraClient.addSubColumn(key, field.name(), mapKey.toString(), keyValue);
             }
           } else {
             LOG.info("Map not supported: " + value.toString());
@@ -390,14 +384,7 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
       case ARRAY:
         if (value != null) {
           if (value instanceof GenericArray<?>) {
-            GenericArray<Object> array = (GenericArray<Object>) value;
-            int i= 0;
-            for (Object itemValue: array) {
-              if (itemValue instanceof Utf8) {
-                itemValue = itemValue.toString();
-              }
-              this.cassandraClient.addSubColumn(key, field.name(), IntegerSerializer.get().toByteBuffer(i++), itemValue);              
-            }
+            this.cassandraClient.addGenericArray(key, field.name(), (GenericArray)value);
           } else {
             LOG.info("Array not supported: " + value.toString());
           }

@@ -31,6 +31,7 @@ import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericArray;
 import org.apache.avro.util.Utf8;
+import org.apache.gora.cassandra.serializers.Utf8Serializer;
 import org.apache.gora.persistency.ListGenericArray;
 import org.apache.gora.persistency.StatefulHashMap;
 import org.apache.gora.persistency.impl.PersistentBase;
@@ -55,12 +56,11 @@ public class CassandraSuperColumn extends CassandraColumn {
     
     switch (type) {
       case ARRAY:
-        Type elementType = fieldSchema.getElementType().getType();
-        GenericArray array = new ListGenericArray(Schema.create(elementType));
+        ListGenericArray array = new ListGenericArray(fieldSchema.getElementType());
         
         for (HColumn<ByteBuffer, ByteBuffer> hColumn : this.hSuperColumn.getColumns()) {
           ByteBuffer memberByteBuffer = hColumn.getValue();
-          Object memberValue = fromByteBuffer(elementType, hColumn.getValue());
+          Object memberValue = fromByteBuffer(fieldSchema.getElementType(), hColumn.getValue());
           // int i = IntegerSerializer().get().fromByteBuffer(hColumn.getName());
           array.add(memberValue);      
         }
@@ -69,12 +69,12 @@ public class CassandraSuperColumn extends CassandraColumn {
         break;
       case MAP:
         Map<Utf8, Object> map = new StatefulHashMap<Utf8, Object>();
-        Type valueType = fieldSchema.getValueType().getType();
         
         for (HColumn<ByteBuffer, ByteBuffer> hColumn : this.hSuperColumn.getColumns()) {
           ByteBuffer memberByteBuffer = hColumn.getValue();
-          Object memberValue = fromByteBuffer(valueType, hColumn.getValue());
-          map.put(new Utf8(StringSerializer.get().fromByteBuffer(hColumn.getName())), memberValue);      
+          Object memberValue = null;
+          memberValue = fromByteBuffer(fieldSchema.getValueType(), hColumn.getValue());
+          map.put(Utf8Serializer.get().fromByteBuffer(hColumn.getName()), memberValue);      
         }
         value = map;
         
@@ -106,6 +106,10 @@ public class CassandraSuperColumn extends CassandraColumn {
 
           for (HColumn<ByteBuffer, ByteBuffer> hColumn : this.hSuperColumn.getColumns()) {
             String memberName = StringSerializer.get().fromByteBuffer(hColumn.getName());
+            if (memberName == null || memberName.length() == 0) {
+              LOG.warn("member name is null or empty.");
+              continue;
+            }
             Field memberField = fieldSchema.getField(memberName);
             CassandraSubColumn cassandraColumn = new CassandraSubColumn();
             cassandraColumn.setField(memberField);
