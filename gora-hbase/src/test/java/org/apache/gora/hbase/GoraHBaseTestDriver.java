@@ -21,6 +21,8 @@ package org.apache.gora.hbase;
 import org.apache.gora.GoraTestDriver;
 import org.apache.gora.hbase.store.HBaseStore;
 import org.apache.hadoop.conf.Configuration;
+
+//HBase imports
 import org.apache.hadoop.hbase.HBaseTestingUtility;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
@@ -82,4 +84,4 @@ public class GoraHBaseTestDriver extends GoraTestDriver {
     return hbaseUtil;
   }
   
-}
+}		

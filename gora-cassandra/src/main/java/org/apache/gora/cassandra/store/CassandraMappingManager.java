@@ -104,13 +104,13 @@ public class CassandraMappingManager {
       LOG.warn("Error locating Cassandra Keyspace element!");
     }
     else {
-      // LOG.info("Located Cassandra Keyspace: '" + KEYSPACE_ELEMENT + "'");
+      LOG.info("Located Cassandra Keyspace: '" + KEYSPACE_ELEMENT + "'");
       for (Element keyspace : keyspaces) {
         String keyspaceName = keyspace.getAttributeValue(NAME_ATTRIBUTE);
         if (keyspaceName == null) {
     	    LOG.warn("Error locating Cassandra Keyspace name attribute!");
         }
-    	// LOG.info("Located Cassandra Keyspace name: '" + NAME_ATTRIBUTE + "'");
+    	LOG.info("Located Cassandra Keyspace name: '" + NAME_ATTRIBUTE + "'");
         keyspaceMap.put(keyspaceName, keyspace);
       }
     }
@@ -121,14 +121,14 @@ public class CassandraMappingManager {
       LOG.warn("Error locating Cassandra Mapping element!");
     }
     else {
-      // LOG.info("Located Cassandra Mapping: '" + MAPPING_ELEMENT + "'");
+      LOG.info("Located Cassandra Mapping: '" + MAPPING_ELEMENT + "'");
       for (Element mapping : mappings) {
         String className = mapping.getAttributeValue(NAME_ATTRIBUTE);
         if (className == null) {
     	    LOG.warn("Error locating Cassandra Mapping class name attribute!");
     	    continue;
         }
-    	// LOG.info("Located Cassandra Mapping class name: '" + NAME_ATTRIBUTE + "'");
+    	LOG.info("Located Cassandra Mapping class name: '" + NAME_ATTRIBUTE + "'");
         mappingMap.put(className, mapping);
       }
     }

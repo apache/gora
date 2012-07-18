@@ -66,12 +66,11 @@
         <sourceDirectory>src/main/java</sourceDirectory>
         <testResources>
             <testResource>
-                <directory>src/test/conf</directory>
+              <directory>src/test/conf</directory>
                 <includes>
-                    <include>
-                        **/*
-                    </include>
+                    <include>**/*</include>
                 </includes>
+            <!--targetPath>${project.basedir}/target/classes/</targetPath-->
             </testResource>
         </testResources>
         <plugins>

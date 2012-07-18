@@ -53,6 +53,7 @@ public class TestHBaseStore extends DataStoreTestBase {
     conf = getTestDriver().getHbaseUtil().getConfiguration();
   }
     
+  @SuppressWarnings("unchecked")
   @Override
   protected DataStore<String, Employee> createEmployeeDataStore()
       throws IOException {
@@ -60,6 +61,7 @@ public class TestHBaseStore extends DataStoreTestBase {
         Employee.class, conf);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   protected DataStore<String, WebPage> createWebPageDataStore()
       throws IOException {
