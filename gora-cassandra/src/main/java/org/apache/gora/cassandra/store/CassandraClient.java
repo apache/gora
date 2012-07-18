@@ -56,6 +56,7 @@ import org.apache.gora.cassandra.serializers.GoraSerializerTypeInferer;
 import org.apache.gora.cassandra.serializers.TypeUtils;
 import org.apache.gora.mapreduce.GoraRecordReader;
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.StatefulHashMap;
 import org.apache.gora.query.Query;
 import org.apache.gora.util.ByteUtils;
 import org.slf4j.Logger;
@@ -107,7 +108,7 @@ public class CassandraClient<K, T extends Persistent> {
       List<ColumnFamilyDefinition> columnFamilyDefinitions = this.cassandraMapping.getColumnFamilyDefinitions();      
       keyspaceDefinition = HFactory.createKeyspaceDefinition(this.cassandraMapping.getKeyspaceName(), "org.apache.cassandra.locator.SimpleStrategy", 1, columnFamilyDefinitions);      
       this.cluster.addKeyspace(keyspaceDefinition, true);
-      LOG.info("Keyspace '" + this.cassandraMapping.getKeyspaceName() + "' in cluster '" + this.cassandraMapping.getClusterName() + "' was created on host '" + this.cassandraMapping.getHostName() + "'");
+      // LOG.info("Keyspace '" + this.cassandraMapping.getKeyspaceName() + "' in cluster '" + this.cassandraMapping.getClusterName() + "' was created on host '" + this.cassandraMapping.getHostName() + "'");
       
       // Create a customized Consistency Level
       ConfigurableConsistencyLevel configurableConsistencyLevel = new ConfigurableConsistencyLevel();
@@ -200,6 +201,10 @@ public class CassandraClient<K, T extends Persistent> {
           if (((GenericArray)itemValue).size() == 0) {
             continue;
           }
+        } else if (itemValue instanceof StatefulHashMap<?,?>) {
+          if (((StatefulHashMap)itemValue).size() == 0) {
+            continue;
+          }
         }
 
         addSubColumn(key, fieldName, i++, itemValue);
@@ -207,6 +212,32 @@ public class CassandraClient<K, T extends Persistent> {
     }
     else {
       addColumn(key, fieldName, array);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  public void addStatefulHashMap(K key, String fieldName, StatefulHashMap<Utf8,Object> map) {
+    if (isSuper( cassandraMapping.getFamily(fieldName) )) {
+      int i= 0;
+      for (Utf8 mapKey: map.keySet()) {
+
+        // TODO: hack, do not store empty arrays
+        Object mapValue = map.get(mapKey);
+        if (mapValue instanceof GenericArray<?>) {
+          if (((GenericArray)mapValue).size() == 0) {
+            continue;
+          }
+        } else if (mapValue instanceof StatefulHashMap<?,?>) {
+          if (((StatefulHashMap)mapValue).size() == 0) {
+            continue;
+          }
+        }
+
+        addSubColumn(key, fieldName, mapKey.toString(), mapValue);
+      }
+    }
+    else {
+      addColumn(key, fieldName, map);
     }
   }
 
