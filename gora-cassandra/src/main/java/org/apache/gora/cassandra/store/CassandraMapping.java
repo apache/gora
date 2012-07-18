@@ -148,7 +148,7 @@ public class CassandraMapping {
       if (superAttribute != null) {
     	// LOG.info("Located super column family");
         this.superFamilies.add(familyName);
-        LOG.info("Added super column family: '" + familyName + "'");
+        // LOG.info("Added super column family: '" + familyName + "'");
         cfDef.setColumnType(ColumnType.SUPER);
         cfDef.setSubComparatorType(ComparatorType.BYTESTYPE);
       }

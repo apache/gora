@@ -38,7 +38,9 @@ import org.apache.avro.generic.GenericArray;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.util.Utf8;
 import org.apache.gora.cassandra.serializers.GenericArraySerializer;
+import org.apache.gora.cassandra.serializers.StatefulHashMapSerializer;
 import org.apache.gora.cassandra.serializers.TypeUtils;
+import org.apache.gora.persistency.StatefulHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,6 +78,10 @@ public class CassandraSubColumn extends CassandraColumn {
       GenericArraySerializer serializer = GenericArraySerializer.get(fieldSchema.getElementType());
       GenericArray genericArray = serializer.fromByteBuffer(byteBuffer);
       value = genericArray;
+    } else if (type == Type.MAP) {
+      StatefulHashMapSerializer serializer = StatefulHashMapSerializer.get(fieldSchema.getValueType());
+      StatefulHashMap map = serializer.fromByteBuffer(byteBuffer);
+      value = map;
     } else {
       value = fromByteBuffer(fieldSchema, byteBuffer);
     }
