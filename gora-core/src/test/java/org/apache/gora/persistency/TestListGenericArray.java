@@ -19,6 +19,7 @@
 package org.apache.gora.persistency;
 
 import org.apache.avro.Schema; 
+import org.apache.avro.generic.GenericData;
 import org.apache.avro.util.Utf8;
 import org.apache.gora.persistency.ListGenericArray; 
 import org.junit.Assert;
@@ -38,6 +39,19 @@ public class TestListGenericArray {
       int hashCode = array.hashCode();
     }
     catch (StackOverflowError e) {
+      stackOverflowError = true;
+    }
+    Assert.assertFalse(stackOverflowError);
+  }
+  
+  @Test
+  public void testCompareTo() {
+    ListGenericArray array = new ListGenericArray(Schema.create(Schema.Type.STRING));
+    boolean stackOverflowError = false;
+    array.add(new Utf8("array comparison test"));
+    try {
+      int compareTo = array.compareTo(array);
+    } catch (StackOverflowError e) {
       stackOverflowError = true;
     }
     Assert.assertFalse(stackOverflowError);
