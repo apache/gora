@@ -390,7 +390,7 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
   @Override
   public boolean schemaExists() throws IOException {
     LOG.info("schema exists");
-    return false;
+    return cassandraClient.keyspaceExists();
   }
 
 }
