@@ -6,6 +6,8 @@ Gora Change Log
 
 0.3 (trunk) Current Development:
 
+* GORA-156 Properly implement getSchemaName in CassandraStore (lewismc)
+
 * GORA-153 gora-cassandra does not correctly handle DELETED State for MAP (kazk)
 
 * GORA-152 gora-core test incorrectly uses ByteBuffer's array() method to get its byte array (kazk)
