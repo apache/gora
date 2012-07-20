@@ -93,6 +93,14 @@ public class CassandraClient<K, T extends Persistent> {
     this.keySerializer = GoraSerializerTypeInferer.getSerializer(keyClass);
     this.mutator = HFactory.createMutator(this.keyspace, this.keySerializer);
   }
+
+  /**
+   * Check if keyspace already exists.
+   */
+  public boolean keyspaceExists() {
+    KeyspaceDefinition keyspaceDefinition = this.cluster.describeKeyspace(this.cassandraMapping.getKeyspaceName());
+    return (keyspaceDefinition != null);
+  }
   
   /**
    * Check if keyspace already exists. If not, create it.

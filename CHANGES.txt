@@ -6,6 +6,8 @@ Gora Change Log
 
 0.3 (trunk) Current Development:
 
+* GORA-151 CassandraStore's schemaExists() method always returns false (kazk)
+
 * GORA-150 Introduce Configuration property preferred.schema.name (ferdy)
 
 * GORA-142 Creates org.apache.gora.cassandra.serializers package in order to clean the code of store and query packages and to support additional types in future. (kazk)
