@@ -56,6 +56,7 @@ import org.apache.gora.cassandra.serializers.GoraSerializerTypeInferer;
 import org.apache.gora.cassandra.serializers.TypeUtils;
 import org.apache.gora.mapreduce.GoraRecordReader;
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.State;
 import org.apache.gora.persistency.StatefulHashMap;
 import org.apache.gora.query.Query;
 import org.apache.gora.util.ByteUtils;
@@ -198,6 +199,26 @@ public class CassandraClient<K, T extends Persistent> {
   }
 
 
+  /**
+   * Delete a member in a super column. This is used for map and record Avro types.
+   * @param key the row key
+   * @param fieldName the field name
+   * @param columnName the column name (the member name, or the index of array)
+   */
+  @SuppressWarnings("unchecked")
+  public void deleteSubColumn(K key, String fieldName, ByteBuffer columnName) {
+
+    String columnFamily = this.cassandraMapping.getFamily(fieldName);
+    String superColumnName = this.cassandraMapping.getColumn(fieldName);
+    
+    HectorUtils.deleteSubColumn(mutator, key, columnFamily, superColumnName, columnName);
+  }
+
+  public void deleteSubColumn(K key, String fieldName, String columnName) {
+    deleteSubColumn(key, fieldName, StringSerializer.get().toByteBuffer(columnName));
+  }
+
+
   @SuppressWarnings("unchecked")
   public void addGenericArray(K key, String fieldName, GenericArray array) {
     if (isSuper( cassandraMapping.getFamily(fieldName) )) {
@@ -228,6 +249,10 @@ public class CassandraClient<K, T extends Persistent> {
     if (isSuper( cassandraMapping.getFamily(fieldName) )) {
       int i= 0;
       for (Utf8 mapKey: map.keySet()) {
+        if (map.getState(mapKey) == State.DELETED) {
+          deleteSubColumn(key, fieldName, mapKey.toString());
+          continue;
+        }
 
         // TODO: hack, do not store empty arrays
         Object mapValue = map.get(mapKey);

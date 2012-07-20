@@ -36,6 +36,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.specific.SpecificFixed;
 import org.apache.avro.util.Utf8;
+import org.apache.gora.persistency.State;
 import org.apache.gora.persistency.StatefulHashMap;
 
 import org.slf4j.Logger;
@@ -134,13 +135,16 @@ public class StatefulHashMapSerializer<T> extends AbstractSerializer<StatefulHas
   }
 
   private ByteBuffer toByteBufferWithFixedLengthElements(StatefulHashMap<Utf8, T> map) {
-    int n = (int) map.size();
-    List<byte[]> list = new ArrayList<byte[]>(n);
-    n *= 4;
+    List<byte[]> list = new ArrayList<byte[]>(map.size());
+    int n = 0;
     for (Utf8 key : map.keySet()) {
+      if (map.getState(key) == State.DELETED) {
+        continue;
+      }
       T value = map.get(key);
       byte[] bytes = BytesArraySerializer.get().fromByteBuffer(Utf8Serializer.get().toByteBuffer(key));
       list.add(bytes);
+      n += 4;
       n += bytes.length;
       bytes = BytesArraySerializer.get().fromByteBuffer(valueSerializer.toByteBuffer(value));
       list.add(bytes);
@@ -160,16 +164,20 @@ public class StatefulHashMapSerializer<T> extends AbstractSerializer<StatefulHas
   }
 
   private ByteBuffer toByteBufferWithVariableLengthElements(StatefulHashMap<Utf8, T> map) {
-    int n = (int) map.size();
-    List<byte[]> list = new ArrayList<byte[]>(n);
-    n *= 8;
+    List<byte[]> list = new ArrayList<byte[]>(map.size());
+    int n = 0;
     for (Utf8 key : map.keySet()) {
+      if (map.getState(key) == State.DELETED) {
+        continue;
+      }
       T value = map.get(key);
       byte[] bytes = BytesArraySerializer.get().fromByteBuffer(Utf8Serializer.get().toByteBuffer(key));
       list.add(bytes);
+      n += 4;
       n += bytes.length;
       bytes = BytesArraySerializer.get().fromByteBuffer(valueSerializer.toByteBuffer(value));
       list.add(bytes);
+      n += 4;
       n += bytes.length;
     }
     ByteBuffer byteBuffer = ByteBuffer.allocate(n);
