@@ -6,6 +6,8 @@ Gora Change Log
 
 0.3 (trunk) Current Development:
 
+* GORA-152 gora-core test incorrectly uses ByteBuffer's array() method to get its byte array (kazk)
+
 * GORA-151 CassandraStore's schemaExists() method always returns false (kazk)
 
 * GORA-150 Introduce Configuration property preferred.schema.name (ferdy)
