@@ -24,7 +24,7 @@
      <family name="sc" type="super" />
   </keyspace>
 
-  <keyspace name="webpage" host="localhost" cluster="Gora Cassandra Test Cluster">
+  <keyspace name="WebPage" host="localhost" cluster="Gora Cassandra Test Cluster">
     <family name="p"/>
     <family name="f"/>
     <family name="sc" type="super"/>
@@ -43,7 +43,7 @@
     <field name="salary"  family="p" qualifier="info:sl"/>
   </class>
 
-  <class name="org.apache.gora.examples.generated.WebPage" keyClass="java.lang.String" keyspace="webpage">
+  <class name="org.apache.gora.examples.generated.WebPage" keyClass="java.lang.String" keyspace="WebPage">
     <field name="url" family="p" qualifier="c:u"/>
     <field name="content" family="p" qualifier="p:cnt:c"/>
     <field name="parsedContent" family="sc" qualifier="p:parsedContent"/>
