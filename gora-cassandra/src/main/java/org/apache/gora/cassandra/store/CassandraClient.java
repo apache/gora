@@ -405,4 +405,12 @@ public class CassandraClient<K, T extends Persistent> {
 
 
   }
+
+  /**
+   * Obtain Schema/Keyspace name
+   * @return Keyspace
+   */
+  public String getKeyspaceName() {
+	return this.cassandraMapping.getKeyspaceName();
+  }
 }

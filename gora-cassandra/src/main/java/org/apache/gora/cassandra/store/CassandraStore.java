@@ -64,7 +64,7 @@ import org.slf4j.LoggerFactory;
 
 public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T> {
   public static final Logger LOG = LoggerFactory.getLogger(CassandraStore.class);
-  
+
   private CassandraClient<K, T>  cassandraClient = new CassandraClient<K, T>();
 
   /**
@@ -97,7 +97,7 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
 
   @Override
   public void createSchema() {
-    LOG.debug("create schema");
+    LOG.debug("creating Cassandra keyspace");
     this.cassandraClient.checkKeyspace();
   }
 
@@ -256,10 +256,14 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
     partitions.add(new PartitionQueryImpl<K,T>(query));
     return partitions;
   }
-
+  
+  /**
+   * In Cassandra Schemas are referred to as Keyspaces
+   * @return Keyspace
+   */
   @Override
   public String getSchemaName() {
-    return null;
+	return this.cassandraClient.getKeyspaceName();
   }
 
   @Override
