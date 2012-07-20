@@ -295,9 +295,7 @@ public class CassandraStore<K, T extends Persistent> extends DataStoreBase<K, T>
             fieldValue = newRecord;
             break;
           case MAP:
-            StatefulHashMap<?, ?> map = (StatefulHashMap<?, ?>) fieldValue;
-            StatefulHashMap<?, ?> newMap = new StatefulHashMap(map);
-            fieldValue = newMap;
+            // needs to keep State.DELETED.
             break;
           case ARRAY:
             GenericArray array = (GenericArray) fieldValue;
