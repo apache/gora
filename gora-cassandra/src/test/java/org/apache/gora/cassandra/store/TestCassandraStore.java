@@ -86,8 +86,6 @@ public class TestCassandraStore extends DataStoreTestBase{
   @Override
   public void testQueryWebPageSingleKeyDefaultFields() throws IOException {}
   @Override
-  public void testQueryWebPageQueryEmptyResults() throws IOException {}
-  @Override
   public void testDelete() throws IOException {}
   @Override
   public void testDeleteByQuery() throws IOException {}
