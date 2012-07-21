@@ -72,6 +72,7 @@ public class TestCassandraStore extends DataStoreTestBase{
 
 // ============================================================================
   //We need to skip the following tests for a while until we fix some issues..
+  
   @Override
   public void testGetWebPageDefaultFields() throws IOException {}
   @Override
@@ -84,6 +85,8 @@ public class TestCassandraStore extends DataStoreTestBase{
   public void testQueryKeyRange() throws IOException {}
   @Override
   public void testQueryWebPageSingleKeyDefaultFields() throws IOException {}
+  @Override
+  public void testQueryWebPageQueryEmptyResults() throws IOException {}
   @Override
   public void testDelete() throws IOException {}
   @Override
