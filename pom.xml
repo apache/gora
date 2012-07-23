@@ -167,6 +167,15 @@
         <role>PMC Member</role>
       </roles>
     </developer>
+    <developer>
+      <id>kazk</id>
+      <name>Kazuomi Kashii</name>
+      <email>kazk [at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PPMC Member</role>
+      </roles>
+    </developer>
   </developers>
 
   <mailingLists>
