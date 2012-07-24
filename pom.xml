@@ -126,7 +126,7 @@
       <email>kturner [at] apache [dot] org</email>
       <roles>
         <role>Committer</role>
-        <role>PPMC Member</role>
+        <role>PMC Member</role>
       </roles>
     </developer>
     <developer>
@@ -173,7 +173,7 @@
       <email>kazk [at] apache [dot] org</email>
       <roles>
         <role>Committer</role>
-        <role>PPMC Member</role>
+        <role>PMC Member</role>
       </roles>
     </developer>
   </developers>
