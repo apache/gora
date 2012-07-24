@@ -4,7 +4,7 @@
 
 Gora Change Log
 
-0.3 (trunk) Current Development:
+0.2.1 Release 24/07/2012 - dd-mm-yyyy:
 
 * GORA-157 gora-cassandra test failure - proposal to skip 10 test cases for a while (kazk)
 
