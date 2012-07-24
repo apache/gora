@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.apache.gora</groupId>
         <artifactId>gora</artifactId>
-        <version>0.3-SNAPSHOT</version>
+        <version>0.2.1</version>
         <relativePath>../</relativePath>
     </parent>
     <artifactId>gora-cassandra</artifactId>
