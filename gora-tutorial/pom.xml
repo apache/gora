@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.apache.gora</groupId>
         <artifactId>gora</artifactId>
-        <version>0.2.1</version>
+        <version>0.3-SNAPSHOT</version>
         <relativePath>../</relativePath>
     </parent>
     <artifactId>gora-tutorial</artifactId>
@@ -39,9 +39,9 @@
     	<url>http://www.apache.org/</url>
     </organization>
     <scm>
-    	<url>http://svn.apache.org/viewvc/gora/tags/apache-gora-0.2.1/gora-tutorial</url>
-    	<connection>scm:svn:http://svn.apache.org/repos/asf/gora/tags/apache-gora-0.2.1/gora-tutorial</connection>
-    	<developerConnection>scm:svn:https://svn.apache.org/repos/asf/gora/tags/apache-gora-0.2.1/gora-tutorial</developerConnection>
+    	<url>http://svn.apache.org/viewvc/gora/trunk/gora-tutorial/</url>
+    	<connection>scm:svn:http://svn.apache.org/repos/asf/gora/trunk/gora-tutorial/</connection>
+    	<developerConnection>scm:svn:https://svn.apache.org/repos/asf/gora/trunk/gora-tutorial/</developerConnection>
     </scm>
     <issueManagement>
     	<system>JIRA</system>
