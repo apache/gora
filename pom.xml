@@ -26,7 +26,7 @@
     <groupId>org.apache.gora</groupId>
     <artifactId>gora</artifactId>
     <packaging>pom</packaging>
-    <version>0.3-SNAPSHOT</version>
+    <version>0.2.1-SNAPSHOT</version>
     <name>Apache Gora</name>
     <description>The Apache Gora open source framework provides an in-memory data model and 
     persistence for big data. Gora supports persisting to column stores, key value stores, 
