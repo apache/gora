@@ -1,0 +1,182 @@
+ =======================================================================
+ ==CHANGES.txt
+ =======================================================================
+
+Gora Change Log
+
+0.2.1 release: 26/07/2012
+Release Report: https://issues.apache.org/jira/secure/ReleaseNote.jspa?projectId=12311172&version=12322496
+
+* GORA-157 gora-cassandra test failure - proposal to skip 10 test cases for a while (kazk)
+
+* GORA-156 Properly implement getSchemaName in CassandraStore (lewismc)
+
+* GORA-153 gora-cassandra does not correctly handle DELETED State for MAP (kazk)
+
+* GORA-152 gora-core test incorrectly uses ByteBuffer's array() method to get its byte array (kazk)
+
+* GORA-151 CassandraStore's schemaExists() method always returns false (kazk)
+
+* GORA-150 Introduce Configuration property preferred.schema.name (ferdy)
+
+* GORA-142 Creates org.apache.gora.cassandra.serializers package in order to clean the code of store and query packages and to support additional types in future. (kazk)
+
+* GORA-148 CassandraMapping supports only (first) keyspace and class in gora-cassandra-mapping.xml (kazk)
+
+* GORA-143 GoraCompiler needs to add "import FixedSize" statement for FIXED type (kazk)
+
+* GORA-147 fix threading issue caused by multiple threads trying to flush (ferdy)
+
+* GORA-146 HBaseStore does not properly set endkey (ferdy)
+
+* GORA-140 Requires some adjustments on dependency at gora-cassandra (kazk, lewismc)
+
+* GORA-138 gora-cassandra array type support: Double fix for GORA-81 Replace CassandraStore#addOrUpdateField with TypeInferringSerializer to take advantage of when the value is already of type ByteBuffer. (Kazuomi Kashii via lewismc)
+
+* GORA-139  Creates Cassandra column family with BytesType for column value validator (and comparators), instead of UTF8Type (Kazuomi Kashii via lewismc)
+
+* GORA-131 gora-cassandra should support other key types than String (Kazuomi Kashii via lewismc)
+
+* GORA-132 Uses ByteBufferSerializer for column value to support various data types rather than StringSerializer (Kazuomi Kashii via lewismc)
+
+* GORA-77 Replace commons logging with Slf4j (Renato Javier Marroquín Mogrovejo via lewismc)
+
+* GORA-134 ListGenericArray's hashCode causes StackOverflowError (Kazuomi Kashii via lewismc)
+
+* GORA-95 Catch incorrect mapping configurations and implement sufficient logging in CassandraMapping. (lewismc)
+
+* GORA-** Commit to fix classloading for CLI execution (lewismc)
+
+* GORA-122 gora-accumulo/lib is not cleaned after mvn clean (lewismc)
+
+* GORA-133 & 63 GoraCompiler cannot compile array type & bin/compile-examples.sh does not work respectively (enis, Kazuomi Kashii via lewismc)
+
+* GORA-129 redundant conf field in HBaseStore (ferdy)
+
+* GORA-123 Append correct submodule directories to SCM paths in submodule pom's (lewismc)
+
+* GORA-127 Result objects are not closed properly from GoraRecordReader. (enis)
+
+0.2 Release: 20/04/2012
+Jira Release Report: https://issues.apache.org/jira/secure/ReleaseNote.jspa?projectId=12311172&version=12315541
+ 
+* GORA-120 Dirty fields are not correctly applied after serialization and map clearance (ferdy)
+ 
+* GORA-115 Flushing HBaseStore should flush all HTable instances. (ferdy)
+
+* Make hbase autoflush default to false and make autoflush configurable rather than hardcoded (stack via lewismc)
+
+* GORA-76 Upgrade to Hadoop 1.0.1 (ferdy & lewismc)
+
+* GORA-65 Initial checkin of gora accumulo datastore (kturner)
+
+* GORA-108 Change CassandraClient#init() to CassandraClient#initialize() for consistency with other Datastores. (lewismc)
+
+* GORA-105 DataStoreFactory does not properly support multiple stores (ferdy)
+
+* GORA-** Update Gora parent pom to include maven release plugin targets, and update developer credentials. (lewismc)
+
+* GORA-74 Remove sqlbuilder library (lewismc)
+
+* GORA-101 HBaseStore should properly support multiple tables in the mapping file. (ferdy)
+
+* GORA-82 Add missing license headers & RAT target to pom.xml (lewismc)
+
+* GORA-88 HBaseByteInterface not thread safe (ferdy)
+
+* GORA-93 [gora-cassandra] Add implementation of CassandraStore.get(key) (Sujit Pal via lewismc)
+
+* GORA-58 Upgrade Gora-Cassandra to use Cassandra 1.0.2 (lewismc)
+
+* GORA-80 Implement functionality to define consistency used for Cassandra read and 
+write operations. (lewismc)
+
+* GORA-91 Ensure that Gora adheres to ASF branding requirements (lewismc)
+
+* GORA-90 Create DOAP for Gora (lewismc)
+
+* GORA-79 Block keyspace creation until the whole cassandra cluster converges to the new keyspace. (Patricio Echagüe via lewismc)
+
+* GORA-83 add 'target' dirs to svn ignore (ferdy)
+
+* GORA-66 testDeleteByQueryFields seems incorrect (Keith Turner via lewismc)
+
+* GORA-72 Made all artifacts proper OSGi bundles. Added ClassLoadingUtils which will fallback to thread context classloader if Class.forName fails. (iocanel)
+
+* GORA-55 Removed second assertion for schema existence, since schema is already deleted, Excluded ranged queries from the tests, since the tests assume end key to be inclussive while Hbase considers it exclusive. (iocanel)
+
+* GORA-** Updated the maven surefire plugin version to properly set the system properties (iocanel)
+
+* GORA-22 Upgrade cassandra backend to 0.7 (jnioche & Alexis Detreglode)
+
+* GORA-69 Added xerces to dependencyManagement to avoid version conflicts (iocanel)
+
+* GORA-54 Split TestHBaseStoreMapReduce to two individual tests, so that they can run properly, Added jvm args to maven surefire plugin to increase the max heap size that the tests will use to 512M. (iocanel)
+
+* GORA-70 Upgrade deprecated expressions in pom.xml for use in building effective models, Replace reference to artifactId/version with project.artifactId/project.version (iocanel)
+
+* GORA-68 Added test.build.data System property so that test data can be stored under target. Added port reservation for gora-sql tests. Added mapping xml to the gora-sql test classpath (iocanel)
+
+* GORA-51 Added surefire plugin configuration to run the tests isolated (iocanel)
+
+* GORA-64 Query should document inclusiveness (Keith Turner via lewismc) 
+
+* GORA-52 Run JUnit tests from the command line (lewismc)
+
+* GORA-62 Run bin/gora commands after maven build (lewismc)
+
+* GORA-43 Forward port 0.1.1 incubating Maven poms to trunk (lewismc)
+
+* GORA-57 HBaseStore does not correctly read family definitions (Ferdy via lewismc)
+
+* GORA-56 HBaseStore is not thread safe. (Ferdy via lewismc)
+
+* GORA-48. HBaseStore initialization of table without configuration in constructor will throw Exception (Ferdy via lewismc)
+
+* GORA-47&46. fix tar ant target & Add nightly target to build.xml respectively (lewismc)
+
+* GORA-45. Add dependency to 'clean-cache' ant target (Lewis John McGibbney via mattmann)
+
+* GORA-44. Ant build fails (Lakshmi Narasimhan via mattmann)
+
+* GORA-28. Merge back recent changes in 0.1-incubating to trunk (mattmann, ab)
+
+* GORA-12. Semantics of DataStore.delete* (ab via mattmann)
+
+* GORA-18. Configuration not found error breaks the build on trunk (ioannis via mattmann)
+
+* GORA-26. Configurable classes should pass around Configuration consistently (ab via mattmann)
+
+* GORA-32. Map type with long values generates non-compilable Java class (Yves Langisch)
+
+* GORA-29. Gora maven support (Ioannis Canellos via mattmann)
+
+* GORA-31. jersey-json dependency not in repositories currently in ivysettings.xml (Marsall Pierce via hsaputra)
+
+0.1-incubating release:
+
+*  INFRA-3038. Initial import of code.
+
+*  GORA-1. Organize source code for Apache. (enis)
+
+*  GORA-6. Add methods that take dataStoreClass instead of data store instance 
+   to Gora{Input|Output}Format and Gora{Mapper|Reducer}. (enis)
+
+*  GORA-7. DataStoreFactory.createDataStore() should throw exceptions on 
+   failure. (enis)
+
+*  GORA-15. Primitive types cannot be used as keys in DataStore. (enis)
+
+*  GORA-16. Create a tutorial for Gora. (enis)
+
+*  GORA-21. Commons-lang needs a configuration in gora-core/ivy/ivy.xml (jnioche)
+
+*  GORA-20. Flush datastore regularly (Alexis Detreglode via jnioche)
+
+*  GORA-23. Limit result set in store reads (Alexis Detreglode via hsaputra)
+
+*  GORA-25. Upgrade Gora-hbase to HBase 0.90.0 (ab)
+
+*  GORA-2. Create Gora web site (enis)
+
+*  GORA-5. Add champions and mentors to Gora website (hsaputra)

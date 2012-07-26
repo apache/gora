@@ -1,0 +1,189 @@
+<?xml version="1.0"?>
+<!DOCTYPE document PUBLIC "-//APACHE//DTD Documentation V2.0//EN" "http://forrest.apache.org/dtd/document-v20.dtd">
+
+<!--
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+
+<document>
+  
+  <header>
+    <title>Quick Start</title>
+  </header>
+  
+  <body>
+  
+    <section>
+      <title>Introduction</title>
+      <p>This is a quick start guide to help you setup the project.</p>
+    </section>
+
+  <section>
+   <title> Download </title>
+   <p> First you need to check out the most stable Gora release through the official Apache Gora release page <a href="ext:releases">here</a>.</p>  
+   <p>For those who would like to use a development version Gora or simply wish to work with the bleeding edge, instructions for how to check out the source code using svn or git can be found 
+   <a href="ext:vcs">here</a>. 
+   </p>
+  </section>
+
+  <section>
+    <title> Compiling the project (Maven users)</title>
+    <p>Once you have the source code for Gora, you can compile the project using</p>
+    <p>
+    <code>
+      $ cd gora 
+    </code> <br/>
+    <code>
+      $ mvn clean compile
+    </code>
+    </p>
+    <p> You can also compile individual modules by cd'ing to the module directory and 
+    running <code>$ mvn clean compile</code> there. </p>
+  </section>
+
+  <section>
+    <title> Setting up your project </title>
+    <p>
+    More recently Gora began using Maven to manage it's dependencies and build lifecycle. Stable Gora releases are available on the central maven repository 
+    or ivy repositories and Gora-SNAPSHOT OSGi bundle artifacts are now pushed to the Apache Nexus <a href="https://repository.apache.org/index.html#nexus-search;quick~gora">here</a>.</p>
+    <p> You can manage Gora dependencies in a few ways. </p>
+
+    <section>
+      <title> Using ivy to manage gora </title>
+    <p>If your project already uses ivy, then you can include gora dependencies
+    to your ivy by adding the following lines to your <code>ivy.xml</code> file: </p>
+
+    <p>
+    <code>
+      &lt;dependency org="org.apache.gora" name="gora-hbase" rev="${version}" conf="*-&gt;compile" changing="true"&gt;
+    </code><br/>
+    <code>
+      &lt;dependency org="org.apache.gora" name="gora-cassandra" rev="${version}" conf="*-&gt;compile" changing="true"&gt;
+    </code><br/>
+    <code>
+      &lt;dependency org="org.apache.gora" name="gora-sql" rev="${version}" conf="*-&gt;compile" changing="true"&gt;
+    </code>
+    </p>
+
+    <p><b>N.B.</b> The <code>${version}</code> variable should be replaced by the most stable Gora release.</p>
+    
+    <p>Only add the modules <code>gora-hbase, gora-cassandra, gora-sql</code>
+    that you will use, and set the <code>conf</code> to point to the 
+    configurations (of your project) that you want to depend on gora. The 
+    <code>changing="true"</code> attribute states that, gora artifacts 
+    should not be cached, which is required if you want to change gora's 
+    source and use the recompiled version.</p>
+
+    <p> Add the following to your <code>ivysettings.xml</code></p>
+    <p>
+    <source>
+    &lt;resolvers&gt;
+      ...
+      &lt;chain name="internal"&gt;
+        &lt;resolver ref="local"/&gt;
+      &lt;/chain&gt;
+      ...
+    &lt;/resolvers&gt;
+    &lt;modules&gt;
+      ...
+      &lt;module organisation="org.apache.gora" name=".*" resolver="internal"/&gt;
+      ...
+    &lt;/modules&gt;
+    </source>
+    </p>
+
+    <p>This forces gora to be built locally rather than look for it in other 
+    repositories.</p>
+  </section>
+    <section>
+      <title> Using Maven to manage Gora </title>
+    <p>If your project however uses maven, then you can include gora dependencies
+    to your project by adding the following lines to your <code>pom.xml</code> file: </p>
+
+    <p>
+    <source>
+	&lt;dependency&gt;
+  		&lt;groupId>org.apache.gora&lt;/groupId&gt;
+  		&lt;artifactId>gora-hbase&lt;/artifactId&gt;
+  		&lt;version>${version}&lt;/version&gt;
+	&lt;/dependency&gt;
+    </source><br/>
+    <source>
+	&lt;dependency&gt;
+  		&lt;groupId>org.apache.gora&lt;/groupId&gt;
+  		&lt;artifactId>gora-cassandra&lt;/artifactId&gt;
+  		&lt;version>${version}&lt;/version&gt;
+	&lt;/dependency&gt;
+    </source><br/>
+    <source>
+	&lt;dependency&gt;
+  		&lt;groupId>org.apache.gora&lt;/groupId&gt;
+  		&lt;artifactId>gora-sql&lt;/artifactId&gt;
+  		&lt;version>${version}&lt;/version&gt;
+	&lt;/dependency&gt;
+    </source>
+    </p>
+
+    <p><b>N.B.</b> The <code>${version}</code> variable should be replaced by the most stable Gora release.</p>
+    
+    <p>Only add the modules <code>gora-hbase, gora-cassandra, gora-sql</code>
+    that you will use.</p>
+  </section>
+
+  <section>
+    <title>Managing gora jars manually </title>
+    <p>You can include gora jars manually, if you prefer so. After compiling gora 
+    first copy all the jars in <code>gora-[modulename]/lib/</code> dir. Then 
+    copy all the jars in <code>gora-core/lib/</code> since all of the modules depend 
+    on <code>gora-core</code>. Last, copy the actual gora-jars in
+    <code>gora-core/build/gora-core-x.×.jar</code> and the jars of all the other 
+    modules that you want to use ( for example 
+    <code>gora-hbase/build/gora-hbase-x.×.jar</code>)</p>
+  </section>
+  </section>
+
+  <section>
+    <title> What's next </title>
+    <p> After setting up gora, you might want to check out the documentation. 
+    Most of the documentation can be find at the project 
+    <a href="ext:gora">web site</a> or at the <a href="ext:wiki">wiki</a>.</p> 
+
+    <section> 
+      <title>Gora Modules </title>
+      <p> Gora source code is organized in a modular architecture. The 
+      <b>gora-core</b> module is the main module which contains the core of 
+      the code. All other modules depend on the gora-core module. Each data 
+      store backend in Gora resides in it's own module. The documentation for 
+      the specific module can be found at the module's documentation directory. 
+      </p>
+
+      <p> It is wise so start with going over the documentation for the gora-core 
+      module and then the specific data store module(s) you want to use. Below are the 
+      modules in gora. </p>
+
+     <p> <ul>
+       <li> <b><a href="site:gora-core">gora-core</a></b>: Module containing core functionality </li>
+       <li> <b><a href="site:gora-cassandra">gora-cassandra</a></b>: Module for Apache Cassandra backend </li>
+       <li> <b><a href="site:gora-hbase">gora-hbase</a></b>: Module for Apache HBase backend </li>
+       <li> <b><a href="site:gora-sql">gora-sql</a></b>: Module for SQL database backends </li>
+     </ul></p>
+
+    </section>
+  </section>
+
+  </body>
+  
+</document>

@@ -1,0 +1,8 @@
+{
+  "type": "record",
+  "name": "TokenDatum",
+  "namespace": "org.apache.gora.examples.generated",
+  "fields" : [
+    {"name": "count", "type": "int"}
+  ]
+}
