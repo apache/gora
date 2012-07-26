@@ -4,7 +4,8 @@
 
 Gora Change Log
 
-0.3 (trunk) Current Development:
+0.2.1 release: 26/07/2012
+Release Report: https://issues.apache.org/jira/secure/ReleaseNote.jspa?projectId=12311172&version=12322496
 
 * GORA-157 gora-cassandra test failure - proposal to skip 10 test cases for a while (kazk)
 
