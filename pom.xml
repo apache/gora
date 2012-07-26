@@ -26,7 +26,7 @@
     <groupId>org.apache.gora</groupId>
     <artifactId>gora</artifactId>
     <packaging>pom</packaging>
-    <version>0.2.1</version>
+    <version>0.3-SNAPSHOT</version>
     <name>Apache Gora</name>
     <description>The Apache Gora open source framework provides an in-memory data model and 
     persistence for big data. Gora supports persisting to column stores, key value stores, 
@@ -205,9 +205,9 @@
   </mailingLists>
        
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/gora/tags/apache-gora-0.2.1</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/gora/tags/apache-gora-0.2.1</developerConnection>
-    <url>http://svn.apache.org/viewvc/gora/tags/apache-gora-0.2.1</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/gora/trunk/</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/gora/trunk/</developerConnection>
+    <url>http://svn.apache.org/viewvc/gora/trunk/</url>
   </scm>
   <issueManagement>
     <system>JIRA</system>
