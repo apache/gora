@@ -627,6 +627,12 @@
             <artifactId>gora-dynamodb</artifactId>
             <version>${project.version}</version>
           </dependency>
+          <dependency>
+            <groupId>org.apache.gora</groupId>
+            <artifactId>gora-dynamodb</artifactId>
+            <version>${project.version}</version>
+            <classifier>tests</classifier>
+          </dependency>
   
           <!-- Avro needs this version of jackson -->
           <dependency>
@@ -729,7 +735,6 @@
 	      <artifactId>aws-java-sdk</artifactId>
 	      <version>${amazon.version}</version>
             </dependency>
-          
 
             <!-- Misc Dependencies -->
             <dependency>

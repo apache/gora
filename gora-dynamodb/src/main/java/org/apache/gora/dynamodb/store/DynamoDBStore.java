@@ -19,270 +19,512 @@
 package org.apache.gora.dynamodb.store;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.lang.reflect.Method;
 
 import org.apache.gora.dynamodb.query.DynamoDBQuery;
 import org.apache.gora.dynamodb.query.DynamoDBResult;
+import org.apache.gora.dynamodb.store.DynamoDBMapping.DynamoDBMappingBuilder;
 import org.apache.gora.persistency.BeanFactory;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
-import org.apache.gora.query.ws.impl.PartitionWSQueryImpl;
 import org.apache.gora.store.ws.impl.WSDataStoreBase;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.input.SAXBuilder;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.PropertiesCredentials;
+import com.amazonaws.services.dynamodb.AmazonDynamoDB;
+import com.amazonaws.services.dynamodb.AmazonDynamoDBAsyncClient;
 import com.amazonaws.services.dynamodb.AmazonDynamoDBClient;
-import com.amazonaws.services.dynamodb.model.QueryResult;
+import com.amazonaws.services.dynamodb.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.dynamodb.datamodeling.DynamoDBQueryExpression;
+import com.amazonaws.services.dynamodb.datamodeling.DynamoDBScanExpression;
+import com.amazonaws.services.dynamodb.model.CreateTableRequest;
+import com.amazonaws.services.dynamodb.model.DeleteTableRequest;
+import com.amazonaws.services.dynamodb.model.DeleteTableResult;
+import com.amazonaws.services.dynamodb.model.DescribeTableRequest;
+import com.amazonaws.services.dynamodb.model.KeySchema;
+import com.amazonaws.services.dynamodb.model.ProvisionedThroughput;
+import com.amazonaws.services.dynamodb.model.ResourceNotFoundException;
+import com.amazonaws.services.dynamodb.model.TableDescription;
+import com.amazonaws.services.dynamodb.model.TableStatus;
+
 
 public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T> {
 	
-  //public static final Logger LOG = LoggerFactory.getLogger(DynamoDBStore.class);
+  public static final Logger LOG = LoggerFactory.getLogger(DynamoDBStore.class);
+
+  // TODO this should be loaded from the class path
+  private static final String MAPPING_FILE_PATH = "gora-dynamodb/conf/";
+  
+  private static String preferredSchema;
   
   /**
-   * Path where the AWS Credential will reside
+   * The mapping file to create the tables from
    */
-  private static String awsCredentialsProperties = "conf/AwsCredentials.properties";
+  private static final String MAPPING_FILE = "gora-dynamodb-mapping.xml";
+
+  /**
+   * Path where the AWS Credential will reside.
+   */
+  // TODO this should point to properties file within the DynamoDB module 
+  private static String awsCredentialsProperties = "AwsCredentials.properties";
   
+  /**
+   * Name of the cloud database provider.
+   */
   private static String wsProvider = "Amazon.Web.Services";
-	 
+  
+  private static String CLI_TYP_PROP = "gora.dynamodb.client";
+  
+  private static String ENDPOINT_PROP = "gora.dynamodb.endpoint";
+
   /**
-   * TODO Amazon DynamoDB decorator 
-   * because all DynamoDBAsyncClients are DynamoDBClients   
+   * The mapping object that contains the mapping file
    */
-  private AmazonDynamoDBClient dynamoDBClient;
+  private DynamoDBMapping mapping;
+  
+  /**
+   * Amazon DynamoDB client which can be asynchronous or nor   
+   */
+  private AmazonDynamoDB dynamoDBClient;
+  
+  private String consistency;
+  
+  /**
+   * The values are Avro fields pending to be stored.
+   *
+   * We want to iterate over the keys in insertion order.
+   * We don't want to lock the entire collection before iterating over the keys, since in the meantime other threads are adding entries to the map.
+   */
+  private Map<K, T> buffer = new LinkedHashMap<K, T>();
+  
+  Class<T> persistentClass;  
 
   public DynamoDBStore(){
   }
 
-  @Override
-  public void initialize(Class<K> keyClass, Class<T> persistentClass,
-	      Properties properties) throws Exception {
-	  try {
-		File file = new File(awsCredentialsProperties);
-		AWSCredentials credentials = new PropertiesCredentials(file);
-		setConf(credentials);
-		setWsProvider(wsProvider);
-		//TODO Create decorator to create different AmazonDynamoDB clients
-		// this is because all amazonDynamoDBAsynClients are AmazonDynamoDBClients
-		dynamoDBClient = new AmazonDynamoDBClient(credentials);
-		
-	  }
-	    catch (Exception e) {
-	      throw new IOException(e.getMessage(), e);
-	  }
+  public void initialize(Class<K> keyClass, Class<T> pPersistentClass,
+	     Properties properties) throws Exception {
+	 try {
+
+		 getCredentials();
+		 setWsProvider(wsProvider);
+		 preferredSchema = properties.getProperty("preferred.schema.name");
+		 //preferredSchema = "person";
+		 dynamoDBClient = getClient(properties.getProperty(CLI_TYP_PROP),(AWSCredentials)getConf());
+		 //dynamoDBClient = getClient("sync",(AWSCredentials)getConf());
+		 dynamoDBClient.setEndpoint(properties.getProperty(ENDPOINT_PROP));
+		 //dynamoDBClient.setEndpoint("http://dynamodb.us-east-1.amazonaws.com/");
+		 mapping = readMapping();
+		 
+		 consistency = properties.getProperty("gora.dynamodb.consistent.reads");
+		 
+		 persistentClass = pPersistentClass;
+	 }
+	 catch (Exception e) {
+	     throw new IOException(e.getMessage(), e);
+	 }
   }
-  /*
-  public void close() throws IOException {
-    LOG.debug("close");
-    flush();
+  
+   /**
+    * Method to create the specific client to be used
+    * @param clientType
+    * @param credentials
+    * @return
+    */
+  public AmazonDynamoDB getClient(String clientType, AWSCredentials credentials){
+	  if (clientType.equals("sync"))
+		  return new AmazonDynamoDBClient(credentials);
+	  if (clientType.equals("async"))
+		  return new AmazonDynamoDBAsyncClient(credentials);
+	  return null;
+  }
+  
+  @SuppressWarnings("unchecked")
+  private DynamoDBMapping readMapping() throws IOException {
+
+    DynamoDBMappingBuilder mappingBuilder = new DynamoDBMappingBuilder();
+
+    try {
+      SAXBuilder builder = new SAXBuilder();
+      //Document doc = builder.build(getClass().getClassLoader() .getResourceAsStream(MAPPING_FILE_PATH + MAPPING_FILE));
+      Document doc = builder.build(new File(MAPPING_FILE_PATH + MAPPING_FILE));
+      
+      Element root = doc.getRootElement();
+
+      List<Element> tableElements = root.getChildren("table");
+      for(Element tableElement : tableElements) {
+    	  
+    	String tableName = tableElement.getAttributeValue("name");
+    	long readCapacUnits = Long.parseLong(tableElement.getAttributeValue("readcunit"));
+    	long writeCapacUnits = Long.parseLong(tableElement.getAttributeValue("readcunit"));
+    	
+    	mappingBuilder.setTableName(tableName);
+    	mappingBuilder.setProvisionedThroughput(tableName, readCapacUnits, writeCapacUnits);
+    	LOG.debug("Basic table properties have been set: Name, and Provisioned throughput.");
+    	
+    	// Retrieving key's features
+    	List<Element> fieldElements = tableElement.getChildren("key");
+    	for(Element fieldElement : fieldElements) {
+    		String keyName  = fieldElement.getAttributeValue("name");
+    		String keyType  = fieldElement.getAttributeValue("type");
+    		String keyAttrType  = fieldElement.getAttributeValue("att-type");
+    		if(keyType.equals("hash"))
+    			mappingBuilder.setHashKeySchema(tableName, keyName, keyAttrType);
+    		else if(keyType.equals("hashrange"))
+    			mappingBuilder.setHashRangeKeySchema(tableName, keyName, keyAttrType);
+    	}
+    	LOG.debug("Table key schemas have been set.");
+    	
+    	// Retrieving attributes
+        fieldElements = tableElement.getChildren("attribute");
+        for(Element fieldElement : fieldElements) {
+          String attributeName  = fieldElement.getAttributeValue("name");
+          String attributeType = fieldElement.getAttributeValue("type");
+          mappingBuilder.addAttribute(tableName, attributeName, attributeType, 0);
+        }
+        LOG.debug("Table attributes have been read.");
+      }
+
+    } catch(IOException ex) {
+      LOG.error("Error while performing xml mapping.");
+      ex.printStackTrace();
+      throw ex;
+
+    } catch(Exception ex) {
+      ex.printStackTrace();
+      throw new IOException(ex);
+    }
+
+    return mappingBuilder.build();
+  }
+  
+  /**
+   * Creates the AWSCredentials object based on the properties file.
+   * @return AWSCredentials object
+   * @throws FileNotFoundException
+   * @throws IllegalArgumentException
+   * @throws IOException
+   */
+  private AWSCredentials getCredentials() throws FileNotFoundException, IllegalArgumentException, IOException{
+	  // TODO this should be done using a class loader, and reading it as a stream
+	  File file = new File(MAPPING_FILE_PATH + awsCredentialsProperties);
+	  AWSCredentials credentials = new PropertiesCredentials(file);
+	  setConf(credentials);
+	  return credentials;
   }
 
-  @Override
-  public void createSchema() {
-    LOG.debug("create schema");
-    this.cassandraClient.checkKeyspace();
+  private DynamoDBQuery<K, T> buildDynamoDBQuery(Query<K, T> query){
+	  if(getSchemaName() == null)
+		  throw new IllegalStateException("There is not a preferred schema defined.");
+	  
+	  DynamoDBQuery<K, T> dynamoDBQuery = new DynamoDBQuery<K, T>();
+	  dynamoDBQuery.setKeySchema(mapping.getKeySchema(getSchemaName()));
+	  dynamoDBQuery.setQuery(query);
+	  dynamoDBQuery.setConsistencyReadLevel(getConsistencyReads());
+	  dynamoDBQuery.buildExpression();
+	  dynamoDBQuery.getQueryExpression();
+	  
+	  return dynamoDBQuery;
   }
-
-  @Override
-  public boolean delete(K key) throws IOException {
-    LOG.debug("delete " + key);
-    return false;
+  private boolean getConsistencyReads(){
+	  if(consistency != null)
+		  if(consistency.equals("true")) 
+			  return true;
+	  return false;
   }
-
-  @Override
-  public long deleteByQuery(Query<K, T> query) throws IOException {
-    LOG.debug("delete by query " + query);
-    return 0;
-  }
-
-  @Override
-  public void deleteSchema() throws IOException {
-    LOG.debug("delete schema");
-    this.cassandraClient.dropKeyspace();
-  }*/
-
+  
   @Override
   public Result<K, T> execute(Query<K, T> query) throws Exception {
-    
-	 DynamoDBQuery<K, T> dynamoDBQuery = new DynamoDBQuery<K, T>();
-	 DynamoDBResult<K, T> dynamoDBResult = new DynamoDBResult<K, T>(this, dynamoDBQuery);
 	 
-	 dynamoDBQuery.setQuery(query);
-	 
-	 // TODO we should return the object that the class is supposed to return
-	 QueryResult dynamodbResult = dynamoDBClient.query(dynamoDBQuery.getQuery());
-	 
-	 return (Result<K, T>)dynamoDBResult;
+	 DynamoDBQuery<K, T> dynamoDBQuery = buildDynamoDBQuery(query);
+	 DynamoDBMapper mapper = new DynamoDBMapper(dynamoDBClient);
+	 List<T> objList = null;
+	 if (dynamoDBQuery.getType().equals("range"))
+		 objList = mapper.query(persistentClass, (DynamoDBQueryExpression)dynamoDBQuery.getQueryExpression());
+	 if (dynamoDBQuery.getType().equals("scan"))
+		 objList = mapper.scan(persistentClass, (DynamoDBScanExpression)dynamoDBQuery.getQueryExpression());
+	 return new DynamoDBResult<K, T>(this, query, objList);  
   }
-
-  /*
-  private void addSubColumns(String family, DynamoDBQuery<K, T> dynamoDBQuery,
-      CassandraResultSet cassandraResultSet) {
-    // select family columns that are included in the query
-    List<Row<K, ByteBuffer, ByteBuffer>> rows = this.cassandraClient.execute(dynamoDBQuery, family);
-    
-    for (Row<K, ByteBuffer, ByteBuffer> row : rows) {
-      K key = row.getKey();
-      
-      // find associated row in the resultset
-      CassandraRow<K> cassandraRow = cassandraResultSet.getRow(key);
-      if (cassandraRow == null) {
-        cassandraRow = new CassandraRow<K>();
-        cassandraResultSet.putRow(key, cassandraRow);
-        cassandraRow.setKey(key);
-      }
-      
-      ColumnSlice<ByteBuffer, ByteBuffer> columnSlice = row.getColumnSlice();
-      
-      for (HColumn<ByteBuffer, ByteBuffer> hColumn : columnSlice.getColumns()) {
-        CassandraSubColumn cassandraSubColumn = new CassandraSubColumn();
-        cassandraSubColumn.setValue(hColumn);
-        cassandraSubColumn.setFamily(family);
-        cassandraRow.add(cassandraSubColumn);
-      }
-      
-    }
-  }
-  */
-/*
-  private void addSuperColumns(String family, CassandraQuery<K, T> cassandraQuery, 
-      CassandraResultSet cassandraResultSet) {
-    
-    List<SuperRow<K, String, ByteBuffer, ByteBuffer>> superRows = this.cassandraClient.executeSuper(cassandraQuery, family);
-    for (SuperRow<K, String, ByteBuffer, ByteBuffer> superRow: superRows) {
-      K key = superRow.getKey();
-      CassandraRow<K> cassandraRow = cassandraResultSet.getRow(key);
-      if (cassandraRow == null) {
-        cassandraRow = new CassandraRow();
-        cassandraResultSet.putRow(key, cassandraRow);
-        cassandraRow.setKey(key);
-      }
-      
-      SuperSlice<String, ByteBuffer, ByteBuffer> superSlice = superRow.getSuperSlice();
-      for (HSuperColumn<String, ByteBuffer, ByteBuffer> hSuperColumn: superSlice.getSuperColumns()) {
-        CassandraSuperColumn cassandraSuperColumn = new CassandraSuperColumn();
-        cassandraSuperColumn.setValue(hSuperColumn);
-        cassandraSuperColumn.setFamily(family);
-        cassandraRow.add(cassandraSuperColumn);
-      }
-    }
-  }
-*/
- 
+  
   @Override
   public T get(K key, String[] fields) throws Exception {
-    DynamoDBQuery<K,T> query = new DynamoDBQuery<K,T>();
+   /* DynamoDBQuery<K,T> query = new DynamoDBQuery<K,T>();
     query.setDataStore(this);
-    query.setKeyRange(key, key);
-    query.setFields(fields);
-    query.setLimit(1);
+    //query.setKeyRange(key, key);
+    //query.setFields(fields);
+    //query.setLimit(1);
     Result<K,T> result = execute(query);
     boolean hasResult = result.next();
-    return hasResult ? result.get() : null;
+    return hasResult ? result.get() : null;*/
+	  return null;
   }
 
+  /**
+   * Gets the object with the specific key
+   */
+  public T get(K key) throws Exception {
+	DynamoDBMapper mapper = new DynamoDBMapper(dynamoDBClient);
+	T object = (T) mapper.load(persistentClass, key); 
+	return object;
+  }
+  
   public Query<K, T> newQuery() {
     Query<K,T> query = new DynamoDBQuery<K, T>(this);
    // query.setFields(getFieldsToQuery(null));
     return query;
   }
 
-@Override
-public String getSchemaName() {
+  public String getSchemaName() {
+	if (preferredSchema != null)
+		return preferredSchema;
+	return null;
+  }
+  
+  public void setSchemaName(String pSchemaName){
+	  preferredSchema = pSchemaName;
+  }
+  
+  public void createSchema() throws Exception {
+	  if (mapping.getTables().isEmpty())	throw new IllegalStateException("There are not tables defined.");
+	  if (preferredSchema == null){
+		  LOG.debug("create schemas");
+		  // read the mapping object
+		  for(String tableName : mapping.getTables().keySet())
+			  executeCreateTableRequest(tableName);
+		  LOG.debug("tables created successfully.");
+	  }
+	  else{
+		  LOG.debug("create schema " + preferredSchema);
+		  executeCreateTableRequest(preferredSchema);
+	  }
+  }
+  
+  /**
+   * Executes a create table request using the DynamoDB client
+   * @param tableName
+   */
+  private void executeCreateTableRequest(String tableName){
+	  CreateTableRequest createTableRequest = getCreateTableRequest(tableName,
+				mapping.getKeySchema(tableName), 
+				mapping.getProvisionedThroughput(tableName));
+	  // use the client to perform the request
+	  dynamoDBClient.createTable(createTableRequest).getTableDescription();
+	  // wait for table to become active
+	  waitForTableToBecomeAvailable(tableName);
+  }
+  
+  /**
+   * Builds the necessary requests to create tables 
+   * @param tableName
+   * @param keySchema
+   * @param proThrou
+   * @return
+   */
+  private CreateTableRequest getCreateTableRequest(String tableName, KeySchema keySchema, ProvisionedThroughput proThrou){
+	  CreateTableRequest createTableRequest = new CreateTableRequest();
+	  createTableRequest.setTableName(tableName);
+	  createTableRequest.setKeySchema(keySchema);
+	  createTableRequest.setProvisionedThroughput(proThrou);
+	  return createTableRequest;
+  }
+  
+  /**
+   * Deletes all tables present in the mapping object.
+   */
+  public void deleteSchema() throws Exception {
+	  if (mapping.getTables().isEmpty())	throw new IllegalStateException("There are not tables defined.");
+	  if (preferredSchema == null){
+		LOG.debug("Delete schemas");
+		if (mapping.getTables().isEmpty())	throw new IllegalStateException("There are not tables defined.");
+		// read the mapping object
+		for(String tableName : mapping.getTables().keySet())
+		   executeDeleteTableRequest(tableName);
+		LOG.debug("All schemas deleted successfully.");
+	  }
+	  else{
+		  LOG.debug("create schema " + preferredSchema);
+		  executeDeleteTableRequest(preferredSchema);
+	  }
+  }
+  
+  /**
+   * Executes a delete table request using the DynamoDB client
+   * @param tableName
+   */
+  public void executeDeleteTableRequest(String tableName){
+	  DeleteTableRequest deleteTableRequest = new DeleteTableRequest()
+      .withTableName(tableName);
+	  DeleteTableResult result = dynamoDBClient.deleteTable(deleteTableRequest);
+	  LOG.debug("Schema: " + result.getTableDescription() + " deleted successfully.");
+  }
+  
+  /**
+   * Waits up to 6 minutes to confirm if a table has been created or not
+   * @param tableName
+   */
+  private void waitForTableToBecomeAvailable(String tableName) {
+      LOG.debug("Waiting for " + tableName + " to become available");
+
+      long startTime = System.currentTimeMillis();
+      long endTime = startTime + (10 * 60 * 1000);
+      while (System.currentTimeMillis() < endTime) {
+          try {Thread.sleep(1000 * 20);} catch (Exception e) {}
+          try {
+              DescribeTableRequest request = new DescribeTableRequest().withTableName(tableName);
+              TableDescription tableDescription = dynamoDBClient.describeTable(request).getTable();
+              String tableStatus = tableDescription.getTableStatus();
+              
+              LOG.debug(tableName + " - current state: " + tableStatus);
+              
+              if (tableStatus.equals(TableStatus.ACTIVE.toString())) return;
+          } catch (AmazonServiceException ase) {
+              if (ase.getErrorCode().equalsIgnoreCase("ResourceNotFoundException") == false) throw ase;
+          }
+      }
+
+      throw new RuntimeException("Table " + tableName + " never became active");
+  }
+
+  /**
+   * Verifies if the specified schemas exist
+   */
+  public boolean schemaExists() throws Exception {
+	TableDescription success = null;
+	if (mapping.getTables().isEmpty())	throw new IllegalStateException("There are not tables defined.");
+	if (preferredSchema == null){
+		LOG.debug("Verifying schemas");
+		if (mapping.getTables().isEmpty())	throw new IllegalStateException("There are not tables defined.");
+		// read the mapping object
+		for(String tableName : mapping.getTables().keySet()){
+		   success = getTableSchema(tableName);
+		   if (success == null) return false;
+		}
+	}
+	else{
+		LOG.debug("Verifying schema " + preferredSchema);
+		success = getTableSchema(preferredSchema);
+	}
+	LOG.debug("Finished verifying schemas.");
+	return (success != null)? true: false;
+  }
+
+  /**
+   * Retrieves the table description for the specific resource name
+   * @param tableName
+   * @return
+   */
+  private TableDescription getTableSchema(String tableName){
+	TableDescription tableDescription = null;
+  	try{
+  		DescribeTableRequest describeTableRequest = new DescribeTableRequest().withTableName(tableName);
+  		tableDescription = dynamoDBClient.describeTable(describeTableRequest).getTable();
+  	}
+  	catch(ResourceNotFoundException e){
+  		return tableDescription;
+  	}
+  	return tableDescription;
+  }
+  
+  public K newKey() throws Exception {
 	// TODO Auto-generated method stub
 	return null;
-}
+  }
 
-@Override
-public void createSchema() throws Exception {
-	// TODO Auto-generated method stub
-	
-}
+  public T newPersistent() throws Exception {
+	T obj = persistentClass.newInstance();
+	return obj;
+  }
 
-@Override
-public void deleteSchema() throws Exception {
-	// TODO Auto-generated method stub
-	
-}
+  public void put(K key, T obj) throws Exception {
+	  Object param = null;
+	  for (Method met : persistentClass.getMethods()) {
+		  if(met.getName().equals("getRangeKey")){
+			  Object [] params = null;
+			  param = met.invoke(obj, params);
+			  break;
+		  }
+	  }
+	  DynamoDBMapper mapper = new DynamoDBMapper(dynamoDBClient);
+	  if (param != null)
+		  mapper.load(persistentClass, key.toString(), param.toString());
+	  else
+		  mapper.load(persistentClass, key.toString());
+	  
+	  mapper.save(obj);
+  }
 
-@Override
-public boolean schemaExists() throws Exception {
-	// TODO Auto-generated method stub
-	return false;
-}
+  /**
+   * Deletes the object using key
+   * @return true for a successful process  
+   */
+  public boolean delete(K key) throws Exception {
+	try{
+		DynamoDBMapper mapper = new DynamoDBMapper(dynamoDBClient);
+		T object = (T) mapper.load(persistentClass, key);
+		
+		if (object == null) return false;
+		
+		// setting key for dynamodbMapper
+		for (Method met : persistentClass.getMethods()) {
+			  if(met.getName().equals("setHashKey")){
+				  met.invoke(object, key);
+				  break;
+			  }
+		}
+		
+		mapper.delete(object);
+		return true;
+	}catch(Exception e){
+		LOG.debug("Error while deleting value with key " + key.toString());
+		LOG.debug(e.getMessage());
+		return false;
+	}
+  }
 
-@Override
-public K newKey() throws Exception {
-	// TODO Auto-generated method stub
-	return null;
-}
-
-@Override
-public T newPersistent() throws Exception {
-	// TODO Auto-generated method stub
-	return null;
-}
-
-@Override
-public T get(K key) throws Exception {
-	// TODO Auto-generated method stub
-	return null;
-}
-
-@Override
-public void put(K key, T obj) throws Exception {
-	// TODO Auto-generated method stub
-	
-}
-
-@Override
-public boolean delete(K key) throws Exception {
-	// TODO Auto-generated method stub
-	return false;
-}
-
-@Override
-public long deleteByQuery(Query<K, T> query) throws Exception {
+  public long deleteByQuery(Query<K, T> query) throws Exception {
 	// TODO Auto-generated method stub
 	return 0;
-}
+  }	
 
-@Override
-public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query)
+  public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query)
 		throws IOException {
 	// TODO Auto-generated method stub
 	return null;
-}
+  }
 
-@Override
-public void flush() throws Exception {
+  public void flush() throws Exception {
 	// TODO Auto-generated method stub
 	
-}
+  }
 
-@Override
-public void setBeanFactory(BeanFactory<K, T> beanFactory) {
+  public void setBeanFactory(BeanFactory<K, T> beanFactory) {
 	// TODO Auto-generated method stub
 	
-}
+  }
 
-@Override
-public BeanFactory<K, T> getBeanFactory() {
+  public BeanFactory<K, T> getBeanFactory() {
 	// TODO Auto-generated method stub
 	return null;
-}
+  }
 
-@Override
-public void close() throws IOException, InterruptedException, Exception {
-	// TODO Auto-generated method stub
-	
-}
+  public void close() throws IOException, InterruptedException, Exception {
+	  LOG.debug("Datastore closed.");
+	  flush();
+  }
 
   /**
    * Duplicate instance to keep all the objects in memory till flushing.

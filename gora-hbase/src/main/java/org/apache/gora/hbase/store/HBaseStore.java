@@ -263,7 +263,7 @@ implements Configurable {
   }
 
   @Override
-  public long deleteByQuery(Query<K, T> query) throws IOException, Exception {
+  public long deleteByQuery(Query<K, T> query) throws Exception, IOException {
 
     String[] fields = getFieldsToQuery(query.getFields());
     //find whether all fields are queried, which means that complete

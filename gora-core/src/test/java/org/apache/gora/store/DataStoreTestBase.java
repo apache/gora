@@ -53,10 +53,11 @@ public abstract class DataStoreTestBase {
   protected DataStore<String,WebPage> webPageStore;
 
   @Deprecated
-  protected abstract DataStore<String,Employee> createEmployeeDataStore() throws IOException ;
+  protected abstract DataStore<String,Employee> createEmployeeDataStore() throws IOException;
 
   @Deprecated
   protected abstract DataStore<String,WebPage> createWebPageDataStore() throws IOException;
+  
 
   /** junit annoyingly forces BeforeClass to be static, so this method
    * should be called from a static block

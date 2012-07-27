@@ -55,17 +55,25 @@
        <directory>target</directory>
        <outputDirectory>target/classes</outputDirectory>
        <finalName>${project.artifactId}-${project.version}</finalName>
-   <!--<testOutputDirectory>target/test-classes</testOutputDirectory>-->
-   <!--<testSourceDirectory>src/test/java</testSourceDirectory>-->
+       <testOutputDirectory>target/test-classes</testOutputDirectory>
+       <testSourceDirectory>src/test/java</testSourceDirectory>
        <sourceDirectory>src/main/java</sourceDirectory>
        <resources>
-          <resource>
-            <directory>${basedir}/src/main/resources</directory>
-          </resource>
-          <resource>
-            <directory>${basedir}/conf</directory>
-          </resource>
+           <resource>
+               <directory>${basedir}/src/main/resources</directory>
+           </resource>
+           <resource>
+               <directory>${basedir}/conf</directory>
+           </resource>
        </resources>
+       <testResources>
+            <testResource>
+                <directory>src/test/conf/</directory>
+                <includes>
+                    <include>**</include>
+                </includes>
+            </testResource>
+       </testResources>
        <plugins>
            <plugin>
                <groupId>org.codehaus.mojo</groupId>
@@ -115,14 +123,21 @@
            <groupId>org.apache.gora</groupId>
            <artifactId>gora-core</artifactId>
            <classifier>tests</classifier>
+           <scope>test</scope>
+       </dependency>
+       
+       <!-- Amazon Dependencies -->
+       <dependency>
+           <groupId>com.amazonaws</groupId>
+	   <artifactId>aws-java-sdk</artifactId>
        </dependency>
        
        <!-- Misc Dependencies -->
        <dependency>
-       	   <groupId>com.amazonaws</groupId>
-	   <artifactId>aws-java-sdk</artifactId>
+            <groupId>org.jdom</groupId>
+            <artifactId>jdom</artifactId>
        </dependency>
-       
+        
        <!-- Logging Dependencies -->
        <dependency>
            <groupId>org.slf4j</groupId>

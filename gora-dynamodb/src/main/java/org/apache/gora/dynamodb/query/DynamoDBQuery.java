@@ -18,85 +18,159 @@
 
 package org.apache.gora.dynamodb.query;
 
-import java.util.Collection;
-
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.ws.impl.QueryWSBase;
 import org.apache.gora.store.DataStore;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.services.dynamodb.model.QueryRequest;
+import com.amazonaws.services.dynamodb.datamodeling.DynamoDBQueryExpression;
+import com.amazonaws.services.dynamodb.datamodeling.DynamoDBScanExpression;
+import com.amazonaws.services.dynamodb.model.AttributeValue;
+import com.amazonaws.services.dynamodb.model.ComparisonOperator;
+import com.amazonaws.services.dynamodb.model.Condition;
+import com.amazonaws.services.dynamodb.model.KeySchema;
+import com.amazonaws.services.dynamodb.model.KeySchemaElement;
 
 public class DynamoDBQuery<K, T extends Persistent> extends QueryWSBase<K, T> {
 	
-	/**
-	 * Query object to perform requests to the datastore
-	 */
-	//private Query<K, T> query;
+	private boolean consistencyReadLevel;
 	
-	/**
-	 * Maps fields to DynamoDB attributes.
-	 */
-	private Collection<String> attributesColl;
+	private static ComparisonOperator rangeCompOp;
 	
-	/**
-	 * Query object to perform requests to the datastore
-	 */
-	QueryRequest dynamoDBquery;
-
+	private static ComparisonOperator scanCompOp;
+	
+	private static final String RANGE_QUERY = "range";
+	
+	private static final String SCAN_QUERY = "scan";
+	
+	private String type;
+	
+	private Query<K, T> query;
+	
+	private Object dynamoDBExpression;
+	
+	private KeySchema keySchema;
+	
 	public DynamoDBQuery(){
 		super(null);
-		this.dynamoDBquery = new QueryRequest();
 	}
   
 	public DynamoDBQuery(DataStore<K, T> dataStore) {
 		super(dataStore);
 	}
-	
-	public void setAttrCollection(Collection<String> attrsColl){
-		this.attributesColl = attrsColl;
+	public void buildExpression(){
+		Condition newCondition = buildRangeCondition();
+		AttributeValue hashAttrValue = buildKeyHashAttribute();
+		if (hashAttrValue == null)
+			throw new IllegalStateException("There is not a key schema defined.");
+		if(newCondition != null){
+			setType(RANGE_QUERY);
+			buildQueryExpression(newCondition, hashAttrValue);
+		}
+		else{
+			setType(SCAN_QUERY);
+			buildScanExpression(hashAttrValue);
+		}
+	}
+	public void buildScanExpression(AttributeValue pHashAttrValue){
+		DynamoDBScanExpression newScanExpression = new DynamoDBScanExpression();
+		// TODO right now we only support scanning using the key, but we should support other types of scans
+		newScanExpression.addFilterCondition(getKeySchema().getHashKeyElement().getAttributeName(), buildKeyScanCondition());
+		dynamoDBExpression = newScanExpression;
 	}
 	
-	public Collection<String> getAttrCollection(){
-		return attributesColl;
-	}
-	public void setTableName(String tableName){
-		this.dynamoDBquery.setTableName(tableName);
-	}
-	
-	public void setLimit(int limit){
-		this.dynamoDBquery.setLimit(limit);
+	public void buildQueryExpression(Condition pNewCondition, AttributeValue pHashAttrValue) {
+		DynamoDBQueryExpression newQueryExpression = new DynamoDBQueryExpression(pHashAttrValue); 
+		newQueryExpression.setConsistentRead(getConsistencyReadLevel());
+		newQueryExpression.setRangeKeyCondition(pNewCondition);
+		dynamoDBExpression = newQueryExpression;
 	}
 	
-	public void setConsistencyRead(boolean consistency){
-		this.dynamoDBquery.setConsistentRead(consistency);
+	private AttributeValue buildKeyHashAttribute(){
+		String pAttrType = getKeySchema().getHashKeyElement().getAttributeType();
+		if(pAttrType.equals("S"))
+			return new AttributeValue().withS(query.getKey().toString());
+		else if(pAttrType.equals("N"))
+			return new AttributeValue().withN(query.getKey().toString());
+		return null;
 	}
 	
-	public void setCredentials(AWSCredentials credentials){
-		this.dynamoDBquery.setRequestCredentials(credentials);
+	private Condition buildKeyScanCondition(){
+		Condition scanKeyCondition = new Condition();
+		scanKeyCondition.setComparisonOperator(getScanCompOp());
+		scanKeyCondition.withAttributeValueList(buildKeyHashAttribute());
+		return scanKeyCondition;
 	}
-  
-  /**
-   * @param family the family name
-   * @return an array of the query column names belonging to the family
-   */
-  public String[] getColumns(String family) {
-    
-    //List<String> columnList = attributesMap.get(family);
-    String[] columns = new String[2];
-    //for (int i = 0; i < columns.length; ++i) {
-    //  columns[i] = columnList.get(i);
-    //}
-    return columns;
-  }
-  
-  public QueryRequest getQuery() {
-    return dynamoDBquery;
-  }
-  
-  public void setQuery(Query<K, T> query) {
-    this.dynamoDBquery = (QueryRequest)query;
-  }
+	private Condition buildRangeCondition(){
+		KeySchemaElement kRangeSchema = getKeySchema().getRangeKeyElement();
+		Condition rangeKeyCondition = null;
+		if(kRangeSchema != null){
+			rangeKeyCondition = new Condition();
+			rangeKeyCondition.setComparisonOperator(ComparisonOperator.BETWEEN.toString());
+			AttributeValue startVal, endVal = null;
+			startVal = buildKeyHashAttribute();
+			if(kRangeSchema.getAttributeType().equals("S"))
+				endVal = new AttributeValue().withS(query.getStartKey().toString());
+			else if (kRangeSchema.getAttributeType().equals("N"))
+				endVal = new AttributeValue().withN(query.getStartKey().toString());
+			rangeKeyCondition.withAttributeValueList(startVal, endVal);
+		}
+		return rangeKeyCondition;
+	}
+	
+	public boolean getConsistencyReadLevel(){
+		return consistencyReadLevel;
+	}
+	
+	public void setConsistencyReadLevel(boolean pConsistencyReadLevel){
+		this.consistencyReadLevel = pConsistencyReadLevel;
+	}
+	
+	public KeySchema getKeySchema(){
+		return keySchema;
+	}
+	
+	public Object getQueryExpression(){
+		return dynamoDBExpression;
+	}
+	
+	public void setKeySchema(KeySchema pKeySchema){
+		this.keySchema = pKeySchema;
+	}
+	
+	public void setQuery(Query<K, T> pQuery){
+		this.query = pQuery;
+	}
+	
+	public Query<K, T> getQuery(){
+		return this.query;
+	}
+	
+	public String getType() {
+		return type;
+	}
+	
+	public void setType(String pType) {
+		this.type = pType;
+	}
 
+	public static ComparisonOperator getScanCompOp() {
+		if (scanCompOp == null)
+			scanCompOp = ComparisonOperator.GE;
+		return scanCompOp;
+	}
+
+	public static void setScanCompOp(ComparisonOperator scanCompOp) {
+		DynamoDBQuery.scanCompOp = scanCompOp;
+	}
+	
+	public static ComparisonOperator getRangeCompOp(){
+		if (rangeCompOp == null)
+			rangeCompOp = ComparisonOperator.BETWEEN;
+		return rangeCompOp;
+	}
+	
+	public static void setRangeCompOp(ComparisonOperator pRangeCompOp){
+		rangeCompOp = pRangeCompOp;
+	}
 }

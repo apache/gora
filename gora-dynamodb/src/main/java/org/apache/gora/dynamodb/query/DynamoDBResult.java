@@ -19,45 +19,48 @@
 package org.apache.gora.dynamodb.query;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.ws.impl.ResultWSBase;
 import org.apache.gora.store.DataStore;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DynamoDBResult<K, T extends Persistent> extends ResultWSBase<K, T> {
-  //public static final Logger LOG = LoggerFactory.getLogger(DynamoDBResult.class);
+  public static final Logger LOG = LoggerFactory.getLogger(DynamoDBResult.class);
   
   private int rowNumber;
 
-  private DynamoDBResultSet<K> dynamoDBResultSet;
+  private List<T> dynamoDBResultSet;
 
-  public DynamoDBResult(DataStore<K, T> dataStore, Query<K, T> query) {
-    super(dataStore, query);
+  public DynamoDBResult(DataStore<K, T> dataStore, Query<K, T> query, List<T> objList) {
+	super(dataStore, query);
+	LOG.debug("DynamoDB result created.");
+    this.setResultSet(objList);
   }
 
-  public void setResultSet(DynamoDBResultSet<K> dynamoDBResultSet) {
-    this.dynamoDBResultSet = dynamoDBResultSet;
+  public void setResultSet(List<T> objList) {
+    this.dynamoDBResultSet = objList;
+    this.limit = objList.size();
   }
 
-@Override
-public float getProgress() throws IOException, InterruptedException, Exception {
+  public float getProgress() throws IOException, InterruptedException, Exception {
 	// TODO Auto-generated method stub
 	return 0;
-}
+  }
 
-@Override
-public void close() throws IOException {
-	// TODO Auto-generated method stub
-	
-}
+  protected boolean nextInner() throws Exception {
+	if (offset < 0 || offset > dynamoDBResultSet.size())
+		return false;
+	persistent = dynamoDBResultSet.get((int) this.offset);
+	return true;
+  }
 
-@Override
-protected boolean nextInner() throws Exception {
+  @Override
+  public void close() throws IOException {
 	// TODO Auto-generated method stub
-	return false;
-}
+  }
 
 }

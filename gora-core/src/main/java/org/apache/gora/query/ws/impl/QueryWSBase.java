@@ -18,9 +18,9 @@
 
 package org.apache.gora.query.ws.impl;
 
-//import org.apache.commons.lang.builder.EqualsBuilder;
-//import org.apache.commons.lang.builder.HashCodeBuilder;
-//import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
@@ -29,8 +29,7 @@ import org.apache.gora.store.DataStore;
 /**
  * Base class for Query implementations.
  */
-public abstract class QueryWSBase<K, T extends Persistent> 
-implements Query<K,T>{
+public abstract class QueryWSBase<K, T extends Persistent> implements Query<K,T>{
 	
   protected DataStore<K,T> dataStore;
 
@@ -62,13 +61,6 @@ implements Query<K,T>{
     return dataStore.execute(this);
   }
 
-//  @Override
-//  public void compile() {
-//    if(!isCompiled) {
-//      isCompiled = true;
-//    }
-//  }
-
   @Override
   public void setDataStore(DataStore<K, T> dataStore) {
     this.dataStore = dataStore;
@@ -78,16 +70,6 @@ implements Query<K,T>{
   public DataStore<K, T> getDataStore() {
     return dataStore;
   }
-
-//  @Override
-//  public void setQueryString(String queryString) {
-//    this.queryString = queryString;
-//  }
-//
-//  @Override
-//  public String getQueryString() {
-//    return queryString;
-//  }
 
   @Override
   public void setFields(String... fields) {
@@ -174,16 +156,6 @@ public String[] getFields() {
     return endTime;
   }
 
-//  @Override
-//  public void setFilter(String filter) {
-//    this.filter = filter;
-//  }
-//
-//  @Override
-//  public String getFilter() {
-//    return filter;
-//  }
-
   @Override
   public void setLimit(long limit) {
     this.limit = limit;
@@ -201,66 +173,13 @@ public String[] getFields() {
   public void setConf(Object auth) {
     this.authentication = auth;
   }
-
  
-  /*@SuppressWarnings("unchecked")
-  public void readFields(DataInput in) throws IOException {
-    String dataStoreClass = Text.readString(in);
-    try {
-      dataStore = (DataStore<K, T>) ReflectionUtils.newInstance(ClassLoadingUtils.loadClass(dataStoreClass), conf);
-      dataStore.readFields(in);
-    } catch (ClassNotFoundException ex) {
-      throw new IOException(ex);
-    }
-
-    boolean[] nullFields = IOUtils.readNullFieldsInfo(in);
-
-    if(!nullFields[0])
-      queryString = Text.readString(in);
-    if(!nullFields[1])
-      fields = IOUtils.readStringArray(in);
-    if(!nullFields[2])
-      startKey = IOUtils.deserialize(null, in, null, dataStore.getKeyClass());
-    if(!nullFields[3])
-      endKey = IOUtils.deserialize(null, in, null, dataStore.getKeyClass());
-    if(!nullFields[4])
-      filter = Text.readString(in);
-
-    startTime = WritableUtils.readVLong(in);
-    endTime = WritableUtils.readVLong(in);
-    limit = WritableUtils.readVLong(in);
-  }*/
-
- /* public void write(DataOutput out) throws IOException {
-    //write datastore
-    Text.writeString(out, dataStore.getClass().getCanonicalName());
-    dataStore.write(out);
-
-    IOUtils.writeNullFieldsInfo(out, queryString, (fields)
-        , startKey, endKey, filter);
-
-    if(queryString != null)
-      Text.writeString(out, queryString);
-    if(fields != null)
-      IOUtils.writeStringArray(out, fields);
-    if(startKey != null)
-      IOUtils.serialize(getConf(), out, startKey, dataStore.getKeyClass());
-    if(endKey != null)
-      IOUtils.serialize(getConf(), out, endKey, dataStore.getKeyClass());
-    if(filter != null)
-      Text.writeString(out, filter);
-
-    WritableUtils.writeVLong(out, getStartTime());
-    WritableUtils.writeVLong(out, getEndTime());
-    WritableUtils.writeVLong(out, getLimit());
-  }*/
-
   @SuppressWarnings({ "rawtypes" })
   @Override
   public boolean equals(Object obj) {
     if(obj instanceof QueryWSBase) {
       QueryWSBase that = (QueryWSBase) obj;
-      /*EqualsBuilder builder = new EqualsBuilder();
+      EqualsBuilder builder = new EqualsBuilder();
       builder.append(dataStore, that.dataStore);
       builder.append(queryString, that.queryString);
       builder.append(fields, that.fields);
@@ -269,16 +188,12 @@ public String[] getFields() {
       builder.append(filter, that.filter);
       builder.append(limit, that.limit);
       return builder.isEquals();
-      */
-      if(that!=null)
-    	  return true;
     }
     return false;
   }
 
   @Override
   public int hashCode() {
-    /*
     HashCodeBuilder builder = new HashCodeBuilder();
     builder.append(dataStore);
     builder.append(queryString);
@@ -288,13 +203,10 @@ public String[] getFields() {
     builder.append(filter);
     builder.append(limit);
     return builder.toHashCode();
-    */
-	  return 0;
   }
 
   @Override
   public String toString() {
-    /*
     ToStringBuilder builder = new ToStringBuilder(this);
     builder.append("dataStore", dataStore);
     builder.append("fields", fields);
@@ -304,7 +216,5 @@ public String[] getFields() {
     builder.append("limit", limit);
 
     return builder.toString();
-    */
-    return "";
   }
 }
