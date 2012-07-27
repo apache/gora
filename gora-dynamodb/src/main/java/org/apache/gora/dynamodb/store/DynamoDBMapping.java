@@ -66,7 +66,7 @@ public class DynamoDBMapping {
   }
   /**
    * A builder for creating the mapper. This will allow building a thread safe
-   * {@link HBaseMapping} using simple immutabilty.
+   * {@link DynamoDBMapping} using simple immutabilty.
    *
    */
   public static class DynamoDBMappingBuilder {
