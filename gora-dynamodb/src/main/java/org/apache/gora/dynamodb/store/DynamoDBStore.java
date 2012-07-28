@@ -21,6 +21,7 @@ package org.apache.gora.dynamodb.store;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,9 +67,6 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
 	
   public static final Logger LOG = LoggerFactory.getLogger(DynamoDBStore.class);
 
-  // TODO this should be loaded from the class path
-  private static final String MAPPING_FILE_PATH = "gora-dynamodb/conf/";
-  
   private static String preferredSchema;
   
   /**
@@ -160,8 +158,8 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
 
     try {
       SAXBuilder builder = new SAXBuilder();
-      //Document doc = builder.build(getClass().getClassLoader() .getResourceAsStream(MAPPING_FILE_PATH + MAPPING_FILE));
-      Document doc = builder.build(new File(MAPPING_FILE_PATH + MAPPING_FILE));
+      Document doc = builder.build(getClass().getClassLoader().getResourceAsStream(MAPPING_FILE));
+      //Document doc = builder.build(new File(MAPPING_FILE_PATH + MAPPING_FILE));
       
       Element root = doc.getRootElement();
 
@@ -219,13 +217,17 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
    * @throws IllegalArgumentException
    * @throws IOException
    */
-  private AWSCredentials getCredentials() throws FileNotFoundException, IllegalArgumentException, IOException{
-	  // TODO this should be done using a class loader, and reading it as a stream
-	  File file = new File(MAPPING_FILE_PATH + awsCredentialsProperties);
-	  AWSCredentials credentials = new PropertiesCredentials(file);
-	  setConf(credentials);
-	  return credentials;
-  }
+  private AWSCredentials getCredentials() throws FileNotFoundException, 
+    IllegalArgumentException, IOException {
+    
+    //File file = new File(MAPPING_FILE_PATH + awsCredentialsProperties);
+    InputStream awsCredInpStr = getClass().getClassLoader().getResourceAsStream(awsCredentialsProperties);
+    if (awsCredInpStr == null)
+      LOG.info("AWS Credentials File was not found on the classpath!");
+      AWSCredentials credentials = new PropertiesCredentials(awsCredInpStr);
+      setConf(credentials);
+      return credentials;
+  }  
 
   private DynamoDBQuery<K, T> buildDynamoDBQuery(Query<K, T> query){
 	  if(getSchemaName() == null)

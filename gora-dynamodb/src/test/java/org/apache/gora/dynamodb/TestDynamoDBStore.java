@@ -38,7 +38,6 @@ import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.DataStoreTestBase;
 import org.apache.gora.store.DataStoreTestUtil;
 import org.apache.gora.store.ws.impl.WSDataStoreFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.junit.After;
 import org.junit.Test;
 
@@ -65,15 +64,13 @@ public class TestDynamoDBStore extends DataStoreTestBase {
   
   private static DynamoDBStore<String,person> personStore;
   
-  private Configuration conf;
-
   static {
     setTestDriver(new GoraDynamoDBTestDriver());
   }
   
   @Override
   public void setUp() throws Exception {
-    //super.setUp();
+    super.setUp();
     auth = getTestDriver().getAuth();
     createDataStore();
     setUpResources();
@@ -82,15 +79,15 @@ public class TestDynamoDBStore extends DataStoreTestBase {
   @Override
   protected DataStore<String, Employee> createEmployeeDataStore()
       throws IOException {
-    return DataStoreFactory.createDataStore(DynamoDBStore.class, String.class, 
-        Employee.class, conf);
+    return WSDataStoreFactory.createDataStore(DynamoDBStore.class, String.class, 
+        Employee.class, auth);
   }
 
   @Override
   protected DataStore<String, WebPage> createWebPageDataStore()
       throws IOException {
-    return DataStoreFactory.createDataStore(DynamoDBStore.class, String.class, 
-        WebPage.class, conf);
+    return WSDataStoreFactory.createDataStore(DynamoDBStore.class, String.class, 
+        WebPage.class, auth);
   }
   
   private void setUpResources(){

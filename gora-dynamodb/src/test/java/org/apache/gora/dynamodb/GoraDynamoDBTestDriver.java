@@ -52,7 +52,7 @@ public class GoraDynamoDBTestDriver extends GoraTestDriver {
   
   static String awsCredentialsFile = "AwsCredentials.properties";
   
-  static String awsCredentialsPath = "gora-dynamodb/conf/";
+  static String awsCredentialsPath = "target/test-classes/";
   
   protected Object auth;
   
