@@ -4,6 +4,10 @@
 
 Gora Change Log
 
+trunk (current development)
+
+* GORA-XX ensure directory cleanup succeeds in gora-* (Simone Tripodi via lewismc)
+
 0.2.1 release: 26/07/2012
 Release Report: https://issues.apache.org/jira/secure/ReleaseNote.jspa?projectId=12311172&version=12322496
 

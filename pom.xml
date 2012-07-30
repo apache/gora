@@ -283,6 +283,23 @@
           </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-clean-plugin</artifactId>
+            <version>${maven-clean-plugin.version}</version>
+            <configuration>
+             	<filesets>
+		    <fileset>
+			<directory>${basedir}/lib</directory>
+			<followSymlinks>false</followSymlinks>
+			<useDefaultExcludes>true</useDefaultExcludes>
+			<includes>
+			    <include>*.jar</include>
+			</includes>
+		    </fileset>
+		</filesets>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-release-plugin</artifactId>
             <version>${maven-release-plugin.version}</version>
             <configuration>
@@ -565,6 +582,7 @@
         <maven-assembly-plugin.version>2.2.2</maven-assembly-plugin.version>
         <maven-deploy-plugin.version>2.5</maven-deploy-plugin.version>
         <checksum-maven-plugin.version>1.0.1</checksum-maven-plugin.version>
+        <maven-clean-plugin.version>2.5</maven-clean-plugin.version>
         
         <!-- General Properties -->
         <implementation.build>${scmBranch}@r${buildNumber}</implementation.build>
