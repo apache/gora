@@ -583,7 +583,7 @@
             <groupId>org.apache.gora</groupId>
             <artifactId>gora-core</artifactId>
             <version>${project.version}</version>
-            <classifier>tests</classifier>
+            <type>test-jar</type>
           </dependency>
 
           <dependency>

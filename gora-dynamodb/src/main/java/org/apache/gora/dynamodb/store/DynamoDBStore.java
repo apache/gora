@@ -18,7 +18,6 @@
 
 package org.apache.gora.dynamodb.store;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.apache.gora.dynamodb.query.DynamoDBQuery;
@@ -52,10 +52,14 @@ import com.amazonaws.services.dynamodb.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodb.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodb.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodb.datamodeling.DynamoDBScanExpression;
+import com.amazonaws.services.dynamodb.model.AttributeValue;
 import com.amazonaws.services.dynamodb.model.CreateTableRequest;
+import com.amazonaws.services.dynamodb.model.DeleteItemRequest;
+import com.amazonaws.services.dynamodb.model.DeleteItemResult;
 import com.amazonaws.services.dynamodb.model.DeleteTableRequest;
 import com.amazonaws.services.dynamodb.model.DeleteTableResult;
 import com.amazonaws.services.dynamodb.model.DescribeTableRequest;
+import com.amazonaws.services.dynamodb.model.Key;
 import com.amazonaws.services.dynamodb.model.KeySchema;
 import com.amazonaws.services.dynamodb.model.ProvisionedThroughput;
 import com.amazonaws.services.dynamodb.model.ResourceNotFoundException;
@@ -80,6 +84,9 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
   // TODO this should point to properties file within the DynamoDB module 
   private static String awsCredentialsProperties = "AwsCredentials.properties";
   
+  private static long waitTime = 10L * 60L * 1000L;
+  private static long sleepTime = 1000L * 20L;
+  
   /**
    * Name of the cloud database provider.
    */
@@ -88,6 +95,10 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
   private static String CLI_TYP_PROP = "gora.dynamodb.client";
   
   private static String ENDPOINT_PROP = "gora.dynamodb.endpoint";
+  
+  private static String PREF_SCH_NAME = "preferred.schema.name";
+  
+  private static String CONSISTENCY_READS = "gora.dynamodb.consistent.reads";
 
   /**
    * The mapping object that contains the mapping file
@@ -120,7 +131,7 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
 
 		 getCredentials();
 		 setWsProvider(wsProvider);
-		 preferredSchema = properties.getProperty("preferred.schema.name");
+		 preferredSchema = properties.getProperty(PREF_SCH_NAME);
 		 //preferredSchema = "person";
 		 dynamoDBClient = getClient(properties.getProperty(CLI_TYP_PROP),(AWSCredentials)getConf());
 		 //dynamoDBClient = getClient("sync",(AWSCredentials)getConf());
@@ -128,7 +139,7 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
 		 //dynamoDBClient.setEndpoint("http://dynamodb.us-east-1.amazonaws.com/");
 		 mapping = readMapping();
 		 
-		 consistency = properties.getProperty("gora.dynamodb.consistent.reads");
+		 consistency = properties.getProperty(CONSISTENCY_READS);
 		 
 		 persistentClass = pPersistentClass;
 	 }
@@ -221,24 +232,25 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
     IllegalArgumentException, IOException {
     
     //File file = new File(MAPPING_FILE_PATH + awsCredentialsProperties);
-    InputStream awsCredInpStr = getClass().getClassLoader().getResourceAsStream(awsCredentialsProperties);
-    if (awsCredInpStr == null)
-      LOG.info("AWS Credentials File was not found on the classpath!");
+	if(authentication == null){
+	  InputStream awsCredInpStr = getClass().getClassLoader().getResourceAsStream(awsCredentialsProperties);
+      if (awsCredInpStr == null)
+        LOG.info("AWS Credentials File was not found on the classpath!");
       AWSCredentials credentials = new PropertiesCredentials(awsCredInpStr);
       setConf(credentials);
-      return credentials;
-  }  
+	}
+	return (AWSCredentials)authentication;
+  }
 
   private DynamoDBQuery<K, T> buildDynamoDBQuery(Query<K, T> query){
-	  if(getSchemaName() == null)
-		  throw new IllegalStateException("There is not a preferred schema defined.");
+	  if(getSchemaName() == null) throw new IllegalStateException("There is not a preferred schema defined.");
 	  
 	  DynamoDBQuery<K, T> dynamoDBQuery = new DynamoDBQuery<K, T>();
 	  dynamoDBQuery.setKeySchema(mapping.getKeySchema(getSchemaName()));
 	  dynamoDBQuery.setQuery(query);
 	  dynamoDBQuery.setConsistencyReadLevel(getConsistencyReads());
 	  dynamoDBQuery.buildExpression();
-	  dynamoDBQuery.getQueryExpression();
+	  //dynamoDBQuery.getQueryExpression();
 	  
 	  return dynamoDBQuery;
   }
@@ -255,9 +267,9 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
 	 DynamoDBQuery<K, T> dynamoDBQuery = buildDynamoDBQuery(query);
 	 DynamoDBMapper mapper = new DynamoDBMapper(dynamoDBClient);
 	 List<T> objList = null;
-	 if (dynamoDBQuery.getType().equals("range"))
+	 if (DynamoDBQuery.getType().equals(DynamoDBQuery.RANGE_QUERY))
 		 objList = mapper.query(persistentClass, (DynamoDBQueryExpression)dynamoDBQuery.getQueryExpression());
-	 if (dynamoDBQuery.getType().equals("scan"))
+	 if (DynamoDBQuery.getType().equals(DynamoDBQuery.SCAN_QUERY))
 		 objList = mapper.scan(persistentClass, (DynamoDBScanExpression)dynamoDBQuery.getQueryExpression());
 	 return new DynamoDBResult<K, T>(this, query, objList);  
   }
@@ -279,11 +291,20 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
    * Gets the object with the specific key
    */
   public T get(K key) throws Exception {
+	T object = null;
+	Object rangeKey = null;
+    for (Method met :key.getClass().getDeclaredMethods()){
+	  if(met.getName().equals("getRangeKey")){
+	    Object [] params = null;
+	    rangeKey = met.invoke(key, params);
+	    break;
+      }
+    }
 	DynamoDBMapper mapper = new DynamoDBMapper(dynamoDBClient);
-	T object = (T) mapper.load(persistentClass, key); 
+	object = (rangeKey == null)?(T) mapper.load(persistentClass, key):(T) mapper.load(persistentClass, key, rangeKey);
 	return object;
   }
-  
+    
   public Query<K, T> newQuery() {
     Query<K,T> query = new DynamoDBQuery<K, T>(this);
    // query.setFields(getFieldsToQuery(null));
@@ -382,9 +403,9 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
       LOG.debug("Waiting for " + tableName + " to become available");
 
       long startTime = System.currentTimeMillis();
-      long endTime = startTime + (10 * 60 * 1000);
+      long endTime = startTime + waitTime;
       while (System.currentTimeMillis() < endTime) {
-          try {Thread.sleep(1000 * 20);} catch (Exception e) {}
+          try {Thread.sleep(sleepTime);} catch (Exception e) {}
           try {
               DescribeTableRequest request = new DescribeTableRequest().withTableName(tableName);
               TableDescription tableDescription = dynamoDBClient.describeTable(request).getTable();
@@ -452,21 +473,21 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
   }
 
   public void put(K key, T obj) throws Exception {
-	  Object param = null;
-	  for (Method met : persistentClass.getMethods()) {
-		  if(met.getName().equals("getRangeKey")){
-			  Object [] params = null;
-			  param = met.invoke(obj, params);
-			  break;
-		  }
-	  }
-	  DynamoDBMapper mapper = new DynamoDBMapper(dynamoDBClient);
-	  if (param != null)
-		  mapper.load(persistentClass, key.toString(), param.toString());
-	  else
-		  mapper.load(persistentClass, key.toString());
+	Object rangeKey = null;
+    for (Method met :key.getClass().getDeclaredMethods()){
+	  if(met.getName().equals("getRangeKey")){
+	    Object [] params = null;
+	    rangeKey = met.invoke(key, params);
+	    break;
+      }
+    }
+    DynamoDBMapper mapper = new DynamoDBMapper(dynamoDBClient);
+    if (rangeKey != null)
+	  mapper.load(persistentClass, key.toString(), rangeKey.toString());
+	else
+	  mapper.load(persistentClass, key.toString());
 	  
-	  mapper.save(obj);
+    mapper.save(obj);
   }
 
   /**
@@ -475,19 +496,32 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
    */
   public boolean delete(K key) throws Exception {
 	try{
+		T object = null;
+		Object rangeKey = null, hashKey = null;
 		DynamoDBMapper mapper = new DynamoDBMapper(dynamoDBClient);
-		T object = (T) mapper.load(persistentClass, key);
-		
+	    for (Method met :key.getClass().getDeclaredMethods()){
+		  if(met.getName().equals("getRangeKey")){
+		    Object [] params = null;
+		    rangeKey = met.invoke(key, params);
+		    break;
+	      }
+	    }
+	    for (Method met :key.getClass().getDeclaredMethods()){
+			  if(met.getName().equals("getHashKey")){
+			    Object [] params = null;
+			    hashKey = met.invoke(key, params);
+			    break;
+		      }
+		    }
+	    if (hashKey == null) object = (T) mapper.load(persistentClass, key);
+        if (rangeKey == null)
+        	object = (T) mapper.load(persistentClass, hashKey);
+        else
+        	object = (T) mapper.load(persistentClass, hashKey, rangeKey);
+	
 		if (object == null) return false;
 		
 		// setting key for dynamodbMapper
-		for (Method met : persistentClass.getMethods()) {
-			  if(met.getName().equals("setHashKey")){
-				  met.invoke(object, key);
-				  break;
-			  }
-		}
-		
 		mapper.delete(object);
 		return true;
 	}catch(Exception e){

@@ -18,10 +18,16 @@
 
 package org.apache.gora.dynamodb.query;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+import org.apache.gora.dynamodb.store.DynamoDBStore;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.ws.impl.QueryWSBase;
 import org.apache.gora.store.DataStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.amazonaws.services.dynamodb.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodb.datamodeling.DynamoDBScanExpression;
@@ -33,23 +39,27 @@ import com.amazonaws.services.dynamodb.model.KeySchemaElement;
 
 public class DynamoDBQuery<K, T extends Persistent> extends QueryWSBase<K, T> {
 	
+	public static final Logger LOG = LoggerFactory.getLogger(DynamoDBQuery.class);
+	
 	private boolean consistencyReadLevel;
 	
 	private static ComparisonOperator rangeCompOp;
 	
 	private static ComparisonOperator scanCompOp;
 	
-	private static final String RANGE_QUERY = "range";
+	public static final String RANGE_QUERY = "range";
 	
-	private static final String SCAN_QUERY = "scan";
+	public static final String SCAN_QUERY = "scan";
 	
-	private String type;
+	private static String type;
 	
 	private Query<K, T> query;
 	
 	private Object dynamoDBExpression;
 	
 	private KeySchema keySchema;
+	
+	private K hashKey;
 	
 	public DynamoDBQuery(){
 		super(null);
@@ -58,20 +68,29 @@ public class DynamoDBQuery<K, T extends Persistent> extends QueryWSBase<K, T> {
 	public DynamoDBQuery(DataStore<K, T> dataStore) {
 		super(dataStore);
 	}
-	public void buildExpression(){
-		Condition newCondition = buildRangeCondition();
-		AttributeValue hashAttrValue = buildKeyHashAttribute();
-		if (hashAttrValue == null)
-			throw new IllegalStateException("There is not a key schema defined.");
-		if(newCondition != null){
-			setType(RANGE_QUERY);
-			buildQueryExpression(newCondition, hashAttrValue);
-		}
-		else{
-			setType(SCAN_QUERY);
-			buildScanExpression(hashAttrValue);
-		}
+	
+	@Override
+    public void setKey(K key) {
+	  this.hashKey = key;
 	}
+	
+	@Override
+	public K getKey() {
+	  return this.hashKey;
+	}
+	
+	public void buildExpression(){
+	  AttributeValue hashAttrValue = buildKeyHashAttribute();
+	  if (hashAttrValue == null)
+	  	throw new IllegalStateException("There is not a key schema defined.");
+	  if (DynamoDBQuery.getType().equals(RANGE_QUERY)){
+	  	Condition newCondition = buildRangeCondition();
+		buildQueryExpression(newCondition, hashAttrValue);
+      }
+	  if (DynamoDBQuery.getType().equals(SCAN_QUERY))
+		buildScanExpression(hashAttrValue);
+	}
+	
 	public void buildScanExpression(AttributeValue pHashAttrValue){
 		DynamoDBScanExpression newScanExpression = new DynamoDBScanExpression();
 		// TODO right now we only support scanning using the key, but we should support other types of scans
@@ -89,11 +108,59 @@ public class DynamoDBQuery<K, T extends Persistent> extends QueryWSBase<K, T> {
 	private AttributeValue buildKeyHashAttribute(){
 		String pAttrType = getKeySchema().getHashKeyElement().getAttributeType();
 		if(pAttrType.equals("S"))
-			return new AttributeValue().withS(query.getKey().toString());
+			return new AttributeValue().withS(getHashKey(query.getKey()).toString());
 		else if(pAttrType.equals("N"))
-			return new AttributeValue().withN(query.getKey().toString());
+			return new AttributeValue().withN(getHashKey(query.getKey()).toString());
 		return null;
 	}
+	
+	private Object getHashKey(K key){
+	    Object hashKey = null;
+	    try {
+		  // Our key may be have hash and range keys
+		  for (Method met :key.getClass().getDeclaredMethods()){
+		    if(met.getName().equals("getHashKey")){
+		      Object [] params = null;
+		      hashKey = met.invoke(key, params);
+		      break;
+		    }
+		  }
+		} catch (IllegalArgumentException e) {
+		  LOG.info("DynamoDBStore: Error while trying to fetch range key.");
+		  e.printStackTrace();
+		} catch (IllegalAccessException e) {
+		  LOG.info("DynamoDBStore: Error while trying to fetch range key.");
+		  e.printStackTrace();
+		} catch (InvocationTargetException e) {
+		  LOG.info("DynamoDBStore: Error while trying to fetch range key.");
+		  e.printStackTrace();
+		}
+		return hashKey;
+	  }
+	
+	  private Object getRangeKey(K key){
+		  Object rangeKey = null;
+		  try {
+	        // Our key may be have hash and range keys
+		    for (Method met :key.getClass().getDeclaredMethods()){
+			  if(met.getName().equals("getRangeKey")){
+			    Object [] params = null;
+			    rangeKey = met.invoke(key, params);
+			    break;
+		      }
+		    }
+		  } catch (IllegalArgumentException e) {
+		    LOG.info("DynamoDBStore: Error while trying to fetch range key.");
+			e.printStackTrace();
+		  } catch (IllegalAccessException e) {
+			LOG.info("DynamoDBStore: Error while trying to fetch range key.");
+			e.printStackTrace();
+		  } catch (InvocationTargetException e) {
+			LOG.info("DynamoDBStore: Error while trying to fetch range key.");
+			e.printStackTrace();
+		  }
+		  return rangeKey;
+	  }
 	
 	private Condition buildKeyScanCondition(){
 		Condition scanKeyCondition = new Condition();
@@ -101,18 +168,23 @@ public class DynamoDBQuery<K, T extends Persistent> extends QueryWSBase<K, T> {
 		scanKeyCondition.withAttributeValueList(buildKeyHashAttribute());
 		return scanKeyCondition;
 	}
+	
 	private Condition buildRangeCondition(){
 		KeySchemaElement kRangeSchema = getKeySchema().getRangeKeyElement();
 		Condition rangeKeyCondition = null;
 		if(kRangeSchema != null){
 			rangeKeyCondition = new Condition();
 			rangeKeyCondition.setComparisonOperator(ComparisonOperator.BETWEEN.toString());
-			AttributeValue startVal, endVal = null;
-			startVal = buildKeyHashAttribute();
-			if(kRangeSchema.getAttributeType().equals("S"))
-				endVal = new AttributeValue().withS(query.getStartKey().toString());
-			else if (kRangeSchema.getAttributeType().equals("N"))
-				endVal = new AttributeValue().withN(query.getStartKey().toString());
+			AttributeValue startVal = null, endVal = null;
+			//startVal = buildKeyHashAttribute();
+			if(kRangeSchema.getAttributeType().equals("S")){
+				startVal = new AttributeValue().withS(getRangeKey(query.getStartKey()).toString());
+				endVal = new AttributeValue().withS(getRangeKey(query.getEndKey()).toString());
+			}
+			else if (kRangeSchema.getAttributeType().equals("N")){
+				startVal = new AttributeValue().withN(getRangeKey(query.getStartKey()).toString());
+				endVal = new AttributeValue().withN(getRangeKey(query.getEndKey()).toString());
+			}
 			rangeKeyCondition.withAttributeValueList(startVal, endVal);
 		}
 		return rangeKeyCondition;
@@ -146,12 +218,12 @@ public class DynamoDBQuery<K, T extends Persistent> extends QueryWSBase<K, T> {
 		return this.query;
 	}
 	
-	public String getType() {
+	public static String getType() {
 		return type;
 	}
 	
-	public void setType(String pType) {
-		this.type = pType;
+	public static void setType(String pType) {
+		type = pType;
 	}
 
 	public static ComparisonOperator getScanCompOp() {

@@ -31,8 +31,6 @@ import org.slf4j.LoggerFactory;
 public class DynamoDBResult<K, T extends Persistent> extends ResultWSBase<K, T> {
   public static final Logger LOG = LoggerFactory.getLogger(DynamoDBResult.class);
   
-  private int rowNumber;
-
   private List<T> dynamoDBResultSet;
 
   public DynamoDBResult(DataStore<K, T> dataStore, Query<K, T> query, List<T> objList) {
@@ -52,7 +50,7 @@ public class DynamoDBResult<K, T extends Persistent> extends ResultWSBase<K, T> 
   }
 
   protected boolean nextInner() throws Exception {
-	if (offset < 0 || offset > dynamoDBResultSet.size())
+	if (offset < 0 || offset > ( dynamoDBResultSet.size() - 1))
 		return false;
 	persistent = dynamoDBResultSet.get((int) this.offset);
 	return true;

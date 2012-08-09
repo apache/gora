@@ -17,7 +17,7 @@ public class person implements Persistent{
 	private String hashKey;
 	
 	// range hash key
-    //private String dateOfBirth;
+    private String rangeKey;
     
     private String firstName;
     
@@ -31,31 +31,31 @@ public class person implements Persistent{
     
     public void setDirty(boolean pDirty){}
     
-    @DynamoDBHashKey
+    @DynamoDBHashKey(attributeName="HashKey")
     public String getHashKey() {  return hashKey;  }
-    public void setHashKey(String pSsn) {  this.hashKey = pSsn;  }
+    public void setHashKey(String pHashKey) {  this.hashKey = pHashKey;  }
+    
+    @DynamoDBRangeKey(attributeName="RangeKey")
+    public String getRangeKey() {  return rangeKey;  }
+    public void setRangeKey(String pRangeKey) {  this.rangeKey = pRangeKey; }
     /*
-    @DynamoDBRangeKey
-    public String getRangeKey() {  return dateOfBirth;  }
-    public void setRangeKey(String pDateOfBirth) {  this.dateOfBirth = pDateOfBirth; }
-   
     @DynamoDBAttribute(attributeName = "ssn")
     public String getSsn() {  return ssn;  }
     public void setSsn(String pSsn) {  this.ssn = pSsn;  }
      */
-    @DynamoDBAttribute(attributeName = "firstName")
+    @DynamoDBAttribute(attributeName = "FirstName")
     public String getFirstName() {  return firstName;  }
     public void setFirstName(String pFirstName) {  this.firstName = pFirstName;  }
     
-    @DynamoDBAttribute(attributeName = "lastName")
+    @DynamoDBAttribute(attributeName = "LastName")
     public String getLastName() {  return lastName;  }
     public void setLastName(String pLastName) {  this.lastName = pLastName;  }
     
-    @DynamoDBAttribute(attributeName = "salary")
+    @DynamoDBAttribute(attributeName = "Salary")
     public double getSalary() {  return salary; }
     public void setSalary(double pSalary) {  this.salary = pSalary; }
     
-    @DynamoDBAttribute(attributeName = "places")
+    @DynamoDBAttribute(attributeName = "Places")
     public Set<String> getPlacesVisited() { 
     	return visitedPlaces; 
     }    

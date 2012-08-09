@@ -77,7 +77,7 @@ public abstract class QueryWSBase<K, T extends Persistent> implements Query<K,T>
   }
 
   @Override
-public String[] getFields() {
+  public String[] getFields() {
     return fields;
   }
 

@@ -23,22 +23,20 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.apache.gora.GoraTestDriver;
+import org.apache.gora.dynamodb.query.DynamoDBKey;
 import org.apache.gora.dynamodb.store.DynamoDBStore;
+import org.apache.gora.examples.generated.person;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.store.DataStore;
-import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.ws.impl.WSDataStoreFactory;
 import org.apache.gora.util.GoraException;
 
-import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.PropertiesCredentials;
 import com.amazonaws.services.dynamodb.AmazonDynamoDBClient;
-import com.amazonaws.services.dynamodb.model.DeleteTableRequest;
 import com.amazonaws.services.dynamodb.model.DescribeTableRequest;
 import com.amazonaws.services.dynamodb.model.ResourceNotFoundException;
 import com.amazonaws.services.dynamodb.model.TableDescription;
-import com.amazonaws.services.dynamodb.model.TableStatus;
 
 /**
  * Helper class for third part tests using gora-dynamodb backend. 
@@ -46,7 +44,7 @@ import com.amazonaws.services.dynamodb.model.TableStatus;
  */
 public class GoraDynamoDBTestDriver extends GoraTestDriver {
 
-  static long waitTime = 10L * 60L * 1000L;
+  private static DynamoDBStore<DynamoDBKey,person> personStore;
   
   static AmazonDynamoDBClient dynamoDBClient;
   
@@ -58,100 +56,67 @@ public class GoraDynamoDBTestDriver extends GoraTestDriver {
   
   public GoraDynamoDBTestDriver() {
     super(DynamoDBStore.class);
-    
-    try {
-    	
-    	File file = new File(awsCredentialsPath + awsCredentialsFile);
-    	AWSCredentials credentials = new PropertiesCredentials(file);
-    	
-    	auth = credentials;
-        dynamoDBClient = new AmazonDynamoDBClient(credentials);
-        
+	try {
+	  AWSCredentials credentials;
+	  File file = new File(awsCredentialsPath + awsCredentialsFile);
+	  credentials = new PropertiesCredentials(file);
+	  auth = credentials;
 	} catch (FileNotFoundException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
+	  e.printStackTrace();
 	} catch (IllegalArgumentException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
+	  e.printStackTrace();
 	} catch (IOException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
+	  e.printStackTrace();
 	}
-    
   }
 
   @Override
   public void setUpClass() throws Exception {
     super.setUpClass();
     log.info("Initializing DynamoDB.");
+    createDataStore();
+  }
+  
+  @Override
+  public void setUp() throws Exception {
+	  personStore.createSchema();
+  }
+  
+  
+  @SuppressWarnings("unchecked")
+  protected DataStore<DynamoDBKey, person> createDataStore() throws IOException {
+    if(personStore == null)
+      personStore = WSDataStoreFactory.createDataStore(DynamoDBStore.class, 
+    		  DynamoDBKey.class,person.class, auth);
+      return personStore;
+  }
+  
+  @SuppressWarnings("unchecked")
+  public<K, T extends Persistent> DataStore<K,T>
+    createDataStore(Class<K> keyClass, Class<T> persistentClass) throws GoraException {
+	personStore = (DynamoDBStore<DynamoDBKey, person>) WSDataStoreFactory.createDataStore(
+        (Class<? extends DataStore<K,T>>)dataStoreClass, keyClass, persistentClass, auth);
+    dataStores.add(personStore);
+
+    return (DataStore<K, T>) personStore;
+  }
+  
+  public DataStore<DynamoDBKey, person> getDataStore(){
+	try {
+	  if(personStore != null)
+	    return personStore;
+	  else
+		return createDataStore();
+	} catch (IOException e) {
+		e.printStackTrace();
+		return null;
+	}
   }
 
   @Override
   public void tearDownClass() throws Exception {
     super.tearDownClass();
-    log.info("Finishing DynamoDB.");
-  }
-  
-  @Override
-  public void setUp() throws Exception {
-    super.setUp();
-  }
-  
-  public void deleteTable(String tableName) throws Exception {
-	  DeleteTableRequest deleteTableRequest = new DeleteTableRequest().withTableName(tableName);
-	  dynamoDBClient.deleteTable(deleteTableRequest);
-	  waitForTableToBeDeleted(tableName);  
-  }
-  
-  public void waitForTableToBecomeAvailable(String tableName) {
-      log.info("Waiting for " + tableName + " to become ACTIVE...");
-
-      long startTime = System.currentTimeMillis();
-      long endTime = startTime + (10 * 60 * 1000);
-      while (System.currentTimeMillis() < endTime) {
-          try {Thread.sleep(1000 * 20);} catch (Exception e) {}
-          try {
-              DescribeTableRequest request = new DescribeTableRequest().withTableName(tableName);
-              TableDescription tableDescription = dynamoDBClient.describeTable(request).getTable();
-              String tableStatus = tableDescription.getTableStatus();
-              log.info("  - current state: " + tableStatus);
-              if (tableStatus.equals(TableStatus.ACTIVE.toString())) return;
-          } catch (AmazonServiceException ase) {
-              if (ase.getErrorCode().equalsIgnoreCase("ResourceNotFoundException") == false) throw ase;
-          }
-      }
-
-      throw new RuntimeException("Table " + tableName + " never went active");
-  }
-  
-  private static void waitForTableToBeDeleted(String tableName) {
-      
-	  log.info("Waiting for " + tableName + " while status DELETING...");
-
-      long startTime = System.currentTimeMillis();
-      long endTime = startTime + (waitTime);
-      
-      while (System.currentTimeMillis() < endTime) {
-          try {Thread.sleep(1000 * 20);} catch (Exception e) {}
-          try {
-              DescribeTableRequest request = new DescribeTableRequest().withTableName(tableName);
-              TableDescription tableDescription = dynamoDBClient.describeTable(request).getTable();
-              String tableStatus = tableDescription.getTableStatus();
-              log.info("  - current state: " + tableStatus);
-              if (tableStatus.equals(TableStatus.ACTIVE.toString())) {
-                  return;
-              }
-          } catch (AmazonServiceException ase) {
-              if (ase.getErrorCode().equalsIgnoreCase("ResourceNotFoundException") == true) {
-            	  log.info("Table " + tableName + " is not found. It was deleted.");
-                  return;
-              }
-              else {
-                  throw ase;
-              }
-          }
-      }
-      throw new RuntimeException("Table " + tableName + " did not go active after 10 minutes.");
+    log.info("Finished DynamoDB driver.");
   }
   
   public Object getAuth() {
@@ -176,14 +141,5 @@ public class GoraDynamoDBTestDriver extends GoraTestDriver {
   	return tableDescription;
   }
   
-  @SuppressWarnings("unchecked")
-  public<K, T extends Persistent> DataStore<K,T>
-    createDataStore(Class<K> keyClass, Class<T> persistentClass) throws GoraException {
-    setProperties(DataStoreFactory.createProps());
-    DataStore<K,T> dataStore = WSDataStoreFactory.createDataStore(
-        (Class<? extends DataStore<K,T>>)dataStoreClass, keyClass, persistentClass, auth);
-    dataStores.add(dataStore);
-
-    return dataStore;
-  }
+  
 }

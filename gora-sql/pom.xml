@@ -147,10 +147,11 @@
             <artifactId>gora-core</artifactId>
         </dependency>
 
-      <dependency>
+        <dependency>
             <groupId>org.apache.gora</groupId>
             <artifactId>gora-core</artifactId>
-            <classifier>tests</classifier>
+            <type>test-jar</type>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
