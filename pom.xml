@@ -618,7 +618,7 @@
             <groupId>org.apache.gora</groupId>
             <artifactId>gora-cassandra</artifactId>
             <version>${project.version}</version>
-            <classifier>tests</classifier>
+            <type>test-jar</type>
           </dependency>
           
           <dependency>
@@ -630,7 +630,7 @@
             <groupId>org.apache.gora</groupId>
             <artifactId>gora-sql</artifactId>
             <version>${project.version}</version>
-            <classifier>tests</classifier>
+            <type>test-jar</type>
           </dependency>
 
           <dependency>
@@ -642,7 +642,7 @@
             <groupId>org.apache.gora</groupId>
             <artifactId>gora-hbase</artifactId>
             <version>${project.version}</version>
-            <classifier>tests</classifier>
+            <type>test-jar</type>
           </dependency>
 
           <dependency>
