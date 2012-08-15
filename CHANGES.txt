@@ -6,6 +6,8 @@ Gora Change Log
 
 trunk (current development)
 
+* GORA-160 Gora Fails to Import Into Recent Versions of Eclipse (Ed Kohlwey via lewismc)
+
 * GORA-85 Implement "Usage" messages for SpecificCompiler and LogAnalytics (lewismc)
 
 * GORA-164 Use <type> instead of <classifier> configuration for test dependencies (lewismc)
