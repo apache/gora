@@ -189,7 +189,13 @@ public class LogAnalytics extends Configured implements Tool {
     return success ? 0 : 1;
   }
   
+  private static final String USAGE = "LogAnalytics <input_data_store> <output_data_store>";
+  
   public static void main(String[] args) throws Exception {
+    if(args.length < 2) {
+      System.err.println(USAGE);
+      System.exit(1);
+    }
     //run as any other MR job
     int ret = ToolRunner.run(new LogAnalytics(), args);
     System.exit(ret);
