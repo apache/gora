@@ -627,12 +627,12 @@
             <artifactId>gora-dynamodb</artifactId>
             <version>${project.version}</version>
           </dependency>
-          <!--dependency>
+          <dependency>
             <groupId>org.apache.gora</groupId>
             <artifactId>gora-dynamodb</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>
-          </dependency-->
+          </dependency>
   
           <!-- Avro needs this version of jackson -->
           <dependency>
