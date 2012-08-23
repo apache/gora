@@ -15,7 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+/**
+ * @author Renato Marroquin Mogrovejo
+ */
 package org.apache.gora.dynamodb.store;
 
 import java.util.ArrayList;
@@ -32,15 +34,32 @@ import com.amazonaws.services.dynamodb.model.ProvisionedThroughput;
 
 public class DynamoDBMapping {
   
+  /**
+   * Helper to write useful information into the logs
+   */
   public static final Logger LOG = LoggerFactory.getLogger(DynamoDBMapping.class);
   
-  // a map from field name to attribute value
+  /**
+   *  a map from field name to attribute value
+   */
   private final Map<String, List<Map<String, String>>> tablesToItems;
   
+  /**
+   * Maps tables to their own key schemas
+   */
   private final Map<String, KeySchema> tablesToKeySchemas;
   
+  /**
+   * Maps tables to their provisioned throughput
+   */
   private final Map<String, ProvisionedThroughput> tablesToPrTh;
   
+  /**
+   * Constructor for DynamoDBMapping 
+   * @param tables	Tables mapped.
+   * @param tablesToKeySchemas	KeySchemas used within tables mapped.
+   * @param provisionedThroughput	Provisioned throughput used within tables mapped.
+   */
   public DynamoDBMapping(Map<String, List<Map<String, String>>> tables,
 	      				Map<String, KeySchema> tablesToKeySchemas,
 	      				Map<String, ProvisionedThroughput> provisionedThroughput) {
@@ -49,21 +68,41 @@ public class DynamoDBMapping {
 	    this.tablesToPrTh = provisionedThroughput;
 	  }
 
+  /**
+   * Gets the tables with their own items
+   * @return tablesToItem HashMap 
+   */
   public Map<String,List<Map<String, String>>> getTables(){
 	  return tablesToItems;
   }
   
+  /**
+   * Gets items or attributes from a specific table
+   * @param tableName	Table name to determine which attributes to get 
+   * @return
+   */
   public List<Map<String, String>> getItems(String tableName){
 	  return tablesToItems.get(tableName);
   }
-	  
+
+  /**
+   * Gets the key schema from a specific table
+   * @param tableName	Table name to determine which key schema to get
+   * @return
+   */
   public KeySchema getKeySchema(String tableName) {
     return tablesToKeySchemas.get(tableName);
   }
   
+  /**
+   * Gets the provisioned throughput from a specific table
+   * @param tableName	Table name to determine which provisioned throughput to get
+   * @return
+   */
   public ProvisionedThroughput getProvisionedThroughput(String tableName){
 	  return tablesToPrTh.get(tableName);
   }
+  
   /**
    * A builder for creating the mapper. This will allow building a thread safe
    * {@link DynamoDBMapping} using simple immutabilty.
@@ -71,6 +110,9 @@ public class DynamoDBMapping {
    */
   public static class DynamoDBMappingBuilder {
 
+	  /**
+	   * Table name to be used to build the DynamoDBMapping object 
+	   */
 	  private String tableName;
 	  
 	  /**
@@ -90,6 +132,11 @@ public class DynamoDBMapping {
 		  tableName = tabName;
 	  }
 	  
+	  /**
+	   * Gets the table name for which the table is being mapped
+	   * @param tableName
+	   * @return
+	   */
 	  public String getTableName(String tableName){
 		  return tableName;
 	  }
@@ -179,6 +226,13 @@ public class DynamoDBMapping {
     	  
       }
       
+	  /**
+	   * Adds an attribute to an specific item
+	   * @param tableName
+	   * @param attributeName
+	   * @param attrType
+	   * @param itemNumber
+	   */
 	  public void addAttribute(String tableName, String attributeName, String attrType, int itemNumber) {
 	    // selecting table
 	    List<Map<String, String>> items = getOrCreateTable(tableName);
@@ -189,6 +243,7 @@ public class DynamoDBMapping {
 	    // add item to table
 	    //tablesToItems.put(tableName, items);
 	  }
+	  
 	  /**
 	   * Method to verify whether or not the schemas have been initialized
 	   * @return
@@ -209,6 +264,11 @@ public class DynamoDBMapping {
 		  
 	  }
 	  
+	  /**
+	   * Verifies is a table has a key schema defined
+	   * @param tableName	Table name to determine which key schema to obtain 
+	   * @return
+	   */
 	  private boolean verifyKeySchema(String tableName){
 		  KeySchema kSchema = tablesToKeySchemas.get(tableName);
 		  
@@ -231,6 +291,7 @@ public class DynamoDBMapping {
 	  }
 	  
 	  /**
+	   * Constructs the DynamoDBMapping object
 	   * @return A newly constructed mapping.
 	   */
 	  public DynamoDBMapping build() {
@@ -248,5 +309,4 @@ public class DynamoDBMapping {
 	      return new DynamoDBMapping(tablesToItems,tablesToKeySchemas, tablesToPrTh);
 	  }
   }
-
 }

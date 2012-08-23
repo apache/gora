@@ -21,7 +21,7 @@
 
   <table name="person" readcunit="5" writecunit="5"> <!-- optional descriptors for tables -->
   	<key name="ssn" type="hash" att-type="S"/>
-  	<!-- key name="dateOfBirth" type="hashrange" att-type="S"/-->
+  	<key name="date" type="hashrange" att-type="S"/>
     <attribute name="firstName" type="S"/>
     <attribute name="lastName" type="S"/>
     <attribute name="salary" type="N"/>

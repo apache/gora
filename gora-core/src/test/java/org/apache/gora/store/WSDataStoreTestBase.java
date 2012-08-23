@@ -15,6 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @author Renato Marroquin Mogrovejo
+ */
 
 package org.apache.gora.store;
 
@@ -47,7 +50,6 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
   protected static GoraTestDriver testDriver;
 
   protected DataStore<K, T> dataStore;
-  //protected DataStore<String, webpage> webPageStore;
   
   private static boolean setUpClassCalled = false;
   
@@ -75,17 +77,16 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
   public static void setUpClass() throws Exception {
     if(testDriver != null && !setUpClassCalled) {
       log.info("setting up class");
-      //testDriver.setUpClass();
+      testDriver.setUpClass();
       setUpClassCalled = true;
     }
   }
 
   @AfterClass
   public static void tearDownClass() throws Exception {
-    if(testDriver != null) {
-      log.info("tearing down class");
-      testDriver.tearDownClass();
-    }
+	log.info("tearing down class");
+    //if(testDriver != null) 
+    //  testDriver.tearDownClass();
   }
 
   @Before
@@ -94,31 +95,25 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
     //methods are not called BEFORE setUpClass. I think this is a bug in 
     //JUnitRunner in Eclipse. Below is a workaround for that problem.
     if(!setUpClassCalled) setUpClass();  
-    
     log.info("setting up test");
-    if(testDriver != null) {
-      dataStore = testDriver.createDataStore(persistentKeyClass, persistentValClass);
-     // webPageStore = testDriver.createDataStore(String.class, webpage.class);
-      testDriver.setUp();
-    } else {
-      dataStore =  createDataStore();
-     //webPageStore = createWebPageDataStore();
-
-      dataStore.truncateSchema();
-     // webPageStore.truncateSchema();
+    if(dataStore == null){
+      if(testDriver != null) {
+        dataStore = testDriver.createDataStore(persistentKeyClass, persistentValClass);
+        testDriver.setUp();
+      } else {
+        dataStore = createDataStore();
+        dataStore.truncateSchema();
+      }
     }
   }
 
   @After
   public void tearDown() throws Exception {
     log.info("tearing down test");
-    if(testDriver != null) {
+    if(testDriver != null)
       testDriver.tearDown();
-    }
-    //employeeStore.close();
-    //webPageStore.close();
   }
-
+  
   @Test
   public void testNewInstance() throws IOException, Exception {
     log.info("test method: testNewInstance");
@@ -128,7 +123,6 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
   @Test
   public void testCreateSchema() throws Exception {
     log.info("test method: testCreateSchema");
-    dataStore.createSchema();
     assertSchemaExists("person");
   }
 
@@ -149,13 +143,16 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
   @Test
   public  void testTruncateSchema() throws Exception {
     log.info("test method: testTruncateSchema");
-    assertSchemaExists("WebPage");
+    assertSchemaExists("person");
   }
 
   @Test
   public void testDeleteSchema() throws IOException, Exception {
     log.info("test method: testDeleteSchema");
-    //DataStoreTestUtil.testDeleteSchema(webPageStore);
+    assertDeleteSchema();
+  }
+  
+  public void assertDeleteSchema(){
   }
 
   @Test
@@ -211,8 +208,12 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
   @Test
   public void testUpdate() throws IOException, Exception {
     log.info("test method: testUpdate");
+    assertTestUpdateDataStore();
   }
 
+  public void assertTestUpdateDataStore(){
+  }
+  
   @Test
   public void testEmptyUpdate() throws IOException, Exception {
   }
@@ -270,7 +271,8 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
     log.info("test method: testDeleteByQuery");
     assertTestDeleteByQueryDataStore();
   }
-  public void assertTestDeleteByQueryDataStore(){}
+  public void assertTestDeleteByQueryDataStore(){
+  }
   
   @Test
   public void testDeleteByQueryFields() throws IOException, Exception {

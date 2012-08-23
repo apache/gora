@@ -15,6 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @author Renato Marroquin Mogrovejo
+ */
 
 package org.apache.gora.dynamodb.query;
 
@@ -39,210 +42,343 @@ import com.amazonaws.services.dynamodb.model.KeySchemaElement;
 
 public class DynamoDBQuery<K, T extends Persistent> extends QueryWSBase<K, T> {
 	
-	public static final Logger LOG = LoggerFactory.getLogger(DynamoDBQuery.class);
+  /**
+   * Helper to write useful information into the logs
+   */
+  public static final Logger LOG = LoggerFactory.getLogger(DynamoDBQuery.class);
 	
-	private boolean consistencyReadLevel;
+  /**
+   * Reads consistency level
+   */
+  private boolean consistencyReadLevel;
 	
-	private static ComparisonOperator rangeCompOp;
+  /**
+   * Range comparator operator
+   */
+  private static ComparisonOperator rangeCompOp;
 	
-	private static ComparisonOperator scanCompOp;
+  /**
+   * Scan comparator operator
+   */
+  private static ComparisonOperator scanCompOp;
 	
-	public static final String RANGE_QUERY = "range";
+  /**
+   * Range query type property
+   */
+  public static final String RANGE_QUERY = "range";
 	
-	public static final String SCAN_QUERY = "scan";
+  /**
+   * Scan query type property
+   */
+  public static final String SCAN_QUERY = "scan";
 	
-	private static String type;
+  /**
+   * Query type property
+   */
+  private static String type;
 	
-	private Query<K, T> query;
+  /**
+   * Generic query
+   */
+  private Query<K, T> query;
 	
-	private Object dynamoDBExpression;
+  /**
+   * DynamoDB Expression to be used.
+   * This could be a range or a scan DynamoDB Expression
+   */
+  private Object dynamoDBExpression;
 	
-	private KeySchema keySchema;
+  /**
+   * Key schema used for the query
+   */
+  private KeySchema keySchema;
 	
-	private K hashKey;
+  /**
+   * Hash key used for the query
+   */
+  private K hashKey;
 	
-	public DynamoDBQuery(){
-		super(null);
-	}
+  /**
+   * Default Constructor
+   */
+  public DynamoDBQuery(){
+  	super(null);
+  }
   
-	public DynamoDBQuery(DataStore<K, T> dataStore) {
-		super(dataStore);
-	}
+  /**
+   * Constructor
+   * @param dataStore
+   */
+  public DynamoDBQuery(DataStore<K, T> dataStore) {
+  	super(dataStore);
+  }
 	
-	@Override
-    public void setKey(K key) {
-	  this.hashKey = key;
-	}
+  /**
+   * Sets hash key
+   */
+  @Override
+  public void setKey(K key) {
+    this.hashKey = key;
+  }
 	
-	@Override
-	public K getKey() {
-	  return this.hashKey;
-	}
+  /**
+   * Gets hash key
+   */
+  @Override
+  public K getKey() {
+    return this.hashKey;
+  }
 	
-	public void buildExpression(){
-	  AttributeValue hashAttrValue = buildKeyHashAttribute();
-	  if (hashAttrValue == null)
-	  	throw new IllegalStateException("There is not a key schema defined.");
-	  if (DynamoDBQuery.getType().equals(RANGE_QUERY)){
-	  	Condition newCondition = buildRangeCondition();
-		buildQueryExpression(newCondition, hashAttrValue);
-      }
-	  if (DynamoDBQuery.getType().equals(SCAN_QUERY))
-		buildScanExpression(hashAttrValue);
-	}
+  /**
+   * Builds query expression depending on query type (range or scan) 
+   */
+  public void buildExpression(){
+    AttributeValue hashAttrValue = buildKeyHashAttribute();
+    if (hashAttrValue == null)
+      throw new IllegalStateException("There is not a key schema defined.");
+    if (DynamoDBQuery.getType().equals(RANGE_QUERY)){
+      Condition newCondition = buildRangeCondition();
+      buildQueryExpression(newCondition, hashAttrValue);
+    }
+	if (DynamoDBQuery.getType().equals(SCAN_QUERY))
+	  buildScanExpression(hashAttrValue);
+  }
 	
-	public void buildScanExpression(AttributeValue pHashAttrValue){
-		DynamoDBScanExpression newScanExpression = new DynamoDBScanExpression();
-		// TODO right now we only support scanning using the key, but we should support other types of scans
-		newScanExpression.addFilterCondition(getKeySchema().getHashKeyElement().getAttributeName(), buildKeyScanCondition());
-		dynamoDBExpression = newScanExpression;
-	}
+  /**
+   * Builds scan query expression using a hash attribute value where to start
+   * @param pHashAttrValue	Hash attribute value where to start scanning
+   */
+  public void buildScanExpression(AttributeValue pHashAttrValue){
+  	DynamoDBScanExpression newScanExpression = new DynamoDBScanExpression();
+	// TODO right now we only support scanning using the key, but we should support other types of scans
+	newScanExpression.addFilterCondition(getKeySchema().getHashKeyElement().getAttributeName(), buildKeyScanCondition());
+	dynamoDBExpression = newScanExpression;
+  }
 	
-	public void buildQueryExpression(Condition pNewCondition, AttributeValue pHashAttrValue) {
-		DynamoDBQueryExpression newQueryExpression = new DynamoDBQueryExpression(pHashAttrValue); 
-		newQueryExpression.setConsistentRead(getConsistencyReadLevel());
-		newQueryExpression.setRangeKeyCondition(pNewCondition);
-		dynamoDBExpression = newQueryExpression;
-	}
+  /**
+   * Builds range query expression
+   * @param pNewCondition		Condition for querying
+   * @param pHashAttrValue	Hash attribute value where to start
+   */
+  public void buildQueryExpression(Condition pNewCondition, AttributeValue pHashAttrValue) {
+  	DynamoDBQueryExpression newQueryExpression = new DynamoDBQueryExpression(pHashAttrValue); 
+  	newQueryExpression.setConsistentRead(getConsistencyReadLevel());
+  	newQueryExpression.setRangeKeyCondition(pNewCondition);
+	dynamoDBExpression = newQueryExpression;
+  }
 	
-	private AttributeValue buildKeyHashAttribute(){
-		String pAttrType = getKeySchema().getHashKeyElement().getAttributeType();
-		if(pAttrType.equals("S"))
-			return new AttributeValue().withS(getHashKey(query.getKey()).toString());
-		else if(pAttrType.equals("N"))
-			return new AttributeValue().withN(getHashKey(query.getKey()).toString());
-		return null;
-	}
+  /**
+   * Builds hash key attribute from generic query received
+   * @return	AttributeValue build from query
+   */
+  private AttributeValue buildKeyHashAttribute(){
+  	String pAttrType = getKeySchema().getHashKeyElement().getAttributeType();
+	if(pAttrType.equals("S"))
+		return new AttributeValue().withS(getHashKey(query.getKey()).toString());
+	else if(pAttrType.equals("N"))
+		return new AttributeValue().withN(getHashKey(query.getKey()).toString());
+	return null;
+  }
 	
-	private Object getHashKey(K key){
-	    Object hashKey = null;
-	    try {
-		  // Our key may be have hash and range keys
-		  for (Method met :key.getClass().getDeclaredMethods()){
-		    if(met.getName().equals("getHashKey")){
-		      Object [] params = null;
-		      hashKey = met.invoke(key, params);
-		      break;
-		    }
-		  }
-		} catch (IllegalArgumentException e) {
-		  LOG.info("DynamoDBStore: Error while trying to fetch range key.");
-		  e.printStackTrace();
-		} catch (IllegalAccessException e) {
-		  LOG.info("DynamoDBStore: Error while trying to fetch range key.");
-		  e.printStackTrace();
-		} catch (InvocationTargetException e) {
-		  LOG.info("DynamoDBStore: Error while trying to fetch range key.");
-		  e.printStackTrace();
-		}
-		return hashKey;
+  /**
+   * Gets hash key for querying
+   * @param key
+   * @return
+   */
+  private Object getHashKey(K key){
+    Object hashKey = null;
+    try {
+	  // Our key may be have hash and range keys
+	  for (Method met :key.getClass().getDeclaredMethods()){
+	    if(met.getName().equals("getHashKey")){
+	      Object [] params = null;
+	      hashKey = met.invoke(key, params);
+	      break;
+	    }
 	  }
-	
-	  private Object getRangeKey(K key){
-		  Object rangeKey = null;
-		  try {
-	        // Our key may be have hash and range keys
-		    for (Method met :key.getClass().getDeclaredMethods()){
-			  if(met.getName().equals("getRangeKey")){
-			    Object [] params = null;
-			    rangeKey = met.invoke(key, params);
-			    break;
-		      }
-		    }
-		  } catch (IllegalArgumentException e) {
-		    LOG.info("DynamoDBStore: Error while trying to fetch range key.");
-			e.printStackTrace();
-		  } catch (IllegalAccessException e) {
-			LOG.info("DynamoDBStore: Error while trying to fetch range key.");
-			e.printStackTrace();
-		  } catch (InvocationTargetException e) {
-			LOG.info("DynamoDBStore: Error while trying to fetch range key.");
-			e.printStackTrace();
-		  }
-		  return rangeKey;
+	} catch (IllegalArgumentException e) {
+	  LOG.info("DynamoDBStore: Error while trying to fetch range key.");
+	  e.printStackTrace();
+	} catch (IllegalAccessException e) {
+	  LOG.info("DynamoDBStore: Error while trying to fetch range key.");
+	  e.printStackTrace();
+	} catch (InvocationTargetException e) {
+	  LOG.info("DynamoDBStore: Error while trying to fetch range key.");
+	  e.printStackTrace();
+	}
+	return hashKey;
+  }
+
+  /**
+   * Gets range key for querying from generic query object received
+   * @param key
+   * @return
+   */
+  private Object getRangeKey(K key){
+	  Object rangeKey = null;
+	  try {
+        // Our key may be have hash and range keys
+	    for (Method met :key.getClass().getDeclaredMethods()){
+		  if(met.getName().equals("getRangeKey")){
+		    Object [] params = null;
+		    rangeKey = met.invoke(key, params);
+		    break;
+	      }
+	    }
+	  } catch (IllegalArgumentException e) {
+	    LOG.info("DynamoDBStore: Error while trying to fetch range key.");
+		e.printStackTrace();
+	  } catch (IllegalAccessException e) {
+		LOG.info("DynamoDBStore: Error while trying to fetch range key.");
+		e.printStackTrace();
+	  } catch (InvocationTargetException e) {
+		LOG.info("DynamoDBStore: Error while trying to fetch range key.");
+		e.printStackTrace();
 	  }
-	
-	private Condition buildKeyScanCondition(){
-		Condition scanKeyCondition = new Condition();
-		scanKeyCondition.setComparisonOperator(getScanCompOp());
-		scanKeyCondition.withAttributeValueList(buildKeyHashAttribute());
-		return scanKeyCondition;
-	}
-	
-	private Condition buildRangeCondition(){
-		KeySchemaElement kRangeSchema = getKeySchema().getRangeKeyElement();
-		Condition rangeKeyCondition = null;
-		if(kRangeSchema != null){
-			rangeKeyCondition = new Condition();
-			rangeKeyCondition.setComparisonOperator(ComparisonOperator.BETWEEN.toString());
-			AttributeValue startVal = null, endVal = null;
-			//startVal = buildKeyHashAttribute();
-			if(kRangeSchema.getAttributeType().equals("S")){
-				startVal = new AttributeValue().withS(getRangeKey(query.getStartKey()).toString());
-				endVal = new AttributeValue().withS(getRangeKey(query.getEndKey()).toString());
-			}
-			else if (kRangeSchema.getAttributeType().equals("N")){
-				startVal = new AttributeValue().withN(getRangeKey(query.getStartKey()).toString());
-				endVal = new AttributeValue().withN(getRangeKey(query.getEndKey()).toString());
-			}
-			rangeKeyCondition.withAttributeValueList(startVal, endVal);
+	  return rangeKey;
+  }
+
+  /**
+   * Builds key scan condition using scan comparator, and hash key attribute
+   * @return
+   */
+  private Condition buildKeyScanCondition(){
+	Condition scanKeyCondition = new Condition();
+	scanKeyCondition.setComparisonOperator(getScanCompOp());
+	scanKeyCondition.withAttributeValueList(buildKeyHashAttribute());
+	return scanKeyCondition;
+  }
+
+  /**
+   * Builds range condition based on elements set 
+   * @return
+   */
+  private Condition buildRangeCondition(){
+	KeySchemaElement kRangeSchema = getKeySchema().getRangeKeyElement();
+	Condition rangeKeyCondition = null;
+	if(kRangeSchema != null){
+		rangeKeyCondition = new Condition();
+		rangeKeyCondition.setComparisonOperator(ComparisonOperator.BETWEEN.toString());
+		AttributeValue startVal = null, endVal = null;
+		//startVal = buildKeyHashAttribute();
+		if(kRangeSchema.getAttributeType().equals("S")){
+			startVal = new AttributeValue().withS(getRangeKey(query.getStartKey()).toString());
+			endVal = new AttributeValue().withS(getRangeKey(query.getEndKey()).toString());
 		}
-		return rangeKeyCondition;
+		else if (kRangeSchema.getAttributeType().equals("N")){
+			startVal = new AttributeValue().withN(getRangeKey(query.getStartKey()).toString());
+			endVal = new AttributeValue().withN(getRangeKey(query.getEndKey()).toString());
+		}
+		rangeKeyCondition.withAttributeValueList(startVal, endVal);
 	}
-	
-	public boolean getConsistencyReadLevel(){
-		return consistencyReadLevel;
-	}
-	
-	public void setConsistencyReadLevel(boolean pConsistencyReadLevel){
-		this.consistencyReadLevel = pConsistencyReadLevel;
-	}
-	
-	public KeySchema getKeySchema(){
-		return keySchema;
-	}
-	
-	public Object getQueryExpression(){
-		return dynamoDBExpression;
-	}
-	
-	public void setKeySchema(KeySchema pKeySchema){
-		this.keySchema = pKeySchema;
-	}
-	
-	public void setQuery(Query<K, T> pQuery){
-		this.query = pQuery;
-	}
-	
-	public Query<K, T> getQuery(){
-		return this.query;
-	}
-	
-	public static String getType() {
-		return type;
-	}
-	
-	public static void setType(String pType) {
-		type = pType;
-	}
+	return rangeKeyCondition;
+  }
 
-	public static ComparisonOperator getScanCompOp() {
-		if (scanCompOp == null)
-			scanCompOp = ComparisonOperator.GE;
-		return scanCompOp;
-	}
+  /**
+   * Gets read consistency level
+   * @return
+   */
+  public boolean getConsistencyReadLevel(){
+  	return consistencyReadLevel;
+  }
+	
+  /**
+   * Sets read consistency level
+   * @param pConsistencyReadLevel
+   */
+  public void setConsistencyReadLevel(boolean pConsistencyReadLevel){
+	this.consistencyReadLevel = pConsistencyReadLevel;
+  }
+	
+  /**
+   * Gets key schema
+   * @return
+   */
+  public KeySchema getKeySchema(){
+	return keySchema;
+  }
 
-	public static void setScanCompOp(ComparisonOperator scanCompOp) {
-		DynamoDBQuery.scanCompOp = scanCompOp;
-	}
+  /**
+   * Gets query expression for query
+   * @return
+   */
+  public Object getQueryExpression(){
+	return dynamoDBExpression;
+  }
+
+  /**
+   * Sets query key schema used for queying
+   * @param pKeySchema
+   */
+  public void setKeySchema(KeySchema pKeySchema){
+	this.keySchema = pKeySchema;
+  }
+
+  /**
+   * Sets query to be performed
+   * @param pQuery
+   */
+  public void setQuery(Query<K, T> pQuery){
+	this.query = pQuery;
+  }
 	
-	public static ComparisonOperator getRangeCompOp(){
-		if (rangeCompOp == null)
-			rangeCompOp = ComparisonOperator.BETWEEN;
-		return rangeCompOp;
-	}
+  /**
+   * Gets query performed
+   * @return
+   */
+  public Query<K, T> getQuery(){
+	return this.query;
+  }
+
+  /**
+   * Gets query type
+   * @return
+   */
+  public static String getType() {
+	return type;
+  }
+
+  /**
+   * Sets query type
+   * @param pType
+   */
+  public static void setType(String pType) {
+	type = pType;
+  }
+
+  /**
+   * Gets scan comparator operator
+   * @return
+   */
+  public static ComparisonOperator getScanCompOp() {
+	if (scanCompOp == null)
+		scanCompOp = ComparisonOperator.GE;
+	return scanCompOp;
+  }
+
+  /**
+   * Sets scan query comparator operator
+   * @param scanCompOp
+   */
+  public static void setScanCompOp(ComparisonOperator scanCompOp) {
+	DynamoDBQuery.scanCompOp = scanCompOp;
+  }
 	
-	public static void setRangeCompOp(ComparisonOperator pRangeCompOp){
-		rangeCompOp = pRangeCompOp;
-	}
+  /**
+   * Gets range query comparator operator
+   * @return
+   */
+  public static ComparisonOperator getRangeCompOp(){
+	 if (rangeCompOp == null)
+		rangeCompOp = ComparisonOperator.BETWEEN;
+	return rangeCompOp;
+  }
+	
+  /**
+   * Sets range query comparator operator
+   * @param pRangeCompOp
+   */
+  public static void setRangeCompOp(ComparisonOperator pRangeCompOp){
+	rangeCompOp = pRangeCompOp;
+  }
 }

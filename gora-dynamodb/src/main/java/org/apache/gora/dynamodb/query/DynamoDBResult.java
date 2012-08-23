@@ -15,6 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @author Renato Marroquin Mogrovejo
+ */
 
 package org.apache.gora.dynamodb.query;
 
@@ -29,26 +32,50 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DynamoDBResult<K, T extends Persistent> extends ResultWSBase<K, T> {
+
+  /**
+   * Helper to write useful information into the logs
+   */
   public static final Logger LOG = LoggerFactory.getLogger(DynamoDBResult.class);
   
+  /**
+   * Result set containing query results
+   */
   private List<T> dynamoDBResultSet;
 
+  /**
+   * Constructor for the result set
+   * @param dataStore	Data store used
+   * @param query		Query used
+   * @param objList		Objects obtained from querying
+   */
   public DynamoDBResult(DataStore<K, T> dataStore, Query<K, T> query, List<T> objList) {
 	super(dataStore, query);
 	LOG.debug("DynamoDB result created.");
     this.setResultSet(objList);
   }
 
+  /**
+   * Sets the resulting objects within the class
+   * @param objList
+   */
   public void setResultSet(List<T> objList) {
     this.dynamoDBResultSet = objList;
     this.limit = objList.size();
   }
 
+  /**
+   * Gets the items reading progress
+   */
   public float getProgress() throws IOException, InterruptedException, Exception {
-	// TODO Auto-generated method stub
-	return 0;
+	if (this.limit <= 0 || this.offset <= 0)
+		return 0;
+	return this.limit/this.offset;
   }
 
+  /**
+   * Gets the next item
+   */
   protected boolean nextInner() throws Exception {
 	if (offset < 0 || offset > ( dynamoDBResultSet.size() - 1))
 		return false;

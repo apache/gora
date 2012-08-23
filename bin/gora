@@ -107,7 +107,7 @@ fi
 #GORA_OPTS="$GORA_OPTS -Dhadoop.log.file=$GORA_LOGFILE"
 
 # figure out which class to run
-if [ "$COMMAND" = "compile" ] ; then
+if [ "$COMMAND" = "goracompiler" ] ; then
   MODULE=gora-core
   CLASSPATH=$CLASSPATH:$GORA_HOME/$MODULE/target/classes/
   CLASS=org.apache.gora.compiler.GoraCompiler
@@ -115,6 +115,10 @@ elif [ "$COMMAND" = "specificcompiler" ] ; then
   MODULE=gora-core
   CLASSPATH=$CLASSPATH:$GORA_HOME/$MODULE/target/classes/
   CLASS=org.apache.avro.specific.SpecificCompiler
+elif [ "$COMMAND" = "dynamocompiler" ] ; then
+  MODULE=gora-dynamodb
+  CLASSPATH=$CLASSPATH:$GORA_HOME/$MODULE/target/classes/
+  CLASS=org.apache.gora.dynamodb.compiler.GoraDynamoDBCompiler
 elif [ "$COMMAND" = "logmanager" ] ; then
   MODULE=gora-tutorial
   CLASSPATH=$CLASSPATH:$GORA_HOME/$MODULE/target/classes/

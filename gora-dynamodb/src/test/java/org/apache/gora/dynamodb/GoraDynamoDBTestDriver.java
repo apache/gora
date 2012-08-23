@@ -15,6 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @author Renato Marroquin Mogrovejo
+ */
 
 package org.apache.gora.dynamodb;
 
@@ -44,16 +47,34 @@ import com.amazonaws.services.dynamodb.model.TableDescription;
  */
 public class GoraDynamoDBTestDriver extends GoraTestDriver {
 
+  /**
+   * Data store to be used within the test driver
+   */
   private static DynamoDBStore<DynamoDBKey,person> personStore;
   
+  /**
+   * DynamoDB client to be used from the test driver
+   */
   static AmazonDynamoDBClient dynamoDBClient;
   
+  /**
+   * Credentials file name
+   */
   static String awsCredentialsFile = "AwsCredentials.properties";
   
+  /**
+   * Test credential paths
+   */
   static String awsCredentialsPath = "target/test-classes/";
   
+  /**
+   * Authentication object
+   */
   protected Object auth;
   
+  /**
+   * Default constructor
+   */
   public GoraDynamoDBTestDriver() {
     super(DynamoDBStore.class);
 	try {
@@ -70,6 +91,9 @@ public class GoraDynamoDBTestDriver extends GoraTestDriver {
 	}
   }
 
+  /**
+   * Sets up the class
+   */
   @Override
   public void setUpClass() throws Exception {
     super.setUpClass();
@@ -77,12 +101,19 @@ public class GoraDynamoDBTestDriver extends GoraTestDriver {
     createDataStore();
   }
   
+  /**
+   * Sets up the data store by creating the schema
+   */
   @Override
   public void setUp() throws Exception {
 	  personStore.createSchema();
   }
   
-  
+  /**
+   * Creates the DynamoDB store and returns an specific object
+   * @return
+   * @throws IOException
+   */
   @SuppressWarnings("unchecked")
   protected DataStore<DynamoDBKey, person> createDataStore() throws IOException {
     if(personStore == null)
@@ -91,6 +122,9 @@ public class GoraDynamoDBTestDriver extends GoraTestDriver {
       return personStore;
   }
   
+  /**
+   * Creates the DynamoDB store but returns a generic object
+   */
   @SuppressWarnings("unchecked")
   public<K, T extends Persistent> DataStore<K,T>
     createDataStore(Class<K> keyClass, Class<T> persistentClass) throws GoraException {
@@ -101,6 +135,10 @@ public class GoraDynamoDBTestDriver extends GoraTestDriver {
     return (DataStore<K, T>) personStore;
   }
   
+  /**
+   * Gets or create the DynamoDB data store
+   * @return
+   */
   public DataStore<DynamoDBKey, person> getDataStore(){
 	try {
 	  if(personStore != null)
@@ -113,20 +151,43 @@ public class GoraDynamoDBTestDriver extends GoraTestDriver {
 	}
   }
 
+  /**
+   * Tears down the class
+   */
   @Override
   public void tearDownClass() throws Exception {
-    super.tearDownClass();
     log.info("Finished DynamoDB driver.");
   }
   
+  /**
+   * Tears down objects created
+   */
+  @Override
+  public void tearDown() throws Exception{
+    super.tearDown();
+  }
+  
+  /**
+   * Gets authentication object
+   * @return
+   */
   public Object getAuth() {
       return auth;
   }
   
+  /**
+   * Gets DynamoDBClient to be used
+   * @return
+   */
   public AmazonDynamoDBClient getDynamoDBClient() {
     return dynamoDBClient;
   }
   
+  /**
+   * Checks if a resource exists or not
+   * @param tableName	Table name to be checked
+   * @return
+   */
   public TableDescription checkResource(String tableName){
   	TableDescription tableDescription = null;
   	
@@ -140,6 +201,4 @@ public class GoraDynamoDBTestDriver extends GoraTestDriver {
       
   	return tableDescription;
   }
-  
-  
 }
