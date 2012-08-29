@@ -31,16 +31,41 @@ import org.apache.gora.util.ReflectionUtils;
  */
 public class BeanFactoryWSImpl<K, T extends Persistent> implements BeanFactory<K, T> {
 
+  /**
+   * Class of the key to be used
+   */
   private Class<K> keyClass;
+  
+  /**
+   * Class of the persistent objects to be stored
+   */
   private Class<T> persistentClass;
   
+  /**
+   * Constructor of the key
+   */
   private Constructor<K> keyConstructor;
   
+  /**
+   * Object's key
+   */
   private K key;
+  
+  /**
+   * Persistent object of class T
+   */
   private T persistent;
   
+  /**
+   * Flag to be used to determine if a key is persistent or not
+   */
   private boolean isKeyPersistent = false;
   
+  /**
+   * Constructor
+   * @param keyClass
+   * @param persistentClass
+   */
   public BeanFactoryWSImpl(Class<K> keyClass, Class<T> persistentClass) {
     this.keyClass = keyClass;
     this.persistentClass = persistentClass;
@@ -60,7 +85,11 @@ public class BeanFactoryWSImpl<K, T extends Persistent> implements BeanFactory<K
   
   @Override
   @SuppressWarnings("unchecked")
+  /**
+   * Creates a new key
+   */
   public K newKey() throws Exception {
+    // TODO this method should be checked to see how object states will be managed
     if(isKeyPersistent)
       return (K)((Persistent)key).newInstance(new StateManagerWSImpl());
     else if(keyConstructor == null) {
@@ -72,30 +101,49 @@ public class BeanFactoryWSImpl<K, T extends Persistent> implements BeanFactory<K
  
   @SuppressWarnings("unchecked")
   @Override
+  /**
+   * Creates a new persistent object
+   */
   public T newPersistent() {
     return (T) persistent.newInstance(new StateManagerWSImpl());
   }
   
   @Override
+  /**
+   * Gets a cached key
+   */
   public K getCachedKey() {
     return key;
   }
   
   @Override
+  /**
+   * Gets a cached persistent object
+   */
   public T getCachedPersistent() {
     return persistent;
   }
   
   @Override
+  /**
+   * Gets the key class
+   */
   public Class<K> getKeyClass() {
     return keyClass;
   }
   
   @Override
+  /**
+   * Gets the persistent object class
+   */
   public Class<T> getPersistentClass() {
     return persistentClass;
   }
   
+  /**
+   * Returns if a key is an object of a persistent class
+   * @return True if it is or false if it is not
+   */
   public boolean isKeyPersistent() {
     return isKeyPersistent;
   }

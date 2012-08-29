@@ -99,15 +99,15 @@ public class GoraDynamoDBCompiler {
   private void setItems(List<Map<String, String>> pItems, int pIden) throws IOException{
     for(Map<String, String> item : pItems){
       for (String itemName : item.keySet()){
-	String itemType = "String";
-	if (item.get(itemName).toString().equals("N"))
-	itemType = "double";
-	if (item.get(itemName).toString().equals("SS"))
-	itemType = "Set<String>";
-	if (item.get(itemName).toString().equals("SN"))
-	itemType = "Set<double>";
-	line(pIden, "private " + itemType + " " + itemName + ";");
-	setItemMethods(itemName, itemType, pIden);
+        String itemType = "String";
+        if (item.get(itemName).toString().equals("N"))
+          itemType = "double";
+        if (item.get(itemName).toString().equals("SS"))
+          itemType = "Set<String>";
+        if (item.get(itemName).toString().equals("SN"))
+          itemType = "Set<double>";
+        line(pIden, "private " + itemType + " " + itemName + ";");
+        setItemMethods(itemName, itemType, pIden);
       }
     }
     line(0, "");

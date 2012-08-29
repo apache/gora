@@ -20,7 +20,8 @@ package org.apache.gora.store;
 
 import org.apache.gora.persistency.Persistent;
 
-/** FileBackedDataStore supplies necessary interfaces to set input 
+/** 
+ * FileBackedDataStore supplies necessary interfaces to set input 
  * and output paths for data stored which are file based.   
  */
 public interface WebServiceBackedDataStore<K, T extends Persistent> extends DataStore<K, T> {

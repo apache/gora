@@ -15,6 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @author Renato Marroquin 
+ */
 
 package org.apache.gora.query.ws.impl;
 
@@ -31,12 +34,24 @@ import org.apache.gora.store.DataStore;
 public abstract class ResultWSBase<K, T extends Persistent> 
   implements Result<K, T> {
 
+  /**
+   * Data store used
+   */
   protected final DataStore<K,T> dataStore;
   
+  /**
+   * Query for obtaining this result
+   */
   protected final Query<K, T> query;
   
+  /**
+   * Key
+   */
   protected K key;
   
+  /**
+   * Persistent object
+   */
   protected T persistent;
   
   /** Query limit */
@@ -45,6 +60,11 @@ public abstract class ResultWSBase<K, T extends Persistent>
   /** How far we have proceeded*/
   protected long offset = 0;
   
+  /**
+   * Constructor
+   * @param dataStore
+   * @param query
+   */
   public ResultWSBase(DataStore<K,T> dataStore, Query<K,T> query) {
     this.dataStore = dataStore;
     this.query = query;
@@ -52,31 +72,49 @@ public abstract class ResultWSBase<K, T extends Persistent>
   }
   
   @Override
+  /**
+   * Gets the data store used for retrieving this result
+   */
   public DataStore<K, T> getDataStore() {
     return dataStore;
   }
   
   @Override
+  /**
+   * Gets the query used for this result
+   */
   public Query<K, T> getQuery() {
     return query;
   }
   
   @Override
+  /**
+   * Gets the persistent object
+   */
   public T get() {
     return persistent;
   }
   
   @Override
+  /**
+   * Gets the key
+   */
   public K getKey() {
     return key;
   }
     
   @Override
+  /**
+   * Gets the key class
+   */
   public Class<K> getKeyClass() {
     return getDataStore().getKeyClass();
   }
   
   @Override
+  /**
+   * Gets the persistent object class
+   */
   public Class<T> getPersistentClass() {
     return getDataStore().getPersistentClass();
   }
@@ -91,6 +129,9 @@ public abstract class ResultWSBase<K, T extends Persistent>
     return false;
   }
   
+  /**
+   * Clears the persistent object
+   */
   protected void clear() {
     if(persistent != null) {
       persistent.clear();
@@ -101,6 +142,9 @@ public abstract class ResultWSBase<K, T extends Persistent>
   }
   
   @Override
+  /**
+   * Returnts the next object from the result's lists
+   */
   public final boolean next() throws Exception {
 	  if(isLimitReached()) {
 		  return false;
@@ -116,6 +160,9 @@ public abstract class ResultWSBase<K, T extends Persistent>
   }
   
   @Override
+  /**
+   * Gets the offset inside the result's list
+   */
   public long getOffset() {
     return offset;
   }
@@ -126,6 +173,13 @@ public abstract class ResultWSBase<K, T extends Persistent>
    */
   protected abstract boolean nextInner() throws Exception; 
   
+  /**
+   * Creates an object if it does not exists
+   * @param persistent  Object to be created if it does not exist
+   * @return
+   * @throws Exception
+   * @throws IOException
+   */
   protected T getOrCreatePersistent(T persistent) throws Exception, IOException {
 	  if(persistent != null) {
 			return persistent;

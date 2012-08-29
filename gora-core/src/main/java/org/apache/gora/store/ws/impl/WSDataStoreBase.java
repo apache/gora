@@ -15,7 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+/**
+ * @author Renato Marroquin
+ */
 package org.apache.gora.store.ws.impl;
 
 import java.util.Properties;
@@ -25,110 +27,84 @@ import org.apache.gora.store.DataStore;
 import org.apache.gora.util.StringUtils;
 
 /**
- * A Base class for Avro persistent {@link DataStore}s.
+ * A Base class for persistent objects{@link DataStore}s.
  */
 public abstract class WSDataStoreBase<K, T extends Persistent>
 implements DataStore<K, T>{
 	
-  //protected BeanFactory<K, T> beanFactory;
-
+  /**
+   * Class of the key to be used
+   */
   protected Class<K> keyClass;
+  
+  /**
+   * Class of the persistent object
+   */
   protected Class<T> persistentClass;
 
-  /** The web service provider's name*/
+  /** 
+   * The web service provider's name
+   */
   private String wsProvider;
 
-  /** A map of field names to Field objects containing schema's fields 
-  protected Map<String, Field> fieldMap; */
-
-  /** The authentication object to be used for our provider*/
+  /** 
+   * The authentication object to be used for our provider
+   */
   protected Object authentication;
 
-  /** Properties object */
+  /** 
+   * Properties object 
+   */
   protected Properties properties;
-  
-  //TODO see if a webservice database will have these persistent datums
-  //protected PersistentDatumReader<T> datumReader;
-  //protected PersistentDatumWriter<T> datumWriter;
 
+  /**
+   * Default constructor
+   */
   public WSDataStoreBase() {
   }
 
   @Override
+  /**
+   * Initializes the web services backed data store
+   */
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
       Properties properties) throws Exception {
     setKeyClass(keyClass);
     setPersistentClass(persistentClass);
-    //TODO See if we need to create a factory to manage our beans
-    //if(this.beanFactory == null)
-    //  this.beanFactory = new BeanFactoryImpl<K, T>(keyClass, persistentClass);
   }
 
   @Override
+  /**
+   * Sets the persistent class to be used
+   */
   public void setPersistentClass(Class<T> persistentClass) {
     this.persistentClass = persistentClass;
   }
 
   @Override
+  /**
+   * Gets the persistent class being used
+   */
   public Class<T> getPersistentClass() {
     return persistentClass;
   }
 
   @Override
+  /**
+   * Gets the key class being used
+   */
   public Class<K> getKeyClass() {
     return keyClass;
   }
 
   @Override
+  /**
+   * Sets the key class to be used
+   */
   public void setKeyClass(Class<K> keyClass) {
     if(keyClass != null)
       this.keyClass = keyClass;
   }
-  /*
-  @Override
-  public K newKey() throws IOException {
-    try {
-      return beanFactory.newKey();
-    } catch (Exception ex) {
-      throw new IOException(ex);
-    }
-  }
-
-  @Override
-  public T newPersistent() throws IOException {
-    try {
-      return beanFactory.newPersistent();
-    } catch (Exception ex) {
-      throw new IOException(ex);
-    }
-  }
-
-  @Override
-  public void setBeanFactory(BeanFactory<K, T> beanFactory) {
-    this.beanFactory = beanFactory;
-  }
-
-  @Override
-  public BeanFactory<K, T> getBeanFactory() {
-    return beanFactory;
-  }
-
-  @Override
-  public T get(K key) throws Exception {
-    return get(key, getFieldsToQuery(null));
-  };
-*/
-  /**
-   * Checks whether the fields argument is null, and if so
-   * returns all the fields of the Persistent object, else returns the
-   * argument.
-   */
-  /*protected String[] getFieldsToQuery(String[] fields) {
-    if(fields != null) {
-      return fields;
-    }
-    return beanFactory.getCachedPersistent().getFields();
-  }*/
 
   /**
    * Gets the configuration (authentication) object
@@ -144,39 +120,29 @@ implements DataStore<K, T>{
   public void setConf(Object auth) {
     this.authentication = auth;
   }
-
-  //@Override
-  //@SuppressWarnings("unchecked")
-  public void readFields(Object in) throws Exception {
-  /*  try {
-      Class<K> keyClass = (Class<K>) ClassLoadingUtils.loadClass(Text.readString(in));
-      Class<T> persistentClass = (Class<T>)ClassLoadingUtils.loadClass(Text.readString(in));
-      Properties props = WritableUtils.readProperties(in);
-      initialize(keyClass, persistentClass, props);
-    } catch (ClassNotFoundException ex) {
-      throw new IOException(ex);
-    }
-    */
+  
+  /**
+   * Reads fields from an object
+   * @param obj
+   * @throws Exception
+   */
+  public void readFields(Object obj) throws Exception {
   }
 
-  //@Override
+  /**
+   * Writes an object
+   * @param obj
+   * @throws Exception
+   */
   public void write(Object obj) throws Exception {
-    /*Text.writeString(out, getKeyClass().getCanonicalName());
-    Text.writeString(out, getPersistentClass().getCanonicalName());
-    WritableUtils.writeProperties(out, properties);
-    */
   }
 
   @Override
   public boolean equals(Object obj) {
     if(obj instanceof WSDataStoreBase) {
       @SuppressWarnings("rawtypes")
-	  WSDataStoreBase that = (WSDataStoreBase) obj;
-      return that.equals(obj);
-     /* EqualsBuilder builder = new EqualsBuilder();
-      builder.append(this.keyClass, that.keyClass);
-      builder.append(this.persistentClass, that.persistentClass);
-      return builder.isEquals();*/
+      WSDataStoreBase that = (WSDataStoreBase) obj;
+      return that.equals(this);
     }
     return false;
   }
@@ -210,11 +176,19 @@ implements DataStore<K, T>{
     return StringUtils.getClassname(persistentClass);
   }
 
+  /**
+   * Gets web service provider name
+   * @return
+   */
   public String getWSProvider() {
-	return wsProvider;
+    return wsProvider;
   }
 
+  /**
+   * Sets web service provider name
+   * @param wsProvider
+   */
   public void setWsProvider(String wsProvider) {
-	this.wsProvider = wsProvider;
+    this.wsProvider = wsProvider;
   }
 }

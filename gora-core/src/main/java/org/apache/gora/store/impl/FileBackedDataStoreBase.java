@@ -158,7 +158,7 @@ public InputStream getInputStream() {
   @Override
   public Result<K, T> execute(Query<K, T> query) throws IOException {
     if(query instanceof FileSplitPartitionQuery) {
-        return executePartial((FileSplitPartitionQuery<K, T>) query);
+      return executePartial((FileSplitPartitionQuery<K, T>) query);
     } else {
       return executeQuery(query);
     }

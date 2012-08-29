@@ -214,8 +214,8 @@ public interface DataStore<K, T> {
    */
   void close()  throws IOException, InterruptedException, Exception;
 
-  //void readFields() throws Exception;
+  //void readFields(Object in) throws Exception;
   
-  //void write() throws IOException;
+  //void write() throws Exception;
 
 }

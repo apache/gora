@@ -176,7 +176,6 @@ implements DataStore<K, T>, Configurable, Writable, Closeable {
     return conf;
   }
 
-  //@Override
   @SuppressWarnings("unchecked")
   public void readFields(DataInput in) throws IOException {
     try {
@@ -189,7 +188,6 @@ implements DataStore<K, T>, Configurable, Writable, Closeable {
     }
   }
 
-  //@Override
   public void write(DataOutput out) throws IOException {
     Text.writeString(out, getKeyClass().getCanonicalName());
     Text.writeString(out, getPersistentClass().getCanonicalName());

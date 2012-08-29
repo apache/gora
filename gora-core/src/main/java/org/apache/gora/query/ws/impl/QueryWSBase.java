@@ -15,7 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+/**
+ * @author Renato Marroquin 
+ */
 package org.apache.gora.query.ws.impl;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -31,78 +33,137 @@ import org.apache.gora.store.DataStore;
  */
 public abstract class QueryWSBase<K, T extends Persistent> implements Query<K,T>{
 	
+  /**
+   * Data store used for this query
+   */
   protected DataStore<K,T> dataStore;
 
+  /**
+   * Query represented in a string
+   */
   protected String queryString;
+  
+  /**
+   * Fields to be retrieved
+   */
   protected String[] fields;
 
+  /**
+   * Range key parameters
+   */
   protected K startKey;
   protected K endKey;
 
+  /**
+   * Query time parameters
+   */
   protected long startTime = -1;
   protected long endTime = -1;
 
+  /**
+   * Query filter
+   */
   protected String filter;
 
+  /**
+   * Max number of results to be retrieved
+   */
   protected long limit = -1;
 
+  /**
+   * Flag to determine whether a query is compiled or not
+   */
   protected boolean isCompiled = false;
 
   /** Object that will hold user's authentication tokens for webservice database */
   private Object authentication;
 
+  /**
+   * Constructor
+   * @param dataStore
+   */
   public QueryWSBase(DataStore<K,T> dataStore) {
     this.dataStore = dataStore;
   }
 
   @Override
+  /**
+   * Executes the query
+   */
   public Result<K,T> execute() throws Exception {
     //compile();
     return dataStore.execute(this);
   }
 
   @Override
+  /**
+   * Sets the data store to be used
+   */
   public void setDataStore(DataStore<K, T> dataStore) {
     this.dataStore = dataStore;
   }
 
   @Override
+  /**
+   * Gets the data store used for querying
+   */
   public DataStore<K, T> getDataStore() {
     return dataStore;
   }
 
   @Override
+  /**
+   * Sets the fields to be retrieved
+   */
   public void setFields(String... fields) {
     this.fields = fields;
   }
 
   @Override
+  /**
+   * Gets the fields to be retrieved
+   */
   public String[] getFields() {
     return fields;
   }
 
   @Override
+  /**
+   * Sets the key to be used for querying
+   */
   public void setKey(K key) {
     setKeyRange(key, key);
   }
 
   @Override
+  /**
+   * Sets the start key to be used for querying
+   */
   public void setStartKey(K startKey) {
     this.startKey = startKey;
   }
 
   @Override
+  /**
+   * Sets the end key to be used for querying
+   */
   public void setEndKey(K endKey) {
     this.endKey = endKey;
   }
 
   @Override
+  /**
+   * Sets the range key to be used for querying
+   */
   public void setKeyRange(K startKey, K endKey) {
     this.startKey = startKey;
     this.endKey = endKey;
   }
 
   @Override
+  /**
+   * Gets the key to be used for querying
+   */
   public K getKey() {
     if(startKey == endKey) {
       return startKey; //address comparison
@@ -111,71 +172,115 @@ public abstract class QueryWSBase<K, T extends Persistent> implements Query<K,T>
   }
 
   @Override
+  /**
+   * Gets the start key to be used for querying
+   */
   public K getStartKey() {
     return startKey;
   }
 
   @Override
+  /**
+   * Gets the end key to be used for querying
+   */
   public K getEndKey() {
     return endKey;
   }
 
   @Override
+  /**
+   * Sets the timestamp to be used for querying
+   */
   public void setTimestamp(long timestamp) {
     setTimeRange(timestamp, timestamp);
   }
 
   @Override
+  /**
+   * Sets the start time for querying
+   */
   public void setStartTime(long startTime) {
     this.startTime = startTime;
   }
 
   @Override
+  /**
+   * Sets the end time for querying
+   */
   public void setEndTime(long endTime) {
     this.endTime = endTime;
   }
 
   @Override
+  /**
+   * Sets the range time for querying
+   */
   public void setTimeRange(long startTime, long endTime) {
     this.startTime = startTime;
     this.endTime = endTime;
   }
 
   @Override
+  /**
+   * Gets the timestamp set
+   */
   public long getTimestamp() {
     return startTime == endTime ? startTime : -1;
   }
 
   @Override
+  /**
+   * Gets the start time
+   */
   public long getStartTime() {
     return startTime;
   }
 
   @Override
+  /**
+   * Gets the end time
+   */
   public long getEndTime() {
     return endTime;
   }
 
   @Override
+  /**
+   * Sets the limit of results to be gotten
+   */
   public void setLimit(long limit) {
     this.limit = limit;
   }
 
   @Override
+  /**
+   * Gets the number limit of this query
+   */
   public long getLimit() {
     return limit;
   }
 
+  /**
+   * Gets the configuration object
+   * @return
+   */
   public Object getConf() {
     return authentication;
   }
 
+  /**
+   * Sets the configuration object
+   * @param auth
+   */
   public void setConf(Object auth) {
     this.authentication = auth;
   }
  
   @SuppressWarnings({ "rawtypes" })
   @Override
+  /**
+   * Determines if this object is equal to a different one
+   */
   public boolean equals(Object obj) {
     if(obj instanceof QueryWSBase) {
       QueryWSBase that = (QueryWSBase) obj;
@@ -193,6 +298,9 @@ public abstract class QueryWSBase<K, T extends Persistent> implements Query<K,T>
   }
 
   @Override
+  /**
+   * Retrieves the object as hash code
+   */
   public int hashCode() {
     HashCodeBuilder builder = new HashCodeBuilder();
     builder.append(dataStore);
@@ -206,6 +314,9 @@ public abstract class QueryWSBase<K, T extends Persistent> implements Query<K,T>
   }
 
   @Override
+  /**
+   * Convets an object to string
+   */
   public String toString() {
     ToStringBuilder builder = new ToStringBuilder(this);
     builder.append("dataStore", dataStore);

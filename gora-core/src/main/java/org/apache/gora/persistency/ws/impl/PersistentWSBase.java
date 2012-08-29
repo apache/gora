@@ -15,6 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @author Renato Marroquin
+ */
+
 package org.apache.gora.persistency.ws.impl;
 
 import java.nio.ByteBuffer;
@@ -25,23 +29,39 @@ import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.StateManager;
 
 /**
- * Base classs implementing common functionality for Persistent
- * classes.
+ * Base classs implementing common functionality for Web services 
+ * backed persistent classes.
  */
 public abstract class PersistentWSBase implements Persistent  {
 
+  /**
+   * Maps keys to their own classes
+   */
   protected static Map<Class<?>, Map<String, Integer>> FIELD_MAP =
     new HashMap<Class<?>, Map<String,Integer>>();
 
+  /**
+   * Maps fields to their own classes
+   */
   protected static Map<Class<?>, String[]> FIELDS =
     new HashMap<Class<?>, String[]>();
     
+  /**
+   * Object used to manage the state of fields
+   */
   private StateManager stateManager;
 
+  /**
+   * Constructor
+   */
   protected PersistentWSBase() {
     this(new StateManagerWSImpl());
   }
 
+  /**
+   * Constructor using a stateManager object
+   * @param stateManager
+   */
   protected PersistentWSBase(StateManager stateManager) {
     this.stateManager = stateManager;
     stateManager.setManagedPersistent(this);
@@ -64,196 +84,219 @@ public abstract class PersistentWSBase implements Persistent  {
   }
 
   @Override
+  /**
+   * Gets the state manager
+   */
   public StateManager getStateManager() {
     return stateManager;
   }
 
   @Override
+  /**
+   * Gets fields using a specific class
+   */
   public String[] getFields() {
     return FIELDS.get(getClass());
   }
 
   @Override
+  /**
+   * Gets a specific field from the fields map
+   */
   public String getField(int index) {
     return FIELDS.get(getClass())[index];
   }
 
   @Override
+  /**
+   * Gets a field index based on the field name
+   */
   public int getFieldIndex(String field) {
     return FIELD_MAP.get(getClass()).get(field);
   }
 
   @Override
+  /**
+   * Clears maps of fields
+   */
   public void clear() {
-    /*List<Field> fields = getSchema().getFields();
-
-    for(int i=0; i<getFields().length; i++) {
-      switch(fields.get(i).schema().getType()) {
-        case MAP: 
-          if(get(i) != null) {
-            if (get(i) instanceof StatefulHashMap) {
-              ((StatefulHashMap)get(i)).reuse(); 
-            } else {
-              ((Map)get(i)).clear();
-            }
-          }
-          break;
-        case ARRAY:
-          if(get(i) != null) {
-            if(get(i) instanceof ListGenericArray) {
-              ((ListGenericArray)get(i)).clear();
-            } else {
-              put(i, new ListGenericArray(fields.get(i).schema()));
-            }
-          }
-          break;
-        case RECORD :
-          Persistent field = ((Persistent)get(i));
-          if(field != null) field.clear();
-          break;
-        case BOOLEAN: put(i, false); break;
-        case INT    : put(i, 0); break;
-        case DOUBLE : put(i, 0d); break;
-        case FLOAT  : put(i, 0f); break;
-        case LONG   : put(i, 0l); break;
-        case NULL   : break;
-        default     : put(i, null); break;
-      }
-    }*/
+    // TODO study the specific cases for other datatypes
     clearDirty();
     clearReadable();
   }
 
   @Override
+  /**
+   * Determines if a class is new or not
+   */
   public boolean isNew() {
     return getStateManager().isNew(this);
   }
 
   @Override
+  /**
+   * Sets this element as a new one inside the stateManager object
+   */
   public void setNew() {
     getStateManager().setNew(this);
   }
 
   @Override
+  /**
+   * Clears a new object from the stateManager
+   */
   public void clearNew() {
     getStateManager().clearNew(this);
   }
 
   @Override
+  /**
+   * Determines if an object has been modified or not
+   */
   public boolean isDirty() {
     return getStateManager().isDirty(this);
   }
 
   @Override
+  /**
+   * Determines if an object has been modified or not
+   * based on its field index
+   */
   public boolean isDirty(int fieldIndex) {
     return getStateManager().isDirty(this, fieldIndex);
   }
 
   @Override
+  /**
+   * Determines if an object has been modified or not
+   * based on its field name
+   */
   public boolean isDirty(String field) {
     return isDirty(getFieldIndex(field));
   }
 
   @Override
+  /**
+   * Sets this class as dirty
+   */
   public void setDirty() {
     getStateManager().setDirty(this);
   }
 
   @Override
+  /**
+   * Sets a specific field as dirty using its index
+   */
   public void setDirty(int fieldIndex) {
     getStateManager().setDirty(this, fieldIndex);
   }
 
   @Override
+  /**
+   * Sets a specific field as dirty using its name
+   */
   public void setDirty(String field) {
     setDirty(getFieldIndex(field));
   }
 
   @Override
+  /**
+   * Clears dirty fields using its index
+   */
   public void clearDirty(int fieldIndex) {
     getStateManager().clearDirty(this, fieldIndex);
   }
 
   @Override
+  /**
+   * Clears dirty fields using its name
+   */
   public void clearDirty(String field) {
     clearDirty(getFieldIndex(field));
   }
 
   @Override
+  /**
+   * Clears dirty fields from the state manager
+   */
   public void clearDirty() {
     getStateManager().clearDirty(this);
   }
 
   @Override
+  /**
+   * Checks if a field is readable using its index
+   */
   public boolean isReadable(int fieldIndex) {
     return getStateManager().isReadable(this, fieldIndex);
   }
 
   @Override
+  /**
+   * Checks if a field is readable using its name
+   */
   public boolean isReadable(String field) {
     return isReadable(getFieldIndex(field));
   }
 
   @Override
+  /**
+   * Sets a field as readable using its index
+   */
   public void setReadable(int fieldIndex) {
     getStateManager().setReadable(this, fieldIndex);
   }
 
   @Override
+  /**
+   * Sets a field as readable using its name
+   */
   public void setReadable(String field) {
     setReadable(getFieldIndex(field));
   }
 
   @Override
+  /**
+   * Clears this readable object from the state manager
+   */
   public void clearReadable() {
     getStateManager().clearReadable(this);
   }
 
   @Override
+  /**
+   * Clears a readable object based on its field index
+   * using a stateManager object
+   */
   public void clearReadable(int fieldIndex) {
     getStateManager().clearReadable(this, fieldIndex);
   }
 
   @Override
+  /**
+   * Clears a readable object based on its field name
+   * using a stateManager object
+   */
   public void clearReadable(String field) {
     clearReadable(getFieldIndex(field));
   }
 
   @Override
+  /**
+   * Determines if an object is equal to this class
+   */
   public boolean equals(Object o) {
     if (this == o) return true;
-    /*if (!(o instanceof SpecificRecord)) return false;
-
-    SpecificRecord r2 = (SpecificRecord)o;
-    if (!this.getSchema().equals(r2.getSchema())) return false;
-
-    return this.hashCode() == r2.hashCode();*/
+    // TODO we should check if the object has schema or not
     return true;
   }
 
   @Override
+  // TODO
   public int hashCode() {
     int result = 1;
-  /*  List<Field> fields = this.getSchema().getFields();
-    int end = fields.size();
-    for (int i = 0; i < end; i++) {
-      result = prime * result + getFieldHashCode(i, fields.get(i));
-    }
-    */
     return result;
   }
-
-  /*private int getFieldHashCode(int i, Field field) {
-    Object o = get(i);
-    if(o == null)
-      return 0;
-
-    if(field.schema().getType() == Type.BYTES) {
-      return getByteBufferHashCode((ByteBuffer)o);
-    }
-
-    return o.hashCode();
-  }*/
 
   /** ByteBuffer.hashCode() takes into account the position of the
    * buffer, but we do not want that*/
@@ -266,33 +309,34 @@ public abstract class PersistentWSBase implements Persistent  {
   }
   
   @Override
+  /**
+   * Clones a persistent object
+   */
   public Persistent clone() {
-    //return datumReader.clone(this, getSchema());
 	  return null;
   }
   
   @Override
+  /**
+   * Converts an object to string
+   */
   public String toString() {
     StringBuilder builder = new StringBuilder();
     builder.append(super.toString());
     builder.append(" {\n");
-    /*List<Field> fields = getSchema().getFields();
-    for(int i=0; i<fields.size(); i++) {
-      builder.append("  \"").append(fields.get(i).name()).append("\":\"");
-      builder.append(get(i)).append("\"\n");
-    }
-    */
+    // TODO get fields
     builder.append("}");
     return builder.toString();
   }
-  
+
+  /**
+   * Checks if a field is equal between two objects
+   * @param index
+   * @param value
+   * @return
+   */
   protected boolean isFieldEqual(int index, Object value) {
-    /*Object old = get(index);
-    if (old == null && value == null)
-      return true;
-    if (old == null || value == null)
-      return false;
-    return value.equals(old);*/
+    // TODO
 	  return true;
   }
 }

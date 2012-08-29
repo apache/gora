@@ -34,9 +34,15 @@ public class StateManagerWSImpl implements StateManager {
   protected BitSet dirtyBits;
   protected BitSet readableBits;
 
+  /**
+   * Constructor
+   */
   public StateManagerWSImpl() {
   }
 
+  /**
+   * Sets dirtyBits and readableBits sizes
+   */
   public void setManagedPersistent(Persistent persistent) {
    // dirtyBits = new BitSet(persistent.getSchema().getFields().size());
    // readableBits = new BitSet(persistent.getSchema().getFields().size());
@@ -44,60 +50,99 @@ public class StateManagerWSImpl implements StateManager {
   }
 
   @Override
+  /**
+   * Checks if an object is new or not
+   */
   public boolean isNew(Persistent persistent) {
     return isNew;
   }
   
   @Override
+  /**
+   * Sets an object as new
+   */
   public void setNew(Persistent persistent) {
     this.isNew = true;
   }
   
   @Override
+  /**
+   * Clear the new object by setting it as not new
+   */
   public void clearNew(Persistent persistent) {
     this.isNew = false;
   }
   
+  /**
+   * Sets an object as dirty using its index
+   */
   public void setDirty(Persistent persistent, int fieldIndex) {
     dirtyBits.set(fieldIndex);
     readableBits.set(fieldIndex);
   }
   
+  /**
+   * Determines if an object is dirty or not based on its index
+   */
   public boolean isDirty(Persistent persistent, int fieldIndex) {
     return dirtyBits.get(fieldIndex);
   }
 
+  /**
+   * Determines if an object is dirty
+   */
   public boolean isDirty(Persistent persistent) {
     return !dirtyBits.isEmpty();
   }
   
   @Override
+  /**
+   * Sets an object as dirty
+   */
   public void setDirty(Persistent persistent) {
     dirtyBits.set(0, dirtyBits.size());
   }
   
   @Override
+  /**
+   * Marks a persistent object as not dirty using its index
+   */
   public void clearDirty(Persistent persistent, int fieldIndex) {
     dirtyBits.clear(fieldIndex);
   }
   
+  /**
+   * Marks all objects as not dirty
+   */
   public void clearDirty(Persistent persistent) {
     dirtyBits.clear();
   }
   
+  /**
+   * Sets a persistent object as readable using its index
+   */
   public void setReadable(Persistent persistent, int fieldIndex) {
     readableBits.set(fieldIndex);
   }
 
+  /**
+   * Determines if an object is readable using its index
+   */
   public boolean isReadable(Persistent persistent, int fieldIndex) {
     return readableBits.get(fieldIndex);
   }
 
   @Override
+  /**
+   * Marks an object as non-readable using its index
+   */
   public void clearReadable(Persistent persistent, int fieldIndex) {
     readableBits.clear(fieldIndex);
   }
   
+  /**
+   * Marks all objects as non-readable
+   */
   public void clearReadable(Persistent persistent) {
     readableBits.clear();
   }

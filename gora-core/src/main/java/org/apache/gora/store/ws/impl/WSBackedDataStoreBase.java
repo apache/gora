@@ -15,7 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+/**
+ * @author Renato Marroquin
+ */
 package org.apache.gora.store.ws.impl;
 
 import java.io.IOException;
@@ -24,30 +26,31 @@ import java.util.Properties;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
-import org.apache.gora.store.FileBackedDataStore;
 import org.apache.gora.store.WebServiceBackedDataStore;
 import org.apache.gora.util.OperationNotSupportedException;
 
 /**
- * Base implementations for {@link FileBackedDataStore} methods.
+ * Base implementations for {@link WebServiceBackedDataStore} methods.
  */
 public abstract class WSBackedDataStoreBase<K, T extends Persistent>
   extends WSDataStoreBase<K, T> implements WebServiceBackedDataStore<K, T> {
 
   @Override
+  /**
+   * Initializes a web service backed data store
+   */
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
       Properties properties) throws Exception {
     super.initialize(keyClass, persistentClass, properties);
-    //if(properties != null) {
-    //}
   }
+
   @Override
+  /**
+   * Executes a query inside a web service backed data store
+   */
   public Result<K, T> execute(Query<K, T> query) throws Exception {
-   /* if(query instanceof PartitionWSQueryImpl) {
-        return executePartial((FileSplitPartitionQuery<K, T>) query);
-    } else {*/
-      return executeQuery(query);
-    //}
+    // TODO We could have different types of execution {@link FileBackedDataStoreBase}
+    return executeQuery(query);
   }
 
   /**
@@ -57,48 +60,57 @@ public abstract class WSBackedDataStoreBase<K, T extends Persistent>
   protected abstract Result<K,T> executeQuery(Query<K,T> query)
     throws Exception;
 
-  /**
-   * Executes a PartitialQuery, reading the data between start and end.
-   */
-  //protected abstract Result<K,T> executePartial(FileSplitPartitionQuery<K,T> query)
-  //  throws Exception;
-
   @Override
+  /**
+   * Flushes objects into the data store
+   */
   public void flush() throws Exception {
   }
 
   @Override
+  /**
+   * Creates schema into the data store
+   */
   public void createSchema() throws Exception{
   }
 
   @Override
+  /**
+   * Deletes schema from the data store
+   */
   public void deleteSchema() throws Exception {
     throw new OperationNotSupportedException("delete schema is not supported for " +
     		"file backed data stores");
   }
 
   @Override
+  /**
+   * Verifies if a schema exists
+   */
   public boolean schemaExists() throws Exception {
     return true;
   }
 
   @Override
+  /**
+   * Writes an object into the data
+   */
   public void write(Object out) throws Exception {
     super.write(out);
-    //if(wsProvider != null)
-      // make write request
-    
   }
 
   @Override
+  /**
+   * Reads fields from an object
+   */
   public void readFields(Object in) throws Exception {
     super.readFields(in);
-    //if(wsProvider != null)
-    // make read request
   }
 
-  // TODO this could be close connection
   @Override
+  /**
+   * Closes the data store
+   */
   public void close() throws IOException, InterruptedException, Exception {
   }
 }
