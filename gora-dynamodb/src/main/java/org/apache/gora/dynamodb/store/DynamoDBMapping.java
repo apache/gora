@@ -287,7 +287,7 @@ public class DynamoDBMapping {
 	// A hash key may exist by itself
 	if (hashKey != null)	  
 	  return true;
-	  return false;
+	return false;
     }
 	  
     /**
