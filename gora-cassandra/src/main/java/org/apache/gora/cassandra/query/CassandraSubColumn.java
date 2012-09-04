@@ -37,6 +37,10 @@ import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericArray;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.util.Utf8;
+import org.apache.gora.cassandra.serializers.GenericArraySerializer;
+import org.apache.gora.cassandra.serializers.StatefulHashMapSerializer;
+import org.apache.gora.cassandra.serializers.TypeUtils;
+import org.apache.gora.persistency.StatefulHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,28 +70,20 @@ public class CassandraSubColumn extends CassandraColumn {
     Schema fieldSchema = field.schema();
     Type type = fieldSchema.getType();
     ByteBuffer byteBuffer = hColumn.getValue();
+    if (byteBuffer == null) {
+      return null;
+    }
     Object value = null;
     if (type == Type.ARRAY) {
-      // convert string to array
-      String valueString = StringSerializer.get().fromByteBuffer(byteBuffer);
-      valueString = valueString.substring(1, valueString.length()-1);
-      String[] elements = valueString.split(", ");
-
-      Type elementType = fieldSchema.getElementType().getType();
-      if (elementType == Schema.Type.STRING) {
-        // the array type is String
-        GenericArray<String> genericArray = new GenericData.Array<String>(elements.length, Schema.createArray(Schema.create(Schema.Type.STRING)));
-        for (String element: elements) {
-          genericArray.add(element);
-        }
-
-        value = genericArray;
-      } else {
-        LOG.info("Element type not supported: " + elementType);
-      }
-    }
-    else {
-      value = fromByteBuffer(type, byteBuffer);
+      GenericArraySerializer serializer = GenericArraySerializer.get(fieldSchema.getElementType());
+      GenericArray genericArray = serializer.fromByteBuffer(byteBuffer);
+      value = genericArray;
+    } else if (type == Type.MAP) {
+      StatefulHashMapSerializer serializer = StatefulHashMapSerializer.get(fieldSchema.getValueType());
+      StatefulHashMap map = serializer.fromByteBuffer(byteBuffer);
+      value = map;
+    } else {
+      value = fromByteBuffer(fieldSchema, byteBuffer);
     }
 
     return value;

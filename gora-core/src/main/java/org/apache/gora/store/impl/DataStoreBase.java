@@ -23,7 +23,6 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.apache.avro.Schema;
@@ -198,7 +197,7 @@ implements DataStore<K, T>, Configurable, Writable, Closeable {
   public boolean equals(Object obj) {
     if(obj instanceof DataStoreBase) {
       @SuppressWarnings("rawtypes")
-	  DataStoreBase that = (DataStoreBase) obj;
+      DataStoreBase that = (DataStoreBase) obj;
       EqualsBuilder builder = new EqualsBuilder();
       builder.append(this.keyClass, that.keyClass);
       builder.append(this.persistentClass, that.persistentClass);
@@ -217,22 +216,25 @@ implements DataStore<K, T>, Configurable, Writable, Closeable {
   /**
    * Returns the name of the schema to use for the persistent class. 
    * 
-   * First the schema name in the defined properties is returned. If null then
+   * The schema name is prefixed with schema.prefix from {@link Configuration}.
+   * The schema name in the defined properties is returned. If null then
    * the provided mappingSchemaName is returned. If this is null too,
    * the class name, without the package, of the persistent class is returned.
    * @param mappingSchemaName the name of the schema as read from the mapping file
    * @param persistentClass persistent class
    */
   protected String getSchemaName(String mappingSchemaName, Class<?> persistentClass) {
+    String prefix = getOrCreateConf().get("schema.prefix","");
+    
     String schemaName = DataStoreFactory.getDefaultSchemaName(properties, this);
     if(schemaName != null) {
-      return schemaName;
+      return prefix+schemaName;
     }
 
     if(mappingSchemaName != null) {
-      return mappingSchemaName;
+      return prefix+mappingSchemaName;
     }
 
-    return StringUtils.getClassname(persistentClass);
+    return prefix+StringUtils.getClassname(persistentClass);
   }
 }

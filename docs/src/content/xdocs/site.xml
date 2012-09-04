@@ -48,7 +48,8 @@ See http://forrest.apache.org/docs/linking.html for more info
     <gora-cassandra  label="gora-cassandra" href="gora-cassandra.html" />
     <gora-hbase label="gora-hbase"         href="gora-hbase.html" />
     <gora-sql   label="gora-sql"           href="gora-sql.html" />
-    <api        label="API docs"           href="ext:api/index" />
+    <nightly	label="Nightly API docs"   href="ext:nightly" />
+    <api        label="0.2.1 API docs"     href="ext:api/index" />
   </docs>
 
   <external-refs>
@@ -70,8 +71,9 @@ See http://forrest.apache.org/docs/linking.html for more info
     <cassandra    href="http://cassandra.apache.org/"/>
     <nutch     href="http://nutch.apache.org/"/>
     <sponsors href="http://www.apache.org/foundation/thanks.html"/>
+    <nightly  href="https://builds.apache.org/job/gora-trunk/javadoc" />
 
-    <api href="api/">
+    <api href="apidocs-0.2.1/">
       <index href="index.html" />
       <org href="org/">
         <apache href="apache/">

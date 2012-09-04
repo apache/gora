@@ -31,10 +31,10 @@ import org.apache.gora.util.GoraException;
 import org.apache.hadoop.conf.Configuration;
 
 /**
- * GoraTestDriver is a helper class for third party tests.
- * GoraTestDriver can be used to initialize and tear down mini clusters
- * (such as mini HBase cluster, local Hsqldb instance, etc) so that
- * these details are abstracted away.
+ * GoraTestDriver is a helper class for third party tests and should
+ * be used to initialize and tear down mini clusters (such as mini HBase 
+ * or Cassandra cluster, local Hsqldb instance, etc) so that these 
+ * details are abstracted away.
  */
 public class GoraTestDriver {
 
@@ -86,13 +86,13 @@ public class GoraTestDriver {
   public void tearDown() throws Exception {
     log.info("tearing down test");
     //delete everything
-    try {
-      for(DataStore store : dataStores) {
+    for(DataStore store : dataStores) {
+      try {
         //store.flush();
         store.deleteSchema();
         store.close();
+      }catch (Exception ignore) {
       }
-    }catch (IOException ignore) {
     }
     dataStores.clear();
   }

@@ -90,7 +90,9 @@ public abstract class DataStoreTestBase {
     //There is an issue in JUnit 4 tests in Eclipse where TestSqlStore static
     //methods are not called BEFORE setUpClass. I think this is a bug in 
     //JUnitRunner in Eclipse. Below is a workaround for that problem.
-    if(!setUpClassCalled) setUpClass();  
+    if(!setUpClassCalled) {
+    	setUpClass();  
+    }
     
     log.info("setting up test");
     if(testDriver != null) {

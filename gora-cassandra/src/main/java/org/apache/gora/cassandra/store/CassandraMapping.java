@@ -107,42 +107,30 @@ public class CassandraMapping {
 
   /**
    * Primary class for loading Cassandra configuration from the 'MAPPING_FILE'.
-   * 
-   * @throws JDOMException
-   * @throws IOException
    */
-  @SuppressWarnings("unchecked")
-  public void loadConfiguration() throws JDOMException, IOException {
-    SAXBuilder saxBuilder = new SAXBuilder();
-    Document document = saxBuilder.build(getClass().getClassLoader().getResourceAsStream(MAPPING_FILE));
-    if (document == null) {
-      LOG.warn("Mapping file '" + MAPPING_FILE + "' could not be found!");
-    }
-    Element root = document.getRootElement();
-    
-    Element keyspace = root.getChild(KEYSPACE_ELEMENT);
+  public CassandraMapping(Element keyspace, Element mapping) {
     if (keyspace == null) {
     	LOG.warn("Error locating Cassandra Keyspace element!");
     } else {
-    	LOG.info("Located Cassandra Keyspace: '" + KEYSPACE_ELEMENT + "'");
+    	// LOG.info("Located Cassandra Keyspace: '" + KEYSPACE_ELEMENT + "'");
     }
     this.keyspaceName = keyspace.getAttributeValue(NAME_ATTRIBUTE);
     if (this.keyspaceName == null) {
     	LOG.warn("Error locating Cassandra Keyspace name attribute!");
     } else {
-    	LOG.info("Located Cassandra Keyspace name: '" + NAME_ATTRIBUTE + "'");
+    	// LOG.info("Located Cassandra Keyspace name: '" + NAME_ATTRIBUTE + "'");
     }
     this.clusterName = keyspace.getAttributeValue(CLUSTER_ATTRIBUTE);
     if (this.clusterName == null) {
     	LOG.warn("Error locating Cassandra Keyspace cluster attribute!");
     } else {
-    	LOG.info("Located Cassandra Keyspace cluster: '" + CLUSTER_ATTRIBUTE + "'");
+    	// LOG.info("Located Cassandra Keyspace cluster: '" + CLUSTER_ATTRIBUTE + "'");
     }
     this.hostName = keyspace.getAttributeValue(HOST_ATTRIBUTE);
     if (this.hostName == null) {
     	LOG.warn("Error locating Cassandra Keyspace host attribute!");
     } else {
-    	LOG.info("Located Cassandra Keyspace host: '" + HOST_ATTRIBUTE + "'");
+    	// LOG.info("Located Cassandra Keyspace host: '" + HOST_ATTRIBUTE + "'");
     }
     
     // load column family definitions
@@ -154,13 +142,13 @@ public class CassandraMapping {
       if (familyName == null) {
       	LOG.warn("Error locating column family name attribute!");
       } else {
-      	LOG.info("Located column family name: '" + NAME_ATTRIBUTE + "'");
+      	// LOG.info("Located column family name: '" + NAME_ATTRIBUTE + "'");
       }
       String superAttribute = element.getAttributeValue(SUPER_ATTRIBUTE);
       if (superAttribute != null) {
-    	LOG.info("Located super column family");
+    	// LOG.info("Located super column family");
         this.superFamilies.add(familyName);
-        LOG.info("Added super column family: '" + familyName + "'");
+        // LOG.info("Added super column family: '" + familyName + "'");
         cfDef.setColumnType(ColumnType.SUPER);
         cfDef.setSubComparatorType(ComparatorType.BYTESTYPE);
       }
@@ -175,7 +163,6 @@ public class CassandraMapping {
     }
     
     // load column definitions    
-    Element mapping = root.getChild(MAPPING_ELEMENT);
     elements = mapping.getChildren();
     for (Element element: elements) {
       String fieldName = element.getAttributeValue(NAME_ATTRIBUTE);

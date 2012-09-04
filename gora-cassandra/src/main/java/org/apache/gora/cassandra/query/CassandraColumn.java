@@ -20,18 +20,12 @@ package org.apache.gora.cassandra.query;
 
 import java.nio.ByteBuffer;
 
-import me.prettyprint.cassandra.serializers.FloatSerializer;
-import me.prettyprint.cassandra.serializers.DoubleSerializer;
-import me.prettyprint.cassandra.serializers.IntegerSerializer;
-import me.prettyprint.cassandra.serializers.LongSerializer;
-import me.prettyprint.cassandra.serializers.StringSerializer;
+import me.prettyprint.hector.api.Serializer;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
-import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
-import org.apache.avro.generic.GenericArray;
-import org.apache.avro.util.Utf8;
+import org.apache.gora.cassandra.serializers.GoraSerializerTypeInferer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,32 +65,13 @@ public abstract class CassandraColumn {
   public abstract ByteBuffer getName();
   public abstract Object getValue();
   
-
-  protected Object fromByteBuffer(Type type, ByteBuffer byteBuffer) {
+  protected Object fromByteBuffer(Schema schema, ByteBuffer byteBuffer) {
     Object value = null;
-    switch (type) {
-      case STRING:
-        value = new Utf8(StringSerializer.get().fromByteBuffer(byteBuffer));
-        break;
-      case BYTES:
-        value = byteBuffer;
-        break;
-      case INT:
-        value = IntegerSerializer.get().fromByteBuffer(byteBuffer);
-        break;
-      case LONG:
-        value = LongSerializer.get().fromByteBuffer(byteBuffer);
-        break;
-      case FLOAT:
-        value = FloatSerializer.get().fromByteBuffer(byteBuffer);
-        break;
-      case DOUBLE:
-        value = DoubleSerializer.get().fromByteBuffer(byteBuffer);
-        break;
-
-      default:
-        LOG.info("Type is not supported: " + type);
-
+    Serializer serializer = GoraSerializerTypeInferer.getSerializer(schema);
+    if (serializer == null) {
+      LOG.info("Schema is not supported: " + schema.toString());
+    } else {
+      value = serializer.fromByteBuffer(byteBuffer);
     }
     return value;
   }

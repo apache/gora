@@ -61,9 +61,18 @@
         <directory>target</directory>
         <outputDirectory>target/classes</outputDirectory>
         <finalName>${project.artifactId}-${project.version}</finalName>
-    <!--<testOutputDirectory>target/test-classes</testOutputDirectory>-->
-    <!--<testSourceDirectory>src/test/java</testSourceDirectory>-->
+        <testOutputDirectory>target/test-classes</testOutputDirectory>
+        <testSourceDirectory>src/test/java</testSourceDirectory>
         <sourceDirectory>src/main/java</sourceDirectory>
+        <testResources>
+          <testResource>
+            <directory>${project.basedir}/src/test/conf</directory>
+            <includes>
+              <include>**/*</include>
+            </includes>
+            <!--targetPath>${project.basedir}/target/classes/</targetPath-->
+          </testResource>
+        </testResources>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -80,24 +89,6 @@
                                 <source>src/examples/java</source>
                             </sources>
                         </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>${maven-jar-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>jar</goal>
-                            <goal>test-jar</goal>
-                        </goals>
-                        <configuration>
-                        <archive>
-                            <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-                        </archive>
-                    </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -122,19 +113,31 @@
         <dependency>
             <groupId>org.apache.cassandra</groupId>
             <artifactId>cassandra-all</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.cassandra.deps</groupId>
+    		    <artifactId>avro</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
-
+        
         <dependency>
             <groupId>org.apache.cassandra</groupId>
             <artifactId>cassandra-thrift</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>me.prettyprint</groupId>
+            <groupId>org.hectorclient</groupId>
             <artifactId>hector-core</artifactId>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.cassandra</groupId>
+    		        <artifactId>cassandra-all</artifactId>
+                    </exclusion>
+            </exclusions>
         </dependency>
-
-
+        
         <!-- Misc Dependencies -->
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -148,13 +151,17 @@
 
         <!-- Logging Dependencies -->
         <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>avro</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-jdk14</artifactId>
+            <artifactId>slf4j-log4j12</artifactId>
         </dependency>
 
         <dependency>
@@ -172,7 +179,7 @@
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-test</artifactId>
         </dependency>
-
+        
     </dependencies>
 
 </project>

@@ -171,6 +171,7 @@ public class GoraCompiler {
     line(0, "import org.apache.avro.util.Utf8;");
     line(0, "import org.apache.avro.ipc.AvroRemoteException;");
     line(0, "import org.apache.avro.generic.GenericArray;");
+    line(0, "import org.apache.avro.specific.FixedSize;");
     line(0, "import org.apache.avro.specific.SpecificExceptionBase;");
     line(0, "import org.apache.avro.specific.SpecificRecordBase;");
     line(0, "import org.apache.avro.specific.SpecificRecord;");
@@ -317,6 +318,7 @@ public class GoraCompiler {
           switch (fieldSchema.getType()) {
           case INT:case LONG:case FLOAT:case DOUBLE:
           case BOOLEAN:case BYTES:case STRING: case ENUM: case RECORD:
+          case FIXED:
             String unboxed = unbox(fieldSchema);
             String fieldType = type(fieldSchema);
             line(1, "public "+unboxed+" get" +camelKey+"() {");

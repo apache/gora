@@ -326,13 +326,13 @@ implements Configurable {
           (stopRow.length == 0 ||
               Bytes.compareTo(stopRow, keys.getFirst()[i]) > 0)) {
 
-        byte[] splitStart = (startRow.length == 0 ||
-          Bytes.compareTo(keys.getFirst()[i], startRow) >= 0) ?
+        byte[] splitStart = startRow.length == 0 || 
+            Bytes.compareTo(keys.getFirst()[i], startRow) >= 0 ? 
             keys.getFirst()[i] : startRow;
 
-        byte[] splitStop = (stopRow.length == 0 ||
-            Bytes.compareTo(keys.getSecond()[i], stopRow) <= 0) ?
-            keys.getSecond()[i] : stopRow;
+        byte[] splitStop = (stopRow.length == 0 || 
+            Bytes.compareTo(keys.getSecond()[i], stopRow) <= 0) && 
+            keys.getSecond()[i].length > 0 ? keys.getSecond()[i] : stopRow;
 
         K startKey = Arrays.equals(HConstants.EMPTY_START_ROW, splitStart) ?
             null : HBaseByteInterface.fromBytes(keyClass, splitStart);

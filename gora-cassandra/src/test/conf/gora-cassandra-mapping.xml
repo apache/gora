@@ -18,24 +18,41 @@
 -->
 
 <gora-orm>
+  <keyspace name="Employee" host="localhost" cluster="Gora Cassandra Test Cluster">
+    <family name="p"/>
+    <family name="f"/>
+     <family name="sc" type="super" />
+  </keyspace>
+
+  <keyspace name="WebPage" host="localhost" cluster="Gora Cassandra Test Cluster">
+    <family name="p"/>
+    <family name="f"/>
+    <family name="sc" type="super"/>
+  </keyspace>
+
+  <keyspace name="TokenDatum" host="localhost" cluster="Gora Cassandra Test Cluster">
+    <family name="p"/>
+    <family name="f"/>
+    <family name="sc" type="super"/>
+  </keyspace>
 
   <class name="org.apache.gora.examples.generated.Employee" keyClass="java.lang.String" keyspace="Employee">
-    <field name="name" path="info:nm"/>
-    <field name="dateOfBirth" path="info:db"/>
-    <field name="ssn" path="info:sn"/>
-    <field name="salary" path="info:sl"/>
+    <field name="name"  family="p" qualifier="info:nm"/>
+    <field name="dateOfBirth"  family="p" qualifier="info:db"/>
+    <field name="ssn"  family="p" qualifier="info:sn"/>
+    <field name="salary"  family="p" qualifier="info:sl"/>
   </class>
 
   <class name="org.apache.gora.examples.generated.WebPage" keyClass="java.lang.String" keyspace="WebPage">
-    <field name="url" path="c:u"/>
-    <field name="content" path="p:cnt:c"/>
-    <field name="parsedContent" path="p:parsedContent"/>
-    <field name="outlinks" path="p:outlinks"/>
-    <field name="metadata" path="c:mt"/>
+    <field name="url" family="p" qualifier="c:u"/>
+    <field name="content" family="p" qualifier="p:cnt:c"/>
+    <field name="parsedContent" family="sc" qualifier="p:parsedContent"/>
+    <field name="outlinks" family="sc" qualifier="p:outlinks"/>
+    <field name="metadata" family="sc" qualifier="c:mt"/>
   </class>
 
   <class name="org.apache.gora.examples.generated.TokenDatum" keyClass="java.lang.String" keyspace="TokenDatum">
-    <field name="count" path="common:count"/>
+    <field name="count"  family="p" qualifier="common:count"/>
   </class>
 
 </gora-orm>

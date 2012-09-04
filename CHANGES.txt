@@ -4,9 +4,42 @@
 
 Gora Change Log
 
-0.3 (trunk) Current Development:
+trunk (current development)
 
-* GORA-103 Datastore for gora dynamodb - phase 1 (Renato Javier Marroquín Mogrovejo via lewismc)
+* GORA-160 Gora Fails to Import Into Recent Versions of Eclipse (Ed Kohlwey via lewismc)
+
+* GORA-85 Implement "Usage" messages for SpecificCompiler and LogAnalytics (lewismc)
+
+* GORA-164 Use <type> instead of <classifier> configuration for test dependencies (lewismc)
+
+* GORA-XX ensure directory cleanup succeeds in gora-* (Simone Tripodi via lewismc)
+
+0.2.1 release: 26/07/2012
+Release Report: https://issues.apache.org/jira/secure/ReleaseNote.jspa?projectId=12311172&version=12322496
+
+* GORA-157 gora-cassandra test failure - proposal to skip 10 test cases for a while (kazk)
+
+* GORA-156 Properly implement getSchemaName in CassandraStore (lewismc)
+
+* GORA-153 gora-cassandra does not correctly handle DELETED State for MAP (kazk)
+
+* GORA-152 gora-core test incorrectly uses ByteBuffer's array() method to get its byte array (kazk)
+
+* GORA-151 CassandraStore's schemaExists() method always returns false (kazk)
+
+* GORA-150 Introduce Configuration property preferred.schema.name (ferdy)
+
+* GORA-142 Creates org.apache.gora.cassandra.serializers package in order to clean the code of store and query packages and to support additional types in future. (kazk)
+
+* GORA-148 CassandraMapping supports only (first) keyspace and class in gora-cassandra-mapping.xml (kazk)
+
+* GORA-143 GoraCompiler needs to add "import FixedSize" statement for FIXED type (kazk)
+
+* GORA-147 fix threading issue caused by multiple threads trying to flush (ferdy)
+
+* GORA-146 HBaseStore does not properly set endkey (ferdy)
+
+* GORA-140 Requires some adjustments on dependency at gora-cassandra (kazk, lewismc)
 
 * GORA-138 gora-cassandra array type support: Double fix for GORA-81 Replace CassandraStore#addOrUpdateField with TypeInferringSerializer to take advantage of when the value is already of type ByteBuffer. (Kazuomi Kashii via lewismc)
 

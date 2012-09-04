@@ -41,6 +41,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericArray;
+import org.apache.avro.specific.SpecificFixed;
 import org.apache.avro.util.Utf8;
 import org.apache.gora.cassandra.query.CassandraQuery;
 import org.apache.gora.cassandra.query.CassandraResult;
@@ -63,7 +64,7 @@ import org.slf4j.LoggerFactory;
 
 public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
   public static final Logger LOG = LoggerFactory.getLogger(CassandraStore.class);
-  
+
   private CassandraClient<K, T>  cassandraClient = new CassandraClient<K, T>();
 
   /**
@@ -81,7 +82,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
   public void initialize(Class<K> keyClass, Class<T> persistent, Properties properties) throws IOException {
     super.initialize(keyClass, persistent, properties);
     try {
-      this.cassandraClient.initialize(keyClass);
+      this.cassandraClient.initialize(keyClass, persistent);
     }
     catch (Exception e) {
       throw new IOException(e.getMessage(), e);
@@ -96,7 +97,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
 
   @Override
   public void createSchema() {
-    LOG.debug("create schema");
+    LOG.debug("creating Cassandra keyspace");
     this.cassandraClient.checkKeyspace();
   }
 
@@ -255,10 +256,14 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
     partitions.add(new PartitionQueryImpl<K,T>(query));
     return partitions;
   }
-
+  
+  /**
+   * In Cassandra Schemas are referred to as Keyspaces
+   * @return Keyspace
+   */
   @Override
   public String getSchemaName() {
-    return null;
+	return this.cassandraClient.getKeyspaceName();
   }
 
   @Override
@@ -277,8 +282,9 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
     T p = (T) value.newInstance(new StateManagerImpl());
     Schema schema = value.getSchema();
     for (Field field: schema.getFields()) {
-      if (value.isDirty(field.pos())) {
-        Object fieldValue = value.get(field.pos());
+      int fieldPos = field.pos();
+      if (value.isDirty(fieldPos)) {
+        Object fieldValue = value.get(fieldPos);
         
         // check if field has a nested structure (array, map, or record)
         Schema fieldSchema = field.schema();
@@ -293,14 +299,11 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
             fieldValue = newRecord;
             break;
           case MAP:
-            StatefulHashMap<?, ?> map = (StatefulHashMap<?, ?>) fieldValue;
-            StatefulHashMap<?, ?> newMap = new StatefulHashMap(map);
-            fieldValue = newMap;
+            // needs to keep State.DELETED.
             break;
           case ARRAY:
             GenericArray array = (GenericArray) fieldValue;
-            Type elementType = fieldSchema.getElementType().getType();
-            GenericArray newArray = new ListGenericArray(Schema.create(elementType));
+            ListGenericArray newArray = new ListGenericArray(fieldSchema.getElementType());
             Iterator iter = array.iterator();
             while (iter.hasNext()) {
               newArray.add(iter.next());
@@ -309,7 +312,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
             break;
         }
         
-        p.put(field.pos(), fieldValue);
+        p.put(fieldPos, fieldValue);
       }
     }
     
@@ -328,11 +331,13 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
     Type type = schema.getType();
     switch (type) {
       case STRING:
+      case BOOLEAN:
       case INT:
       case LONG:
       case BYTES:
       case FLOAT:
       case DOUBLE:
+      case FIXED:
         this.cassandraClient.addColumn(key, field.name(), value);
         break;
       case RECORD:
@@ -344,16 +349,16 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
               // TODO: hack, do not store empty arrays
               Object memberValue = persistentBase.get(member.pos());
               if (memberValue instanceof GenericArray<?>) {
-                GenericArray<String> array = (GenericArray<String>) memberValue;
-                if (array.size() == 0) {
+                if (((GenericArray)memberValue).size() == 0) {
+                  continue;
+                }
+              } else if (memberValue instanceof StatefulHashMap<?,?>) {
+                if (((StatefulHashMap)memberValue).size() == 0) {
                   continue;
                 }
               }
-              
-              if (memberValue instanceof Utf8) {
-                memberValue = memberValue.toString();
-              }
-              this.cassandraClient.addSubColumn(key, field.name(), StringSerializer.get().toByteBuffer(member.name()), memberValue);
+
+              this.cassandraClient.addSubColumn(key, field.name(), member.name(), memberValue);
             }
           } else {
             LOG.info("Record not supported: " + value.toString());
@@ -364,24 +369,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
       case MAP:
         if (value != null) {
           if (value instanceof StatefulHashMap<?, ?>) {
-            //TODO cast to stateful map and only write dirty keys
-            Map<Utf8, Object> map = (Map<Utf8, Object>) value;
-            for (Utf8 mapKey: map.keySet()) {
-              
-              // TODO: hack, do not store empty arrays
-              Object keyValue = map.get(mapKey);
-              if (keyValue instanceof GenericArray<?>) {
-                GenericArray<String> array = (GenericArray<String>) keyValue;
-                if (array.size() == 0) {
-                  continue;
-                }
-              }
-              
-              if (keyValue instanceof Utf8) {
-                keyValue = keyValue.toString();
-              }
-              this.cassandraClient.addSubColumn(key, field.name(), StringSerializer.get().toByteBuffer(mapKey.toString()), keyValue);              
-            }
+            this.cassandraClient.addStatefulHashMap(key, field.name(), (StatefulHashMap<Utf8,Object>)value);
           } else {
             LOG.info("Map not supported: " + value.toString());
           }
@@ -390,14 +378,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
       case ARRAY:
         if (value != null) {
           if (value instanceof GenericArray<?>) {
-            GenericArray<Object> array = (GenericArray<Object>) value;
-            int i= 0;
-            for (Object itemValue: array) {
-              if (itemValue instanceof Utf8) {
-                itemValue = itemValue.toString();
-              }
-              this.cassandraClient.addSubColumn(key, field.name(), IntegerSerializer.get().toByteBuffer(i++), itemValue);              
-            }
+            this.cassandraClient.addGenericArray(key, field.name(), (GenericArray)value);
           } else {
             LOG.info("Array not supported: " + value.toString());
           }
@@ -411,7 +392,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
   @Override
   public boolean schemaExists() throws IOException {
     LOG.info("schema exists");
-    return false;
+    return cassandraClient.keyspaceExists();
   }
 
 }
