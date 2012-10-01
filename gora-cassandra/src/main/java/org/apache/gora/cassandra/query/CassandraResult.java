@@ -27,7 +27,6 @@ import me.prettyprint.cassandra.serializers.StringSerializer;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.specific.SpecificFixed;
-import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.ResultBase;
@@ -65,7 +64,6 @@ public class CassandraResult<K, T extends PersistentBase> extends ResultBase<K, 
    * Load key/value pair from Cassandra row to Avro record.
    * @throws IOException
    */
-  @SuppressWarnings("unchecked")
   private void updatePersistent() throws IOException {
     CassandraRow<K> cassandraRow = this.cassandraResultSet.get(this.rowNumber);
     

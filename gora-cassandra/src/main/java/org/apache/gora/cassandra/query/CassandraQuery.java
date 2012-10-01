@@ -21,7 +21,6 @@ package org.apache.gora.cassandra.query;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.QueryBase;

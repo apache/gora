@@ -50,8 +50,8 @@ public class DynamoDBResult<K, T extends Persistent> extends ResultWSBase<K, T> 
    * @param objList		Objects obtained from querying
    */
   public DynamoDBResult(DataStore<K, T> dataStore, Query<K, T> query, List<T> objList) {
-	super(dataStore, query);
-	LOG.debug("DynamoDB result created.");
+    super(dataStore, query);
+    LOG.debug("DynamoDB result created.");
     this.setResultSet(objList);
   }
 
@@ -68,24 +68,24 @@ public class DynamoDBResult<K, T extends Persistent> extends ResultWSBase<K, T> 
    * Gets the items reading progress
    */
   public float getProgress() throws IOException, InterruptedException, Exception {
-	if (this.limit <= 0 || this.offset <= 0)
-		return 0;
-	return this.limit/this.offset;
+    if (this.limit <= 0 || this.offset <= 0)
+      return 0;
+    return this.limit/this.offset;
   }
 
   /**
    * Gets the next item
    */
   protected boolean nextInner() throws Exception {
-	if (offset < 0 || offset > ( dynamoDBResultSet.size() - 1))
-		return false;
-	persistent = dynamoDBResultSet.get((int) this.offset);
-	return true;
+    if (offset < 0 || offset > ( dynamoDBResultSet.size() - 1))
+      return false;
+    persistent = dynamoDBResultSet.get((int) this.offset);
+    return true;
   }
 
   @Override
   public void close() throws IOException {
-	// TODO Auto-generated method stub
+  // TODO Auto-generated method stub
   }
 
 }

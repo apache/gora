@@ -50,7 +50,6 @@ import org.apache.gora.cassandra.query.CassandraRow;
 import org.apache.gora.cassandra.query.CassandraSubColumn;
 import org.apache.gora.cassandra.query.CassandraSuperColumn;
 import org.apache.gora.persistency.ListGenericArray;
-import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.StatefulHashMap;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.persistency.impl.StateManagerImpl;

@@ -23,7 +23,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map.Entry;
 
-import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.sql.store.Column;
 import org.apache.gora.sql.store.SqlMapping;

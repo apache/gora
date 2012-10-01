@@ -81,7 +81,6 @@ import org.apache.gora.accumulo.encoders.Encoder;
 import org.apache.gora.accumulo.query.AccumuloQuery;
 import org.apache.gora.accumulo.query.AccumuloResult;
 import org.apache.gora.persistency.ListGenericArray;
-import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.State;
 import org.apache.gora.persistency.StateManager;
 import org.apache.gora.persistency.StatefulHashMap;

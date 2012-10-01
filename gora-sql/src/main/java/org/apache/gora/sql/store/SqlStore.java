@@ -47,7 +47,6 @@ import org.apache.avro.specific.SpecificFixed;
 import org.apache.avro.util.Utf8;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.StateManager;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;

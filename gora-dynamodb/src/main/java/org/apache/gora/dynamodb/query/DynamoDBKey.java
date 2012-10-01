@@ -38,7 +38,7 @@ public class DynamoDBKey<H, R>  {
    * @return
    */
   public H getHashKey() {
-	return hashKey;
+    return hashKey;
   }
   
   /**
@@ -46,7 +46,7 @@ public class DynamoDBKey<H, R>  {
    * @param hashKey
    */
   public void setHashKey(H hashKey) {
-	this.hashKey = hashKey;
+    this.hashKey = hashKey;
   }
   
   /**
@@ -54,7 +54,7 @@ public class DynamoDBKey<H, R>  {
    * @return
    */
   public R getRangeKey() {
-	return rangeKey;
+    return rangeKey;
   }
   
   /**
@@ -62,6 +62,6 @@ public class DynamoDBKey<H, R>  {
    * @param rangeKey
    */
   public void setRangeKey(R rangeKey) {
-	this.rangeKey = rangeKey;
+    this.rangeKey = rangeKey;
   }
 }

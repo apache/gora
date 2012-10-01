@@ -18,7 +18,6 @@
 
 package org.apache.gora.sql.query;
 
-import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.impl.QueryBase;
 import org.apache.gora.sql.store.SqlStore;

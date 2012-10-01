@@ -158,22 +158,22 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
    * setting the client's properties up, setting the end point and reading the mapping file  
    */
   public void initialize(Class<K> keyClass, Class<T> pPersistentClass,
-	     Properties properties) throws Exception {
-	 try {
-		 LOG.debug("Initializing DynamoDB store");
-		 getCredentials();
-		 setWsProvider(wsProvider);
-		 preferredSchema = properties.getProperty(PREF_SCH_NAME);
-		 dynamoDBClient = getClient(properties.getProperty(CLI_TYP_PROP),(AWSCredentials)getConf());
-		 dynamoDBClient.setEndpoint(properties.getProperty(ENDPOINT_PROP));
-		 mapping = readMapping();
-		 consistency = properties.getProperty(CONSISTENCY_READS);
-		 persistentClass = pPersistentClass;
-	 }
-	 catch (Exception e) {
-		 LOG.error("Error while initializing DynamoDB store");
-	     throw new IOException(e.getMessage(), e);
-	 }
+       Properties properties) throws Exception {
+    try {
+      LOG.debug("Initializing DynamoDB store");
+      getCredentials();
+      setWsProvider(wsProvider);
+      preferredSchema = properties.getProperty(PREF_SCH_NAME);
+      dynamoDBClient = getClient(properties.getProperty(CLI_TYP_PROP),(AWSCredentials)getConf());
+      dynamoDBClient.setEndpoint(properties.getProperty(ENDPOINT_PROP));
+      mapping = readMapping();
+      consistency = properties.getProperty(CONSISTENCY_READS);
+      persistentClass = pPersistentClass;
+    }
+    catch (Exception e) {
+      LOG.error("Error while initializing DynamoDB store");
+      throw new IOException(e.getMessage(), e);
+    }
   }
   
    /**
@@ -183,11 +183,11 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
     * @return
     */
   public AmazonDynamoDB getClient(String clientType, AWSCredentials credentials){
-	  if (clientType.equals("sync"))
-		  return new AmazonDynamoDBClient(credentials);
-	  if (clientType.equals("async"))
-		  return new AmazonDynamoDBAsyncClient(credentials);
-	  return null;
+    if (clientType.equals("sync"))
+      return new AmazonDynamoDBClient(credentials);
+    if (clientType.equals("async"))
+      return new AmazonDynamoDBAsyncClient(credentials);
+    return null;
   }
   
   /**
@@ -210,28 +210,28 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
       List<Element> tableElements = root.getChildren("table");
       for(Element tableElement : tableElements) {
     	  
-    	String tableName = tableElement.getAttributeValue("name");
-    	long readCapacUnits = Long.parseLong(tableElement.getAttributeValue("readcunit"));
-    	long writeCapacUnits = Long.parseLong(tableElement.getAttributeValue("readcunit"));
+        String tableName = tableElement.getAttributeValue("name");
+        long readCapacUnits = Long.parseLong(tableElement.getAttributeValue("readcunit"));
+        long writeCapacUnits = Long.parseLong(tableElement.getAttributeValue("readcunit"));
     	
-    	mappingBuilder.setTableName(tableName);
-    	mappingBuilder.setProvisionedThroughput(tableName, readCapacUnits, writeCapacUnits);
-    	LOG.debug("Basic table properties have been set: Name, and Provisioned throughput.");
+        mappingBuilder.setTableName(tableName);
+        mappingBuilder.setProvisionedThroughput(tableName, readCapacUnits, writeCapacUnits);
+        LOG.debug("Basic table properties have been set: Name, and Provisioned throughput.");
     	
-    	// Retrieving key's features
-    	List<Element> fieldElements = tableElement.getChildren("key");
-    	for(Element fieldElement : fieldElements) {
-    		String keyName  = fieldElement.getAttributeValue("name");
-    		String keyType  = fieldElement.getAttributeValue("type");
-    		String keyAttrType  = fieldElement.getAttributeValue("att-type");
-    		if(keyType.equals("hash"))
-    			mappingBuilder.setHashKeySchema(tableName, keyName, keyAttrType);
-    		else if(keyType.equals("hashrange"))
-    			mappingBuilder.setHashRangeKeySchema(tableName, keyName, keyAttrType);
-    	}
-    	LOG.debug("Table key schemas have been set.");
+        // Retrieving key's features
+        List<Element> fieldElements = tableElement.getChildren("key");
+        for(Element fieldElement : fieldElements) {
+          String keyName  = fieldElement.getAttributeValue("name");
+          String keyType  = fieldElement.getAttributeValue("type");
+          String keyAttrType  = fieldElement.getAttributeValue("att-type");
+          if(keyType.equals("hash"))
+            mappingBuilder.setHashKeySchema(tableName, keyName, keyAttrType);
+          else if(keyType.equals("hashrange"))
+            mappingBuilder.setHashRangeKeySchema(tableName, keyName, keyAttrType);
+        }
+        LOG.debug("Table key schemas have been set.");
     	
-    	// Retrieving attributes
+        // Retrieving attributes
         fieldElements = tableElement.getChildren("attribute");
         for(Element fieldElement : fieldElements) {
           String attributeName  = fieldElement.getAttributeValue("name");
@@ -265,14 +265,14 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
   private AWSCredentials getCredentials() throws FileNotFoundException, 
     IllegalArgumentException, IOException {
     
-	if(authentication == null){
-	  InputStream awsCredInpStr = getClass().getClassLoader().getResourceAsStream(awsCredentialsProperties);
+  if(authentication == null){
+    InputStream awsCredInpStr = getClass().getClassLoader().getResourceAsStream(awsCredentialsProperties);
       if (awsCredInpStr == null)
         LOG.info("AWS Credentials File was not found on the classpath!");
       AWSCredentials credentials = new PropertiesCredentials(awsCredInpStr);
       setConf(credentials);
-	}
-	return (AWSCredentials)authentication;
+  }
+  return (AWSCredentials)authentication;
   }
 
   /**
@@ -281,15 +281,15 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
    * @return	DynamoDBQuery 
    */
   private DynamoDBQuery<K, T> buildDynamoDBQuery(Query<K, T> query){
-	  if(getSchemaName() == null) throw new IllegalStateException("There is not a preferred schema defined.");
-	  
-	  DynamoDBQuery<K, T> dynamoDBQuery = new DynamoDBQuery<K, T>();
-	  dynamoDBQuery.setKeySchema(mapping.getKeySchema(getSchemaName()));
-	  dynamoDBQuery.setQuery(query);
-	  dynamoDBQuery.setConsistencyReadLevel(getConsistencyReads());
-	  dynamoDBQuery.buildExpression();
-	  
-	  return dynamoDBQuery;
+    if(getSchemaName() == null) throw new IllegalStateException("There is not a preferred schema defined.");
+    
+      DynamoDBQuery<K, T> dynamoDBQuery = new DynamoDBQuery<K, T>();
+      dynamoDBQuery.setKeySchema(mapping.getKeySchema(getSchemaName()));
+      dynamoDBQuery.setQuery(query);
+      dynamoDBQuery.setConsistencyReadLevel(getConsistencyReads());
+      dynamoDBQuery.buildExpression();
+    
+      return dynamoDBQuery;
   }
   
   /**
@@ -297,10 +297,10 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
    * @return True for strong consistency or false for eventual consistent reads
    */
   private boolean getConsistencyReads(){
-	  if(consistency != null)
-		  if(consistency.equals("true")) 
-			  return true;
-	  return false;
+    if(consistency != null)
+      if(consistency.equals("true")) 
+        return true;
+    return false;
   }
   
   /**
@@ -308,14 +308,14 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
    */
   @Override
   public Result<K, T> execute(Query<K, T> query) throws Exception {
-	 DynamoDBQuery<K, T> dynamoDBQuery = buildDynamoDBQuery(query);
-	 DynamoDBMapper mapper = new DynamoDBMapper(dynamoDBClient);
-	 List<T> objList = null;
-	 if (DynamoDBQuery.getType().equals(DynamoDBQuery.RANGE_QUERY))
-		 objList = mapper.query(persistentClass, (DynamoDBQueryExpression)dynamoDBQuery.getQueryExpression());
-	 if (DynamoDBQuery.getType().equals(DynamoDBQuery.SCAN_QUERY))
-		 objList = mapper.scan(persistentClass, (DynamoDBScanExpression)dynamoDBQuery.getQueryExpression());
-	 return new DynamoDBResult<K, T>(this, query, objList);  
+    DynamoDBQuery<K, T> dynamoDBQuery = buildDynamoDBQuery(query);
+    DynamoDBMapper mapper = new DynamoDBMapper(dynamoDBClient);
+    List<T> objList = null;
+    if (DynamoDBQuery.getType().equals(DynamoDBQuery.RANGE_QUERY))
+      objList = mapper.query(persistentClass, (DynamoDBQueryExpression)dynamoDBQuery.getQueryExpression());
+      if (DynamoDBQuery.getType().equals(DynamoDBQuery.SCAN_QUERY))
+        objList = mapper.scan(persistentClass, (DynamoDBScanExpression)dynamoDBQuery.getQueryExpression());
+        return new DynamoDBResult<K, T>(this, query, objList);  
   }
   
   @Override
@@ -328,7 +328,7 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
     Result<K,T> result = execute(query);
     boolean hasResult = result.next();
     return hasResult ? result.get() : null;*/
-	  return null;
+    return null;
   }
 
   /**
@@ -345,9 +345,9 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
       else
         object = mapper.load(persistentClass, hashKey);
     }
-	else
+    else
       throw new GoraException("Error while retrieving keys from object: " + key.toString());
-	return object;
+    return object;
   }
     
   /**
@@ -363,9 +363,9 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
    * Gets the preferred schema
    */
   public String getSchemaName() {
-	if (preferredSchema != null)
-		return preferredSchema;
-	return null;
+    if (preferredSchema != null)
+      return preferredSchema;
+    return null;
   }
   
   /**
@@ -373,7 +373,7 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
    * @param pSchemaName
    */
   public void setSchemaName(String pSchemaName){
-	  preferredSchema = pSchemaName;
+    preferredSchema = pSchemaName;
   }
   
   /**
@@ -381,19 +381,19 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
    * for a group of schemas defined withing the mapping file
    */
   public void createSchema() throws Exception {
-	  LOG.info("Creating schema");
-	  if (mapping.getTables().isEmpty())	throw new IllegalStateException("There are not tables defined.");
-	  if (preferredSchema == null){
-		  LOG.debug("create schemas");
-		  // read the mapping object
-		  for(String tableName : mapping.getTables().keySet())
-			  executeCreateTableRequest(tableName);
-		  LOG.debug("tables created successfully.");
-	  }
-	  else{
-		  LOG.debug("create schema " + preferredSchema);
-		  executeCreateTableRequest(preferredSchema);
-	  }
+    LOG.info("Creating schema");
+    if (mapping.getTables().isEmpty())	throw new IllegalStateException("There are not tables defined.");
+    if (preferredSchema == null){
+      LOG.debug("create schemas");
+      // read the mapping object
+      for(String tableName : mapping.getTables().keySet())
+        executeCreateTableRequest(tableName);
+        LOG.debug("tables created successfully.");
+    }
+    else{
+      LOG.debug("create schema " + preferredSchema);
+      executeCreateTableRequest(preferredSchema);
+    }
   }
   
   /**
@@ -402,14 +402,13 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
    * @param tableName
    */
   private void executeCreateTableRequest(String tableName){
-	  CreateTableRequest createTableRequest = getCreateTableRequest(tableName,
-				mapping.getKeySchema(tableName), 
-				mapping.getProvisionedThroughput(tableName));
-	  // use the client to perform the request
-	  dynamoDBClient.createTable(createTableRequest).getTableDescription();
-	  // wait for table to become active
-	  waitForTableToBecomeAvailable(tableName);
-	  LOG.info(tableName + "Schema now available");
+    CreateTableRequest createTableRequest = getCreateTableRequest(tableName,
+      mapping.getKeySchema(tableName), mapping.getProvisionedThroughput(tableName));
+    // use the client to perform the request
+    dynamoDBClient.createTable(createTableRequest).getTableDescription();
+    // wait for table to become active
+    waitForTableToBecomeAvailable(tableName);
+    LOG.info(tableName + "Schema now available");
   }
   
   /**
@@ -420,11 +419,11 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
    * @return
    */
   private CreateTableRequest getCreateTableRequest(String tableName, KeySchema keySchema, ProvisionedThroughput proThrou){
-	  CreateTableRequest createTableRequest = new CreateTableRequest();
-	  createTableRequest.setTableName(tableName);
-	  createTableRequest.setKeySchema(keySchema);
-	  createTableRequest.setProvisionedThroughput(proThrou);
-	  return createTableRequest;
+    CreateTableRequest createTableRequest = new CreateTableRequest();
+    createTableRequest.setTableName(tableName);
+    createTableRequest.setKeySchema(keySchema);
+    createTableRequest.setProvisionedThroughput(proThrou);
+    return createTableRequest;
   }
   
   /**
@@ -439,11 +438,11 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
       for(String tableName : mapping.getTables().keySet())
         executeDeleteTableRequest(tableName);
         LOG.debug("All schemas deleted successfully.");
-	  }
+    }
       else{
         LOG.debug("create schema " + preferredSchema);
         executeDeleteTableRequest(preferredSchema);
-	  }
+    }
   }
   
   /**
@@ -460,7 +459,7 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
     catch(Exception e){
       LOG.debug("Schema: " + pTableName + " deleted.");
       e.printStackTrace();
-	}
+    }
   }
 
   /**
@@ -515,13 +514,13 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
    */
   public boolean schemaExists() throws Exception {
     LOG.info("Verifying schemas.");
-	TableDescription success = null;
-	if (mapping.getTables().isEmpty())	throw new IllegalStateException("There are not tables defined.");
-	if (preferredSchema == null){
-	  LOG.debug("Verifying schemas");
-	  if (mapping.getTables().isEmpty())	throw new IllegalStateException("There are not tables defined.");
-	  // read the mapping object
-	  for(String tableName : mapping.getTables().keySet()){
+  TableDescription success = null;
+  if (mapping.getTables().isEmpty())	throw new IllegalStateException("There are not tables defined.");
+  if (preferredSchema == null){
+    LOG.debug("Verifying schemas");
+    if (mapping.getTables().isEmpty())	throw new IllegalStateException("There are not tables defined.");
+    // read the mapping object
+    for(String tableName : mapping.getTables().keySet()){
         success = getTableSchema(tableName);
         if (success == null) return false;
       }
@@ -529,7 +528,7 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
     else{
       LOG.info("Verifying schema " + preferredSchema);
       success = getTableSchema(preferredSchema);
-	}
+  }
     LOG.info("Finished verifying schemas.");
     return (success != null)? true: false;
   }
@@ -540,51 +539,50 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
    * @return
    */
   private TableDescription getTableSchema(String tableName){
-	TableDescription tableDescription = null;
+    TableDescription tableDescription = null;
   	try{
       DescribeTableRequest describeTableRequest = new DescribeTableRequest().withTableName(tableName);
       tableDescription = dynamoDBClient.describeTable(describeTableRequest).getTable();
     }
-  	catch(ResourceNotFoundException e){
-  	  LOG.error("Error while getting table schema: " + tableName);
+    catch(ResourceNotFoundException e){
+      LOG.error("Error while getting table schema: " + tableName);
       return tableDescription;
     }
-  	return tableDescription;
+    return tableDescription;
   }
   
   public K newKey() throws Exception {
-	// TODO Auto-generated method stub
-	return null;
+    // TODO Auto-generated method stub
+    return null;
   }
 
   /**
    * Returns a new persistent object
    */
   public T newPersistent() throws Exception {
-	T obj = persistentClass.newInstance();
-	return obj;
+    T obj = persistentClass.newInstance();
+    return obj;
   }
 
   /**
    * Puts an object identified by a key
    */
   public void put(K key, T obj) throws Exception {
-	try{
-	  Object rangeKey = getRangeKey(key);
-	  Object hashKey = getHashKey(key);
+    try{
+      Object rangeKey = getRangeKey(key);
+      Object hashKey = getHashKey(key);
       // if the key does not have these attributes then try to get them from the object
       if (hashKey == null)
         hashKey = getHashKey(obj);
       if (rangeKey == null)
-	    rangeKey = getRangeKey(obj);
-	
+        rangeKey = getRangeKey(obj);
       if (hashKey != null){
         DynamoDBMapper mapper = new DynamoDBMapper(dynamoDBClient);
         if (rangeKey != null)
-	      mapper.load(persistentClass, hashKey.toString(), rangeKey.toString());
+          mapper.load(persistentClass, hashKey.toString(), rangeKey.toString());
         else
           mapper.load(persistentClass, hashKey.toString());
-        mapper.save(obj);
+          mapper.save(obj);
       }
       else
         throw new GoraException("Error while retrieving keys from object: " + obj.toString());
@@ -741,30 +739,29 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
     return rangeKey;
   }
   
-  public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query)
-		throws IOException {
-	// TODO Auto-generated method stub
-	return null;
+  public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query) throws IOException {
+    // TODO Auto-generated method stub
+    return null;
   }
 
   public void flush() throws Exception {
-	// TODO Auto-generated method stub
+    // TODO Auto-generated method stub
   }
 
   public void setBeanFactory(BeanFactory<K, T> beanFactory) {
-	// TODO Auto-generated method stub
+    // TODO Auto-generated method stub
   }
 
   public BeanFactory<K, T> getBeanFactory() {
-	// TODO Auto-generated method stub
-	return null;
+    // TODO Auto-generated method stub
+    return null;
   }
 
   /**
    * Closes the data store.
    */
   public void close() throws IOException, InterruptedException, Exception {
-	  LOG.debug("Datastore closed.");
-	  flush();
+    LOG.debug("Datastore closed.");
+    flush();
   }
 }

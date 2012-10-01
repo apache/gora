@@ -24,7 +24,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.apache.avro.Schema;
-import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.sql.store.Column;
 import org.apache.gora.sql.store.SqlMapping;

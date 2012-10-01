@@ -77,18 +77,18 @@ public class GoraDynamoDBTestDriver extends GoraTestDriver {
    */
   public GoraDynamoDBTestDriver() {
     super(DynamoDBStore.class);
-	try {
-	  AWSCredentials credentials;
-	  File file = new File(awsCredentialsPath + awsCredentialsFile);
-	  credentials = new PropertiesCredentials(file);
-	  auth = credentials;
-	} catch (FileNotFoundException e) {
-	  e.printStackTrace();
-	} catch (IllegalArgumentException e) {
-	  e.printStackTrace();
-	} catch (IOException e) {
-	  e.printStackTrace();
-	}
+    try {
+      AWSCredentials credentials;
+      File file = new File(awsCredentialsPath + awsCredentialsFile);
+      credentials = new PropertiesCredentials(file);
+      auth = credentials;
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    } catch (IllegalArgumentException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   /**
@@ -118,7 +118,7 @@ public class GoraDynamoDBTestDriver extends GoraTestDriver {
   protected DataStore<DynamoDBKey, person> createDataStore() throws IOException {
     if(personStore == null)
       personStore = WSDataStoreFactory.createDataStore(DynamoDBStore.class, 
-    		  DynamoDBKey.class,person.class, auth);
+        DynamoDBKey.class,person.class, auth);
       return personStore;
   }
   
@@ -128,10 +128,9 @@ public class GoraDynamoDBTestDriver extends GoraTestDriver {
   @SuppressWarnings("unchecked")
   public<K, T extends Persistent> DataStore<K,T>
     createDataStore(Class<K> keyClass, Class<T> persistentClass) throws GoraException {
-	personStore = (DynamoDBStore<DynamoDBKey, person>) WSDataStoreFactory.createDataStore(
+      personStore = (DynamoDBStore<DynamoDBKey, person>) WSDataStoreFactory.createDataStore(
         (Class<? extends DataStore<K,T>>)dataStoreClass, keyClass, persistentClass, auth);
-    dataStores.add(personStore);
-
+      dataStores.add(personStore);
     return (DataStore<K, T>) personStore;
   }
   
@@ -140,15 +139,15 @@ public class GoraDynamoDBTestDriver extends GoraTestDriver {
    * @return
    */
   public DataStore<DynamoDBKey, person> getDataStore(){
-	try {
-	  if(personStore != null)
-	    return personStore;
-	  else
-		return createDataStore();
-	} catch (IOException e) {
-		e.printStackTrace();
-		return null;
-	}
+    try {
+      if(personStore != null)
+        return personStore;
+      else
+        return createDataStore();
+    } catch (IOException e) {
+      e.printStackTrace();
+      return null;
+    }
   }
 
   /**
@@ -172,7 +171,7 @@ public class GoraDynamoDBTestDriver extends GoraTestDriver {
    * @return
    */
   public Object getAuth() {
-      return auth;
+    return auth;
   }
   
   /**
@@ -189,16 +188,16 @@ public class GoraDynamoDBTestDriver extends GoraTestDriver {
    * @return
    */
   public TableDescription checkResource(String tableName){
-  	TableDescription tableDescription = null;
+    TableDescription tableDescription = null;
   	
-  	try{
-  		DescribeTableRequest describeTableRequest = new DescribeTableRequest().withTableName(tableName);
-  		tableDescription = dynamoDBClient.describeTable(describeTableRequest).getTable();
-  	}
-  	catch(ResourceNotFoundException e){
-  		tableDescription = null;
-  	}
+    try{
+      DescribeTableRequest describeTableRequest = new DescribeTableRequest().withTableName(tableName);
+      tableDescription = dynamoDBClient.describeTable(describeTableRequest).getTable();
+    }
+    catch(ResourceNotFoundException e){
+      tableDescription = null;
+    }
       
-  	return tableDescription;
+    return tableDescription;
   }
 }

@@ -27,7 +27,6 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.gora.dynamodb.store.DynamoDBMapping;
 import org.apache.gora.dynamodb.store.DynamoDBMapping.DynamoDBMappingBuilder;
@@ -37,7 +36,6 @@ import org.jdom.input.SAXBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.amazonaws.services.dynamodb.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodb.model.KeySchema;
 import com.amazonaws.services.dynamodb.model.KeySchemaElement;
 
@@ -362,28 +360,28 @@ public class GoraDynamoDBCompiler {
       List<Element> tableElements = root.getChildren("table");
       for(Element tableElement : tableElements) {
     	  
-    	String tableName = tableElement.getAttributeValue("name");
-    	long readCapacUnits = Long.parseLong(tableElement.getAttributeValue("readcunit"));
-    	long writeCapacUnits = Long.parseLong(tableElement.getAttributeValue("readcunit"));
+      String tableName = tableElement.getAttributeValue("name");
+      long readCapacUnits = Long.parseLong(tableElement.getAttributeValue("readcunit"));
+      long writeCapacUnits = Long.parseLong(tableElement.getAttributeValue("readcunit"));
     	
-    	mappingBuilder.setTableName(tableName);
-    	mappingBuilder.setProvisionedThroughput(tableName, readCapacUnits, writeCapacUnits);
-    	log.debug("Basic table properties have been set: Name, and Provisioned throughput.");
+      mappingBuilder.setTableName(tableName);
+      mappingBuilder.setProvisionedThroughput(tableName, readCapacUnits, writeCapacUnits);
+      log.debug("Basic table properties have been set: Name, and Provisioned throughput.");
     	
-    	// Retrieving key's features
-    	List<Element> fieldElements = tableElement.getChildren("key");
-    	for(Element fieldElement : fieldElements) {
-    	  String keyName  = fieldElement.getAttributeValue("name");
-    	  String keyType  = fieldElement.getAttributeValue("type");
-    	  String keyAttrType  = fieldElement.getAttributeValue("att-type");
-    	  if(keyType.equals("hash"))
-    	    mappingBuilder.setHashKeySchema(tableName, keyName, keyAttrType);
-    	  else if(keyType.equals("hashrange"))
-    	    mappingBuilder.setHashRangeKeySchema(tableName, keyName, keyAttrType);
-    	}
-    	log.debug("Table key schemas have been set.");
+      // Retrieving key's features
+      List<Element> fieldElements = tableElement.getChildren("key");
+      for(Element fieldElement : fieldElements) {
+        String keyName  = fieldElement.getAttributeValue("name");
+        String keyType  = fieldElement.getAttributeValue("type");
+        String keyAttrType  = fieldElement.getAttributeValue("att-type");
+        if(keyType.equals("hash"))
+          mappingBuilder.setHashKeySchema(tableName, keyName, keyAttrType);
+        else if(keyType.equals("hashrange"))
+          mappingBuilder.setHashRangeKeySchema(tableName, keyName, keyAttrType);
+      }
+      log.debug("Table key schemas have been set.");
     	
-    	// Retrieving attributes
+      // Retrieving attributes
         fieldElements = tableElement.getChildren("attribute");
         for(Element fieldElement : fieldElements) {
           String attributeName  = fieldElement.getAttributeValue("name");
