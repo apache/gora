@@ -48,12 +48,14 @@ Data store implementation in Gora distribution include:</p>
 <p><br/><table>
   <caption>DataStore implementations</caption>
   <tr><th align="left">DataStore Implementation</th> <th align="left">Full Class Name</th> <th align="left">Module Name</th> <th align="left">Explanation</th></tr>
-  <tr><td>AvroStore</td> <td>org.apache.gora.avro.store.AvroStore</td> <td>gora-core</td> <td>An adapter DataStore for binary-compatible Avro serializations. AvroDataStore supports Binary and JSON serializations. </td></tr>
-  <tr><td>DataFileAvroStore</td> <td>org.apache.gora.avro.store.DataFileAvroStore</td> <td>gora-core</td> <td>DataFileAvroStore is file based store which uses Avro's DataFile{Writer,Reader}'s as a backend. This datastore supports mapreduce.</td></tr>
-  <tr><td>HBaseStore</td> <td>org.apache.gora.hbase.store.HBaseStore</td> <td><a href="site:gora-hbase">gora-hbase</a></td> <td> DataStore for <a href="ext:hbase">HBase</a>. </td></tr>
-  <tr><td>CassandraStore</td> <td>org.apache.gora.cassandra.store.CasssandraStore</td> <td><a href="site:gora-cassandra">gora-cassandra</a></td> <td> DataStore for <a href="ext:cassandra">Cassandra</a>. </td></tr>
-  <tr><td>SqlStore</td> <td>org.apache.gora.sql.store.SqlStore</td> <td><a href="site:gora-sql">gora-sql</a></td> <td> A DataStore implementation for RDBMS with a SQL interface. SqlStore uses JDBC drivers to communicate with the DB. Mysql and Hsqldb are supported for now.</td></tr>
-  <tr><td>MemStore</td> <td>org.apache.gora.memory.store.MemStore</td> <td>gora-core</td> <td> Memory based DataStore implementation for tests. </td></tr>
+  <tr><td>AvroStore</td> <td>org.apache.gora.avro.store.AvroStore</td> <td><a href="site:gora-core">gora-core</a></td> <td>An adapter DataStore for binary-compatible Apache Avro serializations. AvroDataStore supports Binary and JSON serializations. </td></tr>
+  <tr><td>DataFileAvroStore</td> <td>org.apache.gora.avro.store.DataFileAvroStore</td> <td><a href="site:gora-core">gora-core</a></td> <td>DataFileAvroStore is file based store which uses Avro's DataFile{Writer,Reader}'s as a backend. This datastore supports mapreduce.</td></tr>
+  <tr><td>AccumuloStore</td> <td>org.apache.gora.accumulo.store.AccumuloStore</td> <td><a href="site:gora-accumulo">gora-accumulo</a></td> <td> DataStore for <a href="ext:accumulo">Apache Accumulo</a>. </td></tr>
+  <tr><td>HBaseStore</td> <td>org.apache.gora.hbase.store.HBaseStore</td> <td><a href="site:gora-hbase">gora-hbase</a></td> <td> DataStore for <a href="ext:hbase">Apache HBase</a>. </td></tr>
+  <tr><td>CassandraStore</td> <td>org.apache.gora.cassandra.store.CasssandraStore</td> <td><a href="site:gora-cassandra">gora-cassandra</a></td> <td> DataStore for <a href="ext:cassandra">Apache Cassandra</a>. </td></tr>
+  <tr><td>SqlStore</td> <td>org.apache.gora.sql.store.SqlStore</td> <td><a href="site:gora-sql">gora-sql</a></td> <td> A DataStore implementation for RDBMS with a SQL interface. SqlStore uses JDBC drivers to communicate with the DB. <a href="http://www.mysql.com/">Mysql</a> and <a href="http://hsqldb.org/">Hsqldb</a> are supported for now.</td></tr>
+  <tr><td>MemStore</td> <td>org.apache.gora.memory.store.MemStore</td> <td><a href="site:gora-core">gora-core</a></td> <td> Memory based DataStore implementation for tests. </td></tr>
+  <tr><td>Dynamodb</td> <td>org.apache.gora.dynamodb.store.DyanmoDBStore</td> <td><a href="site:gora-dynamodb">gora-dynamodb</a></td> <td> Webservices-based datastore implementation for <a href="ext:dynamodb">Amazon's DynamoDB</a>. </td></tr>
 </table><br/></p>
 
 <p>Some of the properties can be customized per datastore. The format of these 
@@ -69,23 +71,24 @@ to all data stores. The following properties can be set per data store.</p>
   <tr><th align="left">Property</th> <th align="left">Required</th> <th align="left">Default</th> <th align="left">Explanation</th></tr>
 
   <tr><td>gora.&lt;data_store_class&gt;.autocreateschema</td> <td>No</td> <td>true</td> <td>Whether to create schemas automatically for the specific data store</td></tr>
-  <tr><td>gora.&lt;data_store_class&gt;.mapping.file</td> <td>No</td> <td>gora-{hbase|cassandra|sql}-mapping.xml</td> <td>The name of the mapping file</td></tr>
+  <tr><td>gora.&lt;data_store_class&gt;.mapping.file</td> <td>No</td> <td>gora-{accumulo|hbase|cassandra|sql|dynamodb}-mapping.xml</td> <td>The name of the mapping file</td></tr>
 </table><br/></p>
 
 <p> </p>
 
   </section>
 
-  <!--TODO: Avro data store properties -->
-
   <section>
     <title>Data store specific settings</title>
     <p> Other than the properties above, some of the data stores have their 
     own configurations. These properties are listed at the module documentations:
     <ul>
+      <li><a href="site:gora-core">Gora Core Module (incl. AvroStore, DataFileAvroStore and MemStore)</a></li>
       <li><a href="site:gora-hbase">Gora HBase Module</a></li>
       <li><a href="site:gora-cassandra">Gora Cassandra Module</a></li>
       <li><a href="site:gora-sql">Gora SQL Module</a></li>
+      <li><a href="site:gora-hbase">Gora Accumulo Module</a></li>
+      <li><a href="site:gora-dynamodb">Gora DynamoDB Module</a></li>
     </ul>
     </p>
   </section>

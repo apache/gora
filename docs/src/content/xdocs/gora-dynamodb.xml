@@ -20,16 +20,15 @@
 
 <document>
   <header>
-    <title>Gora SQL Module</title>
+    <title>Gora DynamoDB Module</title>
   </header>
   
   <body>
 
   <section>
     <title> Overview </title>
-    <p> This is the main documentation for the <b>gora-sql</b> module. gora-sql 
-     module enables SQL backend support for Gora. Currently MySQL and HSQLDB is supported.
-    </p>
+    <p> This is the main documentation for the <b>gora-dynamodb</b> module. gora-dynamodb 
+     module enables <a href="ext:dynamodb">Amazon DynamoDB</a> backend support for Gora. </p>
   </section>
 
   <section>
@@ -39,7 +38,7 @@
 
 
   <section>
-    <title> Gora SQL mappings </title>
+    <title> Gora DynamoDB mappings </title>
     <p> Coming soon </p>
   </section>
 
