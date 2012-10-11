@@ -29,8 +29,29 @@
     <p> This is the main documentation for the <b>gora-core</b> module. gora-core 
     holds most of the core functionality for the gora project. Every module 
     in gora depends on gora-core. Therefore most of the generic documentation 
-    about the project is gathered here. 
+    about the project is gathered here as well as the documentation for AvroStore, 
+    DataFileAvroStore and MemStore. In addition to this gora-core holds all of the 
+    core MapReduce, Persistency, Query and Base DataStore and Utility functionality
+    which is also documented here.
     </p>
+  </section>
+  
+  <section>
+    <title> gora.properties </title>
+    <p>To configure the <b>AvroStore</b> one would typically set the following:<br/>
+    <code>gora.avrostore.output.path=<i>hdfs://uri/path/to/hdfs/data/directory | file:///uri/path/to/local/data/directory</i></code> - This value should point to the hdfs data directory (if running Gora in a distributed Hadoop environment) or to some location on the local file system (if running Gora locally).<br/> 
+    <code>gora.avrostore.xxx=xxx</code> - xyz</p>
+    <p>To configure the <b>DataFileAvroStore</b> one would typically set the following:<br/>
+    <code>gora.datafileavrostore.xxx=xxx</code> - xyz<br/> 
+    <code>gora.datafileavrostore.xxx=xxx</code> - xyz</p>
+    <p>To configure the <b>MemStore</b> one would typically set the following:<br/>
+    <code>gora.memstore.xxx=xxx</code> - xyz</p>
+  </section>
+
+
+  <section>
+    <title> Gora Core mappings </title>
+    <p> In the stores covered within the gora-core module, no physical mappings are required. </p>
   </section>
 
   
