@@ -176,6 +176,15 @@
         <role>PMC Member</role>
       </roles>
     </developer>
+    <developer>
+      <id>rmarroquin</id>
+      <name>Renato Marroquin</name>
+      <email>rmarroquin [at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
   </developers>
 
   <mailingLists>
