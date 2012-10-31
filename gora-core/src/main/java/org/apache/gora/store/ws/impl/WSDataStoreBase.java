@@ -20,6 +20,7 @@
  */
 package org.apache.gora.store.ws.impl;
 
+import java.io.IOException;
 import java.util.Properties;
 
 import org.apache.gora.persistency.Persistent;
@@ -68,7 +69,7 @@ implements DataStore<K, T>{
    * Initializes the web services backed data store
    */
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
-      Properties properties) throws Exception {
+      Properties properties) {
     setKeyClass(keyClass);
     setPersistentClass(persistentClass);
   }
@@ -149,7 +150,7 @@ implements DataStore<K, T>{
 
   @Override
   /** Default implementation deletes and recreates the schema*/
-  public void truncateSchema() throws Exception {
+  public void truncateSchema() {
     deleteSchema();
     createSchema();
   }

@@ -139,8 +139,8 @@ public class DynamoDBQuery<K, T extends Persistent> extends QueryWSBase<K, T> {
       Condition newCondition = buildRangeCondition();
       buildQueryExpression(newCondition, hashAttrValue);
     }
-	if (DynamoDBQuery.getType().equals(SCAN_QUERY))
-	  buildScanExpression(hashAttrValue);
+    if (DynamoDBQuery.getType().equals(SCAN_QUERY))
+      buildScanExpression(hashAttrValue);
   }
 	
   /**

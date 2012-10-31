@@ -38,9 +38,10 @@ public abstract class WSBackedDataStoreBase<K, T extends Persistent>
   @Override
   /**
    * Initializes a web service backed data store
+   * @throws IOException
    */
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
-      Properties properties) throws Exception {
+      Properties properties) {
     super.initialize(keyClass, persistentClass, properties);
   }
 
@@ -48,9 +49,13 @@ public abstract class WSBackedDataStoreBase<K, T extends Persistent>
   /**
    * Executes a query inside a web service backed data store
    */
-  public Result<K, T> execute(Query<K, T> query) throws Exception {
-    // TODO We could have different types of execution {@link FileBackedDataStoreBase}
-    return executeQuery(query);
+  public Result<K, T> execute(Query<K, T> query) {
+    try {
+      return executeQuery(query);
+    } catch (IOException e) {
+      e.printStackTrace();
+      return null;
+    }
   }
 
   /**
@@ -58,27 +63,27 @@ public abstract class WSBackedDataStoreBase<K, T extends Persistent>
    * for non-PartitionQuery's.
    */
   protected abstract Result<K,T> executeQuery(Query<K,T> query)
-    throws Exception;
+    throws IOException;
 
   @Override
   /**
    * Flushes objects into the data store
    */
-  public void flush() throws Exception {
+  public void flush() {
   }
 
   @Override
   /**
    * Creates schema into the data store
    */
-  public void createSchema() throws Exception{
+  public void createSchema() {
   }
 
   @Override
   /**
    * Deletes schema from the data store
    */
-  public void deleteSchema() throws Exception {
+  public void deleteSchema() {
     throw new OperationNotSupportedException("delete schema is not supported for " +
     		"file backed data stores");
   }
@@ -87,7 +92,7 @@ public abstract class WSBackedDataStoreBase<K, T extends Persistent>
   /**
    * Verifies if a schema exists
    */
-  public boolean schemaExists() throws Exception {
+  public boolean schemaExists() {
     return true;
   }
 
@@ -111,6 +116,6 @@ public abstract class WSBackedDataStoreBase<K, T extends Persistent>
   /**
    * Closes the data store
    */
-  public void close() throws IOException, InterruptedException, Exception {
+  public void close() {
   }
 }

@@ -158,7 +158,7 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
    * setting the client's properties up, setting the end point and reading the mapping file  
    */
   public void initialize(Class<K> keyClass, Class<T> pPersistentClass,
-       Properties properties) throws Exception {
+       Properties properties) {
     try {
       LOG.debug("Initializing DynamoDB store");
       getCredentials();
@@ -172,7 +172,8 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
     }
     catch (Exception e) {
       LOG.error("Error while initializing DynamoDB store");
-      throw new IOException(e.getMessage(), e);
+      LOG.error(e.getMessage());
+      LOG.error(e.getStackTrace().toString());
     }
   }
   
@@ -209,7 +210,7 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
 
       List<Element> tableElements = root.getChildren("table");
       for(Element tableElement : tableElements) {
-    	  
+    
         String tableName = tableElement.getAttributeValue("name");
         long readCapacUnits = Long.parseLong(tableElement.getAttributeValue("readcunit"));
         long writeCapacUnits = Long.parseLong(tableElement.getAttributeValue("readcunit"));
@@ -267,8 +268,8 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
     
   if(authentication == null){
     InputStream awsCredInpStr = getClass().getClassLoader().getResourceAsStream(awsCredentialsProperties);
-      if (awsCredInpStr == null)
-        LOG.info("AWS Credentials File was not found on the classpath!");
+    if (awsCredInpStr == null)
+      LOG.info("AWS Credentials File was not found on the classpath!");
       AWSCredentials credentials = new PropertiesCredentials(awsCredInpStr);
       setConf(credentials);
   }
@@ -307,7 +308,7 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
    * Executes a query after building a DynamoDB specific query based on the received one
    */
   @Override
-  public Result<K, T> execute(Query<K, T> query) throws Exception {
+  public Result<K, T> execute(Query<K, T> query) {
     DynamoDBQuery<K, T> dynamoDBQuery = buildDynamoDBQuery(query);
     DynamoDBMapper mapper = new DynamoDBMapper(dynamoDBClient);
     List<T> objList = null;
@@ -319,7 +320,7 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
   }
   
   @Override
-  public T get(K key, String[] fields) throws Exception {
+  public T get(K key, String[] fields) {
    /* DynamoDBQuery<K,T> query = new DynamoDBQuery<K,T>();
     query.setDataStore(this);
     //query.setKeyRange(key, key);
@@ -331,22 +332,36 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
     return null;
   }
 
+  @Override
   /**
    * Gets the object with the specific key
+   * @throws IOException
    */
-  public T get(K key) throws Exception {
+  public T get(K key) {
     T object = null;
-    Object rangeKey = getRangeKey(key);
-    Object hashKey = getHashKey(key);
-    if (hashKey != null){
-      DynamoDBMapper mapper = new DynamoDBMapper(dynamoDBClient);
-      if (rangeKey != null)
+    try {
+      Object rangeKey;
+      rangeKey = getRangeKey(key);
+      Object hashKey = getHashKey(key);
+      if (hashKey != null){
+        DynamoDBMapper mapper = new DynamoDBMapper(dynamoDBClient);
+       if (rangeKey != null)
         object = mapper.load(persistentClass, hashKey, rangeKey);
       else
         object = mapper.load(persistentClass, hashKey);
+      }
+      else
+        throw new GoraException("Error while retrieving keys from object: " + key.toString());
+    } catch (IllegalArgumentException e) {
+      e.printStackTrace();
+    } catch (IllegalAccessException e) {
+      e.printStackTrace();
+    } catch (InvocationTargetException e) {
+      e.printStackTrace();
+    } catch (GoraException ge){
+      LOG.error(ge.getMessage());
+      LOG.error(ge.getStackTrace().toString());
     }
-    else
-      throw new GoraException("Error while retrieving keys from object: " + key.toString());
     return object;
   }
     
@@ -379,8 +394,10 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
   /**
    * Creates the table within the data store for a preferred schema or 
    * for a group of schemas defined withing the mapping file
+   * @throws IOException
    */
-  public void createSchema() throws Exception {
+  @Override
+  public void createSchema() {
     LOG.info("Creating schema");
     if (mapping.getTables().isEmpty())	throw new IllegalStateException("There are not tables defined.");
     if (preferredSchema == null){
@@ -428,8 +445,10 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
   
   /**
    * Deletes all tables present in the mapping object.
+   * @throws IOException
    */
-  public void deleteSchema() throws Exception {
+  @Override
+  public void deleteSchema() {
     if (mapping.getTables().isEmpty())	throw new IllegalStateException("There are not tables defined.");
     if (preferredSchema == null){
       LOG.debug("Delete schemas");
@@ -511,8 +530,10 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
 
   /**
    * Verifies if the specified schemas exist
+   * @throws IOException
    */
-  public boolean schemaExists() throws Exception {
+  @Override
+  public boolean schemaExists() {
     LOG.info("Verifying schemas.");
   TableDescription success = null;
   if (mapping.getTables().isEmpty())	throw new IllegalStateException("There are not tables defined.");
@@ -550,24 +571,41 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
     }
     return tableDescription;
   }
-  
-  public K newKey() throws Exception {
+  /**
+   * Returns a new instance of the key object.
+   * @throws IOException
+   */
+  @Override
+  public K newKey() {
     // TODO Auto-generated method stub
     return null;
   }
 
   /**
    * Returns a new persistent object
+   * @throws IOException
    */
-  public T newPersistent() throws Exception {
-    T obj = persistentClass.newInstance();
+  @Override
+  public T newPersistent() {
+    T obj = null;
+    try {
+      obj = persistentClass.newInstance();
+    } catch (InstantiationException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (IllegalAccessException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
     return obj;
   }
 
   /**
    * Puts an object identified by a key
+   * @throws IOException
    */
-  public void put(K key, T obj) throws Exception {
+  @Override
+  public void put(K key, T obj) {
     try{
       Object rangeKey = getRangeKey(key);
       Object hashKey = getHashKey(key);
@@ -589,14 +627,19 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
     }catch(NullPointerException npe){
       LOG.error("Error while putting an item. " + npe.toString());
       npe.printStackTrace();
+    }catch(Exception e){
+      LOG.error("Error while putting an item. " + obj.toString());
+      e.printStackTrace();
     }
   }
 
   /**
    * Deletes the object using key
    * @return true for a successful process  
+   * @throws IOException
    */
-  public boolean delete(K key) throws Exception {
+  @Override
+  public boolean delete(K key) {
     try{
       T object = null;
       Object rangeKey = null, hashKey = null;
@@ -635,9 +678,11 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
   
   /**
    * Deletes items using a specific query
+   * @throws IOException
    */
+  @Override
   @SuppressWarnings("unchecked")
-  public long deleteByQuery(Query<K, T> query) throws Exception {
+  public long deleteByQuery(Query<K, T> query) {
     // TODO verify whether or not we are deleting a whole row
     //String[] fields = getFieldsToQuery(query.getFields());
     //find whether all fields are queried, which means that complete
@@ -646,15 +691,27 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
     //    , getBeanFactory().getCachedPersistent().getFields());
     Result<K, T> result = execute(query);
     ArrayList<T> deletes = new ArrayList<T>();
-    while(result.next()) {
-      T resultObj = result.get(); 
-      deletes.add(resultObj);
-      
-      @SuppressWarnings("rawtypes")
-      DynamoDBKey dKey = new DynamoDBKey();
-      dKey.setHashKey(getHashKey(resultObj));
-      dKey.setRangeKey(getRangeKey(resultObj));
-      delete((K)dKey);
+    try {
+      while(result.next()) {
+        T resultObj = result.get(); 
+        deletes.add(resultObj);
+        
+        @SuppressWarnings("rawtypes")
+        DynamoDBKey dKey = new DynamoDBKey();
+        
+          dKey.setHashKey(getHashKey(resultObj));
+        
+        dKey.setRangeKey(getRangeKey(resultObj));
+        delete((K)dKey);
+      }
+    } catch (IllegalArgumentException e) {
+      e.printStackTrace();
+    } catch (IllegalAccessException e) {
+      e.printStackTrace();
+    } catch (InvocationTargetException e) {
+      e.printStackTrace();
+    } catch (Exception e) {
+      e.printStackTrace();
     }
     return deletes.size();
   }
@@ -743,8 +800,12 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
     // TODO Auto-generated method stub
     return null;
   }
-
-  public void flush() throws Exception {
+  @Override
+  /**
+   * flushes objects to DynamoDB
+   * @throws IOException
+   */
+  public void flush() {
     // TODO Auto-generated method stub
   }
 
@@ -757,10 +818,11 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
     return null;
   }
 
+  @Override
   /**
    * Closes the data store.
    */
-  public void close() throws IOException, InterruptedException, Exception {
+  public void close() {
     LOG.debug("Datastore closed.");
     flush();
   }

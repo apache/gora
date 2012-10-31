@@ -78,18 +78,18 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
     // this.cassandraClient.initialize();
   }
 
-  public void initialize(Class<K> keyClass, Class<T> persistent, Properties properties) throws IOException {
-    super.initialize(keyClass, persistent, properties);
+  public void initialize(Class<K> keyClass, Class<T> persistent, Properties properties) {
     try {
+      super.initialize(keyClass, persistent, properties);
       this.cassandraClient.initialize(keyClass, persistent);
-    }
-    catch (Exception e) {
-      throw new IOException(e.getMessage(), e);
+    } catch (Exception e) {
+      LOG.error(e.getMessage());
+      LOG.error(e.getStackTrace().toString());
     }
   }
 
   @Override
-  public void close() throws IOException {
+  public void close() {
     LOG.debug("close");
     flush();
   }
@@ -101,25 +101,25 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
   }
 
   @Override
-  public boolean delete(K key) throws IOException {
+  public boolean delete(K key) {
     LOG.debug("delete " + key);
     return false;
   }
 
   @Override
-  public long deleteByQuery(Query<K, T> query) throws IOException {
+  public long deleteByQuery(Query<K, T> query) {
     LOG.debug("delete by query " + query);
     return 0;
   }
 
   @Override
-  public void deleteSchema() throws IOException {
+  public void deleteSchema() {
     LOG.debug("delete schema");
     this.cassandraClient.dropKeyspace();
   }
 
   @Override
-  public Result<K, T> execute(Query<K, T> query) throws IOException {
+  public Result<K, T> execute(Query<K, T> query) {
     
     Map<String, List<String>> familyMap = this.cassandraClient.getFamilyMap(query);
     Map<String, String> reverseMap = this.cassandraClient.getReverseMap(query);
@@ -207,7 +207,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
    * @see org.apache.gora.store.DataStore#flush()
    */
   @Override
-  public void flush() throws IOException {
+  public void flush() {
     
     Set<K> keys = this.buffer.keySet();
     
@@ -236,14 +236,20 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
   }
 
   @Override
-  public T get(K key, String[] fields) throws IOException, Exception {
+  public T get(K key, String[] fields) {
     CassandraQuery<K,T> query = new CassandraQuery<K,T>();
     query.setDataStore(this);
     query.setKeyRange(key, key);
     query.setFields(fields);
     query.setLimit(1);
     Result<K,T> result = execute(query);
-    boolean hasResult = result.next();
+    boolean hasResult = false;
+    try {
+      hasResult = result.next();
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
     return hasResult ? result.get() : null;
   }
 
@@ -262,7 +268,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
    */
   @Override
   public String getSchemaName() {
-	return this.cassandraClient.getKeyspaceName();
+    return this.cassandraClient.getKeyspaceName();
   }
 
   @Override
@@ -277,7 +283,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
    * @see org.apache.gora.store.DataStore#put(java.lang.Object, org.apache.gora.persistency.Persistent)
    */
   @Override
-  public void put(K key, T value) throws IOException {
+  public void put(K key, T value) {
     T p = (T) value.newInstance(new StateManagerImpl());
     Schema schema = value.getSchema();
     for (Field field: schema.getFields()) {
@@ -389,7 +395,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
   }
 
   @Override
-  public boolean schemaExists() throws IOException {
+  public boolean schemaExists() {
     LOG.info("schema exists");
     return cassandraClient.keyspaceExists();
   }

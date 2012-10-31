@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.gora.avro.store.AvroStore;
 import org.apache.gora.mapreduce.GoraMapReduceUtils;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
@@ -42,6 +43,8 @@ import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base implementations for {@link FileBackedDataStore} methods.
@@ -56,10 +59,12 @@ public abstract class FileBackedDataStoreBase<K, T extends PersistentBase>
 
   protected InputStream inputStream;
   protected OutputStream outputStream;
+  
+  public static final Logger LOG = LoggerFactory.getLogger(AvroStore.class);
 
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
-      Properties properties) throws IOException {
+      Properties properties) {
     super.initialize(keyClass, persistentClass, properties);
     if(properties != null) {
       if(this.inputPath == null) {
@@ -122,17 +127,28 @@ public InputStream getInputStream() {
   }
 
   /** Opens an OutputStream for the output Hadoop path */
-  protected OutputStream createOutputStream() throws IOException {
-    Path path = new Path(outputPath);
-    FileSystem fs = path.getFileSystem(getConf());
-    return fs.create(path);
+  protected OutputStream createOutputStream() {
+    OutputStream conf = null;
+    try{
+      Path path = new Path(outputPath);
+      FileSystem fs = path.getFileSystem(getConf());
+      conf = fs.create(path);
+    }catch(IOException ex){
+      LOG.error(ex.getMessage());
+      LOG.error(ex.getStackTrace().toString());
+    }
+    return conf;
   }
 
   protected InputStream getOrCreateInputStream() throws IOException {
-    if(inputStream == null) {
-      inputStream = createInputStream();
+    try{
+      if(inputStream == null) {
+        inputStream = createInputStream();
+      }
+      return inputStream;
+    }catch(IOException ex){
+      throw new IOException(ex);
     }
-    return inputStream;
   }
 
   protected OutputStream getOrCreateOutputStream() throws IOException {
@@ -143,25 +159,37 @@ public InputStream getInputStream() {
   }
 
   @Override
-  public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query)
-      throws IOException {
-    List<InputSplit> splits = GoraMapReduceUtils.getSplits(getConf(), inputPath);
-    List<PartitionQuery<K, T>> queries = new ArrayList<PartitionQuery<K,T>>(splits.size());
-
-    for(InputSplit split : splits) {
-      queries.add(new FileSplitPartitionQuery<K, T>(query, (FileSplit) split));
+  public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query){
+    List<InputSplit> splits = null;
+    List<PartitionQuery<K, T>> queries = null;
+    try{
+      splits = GoraMapReduceUtils.getSplits(getConf(), inputPath);
+      queries = new ArrayList<PartitionQuery<K,T>>(splits.size());
+  
+      for(InputSplit split : splits) {
+        queries.add(new FileSplitPartitionQuery<K, T>(query, (FileSplit) split));
+      }
+    }catch(IOException ex){
+      LOG.error(ex.getMessage());
+      LOG.error(ex.getStackTrace().toString());
     }
-
     return queries;
   }
 
   @Override
-  public Result<K, T> execute(Query<K, T> query) throws IOException {
-    if(query instanceof FileSplitPartitionQuery) {
-      return executePartial((FileSplitPartitionQuery<K, T>) query);
-    } else {
-      return executeQuery(query);
+  public Result<K, T> execute(Query<K, T> query) {
+    Result<K, T> results = null;
+    try{
+      if(query instanceof FileSplitPartitionQuery) {
+        results = executePartial((FileSplitPartitionQuery<K, T>) query);
+      } else {
+        results = executeQuery(query);
+      }
+    }catch(IOException ex){
+      LOG.error(ex.getMessage());
+      LOG.error(ex.getStackTrace().toString());
     }
+    return results;
   }
 
   /**
@@ -178,51 +206,66 @@ public InputStream getInputStream() {
     throws IOException;
 
   @Override
-  public void flush() throws IOException {
-    if(outputStream != null)
-      outputStream.flush();
+  public void flush() {
+    try{
+      if(outputStream != null)
+        outputStream.flush();
+    }catch(IOException ex){
+      LOG.error(ex.getMessage());
+      LOG.error(ex.getStackTrace().toString());
+    }
   }
 
   @Override
-  public void createSchema() throws IOException {
+  public void createSchema() {
   }
 
   @Override
-  public void deleteSchema() throws IOException {
+  public void deleteSchema() {
     throw new OperationNotSupportedException("delete schema is not supported for " +
     		"file backed data stores");
   }
 
   @Override
-  public boolean schemaExists() throws IOException {
+  public boolean schemaExists() {
     return true;
   }
 
   @Override
-  public void write(DataOutput out) throws IOException {
-    super.write(out);
-    org.apache.gora.util.IOUtils.writeNullFieldsInfo(out, inputPath, outputPath);
-    if(inputPath != null)
-      Text.writeString(out, inputPath);
-    if(outputPath != null)
-      Text.writeString(out, outputPath);
+  public void write(DataOutput out) {
+    try{
+      super.write(out);
+      org.apache.gora.util.IOUtils.writeNullFieldsInfo(out, inputPath, outputPath);
+      if(inputPath != null)
+        Text.writeString(out, inputPath);
+      if(outputPath != null)
+        Text.writeString(out, outputPath);
+    }catch(IOException ex){
+      LOG.error(ex.getMessage());
+      LOG.error(ex.getStackTrace().toString());
+    }
   }
 
   @Override
-  public void readFields(DataInput in) throws IOException {
-    super.readFields(in);
-    boolean[] nullFields = org.apache.gora.util.IOUtils.readNullFieldsInfo(in);
-    if(!nullFields[0])
-      inputPath = Text.readString(in);
-    if(!nullFields[1])
-      outputPath = Text.readString(in);
+  public void readFields(DataInput in) {
+    try{
+      super.readFields(in);
+      boolean[] nullFields = org.apache.gora.util.IOUtils.readNullFieldsInfo(in);
+      if(!nullFields[0])
+        inputPath = Text.readString(in);
+      if(!nullFields[1])
+        outputPath = Text.readString(in);
+    }catch(IOException ex){
+      LOG.error(ex.getMessage());
+      LOG.error(ex.getStackTrace().toString());
+    }
   }
 
   @Override
-  public void close() throws IOException {
-    IOUtils.closeStream(inputStream);
-    IOUtils.closeStream(outputStream);
-    inputStream = null;
-    outputStream = null;
+  public void close() {
+      IOUtils.closeStream(inputStream);
+      IOUtils.closeStream(outputStream);
+      inputStream = null;
+      outputStream = null;
   }
 }

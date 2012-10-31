@@ -97,6 +97,8 @@ import org.apache.hadoop.io.Text;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -115,6 +117,8 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
   private AccumuloMapping mapping;
   private AuthInfo authInfo;
   private Encoder encoder;
+  
+  public static final Logger LOG = LoggerFactory.getLogger(AccumuloStore.class);
   
   public Object fromBytes(Schema schema, byte data[]) {
     return fromBytes(encoder, schema, data);
@@ -233,46 +237,51 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
   }
 
   @Override
-  public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) throws IOException {
-    super.initialize(keyClass, persistentClass, properties);
-
-    String mock = DataStoreFactory.findProperty(properties, this, MOCK_PROPERTY, null);
-    String mappingFile = DataStoreFactory.getMappingFile(properties, this, DEFAULT_MAPPING_FILE);
-    String user = DataStoreFactory.findProperty(properties, this, USERNAME_PROPERTY, null);
-    String password = DataStoreFactory.findProperty(properties, this, PASSWORD_PROPERTY, null);
-    
-    mapping = readMapping(mappingFile);
-
-    if (mapping.encoder == null || mapping.encoder.equals("")) {
-      encoder = new org.apache.gora.accumulo.encoders.BinaryEncoder();
-    } else {
-      try {
-        encoder = (Encoder) getClass().getClassLoader().loadClass(mapping.encoder).newInstance();
-      } catch (InstantiationException e) {
-        throw new IOException(e);
-      } catch (IllegalAccessException e) {
-        throw new IOException(e);
-      } catch (ClassNotFoundException e) {
-        throw new IOException(e);
-      }
-    }
-
-    try {
-      if (mock == null || !mock.equals("true")) {
-        String instance = DataStoreFactory.findProperty(properties, this, INSTANCE_NAME_PROPERTY, null);
-        String zookeepers = DataStoreFactory.findProperty(properties, this, ZOOKEEPERS_NAME_PROPERTY, null);
-        conn = new ZooKeeperInstance(instance, zookeepers).getConnector(user, password);
-        authInfo = new AuthInfo(user, ByteBuffer.wrap(password.getBytes()), conn.getInstance().getInstanceID());
+  public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) {
+    try{
+      super.initialize(keyClass, persistentClass, properties);
+  
+      String mock = DataStoreFactory.findProperty(properties, this, MOCK_PROPERTY, null);
+      String mappingFile = DataStoreFactory.getMappingFile(properties, this, DEFAULT_MAPPING_FILE);
+      String user = DataStoreFactory.findProperty(properties, this, USERNAME_PROPERTY, null);
+      String password = DataStoreFactory.findProperty(properties, this, PASSWORD_PROPERTY, null);
+      
+      mapping = readMapping(mappingFile);
+  
+      if (mapping.encoder == null || mapping.encoder.equals("")) {
+        encoder = new org.apache.gora.accumulo.encoders.BinaryEncoder();
       } else {
-        conn = new MockInstance().getConnector(user, password);
+        try {
+          encoder = (Encoder) getClass().getClassLoader().loadClass(mapping.encoder).newInstance();
+        } catch (InstantiationException e) {
+          throw new IOException(e);
+        } catch (IllegalAccessException e) {
+          throw new IOException(e);
+        } catch (ClassNotFoundException e) {
+          throw new IOException(e);
+        }
       }
-
-      if (autoCreateSchema)
-        createSchema();
-    } catch (AccumuloException e) {
-      throw new IOException(e);
-    } catch (AccumuloSecurityException e) {
-      throw new IOException(e);
+  
+      try {
+        if (mock == null || !mock.equals("true")) {
+          String instance = DataStoreFactory.findProperty(properties, this, INSTANCE_NAME_PROPERTY, null);
+          String zookeepers = DataStoreFactory.findProperty(properties, this, ZOOKEEPERS_NAME_PROPERTY, null);
+          conn = new ZooKeeperInstance(instance, zookeepers).getConnector(user, password);
+          authInfo = new AuthInfo(user, ByteBuffer.wrap(password.getBytes()), conn.getInstance().getInstanceID());
+        } else {
+          conn = new MockInstance().getConnector(user, password);
+        }
+  
+        if (autoCreateSchema)
+          createSchema();
+      } catch (AccumuloException e) {
+        throw new IOException(e);
+      } catch (AccumuloSecurityException e) {
+        throw new IOException(e);
+      }
+    }catch(IOException e){
+      LOG.error(e.getMessage());
+      LOG.error(e.getStackTrace().toString());
     }
   }
   
@@ -341,7 +350,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
   }
   
   @Override
-  public void createSchema() throws IOException {
+  public void createSchema() {
     try {
       conn.tableOperations().create(mapping.tableName);
       Set<Entry<String,String>> es = mapping.tableConfig.entrySet();
@@ -350,32 +359,38 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       }
 
     } catch (AccumuloException e) {
-      throw new IOException(e);
+      LOG.error(e.getMessage());
+      LOG.error(e.getStackTrace().toString());
     } catch (AccumuloSecurityException e) {
-      throw new IOException(e);
+      LOG.error(e.getMessage());
+      LOG.error(e.getStackTrace().toString());
     } catch (TableExistsException e) {
-      return;
+      LOG.error(e.getMessage());
+      LOG.error(e.getStackTrace().toString());
     }
   }
 
   @Override
-  public void deleteSchema() throws IOException {
+  public void deleteSchema() {
     try {
       if (batchWriter != null)
         batchWriter.close();
       batchWriter = null;
       conn.tableOperations().delete(mapping.tableName);
     } catch (AccumuloException e) {
-      throw new IOException(e);
+      LOG.error(e.getMessage());
+      LOG.error(e.getStackTrace().toString());
     } catch (AccumuloSecurityException e) {
-      throw new IOException(e);
+      LOG.error(e.getMessage());
+      LOG.error(e.getStackTrace().toString());
     } catch (TableNotFoundException e) {
-      return;
-    }
+      LOG.error(e.getMessage());
+      LOG.error(e.getStackTrace().toString());
+    } 
   }
 
   @Override
-  public boolean schemaExists() throws IOException {
+  public boolean schemaExists() {
     return conn.tableOperations().exists(mapping.tableName);
   }
 
@@ -475,7 +490,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
   }
 
   @Override
-  public T get(K key, String[] fields) throws IOException {
+  public T get(K key, String[] fields) {
     try {
       // TODO make isolated scanner optional?
       Scanner scanner = new IsolatedScanner(conn.createScanner(mapping.tableName, Constants.NO_AUTHS));
@@ -490,103 +505,115 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         return null;
       return persistent;
     } catch (TableNotFoundException e) {
+      LOG.error(e.getMessage());
+      LOG.error(e.getStackTrace().toString());
+      return null;
+    } catch (IOException e) {
+      LOG.error(e.getMessage());
+      LOG.error(e.getStackTrace().toString());
       return null;
     }
   }
   
   @Override
-  public void put(K key, T val) throws IOException {
+  public void put(K key, T val) {
 
-    Mutation m = new Mutation(new Text(toBytes(key)));
-    
-    Schema schema = val.getSchema();
-    StateManager stateManager = val.getStateManager();
-    
-    Iterator<Field> iter = schema.getFields().iterator();
-    
-    int count = 0;
-    for (int i = 0; iter.hasNext(); i++) {
-      Field field = iter.next();
-      if (!stateManager.isDirty(val, i)) {
-        continue;
-      }
+    try{
+      Mutation m = new Mutation(new Text(toBytes(key)));
       
-      Object o = val.get(i);
-      Pair<Text,Text> col = mapping.fieldMap.get(field.name());
-
-      switch (field.schema().getType()) {
-        case MAP:
-          if (o instanceof StatefulMap) {
-            StatefulMap map = (StatefulMap) o;
-            Set<?> es = map.states().entrySet();
-            for (Object entry : es) {
-              Object mapKey = ((Entry) entry).getKey();
-              State state = (State) ((Entry) entry).getValue();
-
-              switch (state) {
-                case NEW:
-                case DIRTY:
-                  m.put(col.getFirst(), new Text(toBytes(mapKey)), new Value(toBytes(map.get(mapKey))));
-                  count++;
-                  break;
-                case DELETED:
-                  m.putDelete(col.getFirst(), new Text(toBytes(mapKey)));
-                  count++;
-                  break;
+      Schema schema = val.getSchema();
+      StateManager stateManager = val.getStateManager();
+      
+      Iterator<Field> iter = schema.getFields().iterator();
+      
+      int count = 0;
+      for (int i = 0; iter.hasNext(); i++) {
+        Field field = iter.next();
+        if (!stateManager.isDirty(val, i)) {
+          continue;
+        }
+        
+        Object o = val.get(i);
+        Pair<Text,Text> col = mapping.fieldMap.get(field.name());
+  
+        switch (field.schema().getType()) {
+          case MAP:
+            if (o instanceof StatefulMap) {
+              StatefulMap map = (StatefulMap) o;
+              Set<?> es = map.states().entrySet();
+              for (Object entry : es) {
+                Object mapKey = ((Entry) entry).getKey();
+                State state = (State) ((Entry) entry).getValue();
+  
+                switch (state) {
+                  case NEW:
+                  case DIRTY:
+                    m.put(col.getFirst(), new Text(toBytes(mapKey)), new Value(toBytes(map.get(mapKey))));
+                    count++;
+                    break;
+                  case DELETED:
+                    m.putDelete(col.getFirst(), new Text(toBytes(mapKey)));
+                    count++;
+                    break;
+                }
+                
               }
-              
+            } else {
+              Map map = (Map) o;
+              Set<?> es = map.entrySet();
+              for (Object entry : es) {
+                Object mapKey = ((Entry) entry).getKey();
+                Object mapVal = ((Entry) entry).getValue();
+                m.put(col.getFirst(), new Text(toBytes(mapKey)), new Value(toBytes(mapVal)));
+                count++;
+              }
             }
-          } else {
-            Map map = (Map) o;
-            Set<?> es = map.entrySet();
-            for (Object entry : es) {
-              Object mapKey = ((Entry) entry).getKey();
-              Object mapVal = ((Entry) entry).getValue();
-              m.put(col.getFirst(), new Text(toBytes(mapKey)), new Value(toBytes(mapVal)));
+            break;
+          case ARRAY:
+            GenericArray array = (GenericArray) o;
+            int j = 0;
+            for (Object item : array) {
+              m.put(col.getFirst(), new Text(toBytes(j++)), new Value(toBytes(item)));
               count++;
             }
-          }
-          break;
-        case ARRAY:
-          GenericArray array = (GenericArray) o;
-          int j = 0;
-          for (Object item : array) {
-            m.put(col.getFirst(), new Text(toBytes(j++)), new Value(toBytes(item)));
+            break;
+          case RECORD:
+            SpecificDatumWriter writer = new SpecificDatumWriter(field.schema());
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            BinaryEncoder encoder = new BinaryEncoder(os);
+            writer.write(o, encoder);
+            encoder.flush();
+            m.put(col.getFirst(), col.getSecond(), new Value(os.toByteArray()));
+            break;
+          default:
+            m.put(col.getFirst(), col.getSecond(), new Value(toBytes(o)));
             count++;
-          }
-          break;
-        case RECORD:
-          SpecificDatumWriter writer = new SpecificDatumWriter(field.schema());
-          ByteArrayOutputStream os = new ByteArrayOutputStream();
-          BinaryEncoder encoder = new BinaryEncoder(os);
-          writer.write(o, encoder);
-          encoder.flush();
-          m.put(col.getFirst(), col.getSecond(), new Value(os.toByteArray()));
-          break;
-        default:
-          m.put(col.getFirst(), col.getSecond(), new Value(toBytes(o)));
-          count++;
+        }
+  
       }
-
+      
+      if (count > 0)
+        try {
+          getBatchWriter().addMutation(m);
+        } catch (MutationsRejectedException e) {
+          LOG.error(e.getMessage());
+          LOG.error(e.getStackTrace().toString());
+        }
+    } catch (IOException e) {
+      LOG.error(e.getMessage());
+      LOG.error(e.getStackTrace().toString());
     }
-    
-    if (count > 0)
-      try {
-        getBatchWriter().addMutation(m);
-      } catch (MutationsRejectedException e) {
-        throw new IOException(e);
-      }
   }
   
   @Override
-  public boolean delete(K key) throws IOException {
+  public boolean delete(K key) {
     Query<K,T> q = newQuery();
     q.setKey(key);
     return deleteByQuery(q) > 0;
   }
 
   @Override
-  public long deleteByQuery(Query<K,T> query) throws IOException {
+  public long deleteByQuery(Query<K,T> query) {
     try {
       Scanner scanner = createScanner(query);
       // add iterator that drops values on the server side
@@ -613,9 +640,17 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       return count;
     } catch (TableNotFoundException e) {
       // TODO return 0?
-      throw new IOException(e);
+      LOG.error(e.getMessage());
+      LOG.error(e.getStackTrace().toString());
+      return 0;
     } catch (MutationsRejectedException e) {
-      throw new IOException(e);
+      LOG.error(e.getMessage());
+      LOG.error(e.getStackTrace().toString());
+      return 0;
+    } catch (IOException e){
+      LOG.error(e.getMessage());
+      LOG.error(e.getStackTrace().toString());
+      return 0;
     }
   }
 
@@ -654,14 +689,16 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
   }
 
   @Override
-  public Result<K,T> execute(Query<K,T> query) throws IOException {
+  public Result<K,T> execute(Query<K,T> query) {
     try {
       Scanner scanner = createScanner(query);
       return new AccumuloResult<K,T>(this, query, scanner);
     } catch (TableNotFoundException e) {
       // TODO return empty result?
-      throw new IOException(e);
-    }
+      LOG.error(e.getMessage());
+      LOG.error(e.getStackTrace().toString());
+      return null;
+    } 
   }
   
   @Override
@@ -817,26 +854,27 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
   }
 
   @Override
-  public void flush() throws IOException {
+  public void flush() {
     try {
       if (batchWriter != null) {
         batchWriter.flush();
       }
     } catch (MutationsRejectedException e) {
-      throw new IOException(e);
-    }
+      LOG.error(e.getMessage());
+      LOG.error(e.getStackTrace().toString());
+    } 
   }
 
   @Override
-  public void close() throws IOException {
+  public void close() {
     try {
       if (batchWriter != null) {
         batchWriter.close();
         batchWriter = null;
       }
     } catch (MutationsRejectedException e) {
-      throw new IOException(e);
-    }
-    
+      LOG.error(e.getMessage());
+      LOG.error(e.getStackTrace().toString());
+    } 
   }
 }

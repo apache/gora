@@ -62,7 +62,8 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
       iterator = map.navigableKeySet().iterator();
     }
     //@Override
-    public void close() throws IOException { }
+    public void close() { }
+    
     @Override
     public float getProgress() throws IOException {
       return 0;
@@ -92,12 +93,12 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
   }
 
   @Override
-  public boolean delete(K key) throws IOException {
+  public boolean delete(K key) {
     return map.remove(key) != null;
   }
 
   @Override
-  public long deleteByQuery(Query<K, T> query) throws IOException {
+  public long deleteByQuery(Query<K, T> query) {
 	try{
 		long deletedRows = 0;
 	    Result<K,T> result = query.execute();
@@ -114,7 +115,7 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
   }
 
   @Override
-  public Result<K, T> execute(Query<K, T> query) throws IOException {
+  public Result<K, T> execute(Query<K, T> query) {
     K startKey = query.getStartKey();
     K endKey = query.getEndKey();
     if(startKey == null) {
@@ -133,7 +134,7 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
   }
 
   @Override
-  public T get(K key, String[] fields) throws IOException {
+  public T get(K key, String[] fields) {
     T obj = map.get(key);
     return getPersistent(obj, getFieldsToQuery(fields));
   }
@@ -160,7 +161,7 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
   }
 
   @Override
-  public void put(K key, T obj) throws IOException {
+  public void put(K key, T obj) {
     map.put(key, obj);
   }
 
@@ -175,23 +176,23 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
   }
 
   @Override
-  public void close() throws IOException {
+  public void close() {
     map.clear();
   }
 
   @Override
-  public void createSchema() throws IOException { }
+  public void createSchema() { }
 
   @Override
-  public void deleteSchema() throws IOException {
+  public void deleteSchema() {
     map.clear();
   }
 
   @Override
-  public boolean schemaExists() throws IOException {
+  public boolean schemaExists() {
     return true;
   }
 
   @Override
-  public void flush() throws IOException { }
+  public void flush() { }
 }

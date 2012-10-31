@@ -36,7 +36,9 @@ import org.apache.gora.query.Result;
  * <p><a name="visibility"><b>Note:</b> Results of updates ({@link #put(Object, Persistent)},
  * {@link #delete(Object)} and {@link #deleteByQuery(Query)} operations) are
  * guaranteed to be visible to subsequent get / execute operations ONLY
- * after a subsequent call to {@link #flush()}.
+ * after a subsequent call to {@link #flush()}. Additionally, exception
+ * handling is largely DataStore specific and is not largely dealt
+ * with from within this interface.
  * @param <K> the class of keys in the datastore
  * @param <T> the class of persistent objects in the datastore
  */
@@ -47,10 +49,10 @@ public interface DataStore<K, T> {
    * @param keyClass the class of the keys
    * @param persistentClass the class of the persistent objects
    * @param properties extra metadata
-   * @throws Exception
+   * @throws IOException
    */
   void initialize(Class<K> keyClass, Class<T> persistentClass,
-      Properties properties) throws Exception;
+      Properties properties);
 
   /**
    * Sets the class of the keys
@@ -87,27 +89,31 @@ public interface DataStore<K, T> {
    * to hold the objects. If the schema is already created previously,
    * or the underlying data model does not support
    * or need this operation, the operation is ignored.
+   * @throws IOException
    */
-  void createSchema() throws Exception;
+  void createSchema();
 
   /**
    * Deletes the underlying schema or table (or similar) in the datastore
    * that holds the objects. This also deletes all the data associated with
    * the schema.
+   * @throws IOException
    */
-  void deleteSchema() throws Exception;
+  void deleteSchema();
 
   /**
    * Deletes all the data associated with the schema, but keeps the
    * schema (table or similar) intact.
+   * @throws IOException
    */
-  void truncateSchema() throws Exception;
+  void truncateSchema();
 
   /**
    * Returns whether the schema that holds the data exists in the datastore.
    * @return whether schema exists
+   * @throws IOException
    */
-  boolean schemaExists() throws Exception;
+  boolean schemaExists();
 
   /**
    * Returns a new instance of the key object. If the object cannot be instantiated 
@@ -115,59 +121,67 @@ public interface DataStore<K, T> {
    * constructor) it throws an exception. Only use this function if you can 
    * make sure that the key class has a no-arg constructor.   
    * @return a new instance of the key object.
+   * @throws IOException
    */
-  K newKey() throws Exception;
+  K newKey();
 
   /**
    * Returns a new instance of the managed persistent object.
    * @return a new instance of the managed persistent object.
+   * @throws IOException
    */
-  T newPersistent() throws Exception;
+  T newPersistent();
 
   /**
    * Returns the object corresponding to the given key fetching all the fields.
    * @param key the key of the object
    * @return the Object corresponding to the key or null if it cannot be found
+   * @throws IOException
    */
-  T get(K key) throws Exception;
+  T get(K key);
 
   /**
    * Returns the object corresponding to the given key.
    * @param key the key of the object
    * @param fields the fields required in the object. Pass null, to retrieve all fields
    * @return the Object corresponding to the key or null if it cannot be found
+   * @throws IOException
    */
-  T get(K key, String[] fields) throws Exception;
+  T get(K key, String[] fields);
 
   /**
    * Inserts the persistent object with the given key. If an 
    * object with the same key already exists it will silently
    * be replaced. See also the note on 
    * <a href="#visibility">visibility</a>.
+   * @throws IOException
    */
-  void put(K key, T obj) throws Exception;
+  void put(K key, T obj);
 
   /**
    * Deletes the object with the given key
    * @param key the key of the object
    * @return whether the object was successfully deleted
+   * @throws IOException
    */
-  boolean delete(K key) throws Exception;
+  boolean delete(K key);
 
   /**
    * Deletes all the objects matching the query.
    * See also the note on <a href="#visibility">visibility</a>.
    * @param query matching records to this query will be deleted
    * @return number of deleted records
+   * @throws IOException
    */
-  long deleteByQuery(Query<K, T> query) throws Exception;
+  long deleteByQuery(Query<K, T> query);
 
   /**
    * Executes the given query and returns the results.
    * @param query the query to execute.
    * @return the results as a {@link Result} object.
+   * @throws IOException
    */
-  Result<K,T> execute(Query<K, T> query) throws Exception;
+  Result<K,T> execute(Query<K, T> query);
 
   /**
    * Constructs and returns a new Query.
@@ -191,8 +205,9 @@ public interface DataStore<K, T> {
    * optimize their writing by deferring the actual put / delete operations
    * until this moment.
    * See also the note on <a href="#visibility">visibility</a>.
+   * @throws IOException
    */
-  void flush() throws Exception;
+  void flush();
 
   /**
    * Sets the {@link BeanFactory} to use by the DataStore.
@@ -211,11 +226,8 @@ public interface DataStore<K, T> {
    * implementation, so that the instance is ready for GC.
    * All other DataStore methods cannot be used after this
    * method was called. Subsequent calls of this method are ignored.
+   * @throws IOException
    */
-  void close()  throws IOException, InterruptedException, Exception;
-
-  //void readFields(Object in) throws Exception;
-  
-  //void write() throws Exception;
+  void close();
 
 }

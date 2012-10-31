@@ -164,7 +164,7 @@ public class SqlStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
   }
 
   @Override
-  public void close() throws IOException {
+  public void close() {
   //TODO
   }
 
@@ -175,8 +175,7 @@ public class SqlStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
   
   
   @Override
-  public void createSchema() throws IOException {
-  //TODO
+  public void createSchema() {
   }
 
   private void getColumnConstraint() throws IOException {
@@ -184,40 +183,40 @@ public class SqlStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
   }
 
   @Override
-  public void deleteSchema() throws IOException {
+  public void deleteSchema() {
   //TODO
   }
 
   @Override
-  public boolean schemaExists() throws IOException {
+  public boolean schemaExists() {
   //TODO
   return false;
   }
 
   @Override
-  public boolean delete(K key) throws IOException {
+  public boolean delete(K key) {
   //TODO
   return false;
   }
   
   @Override
-  public long deleteByQuery(Query<K, T> query) throws IOException {
+  public long deleteByQuery(Query<K, T> query) {
   //TODO
   return 0;
   }
 
-  public void flush() throws IOException {
+  public void flush() {
   //TODO
   }
 
   @Override
-  public T get(K key, String[] requestFields) throws IOException {
+  public T get(K key, String[] requestFields) {
   //TODO
   return null;
   }
 
   @Override
-  public Result<K, T> execute(Query<K, T> query) throws IOException {
+  public Result<K, T> execute(Query<K, T> query) {
   //TODO
   return null;
   }
@@ -262,7 +261,7 @@ public class SqlStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
   }
 
   @Override
-  public void put(K key, T persistent) throws IOException {
+  public void put(K key, T persistent) {
   //TODO
   }
 

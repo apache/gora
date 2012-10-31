@@ -45,6 +45,9 @@ import org.apache.gora.util.OperationNotSupportedException;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * An adapter DataStore for binary-compatible Avro serializations.
  * AvroDataStore supports Binary and JSON serializations.
@@ -56,6 +59,8 @@ public class AvroStore<K, T extends PersistentBase>
   /** The property key specifying avro encoder/decoder type to use. Can take values
    * "BINARY" or "JSON". */
   public static final String CODEC_TYPE_KEY = "codec.type";
+  
+  public static final Logger LOG = LoggerFactory.getLogger(AvroStore.class);
 
   /**
    * The type of the avro Encoder/Decoder.
@@ -76,16 +81,16 @@ public class AvroStore<K, T extends PersistentBase>
 
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
-      Properties properties) throws IOException {
-    super.initialize(keyClass, persistentClass, properties);
-
-    if(properties != null) {
-      if(this.codecType == null) {
-        String codecType = DataStoreFactory.findProperty(
-            properties, this, CODEC_TYPE_KEY, "BINARY");
-        this.codecType = CodecType.valueOf(codecType);
+      Properties properties) {
+      super.initialize(keyClass, persistentClass, properties);
+  
+      if(properties != null) {
+        if(this.codecType == null) {
+          String codecType = DataStoreFactory.findProperty(
+              properties, this, CODEC_TYPE_KEY, "BINARY");
+          this.codecType = CodecType.valueOf(codecType);
+        }
       }
-    }
   }
 
   public void setCodecType(CodecType codecType) {
@@ -109,22 +114,27 @@ public class AvroStore<K, T extends PersistentBase>
   }
 
   @Override
-  public void close() throws IOException {
-    super.close();
-    if(encoder != null) {
-      encoder.flush();
+  public void close() {
+    try{
+      super.close();
+      if(encoder != null) {
+        encoder.flush();
+      }
+      encoder = null;
+      decoder = null;
+    }catch(IOException ex){
+      LOG.error(ex.getMessage());
+      LOG.error(ex.getStackTrace().toString());
     }
-    encoder = null;
-    decoder = null;
   }
 
   @Override
-  public boolean delete(K key) throws IOException {
+  public boolean delete(K key) {
     throw new OperationNotSupportedException("delete is not supported for AvroStore");
   }
 
   @Override
-  public long deleteByQuery(Query<K, T> query) throws IOException {
+  public long deleteByQuery(Query<K, T> query) {
     throw new OperationNotSupportedException("delete is not supported for AvroStore");
   }
 
@@ -148,14 +158,19 @@ public class AvroStore<K, T extends PersistentBase>
   }
 
   @Override
-  public void flush() throws IOException {
-    super.flush();
-    if(encoder != null)
-      encoder.flush();
+  public void flush() {
+    try{
+      super.flush();
+      if(encoder != null)
+        encoder.flush();
+    }catch(IOException ex){
+      LOG.error(ex.getMessage());
+      LOG.error(ex.getStackTrace().toString());
+    }
   }
 
   @Override
-  public T get(K key, String[] fields) throws IOException {
+  public T get(K key, String[] fields) {
     throw new OperationNotSupportedException();
   }
 
@@ -165,8 +180,13 @@ public class AvroStore<K, T extends PersistentBase>
   }
 
   @Override
-  public void put(K key, T obj) throws IOException {
-    getDatumWriter().write(obj, getEncoder());
+  public void put(K key, T obj) {
+    try{
+      getDatumWriter().write(obj, getEncoder());
+    }catch(IOException ex){
+      LOG.error(ex.getMessage());
+      LOG.error(ex.getStackTrace().toString());
+    }
   }
 
   public Encoder getEncoder() throws IOException {
@@ -235,12 +255,12 @@ public class AvroStore<K, T extends PersistentBase>
   }
 
   @Override
-  public void write(DataOutput out) throws IOException {
+  public void write(DataOutput out) {
     super.write(out);
   }
 
   @Override
-  public void readFields(DataInput in) throws IOException {
+  public void readFields(DataInput in) {
     super.readFields(in);
   }
 

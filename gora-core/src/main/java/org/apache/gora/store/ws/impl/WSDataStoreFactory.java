@@ -145,6 +145,7 @@ public class WSDataStoreFactory{
    * @return A new store instance.
    * @throws GoraException
    */
+  @SuppressWarnings("unchecked")
   public static <D extends DataStore<K,T>, K, T extends Persistent>
   D createDataStore(Class<D> dataStoreClass, Class<K> keyClass
       , Class<T> persistent, Object auth, Properties properties, String schemaName) 

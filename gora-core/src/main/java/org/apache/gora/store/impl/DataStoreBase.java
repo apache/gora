@@ -30,6 +30,7 @@ import org.apache.avro.Schema.Field;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.gora.avro.PersistentDatumReader;
 import org.apache.gora.avro.PersistentDatumWriter;
+import org.apache.gora.avro.store.AvroStore;
 import org.apache.gora.persistency.BeanFactory;
 import org.apache.gora.persistency.impl.BeanFactoryImpl;
 import org.apache.gora.persistency.impl.PersistentBase;
@@ -41,9 +42,10 @@ import org.apache.gora.util.StringUtils;
 import org.apache.gora.util.WritableUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configurable;
-import org.apache.hadoop.io.MapWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A Base class for Avro persistent {@link DataStore}s.
@@ -71,25 +73,27 @@ implements DataStore<K, T>, Configurable, Writable, Closeable {
   protected PersistentDatumReader<T> datumReader;
 
   protected PersistentDatumWriter<T> datumWriter;
+  
+  public static final Logger LOG = LoggerFactory.getLogger(AvroStore.class);
 
   public DataStoreBase() {
   }
 
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
-      Properties properties) throws IOException {
-    setKeyClass(keyClass);
-    setPersistentClass(persistentClass);
-    if(this.beanFactory == null)
-      this.beanFactory = new BeanFactoryImpl<K, T>(keyClass, persistentClass);
-    schema = this.beanFactory.getCachedPersistent().getSchema();
-    fieldMap = AvroUtils.getFieldMap(schema);
-
-    autoCreateSchema = DataStoreFactory.getAutoCreateSchema(properties, this);
-    this.properties = properties;
-
-    datumReader = new PersistentDatumReader<T>(schema, false);
-    datumWriter = new PersistentDatumWriter<T>(schema, false);
+      Properties properties) {
+      setKeyClass(keyClass);
+      setPersistentClass(persistentClass);
+      if(this.beanFactory == null)
+        this.beanFactory = new BeanFactoryImpl<K, T>(keyClass, persistentClass);
+      schema = this.beanFactory.getCachedPersistent().getSchema();
+      fieldMap = AvroUtils.getFieldMap(schema);
+  
+      autoCreateSchema = DataStoreFactory.getAutoCreateSchema(properties, this);
+      this.properties = properties;
+  
+      datumReader = new PersistentDatumReader<T>(schema, false);
+      datumWriter = new PersistentDatumWriter<T>(schema, false);
   }
 
   @Override
@@ -114,20 +118,24 @@ implements DataStore<K, T>, Configurable, Writable, Closeable {
   }
 
   @Override
-  public K newKey() throws IOException {
+  public K newKey() {
     try {
       return beanFactory.newKey();
     } catch (Exception ex) {
-      throw new IOException(ex);
+      LOG.error(ex.getMessage());
+      LOG.error(ex.getStackTrace().toString());
+      return null;
     }
   }
 
   @Override
-  public T newPersistent() throws IOException {
+  public T newPersistent() {
     try {
       return beanFactory.newPersistent();
     } catch (Exception ex) {
-      throw new IOException(ex);
+      LOG.error(ex.getMessage());
+      LOG.error(ex.getStackTrace().toString());
+      return null;
     }
   }
 
@@ -142,7 +150,7 @@ implements DataStore<K, T>, Configurable, Writable, Closeable {
   }
 
   @Override
-  public T get(K key) throws IOException, Exception {
+  public T get(K key) {
     return get(key, getFieldsToQuery(null));
   };
 
@@ -176,21 +184,30 @@ implements DataStore<K, T>, Configurable, Writable, Closeable {
   }
 
   @SuppressWarnings("unchecked")
-  public void readFields(DataInput in) throws IOException {
+  public void readFields(DataInput in) {
     try {
       Class<K> keyClass = (Class<K>) ClassLoadingUtils.loadClass(Text.readString(in));
       Class<T> persistentClass = (Class<T>)ClassLoadingUtils.loadClass(Text.readString(in));
       Properties props = WritableUtils.readProperties(in);
       initialize(keyClass, persistentClass, props);
     } catch (ClassNotFoundException ex) {
-      throw new IOException(ex);
+      LOG.error(ex.getMessage());
+      LOG.error(ex.getStackTrace().toString());
+    } catch (IOException e) {
+      LOG.error(e.getMessage());
+      LOG.error(e.getStackTrace().toString());
     }
   }
 
-  public void write(DataOutput out) throws IOException {
-    Text.writeString(out, getKeyClass().getCanonicalName());
-    Text.writeString(out, getPersistentClass().getCanonicalName());
-    WritableUtils.writeProperties(out, properties);
+  public void write(DataOutput out) {
+    try {
+      Text.writeString(out, getKeyClass().getCanonicalName());
+      Text.writeString(out, getPersistentClass().getCanonicalName());
+      WritableUtils.writeProperties(out, properties);
+    } catch (IOException e) {
+      LOG.error(e.getMessage());
+      LOG.error(e.getStackTrace().toString());
+    }
   }
 
   @Override
@@ -208,7 +225,7 @@ implements DataStore<K, T>, Configurable, Writable, Closeable {
 
   @Override
   /** Default implementation deletes and recreates the schema*/
-  public void truncateSchema() throws IOException, Exception {
+  public void truncateSchema() {
     deleteSchema();
     createSchema();
   }

@@ -46,7 +46,6 @@ import org.apache.gora.hbase.query.HBaseScannerResult;
 import org.apache.gora.hbase.store.HBaseMapping.HBaseMappingBuilder;
 import org.apache.gora.hbase.util.HBaseByteInterface;
 import org.apache.gora.persistency.ListGenericArray;
-import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.State;
 import org.apache.gora.persistency.StateManager;
 import org.apache.gora.persistency.StatefulHashMap;
@@ -102,35 +101,42 @@ implements Configurable {
 
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
-      Properties properties) throws IOException {
-    super.initialize(keyClass, persistentClass, properties);
-    this.conf = HBaseConfiguration.create(getConf());
-
-    admin = new HBaseAdmin(this.conf);
-
+      Properties properties) {
     try {
+      
+      super.initialize(keyClass, persistentClass, properties);
+      this.conf = HBaseConfiguration.create(getConf());
+      admin = new HBaseAdmin(this.conf);
       mapping = readMapping(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE));
+      
     } catch (FileNotFoundException ex) {
       try {
         mapping = readMapping(getConf().get(PARSE_MAPPING_FILE_KEY, DEPRECATED_MAPPING_FILE));
         LOG.warn(DEPRECATED_MAPPING_FILE + " is deprecated, please rename the file to "
             + DEFAULT_MAPPING_FILE);
       } catch (FileNotFoundException ex1) {
-        throw ex; //throw the original exception
+          LOG.error(ex1.getMessage());
+          LOG.error(ex1.getStackTrace().toString());
+          //throw (ex1); //throw the original exception
       } catch (Exception ex1) {
         LOG.warn(DEPRECATED_MAPPING_FILE + " is deprecated, please rename the file to "
             + DEFAULT_MAPPING_FILE);
         throw new RuntimeException(ex1);
-      }
+      } 
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+    
     if(autoCreateSchema) {
       createSchema();
     }
-
-    boolean autoflush = this.conf.getBoolean("hbase.client.autoflush.default", false);
-    table = new HBaseTableConnection(getConf(), getSchemaName(), autoflush);
+    try{
+      boolean autoflush = this.conf.getBoolean("hbase.client.autoflush.default", false);
+      table = new HBaseTableConnection(getConf(), getSchemaName(), autoflush);
+    } catch(IOException ex2){
+      LOG.error(ex2.getMessage());
+      LOG.error(ex2.getStackTrace().toString());
+    }
   }
 
   @Override
@@ -140,109 +146,136 @@ implements Configurable {
   }
 
   @Override
-  public void createSchema() throws IOException {
-    if(schemaExists()) {
-      return;
+  public void createSchema() {
+    try{
+      if(schemaExists()) {
+        return;
+      }
+      HTableDescriptor tableDesc = mapping.getTable();
+  
+      admin.createTable(tableDesc);
+    } catch(IOException ex2){
+      LOG.error(ex2.getMessage());
+      LOG.error(ex2.getStackTrace().toString());
     }
-    HTableDescriptor tableDesc = mapping.getTable();
-
-    admin.createTable(tableDesc);
   }
 
   @Override
-  public void deleteSchema() throws IOException {
-    if(!schemaExists()) {
-      return;
+  public void deleteSchema() {
+    try{
+      if(!schemaExists()) {
+        return;
+      }
+      admin.disableTable(getSchemaName());
+      admin.deleteTable(getSchemaName());
+    } catch(IOException ex2){
+      LOG.error(ex2.getMessage());
+      LOG.error(ex2.getStackTrace().toString());
     }
-    admin.disableTable(getSchemaName());
-    admin.deleteTable(getSchemaName());
   }
 
   @Override
-  public boolean schemaExists() throws IOException {
-    return admin.tableExists(mapping.getTableName());
+  public boolean schemaExists() {
+    try{
+      return admin.tableExists(mapping.getTableName());
+    } catch(IOException ex2){
+      LOG.error(ex2.getMessage());
+      LOG.error(ex2.getStackTrace().toString());
+      return false;
+    }
   }
 
   @Override
-  public T get(K key, String[] fields) throws IOException {
-    fields = getFieldsToQuery(fields);
-    Get get = new Get(toBytes(key));
-    addFields(get, fields);
-    Result result = table.get(get);
-    return newInstance(result, fields);
+  public T get(K key, String[] fields) {
+    try{
+      fields = getFieldsToQuery(fields);
+      Get get = new Get(toBytes(key));
+      addFields(get, fields);
+      Result result = table.get(get);
+      return newInstance(result, fields);
+    } catch(IOException ex2){
+      LOG.error(ex2.getMessage());
+      LOG.error(ex2.getStackTrace().toString());
+      return null;
+    }
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
   @Override
-  public void put(K key, T persistent) throws IOException {
-    Schema schema = persistent.getSchema();
-    StateManager stateManager = persistent.getStateManager();
-    byte[] keyRaw = toBytes(key);
-    Put put = new Put(keyRaw);
-    Delete delete = new Delete(keyRaw);
-    boolean hasPuts = false;
-    boolean hasDeletes = false;
-    Iterator<Field> iter = schema.getFields().iterator();
-    for (int i = 0; iter.hasNext(); i++) {
-      Field field = iter.next();
-      if (!stateManager.isDirty(persistent, i)) {
-        continue;
-      }
-      Type type = field.schema().getType();
-      Object o = persistent.get(i);
-      HBaseColumn hcol = mapping.getColumn(field.name());
-      switch(type) {
-        case MAP:
-          if(o instanceof StatefulMap) {
-            StatefulHashMap<Utf8, ?> map = (StatefulHashMap<Utf8, ?>) o;
-            for (Entry<Utf8, State> e : map.states().entrySet()) {
-              Utf8 mapKey = e.getKey();
-              switch (e.getValue()) {
-                case DIRTY:
-                  byte[] qual = Bytes.toBytes(mapKey.toString());
-                  byte[] val = toBytes(map.get(mapKey), field.schema().getValueType());
-                  put.add(hcol.getFamily(), qual, val);
-                  hasPuts = true;
-                  break;
-                case DELETED:
-                  qual = Bytes.toBytes(mapKey.toString());
-                  hasDeletes = true;
-                  delete.deleteColumn(hcol.getFamily(), qual);
-                  break;
+  public void put(K key, T persistent) {
+    try{
+      Schema schema = persistent.getSchema();
+      StateManager stateManager = persistent.getStateManager();
+      byte[] keyRaw = toBytes(key);
+      Put put = new Put(keyRaw);
+      Delete delete = new Delete(keyRaw);
+      boolean hasPuts = false;
+      boolean hasDeletes = false;
+      Iterator<Field> iter = schema.getFields().iterator();
+      for (int i = 0; iter.hasNext(); i++) {
+        Field field = iter.next();
+        if (!stateManager.isDirty(persistent, i)) {
+          continue;
+        }
+        Type type = field.schema().getType();
+        Object o = persistent.get(i);
+        HBaseColumn hcol = mapping.getColumn(field.name());
+        switch(type) {
+          case MAP:
+            if(o instanceof StatefulMap) {
+              StatefulHashMap<Utf8, ?> map = (StatefulHashMap<Utf8, ?>) o;
+              for (Entry<Utf8, State> e : map.states().entrySet()) {
+                Utf8 mapKey = e.getKey();
+                switch (e.getValue()) {
+                  case DIRTY:
+                    byte[] qual = Bytes.toBytes(mapKey.toString());
+                    byte[] val = toBytes(map.get(mapKey), field.schema().getValueType());
+                    put.add(hcol.getFamily(), qual, val);
+                    hasPuts = true;
+                    break;
+                  case DELETED:
+                    qual = Bytes.toBytes(mapKey.toString());
+                    hasDeletes = true;
+                    delete.deleteColumn(hcol.getFamily(), qual);
+                    break;
+                }
+              }
+            } else {
+              Set<Map.Entry> set = ((Map)o).entrySet();
+              for(Entry entry: set) {
+                byte[] qual = toBytes(entry.getKey());
+                byte[] val = toBytes(entry.getValue());
+                put.add(hcol.getFamily(), qual, val);
+                hasPuts = true;
               }
             }
-          } else {
-            Set<Map.Entry> set = ((Map)o).entrySet();
-            for(Entry entry: set) {
-              byte[] qual = toBytes(entry.getKey());
-              byte[] val = toBytes(entry.getValue());
-              put.add(hcol.getFamily(), qual, val);
-              hasPuts = true;
+            break;
+          case ARRAY:
+            if(o instanceof GenericArray) {
+              GenericArray arr = (GenericArray) o;
+              int j=0;
+              for(Object item : arr) {
+                byte[] val = toBytes(item);
+                put.add(hcol.getFamily(), Bytes.toBytes(j++), val);
+                hasPuts = true;
+              }
             }
-          }
-          break;
-        case ARRAY:
-          if(o instanceof GenericArray) {
-            GenericArray arr = (GenericArray) o;
-            int j=0;
-            for(Object item : arr) {
-              byte[] val = toBytes(item);
-              put.add(hcol.getFamily(), Bytes.toBytes(j++), val);
-              hasPuts = true;
-            }
-          }
-          break;
-        default:
-          put.add(hcol.getFamily(), hcol.getQualifier(), toBytes(o, field.schema()));
-          hasPuts = true;
-          break;
+            break;
+          default:
+            put.add(hcol.getFamily(), hcol.getQualifier(), toBytes(o, field.schema()));
+            hasPuts = true;
+            break;
+        }
       }
-    }
-    if (hasPuts) {
-      table.put(put);
-    }
-    if (hasDeletes) {
-      table.delete(delete);
+      if (hasPuts) {
+        table.put(put);
+      }
+      if (hasDeletes) {
+        table.delete(delete);
+      }
+    } catch(IOException ex2){
+      LOG.error(ex2.getMessage());
+      LOG.error(ex2.getStackTrace().toString());
     }
   }
 
@@ -255,42 +288,55 @@ implements Configurable {
    * @return always true
    */
   @Override
-  public boolean delete(K key) throws IOException {
-    table.delete(new Delete(toBytes(key)));
-    //HBase does not return success information and executing a get for
-    //success is a bit costly
-    return true;
-  }
-
-  @Override
-  public long deleteByQuery(Query<K, T> query) throws Exception, IOException {
-
-    String[] fields = getFieldsToQuery(query.getFields());
-    //find whether all fields are queried, which means that complete
-    //rows will be deleted
-    boolean isAllFields = Arrays.equals(fields
-        , getBeanFactory().getCachedPersistent().getFields());
-
-    org.apache.gora.query.Result<K, T> result = query.execute();
-
-    ArrayList<Delete> deletes = new ArrayList<Delete>();
-    while(result.next()) {
-      Delete delete = new Delete(toBytes(result.getKey()));
-      deletes.add(delete);
-      if(!isAllFields) {
-        addFields(delete, query);
-      }
+  public boolean delete(K key) {
+    try{
+      table.delete(new Delete(toBytes(key)));
+      //HBase does not return success information and executing a get for
+      //success is a bit costly
+      return true;
+    } catch(IOException ex2){
+      LOG.error(ex2.getMessage());
+      LOG.error(ex2.getStackTrace().toString());
+      return false;
     }
-    //TODO: delete by timestamp, etc
-
-    table.delete(deletes);
-
-    return deletes.size();
   }
 
   @Override
-  public void flush() throws IOException {
-    table.flushCommits();
+  public long deleteByQuery(Query<K, T> query) {
+    try {
+      String[] fields = getFieldsToQuery(query.getFields());
+      //find whether all fields are queried, which means that complete
+      //rows will be deleted
+      boolean isAllFields = Arrays.equals(fields
+          , getBeanFactory().getCachedPersistent().getFields());
+  
+      org.apache.gora.query.Result<K, T> result = null;
+      result = query.execute();
+      ArrayList<Delete> deletes = new ArrayList<Delete>();
+      while(result.next()) {
+        Delete delete = new Delete(toBytes(result.getKey()));
+        deletes.add(delete);
+        if(!isAllFields) {
+          addFields(delete, query);
+        }
+      }
+      table.delete(deletes);
+      return deletes.size();
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      return -1;
+    }
+  }
+
+  @Override
+  public void flush() {
+    try{
+      table.flushCommits();
+    }catch(IOException ex){
+      LOG.error(ex.getMessage());
+      LOG.error(ex.getStackTrace().toString());
+    }
   }
 
   @Override
@@ -349,26 +395,30 @@ implements Configurable {
   }
 
   @Override
-  public org.apache.gora.query.Result<K, T> execute(Query<K, T> query)
-      throws IOException {
-
-    //check if query.fields is null
-    query.setFields(getFieldsToQuery(query.getFields()));
-
-    if(query.getStartKey() != null && query.getStartKey().equals(
-        query.getEndKey())) {
-      Get get = new Get(toBytes(query.getStartKey()));
-      addFields(get, query.getFields());
-      addTimeRange(get, query);
-      Result result = table.get(get);
-      return new HBaseGetResult<K,T>(this, query, result);
-    } else {
-      ResultScanner scanner = createScanner(query);
-
-      org.apache.gora.query.Result<K,T> result
-      = new HBaseScannerResult<K,T>(this,query, scanner);
-
-      return result;
+  public org.apache.gora.query.Result<K, T> execute(Query<K, T> query){
+    try{
+      //check if query.fields is null
+      query.setFields(getFieldsToQuery(query.getFields()));
+  
+      if(query.getStartKey() != null && query.getStartKey().equals(
+          query.getEndKey())) {
+        Get get = new Get(toBytes(query.getStartKey()));
+        addFields(get, query.getFields());
+        addTimeRange(get, query);
+        Result result = table.get(get);
+        return new HBaseGetResult<K,T>(this, query, result);
+      } else {
+        ResultScanner scanner = createScanner(query);
+  
+        org.apache.gora.query.Result<K,T> result
+        = new HBaseScannerResult<K,T>(this,query, scanner);
+  
+        return result;
+      }
+    }catch(IOException ex){
+      LOG.error(ex.getMessage());
+      LOG.error(ex.getStackTrace().toString());
+      return null;
     }
   }
 
@@ -594,8 +644,13 @@ implements Configurable {
   }
 
   @Override
-  public void close() throws IOException {
-    table.close();
+  public void close() {
+    try{
+      table.close();
+    }catch(IOException ex){
+      LOG.error(ex.getMessage());
+      LOG.error(ex.getStackTrace().toString());
+    }
   }
 
   @Override
