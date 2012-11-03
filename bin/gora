@@ -43,7 +43,7 @@ done
 if [ $# = 0 ]; then
   echo "Usage: run COMMAND [COMMAND options]"
   echo "where COMMAND is one of:"
-  echo "  compile                    Run Compiler"
+  echo "  goracompiler               Run Compiler"
   echo "  specificcompiler           Run Avro Specific Compiler"
   echo "  dynamocompiler             Run Gora DynamoDB Compiler"
   echo "  logmanager                 Run the tutorial log manager"
