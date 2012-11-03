@@ -15,9 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * @author Renato Marroquin
- */
+
 package org.apache.gora.store.ws.impl;
 
 import java.io.IOException;
