@@ -34,7 +34,7 @@ import org.apache.hadoop.conf.Configuration;
 /**
  * A Factory for {@link DataStore}s. DataStoreFactory instances are thread-safe.
  */
-public class DataStoreFactory {
+public class DataStoreFactory{
 
   public static final Logger log = LoggerFactory.getLogger(DataStoreFactory.class);
 

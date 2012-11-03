@@ -38,8 +38,8 @@ public class StateManagerImpl implements StateManager {
   }
 
   public void setManagedPersistent(Persistent persistent) {
-    dirtyBits = new BitSet(persistent.getSchema().getFields().size());
-    readableBits = new BitSet(persistent.getSchema().getFields().size());
+    dirtyBits = new BitSet(((PersistentBase)persistent).getSchema().getFields().size());
+    readableBits = new BitSet(((PersistentBase)persistent).getSchema().getFields().size());
     isNew = true;
   }
 

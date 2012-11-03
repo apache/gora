@@ -557,6 +557,7 @@
         <module>gora-hbase</module>
         <module>gora-accumulo</module>
         <module>gora-cassandra</module>
+        <module>gora-dynamodb</module>
         <module>gora-sql</module>
         <module>gora-tutorial</module>
         <module>sources-dist</module>
@@ -573,6 +574,8 @@
         <hbase.version>0.90.4</hbase.version>
         <avro.version>1.3.3</avro.version>
         <cxf-rt-frontend-jaxrs.version>2.5.2</cxf-rt-frontend-jaxrs.version>
+        <!-- Amazon Dependencies -->
+        <amazon.version>1.3.12</amazon.version>
         <!-- Cassandra Dependencies -->
         <cassandra.version>1.1.2</cassandra.version>
         <libthrift.version>0.7.0</libthrift.version>
@@ -674,7 +677,19 @@
             <groupId>org.apache.gora</groupId>
             <artifactId>gora-tutorial</artifactId>
             <version>${project.version}</version>
-            </dependency>
+          </dependency>
+          
+          <dependency>
+            <groupId>org.apache.gora</groupId>
+            <artifactId>gora-dynamodb</artifactId>
+            <version>${project.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.gora</groupId>
+            <artifactId>gora-dynamodb</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+          </dependency>
   
           <!-- Avro needs this version of jackson -->
           <dependency>
@@ -772,18 +787,25 @@
                 <version>${cassandra.version}</version>
             </dependency>
 
-          <dependency>
-            <groupId>org.hectorclient</groupId>
-            <artifactId>hector-core</artifactId>
-            <version>${hector.version}</version>
-            <exclusions>
-	      <exclusion>
-		<groupId>org.apache.cassandra</groupId>
-		<artifactId>cassandra-all</artifactId>
-	      </exclusion>
-	    </exclusions>
-          </dependency>
-
+            <dependency>
+              <groupId>org.hectorclient</groupId>
+              <artifactId>hector-core</artifactId>
+              <version>${hector.version}</version>
+              <exclusions>
+	        <exclusion>
+		  <groupId>org.apache.cassandra</groupId>
+		  <artifactId>cassandra-all</artifactId>
+	        </exclusion>
+	      </exclusions>
+            </dependency>
+            
+            <!-- Amazon Dependencies -->
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk</artifactId>
+                <version>${amazon.version}</version>
+            </dependency>
+          
             <!-- Misc Dependencies -->
             <dependency>
                 <groupId>com.google.guava</groupId>

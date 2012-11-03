@@ -18,8 +18,11 @@
 
 package org.apache.gora.avro.query;
 
+import java.io.IOException;
+
 import org.apache.gora.avro.store.AvroStore;
-import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
+import org.apache.gora.query.Result;
 import org.apache.gora.query.impl.QueryBase;
 
 /**
@@ -27,7 +30,7 @@ import org.apache.gora.query.impl.QueryBase;
  * most of the operations for Query, like setting start,end keys is not 
  * supported. Setting query limit is supported.
  */
-public class AvroQuery<K, T extends Persistent> extends QueryBase<K,T> {
+public class AvroQuery<K, T extends PersistentBase> extends QueryBase<K,T> {
 
   public AvroQuery() {
     super(null);

@@ -25,33 +25,44 @@ import org.apache.avro.file.DataFileWriter;
 import org.apache.gora.avro.mapreduce.FsInput;
 import org.apache.gora.avro.query.DataFileAvroResult;
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.query.impl.FileSplitPartitionQuery;
 import org.apache.gora.util.OperationNotSupportedException;
 import org.apache.hadoop.fs.Path;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * DataFileAvroStore is file based store which uses Avro's 
  * DataFile{Writer,Reader}'s as a backend. This datastore supports 
  * mapreduce.
  */
-public class DataFileAvroStore<K, T extends Persistent> extends AvroStore<K, T> {
+public class DataFileAvroStore<K, T extends PersistentBase> extends AvroStore<K, T> {
 
+  public static final Logger LOG = LoggerFactory.getLogger(AvroStore.class);
+  
   public DataFileAvroStore() {
   }
   
   private DataFileWriter<T> writer;
   
   @Override
-  public T get(K key, String[] fields) throws java.io.IOException {
+  public T get(K key, String[] fields) {
     throw new OperationNotSupportedException(
         "Avro DataFile's does not support indexed retrieval");
   };
   
   @Override
-  public void put(K key, T obj) throws java.io.IOException {
-    getWriter().append(obj);
+  public void put(K key, T obj) {
+    try{
+      getWriter().append(obj);
+    } catch(IOException ex){
+      LOG.error(ex.getMessage());
+      LOG.error(ex.getStackTrace().toString());
+    }
   };
   
   private DataFileWriter<T> getWriter() throws IOException {
@@ -63,18 +74,29 @@ public class DataFileAvroStore<K, T extends Persistent> extends AvroStore<K, T> 
   }
   
   @Override
-  protected Result<K, T> executeQuery(Query<K, T> query) throws IOException {
-    return new DataFileAvroResult<K, T>(this, query
-        , createReader(createFsInput()));
+  protected Result<K, T> executeQuery(Query<K, T> query) {
+    try{
+      return new DataFileAvroResult<K, T>(this, query
+          , createReader(createFsInput()));
+    } catch(IOException ex){
+      LOG.error(ex.getMessage());
+      LOG.error(ex.getStackTrace().toString());
+      return null;
+    }
   }
  
   @Override
-  protected Result<K,T> executePartial(FileSplitPartitionQuery<K,T> query) 
-    throws IOException {
-    FsInput fsInput = createFsInput();
-    DataFileReader<T> reader = createReader(fsInput);
-    return new DataFileAvroResult<K, T>(this, query, reader, fsInput
-        , query.getStart(), query.getLength());
+  protected Result<K,T> executePartial(FileSplitPartitionQuery<K,T> query) {
+    try{
+      FsInput fsInput = createFsInput();
+      DataFileReader<T> reader = createReader(fsInput);
+      return new DataFileAvroResult<K, T>(this, query, reader, fsInput
+          , query.getStart(), query.getLength());
+    } catch(IOException ex){
+      LOG.error(ex.getMessage());
+      LOG.error(ex.getStackTrace().toString());
+      return null;
+    }
   }
   
   private DataFileReader<T> createReader(FsInput fsInput) throws IOException {
@@ -87,19 +109,29 @@ public class DataFileAvroStore<K, T extends Persistent> extends AvroStore<K, T> 
   }
   
   @Override
-  public void flush() throws IOException {
-    super.flush();
-    if(writer != null) {
-      writer.flush();
+  public void flush() {
+    try{
+      super.flush();
+      if(writer != null) {
+        writer.flush();
+      }
+    } catch(IOException ex){
+      LOG.error(ex.getMessage());
+      LOG.error(ex.getStackTrace().toString());
     }
   }
   
   @Override
-  public void close() throws IOException {
-    if(writer != null)  
-      writer.close(); //hadoop 0.20.2 HDFS streams do not allow 
-                      //to close twice, so close the writer first 
-    writer = null;
-    super.close();
+  public void close() {
+    try{
+      if(writer != null)  
+        writer.close(); //hadoop 0.20.2 HDFS streams do not allow 
+                        //to close twice, so close the writer first 
+      writer = null;
+      super.close();
+    } catch(IOException ex){
+      LOG.error(ex.getMessage());
+      LOG.error(ex.getStackTrace().toString());
+    }
   }
 }

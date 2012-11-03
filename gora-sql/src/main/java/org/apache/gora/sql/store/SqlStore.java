@@ -47,8 +47,8 @@ import org.apache.avro.specific.SpecificFixed;
 import org.apache.avro.util.Utf8;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.StateManager;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
@@ -94,7 +94,7 @@ import org.jdom.input.SAXBuilder;
  * re-write as per GORA-86
  * Please see https://issues.apache.org/jira/browse/GORA-86
  */
-public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
+public class SqlStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
   /** The vendor of the DB */
   public static enum DBVendor {
@@ -164,7 +164,7 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
   }
 
   @Override
-  public void close() throws IOException {
+  public void close() {
   //TODO
   }
 
@@ -175,8 +175,7 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
   
   
   @Override
-  public void createSchema() throws IOException {
-  //TODO
+  public void createSchema() {
   }
 
   private void getColumnConstraint() throws IOException {
@@ -184,40 +183,40 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
   }
 
   @Override
-  public void deleteSchema() throws IOException {
+  public void deleteSchema() {
   //TODO
   }
 
   @Override
-  public boolean schemaExists() throws IOException {
+  public boolean schemaExists() {
   //TODO
   return false;
   }
 
   @Override
-  public boolean delete(K key) throws IOException {
+  public boolean delete(K key) {
   //TODO
   return false;
   }
   
   @Override
-  public long deleteByQuery(Query<K, T> query) throws IOException {
+  public long deleteByQuery(Query<K, T> query) {
   //TODO
   return 0;
   }
 
-  public void flush() throws IOException {
+  public void flush() {
   //TODO
   }
 
   @Override
-  public T get(K key, String[] requestFields) throws IOException {
+  public T get(K key, String[] requestFields) {
   //TODO
   return null;
   }
 
   @Override
-  public Result<K, T> execute(Query<K, T> query) throws IOException {
+  public Result<K, T> execute(Query<K, T> query) {
   //TODO
   return null;
   }
@@ -262,7 +261,7 @@ public class SqlStore<K, T extends Persistent> extends DataStoreBase<K, T> {
   }
 
   @Override
-  public void put(K key, T persistent) throws IOException {
+  public void put(K key, T persistent) {
   //TODO
   }
 

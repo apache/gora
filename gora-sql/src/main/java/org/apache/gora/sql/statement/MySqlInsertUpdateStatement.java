@@ -24,13 +24,13 @@ import java.sql.SQLException;
 import java.util.Map.Entry;
 
 import org.apache.avro.Schema;
-import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.sql.store.Column;
 import org.apache.gora.sql.store.SqlMapping;
 import org.apache.gora.sql.store.SqlStore;
 import org.apache.gora.util.StringUtils;
 
-public class MySqlInsertUpdateStatement<K, V extends Persistent> extends InsertUpdateStatement<K, V> {
+public class MySqlInsertUpdateStatement<K, V extends PersistentBase> extends InsertUpdateStatement<K, V> {
 
   public MySqlInsertUpdateStatement(SqlStore<K, V> store, SqlMapping mapping, String tableName) {
     super(store, mapping, tableName);

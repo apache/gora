@@ -101,17 +101,18 @@ public abstract class ResultBase<K, T extends Persistent>
   }
   
   @Override
-  public final boolean next() throws IOException {
-    if(isLimitReached()) {
-      return false;
-    }
+  public final boolean next() throws Exception, IOException {
+	  if(isLimitReached()) {
+		  return false;
+	  }
+	    
+	  clear();
     
-    clear();
-    persistent = getOrCreatePersistent(persistent);
-    
-    boolean ret = nextInner();
-    if(ret) ++offset;
-    return ret;
+	  persistent = getOrCreatePersistent(persistent);
+	  boolean ret = nextInner();
+	  
+	  if(ret) ++offset;
+	  return ret;
   }
   
   @Override
@@ -125,10 +126,16 @@ public abstract class ResultBase<K, T extends Persistent>
    */
   protected abstract boolean nextInner() throws IOException; 
   
-  protected T getOrCreatePersistent(T persistent) throws IOException {
-    if(persistent != null) {
-      return persistent;
-    }
-    return dataStore.newPersistent();
+  protected T getOrCreatePersistent(T persistent) throws Exception, IOException {
+	  if(persistent != null) {
+			return persistent;
+		}
+		return dataStore.newPersistent();
+  }
+  
+  @Override
+  public void close() throws IOException{
+	// TODO Auto-generated method stub
+	
   }
 }

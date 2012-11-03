@@ -19,6 +19,7 @@
 package org.apache.gora.hbase.query;
 
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.QueryBase;
 import org.apache.gora.store.DataStore;
@@ -26,7 +27,7 @@ import org.apache.gora.store.DataStore;
 /**
  * HBase specific implementation of the {@link Query} interface.
  */
-public class HBaseQuery<K, T extends Persistent> extends QueryBase<K, T> {
+public class HBaseQuery<K, T extends PersistentBase> extends QueryBase<K, T> {
 
   public HBaseQuery() {
     super(null);

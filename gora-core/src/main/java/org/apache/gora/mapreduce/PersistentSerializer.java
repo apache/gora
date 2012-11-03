@@ -22,34 +22,34 @@ import java.io.OutputStream;
 
 import org.apache.avro.io.BinaryEncoder;
 import org.apache.gora.avro.PersistentDatumWriter;
-import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.hadoop.io.serializer.Serializer;
 
 /**
  * Hadoop serializer using {@link PersistentDatumWriter} 
  * with {@link BinaryEncoder}. 
  */
-public class PersistentSerializer implements Serializer<Persistent> {
+public class PersistentSerializer implements Serializer<PersistentBase> {
 
-  private PersistentDatumWriter<Persistent> datumWriter;
+  private PersistentDatumWriter<PersistentBase> datumWriter;
   private BinaryEncoder encoder;  
   
   public PersistentSerializer() {
-    this.datumWriter = new PersistentDatumWriter<Persistent>();
+    this.datumWriter = new PersistentDatumWriter<PersistentBase>();
   }
   
-  @Override
+  //@Override
   public void close() throws IOException {
     encoder.flush();
   }
 
-  @Override
+  //@Override
   public void open(OutputStream out) throws IOException {
     encoder = new BinaryEncoder(out);
   }
 
   @Override
-  public void serialize(Persistent persistent) throws IOException {   
+  public void serialize(PersistentBase persistent) throws IOException {   
     datumWriter.setSchema(persistent.getSchema());
     datumWriter.setPersistent(persistent);
         

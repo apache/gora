@@ -17,12 +17,10 @@
  */
 package org.apache.gora.persistency;
 
-import org.apache.avro.specific.SpecificRecord;
-
 /**
  * Objects that are persisted by Gora implements this interface.
  */
-public interface Persistent extends SpecificRecord, Cloneable {
+public interface Persistent extends Cloneable{
 
   /**
    * Returns the StateManager which manages the persistent 
@@ -183,4 +181,5 @@ public interface Persistent extends SpecificRecord, Cloneable {
   void clearReadable();
   
   Persistent clone();
+
 }

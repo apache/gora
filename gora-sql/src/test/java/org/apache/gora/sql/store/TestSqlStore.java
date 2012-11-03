@@ -40,6 +40,7 @@ public class TestSqlStore extends DataStoreTestBase {
   public TestSqlStore() {
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   protected DataStore<String, Employee> createEmployeeDataStore() throws IOException {
     SqlStore<String, Employee> store = new SqlStore<String, Employee>();
@@ -47,6 +48,7 @@ public class TestSqlStore extends DataStoreTestBase {
     return store;
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   protected DataStore<String, WebPage> createWebPageDataStore() throws IOException {
     SqlStore<String, WebPage> store = new SqlStore<String, WebPage>();

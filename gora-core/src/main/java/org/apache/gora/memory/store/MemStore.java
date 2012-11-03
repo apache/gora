@@ -27,6 +27,7 @@ import java.util.NavigableMap;
 import java.util.TreeMap;
 
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.persistency.impl.StateManagerImpl;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
@@ -40,9 +41,9 @@ import org.apache.gora.store.impl.DataStoreBase;
 /**
  * Memory based {@link DataStore} implementation for tests.
  */
-public class MemStore<K, T extends Persistent> extends DataStoreBase<K, T> {
+public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
-  public static class MemQuery<K, T extends Persistent> extends QueryBase<K, T> {
+  public static class MemQuery<K, T extends PersistentBase> extends QueryBase<K, T> {
     public MemQuery() {
       super(null);
     }
@@ -51,7 +52,7 @@ public class MemStore<K, T extends Persistent> extends DataStoreBase<K, T> {
     }
   }
 
-  public static class MemResult<K, T extends Persistent> extends ResultBase<K, T> {
+  public static class MemResult<K, T extends PersistentBase> extends ResultBase<K, T> {
     private NavigableMap<K, T> map;
     private Iterator<K> iterator;
     public MemResult(DataStore<K, T> dataStore, Query<K, T> query
@@ -60,8 +61,9 @@ public class MemStore<K, T extends Persistent> extends DataStoreBase<K, T> {
       this.map = map;
       iterator = map.navigableKeySet().iterator();
     }
-    @Override
-    public void close() throws IOException { }
+    //@Override
+    public void close() { }
+    
     @Override
     public float getProgress() throws IOException {
       return 0;
@@ -91,25 +93,29 @@ public class MemStore<K, T extends Persistent> extends DataStoreBase<K, T> {
   }
 
   @Override
-  public boolean delete(K key) throws IOException {
+  public boolean delete(K key) {
     return map.remove(key) != null;
   }
 
   @Override
-  public long deleteByQuery(Query<K, T> query) throws IOException {
-    long deletedRows = 0;
-    Result<K,T> result = query.execute();
-
-    while(result.next()) {
-      if(delete(result.getKey()))
-        deletedRows++;
-    }
-
-    return 0;
+  public long deleteByQuery(Query<K, T> query) {
+	try{
+		long deletedRows = 0;
+	    Result<K,T> result = query.execute();
+	
+	    while(result.next()) {
+	      if(delete(result.getKey()))
+	        deletedRows++;
+	    }
+	    return 0;
+	  }
+	catch(Exception e){
+		  return 0;
+	}
   }
 
   @Override
-  public Result<K, T> execute(Query<K, T> query) throws IOException {
+  public Result<K, T> execute(Query<K, T> query) {
     K startKey = query.getStartKey();
     K endKey = query.getEndKey();
     if(startKey == null) {
@@ -128,7 +134,7 @@ public class MemStore<K, T extends Persistent> extends DataStoreBase<K, T> {
   }
 
   @Override
-  public T get(K key, String[] fields) throws IOException {
+  public T get(K key, String[] fields) {
     T obj = map.get(key);
     return getPersistent(obj, getFieldsToQuery(fields));
   }
@@ -144,7 +150,7 @@ public class MemStore<K, T extends Persistent> extends DataStoreBase<K, T> {
     T newObj = (T) obj.newInstance(new StateManagerImpl());
     for(String field:fields) {
       int index = newObj.getFieldIndex(field);
-      newObj.put(index, obj.get(index));
+      ((PersistentBase)newObj).put(index, ((PersistentBase)obj).get(index));
     }
     return newObj;
   }
@@ -155,7 +161,7 @@ public class MemStore<K, T extends Persistent> extends DataStoreBase<K, T> {
   }
 
   @Override
-  public void put(K key, T obj) throws IOException {
+  public void put(K key, T obj) {
     map.put(key, obj);
   }
 
@@ -163,31 +169,30 @@ public class MemStore<K, T extends Persistent> extends DataStoreBase<K, T> {
   /**
    * Returns a single partition containing the original query
    */
-  public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query)
-      throws IOException {
+  public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query){
     List<PartitionQuery<K, T>> list = new ArrayList<PartitionQuery<K,T>>();
     list.add(new PartitionQueryImpl<K, T>(query));
     return list;
   }
 
   @Override
-  public void close() throws IOException {
+  public void close() {
     map.clear();
   }
 
   @Override
-  public void createSchema() throws IOException { }
+  public void createSchema() { }
 
   @Override
-  public void deleteSchema() throws IOException {
+  public void deleteSchema() {
     map.clear();
   }
 
   @Override
-  public boolean schemaExists() throws IOException {
+  public boolean schemaExists() {
     return true;
   }
 
   @Override
-  public void flush() throws IOException { }
+  public void flush() { }
 }

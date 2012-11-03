@@ -77,7 +77,7 @@ public class LogManager {
    * Parses a log file and store the contents at the data store.
    * @param input the input file location
    */
-  private void parse(String input) throws IOException, ParseException {
+  private void parse(String input) throws IOException, ParseException, Exception {
     log.info("Parsing file:" + input);
     BufferedReader reader = new BufferedReader(new FileReader(input));
     long lineCount = 0;
@@ -136,19 +136,19 @@ public class LogManager {
   }
   
   /** Stores the pageview object with the given key */
-  private void storePageview(long key, Pageview pageview) throws IOException {
+  private void storePageview(long key, Pageview pageview) throws IOException, Exception {
 	log.info("Storing Pageview in: " + dataStore.toString());
     dataStore.put(key, pageview);
   }
   
   /** Fetches a single pageview object and prints it*/
-  private void get(long key) throws IOException {
+  private void get(long key) throws IOException, Exception {
     Pageview pageview = dataStore.get(key);
     printPageview(pageview);
   }
   
   /** Queries and prints a single pageview object */
-  private void query(long key) throws IOException {
+  private void query(long key) throws IOException, Exception {
     //Queries are constructed from the data store
     Query<Long, Pageview> query = dataStore.newQuery();
     query.setKey(key);
@@ -160,7 +160,7 @@ public class LogManager {
   }
   
   /** Queries and prints pageview object that have keys between startKey and endKey*/
-  private void query(long startKey, long endKey) throws IOException {
+  private void query(long startKey, long endKey) throws IOException, Exception {
     Query<Long, Pageview> query = dataStore.newQuery();
     //set the properties of query
     query.setStartKey(startKey);
@@ -181,7 +181,7 @@ public class LogManager {
   }
   
   /** This method illustrates delete by query call */
-  private void deleteByQuery(long startKey, long endKey) throws IOException {
+  private void deleteByQuery(long startKey, long endKey) throws IOException, Exception {
     //Constructs a query from the dataStore. The matching rows to this query will be deleted
     Query<Long, Pageview> query = dataStore.newQuery();
     //set the properties of query
@@ -192,7 +192,7 @@ public class LogManager {
     log.info("pageviews with keys between " + startKey + " and " + endKey + " are deleted");
   }
   
-  private void printResult(Result<Long, Pageview> result) throws IOException {
+  private void printResult(Result<Long, Pageview> result) throws IOException, Exception {
     
     while(result.next()) { //advances the Result object and breaks if at end
       long resultKey = result.getKey(); //obtain current key
@@ -215,7 +215,7 @@ public class LogManager {
     }
   }
   
-  private void close() throws IOException {
+  private void close() throws IOException, Exception {
     //It is very important to close the datastore properly, otherwise
     //some data loss might occur.
     if(dataStore != null)

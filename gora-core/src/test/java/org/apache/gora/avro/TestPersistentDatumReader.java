@@ -29,6 +29,7 @@ import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.memory.store.MemStore;
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.store.DataStore;
@@ -46,12 +47,12 @@ public class TestPersistentDatumReader {
     = new PersistentDatumReader<WebPage>();
   private Configuration conf = new Configuration();
   
-  private void testClone(Persistent persistent) throws IOException {
-    Persistent cloned = webPageDatumReader.clone(persistent, persistent.getSchema());
+  private void testClone(PersistentBase persistent) throws IOException {
+    PersistentBase cloned = ((PersistentBase)webPageDatumReader.clone(persistent, persistent.getSchema()));
     assertClone(persistent, cloned);
   }
   
-  private void assertClone(Persistent persistent, Persistent cloned) {
+  private void assertClone(PersistentBase persistent, PersistentBase cloned) {
     Assert.assertNotNull("cloned object is null", cloned);
     Assert.assertEquals("cloned object is not equal to original object", persistent, cloned);
   }
