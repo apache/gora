@@ -45,6 +45,7 @@ if [ $# = 0 ]; then
   echo "where COMMAND is one of:"
   echo "  compile                    Run Compiler"
   echo "  specificcompiler           Run Avro Specific Compiler"
+  echo "  dynamocompiler             Run Gora DynamoDB Compiler"
   echo "  logmanager                 Run the tutorial log manager"
   echo "  loganalytics               Run the tutorial log analytics"
   echo "  junit         	     Run the given JUnit test"
@@ -129,7 +130,7 @@ elif [ "$COMMAND" = "loganalytics" ] ; then
   CLASSPATH=$CLASSPATH:$GORA_HOME/$MODULE/target/classes/
 elif [ "$COMMAND" = "junit" ] ; then
   MODULE=*
-  CLASSPATH=$CLASSPATH:target/test-classes/
+  CLASSPATH=$CLASSPATH:$GORA_HOME/$MODULE/target/test-classes/
   CLASS=junit.textui.TestRunner
 else
   MODULE="$COMMAND"
