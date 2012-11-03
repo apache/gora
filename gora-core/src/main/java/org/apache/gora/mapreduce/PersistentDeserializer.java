@@ -25,6 +25,7 @@ import org.apache.avro.io.BinaryDecoder;
 import org.apache.avro.io.DecoderFactory;
 import org.apache.gora.avro.PersistentDatumReader;
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.util.AvroUtils;
 import org.apache.hadoop.io.serializer.Deserializer;
 
@@ -33,26 +34,26 @@ import org.apache.hadoop.io.serializer.Deserializer;
 * with {@link BinaryDecoder}.
 */
 public class PersistentDeserializer
-   implements Deserializer<Persistent> {
+   implements Deserializer<PersistentBase> {
 
   private BinaryDecoder decoder;
-  private Class<? extends Persistent> persistentClass;
+  private Class<? extends PersistentBase> persistentClass;
   private boolean reuseObjects;
-  private PersistentDatumReader<Persistent> datumReader;
+  private PersistentDatumReader<PersistentBase> datumReader;
 
-  public PersistentDeserializer(Class<? extends Persistent> c, boolean reuseObjects) {
+  public PersistentDeserializer(Class<? extends PersistentBase> c, boolean reuseObjects) {
     this.persistentClass = c;
     this.reuseObjects = reuseObjects;
     try {
       Schema schema = AvroUtils.getSchema(persistentClass);
-      datumReader = new PersistentDatumReader<Persistent>(schema, true);
+      datumReader = new PersistentDatumReader<PersistentBase>(schema, true);
 
     } catch (Exception ex) {
       throw new RuntimeException(ex);
     }
   }
 
-  @Override
+  //@Override
   public void open(InputStream in) throws IOException {
     /* It is very important to use a direct buffer, since Hadoop
      * supplies an input stream that is only valid until the end of one
@@ -64,11 +65,11 @@ public class PersistentDeserializer
       .createBinaryDecoder(in, decoder);
   }
 
-  @Override
+  //@Override
   public void close() throws IOException { }
 
   @Override
-  public Persistent deserialize(Persistent persistent) throws IOException {
+  public PersistentBase deserialize(PersistentBase persistent) throws IOException {
     return datumReader.read(reuseObjects ? persistent : null, decoder);
   }
 }

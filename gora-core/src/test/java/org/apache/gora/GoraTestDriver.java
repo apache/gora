@@ -71,11 +71,8 @@ public class GoraTestDriver {
    */
   public void setUp() throws Exception {
     log.info("setting up test");
-    try {
-      for(DataStore store : dataStores) {
-        store.truncateSchema();
-      }
-    }catch (IOException ignore) {
+    for(DataStore store : dataStores) {
+      store.truncateSchema();
     }
   }
     

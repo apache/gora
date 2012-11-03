@@ -22,6 +22,7 @@ import java.io.IOException;
 
 import org.apache.gora.hbase.store.HBaseStore;
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Result;
@@ -29,7 +30,7 @@ import org.apache.hadoop.hbase.client.Result;
 /**
  * An {@link HBaseResult} based on the result of a HBase {@link Get} query.
  */
-public class HBaseGetResult<K, T extends Persistent> extends HBaseResult<K,T> {
+public class HBaseGetResult<K, T extends PersistentBase> extends HBaseResult<K,T> {
 
   private Result result;
   

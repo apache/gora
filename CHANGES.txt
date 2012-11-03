@@ -6,6 +6,8 @@ Gora Change Log
 
 trunk (current development)
 
+* GORA-103 Datastore for gora-dynamodb (rmarroquin via lewismc)
+
 * GORA-160 Gora Fails to Import Into Recent Versions of Eclipse (Ed Kohlwey via lewismc)
 
 * GORA-85 Implement "Usage" messages for SpecificCompiler and LogAnalytics (lewismc)

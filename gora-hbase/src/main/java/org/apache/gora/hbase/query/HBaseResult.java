@@ -24,6 +24,7 @@ import java.io.IOException;
 
 import org.apache.gora.hbase.store.HBaseStore;
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.ResultBase;
 import org.apache.hadoop.hbase.client.Result;
@@ -31,7 +32,7 @@ import org.apache.hadoop.hbase.client.Result;
 /**
  * Base class for {@link Result} implementations for HBase.  
  */
-public abstract class HBaseResult<K, T extends Persistent> 
+public abstract class HBaseResult<K, T extends PersistentBase> 
   extends ResultBase<K, T> {
 
   public HBaseResult(HBaseStore<K,T> dataStore, Query<K, T> query) {

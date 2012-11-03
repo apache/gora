@@ -23,16 +23,17 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Arrays;
 
-import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.store.DataStore;
+import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.IOUtils;
 
 /**
  * Implementation for {@link PartitionQuery}.
  */
-public class PartitionQueryImpl<K, T extends Persistent>
+public class PartitionQueryImpl<K, T extends PersistentBase>
   extends QueryBase<K, T> implements PartitionQuery<K, T> {
 
   protected Query<K, T> baseQuery;
@@ -53,7 +54,7 @@ public class PartitionQueryImpl<K, T extends Persistent>
     this.locations = locations;
     setStartKey(startKey);
     setEndKey(endKey);
-    this.dataStore = baseQuery.getDataStore();
+    this.dataStore = (DataStoreBase<K, T>) baseQuery.getDataStore();
   }
 
   @Override
@@ -146,7 +147,7 @@ public String[] getLocations() {
     //we should override the data store as basequery's data store
     //also we may not call super.readFields so that temporary this.dataStore
     //is not created at all
-    this.dataStore = baseQuery.getDataStore();
+    this.dataStore = (DataStoreBase<K, T>) baseQuery.getDataStore();
   }
 
   @Override

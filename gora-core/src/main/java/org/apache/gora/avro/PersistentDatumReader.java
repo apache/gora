@@ -38,13 +38,14 @@ import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.State;
 import org.apache.gora.persistency.StatefulHashMap;
 import org.apache.gora.persistency.StatefulMap;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.persistency.impl.StateManagerImpl;
 import org.apache.gora.util.IOUtils;
 
 /**
  * PersistentDatumReader reads, fields' dirty and readable information.
  */
-public class PersistentDatumReader<T extends Persistent>
+public class PersistentDatumReader<T extends PersistentBase>
   extends SpecificDatumReader<T> {
 
   private Schema rootSchema;
@@ -212,7 +213,7 @@ public class PersistentDatumReader<T extends Persistent>
   }
   
   public Persistent clone(Persistent persistent, Schema schema) {
-    Persistent cloned = persistent.newInstance(new StateManagerImpl());
+    Persistent cloned = (PersistentBase)persistent.newInstance(new StateManagerImpl());
     List<Field> fields = schema.getFields();
     for(Field field: fields) {
       int pos = field.pos();
@@ -220,10 +221,10 @@ public class PersistentDatumReader<T extends Persistent>
         case MAP    :
         case ARRAY  :
         case RECORD : 
-        case STRING : cloned.put(pos, cloneObject(
-            field.schema(), persistent.get(pos), cloned.get(pos))); break;
+        case STRING : ((PersistentBase)cloned).put(pos, cloneObject(
+            field.schema(), ((PersistentBase)persistent).get(pos), ((PersistentBase)cloned).get(pos))); break;
         case NULL   : break;
-        default     : cloned.put(pos, persistent.get(pos)); break;
+        default     : ((PersistentBase)cloned).put(pos, ((PersistentBase)persistent).get(pos)); break;
       }
     }
     

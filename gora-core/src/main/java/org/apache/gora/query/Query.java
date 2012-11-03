@@ -20,16 +20,13 @@ package org.apache.gora.query;
 
 import java.io.IOException;
 
-import org.apache.gora.persistency.Persistent;
 import org.apache.gora.store.DataStore;
-import org.apache.hadoop.conf.Configurable;
-import org.apache.hadoop.io.Writable;
 
 /**
  * A query to a data store to retrieve objects. Queries are constructed by 
  * the DataStore implementation via {@link DataStore#newQuery()}.
  */
-public interface Query<K, T extends Persistent> extends Writable, Configurable {
+public interface Query<K, T> {
 
   /**
    * Sets the dataStore of this query. Under normal operation, this call 
@@ -49,7 +46,7 @@ public interface Query<K, T extends Persistent> extends Writable, Configurable {
    * Executes the Query on the DataStore and returns the results.
    * @return the {@link Result} for the query.
    */
-  Result<K,T> execute() throws IOException;
+  Result<K,T> execute() throws Exception, IOException;
   
 //  /**
 //   * Compiles the query for performance and error checking. This 

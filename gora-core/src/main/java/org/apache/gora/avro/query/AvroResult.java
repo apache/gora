@@ -25,13 +25,13 @@ import org.apache.avro.AvroTypeException;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.Decoder;
 import org.apache.gora.avro.store.AvroStore;
-import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.impl.ResultBase;
 
 /**
  * Adapter to convert DatumReader to Result.
  */
-public class AvroResult<K, T extends Persistent> extends ResultBase<K, T> {
+public class AvroResult<K, T extends PersistentBase> extends ResultBase<K, T> {
 
   private DatumReader<T> reader;
   private Decoder decoder;
@@ -43,7 +43,6 @@ public class AvroResult<K, T extends Persistent> extends ResultBase<K, T> {
     this.decoder = decoder;
   }
 
-  @Override
   public void close() throws IOException {
   }
 

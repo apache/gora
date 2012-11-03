@@ -17,9 +17,6 @@
  */
 package org.apache.gora.store;
 
-import java.io.Closeable;
-import java.io.DataInput;
-import java.io.DataOutput;
 import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
@@ -29,9 +26,6 @@ import org.apache.gora.persistency.Persistent;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
-import org.apache.hadoop.conf.Configurable;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.Writable;
 
 /**
  * DataStore handles actual object persistence. Objects can be persisted,
@@ -42,12 +36,13 @@ import org.apache.hadoop.io.Writable;
  * <p><a name="visibility"><b>Note:</b> Results of updates ({@link #put(Object, Persistent)},
  * {@link #delete(Object)} and {@link #deleteByQuery(Query)} operations) are
  * guaranteed to be visible to subsequent get / execute operations ONLY
- * after a subsequent call to {@link #flush()}.
+ * after a subsequent call to {@link #flush()}. Additionally, exception
+ * handling is largely DataStore specific and is not largely dealt
+ * with from within this interface.
  * @param <K> the class of keys in the datastore
  * @param <T> the class of persistent objects in the datastore
  */
-public interface DataStore<K, T extends Persistent> extends Closeable,
-  Writable, Configurable {
+public interface DataStore<K, T> {
 
   /**
    * Initializes this DataStore.
@@ -57,7 +52,7 @@ public interface DataStore<K, T extends Persistent> extends Closeable,
    * @throws IOException
    */
   void initialize(Class<K> keyClass, Class<T> persistentClass,
-      Properties properties) throws IOException;
+      Properties properties);
 
   /**
    * Sets the class of the keys
@@ -94,27 +89,31 @@ public interface DataStore<K, T extends Persistent> extends Closeable,
    * to hold the objects. If the schema is already created previously,
    * or the underlying data model does not support
    * or need this operation, the operation is ignored.
+   * @throws IOException
    */
-  void createSchema() throws IOException;
+  void createSchema();
 
   /**
    * Deletes the underlying schema or table (or similar) in the datastore
    * that holds the objects. This also deletes all the data associated with
    * the schema.
+   * @throws IOException
    */
-  void deleteSchema() throws IOException;
+  void deleteSchema();
 
   /**
    * Deletes all the data associated with the schema, but keeps the
    * schema (table or similar) intact.
+   * @throws IOException
    */
-  void truncateSchema() throws IOException;
+  void truncateSchema();
 
   /**
    * Returns whether the schema that holds the data exists in the datastore.
    * @return whether schema exists
+   * @throws IOException
    */
-  boolean schemaExists() throws IOException;
+  boolean schemaExists();
 
   /**
    * Returns a new instance of the key object. If the object cannot be instantiated 
@@ -122,59 +121,67 @@ public interface DataStore<K, T extends Persistent> extends Closeable,
    * constructor) it throws an exception. Only use this function if you can 
    * make sure that the key class has a no-arg constructor.   
    * @return a new instance of the key object.
+   * @throws IOException
    */
-  K newKey() throws IOException;
+  K newKey();
 
   /**
    * Returns a new instance of the managed persistent object.
    * @return a new instance of the managed persistent object.
+   * @throws IOException
    */
-  T newPersistent() throws IOException;
+  T newPersistent();
 
   /**
    * Returns the object corresponding to the given key fetching all the fields.
    * @param key the key of the object
    * @return the Object corresponding to the key or null if it cannot be found
+   * @throws IOException
    */
-  T get(K key) throws IOException;
+  T get(K key);
 
   /**
    * Returns the object corresponding to the given key.
    * @param key the key of the object
    * @param fields the fields required in the object. Pass null, to retrieve all fields
    * @return the Object corresponding to the key or null if it cannot be found
+   * @throws IOException
    */
-  T get(K key, String[] fields) throws IOException;
+  T get(K key, String[] fields);
 
   /**
    * Inserts the persistent object with the given key. If an 
    * object with the same key already exists it will silently
    * be replaced. See also the note on 
    * <a href="#visibility">visibility</a>.
+   * @throws IOException
    */
-  void put(K key, T obj) throws IOException;
+  void put(K key, T obj);
 
   /**
    * Deletes the object with the given key
    * @param key the key of the object
    * @return whether the object was successfully deleted
+   * @throws IOException
    */
-  boolean delete(K key) throws IOException;
+  boolean delete(K key);
 
   /**
    * Deletes all the objects matching the query.
    * See also the note on <a href="#visibility">visibility</a>.
    * @param query matching records to this query will be deleted
    * @return number of deleted records
+   * @throws IOException
    */
-  long deleteByQuery(Query<K, T> query) throws IOException;
+  long deleteByQuery(Query<K, T> query);
 
   /**
    * Executes the given query and returns the results.
    * @param query the query to execute.
    * @return the results as a {@link Result} object.
+   * @throws IOException
    */
-  Result<K,T> execute(Query<K, T> query) throws IOException;
+  Result<K,T> execute(Query<K, T> query);
 
   /**
    * Constructs and returns a new Query.
@@ -189,17 +196,18 @@ public interface DataStore<K, T extends Persistent> extends Closeable,
    * is null, then the data store returns the partitions for the default query
    * (returning every object)
    * @return a List of PartitionQuery's
+   * @throws IOException 
    */
-  List<PartitionQuery<K,T>> getPartitions(Query<K,T> query)
-    throws IOException;
+  List<PartitionQuery<K,T>> getPartitions(Query<K,T> query) throws IOException;
 
   /**
    * Forces the write caches to be flushed. DataStore implementations may
    * optimize their writing by deferring the actual put / delete operations
    * until this moment.
    * See also the note on <a href="#visibility">visibility</a>.
+   * @throws IOException
    */
-  void flush() throws IOException;
+  void flush();
 
   /**
    * Sets the {@link BeanFactory} to use by the DataStore.
@@ -218,15 +226,8 @@ public interface DataStore<K, T extends Persistent> extends Closeable,
    * implementation, so that the instance is ready for GC.
    * All other DataStore methods cannot be used after this
    * method was called. Subsequent calls of this method are ignored.
+   * @throws IOException
    */
-  void close() throws IOException;
-
-  Configuration getConf();
-
-  void setConf(Configuration conf);
-
-  void readFields(DataInput in) throws IOException;
-
-  void write(DataOutput out) throws IOException;
+  void close();
 
 }

@@ -35,7 +35,7 @@ import org.apache.gora.persistency.StatefulHashMap;
  * Base classs implementing common functionality for Persistent
  * classes.
  */
-public abstract class PersistentBase implements Persistent {
+public abstract class PersistentBase implements Persistent, SpecificRecord {
 
   protected static Map<Class<?>, Map<String, Integer>> FIELD_MAP =
     new HashMap<Class<?>, Map<String,Integer>>();
@@ -43,8 +43,8 @@ public abstract class PersistentBase implements Persistent {
   protected static Map<Class<?>, String[]> FIELDS =
     new HashMap<Class<?>, String[]>();
 
-  protected static final PersistentDatumReader<Persistent> datumReader =
-    new PersistentDatumReader<Persistent>();
+  protected static final PersistentDatumReader<PersistentBase> datumReader =
+    new PersistentDatumReader<PersistentBase>();
     
   private StateManager stateManager;
 
@@ -230,7 +230,7 @@ public abstract class PersistentBase implements Persistent {
     clearReadable(getFieldIndex(field));
   }
 
-  @Override
+  //@Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (!(o instanceof SpecificRecord)) return false;
@@ -241,7 +241,7 @@ public abstract class PersistentBase implements Persistent {
     return this.hashCode() == r2.hashCode();
   }
 
-  @Override
+  //@Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
@@ -280,7 +280,7 @@ public abstract class PersistentBase implements Persistent {
     return datumReader.clone(this, getSchema());
   }
   
-  @Override
+  //@Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
     builder.append(super.toString());

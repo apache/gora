@@ -108,7 +108,7 @@ public class TestPersistentBase {
   }
   
   @Test
-  public void testClone() throws IOException {
+  public void testClone() throws IOException, Exception {
     //more tests for clone are in TestPersistentDatumReader
     @SuppressWarnings("unchecked")
     MemStore<String, Employee> store = DataStoreFactory.getDataStore(
