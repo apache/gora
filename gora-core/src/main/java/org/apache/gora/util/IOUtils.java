@@ -146,7 +146,7 @@ public class IOUtils {
   @SuppressWarnings("unchecked")
   public static<T> void serialize(Configuration conf, DataOutput out
       , T obj) throws IOException {
-    Text.writeString(out, obj.getClass().getCanonicalName());
+    Text.writeString(out, obj.getClass().getName());
     serialize(conf, out, obj, (Class<T>)obj.getClass());
   }
 
@@ -460,7 +460,7 @@ public class IOUtils {
   public static<T> void storeToConf(T obj, Configuration conf, String dataKey)
     throws IOException {
     String classKey = dataKey + "._class";
-    conf.set(classKey, obj.getClass().getCanonicalName());
+    conf.set(classKey, obj.getClass().getName());
     DefaultStringifier.store(conf, obj, dataKey);
   }
 
