@@ -37,13 +37,13 @@
     <dependency org="org.apache.gora" name="gora-core" rev="latest.integration" changing="true" conf="*->@"/> 
     <dependency org="org.jdom" name="jdom" rev="1.1" conf="*->master"/>
 
+    <dependency org="org.apache.hbase" name="hbase" rev="0.90.0" conf="compile->master">
+      <exclude org="org.apache.thrift"/>
+    </dependency>
+
     <!-- test dependencies -->
     <dependency org="org.apache.hadoop" name="hadoop-test" rev="0.20.2" conf="test->default"/>
-    <dependency org="org.apache.hbase" name="hbase" rev="0.90.0" conf="*->*">
-        <exclude org="org.apache.thrift"/>
-    </dependency>
-    <dependency org="org.apache.hbase" name="hbase-tests" rev="0.90.0" conf="*->*">
-        <artifact name="hbase-tests" type="jar" ext="jar" url="http://repo1.maven.org/maven2/org/apache/hbase/hbase/0.90.0/hbase-0.90.0-tests.jar"/>
+    <dependency org="org.apache.hbase" name="hbase-tests" rev="0.90.0" conf="test->default">
         <exclude org="org.apache.thrift"/>
     </dependency>
 

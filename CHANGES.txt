@@ -6,6 +6,8 @@ Gora Change Log
 
 trunk (current development)
 
+* GORA-178 HBase fix ivy.xml to use the correct antconfig mapping (ferdy) 
+
 * GORA-172 java.lang.ClassNotFoundException: org.apache.gora.memory.store.MemStore.MemQuery (yumeng via lewismc)
 
 * GORA-103 Datastore for gora-dynamodb (rmarroquin via lewismc)
