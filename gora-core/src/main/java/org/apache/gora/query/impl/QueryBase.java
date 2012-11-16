@@ -42,8 +42,8 @@ import org.apache.hadoop.util.ReflectionUtils;
 /**
  * Base class for Query implementations.
  */
-public abstract class QueryBase<K, T extends PersistentBase>  
-implements Query<K,T>, Writable, Configurable {
+public abstract class QueryBase<K, T extends PersistentBase>
+    implements Query<K,T>, Writable, Configurable {
 	
   protected DataStoreBase<K,T> dataStore;
 
@@ -60,8 +60,6 @@ implements Query<K,T>, Writable, Configurable {
 
   protected long limit = -1;
 
-  protected boolean isCompiled = false;
-
   private Configuration conf;
 
   public QueryBase(DataStore<K,T> dataStore) {
@@ -69,17 +67,9 @@ implements Query<K,T>, Writable, Configurable {
   }
 
   @Override
-  public Result<K,T> execute() throws Exception, IOException {
-    //compile();
+  public Result<K,T> execute() {
     return dataStore.execute(this);
   }
-
-//  @Override
-//  public void compile() {
-//    if(!isCompiled) {
-//      isCompiled = true;
-//    }
-//  }
 
   @Override
   public void setDataStore(DataStore<K, T> dataStore) {

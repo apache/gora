@@ -20,13 +20,14 @@ package org.apache.gora.query;
 
 import java.io.IOException;
 
+import org.apache.gora.persistency.Persistent;
 import org.apache.gora.store.DataStore;
 
 /**
  * A query to a data store to retrieve objects. Queries are constructed by 
  * the DataStore implementation via {@link DataStore#newQuery()}.
  */
-public interface Query<K, T> {
+public interface Query<K, T extends Persistent> {
 
   /**
    * Sets the dataStore of this query. Under normal operation, this call 
@@ -34,19 +35,19 @@ public interface Query<K, T> {
    * method only if you know what you are doing.
    * @param dataStore the dataStore of the query
    */
-  void setDataStore(DataStore<K,T> dataStore);
+  void setDataStore(DataStore<K, T> dataStore);
   
   /**
    * Returns the DataStore, that this Query is associated with.
    * @return the DataStore of the Query
    */
-  DataStore<K,T> getDataStore();
+  DataStore<K, T> getDataStore();
   
   /**
    * Executes the Query on the DataStore and returns the results.
    * @return the {@link Result} for the query.
    */
-  Result<K,T> execute() throws Exception, IOException;
+  Result<K, T> execute();
   
 //  /**
 //   * Compiles the query for performance and error checking. This 
