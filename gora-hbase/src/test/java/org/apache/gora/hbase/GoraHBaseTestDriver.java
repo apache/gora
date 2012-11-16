@@ -76,7 +76,7 @@ public class GoraHBaseTestDriver extends GoraTestDriver {
     }
   }
   
-  public Configuration  getConf() {
+  public Configuration getConf() {
       return hbaseUtil.getConfiguration();
   }
   

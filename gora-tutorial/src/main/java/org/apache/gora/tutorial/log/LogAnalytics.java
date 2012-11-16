@@ -59,8 +59,8 @@ public class LogAnalytics extends Configured implements Tool {
    * read from the input data store.
    * Note that all Hadoop serializable classes can be used as map output key and value.
    */
-  public static class LogAnalyticsMapper 
-    extends GoraMapper<Long, Pageview, TextLong, LongWritable> {
+  public static class LogAnalyticsMapper extends GoraMapper<Long, Pageview, TextLong,
+      LongWritable> {
     
     private LongWritable one = new LongWritable(1L);
   
@@ -74,8 +74,8 @@ public class LogAnalytics extends Configured implements Tool {
     };
     
     @Override
-    protected void map(Long key, Pageview pageview, Context context) 
-      throws IOException ,InterruptedException {
+    protected void map(Long key, Pageview pageview, Context context)
+        throws IOException ,InterruptedException {
       
       Utf8 url = pageview.getUrl();
       long day = getDay(pageview.getTimestamp());
@@ -99,14 +99,13 @@ public class LogAnalytics extends Configured implements Tool {
    * {@link MetricDatum} objects. The metric datum objects are stored 
    * as job outputs in the output data store.
    */
-  public static class LogAnalyticsReducer 
-    extends GoraReducer<TextLong, LongWritable, String, MetricDatum> {
+  public static class LogAnalyticsReducer extends GoraReducer<TextLong, LongWritable,
+      String, MetricDatum> {
     
     private MetricDatum metricDatum = new MetricDatum();
     
     @Override
-    protected void reduce(TextLong tuple
-        , Iterable<LongWritable> values, Context context) 
+    protected void reduce(TextLong tuple, Iterable<LongWritable> values, Context context)
       throws IOException ,InterruptedException {
       
       long sum = 0L; //sum up the values
@@ -130,23 +129,23 @@ public class LogAnalytics extends Configured implements Tool {
   
   /**
    * Creates and returns the {@link Job} for submitting to Hadoop mapreduce.
-   * @param dataStore
-   * @param query
+   * @param inStore
+   * @param outStore
+   * @param numReducer
    * @return
    * @throws IOException
    */
-  public Job createJob(DataStore<Long, Pageview> inStore
-      , DataStore<String, MetricDatum> outStore, int numReducer) throws IOException {
+  public Job createJob(DataStore<Long, Pageview> inStore,
+      DataStore<String, MetricDatum> outStore, int numReducer) throws IOException {
     Job job = new Job(getConf());
-
     job.setJobName("Log Analytics");
     job.setNumReduceTasks(numReducer);
     job.setJarByClass(getClass());
 
     /* Mappers are initialized with GoraMapper.initMapper() or 
      * GoraInputFormat.setInput()*/
-    GoraMapper.initMapperJob(job, inStore, TextLong.class, LongWritable.class
-        , LogAnalyticsMapper.class, true);
+    GoraMapper.initMapperJob(job, inStore, TextLong.class, LongWritable.class,
+        LogAnalyticsMapper.class, true);
 
     /* Reducers are initialized with GoraReducer#initReducer().
      * If the output is not to be persisted via Gora, any reducer 
@@ -161,7 +160,7 @@ public class LogAnalytics extends Configured implements Tool {
     
     DataStore<Long, Pageview> inStore;
     DataStore<String, MetricDatum> outStore;
-    Configuration conf = new Configuration();    
+    Configuration conf = new Configuration();
 
     if(args.length > 0) {
       String dataStoreClass = args[0];
@@ -171,11 +170,10 @@ public class LogAnalytics extends Configured implements Tool {
         dataStoreClass = args[1];
       }
       outStore = DataStoreFactory.
-          getDataStore(dataStoreClass, 
-			 String.class, MetricDatum.class, conf);
+          getDataStore(dataStoreClass, String.class, MetricDatum.class, conf);
     } else {
-	inStore = DataStoreFactory.getDataStore(Long.class, Pageview.class, conf);
-	outStore = DataStoreFactory.getDataStore(String.class, MetricDatum.class, conf);
+	    inStore = DataStoreFactory.getDataStore(Long.class, Pageview.class, conf);
+	    outStore = DataStoreFactory.getDataStore(String.class, MetricDatum.class, conf);
     }
     
     Job job = createJob(inStore, outStore, 3);

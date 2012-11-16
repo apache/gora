@@ -21,7 +21,6 @@ package org.apache.gora.hbase.query;
 import java.io.IOException;
 
 import org.apache.gora.hbase.store.HBaseStore;
-import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.hadoop.hbase.client.Result;
@@ -30,8 +29,7 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 /**
  * Result of a query based on an HBase scanner.
  */
-public class HBaseScannerResult<K, T extends PersistentBase> 
-  extends HBaseResult<K, T> {
+public class HBaseScannerResult<K, T extends PersistentBase> extends HBaseResult<K, T> {
 
   private final ResultScanner scanner;
   
