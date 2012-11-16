@@ -135,7 +135,5 @@ public abstract class ResultBase<K, T extends Persistent>
   
   @Override
   public void close() throws IOException{
-	// TODO Auto-generated method stub
-	
   }
 }

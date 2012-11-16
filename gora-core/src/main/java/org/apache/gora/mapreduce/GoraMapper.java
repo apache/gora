@@ -29,8 +29,7 @@ import org.apache.hadoop.mapreduce.Partitioner;
 /**
  * Base class for Gora based {@link Mapper}s.
  */
-public class GoraMapper<K1, V1 extends Persistent, K2, V2>
-  extends Mapper<K1, V1, K2, V2> {
+public class GoraMapper<K1, V1 extends Persistent, K2, V2> extends Mapper<K1, V1, K2, V2> {
 
   /**
    * Initializes the Mapper, and sets input parameters for the job. All of 
@@ -48,8 +47,7 @@ public class GoraMapper<K1, V1 extends Persistent, K2, V2>
    * @param reuseObjects whether to reuse objects in serialization
    */
   @SuppressWarnings("rawtypes")
-  public static <K1, V1 extends Persistent, K2, V2>
-  void initMapperJob(
+  public static <K1, V1 extends Persistent, K2, V2> void initMapperJob(
       Job job,
       Class<? extends DataStore<K1,V1>> dataStoreClass,
       Class<K1> inKeyClass, 
@@ -58,8 +56,7 @@ public class GoraMapper<K1, V1 extends Persistent, K2, V2>
       Class<V2> outValueClass,
       Class<? extends GoraMapper> mapperClass,
       Class<? extends Partitioner> partitionerClass, 
-      boolean reuseObjects)
-  throws IOException {
+      boolean reuseObjects) throws IOException {
     
     //set the input via GoraInputFormat
     GoraInputFormat.setInput(job, dataStoreClass, inKeyClass, inValueClass, reuseObjects);
@@ -88,8 +85,7 @@ public class GoraMapper<K1, V1 extends Persistent, K2, V2>
    * @param reuseObjects whether to reuse objects in serialization
    */  
   @SuppressWarnings("rawtypes")
-  public static <K1, V1 extends Persistent, K2, V2>
-  void initMapperJob(
+  public static <K1, V1 extends Persistent, K2, V2> void initMapperJob(
       Job job,
       Class<? extends DataStore<K1,V1>> dataStoreClass,
       Class<K1> inKeyClass, 
@@ -97,10 +93,9 @@ public class GoraMapper<K1, V1 extends Persistent, K2, V2>
       Class<K2> outKeyClass, 
       Class<V2> outValueClass,
       Class<? extends GoraMapper> mapperClass,
-      boolean reuseObjects)
-  throws IOException {
-    initMapperJob(job, dataStoreClass, inKeyClass, inValueClass, outKeyClass
-        , outValueClass, mapperClass, null, reuseObjects);
+      boolean reuseObjects) throws IOException {
+    initMapperJob(job, dataStoreClass, inKeyClass, inValueClass, outKeyClass,
+        outValueClass, mapperClass, null, reuseObjects);
   }
   
   /**
@@ -115,8 +110,7 @@ public class GoraMapper<K1, V1 extends Persistent, K2, V2>
    * @param reuseObjects whether to reuse objects in serialization
    */
   @SuppressWarnings("rawtypes")
-  public static <K1, V1 extends Persistent, K2, V2>
-  void initMapperJob(
+  public static <K1, V1 extends Persistent, K2, V2> void initMapperJob(
       Job job, 
       Query<K1,V1> query,
       DataStore<K1,V1> dataStore,
@@ -124,8 +118,7 @@ public class GoraMapper<K1, V1 extends Persistent, K2, V2>
       Class<V2> outValueClass,
       Class<? extends GoraMapper> mapperClass,
       Class<? extends Partitioner> partitionerClass, 
-      boolean reuseObjects)
-  throws IOException {
+      boolean reuseObjects) throws IOException {
     //set the input via GoraInputFormat
     GoraInputFormat.setInput(job, query, dataStore, reuseObjects);
 
@@ -148,15 +141,13 @@ public class GoraMapper<K1, V1 extends Persistent, K2, V2>
    * @param reuseObjects whether to reuse objects in serialization
    */
   @SuppressWarnings({ "rawtypes" })
-  public static <K1, V1 extends Persistent, K2, V2>
-  void initMapperJob(
+  public static <K1, V1 extends Persistent, K2, V2> void initMapperJob(
       Job job, 
       DataStore<K1,V1> dataStore,
       Class<K2> outKeyClass, 
       Class<V2> outValueClass,
       Class<? extends GoraMapper> mapperClass, 
-      boolean reuseObjects)
-  throws IOException {
+      boolean reuseObjects) throws IOException {
     initMapperJob(job, dataStore.newQuery(), dataStore, 
         outKeyClass, outValueClass, mapperClass, reuseObjects);
   }
@@ -172,17 +163,14 @@ public class GoraMapper<K1, V1 extends Persistent, K2, V2>
    * @param reuseObjects whether to reuse objects in serialization
    */
   @SuppressWarnings({ "rawtypes" })
-  public static <K1, V1 extends Persistent, K2, V2>
-  void initMapperJob(
+  public static <K1, V1 extends Persistent, K2, V2> void initMapperJob(
       Job job, 
       Query<K1,V1> query, 
       DataStore<K1,V1> dataStore,
       Class<K2> outKeyClass, 
       Class<V2> outValueClass,
       Class<? extends GoraMapper> mapperClass, 
-      boolean reuseObjects)
-  throws IOException {
-
+      boolean reuseObjects) throws IOException {
     initMapperJob(job, query, dataStore, outKeyClass, outValueClass,
         mapperClass, null, reuseObjects);
   }

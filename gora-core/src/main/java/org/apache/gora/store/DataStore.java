@@ -42,7 +42,7 @@ import org.apache.gora.query.Result;
  * @param <K> the class of keys in the datastore
  * @param <T> the class of persistent objects in the datastore
  */
-public interface DataStore<K, T> {
+public interface DataStore<K, T extends Persistent> {
 
   /**
    * Initializes this DataStore.
@@ -51,8 +51,7 @@ public interface DataStore<K, T> {
    * @param properties extra metadata
    * @throws IOException
    */
-  void initialize(Class<K> keyClass, Class<T> persistentClass,
-      Properties properties);
+  void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties);
 
   /**
    * Sets the class of the keys
@@ -181,7 +180,7 @@ public interface DataStore<K, T> {
    * @return the results as a {@link Result} object.
    * @throws IOException
    */
-  Result<K,T> execute(Query<K, T> query);
+  Result<K, T> execute(Query<K, T> query);
 
   /**
    * Constructs and returns a new Query.
@@ -198,7 +197,7 @@ public interface DataStore<K, T> {
    * @return a List of PartitionQuery's
    * @throws IOException 
    */
-  List<PartitionQuery<K,T>> getPartitions(Query<K,T> query) throws IOException;
+  List<PartitionQuery<K, T>> getPartitions(Query<K, T> query) throws IOException;
 
   /**
    * Forces the write caches to be flushed. DataStore implementations may

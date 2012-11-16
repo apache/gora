@@ -6,6 +6,8 @@ Gora Change Log
 
 trunk (current development)
 
+* GORA-179 Modify the Query interface to be Query<K, T extends Persistent> to be more precise
+
 * GORA-178 HBase fix ivy.xml to use the correct antconfig mapping (ferdy) 
 
 * GORA-172 java.lang.ClassNotFoundException: org.apache.gora.memory.store.MemStore.MemQuery (yumeng via lewismc)

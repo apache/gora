@@ -29,7 +29,7 @@ import org.apache.gora.store.DataStore;
 /**
  * Base class for Query implementations.
  */
-public abstract class QueryWSBase<K, T extends Persistent> implements Query<K,T>{
+public abstract class QueryWSBase<K, T extends Persistent> implements Query<K,T> {
 	
   /**
    * Data store used for this query
@@ -88,7 +88,7 @@ public abstract class QueryWSBase<K, T extends Persistent> implements Query<K,T>
   /**
    * Executes the query
    */
-  public Result<K,T> execute() throws Exception {
+  public Result<K,T> execute() {
     //compile();
     return dataStore.execute(this);
   }

@@ -20,6 +20,7 @@ package org.apache.gora.query;
 
 import java.io.IOException;
 
+import org.apache.gora.persistency.Persistent;
 import org.apache.gora.store.DataStore;
 
 /**
@@ -27,13 +28,13 @@ import org.apache.gora.store.DataStore;
  * iterated by calling {@link #next()}, {@link #get()} 
  * and {@link #getKey()}. 
  */
-public interface Result<K,T> {
+public interface Result<K, T extends Persistent> {
 
   /**
    * Returns the DataStore, that this Result is associated with.
    * @return the DataStore of the Result
    */
-  DataStore<K,T> getDataStore();
+  DataStore<K, T> getDataStore();
   
   /**
    * Returns the Query object for this Result.
@@ -80,7 +81,7 @@ public interface Result<K,T> {
   /**
    * Returns how far along the result has iterated, a value between 0 and 1.
    */
-  float getProgress() throws IOException, InterruptedException, Exception;
+  float getProgress() throws IOException, InterruptedException;
 
   void close() throws IOException;
   

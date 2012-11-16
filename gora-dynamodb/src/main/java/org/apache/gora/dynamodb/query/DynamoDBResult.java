@@ -64,7 +64,7 @@ public class DynamoDBResult<K, T extends Persistent> extends ResultWSBase<K, T> 
   /**
    * Gets the items reading progress
    */
-  public float getProgress() throws IOException, InterruptedException, Exception {
+  public float getProgress() throws IOException, InterruptedException {
     if (this.limit <= 0 || this.offset <= 0)
       return 0;
     return this.limit/this.offset;
@@ -82,7 +82,6 @@ public class DynamoDBResult<K, T extends Persistent> extends ResultWSBase<K, T> 
 
   @Override
   public void close() throws IOException {
-  // TODO Auto-generated method stub
   }
 
 }

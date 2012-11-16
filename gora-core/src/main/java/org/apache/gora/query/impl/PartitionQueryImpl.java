@@ -33,8 +33,8 @@ import org.apache.gora.util.IOUtils;
 /**
  * Implementation for {@link PartitionQuery}.
  */
-public class PartitionQueryImpl<K, T extends PersistentBase>
-  extends QueryBase<K, T> implements PartitionQuery<K, T> {
+public class PartitionQueryImpl<K, T extends PersistentBase> extends QueryBase<K, T>
+    implements PartitionQuery<K, T> {
 
   protected Query<K, T> baseQuery;
   protected String[] locations;
