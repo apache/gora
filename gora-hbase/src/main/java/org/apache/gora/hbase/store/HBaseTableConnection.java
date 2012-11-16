@@ -43,7 +43,7 @@ import org.apache.hadoop.hbase.util.Pair;
  * Thread safe implementation to connect to a HBase table.
  *
  */
-public class HBaseTableConnection implements HTableInterface{
+public class HBaseTableConnection implements HTableInterface {
   /*
    * The current implementation uses ThreadLocal HTable instances. It keeps
    * track of the floating instances in order to correctly flush and close
@@ -67,8 +67,8 @@ public class HBaseTableConnection implements HTableInterface{
    * @param autoflush
    * @throws IOException
    */
-  public HBaseTableConnection(Configuration conf, String tableName, 
-      boolean autoflush) throws IOException {
+  public HBaseTableConnection(Configuration conf, String tableName, boolean autoflush)
+      throws IOException {
     this.conf = conf;
     this.tables = new ThreadLocal<HTable>();
     this.tableName = tableName;

@@ -411,7 +411,7 @@ implements Configurable {
         ResultScanner scanner = createScanner(query);
   
         org.apache.gora.query.Result<K,T> result
-        = new HBaseScannerResult<K,T>(this,query, scanner);
+            = new HBaseScannerResult<K,T>(this,query, scanner);
   
         return result;
       }
@@ -422,8 +422,7 @@ implements Configurable {
     }
   }
 
-  public ResultScanner createScanner(Query<K, T> query)
-  throws IOException {
+  public ResultScanner createScanner(Query<K, T> query) throws IOException {
     final Scan scan = new Scan();
     if (query.getStartKey() != null) {
       scan.setStartRow(toBytes(query.getStartKey()));
