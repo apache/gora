@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  * A Base class for Avro persistent {@link DataStore}s.
  */
 public abstract class DataStoreBase<K, T extends PersistentBase>
-implements DataStore<K, T>, Configurable, Writable, Closeable {
+    implements DataStore<K, T>, Configurable, Writable, Closeable {
 	
   protected BeanFactory<K, T> beanFactory;
 
