@@ -18,7 +18,6 @@
 
 package org.apache.gora.mapreduce;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,23 +39,20 @@ public class MapReduceTestUtils {
   private static final Logger log = LoggerFactory.getLogger(MapReduceTestUtils.class);
   
   /** Tests by running the {@link QueryCounter} mapreduce job */
-  public static void testCountQuery(DataStore<String, WebPage> dataStore
-      , Configuration conf) 
-  throws Exception {
-    
-	((DataStoreBase<String, WebPage>)dataStore).setConf(conf);
+  public static void testCountQuery(DataStore<String, WebPage> dataStore, Configuration conf)
+      throws Exception {
+
+    ((DataStoreBase<String, WebPage>)dataStore).setConf(conf);
     
     //create input
     WebPageDataCreator.createWebPageData(dataStore);
-    
-    
+
     QueryCounter<String,WebPage> counter = new QueryCounter<String,WebPage>(conf);
     Query<String,WebPage> query = dataStore.newQuery();
     query.setFields(WebPage._ALL_FIELDS);
     
     dataStore.close();
-    
-    
+
     //run the job
     log.info("running count query job");
     long result = counter.countQuery(dataStore, query);
@@ -64,11 +60,9 @@ public class MapReduceTestUtils {
     
     //assert results
     Assert.assertEquals(WebPageDataCreator.URLS.length, result);
-    
   }
  
-  public static void testWordCount(Configuration conf, 
-      DataStore<String,WebPage> inStore, DataStore<String, 
+  public static void testWordCount(Configuration conf, DataStore<String,WebPage> inStore, DataStore<String,
       TokenDatum> outStore) throws Exception {
 	  //Datastore now has to be a Hadoop based datastore
     ((DataStoreBase<String,WebPage>)inStore).setConf(conf);
@@ -97,7 +91,7 @@ public class MapReduceTestUtils {
   }
   
   private static void assertTokenCount(DataStore<String, TokenDatum> outStore,
-      String token, int count) throws IOException, Exception {
+      String token, int count) throws Exception {
     TokenDatum datum = outStore.get(token, null);
     Assert.assertNotNull("token:" + token + " cannot be found in datastore", datum);
     Assert.assertEquals("count for token:" + token + " is wrong", count, datum.getCount());
