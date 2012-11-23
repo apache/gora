@@ -220,6 +220,10 @@ implements Configurable {
         Type type = field.schema().getType();
         Object o = persistent.get(i);
         HBaseColumn hcol = mapping.getColumn(field.name());
+        if (hcol == null) {
+          throw new RuntimeException("HBase mapping for field ["+ persistent.getClass().getName() +
+              "#"+ field.name()+"] not found. Wrong gora-hbase-mapping.xml?");
+        }
         switch(type) {
           case MAP:
             if(o instanceof StatefulMap) {
@@ -322,9 +326,9 @@ implements Configurable {
       }
       table.delete(deletes);
       return deletes.size();
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+    } catch (Exception ex) {
+      LOG.error(ex.getMessage());
+      LOG.error(ex.getStackTrace().toString());
       return -1;
     }
   }
@@ -438,8 +442,11 @@ implements Configurable {
   private void addFields(Get get, String[] fieldNames) {
     for (String f : fieldNames) {
       HBaseColumn col = mapping.getColumn(f);
+      if (col == null) {
+        throw new  RuntimeException("HBase mapping for field ["+ f +"] not found. " +
+            "Wrong gora-hbase-mapping.xml?");
+      }
       Schema fieldSchema = fieldMap.get(f).schema();
-
       switch (fieldSchema.getType()) {
         case MAP:
         case ARRAY:
@@ -455,6 +462,10 @@ implements Configurable {
     String[] fields = query.getFields();
     for (String f : fields) {
       HBaseColumn col = mapping.getColumn(f);
+      if (col == null) {
+        throw new  RuntimeException("HBase mapping for field ["+ f +"] not found. " +
+            "Wrong gora-hbase-mapping.xml?");
+      }
       Schema fieldSchema = fieldMap.get(f).schema();
       switch (fieldSchema.getType()) {
         case MAP:
@@ -472,6 +483,10 @@ implements Configurable {
     String[] fields = query.getFields();
     for (String f : fields) {
       HBaseColumn col = mapping.getColumn(f);
+      if (col == null) {
+        throw new  RuntimeException("HBase mapping for field ["+ f +"] not found. " +
+            "Wrong gora-hbase-mapping.xml?");
+      }
       Schema fieldSchema = fieldMap.get(f).schema();
       switch (fieldSchema.getType()) {
         case MAP:
@@ -505,6 +520,10 @@ implements Configurable {
     StateManager stateManager = persistent.getStateManager();
     for (String f : fields) {
       HBaseColumn col = mapping.getColumn(f);
+      if (col == null) {
+        throw new  RuntimeException("HBase mapping for field ["+ f +"] not found. " +
+            "Wrong gora-hbase-mapping.xml?");
+      }
       Field field = fieldMap.get(f);
       Schema fieldSchema = field.schema();
       switch(fieldSchema.getType()) {
@@ -634,8 +653,12 @@ implements Configurable {
         }
       }
     } catch(IOException ex) {
+      LOG.error(ex.getMessage());
+      LOG.error(ex.getStackTrace().toString());
       throw ex;
     } catch(Exception ex) {
+      LOG.error(ex.getMessage());
+      LOG.error(ex.getStackTrace().toString());
       throw new IOException(ex);
     }
 

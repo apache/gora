@@ -82,18 +82,19 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
       Properties properties) {
-      setKeyClass(keyClass);
-      setPersistentClass(persistentClass);
-      if(this.beanFactory == null)
-        this.beanFactory = new BeanFactoryImpl<K, T>(keyClass, persistentClass);
-      schema = this.beanFactory.getCachedPersistent().getSchema();
-      fieldMap = AvroUtils.getFieldMap(schema);
-  
-      autoCreateSchema = DataStoreFactory.getAutoCreateSchema(properties, this);
-      this.properties = properties;
-  
-      datumReader = new PersistentDatumReader<T>(schema, false);
-      datumWriter = new PersistentDatumWriter<T>(schema, false);
+    setKeyClass(keyClass);
+    setPersistentClass(persistentClass);
+    if (this.beanFactory == null) {
+      this.beanFactory = new BeanFactoryImpl<K, T>(keyClass, persistentClass);
+    }
+    schema = this.beanFactory.getCachedPersistent().getSchema();
+    fieldMap = AvroUtils.getFieldMap(schema);
+
+    autoCreateSchema = DataStoreFactory.getAutoCreateSchema(properties, this);
+    this.properties = properties;
+
+    datumReader = new PersistentDatumReader<T>(schema, false);
+    datumWriter = new PersistentDatumWriter<T>(schema, false);
   }
 
   @Override
