@@ -6,6 +6,8 @@ Gora Change Log
 
 trunk (current development)
 
+* GORA-193 Make sure gora-core test dependency is always generated when packaging (lewismc)
+
 * GORA-186 Show better errors when a field is missing in HBase mapping (Alfonso Nishikawa via hsaputra)
 
 * GORA-179 Modify the Query interface to be Query<K, T extends Persistent> to be more precise
