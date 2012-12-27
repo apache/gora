@@ -37,68 +37,68 @@ import com.amazonaws.services.dynamodb.model.KeySchema;
 import com.amazonaws.services.dynamodb.model.KeySchemaElement;
 
 public class DynamoDBQuery<K, T extends Persistent> extends QueryWSBase<K, T> {
-	
+
   /**
    * Helper to write useful information into the logs
    */
   public static final Logger LOG = LoggerFactory.getLogger(DynamoDBQuery.class);
-	
+
   /**
    * Reads consistency level
    */
   private boolean consistencyReadLevel;
-	
+
   /**
    * Range comparator operator
    */
   private static ComparisonOperator rangeCompOp;
-	
+
   /**
    * Scan comparator operator
    */
   private static ComparisonOperator scanCompOp;
-	
+
   /**
    * Range query type property
    */
   public static final String RANGE_QUERY = "range";
-	
+
   /**
    * Scan query type property
    */
   public static final String SCAN_QUERY = "scan";
-	
+
   /**
    * Query type property
    */
   private static String type;
-	
+
   /**
    * Generic query
    */
   private Query<K, T> query;
-	
+
   /**
    * DynamoDB Expression to be used.
    * This could be a range or a scan DynamoDB Expression
    */
   private Object dynamoDBExpression;
-	
+
   /**
    * Key schema used for the query
    */
   private KeySchema keySchema;
-	
+
   /**
    * Hash key used for the query
    */
   private K hashKey;
-	
+
   /**
    * Default Constructor
    */
   public DynamoDBQuery(){
-  	super(null);
+  super(null);
   }
   
   /**
@@ -106,9 +106,9 @@ public class DynamoDBQuery<K, T extends Persistent> extends QueryWSBase<K, T> {
    * @param dataStore
    */
   public DynamoDBQuery(DataStore<K, T> dataStore) {
-  	super(dataStore);
+  super(dataStore);
   }
-	
+
   /**
    * Sets hash key
    */
@@ -116,7 +116,7 @@ public class DynamoDBQuery<K, T extends Persistent> extends QueryWSBase<K, T> {
   public void setKey(K key) {
     this.hashKey = key;
   }
-	
+
   /**
    * Gets hash key
    */
@@ -124,7 +124,7 @@ public class DynamoDBQuery<K, T extends Persistent> extends QueryWSBase<K, T> {
   public K getKey() {
     return this.hashKey;
   }
-	
+
   /**
    * Builds query expression depending on query type (range or scan) 
    */
@@ -139,10 +139,10 @@ public class DynamoDBQuery<K, T extends Persistent> extends QueryWSBase<K, T> {
     if (DynamoDBQuery.getType().equals(SCAN_QUERY))
       buildScanExpression(hashAttrValue);
   }
-	
+
   /**
    * Builds scan query expression using a hash attribute value where to start
-   * @param pHashAttrValue	Hash attribute value where to start scanning
+   * @param pHashAttrValueHash attribute value where to start scanning
    */
   public void buildScanExpression(AttributeValue pHashAttrValue){
     DynamoDBScanExpression newScanExpression = new DynamoDBScanExpression();
@@ -150,11 +150,11 @@ public class DynamoDBQuery<K, T extends Persistent> extends QueryWSBase<K, T> {
     newScanExpression.addFilterCondition(getKeySchema().getHashKeyElement().getAttributeName(), buildKeyScanCondition());
     dynamoDBExpression = newScanExpression;
   }
-	
+
   /**
    * Builds range query expression
-   * @param pNewCondition		Condition for querying
-   * @param pHashAttrValue	Hash attribute value where to start
+   * @param pNewConditionCondition for querying
+   * @param pHashAttrValueHash attribute value where to start
    */
   public void buildQueryExpression(Condition pNewCondition, AttributeValue pHashAttrValue) {
     DynamoDBQueryExpression newQueryExpression = new DynamoDBQueryExpression(pHashAttrValue); 
@@ -162,10 +162,10 @@ public class DynamoDBQuery<K, T extends Persistent> extends QueryWSBase<K, T> {
     newQueryExpression.setRangeKeyCondition(pNewCondition);
     dynamoDBExpression = newQueryExpression;
   }
-	
+
   /**
    * Builds hash key attribute from generic query received
-   * @return	AttributeValue build from query
+   * @returnAttributeValue build from query
    */
   private AttributeValue buildKeyHashAttribute(){
     String pAttrType = getKeySchema().getHashKeyElement().getAttributeType();
@@ -175,7 +175,7 @@ public class DynamoDBQuery<K, T extends Persistent> extends QueryWSBase<K, T> {
       return new AttributeValue().withN(getHashKey(query.getKey()).toString());
     return null;
   }
-	
+
   /**
    * Gets hash key for querying
    * @param key
@@ -277,7 +277,7 @@ public class DynamoDBQuery<K, T extends Persistent> extends QueryWSBase<K, T> {
   public boolean getConsistencyReadLevel(){
     return consistencyReadLevel;
   }
-	
+
   /**
    * Sets read consistency level
    * @param pConsistencyReadLevel
@@ -285,7 +285,7 @@ public class DynamoDBQuery<K, T extends Persistent> extends QueryWSBase<K, T> {
   public void setConsistencyReadLevel(boolean pConsistencyReadLevel){
     this.consistencyReadLevel = pConsistencyReadLevel;
   }
-	
+
   /**
    * Gets key schema
    * @return
@@ -317,7 +317,7 @@ public class DynamoDBQuery<K, T extends Persistent> extends QueryWSBase<K, T> {
   public void setQuery(Query<K, T> pQuery){
     this.query = pQuery;
   }
-	
+
   /**
    * Gets query performed
    * @return
@@ -359,7 +359,7 @@ public class DynamoDBQuery<K, T extends Persistent> extends QueryWSBase<K, T> {
   public static void setScanCompOp(ComparisonOperator scanCompOp) {
     DynamoDBQuery.scanCompOp = scanCompOp;
   }
-	
+
   /**
    * Gets range query comparator operator
    * @return
@@ -369,7 +369,7 @@ public class DynamoDBQuery<K, T extends Persistent> extends QueryWSBase<K, T> {
       rangeCompOp = ComparisonOperator.BETWEEN;
     return rangeCompOp;
   }
-	
+
   /**
    * Sets range query comparator operator
    * @param pRangeCompOp

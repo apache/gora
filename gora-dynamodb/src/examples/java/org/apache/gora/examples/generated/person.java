@@ -49,19 +49,19 @@ public class person implements Persistent {
     @Override
     public String[] getFields() { return null; }
     @Override
-    public String getField(int index) {	return null; }
+    public String getField(int index) { return null; }
     @Override
     public int getFieldIndex(String field) { return 0; }
     @Override
     public void clear() { }
     @Override
-    public person clone() {	return null; }
+    public person clone() { return null; }
     @Override
     public boolean isNew() { return false; }
     @Override
     public void setNew() { }
     @Override
-    public void clearNew() {	}
+    public void clearNew() { }
     @Override
     public boolean isDirty() { return false; }
     @Override
@@ -81,7 +81,7 @@ public class person implements Persistent {
     @Override
     public void clearDirty() { }
     @Override
-    public boolean isReadable(int fieldIndex) {	return false; }
+    public boolean isReadable(int fieldIndex) { return false; }
     @Override
     public boolean isReadable(String field) { return false; }
     @Override
