@@ -53,7 +53,7 @@ public class GoraDynamoDBCompiler {
     GoraDynamoDBCompiler compiler = new GoraDynamoDBCompiler(dest);
     DynamoDBMapping dynamoDBMap = compiler.readMapping(src);
     if (dynamoDBMap.getTables().isEmpty())  throw new IllegalStateException("There are not tables defined.");
-	
+
     for(String tableName : dynamoDBMap.getTables().keySet()){
       compiler.compile(tableName, dynamoDBMap.getKeySchema(tableName), dynamoDBMap.getItems(tableName));
     }
@@ -61,9 +61,9 @@ public class GoraDynamoDBCompiler {
 
   /**
    * Method in charge of compiling a specific table using a key schema and a set of attributes
-   * @param pTableName	Table name
-   * @param pKeySchema	Key schema used
-   * @param pItems		List of items belonging to a specific table
+   * @param pTableNameTable name
+   * @param pKeySchemaKey schema used
+   * @param pItemsList of items belonging to a specific table
    */
   private void compile(String pTableName, KeySchema pKeySchema, List<Map<String, String>> pItems){
     // TODO define where the generated will go 
@@ -88,8 +88,8 @@ public class GoraDynamoDBCompiler {
   
   /**
    * Receives a list of all items and creates getters and setters for them
-   * @param pItems	The items belonging to the table
-   * @param pIden	The number of spaces used for identation
+   * @param pItemsThe items belonging to the table
+   * @param pIdenThe number of spaces used for identation
    * @throws IOException
    */
   private void setItems(List<Map<String, String>> pItems, int pIden) throws IOException{
@@ -111,9 +111,9 @@ public class GoraDynamoDBCompiler {
   
   /**
    * Creates item getters and setters
-   * @param pItemName	Item's name
-   * @param pItemType	Item's type
-   * @param pIden		Number of spaces used for indentation
+   * @param pItemNameItem's name
+   * @param pItemTypeItem's type
+   * @param pIdenNumber of spaces used for indentation
    * @throws IOException
    */
   private void setItemMethods(String pItemName, String pItemType, int pIden) throws IOException{
@@ -125,8 +125,8 @@ public class GoraDynamoDBCompiler {
   
   /**
    * Creates key getters and setters 
-   * @param pKeySchema	The key schema for a specific table
-   * @param pIden		Number of spaces used for indentation
+   * @param pKeySchemaThe key schema for a specific table
+   * @param pIdenNumber of spaces used for indentation
    * @throws IOException
    */
   private void setKeyMethods(KeySchema pKeySchema, int pIden) throws IOException{
@@ -157,8 +157,8 @@ public class GoraDynamoDBCompiler {
   
   /**
    * Creates the key attributes within the generated class
-   * @param pKeySchema		Key schema
-   * @param pIden			Number of spaces used for indentation
+   * @param pKeySchemaKey schema
+   * @param pIdenNumber of spaces used for indentation
    * @throws IOException
    */
   private void setKeyAttributes(KeySchema pKeySchema, int pIden) throws IOException{
@@ -183,7 +183,7 @@ public class GoraDynamoDBCompiler {
   
   /**
    * Returns camel case version of a string
-   * @param s	String to be camelcasified
+   * @param sString to be camelcasified
    * @return
    */
   private static String camelCasify(String s) {
@@ -208,7 +208,7 @@ public class GoraDynamoDBCompiler {
 
   /**
    * Starts the java generated class file
-   * @param name	Class name
+   * @param nameClass name
    * @param space
    * @throws IOException
    */
@@ -242,7 +242,7 @@ public class GoraDynamoDBCompiler {
 
   /**
    * Creates default methods inherited from upper classes
-   * @param pIden	Number of spaces used for indentation
+   * @param pIdenNumber of spaces used for indentation
    * @throws IOException
    */
   private void setDefaultMethods(int pIden) throws IOException {
@@ -255,19 +255,19 @@ public class GoraDynamoDBCompiler {
     line(pIden, "@Override");
     line(pIden, "public String[] getFields() { return null; }");
     line(pIden, "@Override");
-    line(pIden, "public String getField(int index) {	return null; }");
+    line(pIden, "public String getField(int index) {return null; }");
     line(pIden, "@Override");
     line(pIden, "public int getFieldIndex(String field) { return 0; }");
     line(pIden, "@Override");
     line(pIden, "public void clear() { }");
     line(pIden, "@Override");
-    line(pIden, "public person clone() {	return null; }");
+    line(pIden, "public person clone() {return null; }");
     line(pIden, "@Override");
     line(pIden, "public boolean isNew() { return false; }");
     line(pIden, "@Override");
     line(pIden, "public void setNew() { }");
     line(pIden, "@Override");
-    line(pIden, "public void clearNew() {	}");
+    line(pIden, "public void clearNew() {}");
     line(pIden, "@Override");
     line(pIden, "public boolean isDirty() { return false; }");
     line(pIden, "@Override");
@@ -287,7 +287,7 @@ public class GoraDynamoDBCompiler {
     line(pIden, "@Override");
     line(pIden, "public void clearDirty() { }");
     line(pIden, "@Override");
-    line(pIden, "public boolean isReadable(int fieldIndex) {	return false; }");
+    line(pIden, "public boolean isReadable(int fieldIndex) {return false; }");
     line(pIden, "@Override");
     line(pIden, "public boolean isReadable(String field) { return false; }");
     line(pIden, "@Override");
@@ -304,8 +304,8 @@ public class GoraDynamoDBCompiler {
 
   /**
    * Writes a line within the output stream
-   * @param indent	Number of spaces used for indentation
-   * @param text	Text to be written
+   * @param indentNumber of spaces used for indentation
+   * @param textText to be written
    * @throws IOException
    */
   private void line(int indent, String text) throws IOException {
@@ -318,7 +318,7 @@ public class GoraDynamoDBCompiler {
 
   /**
    * Returns the string received with the first letter in uppercase
-   * @param name	String to be converted
+   * @param nameString to be converted
    * @return
    */
   static String cap(String name) {
@@ -327,7 +327,7 @@ public class GoraDynamoDBCompiler {
 
   /**
    * Start point of the compiler program
-   * @param args	Receives the schema file to be compiled and where this should be written
+   * @param argsReceives the schema file to be compiled and where this should be written
    * @throws Exception
    */
   public static void main(String[] args) throws Exception {
@@ -340,7 +340,7 @@ public class GoraDynamoDBCompiler {
 
   /**
    * Reads the schema file and converts it into a data structure to be used
-   * @param pMapFile	The schema file to be mapped into a table
+   * @param pMapFileThe schema file to be mapped into a table
    * @return
    * @throws IOException
    */
@@ -357,15 +357,15 @@ public class GoraDynamoDBCompiler {
 
       List<Element> tableElements = root.getChildren("table");
       for(Element tableElement : tableElements) {
-    	  
+      
       String tableName = tableElement.getAttributeValue("name");
       long readCapacUnits = Long.parseLong(tableElement.getAttributeValue("readcunit"));
       long writeCapacUnits = Long.parseLong(tableElement.getAttributeValue("readcunit"));
-    	
+    
       mappingBuilder.setTableName(tableName);
       mappingBuilder.setProvisionedThroughput(tableName, readCapacUnits, writeCapacUnits);
       log.debug("Basic table properties have been set: Name, and Provisioned throughput.");
-    	
+    
       // Retrieving key's features
       List<Element> fieldElements = tableElement.getChildren("key");
       for(Element fieldElement : fieldElements) {
@@ -378,7 +378,7 @@ public class GoraDynamoDBCompiler {
           mappingBuilder.setHashRangeKeySchema(tableName, keyName, keyAttrType);
       }
       log.debug("Table key schemas have been set.");
-    	
+    
       // Retrieving attributes
         fieldElements = tableElement.getChildren("attribute");
         for(Element fieldElement : fieldElements) {

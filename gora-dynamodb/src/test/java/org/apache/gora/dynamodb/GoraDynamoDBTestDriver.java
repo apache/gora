@@ -103,7 +103,7 @@ public class GoraDynamoDBTestDriver extends GoraTestDriver {
    */
   @Override
   public void setUp() throws Exception {
-	  personStore.createSchema();
+    personStore.createSchema();
   }
   
   /**
@@ -186,7 +186,7 @@ public class GoraDynamoDBTestDriver extends GoraTestDriver {
    */
   public TableDescription checkResource(String tableName){
     TableDescription tableDescription = null;
-  	
+  
     try{
       DescribeTableRequest describeTableRequest = new DescribeTableRequest().withTableName(tableName);
       tableDescription = dynamoDBClient.describeTable(describeTableRequest).getTable();

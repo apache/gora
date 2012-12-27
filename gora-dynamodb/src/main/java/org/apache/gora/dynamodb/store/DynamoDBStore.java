@@ -212,11 +212,11 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
         String tableName = tableElement.getAttributeValue("name");
         long readCapacUnits = Long.parseLong(tableElement.getAttributeValue("readcunit"));
         long writeCapacUnits = Long.parseLong(tableElement.getAttributeValue("readcunit"));
-    	
+    
         mappingBuilder.setTableName(tableName);
         mappingBuilder.setProvisionedThroughput(tableName, readCapacUnits, writeCapacUnits);
         LOG.debug("Basic table properties have been set: Name, and Provisioned throughput.");
-    	
+    
         // Retrieving key's features
         List<Element> fieldElements = tableElement.getChildren("key");
         for(Element fieldElement : fieldElements) {
@@ -229,7 +229,7 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
             mappingBuilder.setHashRangeKeySchema(tableName, keyName, keyAttrType);
         }
         LOG.debug("Table key schemas have been set.");
-    	
+    
         // Retrieving attributes
         fieldElements = tableElement.getChildren("attribute");
         for(Element fieldElement : fieldElements) {
@@ -397,7 +397,7 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
   @Override
   public void createSchema() {
     LOG.info("Creating schema");
-    if (mapping.getTables().isEmpty())	throw new IllegalStateException("There are not tables defined.");
+    if (mapping.getTables().isEmpty())  throw new IllegalStateException("There are not tables defined.");
     if (preferredSchema == null){
       LOG.debug("create schemas");
       // read the mapping object
@@ -447,10 +447,10 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
    */
   @Override
   public void deleteSchema() {
-    if (mapping.getTables().isEmpty())	throw new IllegalStateException("There are not tables defined.");
+    if (mapping.getTables().isEmpty())  throw new IllegalStateException("There are not tables defined.");
     if (preferredSchema == null){
       LOG.debug("Delete schemas");
-      if (mapping.getTables().isEmpty())	throw new IllegalStateException("There are not tables defined.");
+      if (mapping.getTables().isEmpty())  throw new IllegalStateException("There are not tables defined.");
       // read the mapping object
       for(String tableName : mapping.getTables().keySet())
         executeDeleteTableRequest(tableName);
@@ -534,10 +534,10 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
   public boolean schemaExists() {
     LOG.info("Verifying schemas.");
   TableDescription success = null;
-  if (mapping.getTables().isEmpty())	throw new IllegalStateException("There are not tables defined.");
+  if (mapping.getTables().isEmpty())  throw new IllegalStateException("There are not tables defined.");
   if (preferredSchema == null){
     LOG.debug("Verifying schemas");
-    if (mapping.getTables().isEmpty())	throw new IllegalStateException("There are not tables defined.");
+    if (mapping.getTables().isEmpty())  throw new IllegalStateException("There are not tables defined.");
     // read the mapping object
     for(String tableName : mapping.getTables().keySet()){
         success = getTableSchema(tableName);
@@ -559,7 +559,7 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
    */
   private TableDescription getTableSchema(String tableName){
     TableDescription tableDescription = null;
-  	try{
+    try{
       DescribeTableRequest describeTableRequest = new DescribeTableRequest().withTableName(tableName);
       tableDescription = dynamoDBClient.describeTable(describeTableRequest).getTable();
     }
@@ -661,9 +661,9 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
         object = (T) mapper.load(persistentClass, hashKey);
       else
         object = (T) mapper.load(persistentClass, hashKey, rangeKey);
-	
+
       if (object == null) return false;
-		
+
       // setting key for dynamodbMapper
       mapper.delete(object);
       return true;
