@@ -22,6 +22,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.text.SimpleDateFormat;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -32,28 +33,37 @@ import org.apache.avro.Schema;
 import org.apache.avro.Protocol.Message;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.specific.SpecificData;
+import org.apache.gora.util.LicenseHeaders;
+import org.apache.gora.util.TimingUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Generate specific Java interfaces and classes for protocols and schemas. */
+/** Generate specific Java interfaces and classes for protocols and schemas. 
+ *  GoraCompiler takes its inspiration from, and is largely based on Avro's {@link SpecificCompiler}.
+ */
 public class GoraCompiler {
   private File dest;
   private Writer out;
   private Set<Schema> queue = new HashSet<Schema>();
   private static final Logger log = LoggerFactory.getLogger(GoraCompiler.class);
+  private static LicenseHeaders licenseHeader = new LicenseHeaders(null);
 
   private GoraCompiler(File dest) {
     this.dest = dest;                             // root directory for output
   }
-
+      
   /** Generates Java interface and classes for a protocol.
    * @param src the source Avro protocol file
    * @param dest the directory to place generated files in
    */
   public static void compileProtocol(File src, File dest) throws IOException {
+    log.info("Compiling Protocol: " + src + " to: " + dest);
+    if(licenseHeader != null) {
+      log.info("The generated file will be " + licenseHeader.getLicenseName() + " licensed.");
+    }
     GoraCompiler compiler = new GoraCompiler(dest);
     Protocol protocol = Protocol.parse(src);
-    for (Schema s : protocol.getTypes())          // enqueue types
+    for (Schema s : protocol.getTypes())          // enqueue types 
       compiler.enqueue(s);
     compiler.compileInterface(protocol);          // generate interface
     compiler.compile();                           // generate classes for types
@@ -61,7 +71,10 @@ public class GoraCompiler {
 
   /** Generates Java classes for a schema. */
   public static void compileSchema(File src, File dest) throws IOException {
-	log.info("Compiling " + src + " to " + dest );
+    log.info("Compiling Schema: " + src + " to: " + dest);
+    if(licenseHeader != null) {
+      log.info("The generated artifact will be " + licenseHeader.getLicenseName() + " licensed.");
+    }
     GoraCompiler compiler = new GoraCompiler(dest);
     compiler.enqueue(Schema.parse(src));          // enqueue types
     compiler.compile();                           // generate classes for types
@@ -158,6 +171,9 @@ public class GoraCompiler {
   }
 
   private void header(String namespace) throws IOException {
+    if (licenseHeader != null) {
+      line(0, licenseHeader.getLicense());
+    }
     if(namespace != null) {
       line(0, "package "+namespace+";\n");
     }
@@ -445,13 +461,45 @@ public class GoraCompiler {
   private static String esc(Object o) {
     return o.toString().replace("\"", "\\\"");
   }
-
+  
+  /**
+   * The main method used to invoke the GoraCompiler. It accepts an input (JSON) avsc 
+   * schema file, the target output directory and an optional parameter defining the
+   * license header to be used when compiling the avsc into the generated class.
+   * If no license is explicitely defined, an ASFv2.0 license header is attributed
+   * to all generated files by default.
+   */
   public static void main(String[] args) throws Exception {
     if (args.length < 2) {
-      System.err.println("Usage: Compiler <schema file> <output dir>");
+      System.err.println("Usage: GoraCompiler <schema file> <output dir> [-license <id>]");
+      System.err.println("  <schema file>     - individual avsc file to be compiled");
+      System.err.println("  <output dir>      - output directory for generated Java files");
+      System.err.println("  [-license <id>]   - the preferred license header to add to the\n" +
+                                           "\t\t      generated Java file. Current options include; \n" +
+                                              "\t\t  ASLv2   (Apache Software License v2.0) \n" +
+                                              "\t\t  AGPLv3  (GNU Affero General Public License)\n" +
+                                              "\t\t  CDDLv1  (Common Development and Distribution License v1.0)\n" +
+                                              "\t\t  FDLv13  (GNU Free Documentation License v1.3)\n" +
+                                              "\t\t  GPLv1   (GNU General Public License v1.0)\n" +
+                                              "\t\t  GPLv2   (GNU General Public License v2.0)\n" +
+                                              "\t\t  GPLv3   (GNU General Public License v3.0)\n " +
+                                              "\t\t  LGPLv21 (GNU Lesser General Public License v2.1)\n" +
+                                              "\t\t  LGPLv3  (GNU Lesser General Public License v2.1)\n") ;
       System.exit(1);
     }
+    for (int i = 1; i < args.length; i++) {
+      licenseHeader.setLicenseName("ASLv2");
+      if ("-license".equals(args[i])) {
+        licenseHeader.setLicenseName(args[++i]);
+      } 
+    }
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    long start = System.currentTimeMillis();
+    log.info("GoraCompiler: starting at " + sdf.format(start));
     compileSchema(new File(args[0]), new File(args[1]));
+    long end = System.currentTimeMillis();
+    log.info("GoraCompiler: finished at " + sdf.format(end) + ", elapsed: " + TimingUtil.elapsedTime(start, end));
+    return;
   }
 
 }
