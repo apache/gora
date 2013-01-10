@@ -304,7 +304,13 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
             fieldValue = newRecord;
             break;
           case MAP:
-            // needs to keep State.DELETED.
+            StatefulHashMap map = (StatefulHashMap) fieldValue;
+            StatefulHashMap newMap = new StatefulHashMap();
+            for (Object mapKey : map.keySet()) {
+              newMap.put(mapKey, map.get(mapKey));
+              newMap.putState(mapKey, map.getState(mapKey));
+            }
+            fieldValue = newMap;
             break;
           case ARRAY:
             GenericArray array = (GenericArray) fieldValue;
