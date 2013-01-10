@@ -6,6 +6,8 @@ Gora Change Log
 
 trunk (current development)
 
+* GORA-182 Nutch 2.1 does not work with gora-cassandra 0.2.1 (kazk)
+
 * GORA-193 Make sure gora-core test dependency is always generated when packaging (lewismc)
 
 * GORA-186 Show better errors when a field is missing in HBase mapping (Alfonso Nishikawa via hsaputra)
