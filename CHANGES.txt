@@ -6,6 +6,8 @@ Gora Change Log
 
 trunk (current development)
 
+* GORA-196 OSX JDK7 failed to load snappy native library from snappy-java-1.0.4.1.jar (kazk)
+
 * GORA-182 Nutch 2.1 does not work with gora-cassandra 0.2.1 (kazk)
 
 * GORA-193 Make sure gora-core test dependency is always generated when packaging (lewismc)
