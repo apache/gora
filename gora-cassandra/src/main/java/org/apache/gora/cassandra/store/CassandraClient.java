@@ -37,6 +37,7 @@ import me.prettyprint.hector.api.beans.OrderedSuperRows;
 import me.prettyprint.hector.api.beans.Row;
 import me.prettyprint.hector.api.beans.SuperRow;
 import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
+import me.prettyprint.hector.api.ddl.ComparatorType;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.Mutator;
@@ -116,6 +117,12 @@ public class CassandraClient<K, T extends PersistentBase> {
     KeyspaceDefinition keyspaceDefinition = this.cluster.describeKeyspace(this.cassandraMapping.getKeyspaceName());
     if (keyspaceDefinition == null) {
       List<ColumnFamilyDefinition> columnFamilyDefinitions = this.cassandraMapping.getColumnFamilyDefinitions();      
+
+      // GORA-197
+      for (ColumnFamilyDefinition cfDef : columnFamilyDefinitions) {
+        cfDef.setComparatorType(ComparatorType.BYTESTYPE);
+      }
+
       keyspaceDefinition = HFactory.createKeyspaceDefinition(this.cassandraMapping.getKeyspaceName(), "org.apache.cassandra.locator.SimpleStrategy", 1, columnFamilyDefinitions);      
       this.cluster.addKeyspace(keyspaceDefinition, true);
       // LOG.info("Keyspace '" + this.cassandraMapping.getKeyspaceName() + "' in cluster '" + this.cassandraMapping.getClusterName() + "' was created on host '" + this.cassandraMapping.getHostName() + "'");
@@ -136,7 +143,25 @@ public class CassandraClient<K, T extends PersistentBase> {
 
       keyspaceDefinition = null;
     }
-
+    else {
+      List<ColumnFamilyDefinition> cfDefs = keyspaceDefinition.getCfDefs();
+      if (cfDefs == null || cfDefs.size() == 0) {
+        LOG.warn(keyspaceDefinition.getName() + " does not have any column family.");
+      }
+      else {
+        for (ColumnFamilyDefinition cfDef : cfDefs) {
+          ComparatorType comparatorType = cfDef.getComparatorType();
+          if (! comparatorType.equals(ComparatorType.BYTESTYPE)) {
+            // GORA-197
+            LOG.warn("The comparator type of " + cfDef.getName() + " column family is " + comparatorType.getTypeName()
+                   + ", not BytesType. It may cause a fatal error on column validation later.");
+          }
+          else {
+            // LOG.info("The comparator type of " + cfDef.getName() + " column family is " + comparatorType.getTypeName() + ".");
+          }
+        }
+      }
+    }
   }
   
   /**
