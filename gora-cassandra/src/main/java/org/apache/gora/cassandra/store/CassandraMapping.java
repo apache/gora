@@ -110,27 +110,28 @@ public class CassandraMapping {
    */
   public CassandraMapping(Element keyspace, Element mapping) {
     if (keyspace == null) {
-    	LOG.warn("Error locating Cassandra Keyspace element!");
+    	LOG.error("Keyspace element should not be null!");
+        return;
     } else {
     	// LOG.info("Located Cassandra Keyspace: '" + KEYSPACE_ELEMENT + "'");
     }
     this.keyspaceName = keyspace.getAttributeValue(NAME_ATTRIBUTE);
     if (this.keyspaceName == null) {
-    	LOG.warn("Error locating Cassandra Keyspace name attribute!");
+    	LOG.error("Error locating Cassandra Keyspace name attribute!");
     } else {
-    	// LOG.info("Located Cassandra Keyspace name: '" + NAME_ATTRIBUTE + "'");
+    	// LOG.info("Located Cassandra Keyspace name: '" + NAME_ATTRIBUTE + "' -> " + keyspaceName);
     }
     this.clusterName = keyspace.getAttributeValue(CLUSTER_ATTRIBUTE);
     if (this.clusterName == null) {
-    	LOG.warn("Error locating Cassandra Keyspace cluster attribute!");
+    	LOG.error("Error locating Cassandra Keyspace cluster attribute!");
     } else {
-    	// LOG.info("Located Cassandra Keyspace cluster: '" + CLUSTER_ATTRIBUTE + "'");
+    	// LOG.info("Located Cassandra Keyspace cluster: '" + CLUSTER_ATTRIBUTE + "' -> " + clusterName);
     }
     this.hostName = keyspace.getAttributeValue(HOST_ATTRIBUTE);
     if (this.hostName == null) {
-    	LOG.warn("Error locating Cassandra Keyspace host attribute!");
+    	LOG.error("Error locating Cassandra Keyspace host attribute!");
     } else {
-    	// LOG.info("Located Cassandra Keyspace host: '" + HOST_ATTRIBUTE + "'");
+    	// LOG.info("Located Cassandra Keyspace host: '" + HOST_ATTRIBUTE + "' -> " + hostName);
     }
     
     // load column family definitions
@@ -140,9 +141,10 @@ public class CassandraMapping {
       
       String familyName = element.getAttributeValue(NAME_ATTRIBUTE);
       if (familyName == null) {
-      	LOG.warn("Error locating column family name attribute!");
+      	LOG.error("Error locating column family name attribute!");
+      	continue;
       } else {
-      	// LOG.info("Located column family name: '" + NAME_ATTRIBUTE + "'");
+      	// LOG.info("Located column family name: '" + NAME_ATTRIBUTE + "' -> " + familyName);
       }
       String superAttribute = element.getAttributeValue(SUPER_ATTRIBUTE);
       if (superAttribute != null) {

@@ -79,8 +79,17 @@ public class CassandraMappingManager {
   public CassandraMapping get(Class persistentClass) {
     String className = persistentClass.getName();
     Element mappingElement = mappingMap.get(className);
+    if (mappingElement == null) {
+      LOG.error("Mapping element does not exist for className=" + className);
+      return null;
+    }
     String keyspaceName = mappingElement.getAttributeValue(KEYSPACE_ELEMENT);
+    // LOG.info("className=" + className + " -> keyspaceName=" + keyspaceName);
     Element keyspaceElement = keyspaceMap.get(keyspaceName);
+    if (keyspaceElement == null) {
+      LOG.error("Keyspace element does not exist for keyspaceName=" + keyspaceName);
+      return null;
+    }
     return new CassandraMapping(keyspaceElement, mappingElement);
   }
 
@@ -101,16 +110,19 @@ public class CassandraMappingManager {
     
     List<Element> keyspaces = root.getChildren(KEYSPACE_ELEMENT);
     if (keyspaces == null || keyspaces.size() == 0) {
-      LOG.warn("Error locating Cassandra Keyspace element!");
+      LOG.error("Error locating Cassandra Keyspace element!");
     }
     else {
-      LOG.info("Located Cassandra Keyspace: '" + KEYSPACE_ELEMENT + "'");
+      // LOG.info("Located Cassandra Keyspace: '" + KEYSPACE_ELEMENT + "'");
       for (Element keyspace : keyspaces) {
         String keyspaceName = keyspace.getAttributeValue(NAME_ATTRIBUTE);
         if (keyspaceName == null) {
-    	    LOG.warn("Error locating Cassandra Keyspace name attribute!");
+    	    LOG.error("Error locating Cassandra Keyspace name attribute!");
+    	    continue;
         }
-    	LOG.info("Located Cassandra Keyspace name: '" + NAME_ATTRIBUTE + "'");
+        else {
+    	    // LOG.info("Located Cassandra Keyspace name: '" + NAME_ATTRIBUTE + "' -> " + keyspaceName);
+        }
         keyspaceMap.put(keyspaceName, keyspace);
       }
     }
@@ -118,17 +130,19 @@ public class CassandraMappingManager {
     // load column definitions    
     List<Element> mappings = root.getChildren(MAPPING_ELEMENT);
     if (mappings == null || mappings.size() == 0) {
-      LOG.warn("Error locating Cassandra Mapping element!");
+      LOG.error("Error locating Cassandra Mapping class element!");
     }
     else {
-      LOG.info("Located Cassandra Mapping: '" + MAPPING_ELEMENT + "'");
+      // LOG.info("Located Cassandra Mapping: '" + MAPPING_ELEMENT + "'");
       for (Element mapping : mappings) {
         String className = mapping.getAttributeValue(NAME_ATTRIBUTE);
         if (className == null) {
-    	    LOG.warn("Error locating Cassandra Mapping class name attribute!");
+    	    LOG.error("Error locating Cassandra Mapping class name attribute!");
     	    continue;
         }
-    	LOG.info("Located Cassandra Mapping class name: '" + NAME_ATTRIBUTE + "'");
+        else {
+    	    // LOG.info("Located Cassandra Mapping class name: '" + NAME_ATTRIBUTE + "' -> " + className);
+        }
         mappingMap.put(className, mapping);
       }
     }
