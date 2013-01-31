@@ -6,6 +6,10 @@ Gora Change Log
 
 trunk (current development)
 
+* GORA-27 Optionally add license headers to generated files (lewismc + rmarroquin)
+
+* GORA-181 Replace tab characters with correct Gora coding style (rmarroquin)
+
 * GORA-197 gora-cassandra requires BytesType for Cassandra column family validator (kazk)
 
 * GORA-196 OSX JDK7 failed to load snappy native library from snappy-java-1.0.4.1.jar (kazk)
