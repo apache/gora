@@ -96,6 +96,16 @@
     </build>
 
     <dependencies>
+
+        <!-- OSX JDK 7 -->
+        <!-- should be removed once fixed in Cassandra -->
+        <dependency>
+            <groupId>org.xerial.snappy</groupId>
+            <artifactId>snappy-java</artifactId>
+            <version>1.0.5-M3</version>
+            <scope>test</scope>
+        </dependency>
+
         <!-- Gora Internal Dependencies -->
         <dependency>
             <groupId>org.apache.gora</groupId>
