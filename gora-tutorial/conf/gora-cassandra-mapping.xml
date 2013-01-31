@@ -27,7 +27,7 @@
     <family name="misc"/>
   </keyspace>
 
-  <class name="org.apache.gora.tutorial.log.generated.Pageview" keyClass="java.lang.Long" table="AccessLog">
+  <class name="org.apache.gora.tutorial.log.generated.Pageview" keyClass="java.lang.Long" keyspace="Pageview">
     <field name="url" family="common" qualifier="url"/>
     <field name="timestamp" family="common" qualifier="timestamp"/>
     <field name="ip" family="common" qualifier="ip" />
@@ -38,7 +38,7 @@
     <field name="userAgent" family="misc" qualifier="userAgent"/>
   </class>
 
-  <class name="org.apache.gora.tutorial.log.generated.MetricDatum" keyClass="java.lang.String" table="Metrics">
+  <class name="org.apache.gora.tutorial.log.generated.MetricDatum" keyClass="java.lang.String" keyspace="Pageview">
     <field name="metricDimension" family="common"  qualifier="metricDimension"/>
     <field name="timestamp" family="common" qualifier="ts"/>
     <field name="metric" family="common" qualifier="metric"/>

@@ -84,6 +84,7 @@ public class CassandraClient<K, T extends PersistentBase> {
     // get cassandra mapping with persistent class
     this.persistentClass = persistentClass;
     this.cassandraMapping = CassandraMappingManager.getManager().get(persistentClass);
+    // LOG.info("persistentClass=" + persistentClass.getName() + " -> cassandraMapping=" + cassandraMapping);
 
     this.cluster = HFactory.getOrCreateCluster(this.cassandraMapping.getClusterName(), new CassandraHostConfigurator(this.cassandraMapping.getHostName()));
     
@@ -184,9 +185,9 @@ public class CassandraClient<K, T extends PersistentBase> {
     }
 
     ByteBuffer byteBuffer = toByteBuffer(value);
-    
     String columnFamily = this.cassandraMapping.getFamily(fieldName);
     String columnName = this.cassandraMapping.getColumn(fieldName);
+
     if (columnName == null) {
       LOG.warn("Column name is null for field=" + fieldName + " with value=" + value.toString());
       return;
