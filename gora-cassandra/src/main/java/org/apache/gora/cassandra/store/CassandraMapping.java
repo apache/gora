@@ -18,7 +18,6 @@
 
 package org.apache.gora.cassandra.store;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,10 +29,7 @@ import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
 import me.prettyprint.hector.api.ddl.ColumnType;
 import me.prettyprint.hector.api.ddl.ComparatorType;
 
-import org.jdom.Document;
 import org.jdom.Element;
-import org.jdom.JDOMException;
-import org.jdom.input.SAXBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,10 +37,7 @@ public class CassandraMapping {
   
   public static final Logger LOG = LoggerFactory.getLogger(CassandraMapping.class);
   
-  private static final String MAPPING_FILE = "gora-cassandra-mapping.xml";
-  private static final String KEYSPACE_ELEMENT = "keyspace";
   private static final String NAME_ATTRIBUTE = "name";
-  private static final String MAPPING_ELEMENT = "class";
   private static final String COLUMN_ATTRIBUTE = "qualifier";
   private static final String FAMILY_ATTRIBUTE = "family";
   private static final String SUPER_ATTRIBUTE = "type";
@@ -108,30 +101,31 @@ public class CassandraMapping {
   /**
    * Primary class for loading Cassandra configuration from the 'MAPPING_FILE'.
    */
+  @SuppressWarnings("unchecked")
   public CassandraMapping(Element keyspace, Element mapping) {
     if (keyspace == null) {
     	LOG.error("Keyspace element should not be null!");
         return;
     } else {
-    	// LOG.info("Located Cassandra Keyspace: '" + KEYSPACE_ELEMENT + "'");
+      LOG.debug("Located Cassandra Keyspace");
     }
     this.keyspaceName = keyspace.getAttributeValue(NAME_ATTRIBUTE);
     if (this.keyspaceName == null) {
     	LOG.error("Error locating Cassandra Keyspace name attribute!");
     } else {
-    	// LOG.info("Located Cassandra Keyspace name: '" + NAME_ATTRIBUTE + "' -> " + keyspaceName);
+      LOG.debug("Located Cassandra Keyspace name: '" + keyspaceName + "'");
     }
     this.clusterName = keyspace.getAttributeValue(CLUSTER_ATTRIBUTE);
     if (this.clusterName == null) {
     	LOG.error("Error locating Cassandra Keyspace cluster attribute!");
     } else {
-    	// LOG.info("Located Cassandra Keyspace cluster: '" + CLUSTER_ATTRIBUTE + "' -> " + clusterName);
+      LOG.debug("Located Cassandra Keyspace cluster: '" + clusterName + "'");
     }
     this.hostName = keyspace.getAttributeValue(HOST_ATTRIBUTE);
     if (this.hostName == null) {
     	LOG.error("Error locating Cassandra Keyspace host attribute!");
     } else {
-    	// LOG.info("Located Cassandra Keyspace host: '" + HOST_ATTRIBUTE + "' -> " + hostName);
+      LOG.debug("Located Cassandra Keyspace host: '" + hostName + "'");
     }
     
     // load column family definitions
@@ -144,13 +138,13 @@ public class CassandraMapping {
       	LOG.error("Error locating column family name attribute!");
       	continue;
       } else {
-      	// LOG.info("Located column family name: '" + NAME_ATTRIBUTE + "' -> " + familyName);
+        LOG.debug("Located column family: '" + familyName + "'" );
       }
       String superAttribute = element.getAttributeValue(SUPER_ATTRIBUTE);
       if (superAttribute != null) {
-    	// LOG.info("Located super column family");
+      LOG.debug("Located super column family");
         this.superFamilies.add(familyName);
-        // LOG.info("Added super column family: '" + familyName + "'");
+        LOG.debug("Added super column family: '" + familyName + "'");
         cfDef.setColumnType(ColumnType.SUPER);
         cfDef.setSubComparatorType(ComparatorType.BYTESTYPE);
       }

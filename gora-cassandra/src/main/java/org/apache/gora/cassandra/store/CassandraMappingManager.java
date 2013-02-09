@@ -19,16 +19,9 @@
 package org.apache.gora.cassandra.store;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import me.prettyprint.cassandra.model.BasicColumnFamilyDefinition;
-import me.prettyprint.cassandra.service.ThriftCfDef;
-import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
-import me.prettyprint.hector.api.ddl.ColumnType;
-import me.prettyprint.hector.api.ddl.ComparatorType;
 
 import org.jdom.Document;
 import org.jdom.Element;
@@ -45,12 +38,9 @@ public class CassandraMappingManager {
   private static final String KEYSPACE_ELEMENT = "keyspace";
   private static final String NAME_ATTRIBUTE = "name";
   private static final String MAPPING_ELEMENT = "class";
-  private static final String COLUMN_ATTRIBUTE = "qualifier";
-  private static final String FAMILY_ATTRIBUTE = "family";
-  private static final String SUPER_ATTRIBUTE = "type";
-  private static final String CLUSTER_ATTRIBUTE = "cluster";
+  private static final String KEYCLASS_ATTRIBUTE = "keyClass";
   private static final String HOST_ATTRIBUTE = "host";
-
+  private static final String CLUSTER_ATTRIBUTE = "cluster";
   // singleton
   private static CassandraMappingManager manager = new CassandraMappingManager();
 
@@ -76,7 +66,7 @@ public class CassandraMappingManager {
     }
   }
 
-  public CassandraMapping get(Class persistentClass) {
+  public CassandraMapping get(Class<?> persistentClass) {
     String className = persistentClass.getName();
     Element mappingElement = mappingMap.get(className);
     if (mappingElement == null) {
@@ -84,7 +74,7 @@ public class CassandraMappingManager {
       return null;
     }
     String keyspaceName = mappingElement.getAttributeValue(KEYSPACE_ELEMENT);
-    // LOG.info("className=" + className + " -> keyspaceName=" + keyspaceName);
+      LOG.debug("className=" + className + " -> keyspaceName=" + keyspaceName);
     Element keyspaceElement = keyspaceMap.get(keyspaceName);
     if (keyspaceElement == null) {
       LOG.error("Keyspace element does not exist for keyspaceName=" + keyspaceName);
@@ -102,26 +92,28 @@ public class CassandraMappingManager {
   @SuppressWarnings("unchecked")
   public void loadConfiguration() throws JDOMException, IOException {
     SAXBuilder saxBuilder = new SAXBuilder();
+    // get mapping file
     Document document = saxBuilder.build(getClass().getClassLoader().getResourceAsStream(MAPPING_FILE));
     if (document == null) {
       LOG.warn("Mapping file '" + MAPPING_FILE + "' could not be found!");
     }
     Element root = document.getRootElement();
-    
+    // find cassandra keyspace element
     List<Element> keyspaces = root.getChildren(KEYSPACE_ELEMENT);
     if (keyspaces == null || keyspaces.size() == 0) {
       LOG.error("Error locating Cassandra Keyspace element!");
     }
     else {
-      // LOG.info("Located Cassandra Keyspace: '" + KEYSPACE_ELEMENT + "'");
       for (Element keyspace : keyspaces) {
+        // log name, cluster and host for given keyspace(s)
         String keyspaceName = keyspace.getAttributeValue(NAME_ATTRIBUTE);
+        String clusterName = keyspace.getAttributeValue(CLUSTER_ATTRIBUTE);
+        String hostName = keyspace.getAttributeValue(HOST_ATTRIBUTE);
+        LOG.debug("Located Cassandra Keyspace: '" + keyspaceName + "' in cluster '" + clusterName + 
+          "' on host '" + hostName + "'.");
         if (keyspaceName == null) {
-    	    LOG.error("Error locating Cassandra Keyspace name attribute!");
-    	    continue;
-        }
-        else {
-    	    // LOG.info("Located Cassandra Keyspace name: '" + NAME_ATTRIBUTE + "' -> " + keyspaceName);
+          LOG.error("Error locating Cassandra Keyspace name attribute!");
+          continue;
         }
         keyspaceMap.put(keyspaceName, keyspace);
       }
@@ -133,15 +125,16 @@ public class CassandraMappingManager {
       LOG.error("Error locating Cassandra Mapping class element!");
     }
     else {
-      // LOG.info("Located Cassandra Mapping: '" + MAPPING_ELEMENT + "'");
       for (Element mapping : mappings) {
+        // associate persistent and class names for keyspace(s)
         String className = mapping.getAttributeValue(NAME_ATTRIBUTE);
+        String keyClassName = mapping.getAttributeValue(KEYCLASS_ATTRIBUTE);
+        String keyspaceName = mapping.getAttributeValue(KEYSPACE_ELEMENT);
+        LOG.debug("Located Cassandra Mapping: keyClass: '" + keyClassName + "' in storage class '" 
+          + className + "' for Keyspace '" + keyspaceName + "'.");
         if (className == null) {
-    	    LOG.error("Error locating Cassandra Mapping class name attribute!");
-    	    continue;
-        }
-        else {
-    	    // LOG.info("Located Cassandra Mapping class name: '" + NAME_ATTRIBUTE + "' -> " + className);
+          LOG.error("Error locating Cassandra Mapping class name attribute!");
+          continue;
         }
         mappingMap.put(className, mapping);
       }
