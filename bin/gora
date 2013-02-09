@@ -49,6 +49,7 @@ if [ $# = 0 ]; then
   echo "  logmanager                 Run the tutorial log manager"
   echo "  loganalytics               Run the tutorial log analytics"
   echo "  junit         	     Run the given JUnit test"
+  echo "  version         	     Print Gora version to terminal"
   echo " or"
   echo " MODULE CLASSNAME   run the class named CLASSNAME in module MODULE"
   echo "Most commands print help when invoked w/o parameters."
@@ -132,6 +133,10 @@ elif [ "$COMMAND" = "junit" ] ; then
   MODULE=*
   CLASSPATH=$CLASSPATH:$GORA_HOME/$MODULE/target/test-classes/
   CLASS=junit.textui.TestRunner
+elif [ "$COMMAND" = "version" ] ; then
+  MODULE=gora-core
+  CLASSPATH=$CLASSPATH:$GORA_HOME/$MODULE/target/classes/
+  CLASS=org.apache.gora.util.VersionInfo
 else
   MODULE="$COMMAND"
   CLASS=$1
