@@ -23,8 +23,7 @@ import org.apache.hadoop.io.serializer.Deserializer;
 import org.apache.hadoop.io.serializer.Serialization;
 import org.apache.hadoop.io.serializer.Serializer;
 
-public class PersistentSerialization
-implements Serialization<PersistentBase> {
+public class PersistentSerialization implements Serialization<PersistentBase> {
 
   @Override
   public boolean accept(Class<?> c) {
