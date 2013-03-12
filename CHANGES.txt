@@ -6,6 +6,8 @@ Gora Change Log
 
 trunk (current development)
 
+* GORA-210 thread safety: fix java.util.ConcurrentModificationException (rherget)
+
 * GORA-190 Add "version" switch to bin/gora script (lewismc)
 
 * GORA-169 Implement correct logging for KeySpaces and attributes in CassandraMappingManager (lewismc)
