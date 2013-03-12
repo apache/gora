@@ -26,7 +26,7 @@ trunk (current development)
 
 * GORA-186 Show better errors when a field is missing in HBase mapping (Alfonso Nishikawa via hsaputra)
 
-* GORA-179 Modify the Query interface to be Query<K, T extends Persistent> to be more precise
+* GORA-179 Modify the Query interface to be Query<K, T extends Persistent> to be more precise (hsaputra)
 
 * GORA-178 HBase fix ivy.xml to use the correct antconfig mapping (ferdy) 
 
