@@ -61,7 +61,7 @@ public class WebPageDataCreator {
   }
   
   public static final String[] CONTENTS = {
-    "foo baz bar",
+    null,
     "foo",
     "foo1 bar1 baz1",
     "a b c d e",
@@ -116,11 +116,12 @@ public class WebPageDataCreator {
 	    for(int i=0; i<URLS.length; i++) {
 	      page = new WebPage();
 	      page.setUrl(new Utf8(URLS[i]));
-	      page.setContent(ByteBuffer.wrap(CONTENTS[i].getBytes()));
-	      for(String token : CONTENTS[i].split(" ")) {
-	        page.addToParsedContent(new Utf8(token));  
-	      }
-	      
+	      if (CONTENTS[i]!=null){
+	        page.setContent(ByteBuffer.wrap(CONTENTS[i].getBytes()));
+	        for(String token : CONTENTS[i].split(" ")) {
+	    	  page.addToParsedContent(new Utf8(token));  
+	        }
+          }
 	      for(int j=0; j<LINKS[i].length; j++) {
 	        page.putToOutlinks(new Utf8(URLS[LINKS[i][j]]), new Utf8(ANCHORS[i][j]));
 	      }

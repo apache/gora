@@ -336,27 +336,35 @@ public class DataStoreTestUtil {
     Assert.assertNotNull(page);
 
     Assert.assertEquals(URLS[i], page.getUrl().toString());
-    Assert.assertTrue("content error:" + new String( toByteArray(page.getContent()) ) +
+    // 'content' is optional
+    if (page.getContent() != null) {
+      Assert.assertTrue("content error:" + new String( toByteArray(page.getContent()) ) +
         " actual=" + CONTENTS[i] + " i=" + i
-    , Arrays.equals( toByteArray(page.getContent() )
+        , Arrays.equals( toByteArray(page.getContent() )
         , CONTENTS[i].getBytes()));
-
-    GenericArray<Utf8> parsedContent = page.getParsedContent();
-    Assert.assertNotNull(parsedContent);
-    Assert.assertTrue(parsedContent.size() > 0);
-
-    int j=0;
-    String[] tokens = CONTENTS[i].split(" ");
-    for(Utf8 token : parsedContent) {
-      Assert.assertEquals(tokens[j++], token.toString());
+      GenericArray<Utf8> parsedContent = page.getParsedContent();
+      Assert.assertNotNull(parsedContent);
+      Assert.assertTrue(parsedContent.size() > 0);
+    
+      int j=0;
+      String[] tokens = CONTENTS[i].split(" ");
+      for(Utf8 token : parsedContent) {
+        Assert.assertEquals(tokens[j++], token.toString());
+      }
+    } else {
+      // when page.getContent() is null
+      Assert.assertTrue(CONTENTS[i] == null) ;
+      GenericArray<Utf8> parsedContent = page.getParsedContent();
+      Assert.assertNotNull(parsedContent);
+      Assert.assertTrue(parsedContent.size() == 0);
     }
 
     if(LINKS[i].length > 0) {
       Assert.assertNotNull(page.getOutlinks());
       Assert.assertTrue(page.getOutlinks().size() > 0);
-      for(j=0; j<LINKS[i].length; j++) {
-        Assert.assertEquals(ANCHORS[i][j],
-            page.getFromOutlinks(new Utf8(URLS[LINKS[i][j]])).toString());
+      for(int k=0; k<LINKS[i].length; k++) {
+        Assert.assertEquals(ANCHORS[i][k],
+          page.getFromOutlinks(new Utf8(URLS[LINKS[i][k]])).toString());
       }
     } else {
       Assert.assertTrue(page.getOutlinks() == null || page.getOutlinks().isEmpty());

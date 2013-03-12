@@ -78,11 +78,13 @@ public class MapReduceTestUtils {
     //assert results
     HashMap<String, Integer> actualCounts = new HashMap<String, Integer>();
     for(String content : WebPageDataCreator.CONTENTS) {
-      for(String token:content.split(" ")) {
-        Integer count = actualCounts.get(token);
-        if(count == null) 
-          count = 0;
-        actualCounts.put(token, ++count);
+      if (content != null) {
+        for(String token:content.split(" ")) {
+          Integer count = actualCounts.get(token);
+          if(count == null) 
+            count = 0;
+          actualCounts.put(token, ++count);
+        }
       }
     }
     for(Map.Entry<String, Integer> entry:actualCounts.entrySet()) {

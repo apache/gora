@@ -374,6 +374,27 @@ public class GoraCompiler {
             line(2, "getStateManager().setDirty(this, "+i+");");
             line(2, "return "+field.name()+".remove(key);");
             line(1, "}");
+            break;
+          case UNION:
+            fieldType = type(fieldSchema);
+            //Create get method: public <unbox(field.schema())> get<camelKey>()
+            line(1, "public "+unbox(field.schema())+" get" +camelKey+"() {");
+            line(2, "return ("+unbox(field.schema())+") get("+i+");");
+            line(1, "}");
+            
+            //Create set methods: public void set<camelKey>(<subschema.fieldType> value)
+            for (Schema s : fieldSchema.getTypes()) {
+              if (s.getType().equals(Schema.Type.NULL)) continue ;
+              String unionFieldType = type(s);
+              line(1, "public void set"+camelKey+"("+unionFieldType+" value) {");
+              line(2, "put("+i+", value);");
+              line(1, "}");
+            }
+            break;
+          case NULL:
+            throw new RuntimeException("Unexpected NULL field: "+field);
+          default:
+            throw new RuntimeException("Unknown field: "+field);
           }
           i++;
         }

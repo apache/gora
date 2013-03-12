@@ -65,13 +65,15 @@ public class WordCount extends Configured implements Tool {
     protected void map(String key, WebPage page, Context context) 
       throws IOException ,InterruptedException {
       
-      //Get the content from a WebPage as obtained from the DataStore
-      String content =  new String(page.getContent().array());
-      
-      StringTokenizer itr = new StringTokenizer(content);
-      while (itr.hasMoreTokens()) {
-        word.set(itr.nextToken());
-        context.write(word, one);
+      if (page.getContent() != null) {
+        // Get the content from a WebPage as obtained from the DataStore
+        String content = new String(page.getContent().array());
+
+        StringTokenizer itr = new StringTokenizer(content);
+        while (itr.hasMoreTokens()) {
+          word.set(itr.nextToken());
+          context.write(word, one);
+        }
       }
     };
   }
