@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.Collections;
 
 import me.prettyprint.cassandra.serializers.IntegerSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
@@ -72,7 +73,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
    * We want to iterate over the keys in insertion order.
    * We don't want to lock the entire collection before iterating over the keys, since in the meantime other threads are adding entries to the map.
    */
-  private Map<K, T> buffer = new LinkedHashMap<K, T>();
+  private Map<K, T> buffer = Collections.synchronizedMap(new LinkedHashMap<K, T>());
   
   public CassandraStore() throws Exception {
     // this.cassandraClient.initialize();
