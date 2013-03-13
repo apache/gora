@@ -6,6 +6,8 @@ Gora Change Log
 
 trunk (current development)
 
+* GORA-211 thread safety: fix java.lang.NullPointerException - synchronize on mutator (rherget)
+
 * GORA-210 thread safety: fix java.util.ConcurrentModificationException (rherget)
 
 * GORA-190 Add "version" switch to bin/gora script (lewismc)
