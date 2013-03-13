@@ -193,7 +193,9 @@ public class CassandraClient<K, T extends PersistentBase> {
       return;
     }
     
-    HectorUtils.insertColumn(mutator, key, columnFamily, columnName, byteBuffer);
+    synchronized(mutator) {
+      HectorUtils.insertColumn(mutator, key, columnFamily, columnName, byteBuffer);
+    }
   }
 
   /**
@@ -214,7 +216,9 @@ public class CassandraClient<K, T extends PersistentBase> {
     String columnFamily = this.cassandraMapping.getFamily(fieldName);
     String superColumnName = this.cassandraMapping.getColumn(fieldName);
     
-    HectorUtils.insertSubColumn(mutator, key, columnFamily, superColumnName, columnName, byteBuffer);
+    synchronized(mutator) {
+      HectorUtils.insertSubColumn(mutator, key, columnFamily, superColumnName, columnName, byteBuffer);
+    }
   }
 
   public void addSubColumn(K key, String fieldName, String columnName, Object value) {
@@ -238,7 +242,9 @@ public class CassandraClient<K, T extends PersistentBase> {
     String columnFamily = this.cassandraMapping.getFamily(fieldName);
     String superColumnName = this.cassandraMapping.getColumn(fieldName);
     
-    HectorUtils.deleteSubColumn(mutator, key, columnFamily, superColumnName, columnName);
+    synchronized(mutator) {
+      HectorUtils.deleteSubColumn(mutator, key, columnFamily, superColumnName, columnName);
+    }
   }
 
   public void deleteSubColumn(K key, String fieldName, String columnName) {
