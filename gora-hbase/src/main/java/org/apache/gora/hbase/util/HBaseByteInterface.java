@@ -34,6 +34,8 @@ import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.avro.util.Utf8;
 import org.apache.gora.util.AvroUtils;
+import org.apache.gora.avro.PersistentDatumReader;
+import org.apache.gora.avro.PersistentDatumWriter;
 import org.apache.hadoop.hbase.util.Bytes;
 
 /**
@@ -99,12 +101,26 @@ public class HBaseByteInterface {
     case FLOAT:   return Bytes.toFloat(val);
     case DOUBLE:  return Bytes.toDouble(val);
     case BOOLEAN: return val[0] != 0;
+    case UNION:
     case RECORD:
       Map<String, SpecificDatumReader<?>> readerMap = readerMaps.get();
-      SpecificDatumReader<?> reader = readerMap.get(schema.getFullName());
-      if (reader == null) {
-        reader = new SpecificDatumReader(schema);     
-        readerMap.put(schema.getFullName(), reader);
+      PersistentDatumReader<?> reader = null ;
+            
+      // For UNION schemas, must use a specific (UNION-type-type-type)
+      // since unions don't have own name
+      if (schema.getType().equals(Schema.Type.UNION)) {
+        reader = (PersistentDatumReader<?>)readerMap.get(String.valueOf(schema.hashCode()));
+        if (reader == null) {
+          reader = new PersistentDatumReader(schema, false);// ignore dirty bits
+          readerMap.put(String.valueOf(schema.hashCode()), reader);
+        }
+      } else {
+        // ELSE use reader for Record
+        reader = (PersistentDatumReader<?>)readerMap.get(schema.getFullName());
+        if (reader == null) {
+          reader = new PersistentDatumReader(schema, false);// ignore dirty bits
+          readerMap.put(schema.getFullName(), reader);
+        }
       }
       
       // initialize a decoder, possibly reusing previous one
@@ -116,7 +132,7 @@ public class HBaseByteInterface {
         decoders.set(decoder);
       }
       
-      return reader.read(null, decoder);
+      return reader.read((Object)null, schema, decoder);
     default: throw new RuntimeException("Unknown type: "+type);
     }
   }
@@ -183,12 +199,25 @@ public class HBaseByteInterface {
     case DOUBLE:  return Bytes.toBytes((Double)o);
     case BOOLEAN: return (Boolean)o ? new byte[] {1} : new byte[] {0};
     case ENUM:    return new byte[] { (byte)((Enum<?>) o).ordinal() };
+    case UNION:
     case RECORD:
       Map<String, SpecificDatumWriter<?>> writerMap = writerMaps.get();
-      SpecificDatumWriter writer = writerMap.get(schema.getFullName());
-      if (writer == null) {
-        writer = new SpecificDatumWriter(schema);
-        writerMap.put(schema.getFullName(),writer);
+      PersistentDatumWriter writer = null ;
+      // For UNION schemas, must use a specific (UNION-type-type-type)
+      // since unions don't have own name
+      if (schema.getType().equals(Schema.Type.UNION)) {
+        writer = (PersistentDatumWriter<?>) writerMap.get(String.valueOf(schema.hashCode()));
+        if (writer == null) {
+          writer = new PersistentDatumWriter(schema,false);// ignore dirty bits
+          writerMap.put(String.valueOf(schema.hashCode()),writer);
+        }
+      } else {
+        // ELSE use writer for Record
+        writer = (PersistentDatumWriter<?>) writerMap.get(schema.getFullName());
+        if (writer == null) {
+          writer = new PersistentDatumWriter(schema,false);// ignore dirty bits
+          writerMap.put(schema.getFullName(),writer);
+        }
       }
       
       BinaryEncoderWithStream encoder = encoders.get();
@@ -200,7 +229,7 @@ public class HBaseByteInterface {
       ByteArrayOutputStream os = (ByteArrayOutputStream) encoder.getOut();
       os.reset();
       
-      writer.write(o, encoder);
+      writer.write(schema,o, encoder);
       encoder.flush();
       return os.toByteArray();
     default: throw new RuntimeException("Unknown type: "+type);

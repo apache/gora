@@ -97,14 +97,19 @@ public class TestHBaseStore extends DataStoreTestBase {
   
   @Override
   public void assertPutBytes(byte[] contentBytes) throws IOException {    
-    HTable table = new HTable("WebPage");
-    Get get = new Get(Bytes.toBytes("com.example/http"));
-    org.apache.hadoop.hbase.client.Result result = table.get(get);
+
+    // Since "content" is an optional field, we are forced to reopen the DataStore
+    // to retrieve the union correctly
+    webPageStore = testDriver.createDataStore(String.class, WebPage.class);
     
-    byte[] actualBytes = result.getValue(Bytes.toBytes("content"), null);
+    WebPage page = webPageStore.get("com.example/http") ;
+    byte[] actualBytes = page.getContent().array() ;
+    
+    webPageStore.close() ;
+
     Assert.assertNotNull(actualBytes);
     Assert.assertTrue(Arrays.equals(contentBytes, actualBytes));
-    table.close();
+
   }
   
   @Override
