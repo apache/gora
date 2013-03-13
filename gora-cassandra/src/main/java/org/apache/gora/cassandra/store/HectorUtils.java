@@ -35,6 +35,11 @@ import org.apache.gora.persistency.Persistent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This class it not thread safe.
+ * According to Hector's JavaDoc a Mutator isn't thread safe, too.
+ * Take a look at {@CassandraClient} for safe usage.
+ */
 public class HectorUtils<K,T extends Persistent> {
 
   public static final Logger LOG = LoggerFactory.getLogger(HectorUtils.class);
