@@ -190,9 +190,14 @@ implements Configurable {
     try{
       fields = getFieldsToQuery(fields);
       Get get = new Get(toBytes(key));
-      addFields(get, fields);
-      Result result = table.get(get);
-      return newInstance(result, fields);
+      
+      if (table.exists(get)) {
+        addFields(get, fields);
+        Result result = table.get(get);
+        return newInstance(result, fields);      
+      } else {
+        return null ;
+      }
     } catch(IOException ex2){
       LOG.error(ex2.getMessage());
       LOG.error(ex2.getStackTrace().toString());
@@ -511,9 +516,18 @@ implements Configurable {
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
+  /**
+   * Creates a new Persistent instance with the values in 'result' for the fields listed.
+   * @param result result form a HTable#get()
+   * @param fields List of fields queried, or null for all
+   * @return A new instance with default values for not listed fields
+   *         null if 'result' is null.
+   * @throws IOException
+   */
   public T newInstance(Result result, String[] fields)
   throws IOException {
-    if(result == null || result.isEmpty())
+    // TODO Set the default value for not listed fields.
+    if(result == null)
       return null;
 
     T persistent = newPersistent();

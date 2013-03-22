@@ -42,8 +42,11 @@ import org.apache.avro.generic.GenericArray;
 import org.apache.avro.util.Utf8;
 import org.apache.gora.examples.WebPageDataCreator;
 import org.apache.gora.examples.generated.Employee;
+import org.apache.gora.examples.generated.Metadata;
 import org.apache.gora.examples.generated.WebPage;
+import org.apache.gora.persistency.BeanFactory;
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.BeanFactoryImpl;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
@@ -91,6 +94,17 @@ public class DataStoreTestUtil {
     return employee;
   }
 
+  public static <K> Employee createBoss(
+      DataStore<K, Employee> dataStore) throws IOException, Exception {
+
+    Employee employee = dataStore.newPersistent();
+    employee.setName(new Utf8("Random boss"));
+    employee.setDateOfBirth( System.currentTimeMillis() - 22L *  YEAR_IN_MS );
+    employee.setSalary(1000000);
+    employee.setSsn(new Utf8("202020202020"));
+    return employee;
+  }
+  
   public static void testAutoCreateSchema(DataStore<String,Employee> dataStore)
   throws IOException, Exception {
     //should not throw exception
@@ -147,6 +161,76 @@ public class DataStoreTestUtil {
     Assert.assertEquals(employee, after);
   }
 
+
+  public static void testGetEmployeeRecursive(DataStore<String, Employee> dataStore)
+    throws IOException, Exception {
+
+    Employee employee = DataStoreTestUtil.createEmployee(dataStore);
+    Employee boss = DataStoreTestUtil.createBoss(dataStore);
+    employee.setBoss(boss) ;
+    
+    String ssn = employee.getSsn().toString();
+    dataStore.put(ssn, employee);
+    dataStore.flush();
+    Employee after = dataStore.get(ssn, Employee._ALL_FIELDS);
+    Assert.assertEquals(employee, after);
+    Assert.assertEquals(boss, after.getBoss()) ;
+  }
+
+  public static void testGetEmployeeDoubleRecursive(DataStore<String, Employee> dataStore)
+      throws IOException, Exception {
+
+      Employee employee = DataStoreTestUtil.createEmployee(dataStore);
+      Employee boss = DataStoreTestUtil.createBoss(dataStore);
+      Employee uberBoss = DataStoreTestUtil.createBoss(dataStore);
+      uberBoss.setName(new Utf8("Überboss")) ;
+      boss.setBoss(uberBoss) ;
+      employee.setBoss(boss) ;
+      
+      String ssn = employee.getSsn().toString();
+      dataStore.put(ssn, employee);
+      dataStore.flush();
+      Employee after = dataStore.get(ssn, Employee._ALL_FIELDS);
+      Assert.assertEquals(employee, after);
+      Assert.assertEquals(boss, after.getBoss()) ;
+      Assert.assertEquals(uberBoss, ((Employee)after.getBoss()).getBoss()) ;
+    }
+  
+  public static void testGetEmployeeNested(DataStore<String, Employee> dataStore)
+    throws IOException, Exception {
+
+    Employee employee = DataStoreTestUtil.createEmployee(dataStore);
+    WebPage webpage = new BeanFactoryImpl<String,WebPage>(String.class,WebPage.class).newPersistent() ;
+    
+    webpage.setUrl(new Utf8("url..")) ;
+    webpage.setContent(ByteBuffer.wrap("test content".getBytes())) ;
+    Metadata metadata = new BeanFactoryImpl<String,Metadata>(String.class,Metadata.class).newPersistent() ;
+    webpage.setMetadata(metadata) ;
+    employee.setWebpage(webpage) ;
+    
+    String ssn = employee.getSsn().toString();
+   
+    dataStore.put(ssn, employee);
+    dataStore.flush();
+    Employee after = dataStore.get(ssn, Employee._ALL_FIELDS);
+    Assert.assertEquals(employee, after);
+    Assert.assertEquals(webpage, after.getWebpage()) ;
+  }
+  
+  public static void testGetEmployee3UnionField(DataStore<String, Employee> dataStore)
+    throws IOException, Exception {
+
+    Employee employee = DataStoreTestUtil.createEmployee(dataStore);
+    employee.setBoss(new Utf8("Real boss")) ;
+    
+    String ssn = employee.getSsn().toString();
+    dataStore.put(ssn, employee);
+    dataStore.flush();
+    Employee after = dataStore.get(ssn, Employee._ALL_FIELDS);
+    Assert.assertEquals(employee, after);
+    Assert.assertEquals("Real boss", ((Utf8)after.getBoss()).toString()) ;
+  }
+  
   public static void testGetEmployeeNonExisting(DataStore<String, Employee> dataStore)
     throws IOException, Exception {
     Employee employee = dataStore.get("_NON_EXISTING_SSN_FOR_EMPLOYEE_");

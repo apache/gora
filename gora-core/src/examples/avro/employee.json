@@ -6,6 +6,28 @@
       {"name": "name", "type": "string"},
       {"name": "dateOfBirth", "type": "long"},
       {"name": "ssn", "type": "string"},
-      {"name": "salary", "type": "int"}
+      {"name": "salary", "type": "int"},
+      {"name": "boss", "type":["null","Employee","string"]},
+      {"name": "webpage", "type":["null",
+      							 {
+      							   "type": "record",
+      							   "name": "WebPage",
+      							   "namespace": "org.apache.gora.examples.generated",
+        							 "fields" : [
+          							 {"name": "url", "type": "string"},
+          							 {"name": "content", "type": ["null","bytes"]},
+          							 {"name": "parsedContent", "type": {"type":"array", "items": "string"}},
+          							 {"name": "outlinks", "type": {"type":"map", "values":"string"}},
+          							 {"name": "metadata", "type": {
+            							 "name": "Metadata",
+            							 "type": "record",
+            							 "namespace": "org.apache.gora.examples.generated",
+            							 "fields": [
+              							 {"name": "version", "type": "int"},
+              							 {"name": "data", "type": {"type": "map", "values": "string"}}
+            							 ]
+          							 }}
+        							 ]
+      							 }]}
     ]
   }

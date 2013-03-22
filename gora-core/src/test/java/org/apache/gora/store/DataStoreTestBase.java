@@ -279,6 +279,54 @@ public abstract class DataStoreTestBase {
   }
 
   @Test
+  /**
+   * Tests put and get a record with a nested recursive record
+   * Employee with a boss (nested).
+   * @throws IOException
+   * @throws Exception
+   */
+  public void testGetRecursive() throws IOException, Exception {
+    log.info("test method: testGetRecursive") ;
+    DataStoreTestUtil.testGetEmployeeRecursive(employeeStore) ;
+  }
+
+  @Test
+  /**
+   * Tests put and get a record with a double  nested recursive record
+   * Employee with a boss (nested).
+   * @throws IOException
+   * @throws Exception
+   */
+  public void testGetDoubleRecursive() throws IOException, Exception {
+    log.info("test method: testGetDoubleRecursive") ;
+    DataStoreTestUtil.testGetEmployeeDoubleRecursive(employeeStore) ;
+  }
+  
+  @Test
+  /**
+   * Tests put and get a record with a nested record (not recursive)
+   * The webpage of an Employee
+   * @throws IOException
+   * @throws Exception
+   */
+  public void testGetNested() throws IOException, Exception {
+    log.info("test method: testGetNested") ;
+    DataStoreTestUtil.testGetEmployeeNested(employeeStore) ;
+  }
+  
+  @Test
+  /**
+   * Tests put and get a record with a 3 types union, and
+   * having the value of the 3rd type.
+   * @throws IOException
+   * @throws Exception
+   */
+  public void testGet3UnionField() throws IOException, Exception {
+    log.info("test method: testGet3UnionField") ;
+    DataStoreTestUtil.testGetEmployee3UnionField(employeeStore) ;
+  }
+  
+  @Test
   public void testGetWithFields() throws IOException, Exception {
     log.info("test method: testGetWithFields");
     DataStoreTestUtil.testGetEmployeeWithFields(employeeStore);
