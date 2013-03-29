@@ -74,7 +74,9 @@ public class CassandraMappingManager {
       return null;
     }
     String keyspaceName = mappingElement.getAttributeValue(KEYSPACE_ELEMENT);
+    if (LOG.isDebugEnabled()) {
       LOG.debug("className=" + className + " -> keyspaceName=" + keyspaceName);
+    }
     Element keyspaceElement = keyspaceMap.get(keyspaceName);
     if (keyspaceElement == null) {
       LOG.error("Keyspace element does not exist for keyspaceName=" + keyspaceName);
@@ -109,8 +111,10 @@ public class CassandraMappingManager {
         String keyspaceName = keyspace.getAttributeValue(NAME_ATTRIBUTE);
         String clusterName = keyspace.getAttributeValue(CLUSTER_ATTRIBUTE);
         String hostName = keyspace.getAttributeValue(HOST_ATTRIBUTE);
-        LOG.debug("Located Cassandra Keyspace: '" + keyspaceName + "' in cluster '" + clusterName + 
+        if (LOG.isDebugEnabled()) {
+          LOG.debug("Located Cassandra Keyspace: '" + keyspaceName + "' in cluster '" + clusterName + 
           "' on host '" + hostName + "'.");
+        }
         if (keyspaceName == null) {
           LOG.error("Error locating Cassandra Keyspace name attribute!");
           continue;
@@ -130,8 +134,10 @@ public class CassandraMappingManager {
         String className = mapping.getAttributeValue(NAME_ATTRIBUTE);
         String keyClassName = mapping.getAttributeValue(KEYCLASS_ATTRIBUTE);
         String keyspaceName = mapping.getAttributeValue(KEYSPACE_ELEMENT);
+        if (LOG.isDebugEnabled()) {
         LOG.debug("Located Cassandra Mapping: keyClass: '" + keyClassName + "' in storage class '" 
           + className + "' for Keyspace '" + keyspaceName + "'.");
+        }
         if (className == null) {
           LOG.error("Error locating Cassandra Mapping class name attribute!");
           continue;
