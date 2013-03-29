@@ -26,6 +26,10 @@
     <family name="http"/>
     <family name="misc"/>
   </keyspace>
+  
+  <keyspace name="Metrics" cluster="Test Cluster" host="localhost">
+    <family name="common"/>
+  </keyspace>
 
   <class name="org.apache.gora.tutorial.log.generated.Pageview" keyClass="java.lang.Long" keyspace="Pageview">
     <field name="url" family="common" qualifier="url"/>
@@ -38,7 +42,7 @@
     <field name="userAgent" family="misc" qualifier="userAgent"/>
   </class>
 
-  <class name="org.apache.gora.tutorial.log.generated.MetricDatum" keyClass="java.lang.String" keyspace="Pageview">
+  <class name="org.apache.gora.tutorial.log.generated.MetricDatum" keyClass="java.lang.String" keyspace="Metrics">
     <field name="metricDimension" family="common"  qualifier="metricDimension"/>
     <field name="timestamp" family="common" qualifier="ts"/>
     <field name="metric" family="common" qualifier="metric"/>
