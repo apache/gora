@@ -100,32 +100,44 @@ public class CassandraMapping {
 
   /**
    * Primary class for loading Cassandra configuration from the 'MAPPING_FILE'.
+   * It should be noted that should the "qualifier" attribute and its associated
+   * value be absent from class field definition, it will automatically be set to 
+   * the field name value.
+   * 
    */
   @SuppressWarnings("unchecked")
   public CassandraMapping(Element keyspace, Element mapping) {
     if (keyspace == null) {
-    	LOG.error("Keyspace element should not be null!");
-        return;
+      LOG.error("Keyspace element should not be null!");
+      return;
     } else {
-      LOG.debug("Located Cassandra Keyspace");
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Located Cassandra Keyspace");
+      }
     }
     this.keyspaceName = keyspace.getAttributeValue(NAME_ATTRIBUTE);
     if (this.keyspaceName == null) {
     	LOG.error("Error locating Cassandra Keyspace name attribute!");
     } else {
-      LOG.debug("Located Cassandra Keyspace name: '" + keyspaceName + "'");
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Located Cassandra Keyspace name: '" + keyspaceName + "'");
+      }
     }
     this.clusterName = keyspace.getAttributeValue(CLUSTER_ATTRIBUTE);
     if (this.clusterName == null) {
     	LOG.error("Error locating Cassandra Keyspace cluster attribute!");
     } else {
-      LOG.debug("Located Cassandra Keyspace cluster: '" + clusterName + "'");
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Located Cassandra Keyspace cluster: '" + clusterName + "'");
+      }
     }
     this.hostName = keyspace.getAttributeValue(HOST_ATTRIBUTE);
     if (this.hostName == null) {
     	LOG.error("Error locating Cassandra Keyspace host attribute!");
     } else {
-      LOG.debug("Located Cassandra Keyspace host: '" + hostName + "'");
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Located Cassandra Keyspace host: '" + hostName + "'");
+      }  
     }
     
     // load column family definitions
@@ -138,13 +150,19 @@ public class CassandraMapping {
       	LOG.error("Error locating column family name attribute!");
       	continue;
       } else {
-        LOG.debug("Located column family: '" + familyName + "'" );
+        if (LOG.isDebugEnabled()) {
+          LOG.debug("Located column family: '" + familyName + "'" );
+        }
       }
       String superAttribute = element.getAttributeValue(SUPER_ATTRIBUTE);
       if (superAttribute != null) {
-      LOG.debug("Located super column family");
+        if (LOG.isDebugEnabled()) {
+          LOG.debug("Located super column family");
+        }
         this.superFamilies.add(familyName);
-        LOG.debug("Added super column family: '" + familyName + "'");
+        if (LOG.isDebugEnabled()) {
+          LOG.debug("Added super column family: '" + familyName + "'");
+        }
         cfDef.setColumnType(ColumnType.SUPER);
         cfDef.setSubComparatorType(ComparatorType.BYTESTYPE);
       }
@@ -164,6 +182,19 @@ public class CassandraMapping {
       String fieldName = element.getAttributeValue(NAME_ATTRIBUTE);
       String familyName = element.getAttributeValue(FAMILY_ATTRIBUTE);
       String columnName = element.getAttributeValue(COLUMN_ATTRIBUTE);
+      if (fieldName == null) {
+       LOG.error("Field name is not declared.");
+        continue;
+      }
+      if (familyName == null) {
+        LOG.error("Family name is not declared for \"" + fieldName + "\" field.");
+        continue;
+      }
+      if (columnName == null) {
+        LOG.warn("Column name (qualifier) is not declared for \"" + fieldName + "\" field.");
+        columnName = fieldName;
+      }
+
       BasicColumnFamilyDefinition columnFamilyDefinition = this.columnFamilyDefinitions.get(familyName);
       if (columnFamilyDefinition == null) {
         LOG.warn("Family " + familyName + " was not declared in the keyspace.");
