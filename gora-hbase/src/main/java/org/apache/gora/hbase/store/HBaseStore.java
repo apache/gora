@@ -190,14 +190,9 @@ implements Configurable {
     try{
       fields = getFieldsToQuery(fields);
       Get get = new Get(toBytes(key));
-      
-      if (table.exists(get)) {
-        addFields(get, fields);
-        Result result = table.get(get);
-        return newInstance(result, fields);      
-      } else {
-        return null ;
-      }
+      addFields(get, fields);
+      Result result = table.get(get);
+      return newInstance(result, fields);      
     } catch(IOException ex2){
       LOG.error(ex2.getMessage());
       LOG.error(ex2.getStackTrace().toString());
