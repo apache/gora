@@ -94,11 +94,11 @@ import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.AvroUtils;
 import org.apache.hadoop.io.Text;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -455,6 +455,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
 
           break;
         case RECORD:
+        case UNION:
           SpecificDatumReader reader = new SpecificDatumReader(field.schema());
           byte[] val = entry.getValue().get();
           // TODO reuse decoder
@@ -578,6 +579,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
             }
             break;
           case RECORD:
+          case UNION:
             SpecificDatumWriter writer = new SpecificDatumWriter(field.schema());
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             BinaryEncoder encoder = new BinaryEncoder(os);
