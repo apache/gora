@@ -521,8 +521,7 @@ implements Configurable {
    */
   public T newInstance(Result result, String[] fields)
   throws IOException {
-    // TODO Set the default value for not listed fields.
-    if(result == null)
+    if(result == null || result.isEmpty())
       return null;
 
     T persistent = newPersistent();
