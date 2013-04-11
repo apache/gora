@@ -5,6 +5,9 @@
 Gora Change Log
 
 trunk (current development)
+* GORA-159 gora-hbase MR tests should use HBaseTestingUtility instead of deprecated HBaseClusterTestCase via GORA-89 
+
+* GORA-89 Avoid HBase MiniCluster restarts to shorten gora-hbase tests (hsaputra, alfonso, Ioan eugen Stan)
 
 * GORA-203 Bug in setting column field attribute "qualifier" in CassandraMapping (rmarroquin, lewismc, kazk)
 

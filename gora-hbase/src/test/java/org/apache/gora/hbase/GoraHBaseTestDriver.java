@@ -20,6 +20,7 @@ package org.apache.gora.hbase;
 
 import org.apache.gora.GoraTestDriver;
 import org.apache.gora.hbase.store.HBaseStore;
+import org.apache.gora.hbase.util.HBaseClusterSingleton;
 import org.apache.hadoop.conf.Configuration;
 
 //HBase imports
@@ -32,56 +33,45 @@ import org.apache.hadoop.hbase.client.HBaseAdmin;
  * @see GoraTestDriver
  */
 public class GoraHBaseTestDriver extends GoraTestDriver {
+  private static final HBaseClusterSingleton cluster = HBaseClusterSingleton.build(1);
 
-  protected HBaseTestingUtility hbaseUtil;
-  protected int numServers = 1;
-  
   public GoraHBaseTestDriver() {
     super(HBaseStore.class);
-    hbaseUtil = new HBaseTestingUtility();
-  }
-
-  public void setNumServers(int numServers) {
-    this.numServers = numServers;
-  }
-  
-  public int getNumServers() {
-    return numServers;
   }
   
   @Override
   public void setUpClass() throws Exception {
     super.setUpClass();
-    log.info("Starting HBase cluster");
-    hbaseUtil.startMiniCluster(numServers);
+    log.info("Setting up HBase Test Driver");
   }
 
   @Override
   public void tearDownClass() throws Exception {
     super.tearDownClass();
-    log.info("Stoping HBase cluster");
-    hbaseUtil.shutdownMiniCluster();
+    log.info("Teardown HBase test driver");
   }
   
   @Override
   public void setUp() throws Exception {
-    super.setUp();
+    cluster.truncateAllTables();
+    // super.setUp() deletes all tables, but must only truncate in the right way -HBaseClusterSingleton-
+    //super.setUp();
   }
   
+  @Override
+  public void tearDown() throws Exception {
+    // Do nothing. setUp() must ensure the right data.
+  }
   public void deleteAllTables() throws Exception {
-    HBaseAdmin admin = hbaseUtil.getHBaseAdmin();
-    for(HTableDescriptor table:admin.listTables()) {
-      admin.disableTable(table.getName());
-      admin.deleteTable(table.getName());
-    }
+    cluster.deleteAllTables();
   }
   
   public Configuration getConf() {
-      return hbaseUtil.getConfiguration();
+    return cluster.getHbaseTestingUtil().getConfiguration();
   }
   
   public HBaseTestingUtility getHbaseUtil() {
-    return hbaseUtil;
+    return cluster.getHbaseTestingUtil();
   }
   
 }		
