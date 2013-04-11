@@ -92,13 +92,15 @@ public final class HBaseClusterSingleton {
       hbaseCluster.waitForActiveAndReadyMaster();
       LOG.info("After active and ready.");
       conf = hbaseCluster.getConfiguration();
+      /*
       LOG.info("Start mini mapreduce cluster.");
-      htu.startMiniMapReduceCluster();
+      htu.startMiniMapReduceCluster(numServers);
       LOG.info("After mini mapreduce cluster start-up.");
+      */
     } catch (Exception ex) {
       throw new RuntimeException("Minicluster not starting.");
     } finally {
-      // add a shutdown hook for shuting down the minicluster.
+      // add a shutdown hook for shutting down the minicluster.
       Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
         @Override
         public void run() {
@@ -106,7 +108,7 @@ public final class HBaseClusterSingleton {
             if (hbaseCluster != null) {
               hbaseCluster.shutdown();
             }
-            htu.shutdownMiniMapReduceCluster();
+            //htu.shutdownMiniMapReduceCluster();
           } catch (IOException e) {
             throw new RuntimeException("Exception shutting down cluster.");
           }
