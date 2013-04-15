@@ -26,7 +26,6 @@ import junit.framework.Assert;
 import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.hbase.GoraHBaseTestDriver;
-import org.apache.gora.hbase.store.HBaseStore;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.DataStoreTestBase;
@@ -127,31 +126,31 @@ public class TestHBaseStore extends DataStoreTestBase {
   }
 
 
-    @Override
-    public void testQueryEndKey() throws IOException {
-        //We need to skip this test since gora considers endRow inclusive, while its exclusinve for HBase.
-        //TODO: We should raise an issue for HBase to allow us to specify if the endRow will be inclussive or exclusive.
-    }
+  @Override
+  public void testQueryEndKey() throws IOException {
+    //We need to skip this test since gora considers endRow inclusive, while its exclusinve for HBase.
+    //TODO: We should raise an issue for HBase to allow us to specify if the endRow will be inclussive or exclusive.
+  }
 
-    @Override
-    public void testQueryKeyRange() throws IOException {
-        //We need to skip this test since gora considers endRow inclusive, while its exclusinve for HBase.
-        //TODO: We should raise an issue for HBase to allow us to specify if the endRow will be inclussive or exclusive.
-    }
+  @Override
+  public void testQueryKeyRange() throws IOException {
+    //We need to skip this test since gora considers endRow inclusive, while its exclusinve for HBase.
+    //TODO: We should raise an issue for HBase to allow us to specify if the endRow will be inclussive or exclusive.
+  }
 
-    @Override
-    public void testDeleteByQuery() throws IOException {
-        //We need to skip this test since gora considers endRow inclusive, while its exclusinve for HBase.
-        //TODO: We should raise an issue for HBase to allow us to specify if the endRow will be inclussive or exclusive.
-    }
+  @Override
+  public void testDeleteByQuery() throws IOException {
+    //We need to skip this test since gora considers endRow inclusive, while its exclusinve for HBase.
+    //TODO: We should raise an issue for HBase to allow us to specify if the endRow will be inclussive or exclusive.
+  }
 
-    public static void main(String[] args) throws Exception {
+  public static void main(String[] args) throws Exception {
     TestHBaseStore test = new TestHBaseStore();
     test.setUpClass();
     test.setUp();
-    
+
     test.testQuery();
-    
+
     test.tearDown();
     test.tearDownClass();
   }

@@ -21,9 +21,10 @@ package org.apache.gora.hbase.mapreduce;
 import org.apache.gora.examples.generated.TokenDatum;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.hbase.store.HBaseStore;
+import org.apache.gora.hbase.util.HBaseClusterSingleton;
 import org.apache.gora.mapreduce.MapReduceTestUtils;
 import org.apache.gora.store.DataStoreFactory;
-import org.apache.hadoop.hbase.HBaseClusterTestCase;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,32 +32,30 @@ import org.junit.Test;
 /**
  * Tests related to {@link org.apache.gora.hbase.store.HBaseStore} using mapreduce.
  */
-public class TestHBaseStoreWordCount extends HBaseClusterTestCase{
+public class TestHBaseStoreWordCount {
+  private static final HBaseClusterSingleton cluster = HBaseClusterSingleton.build(1);
 
   private HBaseStore<String, WebPage> webPageStore;
   private HBaseStore<String, TokenDatum> tokenStore;
   
   @Before
-  @Override
   public void setUp() throws Exception {
-    super.setUp();
+    cluster.deleteAllTables();
     webPageStore = DataStoreFactory.getDataStore(
-        HBaseStore.class, String.class, WebPage.class, conf);
+        HBaseStore.class, String.class, WebPage.class, cluster.getConf());
     tokenStore = DataStoreFactory.getDataStore(HBaseStore.class, 
-        String.class, TokenDatum.class, conf);
+        String.class, TokenDatum.class, cluster.getConf());
   }
 
   @After
-  @Override
   public void tearDown() throws Exception {
     webPageStore.close();
     tokenStore.close();
-    super.tearDown();
   }
 
   @Test
   public void testWordCount() throws Exception {
-    MapReduceTestUtils.testWordCount(conf, webPageStore, tokenStore);
+    MapReduceTestUtils.testWordCount(cluster.getConf(), webPageStore, tokenStore);
   }
   
   public static void main(String[] args) throws Exception {

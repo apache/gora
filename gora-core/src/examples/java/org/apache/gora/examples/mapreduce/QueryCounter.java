@@ -47,8 +47,7 @@ public class QueryCounter<K, T extends Persistent> extends Configured implements
   }
 
   public static class QueryCounterMapper<K, T extends Persistent>
-  extends GoraMapper<K, T
-    , NullWritable, NullWritable> {
+      extends GoraMapper<K, T, NullWritable, NullWritable> {
 
     @Override
     protected void map(K key, T value,
@@ -95,6 +94,7 @@ public class QueryCounter<K, T extends Persistent> extends Configured implements
   public long countQuery(DataStore<K,T> dataStore, Query<K,T> query) throws Exception {
     Job job = createJob(dataStore, query);
     job.waitForCompletion(true);
+    assert(job.isComplete() == true);
 
     return job.getCounters().findCounter(COUNTER_GROUP, ROWS).getValue();
   }
@@ -108,6 +108,7 @@ public class QueryCounter<K, T extends Persistent> extends Configured implements
 
     Job job = createJob(dataStore, query);
     job.waitForCompletion(true);
+    assert(job.isComplete() == true);
 
     return job.getCounters().findCounter(COUNTER_GROUP, ROWS).getValue();
   }

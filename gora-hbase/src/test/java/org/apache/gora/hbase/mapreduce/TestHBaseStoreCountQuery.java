@@ -21,9 +21,10 @@ package org.apache.gora.hbase.mapreduce;
 import org.apache.gora.examples.generated.TokenDatum;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.hbase.store.HBaseStore;
+import org.apache.gora.hbase.util.HBaseClusterSingleton;
 import org.apache.gora.mapreduce.MapReduceTestUtils;
 import org.apache.gora.store.DataStoreFactory;
-import org.apache.hadoop.hbase.HBaseClusterTestCase;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,28 +32,26 @@ import org.junit.Test;
 /**
  * Tests related to {@link HBaseStore} using mapreduce.
  */
-public class TestHBaseStoreCountQuery extends HBaseClusterTestCase{
+public class TestHBaseStoreCountQuery {
+  private static final HBaseClusterSingleton cluster = HBaseClusterSingleton.build(1);
 
   private HBaseStore<String, WebPage> webPageStore;
-  
+
   @Before
-  @Override
   public void setUp() throws Exception {
-    super.setUp();
+    cluster.deleteAllTables();
     webPageStore = DataStoreFactory.getDataStore(
-        HBaseStore.class, String.class, WebPage.class, conf);
+        HBaseStore.class, String.class, WebPage.class, cluster.getConf());
   }
 
   @After
-  @Override
   public void tearDown() throws Exception {
     webPageStore.close();
-    super.tearDown();
   }
   
   @Test
   public void testCountQuery() throws Exception {
-    MapReduceTestUtils.testCountQuery(webPageStore, conf);
+    MapReduceTestUtils.testCountQuery(webPageStore, cluster.getConf());
   }
 
   public static void main(String[] args) throws Exception {
