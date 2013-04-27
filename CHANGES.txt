@@ -5,6 +5,9 @@
 Gora Change Log
 
 trunk (current development)
+
+* GORA-191 Support multiple Avro Schemas within GoraCompiler (Udesh Liyanaarachchi, rmarroquin, lewismc) 
+
 * GORA-159 gora-hbase MR tests should use HBaseTestingUtility instead of deprecated HBaseClusterTestCase via GORA-89 
 
 * GORA-89 Avoid HBase MiniCluster restarts to shorten gora-hbase tests (hsaputra, alfonso, Ioan eugen Stan)

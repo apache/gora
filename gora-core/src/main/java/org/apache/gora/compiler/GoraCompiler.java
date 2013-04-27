@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +48,7 @@ public class GoraCompiler {
   private Set<Schema> queue = new HashSet<Schema>();
   private static final Logger log = LoggerFactory.getLogger(GoraCompiler.class);
   private static LicenseHeaders licenseHeader = new LicenseHeaders(null);
+  private final static String SCHEMA_EXTENTION = ".avsc";
 
   private GoraCompiler(File dest) {
     this.dest = dest;                             // root directory for output
@@ -79,6 +81,19 @@ public class GoraCompiler {
     compiler.enqueue(Schema.parse(src));          // enqueue types
     compiler.compile();                           // generate classes for types
   }
+  
+  /** Generates Java classes for a number of schema files. */
+  public static void compileSchema(File[] srcFiles, File dest) throws IOException {
+  if(licenseHeader != null) {
+  log.info("The generated artifact will be " + licenseHeader.getLicenseName() + " licensed.");
+   }
+       for (File src : srcFiles) {
+        log.info("Compiling Schema: " + src + " to: " + dest);
+        GoraCompiler compiler = new GoraCompiler(dest);
+        compiler.enqueue(Schema.parse(src));          // enqueue types
+        compiler.compile();                           // generate classes for types
+  	  }
+  	}
 
   private static String camelCasify(String s) {
     return s.substring(0, 1).toUpperCase() + s.substring(1);
@@ -493,7 +508,7 @@ public class GoraCompiler {
   public static void main(String[] args) throws Exception {
     if (args.length < 2) {
       System.err.println("Usage: GoraCompiler <schema file> <output dir> [-license <id>]");
-      System.err.println("  <schema file>     - individual avsc file to be compiled");
+      System.err.println("  <schema file>     - individual avsc file to be compiled or a directory path containing avsc files");
       System.err.println("  <output dir>      - output directory for generated Java files");
       System.err.println("  [-license <id>]   - the preferred license header to add to the\n" +
                                            "\t\t      generated Java file. Current options include; \n" +
@@ -508,6 +523,12 @@ public class GoraCompiler {
                                               "\t\t  LGPLv3  (GNU Lesser General Public License v2.1)\n") ;
       System.exit(1);
     }
+    File inputFile = new File(args[0]);
+    File output = new File(args[1]);
+    if(!inputFile.exists() || !output.exists()){
+    	System.err.println("input file path or output file path doesn't exists.");
+    	System.exit(1);
+    }
     for (int i = 1; i < args.length; i++) {
       licenseHeader.setLicenseName("ASLv2");
       if ("-license".equals(args[i])) {
@@ -517,7 +538,19 @@ public class GoraCompiler {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     long start = System.currentTimeMillis();
     log.info("GoraCompiler: starting at " + sdf.format(start));
-    compileSchema(new File(args[0]), new File(args[1]));
+    if(inputFile.isDirectory()) {
+    	ArrayList<File> inputSchemas = new ArrayList<File>();
+    	File[] listOfFiles= inputFile.listFiles();
+    	for (File file : listOfFiles) {
+    	    if (file.isFile() && file.exists() && file.getName().endsWith(SCHEMA_EXTENTION)) {
+    	    	inputSchemas.add(file);
+    	    }
+    	}
+    compileSchema(inputSchemas.toArray(new File[inputSchemas.size()]), output);
+    }
+    else if (inputFile.isFile()) {
+    	compileSchema(inputFile, output);	
+    }
     long end = System.currentTimeMillis();
     log.info("GoraCompiler: finished at " + sdf.format(end) + ", elapsed: " + TimingUtil.elapsedTime(start, end));
     return;
