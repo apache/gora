@@ -24,7 +24,6 @@ import me.prettyprint.hector.api.Serializer;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
-import org.apache.avro.Schema.Type;
 import org.apache.gora.cassandra.serializers.GoraSerializerTypeInferer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +40,15 @@ public abstract class CassandraColumn {
   private String family;
   private int type;
   private Field field;
+  private int unionType;
+
+  public void setUnionType(int pUnionType){
+    this.unionType = pUnionType;
+  }
+
+  public int getUnionType(){
+    return unionType;
+  }
   
   public String getFamily() {
     return family;
@@ -67,7 +75,7 @@ public abstract class CassandraColumn {
   
   protected Object fromByteBuffer(Schema schema, ByteBuffer byteBuffer) {
     Object value = null;
-    Serializer serializer = GoraSerializerTypeInferer.getSerializer(schema);
+    Serializer<?> serializer = GoraSerializerTypeInferer.getSerializer(schema);
     if (serializer == null) {
       LOG.info("Schema is not supported: " + schema.toString());
     } else {

@@ -20,6 +20,9 @@ package org.apache.gora.cassandra.query;
 
 import java.util.ArrayList;
 
+import me.prettyprint.cassandra.serializers.StringSerializer;
+
+
 /**
  * List of key value pairs representing a row, tagged by a key.
  */
@@ -37,6 +40,19 @@ public class CassandraRow<K> extends ArrayList<CassandraColumn> {
 
   public void setKey(K key) {
     this.key = key;
+  }
+  
+  /**
+   * Gets a specific CassandraColumn within a row using its name
+   * @param pCassandraColumnName
+   * @return CassandraColumn
+   */
+  public CassandraColumn getCassandraColumn(String pCassandraColumnName){
+    for (CassandraColumn cColumn: this)
+      if ( pCassandraColumnName.equals(StringSerializer.get().fromByteBuffer(cColumn.getName())) )
+        return cColumn;
+    
+    return null;
   }
 
 }

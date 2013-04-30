@@ -148,6 +148,8 @@ public class GoraSerializerTypeInferer {
       serializer = GenericArraySerializer.get(schema.getElementType());
     } else if (type == Type.MAP) {
       serializer = StatefulHashMapSerializer.get(schema.getValueType());
+    } else if (type == Type.UNION){
+      serializer = ByteBufferSerializer.get();
     } else {
       serializer = null;
     }

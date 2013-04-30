@@ -40,6 +40,7 @@ import org.apache.avro.util.Utf8;
 import org.apache.gora.cassandra.serializers.GenericArraySerializer;
 import org.apache.gora.cassandra.serializers.StatefulHashMapSerializer;
 import org.apache.gora.cassandra.serializers.TypeUtils;
+import org.apache.gora.cassandra.store.CassandraStore;
 import org.apache.gora.persistency.StatefulHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,11 +83,30 @@ public class CassandraSubColumn extends CassandraColumn {
       StatefulHashMapSerializer serializer = StatefulHashMapSerializer.get(fieldSchema.getValueType());
       StatefulHashMap map = serializer.fromByteBuffer(byteBuffer);
       value = map;
+    } else if (type == Type.UNION){
+      // the selected union schema is obtained
+      Schema unionFieldSchema = getUnionSchema(super.getUnionType(), field.schema());
+      // we use the selected union schema to deserialize our actual value
+      value = fromByteBuffer(unionFieldSchema, byteBuffer);
     } else {
       value = fromByteBuffer(fieldSchema, byteBuffer);
     }
 
     return value;
+  }
+  
+  /**
+   * Gets the specific schema for a union data type
+   * @param pSchemaPos
+   * @param pSchema
+   * @return
+   */
+  private Schema getUnionSchema (int pSchemaPos, Schema pSchema){
+    Schema unionSchema = pSchema.getTypes().get(pSchemaPos);
+    // default union element
+    if ( unionSchema == null )
+      pSchema.getTypes().get(CassandraStore.DEFAULT_UNION_SCHEMA);
+    return unionSchema;
   }
 
   public void setValue(HColumn<ByteBuffer, ByteBuffer> hColumn) {

@@ -38,7 +38,6 @@ import org.junit.Test;
 
 /**
  * Test for CassandraStore.
- * @author lewismc
  */
 public class TestCassandraStore extends DataStoreTestBase{
 	
