@@ -4,7 +4,8 @@
 
 Gora Change Log
 
-trunk (current development)
+0.3 release: 05/03/2013 (mm/dd/yyyy)
+Release Report: https://issues.apache.org/jira/secure/ReleaseNote.jspa?projectId=12311172&version=12317954
 
 * GORA-191 Support multiple Avro Schemas within GoraCompiler (Udesh Liyanaarachchi, rmarroquin, lewismc)
 
