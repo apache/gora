@@ -200,6 +200,17 @@ implements Configurable {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   * Serializes the Persistent data and saves in HBase.
+   * Topmost fields of the record are persisted in "raw" format (not avro serialized). This behavior happens
+   * in maps and arrays too.
+   * 
+   * ["null","type"] type (a.k.a. optional field) is persisted like as if it is ["type"], but the column get
+   * deleted if value==null (so value read after will be null).
+   * 
+   * @param persistent Record to be persisted in HBase
+   */
   @SuppressWarnings({ "unchecked", "rawtypes" })
   @Override
   public void put(K key, T persistent) {
@@ -234,8 +245,14 @@ implements Configurable {
                   case DIRTY:
                     byte[] qual = Bytes.toBytes(mapKey.toString());
                     byte[] val = toBytes(map.get(mapKey), field.schema().getValueType());
-                    put.add(hcol.getFamily(), qual, val);
-                    hasPuts = true;
+                    // XXX - Gora 207: Top-most record level ["null","type"] must be saved raw. "null"=>delete
+                    if (val == null) { // value == null => must delete the column
+                      delete.deleteColumn(hcol.getFamily(), qual);
+                      hasDeletes = true;
+                    } else {
+                      put.add(hcol.getFamily(), qual, val);
+                      hasPuts = true;
+                    }
                     break;
                   case DELETED:
                     qual = Bytes.toBytes(mapKey.toString());
@@ -248,9 +265,15 @@ implements Configurable {
               Set<Map.Entry> set = ((Map)o).entrySet();
               for(Entry entry: set) {
                 byte[] qual = toBytes(entry.getKey());
-                byte[] val = toBytes(entry.getValue());
-                put.add(hcol.getFamily(), qual, val);
-                hasPuts = true;
+                byte[] val = toBytes(entry.getValue(), field.schema().getValueType());
+                // XXX - Gora 207: Top-most record level ["null","type"] must be saved raw. "null"=>delete
+                if (val == null) { // value == null => must delete the column
+                  delete.deleteColumn(hcol.getFamily(), qual);
+                  hasDeletes = true;
+                } else {
+                  put.add(hcol.getFamily(), qual, val);
+                  hasPuts = true;
+                }
               }
             }
             break;
@@ -259,15 +282,28 @@ implements Configurable {
               GenericArray arr = (GenericArray) o;
               int j=0;
               for(Object item : arr) {
-                byte[] val = toBytes(item);
-                put.add(hcol.getFamily(), Bytes.toBytes(j++), val);
-                hasPuts = true;
+                byte[] val = toBytes(item, field.schema().getElementType());
+                // XXX - Gora 207: Top-most record level ["null","type"] must be saved raw. "null"=>delete
+                if (val == null) { // value == null => must delete the column
+                  delete.deleteColumn(hcol.getFamily(), Bytes.toBytes(j++));
+                  hasDeletes = true;
+                } else {
+                  put.add(hcol.getFamily(), Bytes.toBytes(j++), val);
+                  hasPuts = true;
+                }
               }
             }
             break;
           default:
-            put.add(hcol.getFamily(), hcol.getQualifier(), toBytes(o, field.schema()));
-            hasPuts = true;
+            // XXX - Gora 207: Top-most record level ["null","type"] must be saved raw. "null"=>delete
+            byte[] serializedBytes = toBytes(o, field.schema()) ;
+            if (serializedBytes == null) { // value == null => must delete the column
+              delete.deleteColumn(hcol.getFamily(), hcol.getQualifier());
+              hasDeletes = true;
+            } else {
+              put.add(hcol.getFamily(), hcol.getQualifier(), serializedBytes);
+              hasPuts = true;
+            }
             break;
         }
       }
@@ -563,8 +599,7 @@ implements Configurable {
           setField(persistent, field, arr);
           break;
         default:
-          byte[] val =
-            result.getValue(col.getFamily(), col.getQualifier());
+          byte[] val = result.getValue(col.getFamily(), col.getQualifier());
           if (val == null) {
             continue;
           }

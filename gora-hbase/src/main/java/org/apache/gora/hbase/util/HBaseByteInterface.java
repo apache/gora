@@ -27,6 +27,7 @@ import java.util.Map;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
+import org.apache.avro.generic.GenericData;
 import org.apache.avro.io.BinaryDecoder;
 import org.apache.avro.io.BinaryEncoder;
 import org.apache.avro.io.DecoderFactory;
@@ -88,7 +89,17 @@ public class HBaseByteInterface {
       };
   };
 
-
+  /**
+   * Deserializes an array of bytes matching the given schema to the proper basic (enum, Utf8,...) or
+   * complex type (Persistent/Record).
+   * 
+   * Does not handle <code>arrays/maps</code> if not inside a <code>record</code> type.
+   * 
+   * @param schema Avro schema describing the expected data
+   * @param val array of bytes with the data serialized
+   * @return Enum|Utf8|ByteBuffer|Integer|Long|Float|Double|Boolean|Persistent|Null
+   * @throws IOException
+   */
   @SuppressWarnings("rawtypes")
   public static Object fromBytes(Schema schema, byte[] val) throws IOException {
     Type type = schema.getType();
@@ -102,12 +113,43 @@ public class HBaseByteInterface {
     case DOUBLE:  return Bytes.toDouble(val);
     case BOOLEAN: return val[0] != 0;
     case UNION:
+      // XXX Special case: When reading the top-level field of a record we must handle the
+      // special case ["null","type"] definitions: this will be written as if it was ["type"]
+      // if not in a special case, will execute "case RECORD".
+      
+      // if 'val' is empty we ignore the special case (will match Null in "case RECORD")  
+      if (schema.getTypes().size() == 2) {
+        
+        // schema [type0, type1]
+        Type type0 = schema.getTypes().get(0).getType() ;
+        Type type1 = schema.getTypes().get(1).getType() ;
+        
+        // Check if types are different and there's a "null", like ["null","type"] or ["type","null"]
+        if (!type0.equals(type1)
+            && (   type0.equals(Schema.Type.NULL)
+                || type1.equals(Schema.Type.NULL))) {
+
+          if (type0.equals(Schema.Type.NULL))
+            schema = schema.getTypes().get(1) ;
+          else 
+            schema = schema.getTypes().get(0) ;
+          
+          return fromBytes(schema, val) ; // Deserialize as if schema was ["type"] 
+        }
+        
+      }
+      // else
+      //   type = [type0,type1] where type0=type1
+      //   or val == null
+      // => deserialize like "case RECORD"
+
     case RECORD:
       Map<String, SpecificDatumReader<?>> readerMap = readerMaps.get();
       PersistentDatumReader<?> reader = null ;
             
-      // For UNION schemas, must use a specific (UNION-type-type-type)
-      // since unions don't have own name
+      // For UNION schemas, must use a specific PersistentDatumReader
+      // from the readerMap since unions don't have own name
+      // (key name in map will be "UNION-type-type-...")
       if (schema.getType().equals(Schema.Type.UNION)) {
         reader = (PersistentDatumReader<?>)readerMap.get(String.valueOf(schema.hashCode()));
         if (reader == null) {
@@ -137,6 +179,13 @@ public class HBaseByteInterface {
     }
   }
 
+  /**
+   * Converts an array of bytes to the target <em>basic class</em>.
+   * @param clazz (Byte|Boolean|Short|Integer|Long|Float|Double|String|Utf8).class
+   * @param val array of bytes with the value
+   * @return an instance of <code>clazz</code> with the bytes in <code>val</code>
+   *         deserialized with org.apache.hadoop.hbase.util.Bytes
+   */
   @SuppressWarnings("unchecked")
   public static <K> K fromBytes(Class<K> clazz, byte[] val) {
     if (clazz.equals(Byte.TYPE) || clazz.equals(Byte.class)) {
@@ -161,6 +210,11 @@ public class HBaseByteInterface {
     throw new RuntimeException("Can't parse data as class: " + clazz);
   }
 
+  /**
+   * Converts an instance of a <em>basic class</em> to an array of bytes.
+   * @param o Instance of Enum|Byte|Boolean|Short|Integer|Long|Float|Double|String|Utf8
+   * @return array of bytes with <code>o</code> serialized with org.apache.hadoop.hbase.util.Bytes
+   */
   public static byte[] toBytes(Object o) {
     Class<?> clazz = o.getClass();
     if (clazz.equals(Enum.class)) {
@@ -187,6 +241,14 @@ public class HBaseByteInterface {
     throw new RuntimeException("Can't parse data as class: " + clazz);
   }
 
+  /**
+   * Serializes an object following the given schema.
+   * Does not handle <code>array/map</code> if it is not inside a <code>record</code>
+   * @param o Utf8|ByteBuffer|Integer|Long|Float|Double|Boolean|Enum|Persistent
+   * @param schema The schema describing the object (or a compatible description)
+   * @return array of bytes of the serialized object
+   * @throws IOException
+   */
   @SuppressWarnings({ "rawtypes", "unchecked" })
   public static byte[] toBytes(Object o, Schema schema) throws IOException {
     Type type = schema.getType();
@@ -200,11 +262,40 @@ public class HBaseByteInterface {
     case BOOLEAN: return (Boolean)o ? new byte[] {1} : new byte[] {0};
     case ENUM:    return new byte[] { (byte)((Enum<?>) o).ordinal() };
     case UNION:
+      // XXX Special case: When writing the top-level field of a record we must handle the
+      // special case ["null","type"] definitions: this will be written as if it was ["type"]
+      // if not in a special case, will execute "case RECORD".
+      
+      if (schema.getTypes().size() == 2) {
+        
+        // schema [type0, type1]
+        Type type0 = schema.getTypes().get(0).getType() ;
+        Type type1 = schema.getTypes().get(1).getType() ;
+        
+        // Check if types are different and there's a "null", like ["null","type"] or ["type","null"]
+        if (!type0.equals(type1)
+            && (   type0.equals(Schema.Type.NULL)
+                || type1.equals(Schema.Type.NULL))) {
+
+          if (o == null) return null ;
+          
+          int index = GenericData.get().resolveUnion(schema, o);
+          schema = schema.getTypes().get(index) ;
+          
+          return toBytes(o, schema) ; // Serialize as if schema was ["type"] 
+        }
+        
+      }
+      // else
+      //   type = [type0,type1] where type0=type1
+      // => Serialize like "case RECORD" with Avro
+      
     case RECORD:
       Map<String, SpecificDatumWriter<?>> writerMap = writerMaps.get();
       PersistentDatumWriter writer = null ;
-      // For UNION schemas, must use a specific (UNION-type-type-type)
-      // since unions don't have own name
+      // For UNION schemas, must use a specific PersistentDatumReader
+      // from the readerMap since unions don't have own name
+      // (key name in map will be "UNION-type-type-...")
       if (schema.getType().equals(Schema.Type.UNION)) {
         writer = (PersistentDatumWriter<?>) writerMap.get(String.valueOf(schema.hashCode()));
         if (writer == null) {
