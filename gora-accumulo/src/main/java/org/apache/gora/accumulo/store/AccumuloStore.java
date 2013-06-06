@@ -93,6 +93,7 @@ import org.apache.gora.query.impl.PartitionQueryImpl;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.AvroUtils;
+import org.apache.gora.util.GoraException;
 import org.apache.hadoop.io.Text;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -322,6 +323,10 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         }
 
       }
+
+      if (mapping.tableName == null) {
+        throw new GoraException("Please define the gora to accumulo mapping in " + filename + " for " + persistentClass.getCanonicalName());
+      }
       
       nl = root.getElementsByTagName("table");
       for (int i = 0; i < nl.getLength(); i++) {
@@ -535,6 +540,11 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         
         Object o = val.get(i);
         Pair<Text,Text> col = mapping.fieldMap.get(field.name());
+
+        if (col == null) {
+          throw new GoraException("Please define the gora to accumulo mapping for field " + field.name());
+        }
+
   
         switch (field.schema().getType()) {
           case MAP:
