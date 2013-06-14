@@ -576,7 +576,7 @@
         <module>gora-accumulo</module>
         <module>gora-cassandra</module>
         <module>gora-dynamodb</module>
-        <module>gora-sql</module>
+        <!--module>gora-sql</module-->
         <module>gora-tutorial</module>
         <module>sources-dist</module>
     </modules>

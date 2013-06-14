@@ -4,7 +4,7 @@
   "namespace": "org.apache.gora.examples.generated",
   "fields" : [
     {"name": "url", "type": "string"},
-    {"name": "content", "type": "bytes"},
+    {"name": "content", "type": ["null","bytes"]},
     {"name": "parsedContent", "type": {"type":"array", "items": "string"}},
     {"name": "outlinks", "type": {"type":"map", "values":"string"}},
     {"name": "metadata", "type": {

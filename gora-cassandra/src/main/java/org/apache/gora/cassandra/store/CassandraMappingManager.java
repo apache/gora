@@ -19,6 +19,7 @@
 package org.apache.gora.cassandra.store;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +49,9 @@ public class CassandraMappingManager {
     return manager;
   }
 
-  //
+  /**
+  * Objects to maintain mapped keyspaces
+  */
   private Map<String, Element> keyspaceMap = null;
   private Map<String, Element>  mappingMap = null;
 
@@ -95,7 +98,12 @@ public class CassandraMappingManager {
   public void loadConfiguration() throws JDOMException, IOException {
     SAXBuilder saxBuilder = new SAXBuilder();
     // get mapping file
-    Document document = saxBuilder.build(getClass().getClassLoader().getResourceAsStream(MAPPING_FILE));
+    InputStream inputStream = getClass().getClassLoader().getResourceAsStream(MAPPING_FILE);
+    if (inputStream == null){
+      LOG.warn("Mapping file '" + MAPPING_FILE + "' could not be found!");
+      throw new IOException("Mapping file '" + MAPPING_FILE + "' could not be found!");
+    }
+    Document document = saxBuilder.build(inputStream);
     if (document == null) {
       LOG.warn("Mapping file '" + MAPPING_FILE + "' could not be found!");
     }

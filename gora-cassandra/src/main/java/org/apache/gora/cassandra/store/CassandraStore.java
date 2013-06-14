@@ -29,8 +29,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.Collections;
 
-import me.prettyprint.cassandra.serializers.IntegerSerializer;
-import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.beans.ColumnSlice;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
@@ -42,7 +40,6 @@ import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericArray;
-import org.apache.avro.specific.SpecificFixed;
 import org.apache.avro.util.Utf8;
 import org.apache.gora.cassandra.query.CassandraQuery;
 import org.apache.gora.cassandra.query.CassandraResult;
@@ -66,6 +63,11 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
   public static final Logger LOG = LoggerFactory.getLogger(CassandraStore.class);
 
   private CassandraClient<K, T>  cassandraClient = new CassandraClient<K, T>();
+
+  /**
+   * Default schema index used when AVRO Union data types are stored
+   */
+  public static int DEFAULT_UNION_SCHEMA = 0;
 
   /**
    * The values are Avro fields pending to be stored.
@@ -132,7 +134,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
     CassandraResult<K, T> cassandraResult = new CassandraResult<K, T>(this, query);
     cassandraResult.setReverseMap(reverseMap);
 
-    CassandraResultSet cassandraResultSet = new CassandraResultSet();
+    CassandraResultSet<K> cassandraResultSet = new CassandraResultSet<K>();
     
     // We query Cassandra keyspace by families.
     for (String family : familyMap.keySet()) {
@@ -322,6 +324,11 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
             }
             fieldValue = newArray;
             break;
+          case UNION:
+            // storing the union selected schema, the actual value will be stored as soon as getting out of here
+            // TODO determine which schema we are using: int schemaPos = getUnionSchema(fieldValue,fieldSchema);
+            // and save it p.put( p.getFieldIndex(field.name() + CassandraStore.UNION_COL_SUFIX), schemaPos);
+            break;
         }
         
         p.put(fieldPos, fieldValue);
@@ -341,37 +348,32 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
   private void addOrUpdateField(K key, Field field, Object value) {
     Schema schema = field.schema();
     Type type = schema.getType();
-    switch (type) {
-      case STRING:
-      case BOOLEAN:
-      case INT:
-      case LONG:
-      case BYTES:
-      case FLOAT:
-      case DOUBLE:
-      case FIXED:
-        this.cassandraClient.addColumn(key, field.name(), value);
-        break;
-      case RECORD:
-        if (value != null) {
-          if (value instanceof PersistentBase) {
-            PersistentBase persistentBase = (PersistentBase) value;
-            for (Field member: schema.getFields()) {
-              
-              // TODO: hack, do not store empty arrays
-              Object memberValue = persistentBase.get(member.pos());
-              if (memberValue instanceof GenericArray<?>) {
-                if (((GenericArray)memberValue).size() == 0) {
-                  continue;
+      switch (type) {
+        case STRING:
+        case BOOLEAN:
+        case INT:
+        case LONG:
+        case BYTES:
+        case FLOAT:
+        case DOUBLE:
+        case FIXED:
+          this.cassandraClient.addColumn(key, field.name(), value);
+          break;
+        case RECORD:
+          if (value != null) {
+            if (value instanceof PersistentBase) {
+              PersistentBase persistentBase = (PersistentBase) value;
+              for (Field member: schema.getFields()) {
+                
+                // TODO: hack, do not store empty arrays
+                Object memberValue = persistentBase.get(member.pos());
+                if (memberValue instanceof GenericArray<?>) {
+                  if (((GenericArray)memberValue).size() == 0) {
+                    continue;
+                  }
                 }
-              } else if (memberValue instanceof StatefulHashMap<?,?>) {
-                if (((StatefulHashMap)memberValue).size() == 0) {
-                  continue;
-                }
+                this.cassandraClient.addSubColumn(key, field.name(), member.name(), memberValue);
               }
-
-              this.cassandraClient.addSubColumn(key, field.name(), member.name(), memberValue);
-            }
           } else {
             LOG.info("Record not supported: " + value.toString());
             
@@ -396,9 +398,50 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
           }
         }
         break;
+       case UNION:
+         if(value != null) {
+           LOG.info("Union being supported with value: " + value.toString());
+           // TODO add union schema index used
+           // adding union value
+           this.cassandraClient.addColumn(key, field.name(), value);
+         } else {
+           LOG.info("Union not supported: " + value.toString());
+         }
       default:
         LOG.info("Type not considered: " + type.name());      
     }
+  }
+
+  /**
+   * Gets the position within the schema of the type used
+   * @param pValue
+   * @param pUnionSchema
+   * @return
+   */
+  private int getUnionSchema(Object pValue, Schema pUnionSchema){
+    int unionSchemaPos = 0;
+    String valueType = pValue.getClass().getSimpleName();
+    Iterator<Schema> it = pUnionSchema.getTypes().iterator();
+    while ( it.hasNext() ){
+      String schemaName = it.next().getName();
+      if (valueType.equals("Utf8") && schemaName.equals(Type.STRING.name().toLowerCase()))
+        return unionSchemaPos;
+      else if (valueType.equals("HeapByteBuffer") && schemaName.equals(Type.STRING.name().toLowerCase()))
+        return unionSchemaPos;
+      else if (valueType.equals("Integer") && schemaName.equals(Type.INT.name().toLowerCase()))
+        return unionSchemaPos;
+      else if (valueType.equals("Long") && schemaName.equals(Type.LONG.name().toLowerCase()))
+        return unionSchemaPos;
+      else if (valueType.equals("Double") && schemaName.equals(Type.DOUBLE.name().toLowerCase()))
+        return unionSchemaPos;
+      else if (valueType.equals("Float") && schemaName.equals(Type.FLOAT.name().toLowerCase()))
+        return unionSchemaPos;
+      else if (valueType.equals("Boolean") && schemaName.equals(Type.BOOLEAN.name().toLowerCase()))
+        return unionSchemaPos;
+      unionSchemaPos ++;
+    }
+    // if we weren't able to determine which data type it is, then we return the default
+    return 0;
   }
 
   @Override

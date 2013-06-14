@@ -206,6 +206,17 @@ public class CassandraMapping {
     }    
   }
 
+  /**
+   * Add new column to CassandraMapping using the self-explanatory parameters
+   * @param pFamilyName
+   * @param pFieldName
+   * @param pColumnName
+   */
+  public void addColumn(String pFamilyName, String pFieldName, String pColumnName){
+    this.familyMap.put(pFieldName, pFamilyName);
+    this.columnMap.put(pFieldName, pColumnName);
+  }
+
   public String getFamily(String name) {
     return this.familyMap.get(name);
   }

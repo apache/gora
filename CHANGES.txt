@@ -4,12 +4,15 @@
 
 Gora Change Log
 
+* GORA-174 GORA compiler does not handle ["string", "null"] unions in the AVRO schema (alfonsonishikawa, rmarroquin, kturner via lewismc)
+  incl. GORA-206, 207 and 216.
+
 * GORA-239 Add null checks and better message in AccumuloStore (David Medinets via hsaputra)
 
 0.3 release: 05/03/2013 (mm/dd/yyyy)
-Release Report: https://issues.apache.org/jira/secure/ReleaseNote.jspa?projectId=12311172&version=12317954
+Release Report: https://issues.apache.org/jira/secure/ReleaseNote.jspa?projectId=12311172&version=12317954Gora Change Log
 
-* GORA-191 Support multiple Avro Schemas within GoraCompiler (Udesh Liyanaarachchi, rmarroquin, lewismc)
+* GORA-191 Support multiple Avro Schemas within GoraCompiler (Udesh Liyanaarachchi, rmarroquin, lewismc) 
 
 * GORA-159 gora-hbase MR tests should use HBaseTestingUtility instead of deprecated HBaseClusterTestCase via GORA-89 
 

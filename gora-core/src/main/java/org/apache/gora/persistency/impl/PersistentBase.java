@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
+import org.apache.avro.generic.GenericData;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.gora.avro.PersistentDatumReader;
 import org.apache.gora.persistency.ListGenericArray;
@@ -253,12 +254,33 @@ public abstract class PersistentBase implements Persistent, SpecificRecord {
     return result;
   }
 
+  /**
+   * Computes a (record's) field's hash code.
+   * @param i Index of the field in the actual
+   * @param field
+   * @return
+   */
   private int getFieldHashCode(int i, Field field) {
     Object o = get(i);
     if(o == null)
       return 0;
 
-    if(field.schema().getType() == Type.BYTES) {
+    // XXX Union special case: in a field being union we have to check the
+    // inner schemas for Type.BYTES special case, but because it is not a
+    // field we check it this way. Too simple case to create another
+    // private method
+    boolean isUnionField = false ;
+    int unionIndex = -1 ;
+    
+    if (field.schema().getType() == Type.UNION) {
+      isUnionField = true ;
+      unionIndex = GenericData.get().resolveUnion(field.schema(), o);
+    }
+    
+    if(field.schema().getType() == Type.BYTES
+       || (isUnionField
+           && field.schema().getTypes().get(unionIndex).getType() == Type.BYTES)) {
+      // ByteBuffer.hashCode() depends on internal 'position' index, but we must ignore that.
       return getByteBufferHashCode((ByteBuffer)o);
     }
 

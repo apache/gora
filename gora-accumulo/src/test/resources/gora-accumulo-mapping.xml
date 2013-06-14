@@ -38,6 +38,8 @@
     <field name="dateOfBirth" family="info" qualifier="db"/>
     <field name="ssn" family="info" qualifier="sn"/>
     <field name="salary" family="info" qualifier="sl"/>
+    <field name="boss" family="info" qualifier="bs"/>
+    <field name="webpage" family="info" qualifier="wp"/>
   </class>
   
   <class name="org.apache.gora.examples.generated.WebPage" keyClass="java.lang.String" table="WebPage">

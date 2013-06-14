@@ -42,8 +42,11 @@ import org.apache.avro.generic.GenericArray;
 import org.apache.avro.util.Utf8;
 import org.apache.gora.examples.WebPageDataCreator;
 import org.apache.gora.examples.generated.Employee;
+import org.apache.gora.examples.generated.Metadata;
 import org.apache.gora.examples.generated.WebPage;
+import org.apache.gora.persistency.BeanFactory;
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.BeanFactoryImpl;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
@@ -91,6 +94,17 @@ public class DataStoreTestUtil {
     return employee;
   }
 
+  public static <K> Employee createBoss(
+      DataStore<K, Employee> dataStore) throws IOException, Exception {
+
+    Employee employee = dataStore.newPersistent();
+    employee.setName(new Utf8("Random boss"));
+    employee.setDateOfBirth( System.currentTimeMillis() - 22L *  YEAR_IN_MS );
+    employee.setSalary(1000000);
+    employee.setSsn(new Utf8("202020202020"));
+    return employee;
+  }
+  
   public static void testAutoCreateSchema(DataStore<String,Employee> dataStore)
   throws IOException, Exception {
     //should not throw exception
@@ -147,6 +161,76 @@ public class DataStoreTestUtil {
     Assert.assertEquals(employee, after);
   }
 
+
+  public static void testGetEmployeeRecursive(DataStore<String, Employee> dataStore)
+    throws IOException, Exception {
+
+    Employee employee = DataStoreTestUtil.createEmployee(dataStore);
+    Employee boss = DataStoreTestUtil.createBoss(dataStore);
+    employee.setBoss(boss) ;
+    
+    String ssn = employee.getSsn().toString();
+    dataStore.put(ssn, employee);
+    dataStore.flush();
+    Employee after = dataStore.get(ssn, Employee._ALL_FIELDS);
+    Assert.assertEquals(employee, after);
+    Assert.assertEquals(boss, after.getBoss()) ;
+  }
+
+  public static void testGetEmployeeDoubleRecursive(DataStore<String, Employee> dataStore)
+      throws IOException, Exception {
+
+      Employee employee = DataStoreTestUtil.createEmployee(dataStore);
+      Employee boss = DataStoreTestUtil.createBoss(dataStore);
+      Employee uberBoss = DataStoreTestUtil.createBoss(dataStore);
+      uberBoss.setName(new Utf8("Überboss")) ;
+      boss.setBoss(uberBoss) ;
+      employee.setBoss(boss) ;
+      
+      String ssn = employee.getSsn().toString();
+      dataStore.put(ssn, employee);
+      dataStore.flush();
+      Employee after = dataStore.get(ssn, Employee._ALL_FIELDS);
+      Assert.assertEquals(employee, after);
+      Assert.assertEquals(boss, after.getBoss()) ;
+      Assert.assertEquals(uberBoss, ((Employee)after.getBoss()).getBoss()) ;
+    }
+  
+  public static void testGetEmployeeNested(DataStore<String, Employee> dataStore)
+    throws IOException, Exception {
+
+    Employee employee = DataStoreTestUtil.createEmployee(dataStore);
+    WebPage webpage = new BeanFactoryImpl<String,WebPage>(String.class,WebPage.class).newPersistent() ;
+    
+    webpage.setUrl(new Utf8("url..")) ;
+    webpage.setContent(ByteBuffer.wrap("test content".getBytes())) ;
+    Metadata metadata = new BeanFactoryImpl<String,Metadata>(String.class,Metadata.class).newPersistent() ;
+    webpage.setMetadata(metadata) ;
+    employee.setWebpage(webpage) ;
+    
+    String ssn = employee.getSsn().toString();
+   
+    dataStore.put(ssn, employee);
+    dataStore.flush();
+    Employee after = dataStore.get(ssn, Employee._ALL_FIELDS);
+    Assert.assertEquals(employee, after);
+    Assert.assertEquals(webpage, after.getWebpage()) ;
+  }
+  
+  public static void testGetEmployee3UnionField(DataStore<String, Employee> dataStore)
+    throws IOException, Exception {
+
+    Employee employee = DataStoreTestUtil.createEmployee(dataStore);
+    employee.setBoss(new Utf8("Real boss")) ;
+    
+    String ssn = employee.getSsn().toString();
+    dataStore.put(ssn, employee);
+    dataStore.flush();
+    Employee after = dataStore.get(ssn, Employee._ALL_FIELDS);
+    Assert.assertEquals(employee, after);
+    Assert.assertEquals("Real boss", ((Utf8)after.getBoss()).toString()) ;
+  }
+  
   public static void testGetEmployeeNonExisting(DataStore<String, Employee> dataStore)
     throws IOException, Exception {
     Employee employee = dataStore.get("_NON_EXISTING_SSN_FOR_EMPLOYEE_");
@@ -160,7 +244,14 @@ public class DataStoreTestUtil {
     dataStore.put(ssn, employee);
     dataStore.flush();
 
-    String[] fields = employee.getFields();
+    // XXX See GORA-216: special case until later reviewed.
+    // Like in K-V stores, if retrieved column does not exists ([webpage] case),
+    // get() must return 'null'.
+    // We prepare an actual weird synthetic test.
+    
+    // String[] fields = employee.getFields();
+    String[] fields = {"name","dateOfBirth","ssn","salary"} ;
+    
     for(Set<String> subset : StringUtils.powerset(fields)) {
       if(subset.isEmpty())
         continue;
@@ -171,7 +262,7 @@ public class DataStoreTestUtil {
         expected.put(index, employee.get(index));
       }
 
-      Assert.assertEquals(expected, after);
+      Assert.assertEquals(expected, after);        
     }
   }
 
@@ -336,27 +427,35 @@ public class DataStoreTestUtil {
     Assert.assertNotNull(page);
 
     Assert.assertEquals(URLS[i], page.getUrl().toString());
-    Assert.assertTrue("content error:" + new String( toByteArray(page.getContent()) ) +
+    // 'content' is optional
+    if (page.getContent() != null) {
+      Assert.assertTrue("content error:" + new String( toByteArray(page.getContent()) ) +
         " actual=" + CONTENTS[i] + " i=" + i
-    , Arrays.equals( toByteArray(page.getContent() )
+        , Arrays.equals( toByteArray(page.getContent() )
         , CONTENTS[i].getBytes()));
-
-    GenericArray<Utf8> parsedContent = page.getParsedContent();
-    Assert.assertNotNull(parsedContent);
-    Assert.assertTrue(parsedContent.size() > 0);
-
-    int j=0;
-    String[] tokens = CONTENTS[i].split(" ");
-    for(Utf8 token : parsedContent) {
-      Assert.assertEquals(tokens[j++], token.toString());
+      GenericArray<Utf8> parsedContent = page.getParsedContent();
+      Assert.assertNotNull(parsedContent);
+      Assert.assertTrue(parsedContent.size() > 0);
+    
+      int j=0;
+      String[] tokens = CONTENTS[i].split(" ");
+      for(Utf8 token : parsedContent) {
+        Assert.assertEquals(tokens[j++], token.toString());
+      }
+    } else {
+      // when page.getContent() is null
+      Assert.assertTrue(CONTENTS[i] == null) ;
+      GenericArray<Utf8> parsedContent = page.getParsedContent();
+      Assert.assertNotNull(parsedContent);
+      Assert.assertTrue(parsedContent.size() == 0);
     }
 
     if(LINKS[i].length > 0) {
       Assert.assertNotNull(page.getOutlinks());
       Assert.assertTrue(page.getOutlinks().size() > 0);
-      for(j=0; j<LINKS[i].length; j++) {
-        Assert.assertEquals(ANCHORS[i][j],
-            page.getFromOutlinks(new Utf8(URLS[LINKS[i][j]])).toString());
+      for(int k=0; k<LINKS[i].length; k++) {
+        Assert.assertEquals(ANCHORS[i][k],
+          page.getFromOutlinks(new Utf8(URLS[LINKS[i][k]])).toString());
       }
     } else {
       Assert.assertTrue(page.getOutlinks() == null || page.getOutlinks().isEmpty());
