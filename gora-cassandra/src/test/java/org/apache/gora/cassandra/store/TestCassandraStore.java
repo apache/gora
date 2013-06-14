@@ -17,8 +17,9 @@
  */
 
 /**
- * @author lewismc
- *
+ * Testing class for all standard gora-cassandra functionality.
+ * We extend DataStoreTestBase enabling us to run the entire base test
+ * suite for Gora. 
  */
 package org.apache.gora.cassandra.store;
 
@@ -38,7 +39,6 @@ import org.junit.Test;
 
 /**
  * Test for CassandraStore.
- * @author lewismc
  */
 public class TestCassandraStore extends DataStoreTestBase{
 	
@@ -93,6 +93,14 @@ public class TestCassandraStore extends DataStoreTestBase{
   public void testDeleteByQueryFields() throws IOException {}
   @Override
   public void testGetPartitions() throws IOException {}
+  @Override
+  public void testGetRecursive() throws IOException {}
+  @Override
+  public void testGetDoubleRecursive() throws IOException{}
+  @Override
+  public void testGetNested() throws IOException {}
+  @Override
+  public void testGet3UnionField() throws IOException {}
 // ============================================================================
 
 

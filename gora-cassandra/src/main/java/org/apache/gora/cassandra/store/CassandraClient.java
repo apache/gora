@@ -221,10 +221,24 @@ public class CassandraClient<K, T extends PersistentBase> {
     }
   }
 
+  /**
+   * Adds an subColumn inside the cassandraMapping file when a String is serialized
+   * @param key
+   * @param fieldName
+   * @param columnName
+   * @param value
+   */
   public void addSubColumn(K key, String fieldName, String columnName, Object value) {
     addSubColumn(key, fieldName, StringSerializer.get().toByteBuffer(columnName), value);
   }
 
+  /**
+   * Adds an subColumn inside the cassandraMapping file when an Integer is serialized
+   * @param key
+   * @param fieldName
+   * @param columnName
+   * @param value
+   */
   public void addSubColumn(K key, String fieldName, Integer columnName, Object value) {
     addSubColumn(key, fieldName, IntegerSerializer.get().toByteBuffer(columnName), value);
   }
@@ -364,6 +378,20 @@ public class CassandraClient<K, T extends PersistentBase> {
     
     return orderedRows.getList();
   }
+  
+  private String getMappingFamily(String pField){
+    String family = null;
+    // TODO checking if it was a UNION field the one we are retrieving
+      family = this.cassandraMapping.getFamily(pField);
+    return family;
+  }
+  
+  private String getMappingColumn(String pField){
+    String column = null;
+    // TODO checking if it was a UNION field the one we are retrieving e.g. column = pField;
+      column = this.cassandraMapping.getColumn(pField);
+    return column;
+  }
 
   /**
    * Select the families that contain at least one column mapped to a query field.
@@ -373,8 +401,8 @@ public class CassandraClient<K, T extends PersistentBase> {
   public Map<String, List<String>> getFamilyMap(Query<K, T> query) {
     Map<String, List<String>> map = new HashMap<String, List<String>>();
     for (String field: query.getFields()) {
-      String family = this.cassandraMapping.getFamily(field);
-      String column = this.cassandraMapping.getColumn(field);
+      String family = this.getMappingFamily(field);
+      String column = this.getMappingColumn(field);
       
       // check if the family value was already initialized 
       List<String> list = map.get(family);
@@ -391,6 +419,14 @@ public class CassandraClient<K, T extends PersistentBase> {
     
     return map;
   }
+
+  /**
+   * Retrieves the cassandraMapping which holds whatever was mapped from the gora-cassandra-mapping.xml
+   * @return
+   */
+  public CassandraMapping getCassandraMapping(){
+    return this.cassandraMapping;
+  }
   
   /**
    * Select the field names according to the column names, which format if fully qualified: "family:column"
@@ -400,16 +436,15 @@ public class CassandraClient<K, T extends PersistentBase> {
   public Map<String, String> getReverseMap(Query<K, T> query) {
     Map<String, String> map = new HashMap<String, String>();
     for (String field: query.getFields()) {
-      String family = this.cassandraMapping.getFamily(field);
-      String column = this.cassandraMapping.getColumn(field);
+      String family = this.getMappingFamily(field);
+      String column = this.getMappingColumn(field);
       
       map.put(family + ":" + column, field);
     }
     
     return map;
-     
   }
-
+  
   public boolean isSuper(String family) {
     return this.cassandraMapping.isSuper(family);
   }

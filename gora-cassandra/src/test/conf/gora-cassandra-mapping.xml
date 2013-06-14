@@ -20,19 +20,16 @@
 <gora-orm>
   <keyspace name="Employee" host="localhost" cluster="Gora Cassandra Test Cluster">
     <family name="p"/>
-    <family name="f"/>
      <family name="sc" type="super" />
   </keyspace>
 
   <keyspace name="WebPage" host="localhost" cluster="Gora Cassandra Test Cluster">
     <family name="p"/>
-    <family name="f"/>
     <family name="sc" type="super"/>
   </keyspace>
 
   <keyspace name="TokenDatum" host="localhost" cluster="Gora Cassandra Test Cluster">
     <family name="p"/>
-    <family name="f"/>
     <family name="sc" type="super"/>
   </keyspace>
 
@@ -41,6 +38,8 @@
     <field name="dateOfBirth"  family="p" qualifier="info:db"/>
     <field name="ssn"  family="p" qualifier="info:sn"/>
     <field name="salary"  family="p" qualifier="info:sl"/>
+    <field name="boss" family="p" qualifier="info:bs"/>
+    <field name="webpage" family="p" qualifier="info:wp"/>
   </class>
 
   <class name="org.apache.gora.examples.generated.WebPage" keyClass="java.lang.String" keyspace="WebPage">
