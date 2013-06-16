@@ -143,6 +143,8 @@ else
   shift
 fi
 
+SAVEIFS=$IFS
+IFS=$(echo -en "\n\b")
 # add libs to CLASSPATH
 for f in $GORA_HOME/$MODULE/lib/*.jar; do
   CLASSPATH=${CLASSPATH}:$f;
@@ -151,6 +153,7 @@ done
 for f in $GORA_HOME/$MODULE/target/*.jar; do
   CLASSPATH=${CLASSPATH}:$f;
 done
+IFS=$SAVEIFS
 
 CLASSPATH=${CLASSPATH}:$GORA_HOME/$MODULE/target/classes/
 CLASSPATH=${CLASSPATH}:$GORA_HOME/$MODULE/target/test-classes/
