@@ -520,7 +520,7 @@ public class GoraCompiler {
                                               "\t\t  GPLv2   (GNU General Public License v2.0)\n" +
                                               "\t\t  GPLv3   (GNU General Public License v3.0)\n " +
                                               "\t\t  LGPLv21 (GNU Lesser General Public License v2.1)\n" +
-                                              "\t\t  LGPLv3  (GNU Lesser General Public License v2.1)\n") ;
+                                              "\t\t  LGPLv3  (GNU Lesser General Public License v3)\n") ;
       System.exit(1);
     }
     File inputFile = new File(args[0]);
