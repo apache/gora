@@ -4,6 +4,8 @@
 
 Gora Change Log
 
+* GORA-243 Properly escaping spaces of GORA_HOME in bin/gora (Apostolos Giannakidis via lewismc)
+
 * GORA-174 GORA compiler does not handle ["string", "null"] unions in the AVRO schema (alfonsonishikawa, rmarroquin, kturner via lewismc)
   incl. GORA-206, 207 and 216.
 
