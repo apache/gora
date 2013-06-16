@@ -4,6 +4,8 @@
 
 Gora Change Log
 
+* GORA-230 Change logging behavior in AccumuloStore to pass exception object to LOG.error method. (David Medinets via lewismc)
+
 * GORA-185 Remove ANT scripts and IVY confs (lewismc)
 
 * GORA-243 Properly escaping spaces of GORA_HOME in bin/gora (Apostolos Giannakidis via lewismc)

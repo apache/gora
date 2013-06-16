@@ -281,8 +281,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         throw new IOException(e);
       }
     }catch(IOException e){
-      LOG.error(e.getMessage());
-      LOG.error(e.getStackTrace().toString());
+      LOG.error(e.getMessage(), e);
     }
   }
   
@@ -344,7 +343,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
 
       return mapping;
     } catch (Exception ex) {
-      throw new IOException(ex);
+      throw new IOException("Unable to read " + filename, ex);
     }
 
   }
@@ -364,14 +363,11 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       }
 
     } catch (AccumuloException e) {
-      LOG.error(e.getMessage());
-      LOG.error(e.getStackTrace().toString());
+      LOG.error(e.getMessage(), e);
     } catch (AccumuloSecurityException e) {
-      LOG.error(e.getMessage());
-      LOG.error(e.getStackTrace().toString());
+      LOG.error(e.getMessage(), e);
     } catch (TableExistsException e) {
-      LOG.error(e.getMessage());
-      LOG.error(e.getStackTrace().toString());
+      LOG.error(e.getMessage(), e);
     }
   }
 
@@ -383,14 +379,11 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       batchWriter = null;
       conn.tableOperations().delete(mapping.tableName);
     } catch (AccumuloException e) {
-      LOG.error(e.getMessage());
-      LOG.error(e.getStackTrace().toString());
+      LOG.error(e.getMessage(), e);
     } catch (AccumuloSecurityException e) {
-      LOG.error(e.getMessage());
-      LOG.error(e.getStackTrace().toString());
+      LOG.error(e.getMessage(), e);
     } catch (TableNotFoundException e) {
-      LOG.error(e.getMessage());
-      LOG.error(e.getStackTrace().toString());
+      LOG.error(e.getMessage(), e);
     } 
   }
 
@@ -511,12 +504,10 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         return null;
       return persistent;
     } catch (TableNotFoundException e) {
-      LOG.error(e.getMessage());
-      LOG.error(e.getStackTrace().toString());
+      LOG.error(e.getMessage(), e);
       return null;
     } catch (IOException e) {
-      LOG.error(e.getMessage());
-      LOG.error(e.getStackTrace().toString());
+      LOG.error(e.getMessage(), e);
       return null;
     }
   }
@@ -608,12 +599,10 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         try {
           getBatchWriter().addMutation(m);
         } catch (MutationsRejectedException e) {
-          LOG.error(e.getMessage());
-          LOG.error(e.getStackTrace().toString());
+          LOG.error(e.getMessage(), e);
         }
     } catch (IOException e) {
-      LOG.error(e.getMessage());
-      LOG.error(e.getStackTrace().toString());
+      LOG.error(e.getMessage(), e);
     }
   }
   
@@ -652,16 +641,13 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       return count;
     } catch (TableNotFoundException e) {
       // TODO return 0?
-      LOG.error(e.getMessage());
-      LOG.error(e.getStackTrace().toString());
+      LOG.error(e.getMessage(), e);
       return 0;
     } catch (MutationsRejectedException e) {
-      LOG.error(e.getMessage());
-      LOG.error(e.getStackTrace().toString());
+      LOG.error(e.getMessage(), e);
       return 0;
     } catch (IOException e){
-      LOG.error(e.getMessage());
-      LOG.error(e.getStackTrace().toString());
+      LOG.error(e.getMessage(), e);
       return 0;
     }
   }
@@ -707,8 +693,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       return new AccumuloResult<K,T>(this, query, scanner);
     } catch (TableNotFoundException e) {
       // TODO return empty result?
-      LOG.error(e.getMessage());
-      LOG.error(e.getStackTrace().toString());
+      LOG.error(e.getMessage(), e);
       return null;
     } 
   }
@@ -872,8 +857,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         batchWriter.flush();
       }
     } catch (MutationsRejectedException e) {
-      LOG.error(e.getMessage());
-      LOG.error(e.getStackTrace().toString());
+      LOG.error(e.getMessage(), e);
     } 
   }
 
@@ -885,8 +869,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         batchWriter = null;
       }
     } catch (MutationsRejectedException e) {
-      LOG.error(e.getMessage());
-      LOG.error(e.getStackTrace().toString());
+      LOG.error(e.getMessage(), e);
     } 
   }
 }
