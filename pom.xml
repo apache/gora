@@ -611,7 +611,7 @@
         <restlet.version>2.1.1</restlet.version>
 
         <!-- Misc Dependencies -->
-        <guava.version>10.0.1</guava.version>
+        <guava.version>14.0.1</guava.version>
         <commons-lang.version>2.6</commons-lang.version>
         <jdom.version>1.1.2</jdom.version>
         <hsqldb.version>2.2.8</hsqldb.version>
@@ -866,11 +866,6 @@
               <groupId>com.ibm.icu</groupId>
               <artifactId>icu4j</artifactId>
               <version>49.1</version>
-            </dependency>
-            <dependency>
-              <groupId>com.google.guava</groupId>
-              <artifactId>guava</artifactId>
-              <version>14.0.1</version>
             </dependency>
             <dependency>
               <groupId>commons-codec</groupId>
