@@ -4,6 +4,8 @@
 
 Gora Change Log
 
+* GORA-9 Implement a Solr-based store (ab, lewismc, Scott Stults)
+
 * GORA-237 Gora Compiler usage message for LPGL v3 mentions v2.1 (David Medinets via lewismc)
 
 * GORA-230 Change logging behavior in AccumuloStore to pass exception object to LOG.error method. (David Medinets via lewismc)
