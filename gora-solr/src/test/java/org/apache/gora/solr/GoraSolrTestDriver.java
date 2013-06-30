@@ -17,8 +17,10 @@
  */
 package org.apache.gora.solr;
 
+import java.io.File;
 import java.util.Properties;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.gora.GoraTestDriver;
 import org.apache.gora.solr.store.SolrStore;
 import org.apache.solr.client.solrj.embedded.JettySolrRunner;
@@ -44,7 +46,43 @@ public class GoraSolrTestDriver extends GoraTestDriver {
       solr.stop();
       solr = null;
     }
+    cleanupDirectoriesFailover();
   }
+
+  /**
+   * Simply cleans up Solr's output from the Unit tests.
+   * In the case of a failure, it waits 250 msecs and tries again, 3 times in total.
+   */
+  public void cleanupDirectoriesFailover() {
+    int tries = 3;
+    while (tries-- > 0) {
+      try {
+        cleanupDirectories();
+        break;
+      } catch (Exception e) {
+        //ignore exception
+        try {
+          Thread.sleep(250);
+        } catch (InterruptedException e1) {
+          //ignore exception
+        }
+      }
+    }
+  } 
+
+  /**
+   * Cleans up Solr's temp base directory.
+   *
+   * @throws Exception
+   *    if an error occurs
+   */
+  public void cleanupDirectories() throws Exception {
+    File dirFile = new File("solr");
+    if (dirFile.exists()) {
+      FileUtils.deleteDirectory(dirFile);
+    }
+  }
+
 
   @Override
   protected void setProperties(Properties properties) {
