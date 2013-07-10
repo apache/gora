@@ -4,6 +4,8 @@
 
 Gora Change Log
 
+* GORA-256 Add Solr store to gora-tutorial (Scott Stults via lewismc)
+
 * GORA-9 Implement a Solr-based store (ab, lewismc, Scott Stults)
 
 * GORA-237 Gora Compiler usage message for LPGL v3 mentions v2.1 (David Medinets via lewismc)

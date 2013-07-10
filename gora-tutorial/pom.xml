@@ -116,6 +116,11 @@
             <artifactId>gora-sql</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.gora</groupId>
+            <artifactId>gora-solr</artifactId>
+        </dependency>
+
 		<!-- Hadoop Dependencies -->
 		<dependency>
             <groupId>org.apache.hadoop</groupId>
