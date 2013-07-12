@@ -29,7 +29,7 @@
   <class name="org.apache.gora.examples.generated.WebPage" keyClass="java.lang.String" document="webpage">
     <field name="url" docfield="url" type="string"/>
     <field name="content" docfield="content" type="binary"/>
-    <field name="parsedContent" docfield="pContent" type="binary"/>
+    <field name="parsedContent" docfield="pContent" type="list"/>
     <field name="outlinks" docfield="links.out" type="document"/>
     <field name="metadata" docfield="metadata" type="document"/>
   </class>
