@@ -1,0 +1,189 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Put site-specific property overrides in this file. -->
+
+<configuration>
+
+<property>
+  <name>http.agent.name</name>
+  <value>nutch-crawler</value>
+</property>
+
+<property>
+  <name>http.robots.agents</name>
+  <value>nutch-crawler,*</value>
+</property>
+
+<property>
+  <name>http.accept.language</name>
+  <value>fr-fr,fr,en;q=0.7,*;q=0.3</value>
+</property>
+
+
+<property>
+  <name>db.fetch.schedule.class</name>
+  <value>org.apache.nutch.crawl.AdaptiveFetchSchedule</value>
+</property>
+
+<property>
+  <name>fetcher.throughput.threshold.pages</name>
+  <value>0.8</value>
+  <description>The threshold of minimum pages per second. If the fetcher downloads less
+  pages per second than the configured threshold, the fetcher stops, preventing slow queue's
+  from stalling the throughput. This threshold must be an integer. This can be useful when
+  fetcher.timelimit.mins is hard to determine. The default value of -1 disables this check.
+  </description>
+</property>
+
+<property>
+  <name>generate.update.crawldb</name>
+  <value>true</value>
+  <description>For highly-concurrent environments, where several
+  generate/fetch/update cycles may overlap, setting this to true ensures
+  that generate will create different fetchlists even without intervening
+  updatedb-s, at the cost of running an additional job to update CrawlDB.
+  If false, running generate twice without intervening
+  updatedb will generate identical fetchlists.</description>
+</property>
+
+<property>
+  <name>crawl.gen.delay</name>
+  <value>86400000</value> <!-- Make it one day -->
+  <description>
+   This value, expressed in days, defines how long we should keep the lock on records
+   in CrawlDb that were just selected for fetching. If these records are not updated
+   in the meantime, the lock is canceled, i.e. the become eligible for selecting.
+   Default value of this is 7 days.
+  </description>
+</property>
+
+<property>
+  <name>fetcher.parse</name>
+  <value>true</value>
+  <description>If true, fetcher will parse content. NOTE: previous releases would
+  default to true. Since 2.0 this is set to false as a safer default.</description>
+</property>
+
+<property>
+  <name>parser.html.outlinks.ignore_tags</name>
+  <value>img,script,link</value>
+  <description>Comma separated list of HTML tags, from which outlinks
+  shouldn't be extracted. Nutch takes links from: a, area, form, frame,
+  iframe, script, link, img. If you add any of those tags here, it
+  won't be taken. Default is empty list. Probably reasonable value
+  for most people would be "img,script,link".</description>
+</property>
+
+<property>
+  <name>plugin.includes</name>
+ <value>protocol-http|urlfilter-regex|parse-(html|tika)|urlnormalizer-(pass|regex|basic)|scoring-opic</value>
+</property>
+
+<property>
+	<name>mapred.task.timeout</name>
+	<value>600000</value>
+	<!-- Max 10 minutes idle -->
+</property>
+
+<property>
+  <name>parser.html.impl</name>
+  <value>tagsoup</value>
+  <description>HTML Parser implementation. Currently the following keywords
+  are recognized: "neko" uses NekoHTML, "tagsoup" uses TagSoup.
+  </description>
+</property>
+
+<property>
+  <name>db.update.additions.allowed</name>
+  <value>true</value>
+  <description>If true, updatedb will add newly discovered URLs, if false
+  only already existing URLs in the CrawlDb will be updated and no new
+  URLs will be added.
+  </description>
+</property>
+
+<property>
+  <name>db.ignore.internal.links</name>
+  <value>false</value>
+  <description>If true, when adding new links to a page, links from
+  the same host are ignored.  This is an effective way to limit the
+  size of the link database, keeping only the highest quality
+  links.
+  </description>
+</property>
+
+<property>
+  <name>db.score.link.external</name>
+  <value>2.0</value>
+  <description>The score factor for new pages added due to a link from
+  another host relative to the referencing page's score. Scoring plugins
+  may use this value to affect initial scores of external links.
+  </description>
+</property>
+
+<property>
+  <name>db.score.link.internal</name>
+  <value>0.5</value>
+  <description>The score factor for pages added due to a link from the
+  same host, relative to the referencing page's score. Scoring plugins
+  may use this value to affect initial scores of internal links.
+  </description>
+</property>
+
+<property>
+  <name>db.parsemeta.to.crawldb</name>
+  <value>lang</value>
+  <description>Comma-separated list of parse metadata keys to transfer to the crawldb (NUTCH-779).
+   Assuming for instance that the languageidentifier plugin is enabled, setting the value to 'lang'
+   will copy both the key 'lang' and its value to the corresponding entry in the crawldb.
+  </description>
+</property>
+
+<property>
+  <name>generate.max.count</name>
+  <value>10000</value>
+  <description>The maximum number of urls in a single
+  fetchlist.  -1 if unlimited. The urls are counted according
+  to the value of the parameter generator.count.mode.
+  </description>
+</property>
+
+<!-- storage properties -->
+
+<property>
+  <name>storage.data.store.class</name>
+  <value>org.apache.gora.mongodb.store.MongoStore</value>
+</property>
+
+<property>
+  <name>storage.schema.webpage</name>
+  <value>frontier</value>
+  <description>This value holds the schema name used for Nutch web db.
+  Note that Nutch ignores the value in the gora mapping files, and uses
+  this as the webpage schema name.
+  </description>
+</property>
+
+<property>
+  <name>storage.schema.host</name>
+  <value>host</value>
+  <description>This value holds the schema name used for Nutch host db.
+  Note that Nutch ignores the value in the gora mapping files, and uses
+  this as the host schema name.
+  </description>
+</property>
+
+<property>
+  <name>storage.crawl.id</name>
+  <value></value>
+  <description>This value helps differentiate between the datasets that
+  the jobs in the crawl cycle generate and operate on. The value will
+  be input to all the jobs which then will use it as a prefix when
+  accessing to the schemas. The default configuration uses no id to prefix
+  the schemas. The value could also be given as a command line argument
+  to each job.
+  </description>
+</property>
+
+</configuration>

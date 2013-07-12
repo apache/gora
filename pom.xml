@@ -578,6 +578,7 @@
         <module>gora-solr</module>
         <module>gora-dynamodb</module>
         <!--module>gora-sql</module-->
+        <module>gora-mongodb</module>
         <module>gora-tutorial</module>
         <module>sources-dist</module>
     </modules>
