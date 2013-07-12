@@ -19,6 +19,7 @@ package org.apache.gora.mongodb.query;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import org.apache.gora.mongodb.store.MongoMapping;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.QueryBase;
@@ -67,12 +68,13 @@ public class MongoDBQuery<K, T extends PersistentBase> extends QueryBase<K, T> {
    * @return a {@link DBObject} corresponding to the list of field to be
    *         retrieved with the associated boolean
    */
-  public static DBObject toProjection(Query<?, ?> query) {
+  public static DBObject toProjection(Query<?, ?> query, MongoMapping mapping) {
     BasicDBObject proj = new BasicDBObject();
 
     if (query.getFields() != null) {
-    for (String k : query.getFields())
-      proj.put(k, true);
+      for (String k : query.getFields()) {
+        proj.put(mapping.getDocumentField(k), true);
+      }
     }
 
     return proj;

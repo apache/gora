@@ -452,7 +452,7 @@ public class MongoStore<K, T extends PersistentBase> extends
   public Result<K, T> execute(Query<K, T> query) {
     // Build the actual MongoDB query
     DBObject q = MongoDBQuery.toDBQuery(query);
-    DBObject p = MongoDBQuery.toProjection(query);
+    DBObject p = MongoDBQuery.toProjection(query, mapping);
 
     // Execute the query on the collection
     DBCursor cursor = mongoClientColl.find(q, p);
