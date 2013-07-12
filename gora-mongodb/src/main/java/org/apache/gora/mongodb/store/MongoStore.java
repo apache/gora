@@ -267,9 +267,14 @@ public class MongoStore<K, T extends PersistentBase> extends
     if (mongoClientDB == null)
       throw new IllegalStateException(
           "Impossible to create the schema as no database has been selected.");
+    if (schemaExists()) {
+        return;
+    }
+
     // If initialized create the collection
     mongoClientColl = mongoClientDB.createCollection(
-        mapping.getCollectionName(), null);
+        mapping.getCollectionName(), new BasicDBObject()); //  send a DBObject to force creation
+      // otherwise creation is deferred
     mongoClientColl.setDBEncoderFactory(GoraDBEncoder.FACTORY);
 
     LOG.info("Collection {} has been created for Mongo instance {}.",
@@ -467,7 +472,9 @@ public class MongoStore<K, T extends PersistentBase> extends
    */
   @Override
   public Query<K, T> newQuery() {
-    return new MongoDBQuery<K, T>(this);
+      MongoDBQuery<K, T> query = new MongoDBQuery<K, T>(this);
+      query.setFields(getFieldsToQuery(null));
+      return query;
   }
 
   /**
@@ -640,6 +647,22 @@ public class MongoStore<K, T extends PersistentBase> extends
       case NULL:
         persistent.put(field.pos(), null);
         break;
+      case UNION:
+          if (fieldSchema.getTypes().size() == 2) {
+
+          // schema [type0, type1]
+          Type type0 = fieldSchema.getTypes().get(0).getType() ;
+          Type type1 = fieldSchema.getTypes().get(1).getType() ;
+
+          // Check if types are different and there's a "null", like ["null","type"] or ["type","null"]
+          if (!type0.equals(type1)
+                  && (   type0.equals(Schema.Type.NULL)
+                  || type1.equals(Schema.Type.NULL))) {
+              persistent.put(field.pos(), easybson.getBytes(docf)); // Deserialize as if schema was ["type"]
+          }
+
+          }
+        break;
       default:
         Object o = easybson.get(docf);
         if (o == null)
@@ -808,7 +831,8 @@ public class MongoStore<K, T extends PersistentBase> extends
               record.put(
                   member.name(),
                   toMongoMap((Map<Utf8, ?>) recValue, member.schema()
-                      .getElementType().getType()));
+                      .getValueType().getType()));
+              break;
             case ARRAY:
               record.put(
                   member.name(),

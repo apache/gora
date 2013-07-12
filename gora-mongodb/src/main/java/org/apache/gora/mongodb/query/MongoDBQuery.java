@@ -70,8 +70,10 @@ public class MongoDBQuery<K, T extends PersistentBase> extends QueryBase<K, T> {
   public static DBObject toProjection(Query<?, ?> query) {
     BasicDBObject proj = new BasicDBObject();
 
+    if (query.getFields() != null) {
     for (String k : query.getFields())
       proj.put(k, true);
+    }
 
     return proj;
   }
