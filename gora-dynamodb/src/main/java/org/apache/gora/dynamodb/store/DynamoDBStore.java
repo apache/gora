@@ -211,7 +211,7 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
     
         String tableName = tableElement.getAttributeValue("name");
         long readCapacUnits = Long.parseLong(tableElement.getAttributeValue("readcunit"));
-        long writeCapacUnits = Long.parseLong(tableElement.getAttributeValue("readcunit"));
+        long writeCapacUnits = Long.parseLong(tableElement.getAttributeValue("writecunit"));
     
         mappingBuilder.setTableName(tableName);
         mappingBuilder.setProvisionedThroughput(tableName, readCapacUnits, writeCapacUnits);

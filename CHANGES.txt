@@ -4,6 +4,8 @@
 
 Gora Change Log
 
+* GORA-258 writeCapacUnits gets value from wrong attribute (Apostolos Giannakidis via lewismc)
+
 * GORA-256 Add Solr store to gora-tutorial (Scott Stults via lewismc)
 
 * GORA-9 Implement a Solr-based store (ab, lewismc, Scott Stults)
