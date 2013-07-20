@@ -59,7 +59,15 @@ import org.apache.gora.store.impl.DataStoreBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * {@link org.apache.gora.cassandra.store.CassandraStore} is the primary class 
+ * responsible for directing Gora CRUD operations into Cassandra. We (delegate) rely 
+ * heavily on {@ link org.apache.gora.cassandra.store.CassandraClient} for many operations
+ * such as initialization, creating and deleting schemas (Cassandra Keyspaces), etc.  
+ */
 public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
+  
+  /** Logging implementation */
   public static final Logger LOG = LoggerFactory.getLogger(CassandraStore.class);
 
   private CassandraClient<K, T>  cassandraClient = new CassandraClient<K, T>();
@@ -77,10 +85,17 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
    */
   private Map<K, T> buffer = Collections.synchronizedMap(new LinkedHashMap<K, T>());
   
+  /** The default constructor for CassandraStore */
   public CassandraStore() throws Exception {
     // this.cassandraClient.initialize();
   }
-
+ 
+  /** 
+   * Initialize is called when then the call to 
+   * {@link org.apache.gora.store.DataStoreFactory#createDataStore(Class<D> dataStoreClass, Class<K> keyClass, Class<T> persistent, org.apache.hadoop.conf.Configuration conf)}
+   * is made. In this case, we merely delegate the store initialization to the 
+   * {@link org.apache.gora.cassandra.store.CassandraClient#initialize(Class<K> keyClass, Class<T> persistentClass)}. 
+   */
   public void initialize(Class<K> keyClass, Class<T> persistent, Properties properties) {
     try {
       super.initialize(keyClass, persistent, properties);
@@ -121,6 +136,12 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
     this.cassandraClient.dropKeyspace();
   }
 
+  /**
+   * When executing Gora Queries in Cassandra we query the Cassandra keyspace by families.
+   * When add sub/supercolumns, Gora keys are mapped to Cassandra partition keys only. 
+   * This is because we follow the Cassandra logic where column family data is 
+   * partitioned across nodes based on row Key.
+   */
   @Override
   public Result<K, T> execute(Query<K, T> query) {
     
@@ -153,7 +174,12 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
     
     return cassandraResult;
   }
-
+  
+  /**
+   * When we add subcolumns, Gora keys are mapped to Cassandra partition keys only. 
+   * This is because we follow the Cassandra logic where column family data is 
+   * partitioned across nodes based on row Key.
+   */
   private void addSubColumns(String family, CassandraQuery<K, T> cassandraQuery,
       CassandraResultSet cassandraResultSet) {
     // select family columns that are included in the query
@@ -182,6 +208,11 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
     }
   }
 
+  /**
+   * When we add supercolumns, Gora keys are mapped to Cassandra partition keys only. 
+   * This is because we follow the Cassandra logic where column family data is 
+   * partitioned across nodes based on row Key.
+   */
   private void addSuperColumns(String family, CassandraQuery<K, T> cassandraQuery, 
       CassandraResultSet cassandraResultSet) {
     
