@@ -24,6 +24,7 @@ import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.DataStoreTestBase;
 import org.apache.hadoop.conf.Configuration;
+import org.junit.Ignore;
 
 /**
  * 
@@ -45,8 +46,8 @@ public class AccumuloStoreTest extends DataStoreTestBase {
   
   //Until GORA-66 is resolved this test will always fail, so 
   //do not run it
+  @Ignore("skipped until GORA-66 is resolved")
   @Override
   public void testDeleteByQueryFields() throws IOException {
-    return;
   }
 }

@@ -20,11 +20,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import junit.framework.Assert;
-
 import org.apache.gora.accumulo.encoders.Encoder;
 import org.apache.gora.accumulo.encoders.SignedBinaryEncoder;
 import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * 
@@ -47,17 +47,17 @@ public class PartitionTest {
 
   @Test
   public void test1() {
-    Assert.assertEquals(encl(0x006f000000000000l), (long) AccumuloStore.followingKey(encoder, Long.class, new byte[] {0x00, 0x6f}));
-    Assert.assertEquals(encl(1l), (long) AccumuloStore.followingKey(encoder, Long.class, new byte[] {0, 0, 0, 0, 0, 0, 0, 0}));
-    Assert.assertEquals(encl(0x106f000000000001l), (long) AccumuloStore.followingKey(encoder, Long.class, new byte[] {0x10, 0x6f, 0, 0, 0, 0, 0, 0}));
-    Assert.assertEquals(
+    assertEquals(encl(0x006f000000000000l), (long) AccumuloStore.followingKey(encoder, Long.class, new byte[] {0x00, 0x6f}));
+    assertEquals(encl(1l), (long) AccumuloStore.followingKey(encoder, Long.class, new byte[] {0, 0, 0, 0, 0, 0, 0, 0}));
+    assertEquals(encl(0x106f000000000001l), (long) AccumuloStore.followingKey(encoder, Long.class, new byte[] {0x10, 0x6f, 0, 0, 0, 0, 0, 0}));
+    assertEquals(
         encl(-1l),
         (long) AccumuloStore.followingKey(encoder, Long.class, new byte[] {(byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
             (byte) 0xff,
             (byte) 0xfe}));
     
-    Assert.assertEquals(encl(0x8000000000000001l), (long) AccumuloStore.followingKey(encoder, Long.class, new byte[] {(byte) 0x80, 0, 0, 0, 0, 0, 0, 0}));
-    Assert.assertEquals(
+    assertEquals(encl(0x8000000000000001l), (long) AccumuloStore.followingKey(encoder, Long.class, new byte[] {(byte) 0x80, 0, 0, 0, 0, 0, 0, 0}));
+    assertEquals(
         encl(0x8000000000000000l),
         (long) AccumuloStore.followingKey(encoder, Long.class, new byte[] {(byte) 0x7f, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff,
             (byte) 0xff,
@@ -67,7 +67,7 @@ public class PartitionTest {
     try {
       AccumuloStore.followingKey(encoder, Long.class,
           new byte[] {(byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff});
-      Assert.assertTrue(false);
+      assertTrue(false);
     } catch (IllegalArgumentException iea) {
       
     }
@@ -75,19 +75,19 @@ public class PartitionTest {
   
   @Test
   public void test2() {
-    Assert.assertEquals(encl(0x00ffffffffffffffl), (long) AccumuloStore.lastPossibleKey(encoder, Long.class, new byte[] {0x01}));
-    Assert.assertEquals(encl(0x006effffffffffffl), (long) AccumuloStore.lastPossibleKey(encoder, Long.class, new byte[] {0x00, 0x6f}));
-    Assert.assertEquals(encl(0xff6effffffffffffl), (long) AccumuloStore.lastPossibleKey(encoder, Long.class, new byte[] {(byte) 0xff, 0x6f}));
-    Assert.assertEquals(encl(0xfffeffffffffffffl), (long) AccumuloStore.lastPossibleKey(encoder, Long.class, new byte[] {(byte) 0xff, (byte) 0xff}));
-    Assert.assertEquals(encl(0l), (long) AccumuloStore.lastPossibleKey(encoder, Long.class, new byte[] {(byte) 0, 0, 0, 0, 0, 0, 0, 0}));
+    assertEquals(encl(0x00ffffffffffffffl), (long) AccumuloStore.lastPossibleKey(encoder, Long.class, new byte[] {0x01}));
+    assertEquals(encl(0x006effffffffffffl), (long) AccumuloStore.lastPossibleKey(encoder, Long.class, new byte[] {0x00, 0x6f}));
+    assertEquals(encl(0xff6effffffffffffl), (long) AccumuloStore.lastPossibleKey(encoder, Long.class, new byte[] {(byte) 0xff, 0x6f}));
+    assertEquals(encl(0xfffeffffffffffffl), (long) AccumuloStore.lastPossibleKey(encoder, Long.class, new byte[] {(byte) 0xff, (byte) 0xff}));
+    assertEquals(encl(0l), (long) AccumuloStore.lastPossibleKey(encoder, Long.class, new byte[] {(byte) 0, 0, 0, 0, 0, 0, 0, 0}));
     
-    Assert.assertEquals(encl(0x7effffffffffffffl), (long) AccumuloStore.lastPossibleKey(encoder, Long.class, new byte[] {(byte) 0x7f}));
-    Assert.assertEquals(encl(0x7fffffffffffffffl), (long) AccumuloStore.lastPossibleKey(encoder, Long.class, new byte[] {(byte) 0x80}));
-    Assert.assertEquals(encl(0x80ffffffffffffffl), (long) AccumuloStore.lastPossibleKey(encoder, Long.class, new byte[] {(byte) 0x81}));
+    assertEquals(encl(0x7effffffffffffffl), (long) AccumuloStore.lastPossibleKey(encoder, Long.class, new byte[] {(byte) 0x7f}));
+    assertEquals(encl(0x7fffffffffffffffl), (long) AccumuloStore.lastPossibleKey(encoder, Long.class, new byte[] {(byte) 0x80}));
+    assertEquals(encl(0x80ffffffffffffffl), (long) AccumuloStore.lastPossibleKey(encoder, Long.class, new byte[] {(byte) 0x81}));
 
     try {
       AccumuloStore.lastPossibleKey(encoder, Long.class, new byte[] {(byte) 0, 0, 0, 0, 0, 0, 0});
-      Assert.assertTrue(false);
+      assertTrue(false);
     } catch (IllegalArgumentException iea) {
       
     }

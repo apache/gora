@@ -36,7 +36,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import junit.framework.Assert;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
 
 import org.apache.avro.generic.GenericArray;
 import org.apache.avro.util.Utf8;
@@ -44,15 +48,14 @@ import org.apache.gora.examples.WebPageDataCreator;
 import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.examples.generated.Metadata;
 import org.apache.gora.examples.generated.WebPage;
-import org.apache.gora.persistency.BeanFactory;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.impl.BeanFactoryImpl;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
-import org.apache.gora.store.DataStore;
 import org.apache.gora.util.ByteUtils;
 import org.apache.gora.util.StringUtils;
+import org.junit.Test;
 
 /**
  * Test utilities for DataStores. This utility class provides everything
@@ -76,11 +79,11 @@ public class DataStoreTestUtil {
     T obj1 = dataStore.newPersistent();
     T obj2 = dataStore.newPersistent();
 
-    Assert.assertEquals(dataStore.getPersistentClass(),
+    assertEquals(dataStore.getPersistentClass(),
         obj1.getClass());
-    Assert.assertNotNull(obj1);
-    Assert.assertNotNull(obj2);
-    Assert.assertFalse( obj1 == obj2 );
+    assertNotNull(obj1);
+    assertNotNull(obj2);
+    assertFalse( obj1 == obj2 );
   }
 
   public static <K> Employee createEmployee(
@@ -142,10 +145,10 @@ public class DataStoreTestUtil {
       DataStore<K, T> dataStore) throws IOException, Exception {
     dataStore.createSchema();
 
-    Assert.assertTrue(dataStore.schemaExists());
+    assertTrue(dataStore.schemaExists());
 
     dataStore.deleteSchema();
-    Assert.assertFalse(dataStore.schemaExists());
+    assertFalse(dataStore.schemaExists());
   }
 
   public static void testGetEmployee(DataStore<String, Employee> dataStore)
@@ -158,7 +161,7 @@ public class DataStoreTestUtil {
 
     Employee after = dataStore.get(ssn, Employee._ALL_FIELDS);
 
-    Assert.assertEquals(employee, after);
+    assertEquals(employee, after);
   }
 
 
@@ -173,8 +176,8 @@ public class DataStoreTestUtil {
     dataStore.put(ssn, employee);
     dataStore.flush();
     Employee after = dataStore.get(ssn, Employee._ALL_FIELDS);
-    Assert.assertEquals(employee, after);
-    Assert.assertEquals(boss, after.getBoss()) ;
+    assertEquals(employee, after);
+    assertEquals(boss, after.getBoss()) ;
   }
 
   public static void testGetEmployeeDoubleRecursive(DataStore<String, Employee> dataStore)
@@ -191,9 +194,9 @@ public class DataStoreTestUtil {
       dataStore.put(ssn, employee);
       dataStore.flush();
       Employee after = dataStore.get(ssn, Employee._ALL_FIELDS);
-      Assert.assertEquals(employee, after);
-      Assert.assertEquals(boss, after.getBoss()) ;
-      Assert.assertEquals(uberBoss, ((Employee)after.getBoss()).getBoss()) ;
+      assertEquals(employee, after);
+      assertEquals(boss, after.getBoss()) ;
+      assertEquals(uberBoss, ((Employee)after.getBoss()).getBoss()) ;
     }
   
   public static void testGetEmployeeNested(DataStore<String, Employee> dataStore)
@@ -213,8 +216,8 @@ public class DataStoreTestUtil {
     dataStore.put(ssn, employee);
     dataStore.flush();
     Employee after = dataStore.get(ssn, Employee._ALL_FIELDS);
-    Assert.assertEquals(employee, after);
-    Assert.assertEquals(webpage, after.getWebpage()) ;
+    assertEquals(employee, after);
+    assertEquals(webpage, after.getWebpage()) ;
   }
   
   public static void testGetEmployee3UnionField(DataStore<String, Employee> dataStore)
@@ -227,14 +230,14 @@ public class DataStoreTestUtil {
     dataStore.put(ssn, employee);
     dataStore.flush();
     Employee after = dataStore.get(ssn, Employee._ALL_FIELDS);
-    Assert.assertEquals(employee, after);
-    Assert.assertEquals("Real boss", ((Utf8)after.getBoss()).toString()) ;
+    assertEquals(employee, after);
+    assertEquals("Real boss", ((Utf8)after.getBoss()).toString()) ;
   }
   
   public static void testGetEmployeeNonExisting(DataStore<String, Employee> dataStore)
     throws IOException, Exception {
     Employee employee = dataStore.get("_NON_EXISTING_SSN_FOR_EMPLOYEE_");
-    Assert.assertNull(employee);
+    assertNull(employee);
   }
 
   public static void testGetEmployeeWithFields(DataStore<String, Employee> dataStore)
@@ -262,7 +265,7 @@ public class DataStoreTestUtil {
         expected.put(index, employee.get(index));
       }
 
-      Assert.assertEquals(expected, after);        
+      assertEquals(expected, after);        
     }
   }
 
@@ -300,7 +303,7 @@ public class DataStoreTestUtil {
     dataStore.flush();
 
     employee = dataStore.get(Long.toString(ssn + 1));
-    Assert.assertNull(employee);
+    assertNull(employee);
   }
 
   public static void testUpdateEmployee(DataStore<String, Employee> dataStore)
@@ -334,9 +337,9 @@ public class DataStoreTestUtil {
     for (int i = 0; i < 1; i++) {
       String key = Long.toString(ssn + i);
       Employee employee = dataStore.get(key);
-      Assert.assertEquals(now - 18L * YEAR_IN_MS, employee.getDateOfBirth());
-      Assert.assertEquals("John Doe " + (i + 5), employee.getName().toString());
-      Assert.assertEquals(120000, employee.getSalary());
+      assertEquals(now - 18L * YEAR_IN_MS, employee.getDateOfBirth());
+      assertEquals("John Doe " + (i + 5), employee.getName().toString());
+      assertEquals(120000, employee.getSalary());
     }
   }
 
@@ -384,21 +387,21 @@ public class DataStoreTestUtil {
 
     for (int i = 0; i < urls.length; i++) {
       WebPage webPage = dataStore.get(urls[i]);
-      Assert.assertEquals(content + i, ByteUtils.toString( toByteArray(webPage.getContent()) ));
-      Assert.assertEquals(10, webPage.getParsedContent().size());
+      assertEquals(content + i, ByteUtils.toString( toByteArray(webPage.getContent()) ));
+      assertEquals(10, webPage.getParsedContent().size());
       int j = 0;
       for (Utf8 pc : webPage.getParsedContent()) {
-        Assert.assertEquals(parsedContent + i + "," + j, pc.toString());
+        assertEquals(parsedContent + i + "," + j, pc.toString());
         j++;
       }
       int count = 0;
       for (j = 1; j < urls.length; j += 2) {
         Utf8 link = webPage.getOutlinks().get(new Utf8(anchor + j));
-        Assert.assertNotNull(link);
-        Assert.assertEquals(urls[j], link.toString());
+        assertNotNull(link);
+        assertEquals(urls[j], link.toString());
         count++;
       }
-      Assert.assertEquals(count, webPage.getOutlinks().size());
+      assertEquals(count, webPage.getOutlinks().size());
     }
 
     for (int i = 0; i < urls.length; i++) {
@@ -416,49 +419,49 @@ public class DataStoreTestUtil {
       int count = 0;
       for (int j = 0; j < urls.length; j++) {
         Utf8 link = webPage.getOutlinks().get(new Utf8(anchor + j));
-        Assert.assertNotNull(link);
-        Assert.assertEquals(urls[j], link.toString());
+        assertNotNull(link);
+        assertEquals(urls[j], link.toString());
         count++;
       }
     }
   }
 
   public static void assertWebPage(WebPage page, int i) throws Exception{
-    Assert.assertNotNull(page);
+    assertNotNull(page);
 
-    Assert.assertEquals(URLS[i], page.getUrl().toString());
+    assertEquals(URLS[i], page.getUrl().toString());
     // 'content' is optional
     if (page.getContent() != null) {
-      Assert.assertTrue("content error:" + new String( toByteArray(page.getContent()) ) +
+      assertTrue("content error:" + new String( toByteArray(page.getContent()) ) +
         " actual=" + CONTENTS[i] + " i=" + i
         , Arrays.equals( toByteArray(page.getContent() )
         , CONTENTS[i].getBytes()));
       GenericArray<Utf8> parsedContent = page.getParsedContent();
-      Assert.assertNotNull(parsedContent);
-      Assert.assertTrue(parsedContent.size() > 0);
+      assertNotNull(parsedContent);
+      assertTrue(parsedContent.size() > 0);
     
       int j=0;
       String[] tokens = CONTENTS[i].split(" ");
       for(Utf8 token : parsedContent) {
-        Assert.assertEquals(tokens[j++], token.toString());
+        assertEquals(tokens[j++], token.toString());
       }
     } else {
       // when page.getContent() is null
-      Assert.assertTrue(CONTENTS[i] == null) ;
+      assertTrue(CONTENTS[i] == null) ;
       GenericArray<Utf8> parsedContent = page.getParsedContent();
-      Assert.assertNotNull(parsedContent);
-      Assert.assertTrue(parsedContent.size() == 0);
+      assertNotNull(parsedContent);
+      assertTrue(parsedContent.size() == 0);
     }
 
     if(LINKS[i].length > 0) {
-      Assert.assertNotNull(page.getOutlinks());
-      Assert.assertTrue(page.getOutlinks().size() > 0);
+      assertNotNull(page.getOutlinks());
+      assertTrue(page.getOutlinks().size() > 0);
       for(int k=0; k<LINKS[i].length; k++) {
-        Assert.assertEquals(ANCHORS[i][k],
+        assertEquals(ANCHORS[i][k],
           page.getFromOutlinks(new Utf8(URLS[LINKS[i][k]])).toString());
       }
     } else {
-      Assert.assertTrue(page.getOutlinks() == null || page.getOutlinks().isEmpty());
+      assertTrue(page.getOutlinks() == null || page.getOutlinks().isEmpty());
     }
   }
 
@@ -491,10 +494,10 @@ public class DataStoreTestUtil {
       query.setFields(fields);
       query.setKey(URLS[i]);
       Result<String, WebPage> result = query.execute();
-      Assert.assertTrue(result.next());
+      assertTrue(result.next());
       WebPage page = result.get();
       assertWebPage(page, i);
-      Assert.assertFalse(result.next());
+      assertFalse(result.next());
     }
   }
 
@@ -539,7 +542,7 @@ public class DataStoreTestUtil {
 
         int expectedLength = (setEndKeys ? j+1: sortedUrls.size()) -
                              (setStartKeys ? i: 0);
-        Assert.assertEquals(expectedLength, r);
+        assertEquals(expectedLength, r);
         if(!setEndKeys)
           break;
       }
@@ -597,7 +600,7 @@ public class DataStoreTestUtil {
       actualNumResults++;
     }
     result.close();
-    Assert.assertEquals(numResults, actualNumResults);
+    assertEquals(numResults, actualNumResults);
   }
 
   public static void testGetPartitions(DataStore<String, WebPage> store)
@@ -610,11 +613,11 @@ public class DataStoreTestUtil {
       , Query<String, WebPage> query) throws IOException, Exception {
     List<PartitionQuery<String, WebPage>> partitions = store.getPartitions(query);
 
-    Assert.assertNotNull(partitions);
-    Assert.assertTrue(partitions.size() > 0);
+    assertNotNull(partitions);
+    assertTrue(partitions.size() > 0);
 
     for(PartitionQuery<String, WebPage> partition:partitions) {
-      Assert.assertNotNull(partition);
+      assertNotNull(partition);
     }
 
     assertPartitions(store, query, partitions);
@@ -630,43 +633,43 @@ public class DataStoreTestUtil {
 
     //execute query and count results
     Result<String, WebPage> result = store.execute(query);
-    Assert.assertNotNull(result);
+    assertNotNull(result);
 
     while(result.next()) {
-      Assert.assertNotNull(result.getKey());
-      Assert.assertNotNull(result.get());
+      assertNotNull(result.getKey());
+      assertNotNull(result.get());
       results.put(result.getKey(), result.get().hashCode()); //keys are not reused, so this is safe
       count++;
     }
     result.close();
 
-    Assert.assertTrue(count > 0); //assert that results is not empty
-    Assert.assertEquals(count, results.size()); //assert that keys are unique
+    assertTrue(count > 0); //assert that results is not empty
+    assertEquals(count, results.size()); //assert that keys are unique
 
     for(PartitionQuery<String, WebPage> partition:partitions) {
-      Assert.assertNotNull(partition);
+      assertNotNull(partition);
 
       result = store.execute(partition);
-      Assert.assertNotNull(result);
+      assertNotNull(result);
 
       while(result.next()) {
-        Assert.assertNotNull(result.getKey());
-        Assert.assertNotNull(result.get());
+        assertNotNull(result.getKey());
+        assertNotNull(result.get());
         partitionResults.put(result.getKey(), result.get().hashCode());
         partitionsCount++;
       }
       result.close();
 
-      Assert.assertEquals(partitionsCount, partitionResults.size()); //assert that keys are unique
+      assertEquals(partitionsCount, partitionResults.size()); //assert that keys are unique
     }
 
-    Assert.assertTrue(partitionsCount > 0);
-    Assert.assertEquals(count, partitionsCount);
+    assertTrue(partitionsCount > 0);
+    assertEquals(count, partitionsCount);
 
     for(Map.Entry<String, Integer> r : results.entrySet()) {
       Integer p = partitionResults.get(r.getKey());
-      Assert.assertNotNull(p);
-      Assert.assertEquals(r.getValue(), p);
+      assertNotNull(p);
+      assertEquals(r.getValue(), p);
     }
   }
 
@@ -676,11 +679,11 @@ public class DataStoreTestUtil {
 
     int deletedSoFar = 0;
     for(String url : URLS) {
-      Assert.assertTrue(store.delete(url));
+      assertTrue(store.delete(url));
       store.flush();
 
       //assert that it is actually deleted
-      Assert.assertNull(store.get(url));
+      assertNull(store.get(url));
 
       //assert that other records are not deleted
       assertNumResults(store.newQuery(), URLS.length - ++deletedSoFar);
@@ -765,17 +768,17 @@ public class DataStoreTestUtil {
     //assert that data is deleted
     for (int i = 0; i < SORTED_URLS.length; i++) {
       WebPage page = store.get(SORTED_URLS[i]);
-      Assert.assertNotNull(page);
+      assertNotNull(page);
 
-      Assert.assertNotNull(page.getUrl());
-      Assert.assertEquals(page.getUrl().toString(), SORTED_URLS[i]);
-      Assert.assertEquals(0, page.getOutlinks().size());
-      Assert.assertEquals(0, page.getParsedContent().size());
+      assertNotNull(page.getUrl());
+      assertEquals(page.getUrl().toString(), SORTED_URLS[i]);
+      assertEquals(0, page.getOutlinks().size());
+      assertEquals(0, page.getParsedContent().size());
       if(page.getContent() != null) {
         System.out.println("url:" + page.getUrl().toString());
         System.out.println( "limit:" + page.getContent().limit());
       } else {
-        Assert.assertNull(page.getContent());
+        assertNull(page.getContent());
       }
     }
 
@@ -801,18 +804,18 @@ public class DataStoreTestUtil {
     //assert that data is deleted
     for (int i = 0; i < URLS.length; i++) {
       WebPage page = store.get(URLS[i]);
-      Assert.assertNotNull(page);
+      assertNotNull(page);
       if( URLS[i].compareTo(startKey) < 0 || URLS[i].compareTo(endKey) >= 0) {
         //not deleted
         assertWebPage(page, i);
       } else {
         //deleted
-        Assert.assertNull(page.getUrl());
-        Assert.assertNotNull(page.getOutlinks());
-        Assert.assertNotNull(page.getParsedContent());
-        Assert.assertNotNull(page.getContent());
-        Assert.assertTrue(page.getOutlinks().size() > 0);
-        Assert.assertTrue(page.getParsedContent().size() > 0);
+        assertNull(page.getUrl());
+        assertNotNull(page.getOutlinks());
+        assertNotNull(page.getParsedContent());
+        assertNotNull(page.getContent());
+        assertTrue(page.getOutlinks().size() > 0);
+        assertTrue(page.getParsedContent().size() > 0);
       }
     }
 

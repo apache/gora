@@ -32,7 +32,8 @@ import org.apache.gora.query.Query;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.hadoop.conf.Configuration;
-import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class MapReduceTestUtils {
 
@@ -59,7 +60,7 @@ public class MapReduceTestUtils {
     log.info("finished count query job");
     
     //assert results
-    Assert.assertEquals(WebPageDataCreator.URLS.length, result);
+    assertEquals(WebPageDataCreator.URLS.length, result);
   }
  
   public static void testWordCount(Configuration conf, DataStore<String,WebPage> inStore, DataStore<String,
@@ -95,7 +96,7 @@ public class MapReduceTestUtils {
   private static void assertTokenCount(DataStore<String, TokenDatum> outStore,
       String token, int count) throws Exception {
     TokenDatum datum = outStore.get(token, null);
-    Assert.assertNotNull("token:" + token + " cannot be found in datastore", datum);
-    Assert.assertEquals("count for token:" + token + " is wrong", count, datum.getCount());
+    assertNotNull("token:" + token + " cannot be found in datastore", datum);
+    assertEquals("count for token:" + token + " is wrong", count, datum.getCount());
   }
 }

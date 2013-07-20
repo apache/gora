@@ -18,15 +18,10 @@
 
 package org.apache.gora.mapreduce;
 
-import junit.framework.Assert;
-
 import org.apache.avro.util.Utf8;
 import org.apache.gora.examples.WebPageDataCreator;
 import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.examples.generated.WebPage;
-import org.apache.gora.mapreduce.PersistentDeserializer;
-import org.apache.gora.mapreduce.PersistentSerialization;
-import org.apache.gora.mapreduce.PersistentSerializer;
 import org.apache.gora.memory.store.MemStore;
 import org.apache.gora.query.Result;
 import org.apache.gora.store.DataStoreFactory;
@@ -34,6 +29,7 @@ import org.apache.gora.store.DataStoreTestUtil;
 import org.apache.gora.util.TestIOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 /** Test class for {@link PersistentSerialization}, {@link PersistentSerializer}
  *  and {@link PersistentDeserializer}
@@ -85,7 +81,7 @@ public class TestPersistentSerialization {
       TestIOUtils.testSerializeDeserialize(page);
       i++;
     }
-    Assert.assertEquals(WebPageDataCreator.URLS.length, i);
+    assertEquals(WebPageDataCreator.URLS.length, i);
   }
 
   @Test

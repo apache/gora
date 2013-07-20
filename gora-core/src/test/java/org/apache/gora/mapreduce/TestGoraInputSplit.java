@@ -21,9 +21,6 @@ package org.apache.gora.mapreduce;
 import java.io.IOException;
 import java.util.List;
 
-import junit.framework.Assert;
-
-import org.apache.gora.mapreduce.GoraInputSplit;
 import org.apache.gora.mock.persistency.MockPersistent;
 import org.apache.gora.mock.query.MockQuery;
 import org.apache.gora.mock.store.MockDataStore;
@@ -31,6 +28,7 @@ import org.apache.gora.query.PartitionQuery;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.TestWritable;
 import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test case for {@link GoraInputSplit}.
@@ -44,7 +42,7 @@ public class TestGoraInputSplit {
     MockDataStore store = MockDataStore.get();
     MockQuery query = store.newQuery();
 
-    List<PartitionQuery<String, MockPersistent>> partitions = 
+    List<PartitionQuery<String, MockPersistent>> partitions =
       store.getPartitions(query);
     return partitions;
   }
@@ -54,11 +52,11 @@ public class TestGoraInputSplit {
     List<PartitionQuery<String, MockPersistent>> partitions = 
       getPartitions();
 
-    int i=0;;
+    int i=0;
     for(PartitionQuery<String, MockPersistent> partition : partitions) {
       GoraInputSplit split = new GoraInputSplit(conf, partition);
-      Assert.assertEquals(split.getLocations().length, 1);
-      Assert.assertEquals(split.getLocations()[0], MockDataStore.LOCATIONS[i++]);
+      assertEquals(split.getLocations().length, 1);
+      assertEquals(split.getLocations()[0], MockDataStore.LOCATIONS[i++]);
     }
   }
 

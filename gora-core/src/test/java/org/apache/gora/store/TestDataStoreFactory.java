@@ -20,7 +20,9 @@ package org.apache.gora.store;
 
 import java.util.Properties;
 
-import junit.framework.Assert;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotSame;
 
 import org.apache.gora.avro.store.DataFileAvroStore;
 import org.apache.gora.mock.persistency.MockPersistent;
@@ -42,23 +44,23 @@ public class TestDataStoreFactory {
   public void testGetDataStore() throws GoraException {
     DataStore<?,?> dataStore = DataStoreFactory.getDataStore("org.apache.gora.mock.store.MockDataStore"
         , String.class, MockPersistent.class, conf);
-    Assert.assertNotNull(dataStore);
+    assertNotNull(dataStore);
   }
   
   @Test
   public void testGetClasses() throws GoraException {
     DataStore<?,?> dataStore = DataStoreFactory.getDataStore("org.apache.gora.mock.store.MockDataStore"
         , String.class, MockPersistent.class, conf);
-    Assert.assertNotNull(dataStore);
-    Assert.assertEquals(String.class, dataStore.getKeyClass());
-    Assert.assertEquals(MockPersistent.class, dataStore.getPersistentClass());
+    assertNotNull(dataStore);
+    assertEquals(String.class, dataStore.getKeyClass());
+    assertEquals(MockPersistent.class, dataStore.getPersistentClass());
   }
   
   @Test
   public void testGetDataStore2() throws GoraException {
     DataStore<?,?> dataStore = DataStoreFactory.getDataStore(MockDataStore.class
         , String.class, MockPersistent.class, conf);
-    Assert.assertNotNull(dataStore);
+    assertNotNull(dataStore);
   }
   
   @Test
@@ -70,8 +72,8 @@ public class TestDataStoreFactory {
     DataStore<?,?> dataStore3 = DataStoreFactory.getDataStore("org.apache.gora.mock.store.MockDataStore"
         , String.class, MockPersistent.class, conf);
     
-    Assert.assertNotSame(dataStore1, dataStore2);
-    Assert.assertNotSame(dataStore1, dataStore3);
+    assertNotSame(dataStore1, dataStore2);
+    assertNotSame(dataStore1, dataStore3);
   }
   
   @Test
@@ -79,8 +81,8 @@ public class TestDataStoreFactory {
     //indirect testing
     DataStore<?,?> dataStore = DataStoreFactory.getDataStore(String.class,
             MockPersistent.class, conf);
-    Assert.assertNotNull(dataStore);
-    Assert.assertEquals(MockDataStore.class, dataStore.getClass());
+    assertNotNull(dataStore);
+    assertEquals(MockDataStore.class, dataStore.getClass());
   }
   
   @Test
@@ -91,15 +93,15 @@ public class TestDataStoreFactory {
     
     String fooValue = DataStoreFactory.findProperty(properties, store
         , "foo_property", "foo_default");
-    Assert.assertEquals("foo_value", fooValue);
+    assertEquals("foo_value", fooValue);
     
     String bazValue = DataStoreFactory.findProperty(properties, store
         , "baz_property", "baz_default");
-    Assert.assertEquals("baz_value", bazValue);
+    assertEquals("baz_value", bazValue);
     
     String barValue = DataStoreFactory.findProperty(properties, store
         , "bar_property", "bar_default");
-    Assert.assertEquals("bar_value", barValue);
+    assertEquals("bar_value", barValue);
   }
   
 }

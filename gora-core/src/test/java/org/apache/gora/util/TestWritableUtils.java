@@ -26,7 +26,7 @@ import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.util.Properties;
 
-import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 /**
@@ -47,7 +47,7 @@ public class TestWritableUtils {
     
     Properties propsRead = WritableUtils.readProperties(in);
     
-    Assert.assertEquals(propsRead.get("keyBlah"), props.get("keyBlah"));
-    Assert.assertEquals(propsRead.get("keyBlah2"), props.get("keyBlah2"));
+    assertEquals(propsRead.get("keyBlah"), props.get("keyBlah"));
+    assertEquals(propsRead.get("keyBlah2"), props.get("keyBlah2"));
   }
 }

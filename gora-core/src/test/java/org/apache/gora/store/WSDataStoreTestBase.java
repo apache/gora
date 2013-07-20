@@ -20,18 +20,18 @@ package org.apache.gora.store;
 
 import java.io.IOException;
 
-import junit.framework.Assert;
+import org.junit.BeforeClass;
+import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.After;
+import org.junit.Test;
+import org.junit.Ignore;
+import static org.junit.Assert.assertTrue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.gora.GoraTestDriver;
 import org.apache.gora.persistency.Persistent;
-import org.apache.gora.store.DataStore;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 /**
  * A base class for {@link DataStore} tests. This is just a convenience
@@ -148,14 +148,15 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
     log.info("test method: testDeleteSchema");
     assertDeleteSchema();
   }
-  
+
+
   public void assertDeleteSchema(){
   }
 
   @Test
   public void testSchemaExists() throws Exception {
     log.info("test method: testSchemaExists");
-    Assert.assertTrue(dataStore.schemaExists());
+    assertTrue(dataStore.schemaExists());
   }
 
   @Test
@@ -163,6 +164,7 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
     log.info("test method: testPut");
     assertPut();
   }
+
 
   public void assertPut() throws IOException {
   }
@@ -179,6 +181,7 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
     assertPutArray();
   }
 
+
   public void assertPutArray() throws IOException {
   }
 
@@ -190,6 +193,7 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
     assertPutBytes(contentBytes);
   }
 
+  @Ignore
   public void assertPutBytes(byte[] contentBytes) throws IOException {
   }
 
@@ -199,6 +203,7 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
     assertPutMap();
   }
 
+  @Ignore
   public void assertPutMap() throws IOException {
   }
 
@@ -208,9 +213,11 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
     assertTestUpdateDataStore();
   }
 
+  @Ignore
   public void assertTestUpdateDataStore(){
   }
-  
+
+  @Ignore
   @Test
   public void testEmptyUpdate() throws IOException, Exception {
   }
@@ -220,7 +227,8 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
     log.info("test method: testGet");
     assertTestGetDataStore();
   }
-  
+
+  @Ignore
   public void assertTestGetDataStore() throws IOException {
   }
   
@@ -234,7 +242,8 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
     log.info("test method: testQuery");
     assertTestQueryDataStore();
   }
- 
+
+  @Ignore
   public void assertTestQueryDataStore() throws IOException {
   }
 
@@ -254,6 +263,7 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
     assertTestQueryKeyRange();
   }
 
+  @Ignore
   public void assertTestQueryKeyRange(){}
   
   @Test
@@ -261,6 +271,8 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
     log.info("test method: testDelete");
     assertTestDeleteDataStore();
   }
+
+  @Ignore
   public void assertTestDeleteDataStore(){}
   
   @Test
@@ -268,6 +280,8 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
     log.info("test method: testDeleteByQuery");
     assertTestDeleteByQueryDataStore();
   }
+
+  @Ignore
   public void assertTestDeleteByQueryDataStore(){
   }
   

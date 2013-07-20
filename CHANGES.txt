@@ -4,6 +4,8 @@
 
 Gora Change Log
 
+* GORA-229 Use @Ignore for unimplemented functionality to identify absent tests (Apostolos Giannakidis via lewismc)
+
 * GORA-258 writeCapacUnits gets value from wrong attribute (Apostolos Giannakidis via lewismc)
 
 * GORA-256 Add Solr store to gora-tutorial (Scott Stults via lewismc)

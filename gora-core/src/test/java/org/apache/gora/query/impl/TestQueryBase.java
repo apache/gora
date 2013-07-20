@@ -16,10 +16,7 @@
  * limitations under the License.
  */
 
-
 package org.apache.gora.query.impl;
-
-import junit.framework.Assert;
 
 import org.apache.gora.mock.query.MockQuery;
 import org.apache.gora.mock.store.MockDataStore;
@@ -27,6 +24,7 @@ import org.apache.gora.query.impl.QueryBase;
 import org.apache.gora.util.TestIOUtils;
 import org.junit.Before;
 import org.junit.Test;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Test case for {@link QueryBase}.
@@ -51,7 +49,7 @@ public class TestQueryBase {
     query.setKeyRange(START_KEY, END_KEY);
     TestIOUtils.testSerializeDeserialize(query);
     
-    Assert.assertNotNull(query.getDataStore());
+    assertNotNull(query.getDataStore());
   }
   
   @Test
