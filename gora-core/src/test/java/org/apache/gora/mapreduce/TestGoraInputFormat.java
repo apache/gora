@@ -22,11 +22,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import junit.framework.Assert;
-
 import org.apache.gora.examples.generated.Employee;
-import org.apache.gora.mapreduce.GoraInputFormat;
-import org.apache.gora.mapreduce.GoraInputSplit;
 import org.apache.gora.mock.persistency.MockPersistent;
 import org.apache.gora.mock.query.MockQuery;
 import org.apache.gora.mock.store.MockDataStore;
@@ -34,6 +30,7 @@ import org.apache.gora.query.PartitionQuery;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Job;
 import org.junit.Test;
+import static org.junit.Assert.assertTrue;
 
 public class TestGoraInputFormat {
 
@@ -60,11 +57,11 @@ public class TestGoraInputFormat {
   public void testGetSplits() throws IOException, InterruptedException {
     List<InputSplit> splits = getInputSplits();
 
-    Assert.assertTrue(splits.size() > 0);
+    assertTrue(splits.size() > 0);
 
     InputSplit split = splits.get(0);
     PartitionQuery query = ((GoraInputSplit)split).getQuery();
-    Assert.assertTrue(Arrays.equals(Employee._ALL_FIELDS, query.getFields()));
+    assertTrue(Arrays.equals(Employee._ALL_FIELDS, query.getFields()));
   }
 
 }

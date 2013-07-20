@@ -24,8 +24,6 @@ import static org.apache.gora.examples.WebPageDataCreator.createWebPageData;
 
 import java.io.IOException;
 
-import junit.framework.Assert;
-
 import org.apache.gora.avro.store.AvroStore.CodecType;
 import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.examples.generated.WebPage;
@@ -40,6 +38,7 @@ import org.apache.hadoop.fs.Path;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test case for {@link AvroStore}.
@@ -147,7 +146,7 @@ public class TestAvroStore {
       DataStoreTestUtil.assertWebPage(page, URL_INDEXES.get(page.getUrl().toString()));
       i++;
     }
-    Assert.assertEquals(i, URLS.length);
+    assertEquals(i, URLS.length);
   }
 
 }

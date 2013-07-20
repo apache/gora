@@ -105,6 +105,7 @@ public class GoraTestDriver {
         (Class<? extends DataStore<K,T>>)dataStoreClass, keyClass, persistentClass, conf);
     dataStores.add(dataStore);
 
+    log.info("Datastore for "+persistentClass+" was added.");
     return dataStore;
   }
   

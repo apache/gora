@@ -18,11 +18,9 @@
 
 package org.apache.gora.persistency;
 
-import org.apache.avro.Schema; 
-import org.apache.avro.generic.GenericData;
+import org.apache.avro.Schema;
 import org.apache.avro.util.Utf8;
-import org.apache.gora.persistency.ListGenericArray; 
-import org.junit.Assert;
+import static org.junit.Assert.assertFalse;
 import org.junit.Test;
 
 /**
@@ -41,7 +39,7 @@ public class TestListGenericArray {
     catch (StackOverflowError e) {
       stackOverflowError = true;
     }
-    Assert.assertFalse(stackOverflowError);
+    assertFalse(stackOverflowError);
   }
   
   @Test
@@ -54,6 +52,6 @@ public class TestListGenericArray {
     } catch (StackOverflowError e) {
       stackOverflowError = true;
     }
-    Assert.assertFalse(stackOverflowError);
+    assertFalse(stackOverflowError);
   }
 }

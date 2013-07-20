@@ -19,11 +19,11 @@ package org.apache.gora.accumulo.util;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import junit.framework.Assert;
-
 import org.apache.gora.accumulo.encoders.SignedBinaryEncoder;
 import org.apache.hadoop.io.Text;
 import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * 
@@ -38,10 +38,10 @@ public class SignedBinaryEncoderTest {
 
     while (true) {
       byte[] enc = encoder.encodeShort(s);
-      Assert.assertEquals(s, encoder.decodeShort(enc));
+      assertEquals(s, encoder.decodeShort(enc));
       Text current = new Text(enc);
       if (prev != null)
-        Assert.assertTrue(prev.compareTo(current) < 0);
+        assertTrue(prev.compareTo(current) < 0);
       prev = current;
       s++;
       if (s == Short.MAX_VALUE)
@@ -57,10 +57,10 @@ public class SignedBinaryEncoderTest {
 
     while (true) {
       byte[] enc = encoder.encodeInt(i);
-      Assert.assertEquals(i, encoder.decodeInt(enc));
+      assertEquals(i, encoder.decodeInt(enc));
       Text current = new Text(enc);
       if (prev != null)
-        Assert.assertTrue(prev.compareTo(current) < 0);
+        assertTrue(prev.compareTo(current) < 0);
       prev = current;
       i++;
       if (i == finish)
@@ -83,10 +83,10 @@ public class SignedBinaryEncoderTest {
 
     while (true) {
       byte[] enc = encoder.encodeLong(l);
-      Assert.assertEquals(l, encoder.decodeLong(enc));
+      assertEquals(l, encoder.decodeLong(enc));
       Text current = new Text(enc);
       if (prev != null)
-        Assert.assertTrue(prev.compareTo(current) < 0);
+        assertTrue(prev.compareTo(current) < 0);
       prev = current;
       l++;
       if (l == finish)
@@ -124,9 +124,9 @@ public class SignedBinaryEncoderTest {
 
     for (int i = 0; i < testData.size(); i++) {
       byte[] enc = encoder.encodeDouble(testData.get(i));
-      Assert.assertEquals(testData.get(i), encoder.decodeDouble(enc));
+      assertEquals(testData.get(i), (Double) encoder.decodeDouble(enc));
       if (i > 1) {
-        Assert.assertTrue("Checking " + testData.get(i) + " > " + testData.get(i - 1),
+        assertTrue("Checking " + testData.get(i) + " > " + testData.get(i - 1),
             new Text(enc).compareTo(new Text(encoder.encodeDouble(testData.get(i - 1)))) > 0);
       }
     }
@@ -155,9 +155,9 @@ public class SignedBinaryEncoderTest {
 
     for (int i = 0; i < testData.size(); i++) {
       byte[] enc = encoder.encodeFloat(testData.get(i));
-      Assert.assertEquals(testData.get(i), encoder.decodeFloat(enc));
+      assertEquals(testData.get(i), (Float)encoder.decodeFloat(enc));
       if (i > 1) {
-        Assert.assertTrue("Checking " + testData.get(i) + " > " + testData.get(i - 1),
+        assertTrue("Checking " + testData.get(i) + " > " + testData.get(i - 1),
             new Text(enc).compareTo(new Text(encoder.encodeFloat(testData.get(i - 1)))) > 0);
       }
     }

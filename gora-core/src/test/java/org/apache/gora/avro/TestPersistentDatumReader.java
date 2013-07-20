@@ -20,15 +20,11 @@ package org.apache.gora.avro;
 
 import java.io.IOException;
 
-import junit.framework.Assert;
-
 import org.apache.avro.util.Utf8;
-import org.apache.gora.avro.PersistentDatumReader;
 import org.apache.gora.examples.WebPageDataCreator;
 import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.memory.store.MemStore;
-import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
@@ -37,6 +33,8 @@ import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.DataStoreTestUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Test;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test case for {@link PersistentDatumReader}.
@@ -53,8 +51,8 @@ public class TestPersistentDatumReader {
   }
   
   private void assertClone(PersistentBase persistent, PersistentBase cloned) {
-    Assert.assertNotNull("cloned object is null", cloned);
-    Assert.assertEquals("cloned object is not equal to original object", persistent, cloned);
+    assertNotNull("cloned object is null", cloned);
+    assertEquals("cloned object is not equal to original object", persistent, cloned);
   }
   
   @Test
@@ -101,6 +99,6 @@ public class TestPersistentDatumReader {
       testClone(page);
       tested++;
     }
-    Assert.assertEquals(WebPageDataCreator.URLS.length, tested);
+    assertEquals(WebPageDataCreator.URLS.length, tested);
   }
 }

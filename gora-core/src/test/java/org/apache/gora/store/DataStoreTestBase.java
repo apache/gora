@@ -21,8 +21,6 @@ package org.apache.gora.store;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import junit.framework.Assert;
-
 import org.apache.avro.util.Utf8;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,12 +28,13 @@ import org.apache.gora.GoraTestDriver;
 import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.examples.generated.Metadata;
 import org.apache.gora.examples.generated.WebPage;
-import org.apache.gora.store.DataStore;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * A base class for {@link DataStore} tests. This is just a convenience
@@ -57,7 +56,7 @@ public abstract class DataStoreTestBase {
 
   @Deprecated
   protected abstract DataStore<String,WebPage> createWebPageDataStore() throws IOException;
-  
+
 
   /** junit annoyingly forces BeforeClass to be static, so this method
    * should be called from a static block
@@ -67,7 +66,7 @@ public abstract class DataStoreTestBase {
   }
 
   private static boolean setUpClassCalled = false;
-  
+
   @BeforeClass
   public static void setUpClass() throws Exception {
     if(testDriver != null && !setUpClassCalled) {
@@ -88,12 +87,12 @@ public abstract class DataStoreTestBase {
   @Before
   public void setUp() throws Exception {
     //There is an issue in JUnit 4 tests in Eclipse where TestSqlStore static
-    //methods are not called BEFORE setUpClass. I think this is a bug in 
+    //methods are not called BEFORE setUpClass. I think this is a bug in
     //JUnitRunner in Eclipse. Below is a workaround for that problem.
     if(!setUpClassCalled) {
-    	setUpClass();  
+      setUpClass();
     }
-    
+
     log.info("setting up test");
     if(testDriver != null) {
       employeeStore = testDriver.createDataStore(String.class, Employee.class);
@@ -131,7 +130,9 @@ public abstract class DataStoreTestBase {
     assertSchemaExists("Employee");
   }
 
+
   // Override this to assert that schema is created correctly
+
   public void assertSchemaExists(String schemaName) throws Exception {
   }
 
@@ -184,7 +185,7 @@ public abstract class DataStoreTestBase {
 
     webPageStore.createSchema();
     WebPage page = webPageStore.newPersistent();
-    Metadata metadata = new Metadata();  
+    Metadata metadata = new Metadata();
     metadata.setVersion(1);
     metadata.putToData(new Utf8("foo"), new Utf8("baz"));
 
@@ -196,9 +197,9 @@ public abstract class DataStoreTestBase {
 
     page = webPageStore.get(revUrl);
     metadata = page.getMetadata();
-    Assert.assertNotNull(metadata);
-    Assert.assertEquals(1, metadata.getVersion());
-    Assert.assertEquals(new Utf8("baz"), metadata.getData().get(new Utf8("foo")));
+    assertNotNull(metadata);
+    assertEquals(1, metadata.getVersion());
+    assertEquals(new Utf8("baz"), metadata.getData().get(new Utf8("foo")));
   }
 
   @Test
@@ -301,7 +302,7 @@ public abstract class DataStoreTestBase {
     log.info("test method: testGetDoubleRecursive") ;
     DataStoreTestUtil.testGetEmployeeDoubleRecursive(employeeStore) ;
   }
-  
+
   @Test
   /**
    * Tests put and get a record with a nested record (not recursive)
@@ -313,7 +314,7 @@ public abstract class DataStoreTestBase {
     log.info("test method: testGetNested") ;
     DataStoreTestUtil.testGetEmployeeNested(employeeStore) ;
   }
-  
+
   @Test
   /**
    * Tests put and get a record with a 3 types union, and
@@ -325,7 +326,7 @@ public abstract class DataStoreTestBase {
     log.info("test method: testGet3UnionField") ;
     DataStoreTestUtil.testGetEmployee3UnionField(employeeStore) ;
   }
-  
+
   @Test
   public void testGetWithFields() throws IOException, Exception {
     log.info("test method: testGetWithFields");
