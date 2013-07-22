@@ -47,7 +47,6 @@ public class MongoDBQuery<K, T extends PersistentBase> extends QueryBase<K, T> {
    */
   public static DBObject toDBQuery(Query<?, ?> query) {
     BasicDBObject q = new BasicDBObject();
-
     if ((query.getStartKey() != null) && (query.getEndKey() != null)
         && query.getStartKey().equals(query.getEndKey())) {
       q.put("_id", query.getStartKey());
@@ -68,14 +67,12 @@ public class MongoDBQuery<K, T extends PersistentBase> extends QueryBase<K, T> {
    * @return a {@link DBObject} corresponding to the list of field to be
    *         retrieved with the associated boolean
    */
-  public static DBObject toProjection(Query<?, ?> query, MongoMapping mapping) {
+  public static DBObject toProjection(String[] fields, MongoMapping mapping) {
     BasicDBObject proj = new BasicDBObject();
 
-    if (query.getFields() != null) {
-      for (String k : query.getFields()) {
+      for (String k : fields) {
         proj.put(mapping.getDocumentField(k), true);
       }
-    }
 
     return proj;
   }

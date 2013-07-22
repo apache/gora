@@ -41,6 +41,7 @@ import org.apache.gora.persistency.ListGenericArray;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.StateManager;
 import org.apache.gora.persistency.StatefulHashMap;
+import org.apache.gora.persistency.impl.BeanFactoryImpl;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.persistency.impl.StateManagerImpl;
 import org.apache.gora.query.PartitionQuery;
@@ -49,6 +50,7 @@ import org.apache.gora.query.Result;
 import org.apache.gora.query.impl.PartitionQueryImpl;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.AvroUtils;
+import org.apache.gora.util.ClassLoadingUtils;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -414,7 +416,7 @@ public class MongoStore<K, T extends PersistentBase> extends
   /**
    * Insert a new object into the store. The object must be new or the insert
    * may fail.
-   * 
+   *
    * @param key
    *          identifier of the object in the store
    * @param obj
@@ -450,9 +452,11 @@ public class MongoStore<K, T extends PersistentBase> extends
    */
   @Override
   public Result<K, T> execute(Query<K, T> query) {
+
+    String[] fields = getFieldsToQuery(query.getFields());
     // Build the actual MongoDB query
     DBObject q = MongoDBQuery.toDBQuery(query);
-    DBObject p = MongoDBQuery.toProjection(query, mapping);
+    DBObject p = MongoDBQuery.toProjection(fields, mapping);
 
     // Execute the query on the collection
     DBCursor cursor = mongoClientColl.find(q, p);
@@ -508,12 +512,11 @@ public class MongoStore<K, T extends PersistentBase> extends
   public T newInstance(DBObject obj, String[] fields) {
     if (obj == null)
       return null;
-    BSONDecorator easybson = new BSONDecorator((BasicDBObject) obj);
-    // BasicBSONObject bsonobj = (BasicBSONObject) obj;
-
+    BSONDecorator easybson = new BSONDecorator(obj);
     // Create new empty persistent bean instance
     T persistent = newPersistent();
     StateManager stateManager = persistent.getStateManager();
+    fields = getFieldsToQuery(fields);
 
     // Populate each field
     for (String f : fields) {
@@ -530,152 +533,150 @@ public class MongoStore<K, T extends PersistentBase> extends
       Field field = fieldMap.get(f);
       Schema fieldSchema = field.schema();
 
-      switch (fieldSchema.getType()) {
-      case MAP:
-        // BasicDBObject map = (BasicDBObject) bsonobj.get(docf);
-        BasicDBObject map = easybson.getDBObject(docf);
-        if (map == null)
-          continue;
-        Map<Utf8, Object> rmap = new StatefulHashMap<Utf8, Object>();
-        for (Entry<String, Object> e : map.entrySet()) {
-          // ensure Key decoding -> middle dots replaced with dots
-          // FIXME: better approach ?
-          String oKey = e.getKey().replace("\u00B7", ".");
-
-          switch (fieldSchema.getValueType().getType()) {
-          case STRING:
-            rmap.put(new Utf8(oKey), new Utf8((String) e.getValue()));
-            break;
-          case BYTES:
-            rmap.put(new Utf8(oKey), ByteBuffer.wrap((byte[]) e.getValue()));
-            break;
-          default:
-            rmap.put(new Utf8(oKey), e.getValue());
-            break;
-          }
-        }
-        ((StatefulHashMap<Utf8, Object>) rmap).clearStates();
-        persistent.put(field.pos(), rmap);
-        break;
-      case ARRAY:
-        List<Object> list = easybson.getDBList(docf);
-        if (list == null)
-          continue;
-        switch (fieldSchema.getElementType().getType()) {
-        case STRING:
-          ListGenericArray<Utf8> arrS = new ListGenericArray<Utf8>(fieldSchema);
-          for (Object o : list)
-            arrS.add(new Utf8((String) o));
-          persistent.put(field.pos(), arrS);
-          break;
-        case BYTES:
-          ListGenericArray<ByteBuffer> arrB = new ListGenericArray<ByteBuffer>(
-              fieldSchema);
-          for (Object o : list)
-            arrB.add(ByteBuffer.wrap((byte[]) o));
-          persistent.put(field.pos(), arrB);
-          break;
-        default:
-          ListGenericArray<Object> arrT = new ListGenericArray<Object>(
-              fieldSchema);
-          for (Object o : list)
-            arrT.add(o);
-          persistent.put(field.pos(), arrT);
-          break;
-        }
-        break;
-      case RECORD:
-        if (persistent.get(field.pos()) == null)
-          break;
-        // FIXME Handle subtypes... certainly a better way to do that!
-        DBObject rec = easybson.getDBObject(docf);
-        Persistent record = ((Persistent) persistent.get(field.pos()))
-            .newInstance(new StateManagerImpl());
-        for (Field recField : field.schema().getFields()) {
-          // FIXME: need special mapping ?
-            ((PersistentBase)record).put(recField.pos(), rec.get(recField.name()));
-        }
-        persistent.put(field.pos(), record);
-        break;
-      case BOOLEAN:
-        persistent.put(field.pos(), easybson.getBoolean(docf));
-        break;
-      case DOUBLE:
-        persistent.put(field.pos(), easybson.getDouble(docf));
-        break;
-      case FLOAT:
-        persistent.put(field.pos(), easybson.getDouble(docf).floatValue());
-        break;
-      case INT:
-        persistent.put(field.pos(), easybson.getInt(docf));
-        break;
-      case LONG:
-        persistent.put(field.pos(), easybson.getLong(docf));
-        break;
-      case STRING:
-        if (storeType == DocumentFieldType.OBJECTID) {
-          // Try auto-conversion of BSON data to ObjectId
-          // It will work if data is stored as String or as ObjectId
-          final Object bin = easybson.get(docf);
-          final ObjectId id = ObjectId.massageToObjectId(bin);
-          Utf8 utf8 = new Utf8(id.toString());
-          persistent.put(field.pos(), utf8);
-        } else if (storeType == DocumentFieldType.DATE) {
-          Utf8 utf8;
-          final Object bin = easybson.get(docf);
-          if (bin instanceof Date) {
-            Calendar calendar = Calendar.getInstance(TimeZone
-                .getTimeZone("UTC"));
-            calendar.setTime((Date) bin);
-            utf8 = new Utf8(DatatypeConverter.printDateTime(calendar));
-          } else {
-            utf8 = new Utf8(bin.toString());
-          }
-          persistent.put(field.pos(), utf8);
-        } else {
-          final Utf8 string = easybson.getUtf8String(docf);
-          persistent.put(field.pos(), string);
-        }
-        break;
-      case ENUM:
-        persistent.put(field.pos(), AvroUtils.getEnumValue(fieldSchema,
-            easybson.getUtf8String(docf).toString()));
-        break;
-      case BYTES:
-        persistent.put(field.pos(), easybson.getBytes(docf));
-        break;
-      case NULL:
-        persistent.put(field.pos(), null);
-        break;
-      case UNION:
-          if (fieldSchema.getTypes().size() == 2) {
-
-          // schema [type0, type1]
-          Type type0 = fieldSchema.getTypes().get(0).getType() ;
-          Type type1 = fieldSchema.getTypes().get(1).getType() ;
-
-          // Check if types are different and there's a "null", like ["null","type"] or ["type","null"]
-          if (!type0.equals(type1)
-                  && (   type0.equals(Schema.Type.NULL)
-                  || type1.equals(Schema.Type.NULL))) {
-              persistent.put(field.pos(), easybson.getBytes(docf)); // Deserialize as if schema was ["type"]
-          }
-
-          }
-        break;
-      default:
-        Object o = easybson.get(docf);
-        if (o == null)
-          continue;
-        persistent.put(field.pos(), o);
-        break;
-      }
+      Object result = fromDBObject(fieldSchema, storeType, field, docf, easybson);
+      persistent.put(field.pos(), result);
     }
     stateManager.clearDirty(persistent);
     return persistent;
   }
 
-  // ////////////////////////////////////////////////////////// SERIALIZATION
+    private Object fromDBObject(final Schema fieldSchema, final DocumentFieldType storeType, final Field field, final String docf, final BSONDecorator easybson) {
+        Object result = null;
+        switch (fieldSchema.getType()) {
+            case MAP:
+                BasicDBObject map = easybson.getDBObject(docf);
+                StatefulHashMap<Utf8, Object> rmap = new StatefulHashMap<Utf8, Object>();
+                for (Entry<String, Object> e : map.entrySet()) {
+                    // ensure Key decoding -> middle dots replaced with dots
+                    // FIXME: better approach ?
+                    String oKey = e.getKey().replace("\u00B7", ".");
+
+                    switch (fieldSchema.getValueType().getType()) {
+                        case STRING:
+                            rmap.put(new Utf8(oKey), new Utf8((String) e.getValue()));
+                            break;
+                        case BYTES:
+                            rmap.put(new Utf8(oKey), ByteBuffer.wrap((byte[]) e.getValue()));
+                            break;
+                        default:
+                            rmap.put(new Utf8(oKey), e.getValue());
+                            break;
+                    }
+                }
+                rmap.clearStates();
+                result = rmap;
+                break;
+            case ARRAY:
+                List<Object> list = easybson.getDBList(docf);
+                switch (fieldSchema.getElementType().getType()) {
+                    case STRING:
+                        ListGenericArray<Utf8> arrS = new ListGenericArray<Utf8>(fieldSchema);
+                        for (Object o : list)
+                            arrS.add(new Utf8((String) o));
+                        result = arrS;
+                        break;
+                    case BYTES:
+                        ListGenericArray<ByteBuffer> arrB = new ListGenericArray<ByteBuffer>(
+                                fieldSchema);
+                        for (Object o : list)
+                            arrB.add(ByteBuffer.wrap((byte[]) o));
+                        result = arrB;
+                        break;
+                    default:
+                        ListGenericArray<Object> arrT = new ListGenericArray<Object>(
+                                fieldSchema);
+                        for (Object o : list)
+                            arrT.add(o);
+                        result = arrT;
+                        break;
+                }
+                break;
+            case RECORD:
+                DBObject rec = easybson.getDBObject(docf);
+                BSONDecorator innerBson = new BSONDecorator(rec);
+                Class<?> clazz = null;
+                try {
+                    clazz = ClassLoadingUtils.loadClass(fieldSchema.getFullName());
+                } catch (ClassNotFoundException e) {
+                }
+                Persistent record = new BeanFactoryImpl(keyClass, clazz).newPersistent();
+                for (Field recField : fieldSchema.getFields()) {
+                    Schema innerSchema = recField.schema();
+                    DocumentFieldType innerStoreType = mapping.getDocumentFieldType(innerSchema.getName());
+                    String recDocField = mapping.getDocumentField(recField.name()) != null ? mapping.getDocumentField(recField.name()) : recField.name();
+                    ((PersistentBase) record).put(recField.pos(), fromDBObject(innerSchema, innerStoreType, recField, recDocField, innerBson));
+                }
+                result = record;
+                break;
+            case BOOLEAN:
+                result = easybson.getBoolean(docf);
+                break;
+            case DOUBLE:
+                result = easybson.getDouble(docf);
+                break;
+            case FLOAT:
+                result = easybson.getDouble(docf).floatValue();
+                break;
+            case INT:
+                result = easybson.getInt(docf);
+                break;
+            case LONG:
+                result = easybson.getLong(docf);
+                break;
+            case STRING:
+                if (storeType == DocumentFieldType.OBJECTID) {
+                    // Try auto-conversion of BSON data to ObjectId
+                    // It will work if data is stored as String or as ObjectId
+                    final Object bin = easybson.get(docf);
+                    final ObjectId id = ObjectId.massageToObjectId(bin);
+                    result = new Utf8(id.toString());
+                } else if (storeType == DocumentFieldType.DATE) {
+                    final Object bin = easybson.get(docf);
+                    if (bin instanceof Date) {
+                        Calendar calendar = Calendar.getInstance(TimeZone
+                                .getTimeZone("UTC"));
+                        calendar.setTime((Date) bin);
+                        result = new Utf8(DatatypeConverter.printDateTime(calendar));
+                    } else {
+                        result = new Utf8(bin.toString());
+                    }
+                } else {
+                    result = easybson.getUtf8String(docf);
+                }
+                break;
+            case ENUM:
+                result = AvroUtils.getEnumValue(fieldSchema,
+                        easybson.getUtf8String(docf).toString());
+                break;
+            case BYTES:
+            case FIXED:
+                result = easybson.getBytes(docf);
+                break;
+            case NULL:
+                result = null;
+                break;
+            case UNION:
+                // schema [type0, type1]
+                Type type0 = fieldSchema.getTypes().get(0).getType();
+                Type type1 = fieldSchema.getTypes().get(1).getType();
+
+                // Check if types are different and there's a "null", like ["null","type"] or ["type","null"]
+                if (!type0.equals(type1)
+                        && (type0.equals(Type.NULL)
+                        || type1.equals(Type.NULL))) {
+                    Schema innerSchema = fieldSchema.getTypes().get(1);
+                    DocumentFieldType innerStoreType = mapping.getDocumentFieldType(innerSchema.getName());
+                    result = fromDBObject(innerSchema, innerStoreType, field, docf, easybson); // Deserialize as if schema was ["type"]
+                }
+                break;
+            default:
+                LOG.warn("Unable to read {}", docf);
+                break;
+        }
+        return result;
+    }
+
+    // ////////////////////////////////////////////////////////// SERIALIZATION
 
   /**
    * Build a new instance of {@link DBObject} from the persistence class
@@ -721,7 +722,7 @@ public class MongoStore<K, T extends PersistentBase> extends
    * store.
    * <p/>
    * This implementation mainly differs from the
-   * {@link MongoStore#newInstance(Persistent)} one from two points:
+   * {@link MongoStore#newInstance(org.apache.gora.persistency.impl.PersistentBase)} one from two points:
    * <ol>
    * <li>the restriction to fields that are dirty and then need an update</li>
    * <li>the qualification of field names as fully qualified names</li>
@@ -731,7 +732,7 @@ public class MongoStore<K, T extends PersistentBase> extends
    *          a persistence class instance which content is to be serialized as
    *          a {@link DBObject} for use as parameter of a $set operator
    * @return a {@link DBObject} which content corresponds to the fields that
-   *         have to be updated... and formated to be passed in parameter of a
+   *         have to be updated... and formatted to be passed in parameter of a
    *         $set operator
    */
   private BasicDBObject newUpdateSetInstance(T persistent) {
@@ -740,129 +741,9 @@ public class MongoStore<K, T extends PersistentBase> extends
       if (persistent.isReadable(f.pos()) && persistent.isDirty(f.pos())
           && (persistent.get(f.pos()) != null)) {
         String docf = mapping.getDocumentField(f.name());
-        DocumentFieldType storeType = mapping.getDocumentFieldType(docf);
         Object value = persistent.get(f.pos());
-        switch (f.schema().getType()) {
-        case MAP:
-          if (storeType != DocumentFieldType.DOCUMENT) {
-            throw new IllegalStateException(
-                "Field "
-                    + f.name()
-                    + ": to store a Gora 'map', target Mongo mapping have to be of 'document' type");
-          }
-          result.put(
-              docf,
-              toMongoMap((Map<Utf8, ?>) value, f.schema().getValueType()
-                  .getType()));
-          break;
-        case ARRAY:
-          if (storeType != DocumentFieldType.LIST) {
-            throw new IllegalStateException(
-                "Field "
-                    + f.name()
-                    + ": To store a Gora 'array', target Mongo mapping have to be of 'list' type");
-          }
-          result.put(
-              docf,
-              toMongoList((GenericArray<?>) value, f.schema().getElementType()
-                  .getType()));
-          break;
-        case BYTES:
-          // Beware of ByteBuffer not being safely serialized
-          if (value != null)
-            result.put(docf, ((ByteBuffer) value).array());
-          break;
-        case STRING:
-          if (storeType == DocumentFieldType.OBJECTID) {
-            if (value != null) {
-              ObjectId id;
-              try {
-                id = new ObjectId(value.toString());
-              } catch (IllegalArgumentException e1) {
-                // Unable to parse anything from Utf8 value, throw error
-                throw new IllegalStateException("Field " + f.name()
-                    + ": Invalid string: unable to convert to ObjectId");
-              }
-              result.put(docf, id);
-            }
-          } else if (storeType == DocumentFieldType.DATE) {
-            if (value != null) {
-              // Try to parse date from Utf8 value
-              Calendar calendar = null;
-              try {
-                // Parse as date + time
-                calendar = DatatypeConverter.parseDateTime(value.toString());
-              } catch (IllegalArgumentException e1) {
-                try {
-                  // Parse as date only
-                  calendar = DatatypeConverter.parseDate(value.toString());
-                } catch (IllegalArgumentException e2) {
-                  // No-op
-                }
-              }
-              if (calendar == null) {
-                // Unable to parse anything from Utf8 value, throw error
-                throw new IllegalStateException("Field " + f.name()
-                    + ": Invalid date format '" + value + "'");
-              }
-              result.put(docf, calendar.getTime());
-            }
-          } else {
-            // Beware of Utf8 not being safely serialized
-            if (value != null) {
-              result.put(docf, value.toString());
-            }
-          }
-          break;
-        case ENUM:
-          // Beware of Utf8 not being safely serialized
-          if (value != null)
-            result.put(docf, value.toString());
-          break;
-        case RECORD:
-          if (value == null)
-            break;
-          // FIXME Handle subtypes... certainly a better way to do that!
-          BasicDBObject record = new BasicDBObject();
-          for (Field member : f.schema().getFields()) {
-            Object recValue = ((PersistentBase) value).get(member.pos());
-            switch (member.schema().getType()) {
-            case MAP:
-              record.put(
-                  member.name(),
-                  toMongoMap((Map<Utf8, ?>) recValue, member.schema()
-                      .getValueType().getType()));
-              break;
-            case ARRAY:
-              record.put(
-                  member.name(),
-                  toMongoList((GenericArray<?>) recValue, member.schema()
-                      .getElementType().getType()));
-              break;
-            case STRING:
-            case ENUM:
-              if (recValue != null)
-                record.put(member.name(), recValue.toString());
-              break;
-            case BYTES:
-              if (recValue != null)
-                record.put(member.name(), ((ByteBuffer) recValue).array());
-              break;
-            case RECORD:
-              // COME ON!
-              throw new IllegalStateException("A record in a record! "
-                  + "Seriously? Fuck it, it's not supported yet.");
-            default:
-              record.put(member.name(), recValue);
-              break;
-            }
-          }
-          result.put(docf, record);
-          break;
-        default:
-          result.put(docf, value);
-          break;
-        }
+        DocumentFieldType storeType = mapping.getDocumentFieldType(docf);
+        result.put(docf, toDBObject(f.schema(), f.schema().getType(), storeType, value));
       }
     }
     return result;
@@ -875,7 +756,7 @@ public class MongoStore<K, T extends PersistentBase> extends
    * store by being removed.
    * <p/>
    * This implementation mainly differs from the
-   * {@link MongoStore#newInstance(Persistent)} one from two points:
+   * {@link MongoStore#newInstance(org.apache.gora.persistency.impl.PersistentBase)} one from two points:
    * <ol>
    * <li>the restriction to fields that are dirty and then need an update</li>
    * <li>the qualification of field names as fully qualified names</li>
@@ -895,77 +776,137 @@ public class MongoStore<K, T extends PersistentBase> extends
           && (persistent.get(f.pos()) == null)) {
         String docf = mapping.getDocumentField(f.name());
         Object value = persistent.get(f.pos());
-        switch (f.schema().getType()) {
-        case MAP:
-          result.put(
-              docf,
-              toMongoMap((Map<Utf8, ?>) value, f.schema().getValueType()
-                  .getType()));
-          break;
-        case ARRAY:
-          result.put(
-              docf,
-              toMongoList((GenericArray<?>) value, f.schema().getElementType()
-                  .getType()));
-          break;
-        case BYTES:
-          // Beware of ByteBuffer not being safely serialized
-          if (value != null)
-            result.put(docf, ((ByteBuffer) value).array());
-          break;
-        case STRING:
-          // Beware of Utf8 not being safely serialized
-          if (value != null)
-            result.put(docf, value.toString());
-          break;
-        case RECORD:
-          if (value == null)
-            break;
-          // FIXME Handle subtypes... certainly a better way to do that!
-          BasicDBObject record = new BasicDBObject();
-          for (Field member : f.schema().getFields()) {
-            Object recValue = ((PersistentBase) value).get(member.pos());
-            switch (member.schema().getType()) {
-            case MAP:
-              record.put(
-                  member.name(),
-                  toMongoMap((Map<Utf8, ?>) recValue, member.schema()
-                      .getElementType().getType()));
-            case ARRAY:
-              record.put(
-                  member.name(),
-                  toMongoList((GenericArray<?>) recValue, member.schema()
-                      .getElementType().getType()));
-              break;
-            case STRING:
-              if (recValue != null)
-                record.put(member.name(), recValue.toString());
-              break;
-            case BYTES:
-              if (recValue != null)
-                record.put(member.name(), ((ByteBuffer) recValue).array());
-              break;
-            case RECORD:
-              // COME ON!
-              throw new IllegalStateException("A record in a record! "
-                  + "Seriously? Fuck it, it's not supported yet.");
-            default:
-              record.put(member.name(), recValue);
-              break;
-            }
-          }
-          result.put(docf, record);
-          break;
-        default:
-          result.put(docf, value);
-          break;
-        }
+        DocumentFieldType storeType = mapping.getDocumentFieldType(docf);
+        Object o = toDBObject(f.schema(), f.schema().getType(), storeType, value);
+        result.put(docf, o);
       }
     }
     return result;
   }
 
-  /**
+    private Object toDBObject(Schema fieldSchema, Type fieldType, DocumentFieldType storeType, Object value) {
+        Object result = null;
+        switch (fieldType) {
+            case MAP:
+                if (storeType != null && storeType != DocumentFieldType.DOCUMENT) {
+                    throw new IllegalStateException(
+                            "Field "
+                                    + fieldSchema.getType()
+                                    + ": to store a Gora 'map', target Mongo mapping have to be of 'document' type");
+                }
+                Schema valueSchema = fieldSchema.getValueType();
+                result = toMongoMap((Map<Utf8, ?>) value, valueSchema.getType());
+                break;
+            case ARRAY:
+                if (storeType != null && storeType != DocumentFieldType.LIST) {
+                    throw new IllegalStateException(
+                            "Field "
+                                    + fieldSchema.getType()
+                                    + ": To store a Gora 'array', target Mongo mapping have to be of 'list' type");
+                }
+                Schema elementSchema = fieldSchema.getElementType();
+                result = toMongoList((GenericArray<?>) value, elementSchema.getType());
+                break;
+            case BYTES:
+                // Beware of ByteBuffer not being safely serialized
+                if (value != null) {
+                    result = ((ByteBuffer) value).array();
+                }
+                break;
+            case INT:
+            case LONG:
+            case FLOAT:
+            case DOUBLE:
+            case BOOLEAN:
+                result = value;
+                break;
+            case STRING:
+                if (storeType == DocumentFieldType.OBJECTID) {
+                    if (value != null) {
+                        ObjectId id;
+                        try {
+                            id = new ObjectId(value.toString());
+                        } catch (IllegalArgumentException e1) {
+                            // Unable to parse anything from Utf8 value, throw error
+                            throw new IllegalStateException("Field " + fieldSchema.getType()
+                                    + ": Invalid string: unable to convert to ObjectId");
+                        }
+                        result = id;
+                    }
+                } else if (storeType == DocumentFieldType.DATE) {
+                    if (value != null) {
+                        // Try to parse date from Utf8 value
+                        Calendar calendar = null;
+                        try {
+                            // Parse as date + time
+                            calendar = DatatypeConverter.parseDateTime(value.toString());
+                        } catch (IllegalArgumentException e1) {
+                            try {
+                                // Parse as date only
+                                calendar = DatatypeConverter.parseDate(value.toString());
+                            } catch (IllegalArgumentException e2) {
+                                // No-op
+                            }
+                        }
+                        if (calendar == null) {
+                            // Unable to parse anything from Utf8 value, throw error
+                            throw new IllegalStateException("Field " + fieldSchema.getType()
+                                    + ": Invalid date format '" + value + "'");
+                        }
+                        result = calendar.getTime();
+                    }
+                } else {
+                    // Beware of Utf8 not being safely serialized
+                    if (value != null) {
+                        result = value.toString();
+                    }
+                }
+                break;
+            case ENUM:
+                // Beware of Utf8 not being safely serialized
+                if (value != null)
+                    result = value.toString();
+                break;
+            case RECORD:
+                if (value == null)
+                    break;
+                BasicDBObject record = new BasicDBObject();
+                for (Field member : fieldSchema.getFields()) {
+                    Object innerValue = ((PersistentBase) value).get(member.pos());
+                    String innerDoc = mapping.getDocumentField(member.name());
+                    Type innerType = member.schema().getType();
+                    DocumentFieldType innerStoreType = mapping.getDocumentFieldType(innerDoc);
+                    record.put(member.name(), toDBObject(member.schema(), innerType, innerStoreType, innerValue));
+                }
+                result = record;
+                break;
+            case UNION:
+                // schema [type0, type1]
+                Type type0 = fieldSchema.getTypes().get(0).getType();
+                Type type1 = fieldSchema.getTypes().get(1).getType();
+
+                // Check if types are different and there's a "null", like ["null","type"] or ["type","null"]
+                if (!type0.equals(type1)
+                        && (type0.equals(Schema.Type.NULL)
+                        || type1.equals(Schema.Type.NULL))) {
+                    Schema innerSchema = fieldSchema.getTypes().get(1);
+                    DocumentFieldType innerStoreType = mapping.getDocumentFieldType(innerSchema.getName());
+                    result = toDBObject(innerSchema, type1, innerStoreType, value); // Deserialize as if schema was ["type"]
+                }
+                break;
+            case FIXED:
+                result = value;
+                break;
+
+            default:
+                LOG.error("Unknown field type: " + fieldSchema.getType());
+                break;
+        }
+
+        return result;
+    }
+
+    /**
    * Put a key/value pair in a {@link BSONDecorator} as a valid Mongo object
    * that will be safely serialized in base.
    * 
@@ -1005,6 +946,10 @@ public class MongoStore<K, T extends PersistentBase> extends
       if (value != null)
         easybson.put(key, value.toString());
       break;
+    case LONG:
+    case INT:
+        easybson.put(key, value);
+        break;
     case RECORD:
       if (value == null)
         break;
@@ -1024,6 +969,10 @@ public class MongoStore<K, T extends PersistentBase> extends
               toMongoList((GenericArray<?>) recValue, member.schema()
                   .getElementType().getType()));
           break;
+        case LONG:
+        case INT:
+            easybson.put(key, value);
+            break;
         case STRING:
           if (recValue != null)
             record.put(member.name(), recValue.toString());
@@ -1033,18 +982,23 @@ public class MongoStore<K, T extends PersistentBase> extends
             record.put(member.name(), ((ByteBuffer) recValue).array());
           break;
         case RECORD:
-          // COME ON!
-          throw new IllegalStateException("A record in a record! "
-              + "Seriously? Fuck it, it's not supported yet.");
+          LOG.error("A record in a record! Seriously? Fuck it, it's not supported yet.");
+          break;
+        case UNION:
+          LOG.error("Union is not supported");
+          break;
         default:
-          record.put(member.name(), recValue);
+          LOG.error("Unknown field type: " + member.schema().getType());
           break;
         }
       }
       easybson.put(key, record);
       break;
+    case UNION:
+      LOG.error("Union is not supported");
+      break;
     default:
-      easybson.put(key, value);
+      LOG.error("Unknown field type: " + field.schema().getType());
       break;
     }
   }
