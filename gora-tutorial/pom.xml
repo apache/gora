@@ -111,7 +111,7 @@
             <artifactId>gora-cassandra</artifactId>
         </dependency>
 
-        <dependency>
+        <!--dependency>
             <groupId>org.apache.gora</groupId>
             <artifactId>gora-sql</artifactId>
         </dependency>
@@ -119,10 +119,10 @@
         <dependency>
             <groupId>org.apache.gora</groupId>
             <artifactId>gora-solr</artifactId>
-        </dependency>
+        </dependency-->
 
-		<!-- Hadoop Dependencies -->
-		<dependency>
+	<!-- Hadoop Dependencies -->
+	<dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-core</artifactId>
         </dependency>
@@ -160,7 +160,7 @@
             </exclusions>
         </dependency>
 		
-        <dependency>
+        <!--dependency>
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
         </dependency>
@@ -168,7 +168,7 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-        </dependency>
+        </dependency-->
     </dependencies>
 
 </project>

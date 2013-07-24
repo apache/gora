@@ -575,7 +575,7 @@
         <module>gora-hbase</module>
         <module>gora-accumulo</module>
         <module>gora-cassandra</module>
-        <module>gora-solr</module>
+        <!-- module>gora-solr</module-->
         <module>gora-dynamodb</module>
         <!--module>gora-sql</module-->
         <module>gora-tutorial</module>
@@ -611,7 +611,7 @@
         <restlet.version>2.1.1</restlet.version>
 
         <!-- Misc Dependencies -->
-        <guava.version>14.0.1</guava.version>
+        <guava.version>10.0.1</guava.version>
         <commons-lang.version>2.6</commons-lang.version>
         <jdom.version>1.1.2</jdom.version>
         <hsqldb.version>2.2.8</hsqldb.version>
@@ -667,7 +667,7 @@
             <type>test-jar</type>
           </dependency>
           
-          <dependency>
+          <!--dependency>
             <groupId>org.apache.gora</groupId>
             <artifactId>gora-solr</artifactId>
             <version>${project.version}</version>
@@ -677,7 +677,7 @@
             <artifactId>gora-solr</artifactId>
             <version>${project.version}</version>
             <classifier>tests</classifier>
-          </dependency>
+          </dependency-->
 
           <dependency>
             <groupId>org.apache.gora</groupId>
@@ -842,7 +842,7 @@
             </dependency>
 
             <!-- Solr Dependencies -->
-            <dependency>
+            <!--dependency>
               <groupId>org.apache.solr</groupId>
               <artifactId>solr-core</artifactId>
               <version>${lucene-solr.version}</version>
@@ -1131,7 +1131,7 @@
               <groupId>com.carrotsearch.randomizedtesting</groupId>
               <artifactId>randomizedtesting-runner</artifactId>
               <version>2.0.10</version>
-            </dependency>
+            </dependency-->
               
             <!-- Amazon Dependencies -->
             <dependency>
@@ -1169,7 +1169,7 @@
                 </exclusions>
             </dependency>
 
-            <dependency>
+            <!--dependency>
                 <groupId>org.hsqldb</groupId>
                 <artifactId>hsqldb</artifactId>
                 <version>${hsqldb.version}</version>
@@ -1179,7 +1179,7 @@
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
                 <version>${mysql.version}</version>
-            </dependency>
+            </dependency-->
 
             <dependency>
                 <groupId>xerces</groupId>
