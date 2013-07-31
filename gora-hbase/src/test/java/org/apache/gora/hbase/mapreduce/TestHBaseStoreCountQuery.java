@@ -53,10 +53,4 @@ public class TestHBaseStoreCountQuery {
   public void testCountQuery() throws Exception {
     MapReduceTestUtils.testCountQuery(webPageStore, cluster.getConf());
   }
-
-  public static void main(String[] args) throws Exception {
-   TestHBaseStoreCountQuery test =  new TestHBaseStoreCountQuery();
-   test.setUp();
-   test.testCountQuery();
-  }
 }
