@@ -57,10 +57,5 @@ public class TestHBaseStoreWordCount {
   public void testWordCount() throws Exception {
     MapReduceTestUtils.testWordCount(cluster.getConf(), webPageStore, tokenStore);
   }
-  
-  public static void main(String[] args) throws Exception {
-   TestHBaseStoreWordCount test =  new TestHBaseStoreWordCount();
-   test.setUp();
-   test.testWordCount();
-  }
+
 }

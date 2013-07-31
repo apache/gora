@@ -383,25 +383,4 @@ public class TestDynamoDBStore extends WSDataStoreTestBase<DynamoDBKey, person> 
       log.info("\t" + place);
   }
 
-  public static void main(String[] args) throws Exception {
-    TestDynamoDBStore test = new TestDynamoDBStore();
-    try{
-      test.setPersistentKeyClass(DynamoDBKey.class);
-      test.setPersistentValClass(person.class);
-      TestDynamoDBStore.setUpClass();
-      test.setUp();
-      test.testPut();
-      /*test.testGet();
-      test.testQuery();
-      test.testUpdate();
-      test.testQueryKeyRange();
-      test.testDelete();
-      test.testDeleteByQuery(); */
-    }catch (Exception e){
-      log.error("Error while executing tests.");
-    }finally{
-      test.tearDown();
-      TestDynamoDBStore.tearDownClass();
-    }
-  }
 }

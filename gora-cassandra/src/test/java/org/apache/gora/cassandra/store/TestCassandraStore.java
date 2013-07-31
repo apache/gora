@@ -68,8 +68,7 @@ public class TestCassandraStore extends DataStoreTestBase{
   }
 
 
-// ============================================================================
-    //We need to skip the following tests for a while until we fix some issues..
+  //We need to skip the following tests for a while until we fix some issues..
 
   @Ignore("skipped until some bugs are fixed")
   @Override
@@ -113,15 +112,5 @@ public class TestCassandraStore extends DataStoreTestBase{
   @Ignore("skipped until some bugs are fixed")
   @Override
   public void testGet3UnionField() throws IOException {}
-// ============================================================================
 
-
-  public static void main(String[] args) throws Exception {
-    TestCassandraStore test = new TestCassandraStore();
-    setUpClass();
-    test.setUp();
-
-    test.tearDown();
-    tearDownClass();
-  }
 }

@@ -243,14 +243,4 @@ public class TestHBaseStore extends DataStoreTestBase {
    //TODO: We should raise an issue for HBase to allow us to specify if the endRow will be inclussive or exclusive.
   }
 
-  public static void main(String[] args) throws Exception {
-    TestHBaseStore test = new TestHBaseStore();
-    setUpClass();
-    test.setUp();
-
-    test.testQuery();
-
-    test.tearDown();
-    tearDownClass();
-  }
 }
