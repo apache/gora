@@ -533,6 +533,7 @@ public class MongoStore<K, T extends PersistentBase> extends
       Field field = fieldMap.get(f);
       Schema fieldSchema = field.schema();
 
+      LOG.debug("Load from DBObject (MAIN), field:{}, schemaType:{}, docField:{}, storeType:{}", new Object[]{field.name(), fieldSchema.getType(), docf, storeType});
       Object result = fromDBObject(fieldSchema, storeType, field, docf, easybson);
       persistent.put(field.pos(), result);
     }
@@ -593,6 +594,9 @@ public class MongoStore<K, T extends PersistentBase> extends
                 break;
             case RECORD:
                 DBObject rec = easybson.getDBObject(docf);
+                if (rec == null) {
+                    return result;
+                }
                 BSONDecorator innerBson = new BSONDecorator(rec);
                 Class<?> clazz = null;
                 try {
@@ -603,8 +607,10 @@ public class MongoStore<K, T extends PersistentBase> extends
                 for (Field recField : fieldSchema.getFields()) {
                     Schema innerSchema = recField.schema();
                     DocumentFieldType innerStoreType = mapping.getDocumentFieldType(innerSchema.getName());
-                    String recDocField = mapping.getDocumentField(recField.name()) != null ? mapping.getDocumentField(recField.name()) : recField.name();
-                    ((PersistentBase) record).put(recField.pos(), fromDBObject(innerSchema, innerStoreType, recField, recDocField, innerBson));
+                    String innerDocField = mapping.getDocumentField(recField.name()) != null ? mapping.getDocumentField(recField.name()) : recField.name();
+                    String fieldPath = docf + "." + innerDocField;
+                    LOG.debug("Load from DBObject (RECORD), field:{}, schemaType:{}, docField:{}, storeType:{}", new Object[]{recField.name(), innerSchema.getType(), fieldPath, innerStoreType});
+                    ((PersistentBase) record).put(recField.pos(), fromDBObject(innerSchema, innerStoreType, recField, innerDocField, innerBson));
                 }
                 result = record;
                 break;
@@ -666,6 +672,7 @@ public class MongoStore<K, T extends PersistentBase> extends
                         || type1.equals(Type.NULL))) {
                     Schema innerSchema = fieldSchema.getTypes().get(1);
                     DocumentFieldType innerStoreType = mapping.getDocumentFieldType(innerSchema.getName());
+                    LOG.debug("Load from DBObject (UNION), schemaType:{}, docField:{}, storeType:{}", new Object[]{innerSchema.getType(), docf, innerStoreType});
                     result = fromDBObject(innerSchema, innerStoreType, field, docf, easybson); // Deserialize as if schema was ["type"]
                 }
                 break;
@@ -743,6 +750,7 @@ public class MongoStore<K, T extends PersistentBase> extends
         String docf = mapping.getDocumentField(f.name());
         Object value = persistent.get(f.pos());
         DocumentFieldType storeType = mapping.getDocumentFieldType(docf);
+        LOG.debug("Transform value to DBObject (MAIN), docField:{}, schemaType:{}, storeType:{}", new Object[]{docf, f.schema().getType(), storeType});
         result.put(docf, toDBObject(f.schema(), f.schema().getType(), storeType, value));
       }
     }
@@ -777,6 +785,7 @@ public class MongoStore<K, T extends PersistentBase> extends
         String docf = mapping.getDocumentField(f.name());
         Object value = persistent.get(f.pos());
         DocumentFieldType storeType = mapping.getDocumentFieldType(docf);
+        LOG.debug("Transform value to DBObject (MAIN), docField:{}, schemaType:{}, storeType:{}", new Object[]{docf, f.schema().getType(), storeType});
         Object o = toDBObject(f.schema(), f.schema().getType(), storeType, value);
         result.put(docf, o);
       }
@@ -876,6 +885,7 @@ public class MongoStore<K, T extends PersistentBase> extends
                     String innerDoc = mapping.getDocumentField(member.name());
                     Type innerType = member.schema().getType();
                     DocumentFieldType innerStoreType = mapping.getDocumentFieldType(innerDoc);
+                    LOG.debug("Transform value to DBObject (RECORD), docField:{}, schemaType:{}, storeType:{}", new Object[]{member.name(), member.schema().getType(), innerStoreType});
                     record.put(member.name(), toDBObject(member.schema(), innerType, innerStoreType, innerValue));
                 }
                 result = record;
@@ -891,6 +901,7 @@ public class MongoStore<K, T extends PersistentBase> extends
                         || type1.equals(Schema.Type.NULL))) {
                     Schema innerSchema = fieldSchema.getTypes().get(1);
                     DocumentFieldType innerStoreType = mapping.getDocumentFieldType(innerSchema.getName());
+                    LOG.debug("Transform value to DBObject (UNION), schemaType:{}, type1:{}, storeType:{}", new Object[]{innerSchema.getType(), type1, innerStoreType});
                     result = toDBObject(innerSchema, type1, innerStoreType, value); // Deserialize as if schema was ["type"]
                 }
                 break;
