@@ -586,7 +586,7 @@
         <!-- Dependencies -->
         <osgi.version>4.2.0</osgi.version>
         <!-- Avro Dependencies -->
-        <jackson.version>1.4.2</jackson.version>
+        <jackson.version>1.6.9</jackson.version>
         <!-- Hadoop Dependencies -->
         <hadoop.version>1.0.1</hadoop.version>
         <hadoop.test.version>1.0.1</hadoop.test.version>
