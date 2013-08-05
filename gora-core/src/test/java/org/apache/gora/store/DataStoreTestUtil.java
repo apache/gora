@@ -821,6 +821,77 @@ public class DataStoreTestUtil {
 
   }
 
+
+  public static void testPutNested(DataStore<String, WebPage> store)
+          throws IOException, Exception {
+    String revUrl = "foo.com:http/";
+    String url = "http://foo.com/";
+
+    store.createSchema();
+    WebPage page = store.newPersistent();
+    Metadata metadata = new Metadata();
+    metadata.setVersion(1);
+    metadata.putToData(new Utf8("foo"), new Utf8("baz"));
+
+    page.setMetadata(metadata);
+    page.setUrl(new Utf8(url));
+
+    store.put(revUrl, page);
+    store.flush();
+
+    page = store.get(revUrl);
+    metadata = page.getMetadata();
+    assertNotNull(metadata);
+    assertEquals(1, metadata.getVersion());
+    assertEquals(new Utf8("baz"), metadata.getData().get(new Utf8("foo")));
+  }
+
+  public static void testPutArray(DataStore<String, WebPage> store)
+          throws IOException, Exception {
+    store.createSchema();
+    WebPage page = store.newPersistent();
+
+    String[] tokens = {"example", "content", "in", "example.com"};
+
+    for(String token: tokens) {
+      page.addToParsedContent(new Utf8(token));
+    }
+
+    store.put("com.example/http", page);
+    store.close();
+  }
+
+  public static byte[] testPutBytes(DataStore<String, WebPage> store)
+          throws IOException, Exception {
+
+    store.createSchema();
+    WebPage page = store.newPersistent();
+    page.setUrl(new Utf8("http://example.com"));
+    byte[] contentBytes = "example content in example.com".getBytes();
+    ByteBuffer buff = ByteBuffer.wrap(contentBytes);
+    page.setContent(buff);
+
+    store.put("com.example/http", page);
+    store.close();
+
+    return contentBytes;
+  }
+
+  public static void testPutMap(DataStore<String, WebPage> store)
+          throws IOException, Exception {
+
+    store.createSchema();
+
+    WebPage page = store.newPersistent();
+
+    page.setUrl(new Utf8("http://example.com"));
+    page.putToOutlinks(new Utf8("http://example2.com"), new Utf8("anchor2"));
+    page.putToOutlinks(new Utf8("http://example3.com"), new Utf8("anchor3"));
+    page.putToOutlinks(new Utf8("http://example3.com"), new Utf8("anchor4"));
+    store.put("com.example/http", page);
+    store.close();
+  }
+
   private static byte[] toByteArray(ByteBuffer buffer) {
     int p = buffer.position();
     int n = buffer.limit() - p;
