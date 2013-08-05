@@ -179,44 +179,13 @@ public abstract class DataStoreTestBase {
   @Test
   public void testPutNested() throws IOException, Exception {
     log.info("test method: testPutNested");
-
-    String revUrl = "foo.com:http/";
-    String url = "http://foo.com/";
-
-    webPageStore.createSchema();
-    WebPage page = webPageStore.newPersistent();
-    Metadata metadata = new Metadata();
-    metadata.setVersion(1);
-    metadata.putToData(new Utf8("foo"), new Utf8("baz"));
-
-    page.setMetadata(metadata);
-    page.setUrl(new Utf8(url));
-
-    webPageStore.put(revUrl, page);
-    webPageStore.flush();
-
-    page = webPageStore.get(revUrl);
-    metadata = page.getMetadata();
-    assertNotNull(metadata);
-    assertEquals(1, metadata.getVersion());
-    assertEquals(new Utf8("baz"), metadata.getData().get(new Utf8("foo")));
+    DataStoreTestUtil.testPutNested(webPageStore);
   }
 
   @Test
   public void testPutArray() throws IOException, Exception {
     log.info("test method: testPutArray");
-    webPageStore.createSchema();
-    WebPage page = webPageStore.newPersistent();
-
-    String[] tokens = {"example", "content", "in", "example.com"};
-
-    for(String token: tokens) {
-      page.addToParsedContent(new Utf8(token));
-    }
-
-    webPageStore.put("com.example/http", page);
-    webPageStore.close();
-
+    DataStoreTestUtil.testPutArray(webPageStore);
     assertPutArray();
   }
 
@@ -226,16 +195,7 @@ public abstract class DataStoreTestBase {
   @Test
   public void testPutBytes() throws IOException, Exception {
     log.info("test method: testPutBytes");
-    webPageStore.createSchema();
-    WebPage page = webPageStore.newPersistent();
-    page.setUrl(new Utf8("http://example.com"));
-    byte[] contentBytes = "example content in example.com".getBytes();
-    ByteBuffer buff = ByteBuffer.wrap(contentBytes);
-    page.setContent(buff);
-
-    webPageStore.put("com.example/http", page);
-    webPageStore.close();
-
+    byte[] contentBytes = DataStoreTestUtil.testPutBytes(webPageStore);
     assertPutBytes(contentBytes);
   }
 
@@ -245,17 +205,7 @@ public abstract class DataStoreTestBase {
   @Test
   public void testPutMap() throws IOException, Exception {
     log.info("test method: testPutMap");
-    webPageStore.createSchema();
-
-    WebPage page = webPageStore.newPersistent();
-
-    page.setUrl(new Utf8("http://example.com"));
-    page.putToOutlinks(new Utf8("http://example2.com"), new Utf8("anchor2"));
-    page.putToOutlinks(new Utf8("http://example3.com"), new Utf8("anchor3"));
-    page.putToOutlinks(new Utf8("http://example3.com"), new Utf8("anchor4"));
-    webPageStore.put("com.example/http", page);
-    webPageStore.close();
-
+    DataStoreTestUtil.testPutMap(webPageStore);
     assertPutMap();
   }
 
