@@ -491,7 +491,9 @@ public class MongoStore<K, T extends PersistentBase> extends
     // FIXME: for now, there is only one partition as we do not handle
     // MongoDB sharding configuration
     List<PartitionQuery<K, T>> partitions = new ArrayList<PartitionQuery<K, T>>();
-    partitions.add(new PartitionQueryImpl<K, T>(query));
+    PartitionQueryImpl<K, T> partitionQuery = new PartitionQueryImpl<K, T>(query);
+    partitionQuery.setConf(getConf());
+    partitions.add(partitionQuery);
     return partitions;
   }
 
