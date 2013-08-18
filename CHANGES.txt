@@ -4,6 +4,8 @@
 
 Gora Change Log
 
+* GORA-264 Make generated data beans more java doc friendly (Apostolos Giannakidis via lewismc)
+
 * GORA-222 upgrade jackson version to 1.6.9 (rherget via lewismc)
 
 * GORA-232 DataStoreTestBase should delegate all functionality to DataStoreTestUtil (Apostolos Giannakidis via lewismc)
