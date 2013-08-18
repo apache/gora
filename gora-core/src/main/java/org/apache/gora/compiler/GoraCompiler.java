@@ -217,8 +217,6 @@ public class GoraCompiler {
           ? (s.getNamespace() != null)
           : !namespace.equals(s.getNamespace()))
         line(0, "import "+SpecificData.get().getClassName(s)+";");
-    line(0, "");
-    line(0, "@SuppressWarnings(\"all\")");
   }
 
   private String params(Schema request) throws IOException {
@@ -232,6 +230,36 @@ public class GoraCompiler {
         b.append(", ");
     }
     return b.toString();
+  }
+
+  /**
+   * Method that adds javadoc to the generated data beans.
+   * @param indent  Specifies the indentation for the javadoc
+   * @param javadoc The javadoc to be added. Use \n to span the javadoc
+   *                to multiple lines.
+   * @throws IOException
+   */
+  private void addJavaDoc(int indent, String javadoc) throws IOException {
+
+    if (javadoc==null)
+      return;
+
+    if (indent<0)
+      return;
+
+    line(indent, "");
+    line(indent, "/**");
+
+    if (javadoc.contains("\n")){
+      String javadocLines[] = javadoc.split("\n");
+
+      for(String line : javadocLines)
+        line(indent, " * "+line);
+    }
+    else
+      line(indent," * "+javadoc);
+
+    line(indent, " */");
   }
 
   private String errors(Schema errs) throws IOException {
@@ -248,28 +276,51 @@ public class GoraCompiler {
     try {
       switch (schema.getType()) {
       case RECORD:
+        addJavaDoc(0,schema.getDoc());
+        line(0, "@SuppressWarnings(\"all\")");
         String type = type(schema);
         line(0, "public class "+ type
              +" extends PersistentBase {");
+
         // schema definition
+        addJavaDoc(1,"Variable holding the data bean schema.");
         line(1, "public static final Schema _SCHEMA = Schema.parse(\""
              +esc(schema)+"\");");
 
         //field information
+        addJavaDoc(1,"Enum containing all data bean's fields.");
         line(1, "public static enum Field {");
         int i=0;
         for (Field field : schema.getFields()) {
           line(2,toUpperCase(field.name())+"("+(i++)+ ",\"" + field.name() + "\"),");
         }
         line(2, ";");
+
+        addJavaDoc(2,"Field's index.");
         line(2, "private int index;");
+
+        addJavaDoc(2,"Field's name.");
         line(2, "private String name;");
+
+        addJavaDoc(2,"Field's constructor\n"+
+                     "@param index field's index.\n"+
+                     "@param name field's name.");
         line(2, "Field(int index, String name) {this.index=index;this.name=name;}");
+
+        addJavaDoc(2,"Gets field's index.\n"+
+                     "@return int field's index.");
         line(2, "public int getIndex() {return index;}");
+
+        addJavaDoc(2,"Gets field's name.\n"+
+                "@return String field's name.");
         line(2, "public String getName() {return name;}");
+
+        addJavaDoc(2,"Gets field's attributes to string.\n"+
+                "@return String field's attributes to string.");
         line(2, "public String toString() {return name;}");
         line(1, "};");
 
+        addJavaDoc(2,"Contains all field's names.");
         StringBuilder builder = new StringBuilder(
         "public static final String[] _ALL_FIELDS = {");
         for (Field field : schema.getFields()) {
@@ -284,13 +335,17 @@ public class GoraCompiler {
 
         // field declations
         for (Field field : schema.getFields()) {
+          addJavaDoc(1,field.doc());
           line(1,"private "+unbox(field.schema())+" "+field.name()+";");
         }
 
         //constructors
+        addJavaDoc(1,"Default Constructor");
         line(1, "public " + type + "() {");
         line(2, "this(new StateManagerImpl());");
         line(1, "}");
+
+        addJavaDoc(1,"Constructor\n@param stateManager for the data bean.");
         line(1, "public " + type + "(StateManager stateManager) {");
         line(2, "super(stateManager);");
         for (Field field : schema.getFields()) {
@@ -309,13 +364,22 @@ public class GoraCompiler {
         line(1, "}");
 
         //newInstance(StateManager)
+        addJavaDoc(1,"Returns a new instance by using a state manager.\n"+
+                     "@param stateManager for the data bean.\n"+
+                     "@return "+schema.getName()+" created.");
         line(1, "public " + type + " newInstance(StateManager stateManager) {");
         line(2, "return new " + type + "(stateManager);" );
         line(1, "}");
 
         // schema method
+        addJavaDoc(1,"Returns the schema of the data bean.\n"+
+                     "@return Schema for the data bean.");
         line(1, "public Schema getSchema() { return _SCHEMA; }");
+
         // get method
+        addJavaDoc(1,"Gets a specific field.\n"+
+                     "@param field index of a field for the data bean.\n"+
+                     "@return Object representing a data bean's field.");
         line(1, "public Object get(int _field) {");
         line(2, "switch (_field) {");
         i = 0;
@@ -325,7 +389,11 @@ public class GoraCompiler {
         line(2, "default: throw new AvroRuntimeException(\"Bad index\");");
         line(2, "}");
         line(1, "}");
+
         // put method
+        addJavaDoc(1,"Puts a value for a specific field.\n"+
+                     "@param field index of a field for the data bean.\n"+
+                     "@param value value of a field for the data bean.");
         line(1, "@SuppressWarnings(value=\"unchecked\")");
         line(1, "public void put(int _field, Object _value) {");
         line(2, "if(isFieldEqual(_field, _value)) return;");
@@ -352,9 +420,14 @@ public class GoraCompiler {
           case FIXED:
             String unboxed = unbox(fieldSchema);
             String fieldType = type(fieldSchema);
+            addJavaDoc(1,"Gets the "+camelKey+".\n"+
+                         "@return "+unboxed+" representing "+schema.getName()+" "+camelKey+".");
             line(1, "public "+unboxed+" get" +camelKey+"() {");
             line(2, "return ("+fieldType+") get("+i+");");
             line(1, "}");
+
+            addJavaDoc(1,"Sets the "+camelKey+".\n"+
+                         "@param value containing "+schema.getName()+" "+camelKey+".");
             line(1, "public void set"+camelKey+"("+unboxed+" value) {");
             line(2, "put("+i+", value);");
             line(1, "}");
@@ -362,9 +435,15 @@ public class GoraCompiler {
           case ARRAY:
             unboxed = unbox(fieldSchema.getElementType());
             fieldType = type(fieldSchema.getElementType());
+
+            addJavaDoc(1,"Gets the "+camelKey+" array.\n"+
+                    "@return GenericArray<"+fieldType+"> containing "+fieldType+" elements.");
             line(1, "public GenericArray<"+fieldType+"> get"+camelKey+"() {");
             line(2, "return (GenericArray<"+fieldType+">) get("+i+");");
             line(1, "}");
+
+            addJavaDoc(1,"Adds a "+unboxed+" element into the array.\n"+
+                    "@param the "+unboxed+" element to be added.");
             line(1, "public void addTo"+camelKey+"("+unboxed+" element) {");
             line(2, "getStateManager().setDirty(this, "+i+");");
             line(2, field.name()+".add(element);");
@@ -373,17 +452,30 @@ public class GoraCompiler {
           case MAP:
             unboxed = unbox(fieldSchema.getValueType());
             fieldType = type(fieldSchema.getValueType());
+
+            addJavaDoc(1,"Gets "+camelKey+".\n"+
+                    "@return Map containing "+camelKey+" value.");
             line(1, "public Map<Utf8, "+fieldType+"> get"+camelKey+"() {");
             line(2, "return (Map<Utf8, "+fieldType+">) get("+i+");");
             line(1, "}");
+
+            addJavaDoc(1,"Gets the "+camelKey+"'s value using a key.\n"+
+                    "@param key gets a specific "+camelKey+" using a "+schema.getName()+"ID.\n"+
+                    "@return "+fieldType+" containing "+camelKey+" value.");
             line(1, "public "+fieldType+" getFrom"+camelKey+"(Utf8 key) {");
             line(2, "if ("+field.name()+" == null) { return null; }");
             line(2, "return "+field.name()+".get(key);");
             line(1, "}");
+
+            addJavaDoc(1,"Adds a "+camelKey+" into a "+schema.getName()+".\n"+
+                    "@param Map containing "+camelKey+" value.");
             line(1, "public void putTo"+camelKey+"(Utf8 key, "+unboxed+" value) {");
             line(2, "getStateManager().setDirty(this, "+i+");");
             line(2, field.name()+".put(key, value);");
             line(1, "}");
+
+            addJavaDoc(1,"Removes "+camelKey+" from a "+schema.getName()+".\n"+
+                    "@return key "+schema.getName()+" ID to be removed.");
             line(1, "public "+fieldType+" removeFrom"+camelKey+"(Utf8 key) {");
             line(2, "if ("+field.name()+" == null) { return null; }");
             line(2, "getStateManager().setDirty(this, "+i+");");
@@ -392,7 +484,10 @@ public class GoraCompiler {
             break;
           case UNION:
             fieldType = type(fieldSchema);
+
             //Create get method: public <unbox(field.schema())> get<camelKey>()
+            addJavaDoc(1,"Gets "+camelKey+".\n"+
+                    "@return the "+unbox(field.schema())+" value.");
             line(1, "public "+unbox(field.schema())+" get" +camelKey+"() {");
             line(2, "return ("+unbox(field.schema())+") get("+i+");");
             line(1, "}");
@@ -401,6 +496,9 @@ public class GoraCompiler {
             for (Schema s : fieldSchema.getTypes()) {
               if (s.getType().equals(Schema.Type.NULL)) continue ;
               String unionFieldType = type(s);
+
+              addJavaDoc(1,"Sets the "+camelKey+".\n"+
+                      "@param the "+camelKey+" value to be set.");
               line(1, "public void set"+camelKey+"("+unionFieldType+" value) {");
               line(2, "put("+i+", value);");
               line(1, "}");
