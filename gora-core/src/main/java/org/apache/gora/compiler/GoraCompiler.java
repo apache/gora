@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Arrays;
 
 import org.apache.avro.Protocol;
 import org.apache.avro.Schema;
@@ -48,7 +49,7 @@ public class GoraCompiler {
   private Set<Schema> queue = new HashSet<Schema>();
   private static final Logger log = LoggerFactory.getLogger(GoraCompiler.class);
   private static LicenseHeaders licenseHeader = new LicenseHeaders(null);
-  private final static String SCHEMA_EXTENTION = ".avsc";
+  private final static String DEFAULT_SCHEMA_EXTENTION = ".avsc";
 
   private GoraCompiler(File dest) {
     this.dest = dest;                             // root directory for output
@@ -609,49 +610,91 @@ public class GoraCompiler {
       System.err.println("  <schema file>     - individual avsc file to be compiled or a directory path containing avsc files");
       System.err.println("  <output dir>      - output directory for generated Java files");
       System.err.println("  [-license <id>]   - the preferred license header to add to the\n" +
-                                           "\t\t      generated Java file. Current options include; \n" +
-                                              "\t\t  ASLv2   (Apache Software License v2.0) \n" +
-                                              "\t\t  AGPLv3  (GNU Affero General Public License)\n" +
-                                              "\t\t  CDDLv1  (Common Development and Distribution License v1.0)\n" +
-                                              "\t\t  FDLv13  (GNU Free Documentation License v1.3)\n" +
-                                              "\t\t  GPLv1   (GNU General Public License v1.0)\n" +
-                                              "\t\t  GPLv2   (GNU General Public License v2.0)\n" +
-                                              "\t\t  GPLv3   (GNU General Public License v3.0)\n " +
-                                              "\t\t  LGPLv21 (GNU Lesser General Public License v2.1)\n" +
-                                              "\t\t  LGPLv3  (GNU Lesser General Public License v3)\n") ;
+              "\t\t      generated Java file. Current options include; \n" +
+              "\t\t  ASLv2   (Apache Software License v2.0) \n" +
+              "\t\t  AGPLv3  (GNU Affero General Public License)\n" +
+              "\t\t  CDDLv1  (Common Development and Distribution License v1.0)\n" +
+              "\t\t  FDLv13  (GNU Free Documentation License v1.3)\n" +
+              "\t\t  GPLv1   (GNU General Public License v1.0)\n" +
+              "\t\t  GPLv2   (GNU General Public License v2.0)\n" +
+              "\t\t  GPLv3   (GNU General Public License v3.0)\n " +
+              "\t\t  LGPLv21 (GNU Lesser General Public License v2.1)\n" +
+              "\t\t  LGPLv3  (GNU Lesser General Public License v3)\n") ;
       System.exit(1);
     }
-    File inputFile = new File(args[0]);
-    File output = new File(args[1]);
-    if(!inputFile.exists() || !output.exists()){
-    	System.err.println("input file path or output file path doesn't exists.");
-    	System.exit(1);
-    }
+
+    SimpleDateFormat sdf;
+    File inputFile;
+    File output;
+    long start;
+
     for (int i = 1; i < args.length; i++) {
       licenseHeader.setLicenseName("ASLv2");
       if ("-license".equals(args[i])) {
         licenseHeader.setLicenseName(args[++i]);
-      } 
+      }
     }
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    long start = System.currentTimeMillis();
-    log.info("GoraCompiler: starting at " + sdf.format(start));
-    if(inputFile.isDirectory()) {
-    	ArrayList<File> inputSchemas = new ArrayList<File>();
-    	File[] listOfFiles= inputFile.listFiles();
-    	for (File file : listOfFiles) {
-    	    if (file.isFile() && file.exists() && file.getName().endsWith(SCHEMA_EXTENTION)) {
-    	    	inputSchemas.add(file);
-    	    }
-    	}
-    compileSchema(inputSchemas.toArray(new File[inputSchemas.size()]), output);
+
+    if (args.length==2){ //case of single file or single directory
+      inputFile = new File(args[0]);
+      output = new File(args[1]);
+
+      if(!inputFile.exists() || !output.exists()){
+        log.error("input file path or output file path doesn't exist.");
+        System.exit(1);
+      }
+
+      sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+      start = System.currentTimeMillis();
+      log.info("GoraCompiler: starting at " + sdf.format(start));
+      if(inputFile.isDirectory()) {
+        ArrayList<File> inputSchemas = new ArrayList<File>();
+        File[] listOfFiles= inputFile.listFiles();
+
+        if ( (listOfFiles!=null) && (listOfFiles.length>0)){
+          for (File file : listOfFiles) {
+            if (file.isFile() && file.exists() && file.getName().endsWith(DEFAULT_SCHEMA_EXTENTION)) {
+              inputSchemas.add(file);
+            }
+          }
+
+          compileSchema(inputSchemas.toArray(new File[inputSchemas.size()]), output);
+        }
+        else{
+          log.info("Path contains no files. Nothing to compile.");
+        }
+      }
+      else if (inputFile.isFile()) {
+        compileSchema(inputFile, output);
+      }
     }
-    else if (inputFile.isFile()) {
-    	compileSchema(inputFile, output);	
+    else{ //case of dynamic filename extension (such as *.* or *.json)
+      List<String> files = new ArrayList<String>(Arrays.asList(args));
+      output = new File(files.get(files.size()-1));
+      files.remove(files.size()-1); //remove the last one, as this is the output directory
+
+      if(!output.exists()){
+        log.error("output path doesn't exist");
+        System.exit(1);
+      }
+
+      sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+      start = System.currentTimeMillis();
+      log.info("GoraCompiler: starting at " + sdf.format(start));
+
+      for(String filename : files){ //loop for all the retrieved files
+        inputFile = new File(filename);
+        if(!inputFile.exists()){
+          log.error("input file: "+filename+" doesn't exist.");
+          continue; //in case the file does not exist, continue to the next file
+        }
+
+        compileSchema(inputFile, output);
+      }
     }
+
     long end = System.currentTimeMillis();
     log.info("GoraCompiler: finished at " + sdf.format(end) + ", elapsed: " + TimingUtil.elapsedTime(start, end));
-    return;
   }
 
 }
