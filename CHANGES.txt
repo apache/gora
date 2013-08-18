@@ -4,6 +4,8 @@
 
 Gora Change Log
 
+* GORA-268 Make GoraCompiler the main manifest attribute in gora-core (Apostolos Giannakidis via lewismc)
+
 * GORA-265 Support for dynamic file extensions when traversing a directory (Apostolos Giannakidis via lewismc)
 
 * GORA-264 Make generated data beans more java doc friendly (Apostolos Giannakidis via lewismc)
