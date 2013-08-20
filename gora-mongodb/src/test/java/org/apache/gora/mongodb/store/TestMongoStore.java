@@ -23,6 +23,7 @@ import org.apache.gora.mongodb.GoraMongodbTestDriver;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.DataStoreTestBase;
+import org.apache.gora.store.DataStoreTestUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Before;
 
@@ -60,7 +61,12 @@ public class TestMongoStore extends DataStoreTestBase {
 
   @Override
   public void testDeleteByQueryFields() throws IOException {
-      // Skip until GORA-66 is fixed
+      // Skip until GORA-66 is fixed: need better semantic for end/start keys
+  }
+
+  @Override
+  public void testQueryKeyRange() throws IOException, Exception {
+      // Skip until GORA-66 is fixed: need better semantic for end/start keys
   }
   
   public static void main (String[] args) throws Exception {
