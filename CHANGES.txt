@@ -4,6 +4,22 @@
 
 Gora Change Log
 
+* GORA-268 Make GoraCompiler the main manifest attribute in gora-core (Apostolos Giannakidis via lewismc)
+
+* GORA-265 Support for dynamic file extensions when traversing a directory (Apostolos Giannakidis via lewismc)
+
+* GORA-264 Make generated data beans more java doc friendly (Apostolos Giannakidis via lewismc)
+
+* GORA-222 upgrade jackson version to 1.6.9 (rherget via lewismc)
+
+* GORA-232 DataStoreTestBase should delegate all functionality to DataStoreTestUtil (Apostolos Giannakidis via lewismc)
+
+* GORA-259 Removal of the main methods from the test case classes (Apostolos via hsaputra)
+
+* GORA-229 Use @Ignore for unimplemented functionality to identify absent tests (Apostolos Giannakidis via lewismc)
+
+* GORA-258 writeCapacUnits gets value from wrong attribute (Apostolos Giannakidis via lewismc)
+
 * GORA-256 Add Solr store to gora-tutorial (Scott Stults via lewismc)
 
 * GORA-9 Implement a Solr-based store (ab, lewismc, Scott Stults)

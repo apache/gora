@@ -17,7 +17,7 @@
 package org.apache.gora.accumulo.util;
 
 import org.apache.gora.accumulo.encoders.HexEncoder;
-import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 /**
@@ -29,12 +29,12 @@ public class HexEncoderTest {
   public void testByte() {
     HexEncoder encoder = new HexEncoder();
     
-    Assert.assertEquals("12", new String(encoder.encodeByte((byte) 0x12)));
-    Assert.assertEquals("f2", new String(encoder.encodeByte((byte) 0xf2)));
+    assertEquals("12", new String(encoder.encodeByte((byte) 0x12)));
+    assertEquals("f2", new String(encoder.encodeByte((byte) 0xf2)));
     
     byte b = Byte.MIN_VALUE;
     while (b != Byte.MAX_VALUE) {
-      Assert.assertEquals(b, encoder.decodeByte(encoder.encodeByte(b)));
+      assertEquals(b, encoder.decodeByte(encoder.encodeByte(b)));
       b++;
     }
   }
@@ -43,12 +43,12 @@ public class HexEncoderTest {
   public void testShort() {
     HexEncoder encoder = new HexEncoder();
     
-    Assert.assertEquals("1234", new String(encoder.encodeShort((short) 0x1234)));
-    Assert.assertEquals("f234", new String(encoder.encodeShort((short) 0xf234)));
+    assertEquals("1234", new String(encoder.encodeShort((short) 0x1234)));
+    assertEquals("f234", new String(encoder.encodeShort((short) 0xf234)));
     
     short s = Short.MIN_VALUE;
     while (s != Short.MAX_VALUE) {
-      Assert.assertEquals(s, encoder.decodeShort(encoder.encodeShort(s)));
+      assertEquals(s, encoder.decodeShort(encoder.encodeShort(s)));
       s++;
     }
   }

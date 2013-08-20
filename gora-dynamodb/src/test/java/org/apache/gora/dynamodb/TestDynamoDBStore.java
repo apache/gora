@@ -21,7 +21,8 @@ package org.apache.gora.dynamodb;
 import java.io.IOException;
 import java.util.HashSet;
 
-import junit.framework.Assert;
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.assertFalse;
 
 import org.apache.gora.dynamodb.query.DynamoDBKey;
 import org.apache.gora.dynamodb.query.DynamoDBQuery;
@@ -30,10 +31,7 @@ import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.WSDataStoreTestBase;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,74 +48,87 @@ public class TestDynamoDBStore extends WSDataStoreTestBase<DynamoDBKey, person> 
   static {
     setTestDriver(new GoraDynamoDBTestDriver());
   }
-  
+
   @Before
   public void setUp() throws Exception {
     setPersistentKeyClass(DynamoDBKey.class);
     setPersistentValClass(person.class);
     super.setUp();
   }
-  
+
   public GoraDynamoDBTestDriver getTestDriver() {
     return (GoraDynamoDBTestDriver) testDriver;
   }
-  
+
 //============================================================================
-  //We need to skip the following tests for a while until we fix some issues..
+    //We need to skip the following tests for a while until we fix some issues..
+  @Ignore("Needs to be skipped for a while until some issues are fixed")
   @Override
   public void testQueryStartKey() throws IOException {
     log.info("test method: TestQueryStartKey SKIPPED.");
   }
+  @Ignore("Needs to be skipped for a while until some issues are fixed")
   @Override
   public void testQueryEndKey() throws IOException {
     log.info("test method: TestQueryEndKey SKIPPED.");
   }
+  @Ignore("Needs to be skipped for a while until some issues are fixed")
   @Override
   public void testDeleteByQueryFields() throws IOException {
     log.info("test method: TestDeleteByQueryFields SKIPPED.");
   }
+  @Ignore("Needs to be skipped for a while until some issues are fixed")
   @Override
   public void testNewInstance() throws IOException, Exception {
     log.info("test method: TestNewInstance SKIPPED.");
-  } 
+  }
+  @Ignore("Needs to be skipped for a while until some issues are fixed")
   @Override
   public void testAutoCreateSchema() throws Exception {
     log.info("test method: TestAutoCreateSchema SKIPPED.");
   }
+  @Ignore("Needs to be skipped for a while until some issues are fixed")
   @Override
   public void testTruncateSchema() throws Exception {
     log.info("test method: TestTruncateSchema SKIPPED.");
   }
+  @Ignore("Needs to be skipped for a while until some issues are fixed")
   @Override
   public void testPutNested() throws IOException, Exception {
     log.info("test method: TestPutNested SKIPPED.");
   }
+  @Ignore("Needs to be skipped for a while until some issues are fixed")
   @Override
   public void testPutArray() throws IOException, Exception {
     log.info("test method: TestPutArray SKIPPED.");
   }
+  @Ignore("Needs to be skipped for a while until some issues are fixed")
   @Override
   public void testPutBytes() throws IOException, Exception {
-    log.info("test method: TestPutBytes SKIPPED."); 
+    log.info("test method: TestPutBytes SKIPPED.");
   }
+  @Ignore("Needs to be skipped for a while until some issues are fixed")
   @Override
   public void testPutMap() throws IOException, Exception {
     log.info("test method: TestPutMap SKIPPED.");
   }
+  @Ignore("Needs to be skipped for a while until some issues are fixed")
   @Override
   public void testEmptyUpdate() throws IOException, Exception {
-    log.info("test method: TestEmptyUpdate SKIPPED."); 
+    log.info("test method: TestEmptyUpdate SKIPPED.");
   }
+  @Ignore("Needs to be skipped for a while until some issues are fixed")
   @Override
   public void testDeleteSchema() throws IOException, Exception {
     log.info("test method: TestDeleteSchema SKIPPED.");
   }
+  @Ignore("Needs to be skipped for a while until some issues are fixed")
   @Override
   public void testGetWithFields() throws IOException, Exception {
-    log.info("test method: TestGetWithFields SKIPPED."); 
+    log.info("test method: TestGetWithFields SKIPPED.");
   }
-//============================================================================
-  
+//==========================================================================
+
   /**
    * Tests deleting items using a query
    */
@@ -143,7 +154,7 @@ public class TestDynamoDBStore extends WSDataStoreTestBase<DynamoDBKey, person> 
       e.printStackTrace();
     }
   }
-  
+
   /**
    * Tests updating a specific item
    */
@@ -163,28 +174,28 @@ public class TestDynamoDBStore extends WSDataStoreTestBase<DynamoDBKey, person> 
       e.printStackTrace();
     }
   }
-  
+
   /**
    * Method to test deleting a schema
-   
+   */
   @Override
   public void assertDeleteSchema(){
     try {
       log.info("test method: TestDeleteSchema using DynamoDB store.");
-    dataStore.deleteSchema();
+      dataStore.deleteSchema();
     } catch (Exception e) {
       log.error("error in test method: testDeleteSchema.");
       e.printStackTrace();
     }
   }
-*/
+ 
   /**
    * Method to verify if a schema exists or not
    */
   @Override
   public void assertSchemaExists(String schemaName) throws Exception {
     log.info("test method: TestSchemaExists using DynamoDB store.");
-    Assert.assertTrue(dataStore.schemaExists());
+    assertTrue(dataStore.schemaExists());
   }
 
   /**
@@ -204,10 +215,10 @@ public class TestDynamoDBStore extends WSDataStoreTestBase<DynamoDBKey, person> 
       dataStore.put(dKey, p2);
     } catch (Exception e) {
       log.error("error in test method: testPut.");
-    e.printStackTrace();
+      e.printStackTrace();
     }
   }
-  
+
   /**
    * Method to query the data store
    */
@@ -223,18 +234,18 @@ public class TestDynamoDBStore extends WSDataStoreTestBase<DynamoDBKey, person> 
       query.setKey(dKey);
       Result<DynamoDBKey, person> queryResult = dataStore.execute(query);
       processQueryResult(queryResult);
-  } catch (Exception e) {
-    log.error("error in test method: testQuery.");
+    } catch (Exception e) {
+      log.error("error in test method: testQuery.");
       e.printStackTrace();
     }
   }
-  
+
   /**
    * Method to query items into the data store
    */
   @Override
   public void assertTestQueryKeyRange(){
-    log.info("test method: testQueryKeyRange using specific data store.");  
+    log.info("test method: testQueryKeyRange using specific data store.");
     try {
       DynamoDBKey<String, String> dKey = new DynamoDBKey<String, String>();
       DynamoDBKey<String, String> startKey = new DynamoDBKey<String, String>();
@@ -255,7 +266,7 @@ public class TestDynamoDBStore extends WSDataStoreTestBase<DynamoDBKey, person> 
       e.printStackTrace();
     }
   }
-  
+
   /**
    * Method to get an specific object using a key
    */
@@ -277,7 +288,7 @@ public class TestDynamoDBStore extends WSDataStoreTestBase<DynamoDBKey, person> 
       e.printStackTrace();
     }
   }
-  
+
   /**
    * Method to delete items into the data store
    */
@@ -294,21 +305,21 @@ public class TestDynamoDBStore extends WSDataStoreTestBase<DynamoDBKey, person> 
       p1.setFirstName("Joao");
       p1.setLastName("Velasco");
       dataStore.put(dKey, p1);
-      Assert.assertTrue(dataStore.delete(dKey));
+      assertTrue(dataStore.delete(dKey));
       dKey.setRangeKey("10/10/1000");
-      Assert.assertFalse(dataStore.delete(dKey));
+      assertFalse(dataStore.delete(dKey));
     }catch (Exception e) {
       log.error("error in test method: testDeleteDataStore.");
       e.printStackTrace();
+    }
   }
-  }
-  
+
   /**
    * Method to create the data store
    */
   @Override
   protected DataStore<DynamoDBKey, person> createDataStore() {
-   log.info("Creating DynamoDB data store.");
+    log.info("Creating DynamoDB data store.");
     try {
       dataStore = getTestDriver().getDataStore();
       dataStore.createSchema();
@@ -316,9 +327,9 @@ public class TestDynamoDBStore extends WSDataStoreTestBase<DynamoDBKey, person> 
       log.error("error while creating DynamoDB data store");
       e.printStackTrace();
     }
-    return dataStore;
-  } 
-  
+      return dataStore;
+  }
+
   /**
    * Processes query results from an query execution
    * @param pQueryResult
@@ -328,15 +339,15 @@ public class TestDynamoDBStore extends WSDataStoreTestBase<DynamoDBKey, person> 
       log.debug("Processing tests results.");
       while(pQueryResult.next())
         printPersonInfo(pQueryResult.get());
-    } catch (IOException e) {
-      log.error("error while processing tests results.");
-      e.printStackTrace();
-    } catch (Exception e) {
-      log.error("error while processing tests results.");
-      e.printStackTrace();
+      } catch (IOException e) {
+        log.error("error while processing tests results.");
+        e.printStackTrace();
+      } catch (Exception e) {
+        log.error("error while processing tests results.");
+        e.printStackTrace();
+      }
     }
-  }
-  
+
   /**
    * Method to generate persisten objects
    * @param key
@@ -354,43 +365,22 @@ public class TestDynamoDBStore extends WSDataStoreTestBase<DynamoDBKey, person> 
     newPerson.setLastName(pLastName);
     newPerson.setVisitedplaces(new HashSet<String>());
     for(String place : places)
-  	  newPerson.getVisitedplaces().add(place);
-    return newPerson;
-  }
-  
+      newPerson.getVisitedplaces().add(place);
+      return newPerson;
+    }
+
   /**
    * Method to print the object returned from Get method
    * @param pPerson
    */
   private void printPersonInfo(person pPerson){
-    System.out.println(	"Origin:\t" + pPerson.getHashKey() +
-    "\n Birthday:\t" + pPerson.getRangeKey() +
-    "\n FirstName:" + pPerson.getFirstName() +
-    "\n LastName:" + pPerson.getLastName() + 
-    "\n Visited Places:");
+    log.info("Origin:\t" + pPerson.getHashKey() +
+      "\n Birthday:\t" + pPerson.getRangeKey() +
+      "\n FirstName:" + pPerson.getFirstName() +
+      "\n LastName:" + pPerson.getLastName() +
+      "\n Visited Places:");
     for(String place : pPerson.getVisitedplaces())
-      System.out.println("\t" + place);
+      log.info("\t" + place);
   }
-  
-  public static void main(String[] args) throws Exception {
-    TestDynamoDBStore test = new TestDynamoDBStore();
-    try{
-      test.setPersistentKeyClass(DynamoDBKey.class);
-      test.setPersistentValClass(person.class);
-      TestDynamoDBStore.setUpClass();
-      test.setUp();
-      test.testPut();
-      /*test.testGet();
-      test.testQuery();
-      test.testUpdate();
-      test.testQueryKeyRange();
-      test.testDelete();
-      test.testDeleteByQuery(); */
-    }catch (Exception e){
-      log.error("Error while executing tests.");
-    }finally{
-      test.tearDown();
-      TestDynamoDBStore.tearDownClass();
-    }
-  }
+
 }
