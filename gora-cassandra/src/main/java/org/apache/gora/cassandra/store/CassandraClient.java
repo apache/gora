@@ -274,11 +274,11 @@ public class CassandraClient<K, T extends PersistentBase> {
 
         // TODO: hack, do not store empty arrays
         if (itemValue instanceof GenericArray<?>) {
-          if (((GenericArray)itemValue).size() == 0) {
+          if (((List)itemValue).size() == 0) {
             continue;
           }
-        } else if (itemValue instanceof StatefulHashMap<?,?>) {
-          if (((StatefulHashMap)itemValue).size() == 0) {
+        } else if (itemValue instanceof Map<?,?>) {
+          if (((Map)itemValue).size() == 0) {
             continue;
           }
         }

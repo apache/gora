@@ -19,16 +19,15 @@
 package org.apache.gora.cassandra.serializers;
 
 import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericArray;
 import org.apache.avro.specific.SpecificFixed;
 import org.apache.avro.util.Utf8;
-import org.apache.gora.persistency.ListGenericArray;
 import org.apache.gora.persistency.Persistent;
-import org.apache.gora.persistency.StatefulHashMap;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,9 +71,9 @@ public class TypeUtils {
       return Type.INT;
     } else if (clazz.equals(Long.class) || clazz.equals(long.class)) {
       return Type.LONG;
-    } else if (clazz.equals(ListGenericArray.class)) {
+    } else if (clazz.isAssignableFrom(List.class)) {
       return Type.ARRAY;
-    } else if (clazz.equals(StatefulHashMap.class)) {
+    } else if (clazz.isAssignableFrom(Map.class)) {
       return Type.MAP;
     } else if (clazz.equals(Persistent.class)) {
       return Type.RECORD;
@@ -101,9 +100,9 @@ public class TypeUtils {
     } else if (type == Type.LONG) {
       return Long.class;
     } else if (type == Type.ARRAY) {
-      return ListGenericArray.class;
+      return List.class;
     } else if (type == Type.MAP) {
-      return StatefulHashMap.class;
+      return Map.class;
     } else if (type == Type.RECORD) {
       return Persistent.class;
     } else if (type == Type.FIXED) {
@@ -219,10 +218,7 @@ public class TypeUtils {
     Schema schema = array.getSchema();
     return (schema.getType() == Type.ARRAY) ? schema.getElementType() : schema;
   }
-
-  public static Type getElementType(ListGenericArray array) {
-    return getElementSchema(array).getType();
-  }
+ 
 
   /*
   public static Schema getValueSchema(StatefulHashMap map) {

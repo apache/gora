@@ -413,8 +413,8 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
         break;
       case MAP:
         if (value != null) {
-          if (value instanceof StatefulHashMap<?, ?>) {
-            this.cassandraClient.addStatefulHashMap(key, field.name(), (StatefulHashMap<Utf8,Object>)value);
+          if (value instanceof Map<?, ?>) {
+            this.cassandraClient.addStatefulHashMap(key, field.name(), (Map<CharSequence,Object>)value);
           } else {
             LOG.info("Map not supported: " + value.toString());
           }

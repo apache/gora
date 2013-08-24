@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.avro.Schema.Field;
 import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.mock.persistency.MockPersistent;
 import org.apache.gora.mock.query.MockQuery;
@@ -41,7 +42,8 @@ public class TestGoraInputFormat {
     MockDataStore store = MockDataStore.get();
 
     MockQuery query = store.newQuery();
-    query.setFields(Employee._ALL_FIELDS);
+    
+    query.setFields(getEmployeeFieldNames());
     GoraInputFormat.setInput(job, query, false);
 
     GoraInputFormat<String, MockPersistent> inputFormat
@@ -61,7 +63,16 @@ public class TestGoraInputFormat {
 
     InputSplit split = splits.get(0);
     PartitionQuery query = ((GoraInputSplit)split).getQuery();
-    assertTrue(Arrays.equals(Employee._ALL_FIELDS, query.getFields()));
+    Assert.assertTrue(Arrays.equals(getEmployeeFieldNames(), query.getFields()));
+  }
+  
+  private static String[] getEmployeeFieldNames(){
+    List<Field> fields = Employee.SCHEMA$.getFields();
+    String[] fieldNames = new String[fields.size()];
+    for(int i = 0; i< fieldNames.length; i++){
+      fieldNames[i] = fields.get(i).name();
+    }
+    return fieldNames;
   }
 
 }

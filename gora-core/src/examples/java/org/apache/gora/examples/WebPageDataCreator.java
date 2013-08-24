@@ -20,17 +20,18 @@ package org.apache.gora.examples;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
 import org.apache.avro.util.Utf8;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.gora.examples.generated.Metadata;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Creates and stores some data to be used in the tests.
@@ -109,36 +110,38 @@ public class WebPageDataCreator {
   
   public static void createWebPageData(DataStore<String, WebPage> dataStore) 
   throws IOException {
-	  try{
-	    WebPage page;
-	    log.info("creating web page data");
-	    
-	    for(int i=0; i<URLS.length; i++) {
-	      page = new WebPage();
-	      page.setUrl(new Utf8(URLS[i]));
-	      if (CONTENTS[i]!=null){
-	        page.setContent(ByteBuffer.wrap(CONTENTS[i].getBytes()));
-	        for(String token : CONTENTS[i].split(" ")) {
-	    	  page.addToParsedContent(new Utf8(token));  
-	        }
-          }
-	      for(int j=0; j<LINKS[i].length; j++) {
-	        page.putToOutlinks(new Utf8(URLS[LINKS[i][j]]), new Utf8(ANCHORS[i][j]));
-	      }
-	      
-	      Metadata metadata = new Metadata();
-	      metadata.setVersion(1);
-	      metadata.putToData(new Utf8("metakey"), new Utf8("metavalue"));
-	      page.setMetadata(metadata);
-	      
-	      dataStore.put(URLS[i], page);
-	    }
-	    dataStore.flush();
-	    log.info("finished creating web page data");
-  	}
- 	catch(Exception e){
- 		log.info("error creating web page data");
- 	}
+    try{
+      WebPage page;
+      log.info("creating web page data");
+      
+      for(int i=0; i<URLS.length; i++) {
+        page = new WebPage();
+        page.setUrl(new Utf8(URLS[i]));
+        page.setContent(ByteBuffer.wrap(CONTENTS[i].getBytes()));
+        page.setParsedContent(new ArrayList<CharSequence>());  
+        for(String token : CONTENTS[i].split(" ")) {
+          page.getParsedContent().add(new Utf8(token));
+        }
+        
+        page.setOutlinks(new HashMap<CharSequence, CharSequence>());
+        for(int j=0; j<LINKS[i].length; j++) {
+          page.getOutlinks().put(new Utf8(URLS[LINKS[i][j]]), new Utf8(ANCHORS[i][j]));
+        }
+        
+        Metadata metadata = new Metadata();
+        metadata.setVersion(1);
+        metadata.setData(new HashMap<CharSequence, CharSequence>());
+        metadata.getData().put(new Utf8("metakey"), new Utf8("metavalue"));
+        page.setMetadata(metadata);
+        
+        dataStore.put(URLS[i], page);
+      }
+      dataStore.flush();
+      log.info("finished creating web page data");
+    }
+    catch(Exception e){
+      log.info("error creating web page data");
+    } 
   }
   
   public int run(String[] args) throws Exception {

@@ -32,3 +32,8 @@ lib
 ivy/ivy*.jar
 /conf/*-site.xml
 **/conf/*-site.xml
+gora-accumulo/bin/
+gora-cassandra/bin/
+gora-core/bin/
+gora-hbase/bin/
+gora-sql/bin/

@@ -47,10 +47,6 @@ public class GoraMapReduceUtils {
   public static void setIOSerializations(Configuration conf, boolean reuseObjects) {
     String serializationClass =
       PersistentSerialization.class.getCanonicalName();
-    if (!reuseObjects) {
-      serializationClass =
-        PersistentNonReusingSerialization.class.getCanonicalName();
-    }
     String[] serializations = StringUtils.joinStringArrays(
         conf.getStrings("io.serializations"), 
         "org.apache.hadoop.io.serializer.WritableSerialization",

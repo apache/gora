@@ -20,13 +20,19 @@ package org.apache.gora.persistency.impl;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.apache.avro.util.Utf8;
 import org.apache.gora.examples.generated.Employee;
+import org.apache.gora.examples.generated.ImmutableFields;
+import org.apache.gora.examples.generated.Metadata;
+import org.apache.gora.examples.generated.V2;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.memory.store.MemStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.DataStoreTestUtil;
+import org.apache.gora.util.AvroUtils;
 import org.apache.hadoop.conf.Configuration;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;

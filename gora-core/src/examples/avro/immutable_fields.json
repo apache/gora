@@ -1,0 +1,18 @@
+{
+  "type": "record",
+  "name": "ImmutableFields",
+  "doc": "Record with only immutable or dirtyable fields, used for testing",
+  "namespace": "org.apache.gora.examples.generated",
+  "fields" : [
+    {"name": "v1", "type": "int"},
+    {"name": "v2", "type": [{
+      "name": "V2",
+      "type": "record",
+      "namespace": "org.apache.gora.examples.generated",
+      "fields": [
+        {"name": "v3", "type": "int"}
+      ]
+    },"null"]
+    }
+  ]
+}

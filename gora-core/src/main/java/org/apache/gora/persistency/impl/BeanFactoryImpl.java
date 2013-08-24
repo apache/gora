@@ -31,16 +31,29 @@ import org.apache.gora.util.ReflectionUtils;
  */
 public class BeanFactoryImpl<K, T extends Persistent> implements BeanFactory<K, T> {
 
+  /** Class of the key to be used */
   private Class<K> keyClass;
+  
+  /** Class of the persistent objects to be stored */
   private Class<T> persistentClass;
   
+  /** Constructor of the key */
   private Constructor<K> keyConstructor;
   
+  /** Object's key */
   private K key;
+  
+  /** Persistent object of class T */
   private T persistent;
   
+  /** Flag to be used to determine if a key is persistent or not */
   private boolean isKeyPersistent = false;
   
+  /**
+   * 
+   * @param keyClass
+   * @param persistentClass
+   */
   public BeanFactoryImpl(Class<K> keyClass, Class<T> persistentClass) {
     this.keyClass = keyClass;
     this.persistentClass = persistentClass;
@@ -59,21 +72,19 @@ public class BeanFactoryImpl<K, T extends Persistent> implements BeanFactory<K, 
   }
   
   @Override
-  @SuppressWarnings("unchecked")
   public K newKey() throws Exception {
-    if(isKeyPersistent)
-      return (K)((Persistent)key).newInstance(new StateManagerImpl());
-    else if(keyConstructor == null) {
-      throw new RuntimeException("Key class does not have a no-arg constructor");
-    }
-    else
-      return keyConstructor.newInstance(ReflectionUtils.EMPTY_OBJECT_ARRAY);
+    return keyClass.newInstance();
   }
  
-  @SuppressWarnings("unchecked")
   @Override
   public T newPersistent() {
-    return (T) persistent.newInstance(new StateManagerImpl());
+    try {
+      return persistentClass.newInstance();
+    } catch (InstantiationException e) {
+      throw new RuntimeException(e);
+    } catch (IllegalAccessException e) {
+      throw new RuntimeException(e);
+    }
   }
   
   @Override

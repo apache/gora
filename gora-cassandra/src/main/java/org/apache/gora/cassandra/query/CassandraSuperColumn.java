@@ -19,9 +19,11 @@
 package org.apache.gora.cassandra.query;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import me.prettyprint.cassandra.serializers.IntegerSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
@@ -29,11 +31,7 @@ import me.prettyprint.hector.api.beans.HSuperColumn;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
-import org.apache.avro.generic.GenericArray;
-import org.apache.avro.util.Utf8;
-import org.apache.gora.cassandra.serializers.Utf8Serializer;
-import org.apache.gora.persistency.ListGenericArray;
-import org.apache.gora.persistency.StatefulHashMap;
+import org.apache.gora.cassandra.serializers.CharSequenceSerializer;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +54,7 @@ public class CassandraSuperColumn extends CassandraColumn {
     
     switch (type) {
       case ARRAY:
-        ListGenericArray array = new ListGenericArray(fieldSchema.getElementType());
+        List<Object> array = new ArrayList<Object>();
         
         for (HColumn<ByteBuffer, ByteBuffer> hColumn : this.hSuperColumn.getColumns()) {
           ByteBuffer memberByteBuffer = hColumn.getValue();
@@ -68,13 +66,13 @@ public class CassandraSuperColumn extends CassandraColumn {
         
         break;
       case MAP:
-        Map<Utf8, Object> map = new StatefulHashMap<Utf8, Object>();
+        Map<CharSequence, Object> map = new HashMap<CharSequence, Object>();
         
         for (HColumn<ByteBuffer, ByteBuffer> hColumn : this.hSuperColumn.getColumns()) {
           ByteBuffer memberByteBuffer = hColumn.getValue();
           Object memberValue = null;
           memberValue = fromByteBuffer(fieldSchema.getValueType(), hColumn.getValue());
-          map.put(Utf8Serializer.get().fromByteBuffer(hColumn.getName()), memberValue);      
+          map.put(CharSequenceSerializer.get().fromByteBuffer(hColumn.getName()), memberValue);      
         }
         value = map;
         
@@ -114,7 +112,7 @@ public class CassandraSuperColumn extends CassandraColumn {
             CassandraSubColumn cassandraColumn = new CassandraSubColumn();
             cassandraColumn.setField(memberField);
             cassandraColumn.setValue(hColumn);
-            record.put(record.getFieldIndex(memberName), cassandraColumn.getValue());
+            record.put(record.getSchema().getField(memberName).pos(), cassandraColumn.getValue());
           }
         }
         break;

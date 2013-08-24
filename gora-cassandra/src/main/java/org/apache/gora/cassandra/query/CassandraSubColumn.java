@@ -76,12 +76,12 @@ public class CassandraSubColumn extends CassandraColumn {
     }
     Object value = null;
     if (type == Type.ARRAY) {
-      GenericArraySerializer serializer = GenericArraySerializer.get(fieldSchema.getElementType());
-      GenericArray genericArray = serializer.fromByteBuffer(byteBuffer);
+      ListSerializer serializer = ListSerializer.get(fieldSchema.getElementType());
+      List genericArray = serializer.fromByteBuffer(byteBuffer);
       value = genericArray;
     } else if (type == Type.MAP) {
-      StatefulHashMapSerializer serializer = StatefulHashMapSerializer.get(fieldSchema.getValueType());
-      StatefulHashMap map = serializer.fromByteBuffer(byteBuffer);
+      MapSerializer serializer = MapSerializer.get(fieldSchema.getValueType());
+      Map map = serializer.fromByteBuffer(byteBuffer);
       value = map;
     } else if (type == Type.UNION){
       // the selected union schema is obtained

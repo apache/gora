@@ -18,310 +18,194 @@
 package org.apache.gora.persistency.impl;
 
 import java.nio.ByteBuffer;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-
 import org.apache.avro.Schema.Field;
-import org.apache.avro.Schema.Type;
-import org.apache.avro.generic.GenericData;
+import org.apache.avro.specific.SpecificData;
 import org.apache.avro.specific.SpecificRecord;
-import org.apache.gora.avro.PersistentDatumReader;
-import org.apache.gora.persistency.ListGenericArray;
+import org.apache.avro.specific.SpecificRecordBase;
+import org.apache.gora.persistency.Dirtyable;
 import org.apache.gora.persistency.Persistent;
-import org.apache.gora.persistency.StateManager;
-import org.apache.gora.persistency.StatefulHashMap;
 
 /**
  * Base classs implementing common functionality for Persistent
  * classes.
  */
-public abstract class PersistentBase implements Persistent, SpecificRecord {
+public abstract class PersistentBase extends SpecificRecordBase implements Persistent  {
 
-  protected static Map<Class<?>, Map<String, Integer>> FIELD_MAP =
-    new HashMap<Class<?>, Map<String,Integer>>();
+  public static class PersistentData extends SpecificData {
+    private static final PersistentData INSTANCE = new PersistentData();
 
-  protected static Map<Class<?>, String[]> FIELDS =
-    new HashMap<Class<?>, String[]>();
-
-  protected static final PersistentDatumReader<PersistentBase> datumReader =
-    new PersistentDatumReader<PersistentBase>();
-    
-  private StateManager stateManager;
-
-  protected PersistentBase() {
-    this(new StateManagerImpl());
-  }
-
-  protected PersistentBase(StateManager stateManager) {
-    this.stateManager = stateManager;
-    stateManager.setManagedPersistent(this);
-  }
-
-  /** Subclasses should call this function for all the persistable fields
-   * in the class to register them.
-   * @param clazz the Persistent class
-   * @param fields the name of the fields of the class
-   */
-  protected static void registerFields(Class<?> clazz, String... fields) {
-    FIELDS.put(clazz, fields);
-    int fieldsLength = fields == null ? 0 :fields.length;
-    HashMap<String, Integer> map = new HashMap<String, Integer>(fieldsLength);
-
-    for(int i=0; i < fieldsLength; i++) {
-      map.put(fields[i], i);
+    public static PersistentData get() {
+      return INSTANCE;
     }
-    FIELD_MAP.put(clazz, map);
-  }
 
-  @Override
-  public StateManager getStateManager() {
-    return stateManager;
-  }
-
-  @Override
-  public String[] getFields() {
-    return FIELDS.get(getClass());
-  }
-
-  @Override
-  public String getField(int index) {
-    return FIELDS.get(getClass())[index];
-  }
-
-  @Override
-  public int getFieldIndex(String field) {
-    return FIELD_MAP.get(getClass()).get(field);
-  }
-
-  @Override
-  @SuppressWarnings("rawtypes")
-  public void clear() {
-    List<Field> fields = getSchema().getFields();
-
-    for(int i=0; i<getFields().length; i++) {
-      switch(fields.get(i).schema().getType()) {
-        case MAP: 
-          if(get(i) != null) {
-            if (get(i) instanceof StatefulHashMap) {
-              ((StatefulHashMap)get(i)).reuse(); 
-            } else {
-              ((Map)get(i)).clear();
-            }
-          }
-          break;
-        case ARRAY:
-          if(get(i) != null) {
-            if(get(i) instanceof ListGenericArray) {
-              ((ListGenericArray)get(i)).clear();
-            } else {
-              put(i, new ListGenericArray(fields.get(i).schema()));
-            }
-          }
-          break;
-        case RECORD :
-          Persistent field = ((Persistent)get(i));
-          if(field != null) field.clear();
-          break;
-        case BOOLEAN: put(i, false); break;
-        case INT    : put(i, 0); break;
-        case DOUBLE : put(i, 0d); break;
-        case FLOAT  : put(i, 0f); break;
-        case LONG   : put(i, 0l); break;
-        case NULL   : break;
-        default     : put(i, null); break;
-      }
+    public boolean equals(SpecificRecord obj1, SpecificRecord that) {
+      if (that == obj1)
+        return true; // identical object
+      if (!(that instanceof SpecificRecord))
+        return false; // not a record
+      if (obj1.getClass() != that.getClass())
+        return false; // not same schema
+      return PersistentData.get().compare(obj1, that, obj1.getSchema(), true) == 0;
     }
-    clearDirty();
-    clearReadable();
-  }
 
-  @Override
-  public boolean isNew() {
-    return getStateManager().isNew(this);
-  }
-
-  @Override
-  public void setNew() {
-    getStateManager().setNew(this);
-  }
-
-  @Override
-  public void clearNew() {
-    getStateManager().clearNew(this);
-  }
-
-  @Override
-  public boolean isDirty() {
-    return getStateManager().isDirty(this);
-  }
-
-  @Override
-  public boolean isDirty(int fieldIndex) {
-    return getStateManager().isDirty(this, fieldIndex);
-  }
-
-  @Override
-  public boolean isDirty(String field) {
-    return isDirty(getFieldIndex(field));
-  }
-
-  @Override
-  public void setDirty() {
-    getStateManager().setDirty(this);
-  }
-
-  @Override
-  public void setDirty(int fieldIndex) {
-    getStateManager().setDirty(this, fieldIndex);
-  }
-
-  @Override
-  public void setDirty(String field) {
-    setDirty(getFieldIndex(field));
-  }
-
-  @Override
-  public void clearDirty(int fieldIndex) {
-    getStateManager().clearDirty(this, fieldIndex);
-  }
-
-  @Override
-  public void clearDirty(String field) {
-    clearDirty(getFieldIndex(field));
   }
 
   @Override
   public void clearDirty() {
-    getStateManager().clearDirty(this);
-  }
-
-  @Override
-  public boolean isReadable(int fieldIndex) {
-    return getStateManager().isReadable(this, fieldIndex);
-  }
-
-  @Override
-  public boolean isReadable(String field) {
-    return isReadable(getFieldIndex(field));
-  }
-
-  @Override
-  public void setReadable(int fieldIndex) {
-    getStateManager().setReadable(this, fieldIndex);
-  }
-
-  @Override
-  public void setReadable(String field) {
-    setReadable(getFieldIndex(field));
-  }
-
-  @Override
-  public void clearReadable() {
-    getStateManager().clearReadable(this);
-  }
-
-  @Override
-  public void clearReadable(int fieldIndex) {
-    getStateManager().clearReadable(this, fieldIndex);
-  }
-
-  @Override
-  public void clearReadable(String field) {
-    clearReadable(getFieldIndex(field));
-  }
-
-  //@Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof SpecificRecord)) return false;
-
-    SpecificRecord r2 = (SpecificRecord)o;
-    if (!this.getSchema().equals(r2.getSchema())) return false;
-
-    return this.hashCode() == r2.hashCode();
-  }
-
-  //@Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    List<Field> fields = this.getSchema().getFields();
-    int end = fields.size();
-    for (int i = 0; i < end; i++) {
-      result = prime * result + getFieldHashCode(i, fields.get(i));
+    ByteBuffer dirtyBytes = getDirtyBytes();
+    assert (dirtyBytes.position() == 0);
+    for (int i = 0; i < dirtyBytes.limit(); i++) {
+      dirtyBytes.put(i, (byte) 0);
     }
-    return result;
-  }
-
-  /**
-   * Computes a (record's) field's hash code.
-   * @param i Index of the field in the actual
-   * @param field
-   * @return
-   */
-  private int getFieldHashCode(int i, Field field) {
-    Object o = get(i);
-    if(o == null)
-      return 0;
-
-    // XXX Union special case: in a field being union we have to check the
-    // inner schemas for Type.BYTES special case, but because it is not a
-    // field we check it this way. Too simple case to create another
-    // private method
-    boolean isUnionField = false ;
-    int unionIndex = -1 ;
-    
-    if (field.schema().getType() == Type.UNION) {
-      isUnionField = true ;
-      unionIndex = GenericData.get().resolveUnion(field.schema(), o);
+    for (Field field : getSchema().getFields()) {
+      clearDirynessIfFieldIsDirtyable(field.pos());
     }
-    
-    if(field.schema().getType() == Type.BYTES
-       || (isUnionField
-           && field.schema().getTypes().get(unionIndex).getType() == Type.BYTES)) {
-      // ByteBuffer.hashCode() depends on internal 'position' index, but we must ignore that.
-      return getByteBufferHashCode((ByteBuffer)o);
+  }
+
+  private void clearDirynessIfFieldIsDirtyable(int fieldIndex) {
+    if (fieldIndex == 0)
+      return;
+    Object value = get(fieldIndex);
+    if (value instanceof Dirtyable) {
+      ((Dirtyable) value).clearDirty();
     }
-
-    return o.hashCode();
   }
 
-  /** ByteBuffer.hashCode() takes into account the position of the
-   * buffer, but we do not want that*/
-  private int getByteBufferHashCode(ByteBuffer buf) {
-    int h = 1;
-    int p = buf.arrayOffset();
-    for (int j = buf.limit() - 1; j >= p; j--)
-          h = 31 * h + buf.get(j);
-    return h;
-  }
-  
   @Override
-  public Persistent clone() {
-    return datumReader.clone(this, getSchema());
+  public void clearDirty(int fieldIndex) {
+    ByteBuffer dirtyBytes = getDirtyBytes();
+    assert (dirtyBytes.position() == 0);
+    int byteOffset = fieldIndex / 8;
+    int bitOffset = fieldIndex % 8;
+    byte currentByte = dirtyBytes.get(byteOffset);
+    currentByte = (byte) ((~(1 << bitOffset)) & currentByte);
+    dirtyBytes.put(byteOffset, currentByte);
+    clearDirynessIfFieldIsDirtyable(fieldIndex);
   }
-  
-  //@Override
-  public String toString() {
-    StringBuilder builder = new StringBuilder();
-    builder.append(super.toString());
-    builder.append(" {\n");
+
+  @Override
+  public void clearDirty(String field) {
+    clearDirty(getSchema().getField(field).pos());
+  }
+
+  @Override
+  public boolean isDirty() {
     List<Field> fields = getSchema().getFields();
-    for(int i=0; i<fields.size(); i++) {
-      builder.append("  \"").append(fields.get(i).name()).append("\":\"");
-      builder.append(get(i)).append("\"\n");
+    boolean isSubRecordDirty = false;
+    for (Field field : fields) {
+      isSubRecordDirty = isSubRecordDirty || checkIfMutableFieldAndDirty(field);
     }
-    builder.append("}");
-    return builder.toString();
+    ByteBuffer dirtyBytes = getDirtyBytes();
+    assert (dirtyBytes.position() == 0);
+    boolean dirty = false;
+    for (int i = 0; i < dirtyBytes.limit(); i++) {
+      dirty = dirty || dirtyBytes.get(i) != 0;
+    }
+    return isSubRecordDirty || dirty;
+  }
+
+  private boolean checkIfMutableFieldAndDirty(Field field) {
+    if (field.pos() == 0)
+      return false;
+    switch (field.schema().getType()) {
+    case RECORD:
+    case MAP:
+    case ARRAY:
+      return ((Dirtyable) get(field.pos())).isDirty();
+    case UNION:
+      Object value = get(field.pos());
+      if (value instanceof Dirtyable) {
+        return ((Dirtyable) value).isDirty();
+      }
+    default:
+      // TODO add sufficient logging
+      break;
+    }
+    return false;
+  }
+
+  @Override
+  public boolean isDirty(int fieldIndex) {
+    Field field = getSchema().getFields().get(fieldIndex);
+    boolean isSubRecordDirty = checkIfMutableFieldAndDirty(field);
+    ByteBuffer dirtyBytes = getDirtyBytes();
+    assert (dirtyBytes.position() == 0);
+    int byteOffset = fieldIndex / 8;
+    int bitOffset = fieldIndex % 8;
+    byte currentByte = dirtyBytes.get(byteOffset);
+    return isSubRecordDirty || 0 != ((1 << bitOffset) & currentByte);
+  }
+
+  @Override
+  public boolean isDirty(String fieldName) {
+    Field field = getSchema().getField(fieldName);
+    if(field == null){
+      throw new IndexOutOfBoundsException("Field "+ fieldName + " does not exist in this schema.");
+    }
+    return isDirty(field.pos());
+  }
+
+  @Override
+  public void setDirty() {
+    ByteBuffer dirtyBytes = getDirtyBytes();
+    assert (dirtyBytes.position() == 0);
+    for (int i = 0; i < dirtyBytes.limit(); i++) {
+      dirtyBytes.put(i, (byte) -128);
+    }
+  }
+
+  @Override
+  public void setDirty(int fieldIndex) {
+    ByteBuffer dirtyBytes = getDirtyBytes();
+    assert (dirtyBytes.position() == 0);
+    int byteOffset = fieldIndex / 8;
+    int bitOffset = fieldIndex % 8;
+    byte currentByte = dirtyBytes.get(byteOffset);
+    currentByte = (byte) ((1 << bitOffset) | currentByte);
+    dirtyBytes.put(byteOffset, currentByte);
+  }
+
+  @Override
+  public void setDirty(String field) {
+    setDirty(getSchema().getField(field).pos());
+  }
+
+  private ByteBuffer getDirtyBytes() {
+    return (ByteBuffer) get(0);
+  }
+
+  @Override
+  public void clear() {
+    Collection<Field> unmanagedFields = getUnmanagedFields();
+    for (Field field : getSchema().getFields()) {
+      if (!unmanagedFields.contains(field))
+        continue;
+      /*
+* TODO: Its more in the spirit of Gora's clear method to actually clear
+* data structures, but since avro no-longer defaults to having empty
+* structures the way to do this consistently would be complicated.
+*/
+      put(field.pos(), null);
+    }
+    clearDirty();
+  }
+
+  @Override
+  public boolean equals(Object that) {
+    if (that == this) {
+      return true;
+    } else if (that instanceof Persistent) {
+      return PersistentData.get().equals(this, (SpecificRecord) that);
+    } else {
+      return false;
+    }
   }
   
-  protected boolean isFieldEqual(int index, Object value) {
-    Object old = get(index);
-    if (old == null && value == null)
-      return true;
-    if (old == null || value == null)
-      return false;
-    return value.equals(old);
+  public List<Field> getUnmanagedFields(){
+    List<Field> fields = getSchema().getFields();
+    return fields.subList(1, fields.size());
   }
+  
 }

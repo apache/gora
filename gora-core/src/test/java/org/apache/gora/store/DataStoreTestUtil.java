@@ -53,6 +53,7 @@ import org.apache.gora.persistency.impl.BeanFactoryImpl;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
+import org.apache.gora.util.AvroUtils;
 import org.apache.gora.util.ByteUtils;
 import org.apache.gora.util.StringUtils;
 import org.junit.Test;
@@ -159,7 +160,7 @@ public class DataStoreTestUtil {
     dataStore.put(ssn, employee);
     dataStore.flush();
 
-    Employee after = dataStore.get(ssn, Employee._ALL_FIELDS);
+    Employee after = dataStore.get(ssn, AvroUtils.getSchemaFieldNames(Employee.SCHEMA$));
 
     assertEquals(employee, after);
   }
@@ -337,9 +338,9 @@ public class DataStoreTestUtil {
     for (int i = 0; i < 1; i++) {
       String key = Long.toString(ssn + i);
       Employee employee = dataStore.get(key);
-      assertEquals(now - 18L * YEAR_IN_MS, employee.getDateOfBirth());
+      assertEquals(now - 18L * YEAR_IN_MS, employee.getDateOfBirth()); //.intValue()?
       assertEquals("John Doe " + (i + 5), employee.getName().toString());
-      assertEquals(120000, employee.getSalary());
+      assertEquals(120000, employee.getSalary()); //.intValue()?
     }
   }
 
@@ -360,10 +361,10 @@ public class DataStoreTestUtil {
       WebPage webPage = dataStore.newPersistent();
       webPage.setUrl(new Utf8(urls[i]));
       for (parsedContentCount = 0; parsedContentCount < 5; parsedContentCount++) {
-        webPage.addToParsedContent(new Utf8(parsedContent + i + "," + parsedContentCount));
+        webPage.getParsedContent().add(new Utf8(parsedContent + i + "," + parsedContentCount));
       }
       for (int j = 0; j < urls.length; j += 2) {
-        webPage.putToOutlinks(new Utf8(anchor + j), new Utf8(urls[j]));
+        webPage.getOutlinks().put(new Utf8(anchor + j), new Utf8(urls[j]));
       }
       dataStore.put(webPage.getUrl().toString(), webPage);
     }
@@ -374,11 +375,11 @@ public class DataStoreTestUtil {
       WebPage webPage = dataStore.get(urls[i]);
       webPage.setContent(ByteBuffer.wrap(ByteUtils.toBytes(content + i)));
       for (parsedContentCount = 5; parsedContentCount < 10; parsedContentCount++) {
-        webPage.addToParsedContent(new Utf8(parsedContent + i + "," + parsedContentCount));
+        webPage.getParsedContent().add(new Utf8(parsedContent + i + "," + parsedContentCount));
       }
       webPage.getOutlinks().clear();
       for (int j = 1; j < urls.length; j += 2) {
-        webPage.putToOutlinks(new Utf8(anchor + j), new Utf8(urls[j]));
+        webPage.getOutlinks().put(new Utf8(anchor + j), new Utf8(urls[j]));
       }
       dataStore.put(webPage.getUrl().toString(), webPage);
     }
@@ -390,13 +391,13 @@ public class DataStoreTestUtil {
       assertEquals(content + i, ByteUtils.toString( toByteArray(webPage.getContent()) ));
       assertEquals(10, webPage.getParsedContent().size());
       int j = 0;
-      for (Utf8 pc : webPage.getParsedContent()) {
+      for (CharSequence pc : webPage.getParsedContent()) {
         assertEquals(parsedContent + i + "," + j, pc.toString());
         j++;
       }
       int count = 0;
       for (j = 1; j < urls.length; j += 2) {
-        Utf8 link = webPage.getOutlinks().get(new Utf8(anchor + j));
+        CharSequence link = webPage.getOutlinks().get(new Utf8(anchor + j));
         assertNotNull(link);
         assertEquals(urls[j], link.toString());
         count++;
@@ -407,7 +408,7 @@ public class DataStoreTestUtil {
     for (int i = 0; i < urls.length; i++) {
       WebPage webPage = dataStore.get(urls[i]);
       for (int j = 0; j < urls.length; j += 2) {
-        webPage.putToOutlinks(new Utf8(anchor + j), new Utf8(urls[j]));
+        webPage.getOutlinks().put(new Utf8(anchor + j), new Utf8(urls[j]));
       }
       dataStore.put(webPage.getUrl().toString(), webPage);
     }
@@ -418,7 +419,7 @@ public class DataStoreTestUtil {
       WebPage webPage = dataStore.get(urls[i]);
       int count = 0;
       for (int j = 0; j < urls.length; j++) {
-        Utf8 link = webPage.getOutlinks().get(new Utf8(anchor + j));
+        CharSequence link = webPage.getOutlinks().get(new Utf8(anchor + j));
         assertNotNull(link);
         assertEquals(urls[j], link.toString());
         count++;
@@ -710,7 +711,7 @@ public class DataStoreTestUtil {
     WebPageDataCreator.createWebPageData(store);
 
     query = store.newQuery();
-    query.setFields(WebPage._ALL_FIELDS);
+    query.setFields(AvroUtils.getSchemaFieldNames(WebPage.SCHEMA$));
 
     assertNumResults(store.newQuery(), URLS.length);
     store.deleteByQuery(query);
@@ -753,8 +754,8 @@ public class DataStoreTestUtil {
     WebPageDataCreator.createWebPageData(store);
 
     query = store.newQuery();
-    query.setFields(WebPage.Field.OUTLINKS.getName()
-        , WebPage.Field.PARSED_CONTENT.getName(), WebPage.Field.CONTENT.getName());
+    query.setFields("outlinks"
+        , "parsedContent", "content");
 
     assertNumResults(store.newQuery(), URLS.length);
     store.deleteByQuery(query);
@@ -786,7 +787,7 @@ public class DataStoreTestUtil {
     WebPageDataCreator.createWebPageData(store);
 
     query = store.newQuery();
-    query.setFields(WebPage.Field.URL.getName());
+    query.setFields("url");
     String startKey = SORTED_URLS[NUM_KEYS];
     String endKey = SORTED_URLS[SORTED_URLS.length - NUM_KEYS];
     query.setStartKey(startKey);
@@ -831,7 +832,7 @@ public class DataStoreTestUtil {
     WebPage page = store.newPersistent();
     Metadata metadata = new Metadata();
     metadata.setVersion(1);
-    metadata.putToData(new Utf8("foo"), new Utf8("baz"));
+    metadata.getData().put(new Utf8("foo"), new Utf8("baz"));
 
     page.setMetadata(metadata);
     page.setUrl(new Utf8(url));
@@ -842,7 +843,7 @@ public class DataStoreTestUtil {
     page = store.get(revUrl);
     metadata = page.getMetadata();
     assertNotNull(metadata);
-    assertEquals(1, metadata.getVersion());
+    assertEquals(1, metadata.getVersion()); //.intValue()?
     assertEquals(new Utf8("baz"), metadata.getData().get(new Utf8("foo")));
   }
 
@@ -854,7 +855,7 @@ public class DataStoreTestUtil {
     String[] tokens = {"example", "content", "in", "example.com"};
 
     for(String token: tokens) {
-      page.addToParsedContent(new Utf8(token));
+      page.getParsedContent().add(new Utf8(token));
     }
 
     store.put("com.example/http", page);
@@ -885,9 +886,9 @@ public class DataStoreTestUtil {
     WebPage page = store.newPersistent();
 
     page.setUrl(new Utf8("http://example.com"));
-    page.putToOutlinks(new Utf8("http://example2.com"), new Utf8("anchor2"));
-    page.putToOutlinks(new Utf8("http://example3.com"), new Utf8("anchor3"));
-    page.putToOutlinks(new Utf8("http://example3.com"), new Utf8("anchor4"));
+    page.getOutlinks().put(new Utf8("http://example2.com"), new Utf8("anchor2"));
+    page.getOutlinks().put(new Utf8("http://example3.com"), new Utf8("anchor3"));
+    page.getOutlinks().put(new Utf8("http://example3.com"), new Utf8("anchor4"));
     store.put("com.example/http", page);
     store.close();
   }

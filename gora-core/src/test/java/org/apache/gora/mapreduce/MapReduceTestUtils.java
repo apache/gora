@@ -19,10 +19,10 @@
 package org.apache.gora.mapreduce;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.avro.Schema.Field;
 import org.apache.gora.examples.WebPageDataCreator;
 import org.apache.gora.examples.generated.TokenDatum;
 import org.apache.gora.examples.generated.WebPage;
@@ -32,8 +32,11 @@ import org.apache.gora.query.Query;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.hadoop.conf.Configuration;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MapReduceTestUtils {
 
@@ -50,7 +53,12 @@ public class MapReduceTestUtils {
 
     QueryCounter<String,WebPage> counter = new QueryCounter<String,WebPage>(conf);
     Query<String,WebPage> query = dataStore.newQuery();
-    query.setFields(WebPage._ALL_FIELDS);
+    List<Field> fields = WebPage.SCHEMA$.getFields();
+    String[] fieldNames = new String[fields.size()];
+    for(int i = 0; i< fieldNames.length; i++){
+      fieldNames[i] = fields.get(i).name();
+    }
+    query.setFields(fieldNames);
     
     dataStore.close();
 
@@ -65,7 +73,7 @@ public class MapReduceTestUtils {
  
   public static void testWordCount(Configuration conf, DataStore<String,WebPage> inStore, DataStore<String,
       TokenDatum> outStore) throws Exception {
-	  //Datastore now has to be a Hadoop based datastore
+    //Datastore now has to be a Hadoop based datastore
     ((DataStoreBase<String,WebPage>)inStore).setConf(conf);
     ((DataStoreBase<String,TokenDatum>)outStore).setConf(conf);
     
@@ -97,6 +105,6 @@ public class MapReduceTestUtils {
       String token, int count) throws Exception {
     TokenDatum datum = outStore.get(token, null);
     assertNotNull("token:" + token + " cannot be found in datastore", datum);
-    assertEquals("count for token:" + token + " is wrong", count, datum.getCount());
+    assertEquals("count for token:" + token + " is wrong", count, datum.getCount()); //.intValue()?
   }
 }
