@@ -471,7 +471,9 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
     // TODO: implement this using Hadoop DB support
 
     ArrayList<PartitionQuery<K, T>> partitions = new ArrayList<PartitionQuery<K, T>>();
-    partitions.add( new PartitionQueryImpl<K, T>( query ) );
+    PartitionQueryImpl<K, T> pqi = new PartitionQueryImpl<K, T>(query);
+    pqi.setConf(getConf());
+    partitions.add(pqi);
 
     return partitions;
   }

@@ -171,7 +171,9 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
    */
   public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query){
     List<PartitionQuery<K, T>> list = new ArrayList<PartitionQuery<K,T>>();
-    list.add(new PartitionQueryImpl<K, T>(query));
+    PartitionQueryImpl<K, T> pqi = new PartitionQueryImpl<K, T>(query);
+    pqi.setConf(getConf());
+    list.add(pqi);
     return list;
   }
 

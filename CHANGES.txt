@@ -4,6 +4,10 @@
 
 Gora Change Log
 
+* GORA-275 Update Gora stores to pass conf when creating instance of PartitionQueryImpl (Damien Raude-Morvan via hsaputra)
+
+* GORA-270 IOUtils static SerializationFactory field (Damien Raude-Morvan via hsaputra)
+
 * GORA-268 Make GoraCompiler the main manifest attribute in gora-core (Apostolos Giannakidis via lewismc)
 
 * GORA-265 Support for dynamic file extensions when traversing a directory (Apostolos Giannakidis via lewismc)

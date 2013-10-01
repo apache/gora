@@ -222,9 +222,9 @@ public String[] getFields() {
     if(!nullFields[1])
       fields = IOUtils.readStringArray(in);
     if(!nullFields[2])
-      startKey = IOUtils.deserialize(null, in, null, dataStore.getKeyClass());
+      startKey = IOUtils.deserialize(getConf(), in, null, dataStore.getKeyClass());
     if(!nullFields[3])
-      endKey = IOUtils.deserialize(null, in, null, dataStore.getKeyClass());
+      endKey = IOUtils.deserialize(getConf(), in, null, dataStore.getKeyClass());
     if(!nullFields[4])
       filter = Text.readString(in);
 
