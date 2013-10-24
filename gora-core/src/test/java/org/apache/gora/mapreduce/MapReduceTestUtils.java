@@ -105,6 +105,6 @@ public class MapReduceTestUtils {
       String token, int count) throws Exception {
     TokenDatum datum = outStore.get(token, null);
     assertNotNull("token:" + token + " cannot be found in datastore", datum);
-    assertEquals("count for token:" + token + " is wrong", count, datum.getCount()); //.intValue()?
+    assertEquals("count for token:" + token + " is wrong", count, datum.getCount().intValue());
   }
 }
