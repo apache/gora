@@ -338,9 +338,9 @@ public class DataStoreTestUtil {
     for (int i = 0; i < 1; i++) {
       String key = Long.toString(ssn + i);
       Employee employee = dataStore.get(key);
-      assertEquals(now - 18L * YEAR_IN_MS, employee.getDateOfBirth()); //.intValue()?
+      assertEquals(now - 18L * YEAR_IN_MS, employee.getDateOfBirth().intValue()); 
       assertEquals("John Doe " + (i + 5), employee.getName().toString());
-      assertEquals(120000, employee.getSalary()); //.intValue()?
+      assertEquals(120000, employee.getSalary().intValue()); 
     }
   }
 
@@ -437,19 +437,20 @@ public class DataStoreTestUtil {
         " actual=" + CONTENTS[i] + " i=" + i
         , Arrays.equals( toByteArray(page.getContent() )
         , CONTENTS[i].getBytes()));
-      GenericArray<Utf8> parsedContent = page.getParsedContent();
+    
+      List<CharSequence> parsedContent = page.getParsedContent();
       assertNotNull(parsedContent);
       assertTrue(parsedContent.size() > 0);
     
       int j=0;
       String[] tokens = CONTENTS[i].split(" ");
-      for(Utf8 token : parsedContent) {
+      for(CharSequence token : parsedContent) {
         assertEquals(tokens[j++], token.toString());
       }
     } else {
       // when page.getContent() is null
       assertTrue(CONTENTS[i] == null) ;
-      GenericArray<Utf8> parsedContent = page.getParsedContent();
+      List<CharSequence> parsedContent = page.getParsedContent();
       assertNotNull(parsedContent);
       assertTrue(parsedContent.size() == 0);
     }
@@ -459,7 +460,7 @@ public class DataStoreTestUtil {
       assertTrue(page.getOutlinks().size() > 0);
       for(int k=0; k<LINKS[i].length; k++) {
         assertEquals(ANCHORS[i][k],
-          page.getFromOutlinks(new Utf8(URLS[LINKS[i][k]])).toString());
+          page.getOutlinks().get(new Utf8(URLS[LINKS[i][k]])).toString());
       }
     } else {
       assertTrue(page.getOutlinks() == null || page.getOutlinks().isEmpty());
@@ -477,7 +478,7 @@ public class DataStoreTestUtil {
   }
 
   public static void testGetWebPage(DataStore<String, WebPage> store) throws IOException, Exception {
-    testGetWebPage(store, WebPage._ALL_FIELDS);
+    testGetWebPage(store, WebPage.SCHEMA$.getFields().toArray(new String[0]));
   }
 
   public static void testGetWebPageDefaultFields(DataStore<String, WebPage> store)
@@ -504,7 +505,7 @@ public class DataStoreTestUtil {
 
   public static void testQueryWebPageSingleKey(DataStore<String, WebPage> store)
   throws IOException, Exception {
-    testQueryWebPageSingleKey(store, WebPage._ALL_FIELDS);
+    testQueryWebPageSingleKey(store, WebPage.SCHEMA$.getFields().toArray(new String[0]));
   }
 
   public static void testQueryWebPageSingleKeyDefaultFields(
@@ -843,7 +844,7 @@ public class DataStoreTestUtil {
     page = store.get(revUrl);
     metadata = page.getMetadata();
     assertNotNull(metadata);
-    assertEquals(1, metadata.getVersion()); //.intValue()?
+    assertEquals(1, metadata.getVersion().intValue()); 
     assertEquals(new Utf8("baz"), metadata.getData().get(new Utf8("foo")));
   }
 

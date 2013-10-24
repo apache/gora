@@ -22,22 +22,17 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
-
+import java.util.List;
+import org.apache.avro.Schema.Field;
 import org.apache.avro.util.Utf8;
 import org.apache.gora.examples.generated.Employee;
-import org.apache.gora.examples.generated.ImmutableFields;
-import org.apache.gora.examples.generated.Metadata;
-import org.apache.gora.examples.generated.V2;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.memory.store.MemStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.DataStoreTestUtil;
-import org.apache.gora.util.AvroUtils;
 import org.apache.hadoop.conf.Configuration;
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-
 import org.junit.Test;
 
 /**
@@ -45,77 +40,113 @@ import org.junit.Test;
  */
 public class TestPersistentBase {
   
+  /**
+   * Assert that the list of fields from the WebPage Schema
+   * are as we expect. This is done by creating and accessing 
+   * a WebPage object, then comparing the results against 
+   * static fields of the WebPage.SCHEMA$.
+   */
   @Test
   public void testGetFields() {
     WebPage page = new WebPage();
-    String[] fields = page.getFields();
-    assertArrayEquals(WebPage._ALL_FIELDS, fields);
+    List<Field> fields = page.getSchema().getFields();
+    assertEquals(WebPage.SCHEMA$.getFields(), fields);
   }
   
+  /**
+   * Assert that individual field values are as we would
+   * expect from directly accessing WebPage.SCHEMA$ values.
+   */
   @Test
   public void testGetField() {
     WebPage page = new WebPage();
-    for(int i=0; i<WebPage._ALL_FIELDS.length; i++) {
-      String field = page.getField(i);
-      assertEquals(WebPage._ALL_FIELDS[i], field);
+    for(int i=0; i<WebPage.SCHEMA$.getFields().toArray().length; i++) {
+      Field field = page.getSchema().getFields().get(i);
+      assertEquals(WebPage.SCHEMA$.getFields().get(i), field);
     }
   }
   
+  /**
+   * Assert that field positions as found within the SCHEMA array
+   * are as we would expect by accessing them directly. 
+   */
   @Test
   public void testGetFieldIndex() {
     WebPage page = new WebPage();
-    for(int i=0; i<WebPage._ALL_FIELDS.length; i++) {
-      int index = page.getFieldIndex(WebPage._ALL_FIELDS[i]);
+    for(int i=0; i<WebPage.SCHEMA$.getFields().toArray().length; i++) {
+      int index = page.getSchema().getFields().get(i).pos();
       assertEquals(i, index);
     }
   }
   
+  /**
+   * Assert that field positions as found within the SCHEMA array
+   * are as we would expect by accessing them directly. 
+   * This tests for both WebPage and Employee data beans.
+   */
   @Test
   public void testFieldsWithTwoClasses() {
     WebPage page = new WebPage();
-    for(int i=0; i<WebPage._ALL_FIELDS.length; i++) {
-      int index = page.getFieldIndex(WebPage._ALL_FIELDS[i]);
+    for(int i=0; i<WebPage.SCHEMA$.getFields().toArray().length; i++) {
+      int index = page.getSchema().getFields().get(i).pos();
       assertEquals(i, index);
     }
     Employee employee = new Employee();
     for(int i=0; i<Employee._ALL_FIELDS.length; i++) {
-      int index = employee.getFieldIndex(Employee._ALL_FIELDS[i]);
+      int index = employee.getSchema().getFields().get(i).pos();
       assertEquals(i, index);
     }
   }
   
+  /**
+   * First we create a new WebPage object, to which we add some
+   * field values. This makes the fields dirty as we have not 
+   * flushed them to the datastore. We then clear the dirty
+   * fields and assert that the values DO NOT exist for the 
+   * field we previously made dirty.
+   * We then set new values for fields, consequently making them 
+   * dirty, before testing the clearing of an entirely new object
+   * has all fields as null as they should be clean.
+   */
   @Test
   public void testClear() {
     
     //test clear all fields
     WebPage page = new WebPage();
+   
     page.setUrl(new Utf8("http://foo.com"));
-    page.addToParsedContent(new Utf8("foo"));
-    page.putToOutlinks(new Utf8("foo"), new Utf8("bar"));
+    page.setParsedContent(new ArrayList<CharSequence>());
+    page.getParsedContent().add(new Utf8("foo"));
+    page.setOutlinks(new HashMap<CharSequence, CharSequence>());
+    page.getOutlinks().put(new Utf8("foo"), new Utf8("bar"));
     page.setContent(ByteBuffer.wrap("foo baz bar".getBytes()));
     
     page.clear();
     
     assertNull(page.getUrl());
-    assertEquals(0, page.getParsedContent().size());
-    assertEquals(0, page.getOutlinks().size());
+    assertNull(page.getParsedContent());
+    assertNull(page.getOutlinks());
     assertNull(page.getContent());
     
     //set fields again
     page.setUrl(new Utf8("http://bar.com"));
-    page.addToParsedContent(new Utf8("bar"));
-    page.putToOutlinks(new Utf8("bar"), new Utf8("baz"));
+    page.setParsedContent(new ArrayList<CharSequence>());
+    page.getParsedContent().add(new Utf8("bar"));
+    page.setOutlinks(new HashMap<CharSequence, CharSequence>());
+    page.getOutlinks().put(new Utf8("bar"), new Utf8("baz"));
     page.setContent(ByteBuffer.wrap("foo baz bar barbaz".getBytes()));
     
     //test clear new object
     page = new WebPage();
     page.clear();
-    
-    //test primitive fields
-    Employee employee = new Employee();
-    employee.clear();
   }
   
+  /**
+   * Tests and asserts that an in-memory representation of the 
+   * Employee object is Equal to a clone of the same object.
+   * @throws IOException
+   * @throws Exception
+   */
   @Test
   public void testClone() throws IOException, Exception {
     //more tests for clone are in TestPersistentDatumReader
@@ -125,6 +156,6 @@ public class TestPersistentBase {
 
     Employee employee = DataStoreTestUtil.createEmployee(store);
     
-    assertEquals(employee, employee.clone());
+    assertEquals(employee, Employee.newBuilder(employee).build());
   }
 }

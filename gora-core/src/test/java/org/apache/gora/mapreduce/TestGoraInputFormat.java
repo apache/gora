@@ -54,6 +54,15 @@ public class TestGoraInputFormat {
     return inputFormat.getSplits(job);
   }
 
+  /**
+   * First, asserts that the attempt to obtain splits results in 
+   * greater than 0 splits which can be used for computation.
+   * We then check that the partition query (obtained by using the 
+   * splits) has the same fields as we would expect by directly 
+   * accessing the fields of an Employee object.
+   * @throws IOException
+   * @throws InterruptedException
+   */
   @Test
   @SuppressWarnings("rawtypes")
   public void testGetSplits() throws IOException, InterruptedException {
@@ -63,7 +72,7 @@ public class TestGoraInputFormat {
 
     InputSplit split = splits.get(0);
     PartitionQuery query = ((GoraInputSplit)split).getQuery();
-    Assert.assertTrue(Arrays.equals(getEmployeeFieldNames(), query.getFields()));
+    assertTrue(Arrays.equals(getEmployeeFieldNames(), query.getFields()));
   }
   
   private static String[] getEmployeeFieldNames(){

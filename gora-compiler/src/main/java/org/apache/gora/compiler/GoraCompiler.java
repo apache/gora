@@ -21,8 +21,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.avro.Schema;
@@ -48,18 +51,22 @@ public class GoraCompiler extends SpecificCompiler {
   static {
     GORA_HIDDEN_FIELD_NAMES.add(DIRTY_BYTES_FIELD_NAME);
   }
-
-  public static void compileSchema(File[] srcFiles, File dest) throws IOException {
+  
+  public static void compileSchema(File[] srcFiles, File dest)
+      throws IOException {
     Schema.Parser parser = new Schema.Parser();
 
     for (File src : srcFiles) {
       Schema originalSchema = parser.parse(src);
-      Schema newSchema = getSchemaWithDirtySupport(originalSchema);
+      Map<Schema,Schema> queue = new HashMap<Schema,Schema>();
+      Schema newSchema = getSchemaWithDirtySupport(originalSchema, queue);
       GoraCompiler compiler = new GoraCompiler(newSchema);
       compiler.setTemplateDir("/org/apache/gora/compiler/templates/");
       compiler.compileToDestination(src, dest);
+
     }
   }
+  
 
   public static String generateAppropriateImmutabilityModifier(Schema schema){
     switch (schema.getType()) {
@@ -122,40 +129,43 @@ public class GoraCompiler extends SpecificCompiler {
     super(schema);
   }
 
-  private static Schema getSchemaWithDirtySupport(Schema originalSchema) throws IOException {
+  private static Schema getSchemaWithDirtySupport(Schema originalSchema, Map<Schema,Schema> queue) throws IOException {
     switch (originalSchema.getType()) {
       case RECORD:
-        return getRecordSchemaWithDirtySupport(originalSchema);
+        if (queue.containsKey(originalSchema)) {
+          return queue.get(originalSchema);
+        }
+        return getRecordSchemaWithDirtySupport(originalSchema,queue);
       case UNION:
-        return getUnionSchemaWithDirtySupport(originalSchema);
+        return getUnionSchemaWithDirtySupport(originalSchema,queue);
       case MAP:
-        return getMapSchemaWithDirtySupport(originalSchema);
+        return getMapSchemaWithDirtySupport(originalSchema,queue);
       case ARRAY:
-        return getArraySchemaWithDirtySupport(originalSchema);
+        return getArraySchemaWithDirtySupport(originalSchema,queue);
       default:
         return originalSchema;
     }
   }
-
-  private static Schema getArraySchemaWithDirtySupport(Schema originalSchema) throws IOException {
-    return Schema.createArray(getSchemaWithDirtySupport(originalSchema.getElementType()));
+  
+  private static Schema getArraySchemaWithDirtySupport(Schema originalSchema, Map<Schema,Schema> queue) throws IOException {
+    return Schema.createArray(getSchemaWithDirtySupport(originalSchema.getElementType(),queue));
   }
 
-  private static Schema getMapSchemaWithDirtySupport(Schema originalSchema) throws IOException {
-    return Schema.createMap(getSchemaWithDirtySupport(originalSchema.getValueType()));
+  private static Schema getMapSchemaWithDirtySupport(Schema originalSchema, Map<Schema,Schema> queue) throws IOException {
+    return Schema.createMap(getSchemaWithDirtySupport(originalSchema.getValueType(),queue));
   }
 
-  private static Schema getUnionSchemaWithDirtySupport(Schema originalSchema) throws IOException {
+  private static Schema getUnionSchemaWithDirtySupport(Schema originalSchema, Map<Schema,Schema> queue) throws IOException {
     List<Schema> schemaTypes = originalSchema.getTypes();
     List<Schema> newTypeSchemas = new ArrayList<Schema>();
     for (int i = 0; i < schemaTypes.size(); i++) {
       Schema currentTypeSchema = schemaTypes.get(i);
-      newTypeSchemas.add(getSchemaWithDirtySupport(currentTypeSchema));
+      newTypeSchemas.add(getSchemaWithDirtySupport(currentTypeSchema,queue));
     }
     return Schema.createUnion(newTypeSchemas);
   }
 
-  private static Schema getRecordSchemaWithDirtySupport(Schema originalSchema) throws IOException {
+  private static Schema getRecordSchemaWithDirtySupport(Schema originalSchema, Map<Schema,Schema> queue) throws IOException {
     if (originalSchema.getType() != Type.RECORD) {
       throw new IOException("Gora only supports record schemas.");
     }
@@ -170,6 +180,9 @@ public class GoraCompiler extends SpecificCompiler {
     Schema newSchema = Schema.createRecord(originalSchema.getName(),
     originalSchema.getDoc(), originalSchema.getNamespace(),
     originalSchema.isError());
+    
+    queue.put(originalSchema, newSchema);
+    
     List<Field> newFields = new ArrayList<Schema.Field>();
     byte[] defaultDirtyBytesValue = new byte[getNumberOfBytesNeededForDirtyBits(originalSchema)];
     Arrays.fill(defaultDirtyBytesValue, (byte) 0);
@@ -183,7 +196,7 @@ public class GoraCompiler extends SpecificCompiler {
     for (Field originalField : originalFields) {
       // recursively add dirty support
       Field newField = new Field(originalField.name(),
-        getSchemaWithDirtySupport(originalField.schema()),
+        getSchemaWithDirtySupport(originalField.schema(),queue),
         originalField.doc(), originalField.defaultValue(),
         originalField.order());
       newFields.add(newField);

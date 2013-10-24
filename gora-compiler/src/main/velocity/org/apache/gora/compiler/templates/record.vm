@@ -24,6 +24,13 @@ package $schema.getNamespace();
 #end
 public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends org.apache.avro.specific.SpecificExceptionBase#else extends org.apache.gora.persistency.impl.PersistentBase#end implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
   public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("${this.javaEscape($schema.toString())}");
+  
+  public static final String[] _ALL_FIELDS = {
+#foreach ($field in $schema.getFields())
+  "${this.mangle($field.name(), $schema.isError())}",
+#end		
+  };
+
 #foreach ($field in $schema.getFields())
 #if ($field.doc())
   /** $field.doc() */

@@ -109,7 +109,7 @@ public class WebPageDataCreator {
   }
   
   public static void createWebPageData(DataStore<String, WebPage> dataStore) 
-  throws IOException {
+      throws IOException {
     try{
       WebPage page;
       log.info("creating web page data");
@@ -117,11 +117,13 @@ public class WebPageDataCreator {
       for(int i=0; i<URLS.length; i++) {
         page = new WebPage();
         page.setUrl(new Utf8(URLS[i]));
-        page.setContent(ByteBuffer.wrap(CONTENTS[i].getBytes()));
-        page.setParsedContent(new ArrayList<CharSequence>());  
-        for(String token : CONTENTS[i].split(" ")) {
-          page.getParsedContent().add(new Utf8(token));
-        }
+        page.setParsedContent(new ArrayList<CharSequence>());
+	    if (CONTENTS[i]!=null){
+		  page.setContent(ByteBuffer.wrap(CONTENTS[i].getBytes()));
+		  for(String token : CONTENTS[i].split(" ")) {
+		    page.getParsedContent().add(new Utf8(token));  
+		  }
+	    }
         
         page.setOutlinks(new HashMap<CharSequence, CharSequence>());
         for(int j=0; j<LINKS[i].length; j++) {

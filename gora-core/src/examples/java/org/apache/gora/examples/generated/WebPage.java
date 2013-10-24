@@ -45,7 +45,7 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
    * Gets the value of the 'url' field.
    */
   public java.lang.CharSequence getUrl() {
-    return url.toString();
+    return url;
   }
 
   /**
@@ -53,7 +53,7 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
    * @param value the value to set.
    */
   public void setUrl(java.lang.CharSequence value) {
-    this.url = value.toString();
+    this.url = value;
     setDirty(1);
   }
   
