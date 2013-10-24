@@ -42,7 +42,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNull;
 
-import org.apache.avro.generic.GenericArray;
 import org.apache.avro.util.Utf8;
 import org.apache.gora.examples.WebPageDataCreator;
 import org.apache.gora.examples.generated.Employee;
@@ -56,7 +55,6 @@ import org.apache.gora.query.Result;
 import org.apache.gora.util.AvroUtils;
 import org.apache.gora.util.ByteUtils;
 import org.apache.gora.util.StringUtils;
-import org.junit.Test;
 
 /**
  * Test utilities for DataStores. This utility class provides everything
@@ -248,25 +246,18 @@ public class DataStoreTestUtil {
     dataStore.put(ssn, employee);
     dataStore.flush();
 
-    // XXX See GORA-216: special case until later reviewed.
-    // Like in K-V stores, if retrieved column does not exists ([webpage] case),
-    // get() must return 'null'.
-    // We prepare an actual weird synthetic test.
-    
-    // String[] fields = employee.getFields();
-    String[] fields = {"name","dateOfBirth","ssn","salary"} ;
-    
+    String[] fields = AvroUtils.getPersistentFieldNames(employee);
     for(Set<String> subset : StringUtils.powerset(fields)) {
       if(subset.isEmpty())
         continue;
       Employee after = dataStore.get(ssn, subset.toArray(new String[subset.size()]));
       Employee expected = new Employee();
       for(String field:subset) {
-        int index = expected.getFieldIndex(field);
+        int index = expected.getSchema().getField(field).pos();
         expected.put(index, employee.get(index));
       }
 
-      assertEquals(expected, after);        
+      assertEquals(expected, after);
     }
   }
 
