@@ -1,30 +1,30 @@
   {
     "type": "record",
-    "name": "Employee",
+    "name": "Employee","default":null,
     "namespace": "org.apache.gora.examples.generated",
     "fields" : [
-      {"name": "name", "type": ["string","null"]},
-      {"name": "dateOfBirth", "type": "long"},
-      {"name": "ssn", "type": "string"},
-      {"name": "salary", "type": "int"},
-      {"name": "boss", "type":["null","Employee","string"]},
-      {"name": "webpage", "type":["null",
+      {"name": "name", "type": ["null","string"],"default":null},
+      {"name": "dateOfBirth", "type": "long","default":0},
+      {"name": "ssn", "type": ["null","string"],"default":null},
+      {"name": "salary", "type": "int","default":0},
+      {"name": "boss", "type":["null","Employee","string"],"default":null},
+      {"name": "webpage","default":null, "type":["null",
         {
       	  "type": "record",
       	  "name": "WebPage",
       	  "namespace": "org.apache.gora.examples.generated",
           "fields" : [
-           {"name": "url", "type": "string"},
-           {"name": "content", "type": ["null","bytes"]},
-           {"name": "parsedContent", "type": {"type":"array", "items": "string"}},
-           {"name": "outlinks", "type": {"type":"map", "values":"string"}},
-           {"name": "metadata", "type": {
+           {"name": "url", "type": ["null","string"], "default":null},
+           {"name": "content", "type": ["null","bytes"],"default":null},
+           {"name": "parsedContent", "type": {"type":"array", "items": "string"},"default":null},
+           {"name": "outlinks", "type": {"type":"map", "values":"string"},"default":null},
+           {"name": "metadata", "default":null, "type": {
             "name": "Metadata",
             "type": "record",
             "namespace": "org.apache.gora.examples.generated",
             "fields": [
-             {"name": "version", "type": "int"},
-             {"name": "data", "type": {"type": "map", "values": "string"}}
+             {"name": "version", "type": "int","default":0},
+             {"name": "data", "type": {"type": "map", "values": "string"},"default":null}
             ]
           }}
           ]

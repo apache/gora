@@ -42,6 +42,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNull;
 
+import org.apache.avro.Schema.Field;
 import org.apache.avro.util.Utf8;
 import org.apache.gora.examples.WebPageDataCreator;
 import org.apache.gora.examples.generated.Employee;
@@ -169,12 +170,12 @@ public class DataStoreTestUtil {
 
     Employee employee = DataStoreTestUtil.createEmployee(dataStore);
     Employee boss = DataStoreTestUtil.createBoss(dataStore);
-    employee.setBoss(boss) ;
+    employee.setBoss(boss);
     
     String ssn = employee.getSsn().toString();
     dataStore.put(ssn, employee);
     dataStore.flush();
-    Employee after = dataStore.get(ssn, Employee._ALL_FIELDS);
+    Employee after = dataStore.get(ssn, getFields(Employee.SCHEMA$.getFields()));
     assertEquals(employee, after);
     assertEquals(boss, after.getBoss()) ;
   }
@@ -192,7 +193,7 @@ public class DataStoreTestUtil {
       String ssn = employee.getSsn().toString();
       dataStore.put(ssn, employee);
       dataStore.flush();
-      Employee after = dataStore.get(ssn, Employee._ALL_FIELDS);
+      Employee after = dataStore.get(ssn, getFields(Employee.SCHEMA$.getFields()));
       assertEquals(employee, after);
       assertEquals(boss, after.getBoss()) ;
       assertEquals(uberBoss, ((Employee)after.getBoss()).getBoss()) ;
@@ -214,7 +215,7 @@ public class DataStoreTestUtil {
    
     dataStore.put(ssn, employee);
     dataStore.flush();
-    Employee after = dataStore.get(ssn, Employee._ALL_FIELDS);
+    Employee after = dataStore.get(ssn, getFields(Employee.SCHEMA$.getFields()));
     assertEquals(employee, after);
     assertEquals(webpage, after.getWebpage()) ;
   }
@@ -228,7 +229,7 @@ public class DataStoreTestUtil {
     String ssn = employee.getSsn().toString();
     dataStore.put(ssn, employee);
     dataStore.flush();
-    Employee after = dataStore.get(ssn, Employee._ALL_FIELDS);
+    Employee after = dataStore.get(ssn, getFields(Employee.SCHEMA$.getFields()));
     assertEquals(employee, after);
     assertEquals("Real boss", ((Utf8)after.getBoss()).toString()) ;
   }
@@ -251,7 +252,7 @@ public class DataStoreTestUtil {
       if(subset.isEmpty())
         continue;
       Employee after = dataStore.get(ssn, subset.toArray(new String[subset.size()]));
-      Employee expected = new Employee();
+      Employee expected = Employee.newBuilder().build();
       for(String field:subset) {
         int index = expected.getSchema().getField(field).pos();
         expected.put(index, employee.get(index));
@@ -469,7 +470,7 @@ public class DataStoreTestUtil {
   }
 
   public static void testGetWebPage(DataStore<String, WebPage> store) throws IOException, Exception {
-    testGetWebPage(store, WebPage.SCHEMA$.getFields().toArray(new String[0]));
+    testGetWebPage(store, getFields(WebPage.SCHEMA$.getFields()));
   }
 
   public static void testGetWebPageDefaultFields(DataStore<String, WebPage> store)
@@ -496,7 +497,7 @@ public class DataStoreTestUtil {
 
   public static void testQueryWebPageSingleKey(DataStore<String, WebPage> store)
   throws IOException, Exception {
-    testQueryWebPageSingleKey(store, WebPage.SCHEMA$.getFields().toArray(new String[0]));
+    testQueryWebPageSingleKey(store, getFields(WebPage.SCHEMA$.getFields()));
   }
 
   public static void testQueryWebPageSingleKeyDefaultFields(
@@ -822,7 +823,7 @@ public class DataStoreTestUtil {
 
     store.createSchema();
     WebPage page = store.newPersistent();
-    Metadata metadata = new Metadata();
+    Metadata metadata = Metadata.newBuilder().build();
     metadata.setVersion(1);
     metadata.getData().put(new Utf8("foo"), new Utf8("baz"));
 
@@ -893,6 +894,24 @@ public class DataStoreTestUtil {
       bytes[i] = buffer.get(p++);
     }
     return bytes;
+  }
+  
+  public static String[] getFields(List<Field> schemaFields) {
+    
+    List<Field> list = new ArrayList<Field>();
+    for (Field field : schemaFields) {
+      if (!Persistent.DIRTY_BYTES_FIELD_NAME.equalsIgnoreCase(field.name())) {
+        list.add(field);
+      }
+    }
+    schemaFields = list;
+    
+    String[] fieldNames = new String[schemaFields.size()];
+    for(int i = 0; i<fieldNames.length; i++ ){
+      fieldNames[i] = schemaFields.get(i).name();
+    }
+    
+    return fieldNames;
   }
 
 }

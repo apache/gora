@@ -48,7 +48,7 @@ public class TestPersistentBase {
    */
   @Test
   public void testGetFields() {
-    WebPage page = new WebPage();
+    WebPage page = WebPage.newBuilder().build();
     List<Field> fields = page.getSchema().getFields();
     assertEquals(WebPage.SCHEMA$.getFields(), fields);
   }
@@ -59,7 +59,7 @@ public class TestPersistentBase {
    */
   @Test
   public void testGetField() {
-    WebPage page = new WebPage();
+    WebPage page = WebPage.newBuilder().build();
     for(int i=0; i<WebPage.SCHEMA$.getFields().toArray().length; i++) {
       Field field = page.getSchema().getFields().get(i);
       assertEquals(WebPage.SCHEMA$.getFields().get(i), field);
@@ -72,7 +72,7 @@ public class TestPersistentBase {
    */
   @Test
   public void testGetFieldIndex() {
-    WebPage page = new WebPage();
+    WebPage page = WebPage.newBuilder().build();
     for(int i=0; i<WebPage.SCHEMA$.getFields().toArray().length; i++) {
       int index = page.getSchema().getFields().get(i).pos();
       assertEquals(i, index);
@@ -86,13 +86,13 @@ public class TestPersistentBase {
    */
   @Test
   public void testFieldsWithTwoClasses() {
-    WebPage page = new WebPage();
+    WebPage page = WebPage.newBuilder().build();
     for(int i=0; i<WebPage.SCHEMA$.getFields().toArray().length; i++) {
       int index = page.getSchema().getFields().get(i).pos();
       assertEquals(i, index);
     }
-    Employee employee = new Employee();
-    for(int i=0; i<Employee._ALL_FIELDS.length; i++) {
+    Employee employee = Employee.newBuilder().build();
+    for(int i=0; i<Employee.SCHEMA$.getFields().toArray().length; i++) {
       int index = employee.getSchema().getFields().get(i).pos();
       assertEquals(i, index);
     }
@@ -112,7 +112,7 @@ public class TestPersistentBase {
   public void testClear() {
     
     //test clear all fields
-    WebPage page = new WebPage();
+    WebPage page = WebPage.newBuilder().build();
    
     page.setUrl(new Utf8("http://foo.com"));
     page.setParsedContent(new ArrayList<CharSequence>());
@@ -137,7 +137,7 @@ public class TestPersistentBase {
     page.setContent(ByteBuffer.wrap("foo baz bar barbaz".getBytes()));
     
     //test clear new object
-    page = new WebPage();
+    page = WebPage.newBuilder().build();
     page.clear();
   }
   

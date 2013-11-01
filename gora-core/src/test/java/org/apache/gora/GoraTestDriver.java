@@ -18,7 +18,6 @@
 
 package org.apache.gora;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Properties;
 
@@ -111,5 +110,9 @@ public class GoraTestDriver {
   
   public Class<?> getDataStoreClass() {
     return dataStoreClass;
+  }
+  
+  public Configuration getConfiguration() {
+    return this.conf;
   }
 }

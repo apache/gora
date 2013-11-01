@@ -17,6 +17,7 @@
  */
 package org.apache.gora.compiler;
 
+import java.beans.PersistenceDelegate;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.compiler.specific.SpecificCompiler;
+import org.apache.avro.generic.GenericData.StringType;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 
@@ -66,19 +68,16 @@ public class GoraCompiler extends SpecificCompiler {
 
     }
   }
-  
 
   public static String generateAppropriateImmutabilityModifier(Schema schema){
     switch (schema.getType()) {
-      case STRING:
-        return ".toString()";
       case BYTES:
         return ".asReadOnlyBuffer()";
       default:
         return "";
     }
   }
-	
+
   public static String generateAppropriateWrapperOrValue(Schema schema) {
     switch (schema.getType()) {
       case MAP:
@@ -87,12 +86,55 @@ public class GoraCompiler extends SpecificCompiler {
       case ARRAY:
         return "(value instanceof org.apache.gora.persistency.Dirtyable) ? "
           + "value : new org.apache.gora.persistency.impl.DirtyListWrapper(value)";
-      case STRING:
-        return "value.toString()";
       case BYTES:
         return "deepCopyToReadOnlyBuffer(value)";
       default:
         return "value";
+    }
+  }
+  
+  public static String generateAppropriateWrapperOrValueForPut(Schema schema) {
+    switch (schema.getType()) {
+      case MAP:
+        return "(value instanceof org.apache.gora.persistency.Dirtyable) ? "
+          + "value : new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)value)";
+      case ARRAY:
+        return "(value instanceof org.apache.gora.persistency.Dirtyable) ? "
+          + "value : new org.apache.gora.persistency.impl.DirtyListWrapper((java.util.List)value)";
+      default:
+        return "value";
+    }
+  }
+  
+  public static String generateAppropriateWrapper(Schema schema, Field field) {
+    if (field.name() == "__g__dirty") {
+      return "java.nio.ByteBuffer.wrap(new byte["
+        + getNumberOfBytesNeededForDirtyBits(schema) + "])";
+    } else {
+      switch (field.schema().getType()) {
+      case RECORD:
+        return field.schema().getName()+".newBuilder().build()";
+      case MAP:
+        return "new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)defaultValue(fields()["+field.pos()+"]))";
+      case ARRAY:
+        return "new org.apache.gora.persistency.impl.DirtyListWrapper((java.util.List)defaultValue(fields()["+field.pos()+"]))";
+      default:
+        return "defaultValue(fields()["+field.pos()+"])";
+      }
+    }
+    
+  }
+  
+  public static String generateAppropriateValue(Field field) {
+    switch (field.schema().getType()) {
+      case RECORD:
+        return field.schema().getName()+".newBuilder().build()";
+      case MAP:
+        return "new org.apache.gora.persistency.impl.DirtyMapWrapper(new java.util.HashMap())";
+      case ARRAY:
+        return "new org.apache.gora.persistency.impl.DirtyListWrapper(new java.util.ArrayList())";
+      default:
+        return "this."+field.name();
     }
   }
 

@@ -28,7 +28,7 @@ import org.apache.gora.persistency.Dirtyable;
 import org.apache.gora.persistency.Persistent;
 
 /**
- * Base classs implementing common functionality for Persistent
+ * Base class implementing common functionality for Persistent
  * classes.
  */
 public abstract class PersistentBase extends SpecificRecordBase implements Persistent  {
@@ -113,9 +113,10 @@ public abstract class PersistentBase extends SpecificRecordBase implements Persi
     case RECORD:
     case MAP:
     case ARRAY:
-      return ((Dirtyable) get(field.pos())).isDirty();
-    case UNION:
       Object value = get(field.pos());
+      return value==null ? false : ((Dirtyable) value).isDirty();
+    case UNION:
+      value = get(field.pos());
       if (value instanceof Dirtyable) {
         return ((Dirtyable) value).isDirty();
       }

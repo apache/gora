@@ -6,8 +6,21 @@
 package org.apache.gora.tutorial.log.generated;  
 @SuppressWarnings("all")
 public class Pageview extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Pageview\",\"namespace\":\"org.apache.gora.tutorial.log.generated\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty.\",\"default\":\"AAA=\"},{\"name\":\"url\",\"type\":\"string\"},{\"name\":\"timestamp\",\"type\":\"long\"},{\"name\":\"ip\",\"type\":\"string\"},{\"name\":\"httpMethod\",\"type\":\"string\"},{\"name\":\"httpStatusCode\",\"type\":\"int\"},{\"name\":\"responseSize\",\"type\":\"int\"},{\"name\":\"referrer\",\"type\":\"string\"},{\"name\":\"userAgent\",\"type\":\"string\"}]}");
-  /** Bytes used to represent weather or not a field is dirty. */
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Pageview\",\"namespace\":\"org.apache.gora.tutorial.log.generated\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty\",\"default\":\"AAA=\"},{\"name\":\"url\",\"type\":\"string\"},{\"name\":\"timestamp\",\"type\":\"long\"},{\"name\":\"ip\",\"type\":\"string\"},{\"name\":\"httpMethod\",\"type\":\"string\"},{\"name\":\"httpStatusCode\",\"type\":\"int\"},{\"name\":\"responseSize\",\"type\":\"int\"},{\"name\":\"referrer\",\"type\":\"string\"},{\"name\":\"userAgent\",\"type\":\"string\"}]}");
+  
+  public static final String[] _ALL_FIELDS = {
+  "__g__dirty",
+  "url",
+  "timestamp",
+  "ip",
+  "httpMethod",
+  "httpStatusCode",
+  "responseSize",
+  "referrer",
+  "userAgent",
+  };
+
+  /** Bytes used to represent weather or not a field is dirty */
   private java.nio.ByteBuffer __g__dirty = java.nio.ByteBuffer.wrap(new byte[2]);
   private java.lang.CharSequence url;
   private long timestamp;

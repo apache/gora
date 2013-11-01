@@ -22,6 +22,7 @@ import java.io.Closeable;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -33,6 +34,7 @@ import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.gora.avro.store.AvroStore;
 import org.apache.gora.persistency.BeanFactory;
+import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.impl.BeanFactoryImpl;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.store.DataStore;
@@ -165,11 +167,25 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
     if(fields != null) {
       return fields;
     }
+    return getFields();
+  }
+  
+  protected String[] getFields() {
     List<Field> schemaFields = beanFactory.getCachedPersistent().getSchema().getFields();
+    
+    List<Field> list = new ArrayList<Field>();
+    for (Field field : schemaFields) {
+      if (!Persistent.DIRTY_BYTES_FIELD_NAME.equalsIgnoreCase(field.name())) {
+        list.add(field);
+      }
+    }
+    schemaFields = list;
+    
     String[] fieldNames = new String[schemaFields.size()];
     for(int i = 0; i<fieldNames.length; i++ ){
       fieldNames[i] = schemaFields.get(i).name();
     }
+    
     return fieldNames;
   }
 

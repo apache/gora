@@ -6,18 +6,7 @@
 package org.apache.gora.examples.generated;  
 @SuppressWarnings("all")
 public class Employee extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Employee\",\"namespace\":\"org.apache.gora.examples.generated\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty.\",\"default\":\"AA==\"},{\"name\":\"name\",\"type\":[\"string\",\"null\"]},{\"name\":\"dateOfBirth\",\"type\":\"long\"},{\"name\":\"ssn\",\"type\":\"string\"},{\"name\":\"salary\",\"type\":\"int\"},{\"name\":\"boss\",\"type\":[\"null\",\"Employee\",\"string\"]},{\"name\":\"webpage\",\"type\":[\"null\",{\"type\":\"record\",\"name\":\"WebPage\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty.\",\"default\":\"AA==\"},{\"name\":\"url\",\"type\":\"string\"},{\"name\":\"content\",\"type\":[\"null\",\"bytes\"]},{\"name\":\"parsedContent\",\"type\":{\"type\":\"array\",\"items\":\"string\"}},{\"name\":\"outlinks\",\"type\":{\"type\":\"map\",\"values\":\"string\"}},{\"name\":\"metadata\",\"type\":{\"type\":\"record\",\"name\":\"Metadata\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty.\",\"default\":\"AA==\"},{\"name\":\"version\",\"type\":\"int\"},{\"name\":\"data\",\"type\":{\"type\":\"map\",\"values\":\"string\"}}]}}]}]}]}");
-  
-  public static final String[] _ALL_FIELDS = {
-  "__g__dirty",
-  "name",
-  "dateOfBirth",
-  "ssn",
-  "salary",
-  "boss",
-  "webpage",
-  };
-
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Employee\",\"namespace\":\"org.apache.gora.examples.generated\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty.\",\"default\":\"AA==\"},{\"name\":\"name\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"dateOfBirth\",\"type\":\"long\",\"default\":0},{\"name\":\"ssn\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"salary\",\"type\":\"int\",\"default\":0},{\"name\":\"boss\",\"type\":[\"null\",\"Employee\",\"string\"],\"default\":null},{\"name\":\"webpage\",\"type\":[\"null\",{\"type\":\"record\",\"name\":\"WebPage\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty.\",\"default\":\"AA==\"},{\"name\":\"url\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"content\",\"type\":[\"null\",\"bytes\"],\"default\":null},{\"name\":\"parsedContent\",\"type\":{\"type\":\"array\",\"items\":\"string\"},\"default\":null},{\"name\":\"outlinks\",\"type\":{\"type\":\"map\",\"values\":\"string\"},\"default\":null},{\"name\":\"metadata\",\"type\":{\"type\":\"record\",\"name\":\"Metadata\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty.\",\"default\":\"AA==\"},{\"name\":\"version\",\"type\":\"int\",\"default\":0},{\"name\":\"data\",\"type\":{\"type\":\"map\",\"values\":\"string\"},\"default\":null}]},\"default\":null}]}],\"default\":null}]}");
   /** Bytes used to represent weather or not a field is dirty. */
   private java.nio.ByteBuffer __g__dirty = java.nio.ByteBuffer.wrap(new byte[1]);
   private java.lang.CharSequence name;
@@ -40,17 +29,18 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
+  
   // Used by DatumReader.  Applications should not call. 
   @SuppressWarnings(value="unchecked")
-  public void put(int field$, java.lang.Object value$) {
+  public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: __g__dirty = (java.nio.ByteBuffer)value$; break;
-    case 1: name = (java.lang.CharSequence)value$; break;
-    case 2: dateOfBirth = (java.lang.Long)value$; break;
-    case 3: ssn = (java.lang.CharSequence)value$; break;
-    case 4: salary = (java.lang.Integer)value$; break;
-    case 5: boss = (java.lang.Object)value$; break;
-    case 6: webpage = (org.apache.gora.examples.generated.WebPage)value$; break;
+    case 0: __g__dirty = (java.nio.ByteBuffer)(value); break;
+    case 1: name = (java.lang.CharSequence)(value); break;
+    case 2: dateOfBirth = (java.lang.Long)(value); break;
+    case 3: ssn = (java.lang.CharSequence)(value); break;
+    case 4: salary = (java.lang.Integer)(value); break;
+    case 5: boss = (java.lang.Object)(value); break;
+    case 6: webpage = (org.apache.gora.examples.generated.WebPage)(value); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -107,7 +97,7 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
    * Gets the value of the 'ssn' field.
    */
   public java.lang.CharSequence getSsn() {
-    return ssn.toString();
+    return ssn;
   }
 
   /**
@@ -115,7 +105,7 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
    * @param value the value to set.
    */
   public void setSsn(java.lang.CharSequence value) {
-    this.ssn = value.toString();
+    this.ssn = value;
     setDirty(3);
   }
   
@@ -446,7 +436,7 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
     public Employee build() {
       try {
         Employee record = new Employee();
-        record.__g__dirty = fieldSetFlags()[0] ? this.__g__dirty : (java.nio.ByteBuffer) defaultValue(fields()[0]);
+        record.__g__dirty = fieldSetFlags()[0] ? this.__g__dirty : (java.nio.ByteBuffer) java.nio.ByteBuffer.wrap(new byte[1]);
         record.name = fieldSetFlags()[1] ? this.name : (java.lang.CharSequence) defaultValue(fields()[1]);
         record.dateOfBirth = fieldSetFlags()[2] ? this.dateOfBirth : (java.lang.Long) defaultValue(fields()[2]);
         record.ssn = fieldSetFlags()[3] ? this.ssn : (java.lang.CharSequence) defaultValue(fields()[3]);

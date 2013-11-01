@@ -51,6 +51,7 @@ public class WebPageDataCreator {
     "http://baz.com/1.jsp&q=barbaz&p=foo",
     "http://baz.com/1.jsp&q=foo",
     "http://bazbar.com",
+    //"http://example.com",
   };
   
   public static HashMap<String, Integer> URL_INDEXES = new HashMap<String, Integer>();
@@ -72,6 +73,7 @@ public class WebPageDataCreator {
     "a b b b b b a",
     "a a a",
     "foo bar baz",
+    //"fck fck dck",
   };
   
   public static final int[][] LINKS = {
@@ -115,14 +117,14 @@ public class WebPageDataCreator {
       log.info("creating web page data");
       
       for(int i=0; i<URLS.length; i++) {
-        page = new WebPage();
+        page = WebPage.newBuilder().build();
         page.setUrl(new Utf8(URLS[i]));
         page.setParsedContent(new ArrayList<CharSequence>());
 	    if (CONTENTS[i]!=null){
-		  page.setContent(ByteBuffer.wrap(CONTENTS[i].getBytes()));
-		  for(String token : CONTENTS[i].split(" ")) {
-		    page.getParsedContent().add(new Utf8(token));  
-		  }
+		    page.setContent(ByteBuffer.wrap(CONTENTS[i].getBytes()));
+		    for(String token : CONTENTS[i].split(" ")) {
+		      page.getParsedContent().add(new Utf8(token));  
+		    }
 	    }
         
         page.setOutlinks(new HashMap<CharSequence, CharSequence>());
@@ -130,7 +132,7 @@ public class WebPageDataCreator {
           page.getOutlinks().put(new Utf8(URLS[LINKS[i][j]]), new Utf8(ANCHORS[i][j]));
         }
         
-        Metadata metadata = new Metadata();
+        Metadata metadata = Metadata.newBuilder().build();
         metadata.setVersion(1);
         metadata.setData(new HashMap<CharSequence, CharSequence>());
         metadata.getData().put(new Utf8("metakey"), new Utf8("metavalue"));

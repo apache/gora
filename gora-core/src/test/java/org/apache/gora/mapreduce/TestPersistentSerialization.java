@@ -67,7 +67,7 @@ public class TestPersistentSerialization {
    */
   @Test
   public void testSerdeEmployeeOneField() throws Exception {
-    Employee employee = new Employee();
+    Employee employee = Employee.newBuilder().build();
     employee.setSsn(new Utf8("11111"));
 
     TestIOUtils.testSerializeDeserialize(employee);
@@ -81,7 +81,7 @@ public class TestPersistentSerialization {
    */
   @Test
   public void testSerdeEmployeeTwoFields() throws Exception {
-    Employee employee = new Employee();
+    Employee employee = Employee.newBuilder().build();
     employee.setSsn(new Utf8("11111"));
     employee.setSalary(100);
 
@@ -126,9 +126,9 @@ public class TestPersistentSerialization {
    */
   @Test
   public void testSerdeMultipleWebPages() throws Exception {
-    WebPage page1 = new WebPage();
-    WebPage page2 = new WebPage();
-    WebPage page3 = new WebPage();
+    WebPage page1 = WebPage.newBuilder().build();
+    WebPage page2 = WebPage.newBuilder().build();
+    WebPage page3 = WebPage.newBuilder().build();
 
     page1.setUrl(new Utf8("foo"));
     page2.setUrl(new Utf8("baz"));

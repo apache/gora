@@ -24,13 +24,6 @@ package $schema.getNamespace();
 #end
 public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends org.apache.avro.specific.SpecificExceptionBase#else extends org.apache.gora.persistency.impl.PersistentBase#end implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
   public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("${this.javaEscape($schema.toString())}");
-  
-  public static final String[] _ALL_FIELDS = {
-#foreach ($field in $schema.getFields())
-  "${this.mangle($field.name(), $schema.isError())}",
-#end		
-  };
-
 #foreach ($field in $schema.getFields())
 #if ($field.doc())
   /** $field.doc() */
@@ -68,13 +61,14 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
+  
   // Used by DatumReader.  Applications should not call. 
   @SuppressWarnings(value="unchecked")
-  public void put(int field$, java.lang.Object value$) {
+  public void put(int field$, java.lang.Object value) {
     switch (field$) {
 #set ($i = 0)
 #foreach ($field in $schema.getFields())
-    case $i: ${this.mangle($field.name(), $schema.isError())} = (${this.javaType($field.schema())})value$; break;
+    case $i: ${this.mangle($field.name(), $schema.isError())} = (${this.javaType($field.schema())})(${this.generateAppropriateWrapperOrValueForPut($field.schema())}); break;
 #set ($i = $i + 1)
 #end
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
@@ -245,7 +239,7 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
       try {
         ${this.mangle($schema.getName())} record = new ${this.mangle($schema.getName())}(#if ($schema.isError())getValue(), getCause()#end);
 #foreach ($field in $schema.getFields())
-        record.${this.mangle($field.name(), $schema.isError())} = fieldSetFlags()[$field.pos()] ? this.${this.mangle($field.name(), $schema.isError())} : (${this.javaType($field.schema())}) defaultValue(fields()[$field.pos()]);
+        record.${this.mangle($field.name(), $schema.isError())} = fieldSetFlags()[$field.pos()] ? this.${this.mangle($field.name(), $schema.isError())} : (${this.javaType($field.schema())}) ${this.generateAppropriateWrapper($schema,$field)};
 #end
         return record;
       } catch (Exception e) {

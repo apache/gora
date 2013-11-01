@@ -1,20 +1,20 @@
 {
   "type": "record",
-  "name": "WebPage",
+  "name": "WebPage","default":null,
   "namespace": "org.apache.gora.examples.generated",
   "fields" : [
-    {"name": "url", "type": "string"},
-    {"name": "content", "type": ["null","bytes"]},
-    {"name": "parsedContent", "type": {"type":"array", "items": "string"}},
-    {"name": "outlinks", "type": {"type":"map", "values":"string"}},
-    {"name": "metadata", "type": {
+    {"name": "url", "type": ["null","string"], "default":null},
+    {"name": "content", "type": ["null","bytes"],"default":null},
+    {"name": "parsedContent", "type": {"type":"array", "items": "string"}, "default":null},
+    {"name": "outlinks", "type": {"type":"map", "values":"string"}, "default":null},
+    {"name": "metadata", "default":null, "type": {
       "name": "Metadata",
       "type": "record",
       "namespace": "org.apache.gora.examples.generated",
-      "fields": [
-        {"name": "version", "type": "int"},
-        {"name": "data", "type": {"type": "map", "values": "string"}}
-      ]
+      "fields" : [
+			  {"name":"version","type":"int","default":0},
+			  {"name":"data","type":{"type":"map","values":"string"}, "default":null}
+			]
     }}
   ]
 }

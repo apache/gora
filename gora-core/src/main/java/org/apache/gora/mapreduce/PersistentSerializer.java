@@ -27,7 +27,7 @@ import org.apache.gora.persistency.Persistent;
 import org.apache.hadoop.io.serializer.Serializer;
 
 /**
- * Hadoop serializer using {@link PersistentDatumWriter}
+ * Hadoop serializer using Avro's {@link SpecificDatumWriter}
  * with {@link BinaryEncoder}.
  */
 public class PersistentSerializer implements Serializer<Persistent> {
@@ -44,11 +44,19 @@ public class PersistentSerializer implements Serializer<Persistent> {
     encoder.flush();
   }
 
+  /**
+   * Open a connection for the {@link OutputStream}; should be
+   * called before serialization occurs. N.B. the {@link PersistentSerializer#close()}
+   * should be called 'finally' after serialization is complete.
+   */
   @Override
   public void open(OutputStream out) throws IOException {
     encoder = EncoderFactory.get().directBinaryEncoder(out, null);
   }
 
+  /**
+   * Do the serialization of the {@link Persistent} object
+   */
   @Override
   public void serialize(Persistent persistent) throws IOException {
     datumWriter.setSchema(persistent.getSchema());
