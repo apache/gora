@@ -21,22 +21,29 @@ package org.apache.gora.hbase.util;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.io.BinaryDecoder;
 import org.apache.avro.io.BinaryEncoder;
+import org.apache.avro.io.Decoder;
 import org.apache.avro.io.DecoderFactory;
+import org.apache.avro.io.EncoderFactory;
+import org.apache.avro.io.ResolvingDecoder;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.avro.util.Utf8;
+import org.apache.gora.persistency.Persistent;
 import org.apache.gora.util.AvroUtils;
-import org.apache.gora.avro.PersistentDatumReader;
-import org.apache.gora.avro.PersistentDatumWriter;
+import org.apache.gora.util.ClassLoadingUtils;
+import org.apache.gora.util.ReflectionUtils;
 import org.apache.hadoop.hbase.util.Bytes;
 
 /**
@@ -47,27 +54,13 @@ public class HBaseByteInterface {
   /**
    * Threadlocals maintaining reusable binary decoders and encoders.
    */
+  private static ThreadLocal<ByteArrayOutputStream> outputStream =
+      new ThreadLocal<ByteArrayOutputStream>();
+  
   public static final ThreadLocal<BinaryDecoder> decoders =
       new ThreadLocal<BinaryDecoder>();
-  public static final ThreadLocal<BinaryEncoderWithStream> encoders =
-      new ThreadLocal<BinaryEncoderWithStream>();
-  
-  /**
-   * A BinaryEncoder that exposes the outputstream so that it can be reset
-   * every time. (This is a workaround to reuse BinaryEncoder and the buffers,
-   * normally provided be EncoderFactory, but this class does not exist yet 
-   * in the current Avro version).
-   */
-  public static final class BinaryEncoderWithStream extends BinaryEncoder {
-    public BinaryEncoderWithStream(OutputStream out) {
-      super(out);
-    }
-    
-    protected OutputStream getOut() {
-      return out;
-    }
-  }
-  
+  public static final ThreadLocal<BinaryEncoder> encoders =
+      new ThreadLocal<BinaryEncoder>();
   /*
    * Create a threadlocal map for the datum readers and writers, because
    * they are not thread safe, at least not before Avro 1.4.0 (See AVRO-650).
@@ -75,19 +68,9 @@ public class HBaseByteInterface {
    * writer pair for every schema, instead of one for every thread.
    */
   
-  public static final ThreadLocal<Map<String, SpecificDatumReader<?>>> 
-    readerMaps = new ThreadLocal<Map<String, SpecificDatumReader<?>>>() {
-      protected Map<String,SpecificDatumReader<?>> initialValue() {
-        return new HashMap<String, SpecificDatumReader<?>>();
-      };
-  };
-  
-  public static final ThreadLocal<Map<String, SpecificDatumWriter<?>>> 
-    writerMaps = new ThreadLocal<Map<String, SpecificDatumWriter<?>>>() {
-      protected Map<String,SpecificDatumWriter<?>> initialValue() {
-        return new HashMap<String, SpecificDatumWriter<?>>();
-      };
-  };
+  public static final ConcurrentHashMap<String, SpecificDatumReader<?>> readerMap = new ConcurrentHashMap<String, SpecificDatumReader<?>>();
+     
+  public static final ConcurrentHashMap<String, SpecificDatumWriter<?>> writerMap = new ConcurrentHashMap<String, SpecificDatumWriter<?>>();
 
   /**
    * Deserializes an array of bytes matching the given schema to the proper basic (enum, Utf8,...) or
@@ -100,7 +83,7 @@ public class HBaseByteInterface {
    * @return Enum|Utf8|ByteBuffer|Integer|Long|Float|Double|Boolean|Persistent|Null
    * @throws IOException
    */
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   public static Object fromBytes(Schema schema, byte[] val) throws IOException {
     Type type = schema.getType();
     switch (type) {
@@ -144,37 +127,28 @@ public class HBaseByteInterface {
       // => deserialize like "case RECORD"
 
     case RECORD:
-      Map<String, SpecificDatumReader<?>> readerMap = readerMaps.get();
-      PersistentDatumReader<?> reader = null ;
-            
-      // For UNION schemas, must use a specific PersistentDatumReader
+      // For UNION schemas, must use a specific SpecificDatumReader
       // from the readerMap since unions don't have own name
       // (key name in map will be "UNION-type-type-...")
-      if (schema.getType().equals(Schema.Type.UNION)) {
-        reader = (PersistentDatumReader<?>)readerMap.get(String.valueOf(schema.hashCode()));
-        if (reader == null) {
-          reader = new PersistentDatumReader(schema, false);// ignore dirty bits
-          readerMap.put(String.valueOf(schema.hashCode()), reader);
-        }
-      } else {
-        // ELSE use reader for Record
-        reader = (PersistentDatumReader<?>)readerMap.get(schema.getFullName());
-        if (reader == null) {
-          reader = new PersistentDatumReader(schema, false);// ignore dirty bits
-          readerMap.put(schema.getFullName(), reader);
+      String schemaId = schema.getType().equals(Schema.Type.UNION) ? String.valueOf(schema.hashCode()) : schema.getFullName();      
+      
+      SpecificDatumReader<?> reader = (SpecificDatumReader<?>)readerMap.get(schemaId);
+      if (reader == null) {
+        reader = new SpecificDatumReader(schema);// ignore dirty bits
+        SpecificDatumReader localReader=null;
+        if((localReader=readerMap.putIfAbsent(schemaId, reader))!=null) {
+          reader = localReader;
         }
       }
       
       // initialize a decoder, possibly reusing previous one
       BinaryDecoder decoderFromCache = decoders.get();
-      BinaryDecoder decoder=DecoderFactory.defaultFactory().
-          createBinaryDecoder(val, decoderFromCache);
+      BinaryDecoder decoder = DecoderFactory.get().binaryDecoder(val, null);
       // put in threadlocal cache if the initial get was empty
       if (decoderFromCache==null) {
         decoders.set(decoder);
       }
-      
-      return reader.read((Object)null, schema, decoder);
+      return reader.read(null, decoder);
     default: throw new RuntimeException("Unknown type: "+type);
     }
   }
@@ -253,7 +227,7 @@ public class HBaseByteInterface {
   public static byte[] toBytes(Object o, Schema schema) throws IOException {
     Type type = schema.getType();
     switch (type) {
-    case STRING:  return Bytes.toBytes(((Utf8)o).toString()); // TODO: maybe ((Utf8)o).getBytes(); ?
+    case STRING:  return Bytes.toBytes(((CharSequence)o).toString()); // TODO: maybe ((Utf8)o).getBytes(); ?
     case BYTES:   return ((ByteBuffer)o).array();
     case INT:     return Bytes.toBytes((Integer)o);
     case LONG:    return Bytes.toBytes((Long)o);
@@ -291,36 +265,25 @@ public class HBaseByteInterface {
       // => Serialize like "case RECORD" with Avro
       
     case RECORD:
-      Map<String, SpecificDatumWriter<?>> writerMap = writerMaps.get();
-      PersistentDatumWriter writer = null ;
-      // For UNION schemas, must use a specific PersistentDatumReader
-      // from the readerMap since unions don't have own name
-      // (key name in map will be "UNION-type-type-...")
-      if (schema.getType().equals(Schema.Type.UNION)) {
-        writer = (PersistentDatumWriter<?>) writerMap.get(String.valueOf(schema.hashCode()));
-        if (writer == null) {
-          writer = new PersistentDatumWriter(schema,false);// ignore dirty bits
-          writerMap.put(String.valueOf(schema.hashCode()),writer);
-        }
-      } else {
-        // ELSE use writer for Record
-        writer = (PersistentDatumWriter<?>) writerMap.get(schema.getFullName());
-        if (writer == null) {
-          writer = new PersistentDatumWriter(schema,false);// ignore dirty bits
-          writerMap.put(schema.getFullName(),writer);
-        }
+      SpecificDatumWriter writer = (SpecificDatumWriter<?>) writerMap.get(schema.getFullName());
+      if (writer == null) {
+        writer = new SpecificDatumWriter(schema);// ignore dirty bits
+        writerMap.put(schema.getFullName(),writer);
       }
       
-      BinaryEncoderWithStream encoder = encoders.get();
-      if (encoder == null) {
-        encoder = new BinaryEncoderWithStream(new ByteArrayOutputStream());
+      BinaryEncoder encoderFromCache = encoders.get();
+      ByteArrayOutputStream bos = new ByteArrayOutputStream();
+      outputStream.set(bos);
+      BinaryEncoder encoder = EncoderFactory.get().directBinaryEncoder(bos, null);
+      if (encoderFromCache == null) {
         encoders.set(encoder);
       }
+      
       //reset the buffers
-      ByteArrayOutputStream os = (ByteArrayOutputStream) encoder.getOut();
+      ByteArrayOutputStream os = outputStream.get();
       os.reset();
       
-      writer.write(schema,o, encoder);
+      writer.write(o, encoder);
       encoder.flush();
       return os.toByteArray();
     default: throw new RuntimeException("Unknown type: "+type);

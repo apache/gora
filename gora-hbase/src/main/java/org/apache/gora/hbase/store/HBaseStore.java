@@ -45,11 +45,8 @@ import org.apache.gora.hbase.query.HBaseQuery;
 import org.apache.gora.hbase.query.HBaseScannerResult;
 import org.apache.gora.hbase.store.HBaseMapping.HBaseMappingBuilder;
 import org.apache.gora.hbase.util.HBaseByteInterface;
-import org.apache.gora.persistency.ListGenericArray;
-import org.apache.gora.persistency.State;
-import org.apache.gora.persistency.StateManager;
-import org.apache.gora.persistency.StatefulHashMap;
-import org.apache.gora.persistency.StatefulMap;
+import org.apache.gora.persistency.impl.DirtyListWrapper;
+import org.apache.gora.persistency.impl.DirtyMapWrapper;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
@@ -216,7 +213,6 @@ implements Configurable {
   public void put(K key, T persistent) {
     try{
       Schema schema = persistent.getSchema();
-      StateManager stateManager = persistent.getStateManager();
       byte[] keyRaw = toBytes(key);
       Put put = new Put(keyRaw);
       Delete delete = new Delete(keyRaw);
@@ -225,7 +221,7 @@ implements Configurable {
       Iterator<Field> iter = schema.getFields().iterator();
       for (int i = 0; iter.hasNext(); i++) {
         Field field = iter.next();
-        if (!stateManager.isDirty(persistent, i)) {
+        if (i==0 || !persistent.isDirty(i)) {
           continue;
         }
         Type type = field.schema().getType();
@@ -237,43 +233,17 @@ implements Configurable {
         }
         switch(type) {
           case MAP:
-            if(o instanceof StatefulMap) {
-              StatefulHashMap<Utf8, ?> map = (StatefulHashMap<Utf8, ?>) o;
-              for (Entry<Utf8, State> e : map.states().entrySet()) {
-                Utf8 mapKey = e.getKey();
-                switch (e.getValue()) {
-                  case DIRTY:
-                    byte[] qual = Bytes.toBytes(mapKey.toString());
-                    byte[] val = toBytes(map.get(mapKey), field.schema().getValueType());
-                    // XXX - Gora 207: Top-most record level ["null","type"] must be saved raw. "null"=>delete
-                    if (val == null) { // value == null => must delete the column
-                      delete.deleteColumn(hcol.getFamily(), qual);
-                      hasDeletes = true;
-                    } else {
-                      put.add(hcol.getFamily(), qual, val);
-                      hasPuts = true;
-                    }
-                    break;
-                  case DELETED:
-                    qual = Bytes.toBytes(mapKey.toString());
-                    hasDeletes = true;
-                    delete.deleteColumn(hcol.getFamily(), qual);
-                    break;
-                }
-              }
-            } else {
-              Set<Map.Entry> set = ((Map)o).entrySet();
-              for(Entry entry: set) {
-                byte[] qual = toBytes(entry.getKey());
-                byte[] val = toBytes(entry.getValue(), field.schema().getValueType());
-                // XXX - Gora 207: Top-most record level ["null","type"] must be saved raw. "null"=>delete
-                if (val == null) { // value == null => must delete the column
-                  delete.deleteColumn(hcol.getFamily(), qual);
-                  hasDeletes = true;
-                } else {
-                  put.add(hcol.getFamily(), qual, val);
-                  hasPuts = true;
-                }
+            Set<Map.Entry> set = ((Map)o).entrySet();
+            for(Entry entry: set) {
+              byte[] qual = toBytes(entry.getKey());
+              byte[] val = toBytes(entry.getValue(), field.schema().getValueType());
+              // XXX - Gora 207: Top-most record level ["null","type"] must be saved raw. "null"=>delete
+              if (val == null) { // value == null => must delete the column
+                delete.deleteColumn(hcol.getFamily(), qual);
+                hasDeletes = true;
+              } else {
+                put.add(hcol.getFamily(), qual, val);
+                hasPuts = true;
               }
             }
             break;
@@ -347,8 +317,7 @@ implements Configurable {
       String[] fields = getFieldsToQuery(query.getFields());
       //find whether all fields are queried, which means that complete
       //rows will be deleted
-      boolean isAllFields = Arrays.equals(fields
-          , getBeanFactory().getCachedPersistent().getFields());
+      boolean isAllFields = Arrays.equals(fields, getFields());
   
       org.apache.gora.query.Result<K, T> result = null;
       result = query.execute();
@@ -561,7 +530,6 @@ implements Configurable {
       return null;
 
     T persistent = newPersistent();
-    StateManager stateManager = persistent.getStateManager();
     for (String f : fields) {
       HBaseColumn col = mapping.getColumn(f);
       if (col == null) {
@@ -592,11 +560,11 @@ implements Configurable {
           }
           valueSchema = fieldSchema.getElementType();
           ArrayList arrayList = new ArrayList();
+          DirtyListWrapper dirtyListWrapper = new DirtyListWrapper(arrayList);
           for (Entry<byte[], byte[]> e : qualMap.entrySet()) {
-            arrayList.add(fromBytes(valueSchema, e.getValue()));
+            dirtyListWrapper.add(fromBytes(valueSchema, e.getValue()));
           }
-          ListGenericArray arr = new ListGenericArray(fieldSchema, arrayList);
-          setField(persistent, field, arr);
+          setField(persistent, field, arrayList);
           break;
         default:
           byte[] val = result.getValue(col.getFamily(), col.getQualifier());
@@ -607,13 +575,13 @@ implements Configurable {
           break;
       }
     }
-    stateManager.clearDirty(persistent);
+    persistent.clearDirty();
     return persistent;
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
   private void setField(T persistent, Field field, Map map) {
-    persistent.put(field.pos(), new StatefulHashMap(map));
+    persistent.put(field.pos(), new DirtyMapWrapper(map));
   }
 
   private void setField(T persistent, Field field, byte[] val)
@@ -622,8 +590,8 @@ implements Configurable {
   }
 
   @SuppressWarnings("rawtypes")
-  private void setField(T persistent, Field field, GenericArray list) {
-    persistent.put(field.pos(), list);
+  private void setField(T persistent, Field field, List list) {
+    persistent.put(field.pos(), new DirtyListWrapper(list));
   }
 
   @SuppressWarnings("unchecked")

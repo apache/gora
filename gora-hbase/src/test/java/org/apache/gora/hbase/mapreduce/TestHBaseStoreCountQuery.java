@@ -18,7 +18,6 @@
 
 package org.apache.gora.hbase.mapreduce;
 
-import org.apache.gora.examples.generated.TokenDatum;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.hbase.store.HBaseStore;
 import org.apache.gora.hbase.util.HBaseClusterSingleton;

@@ -574,8 +574,8 @@
         <module>gora-compiler</module>
         <module>gora-compiler-cli</module>
         <module>gora-core</module>
-        <!--module>gora-hbase</module>
-        <module>gora-accumulo</module-->
+        <module>gora-hbase</module>
+        <!--module>gora-accumulo</module-->
         <!--module>gora-cassandra</module-->
         <!-- module>gora-solr</module-->
         <!--module>gora-dynamodb</module-->
@@ -592,7 +592,7 @@
         <!-- Hadoop Dependencies -->
         <hadoop.version>1.0.1</hadoop.version>
         <hadoop.test.version>1.0.1</hadoop.test.version>
-        <hbase.version>0.90.4</hbase.version>
+        <hbase.version>0.94.9</hbase.version>
         <avro.version>1.7.4</avro.version>
         <cxf-rt-frontend-jaxrs.version>2.5.2</cxf-rt-frontend-jaxrs.version>
         <!-- Amazon Dependencies -->
