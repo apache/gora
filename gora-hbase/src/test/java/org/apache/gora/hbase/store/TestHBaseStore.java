@@ -204,7 +204,7 @@ public class TestHBaseStore extends DataStoreTestBase {
     HTable table = new HTable(conf,"WebPage");
     Get get = new Get(Bytes.toBytes("com.example/http"));
     org.apache.hadoop.hbase.client.Result result = table.get(get);
-        
+    table.close();
     byte[] contentBytes = result.getValue(Bytes.toBytes("content"), null);
 
     assertNull(webPageStore.get("com.example/http", new String[]{"content"})) ;

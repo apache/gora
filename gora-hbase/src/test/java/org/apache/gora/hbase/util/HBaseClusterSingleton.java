@@ -85,8 +85,8 @@ public final class HBaseClusterSingleton {
 
     htu.getConfiguration().setBoolean("dfs.support.append", true);
     htu.getConfiguration().setInt("zookeeper.session.timeout", 20000);
-    htu.getConfiguration().set("hbase.zookeeper.quorum", "localhost");
-    htu.getConfiguration().setInt("hbase.zookeeper.property.clientPort", 2181);
+    //htu.getConfiguration().set("hbase.zookeeper.quorum", "localhost");
+    //htu.getConfiguration().setInt("hbase.zookeeper.property.clientPort", 2181);
     
     try {
       LOG.info("Start HBase mini cluster.");
