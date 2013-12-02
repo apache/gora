@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -36,10 +35,8 @@ import java.util.Set;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
-import org.apache.avro.generic.GenericArray;
 import org.apache.avro.util.Utf8;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.apache.gora.hbase.query.HBaseGetResult;
 import org.apache.gora.hbase.query.HBaseQuery;
 import org.apache.gora.hbase.query.HBaseScannerResult;
@@ -52,6 +49,7 @@ import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.PartitionQueryImpl;
 import org.apache.gora.store.impl.DataStoreBase;
+
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -66,9 +64,13 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.util.Pair;
+
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * DataStore for HBase. Thread safe.
@@ -218,9 +220,9 @@ implements Configurable {
       Delete delete = new Delete(keyRaw);
       boolean hasPuts = false;
       boolean hasDeletes = false;
-      Iterator<Field> iter = schema.getFields().iterator();
-      for (int i = 0; iter.hasNext(); i++) {
-        Field field = iter.next();
+      List<Field> fields = schema.getFields();
+      for (int i = 1; i<fields.size(); i++) {
+        Field field = fields.get(i);
         if (i==0 || !persistent.isDirty(i)) {
           continue;
         }
@@ -237,7 +239,7 @@ implements Configurable {
             for(Entry entry: set) {
               byte[] qual = toBytes(entry.getKey());
               byte[] val = toBytes(entry.getValue(), field.schema().getValueType());
-              // XXX - Gora 207: Top-most record level ["null","type"] must be saved raw. "null"=>delete
+              // Gora 207: Top-most record level ["null","type"] must be saved raw. "null"=>delete
               if (val == null) { // value == null => must delete the column
                 delete.deleteColumn(hcol.getFamily(), qual);
                 hasDeletes = true;
@@ -248,24 +250,24 @@ implements Configurable {
             }
             break;
           case ARRAY:
-            if(o instanceof GenericArray) {
-              GenericArray arr = (GenericArray) o;
-              int j=0;
-              for(Object item : arr) {
-                byte[] val = toBytes(item, field.schema().getElementType());
-                // XXX - Gora 207: Top-most record level ["null","type"] must be saved raw. "null"=>delete
-                if (val == null) { // value == null => must delete the column
-                  delete.deleteColumn(hcol.getFamily(), Bytes.toBytes(j++));
-                  hasDeletes = true;
-                } else {
-                  put.add(hcol.getFamily(), Bytes.toBytes(j++), val);
-                  hasPuts = true;
-                }
+            List<?> array = (List<?>) o;
+            int j=0;
+            for(Object item : array) {
+              byte[] val = toBytes(item);
+              // Gora 207: Top-most record level ["null","type"] 
+              // must be saved raw. "null"=>delete
+              if (val == null) { // value == null => must delete the column
+                delete.deleteColumn(hcol.getFamily(), Bytes.toBytes(j++));
+                hasDeletes = true;
+              } else {
+                put.add(hcol.getFamily(), Bytes.toBytes(j++), val);
+                hasPuts = true;
               }
             }
             break;
           default:
-            // XXX - Gora 207: Top-most record level ["null","type"] must be saved raw. "null"=>delete
+            // Gora 207: Top-most record level ["null","type"] 
+            // must be saved raw. "null"=>delete
             byte[] serializedBytes = toBytes(o, field.schema()) ;
             if (serializedBytes == null) { // value == null => must delete the column
               delete.deleteColumn(hcol.getFamily(), hcol.getQualifier());
@@ -589,7 +591,7 @@ implements Configurable {
     persistent.put(field.pos(), fromBytes(field.schema(), val));
   }
 
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   private void setField(T persistent, Field field, List list) {
     persistent.put(field.pos(), new DirtyListWrapper(list));
   }

@@ -89,7 +89,7 @@ public class DataStoreTestUtil {
   public static <K> Employee createEmployee(
       DataStore<K, Employee> dataStore) throws IOException, Exception {
 
-    Employee employee = dataStore.newPersistent();
+    Employee employee = Employee.newBuilder().build();
     employee.setName(new Utf8("Random Joe"));
     employee.setDateOfBirth( System.currentTimeMillis() - 20L *  YEAR_IN_MS );
     employee.setSalary(100000);
@@ -100,7 +100,7 @@ public class DataStoreTestUtil {
   public static <K> Employee createBoss(
       DataStore<K, Employee> dataStore) throws IOException, Exception {
 
-    Employee employee = dataStore.newPersistent();
+    Employee employee = Employee.newBuilder().build();
     employee.setName(new Utf8("Random boss"));
     employee.setDateOfBirth( System.currentTimeMillis() - 22L *  YEAR_IN_MS );
     employee.setSalary(1000000);
@@ -306,7 +306,7 @@ public class DataStoreTestUtil {
     long now = System.currentTimeMillis();
 
     for (int i = 0; i < 5; i++) {
-      Employee employee = dataStore.newPersistent();
+      Employee employee = Employee.newBuilder().build();
       employee.setName(new Utf8("John Doe " + i));
       employee.setDateOfBirth(now - 20L *  YEAR_IN_MS);
       employee.setSalary(100000);
@@ -317,7 +317,7 @@ public class DataStoreTestUtil {
     dataStore.flush();
 
     for (int i = 0; i < 1; i++) {
-      Employee employee = dataStore.newPersistent();
+      Employee employee = Employee.newBuilder().build();
       employee.setName(new Utf8("John Doe " + (i + 5)));
       employee.setDateOfBirth(now - 18L *  YEAR_IN_MS);
       employee.setSalary(120000);
@@ -350,11 +350,13 @@ public class DataStoreTestUtil {
 
 
     for (int i = 0; i < urls.length; i++) {
-      WebPage webPage = dataStore.newPersistent();
+      WebPage webPage = WebPage.newBuilder().build();
       webPage.setUrl(new Utf8(urls[i]));
+      webPage.setParsedContent(new ArrayList<CharSequence>());
       for (parsedContentCount = 0; parsedContentCount < 5; parsedContentCount++) {
         webPage.getParsedContent().add(new Utf8(parsedContent + i + "," + parsedContentCount));
       }
+      webPage.setOutlinks(new HashMap<CharSequence, CharSequence>());
       for (int j = 0; j < urls.length; j += 2) {
         webPage.getOutlinks().put(new Utf8(anchor + j), new Utf8(urls[j]));
       }
@@ -843,23 +845,24 @@ public class DataStoreTestUtil {
   public static void testPutArray(DataStore<String, WebPage> store)
           throws IOException, Exception {
     store.createSchema();
-    WebPage page = store.newPersistent();
+    WebPage page = WebPage.newBuilder().build();
 
     String[] tokens = {"example", "content", "in", "example.com"};
-
+    page.setParsedContent(new ArrayList<CharSequence>());
     for(String token: tokens) {
       page.getParsedContent().add(new Utf8(token));
     }
 
     store.put("com.example/http", page);
     store.close();
+
   }
 
   public static byte[] testPutBytes(DataStore<String, WebPage> store)
           throws IOException, Exception {
 
     store.createSchema();
-    WebPage page = store.newPersistent();
+    WebPage page = WebPage.newBuilder().build();
     page.setUrl(new Utf8("http://example.com"));
     byte[] contentBytes = "example content in example.com".getBytes();
     ByteBuffer buff = ByteBuffer.wrap(contentBytes);
@@ -876,9 +879,10 @@ public class DataStoreTestUtil {
 
     store.createSchema();
 
-    WebPage page = store.newPersistent();
+    WebPage page = WebPage.newBuilder().build();
 
     page.setUrl(new Utf8("http://example.com"));
+    page.setOutlinks(new HashMap<CharSequence, CharSequence>());
     page.getOutlinks().put(new Utf8("http://example2.com"), new Utf8("anchor2"));
     page.getOutlinks().put(new Utf8("http://example3.com"), new Utf8("anchor3"));
     page.getOutlinks().put(new Utf8("http://example3.com"), new Utf8("anchor4"));
@@ -913,5 +917,5 @@ public class DataStoreTestUtil {
     
     return fieldNames;
   }
-
+  
 }

@@ -20,12 +20,7 @@ package org.apache.gora.hbase.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.avro.Schema;
@@ -33,17 +28,14 @@ import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.io.BinaryDecoder;
 import org.apache.avro.io.BinaryEncoder;
-import org.apache.avro.io.Decoder;
 import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.EncoderFactory;
-import org.apache.avro.io.ResolvingDecoder;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.avro.util.Utf8;
-import org.apache.gora.persistency.Persistent;
+
 import org.apache.gora.util.AvroUtils;
-import org.apache.gora.util.ClassLoadingUtils;
-import org.apache.gora.util.ReflectionUtils;
+
 import org.apache.hadoop.hbase.util.Bytes;
 
 /**
@@ -68,13 +60,15 @@ public class HBaseByteInterface {
    * writer pair for every schema, instead of one for every thread.
    */
   
-  public static final ConcurrentHashMap<String, SpecificDatumReader<?>> readerMap = new ConcurrentHashMap<String, SpecificDatumReader<?>>();
+  public static final ConcurrentHashMap<String, SpecificDatumReader<?>> readerMap = 
+      new ConcurrentHashMap<String, SpecificDatumReader<?>>();
      
-  public static final ConcurrentHashMap<String, SpecificDatumWriter<?>> writerMap = new ConcurrentHashMap<String, SpecificDatumWriter<?>>();
+  public static final ConcurrentHashMap<String, SpecificDatumWriter<?>> writerMap = 
+      new ConcurrentHashMap<String, SpecificDatumWriter<?>>();
 
   /**
-   * Deserializes an array of bytes matching the given schema to the proper basic (enum, Utf8,...) or
-   * complex type (Persistent/Record).
+   * Deserializes an array of bytes matching the given schema to the proper basic 
+   * (enum, Utf8,...) or complex type (Persistent/Record).
    * 
    * Does not handle <code>arrays/maps</code> if not inside a <code>record</code> type.
    * 
@@ -83,7 +77,7 @@ public class HBaseByteInterface {
    * @return Enum|Utf8|ByteBuffer|Integer|Long|Float|Double|Boolean|Persistent|Null
    * @throws IOException
    */
-  @SuppressWarnings({ "rawtypes", "unchecked" })
+  @SuppressWarnings({ "rawtypes" })
   public static Object fromBytes(Schema schema, byte[] val) throws IOException {
     Type type = schema.getType();
     switch (type) {

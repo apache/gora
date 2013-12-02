@@ -29,6 +29,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.apache.avro.util.Utf8;
+
 import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.examples.generated.Metadata;
 
@@ -38,7 +39,7 @@ import org.junit.Test;
 
 public class TestHBaseByteInterface {
 
-  private static final Random RANDOM = new Random();
+  private static final Random RANDOM = new Random(0);
 
   @Test
   public void testEncodingDecoding() throws Exception {
