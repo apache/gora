@@ -12,9 +12,9 @@
       "type": "record",
       "namespace": "org.apache.gora.examples.generated",
       "fields" : [
-			  {"name":"version","type":"int","default":0},
-			  {"name":"data","type":{"type":"map","values":"string"}, "default":null}
-			]
+        {"name":"version","type":"int","default":0},
+        {"name":"data","type":{"type":"map","values":"string"}, "default":null}
+      ]
     }}
   ]
 }

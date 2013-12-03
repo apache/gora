@@ -59,20 +59,12 @@ import org.apache.hadoop.io.serializer.Serializer;
  */
 public class IOUtils {
 
-  private static SerializationFactory serializationFactory = null;
-  private static Configuration conf;
-
   public static final int BUFFER_SIZE = 8192;
 
   private static BinaryDecoder decoder;
 
   private static Configuration getOrCreateConf(Configuration conf) {
-    if(conf == null) {
-      if(IOUtils.conf == null) {
-        IOUtils.conf = new Configuration();
-      }
-    }
-    return conf != null ? conf : IOUtils.conf;
+    return conf != null ? conf : new Configuration();
   }
 
   public static Object readObject(DataInput in)
@@ -111,9 +103,7 @@ public class IOUtils {
   public static<T> void serialize(Configuration conf, DataOutput out
       , T obj, Class<T> objClass) throws IOException {
 
-    if(serializationFactory == null) {
-      serializationFactory = new SerializationFactory(getOrCreateConf(conf));
-    }
+    SerializationFactory serializationFactory = new SerializationFactory(getOrCreateConf(conf));
     Serializer<T> serializer = serializationFactory.getSerializer(objClass);
 
     ByteBufferOutputStream os = new ByteBufferOutputStream();
@@ -200,9 +190,7 @@ public class IOUtils {
    * @throws IOException */
   public static<T> T deserialize(Configuration conf, DataInput in
       , T obj , Class<T> objClass) throws IOException {
-    if(serializationFactory == null) {
-      serializationFactory = new SerializationFactory(getOrCreateConf(conf));
-    }
+    SerializationFactory serializationFactory = new SerializationFactory(getOrCreateConf(conf));
     Deserializer<T> deserializer = serializationFactory.getDeserializer(
         objClass);
 

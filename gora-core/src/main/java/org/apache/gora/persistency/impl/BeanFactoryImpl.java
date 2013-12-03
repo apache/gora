@@ -50,8 +50,8 @@ public class BeanFactoryImpl<K, T extends Persistent> implements BeanFactory<K, 
   private boolean isKeyPersistent = false;
   
   /**
-   * 
-   * @param keyClass
+   * Default constructor for this class.
+   * @param keyClass.
    * @param persistentClass
    */
   public BeanFactoryImpl(Class<K> keyClass, Class<T> persistentClass) {

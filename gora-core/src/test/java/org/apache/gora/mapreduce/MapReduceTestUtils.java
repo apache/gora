@@ -42,7 +42,10 @@ public class MapReduceTestUtils {
 
   private static final Logger log = LoggerFactory.getLogger(MapReduceTestUtils.class);
   
-  /** Tests by running the {@link QueryCounter} mapreduce job */
+  /** 
+   * Tests by running the {@link org.apache.gora.examples.mapreduce.QueryCounter} 
+   * mapreduce job 
+   */
   public static void testCountQuery(DataStore<String, WebPage> dataStore, Configuration conf)
       throws Exception {
 
@@ -54,9 +57,9 @@ public class MapReduceTestUtils {
     QueryCounter<String,WebPage> counter = new QueryCounter<String,WebPage>(conf);
     Query<String,WebPage> query = dataStore.newQuery();
     List<Field> fields = WebPage.SCHEMA$.getFields();
-    String[] fieldNames = new String[fields.size()];
+    String[] fieldNames = new String[fields.size() - 1];
     for(int i = 0; i< fieldNames.length; i++){
-      fieldNames[i] = fields.get(i).name();
+      fieldNames[i] = fields.get(i+1).name();
     }
     query.setFields(fieldNames);
     

@@ -137,7 +137,8 @@ public class TestHBaseStore extends DataStoreTestBase {
     assertNull(actualBytes);
     table.close();
     
-    // Test writing+reading an empty bytes field. FIELD in HBASE MUST become EMPTY (byte[0])
+    // Test writing+reading an empty bytes field. FIELD in HBASE MUST 
+    // become EMPTY (byte[0])
     page = webPageStore.get("com.example/http") ;
     page.setContent(ByteBuffer.wrap("".getBytes())) ;
     webPageStore.put("com.example/http", page) ;
@@ -156,7 +157,8 @@ public class TestHBaseStore extends DataStoreTestBase {
   }
   
   /**
-   * Checks that when writing a top level union <code>['null','type']</code> the value is written in raw format
+   * Checks that when writing a top level union <code>['null','type']</code> 
+   * the value is written in raw format
    * @throws Exception
    */
   @Test
@@ -184,8 +186,10 @@ public class TestHBaseStore extends DataStoreTestBase {
   }
   
   /**
-   * Checks that when writing a top level union <code>['null','type']</code> with the option <code>RAW_ROOT_FIELDS_OPTION=true</code>
-   * the column is not created, and when <code>RAW_ROOT_FIELDS_OPTION=false</code> the <code>null</code> value is serialized
+   * Checks that when writing a top level union <code>['null','type']</code> 
+   * with the option <code>RAW_ROOT_FIELDS_OPTION=true</code>
+   * the column is not created, and when <code>RAW_ROOT_FIELDS_OPTION=false</code> 
+   * the <code>null</code> value is serialized
    * with Avro.
    * @throws Exception
    */

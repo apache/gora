@@ -396,8 +396,9 @@ implements Configurable {
         K endKey = Arrays.equals(HConstants.EMPTY_END_ROW, splitStop) ?
             null : HBaseByteInterface.fromBytes(keyClass, splitStop);
 
-        PartitionQuery<K, T> partition = new PartitionQueryImpl<K, T>(
+        PartitionQueryImpl<K, T> partition = new PartitionQueryImpl<K, T>(
             query, startKey, endKey, regionLocation);
+        partition.setConf(getConf());
 
         partitions.add(partition);
       }

@@ -161,9 +161,8 @@ public class DataStoreTestUtil {
 
     Employee after = dataStore.get(ssn, AvroUtils.getSchemaFieldNames(Employee.SCHEMA$));
 
-    assertEquals(employee, after);
+    assertEqualEmployeeObjects(employee, after);
   }
-
 
   public static void testGetEmployeeRecursive(DataStore<String, Employee> dataStore)
     throws IOException, Exception {
@@ -175,9 +174,8 @@ public class DataStoreTestUtil {
     String ssn = employee.getSsn().toString();
     dataStore.put(ssn, employee);
     dataStore.flush();
-    Employee after = dataStore.get(ssn, getFields(Employee.SCHEMA$.getFields()));
-    assertEquals(employee, after);
-    assertEquals(boss, after.getBoss()) ;
+    Employee after = dataStore.get(ssn, AvroUtils.getSchemaFieldNames(Employee.SCHEMA$));
+    assertEqualEmployeeObjects(employee, after);
   }
 
   public static void testGetEmployeeDoubleRecursive(DataStore<String, Employee> dataStore)
@@ -193,10 +191,8 @@ public class DataStoreTestUtil {
       String ssn = employee.getSsn().toString();
       dataStore.put(ssn, employee);
       dataStore.flush();
-      Employee after = dataStore.get(ssn, getFields(Employee.SCHEMA$.getFields()));
-      assertEquals(employee, after);
-      assertEquals(boss, after.getBoss()) ;
-      assertEquals(uberBoss, ((Employee)after.getBoss()).getBoss()) ;
+      Employee after = dataStore.get(ssn, AvroUtils.getSchemaFieldNames(Employee.SCHEMA$));
+      assertEqualEmployeeObjects(employee, after);
     }
   
   public static void testGetEmployeeNested(DataStore<String, Employee> dataStore)
@@ -207,7 +203,10 @@ public class DataStoreTestUtil {
     
     webpage.setUrl(new Utf8("url..")) ;
     webpage.setContent(ByteBuffer.wrap("test content".getBytes())) ;
-    Metadata metadata = new BeanFactoryImpl<String,Metadata>(String.class,Metadata.class).newPersistent() ;
+    webpage.setParsedContent(new ArrayList<CharSequence>());
+    webpage.setOutlinks(new HashMap<CharSequence, CharSequence>());
+    Metadata metadata = new BeanFactoryImpl<String,Metadata>(String.class,Metadata.class).newPersistent();
+    metadata.setData(new HashMap<CharSequence, CharSequence>());
     webpage.setMetadata(metadata) ;
     employee.setWebpage(webpage) ;
     
@@ -215,9 +214,9 @@ public class DataStoreTestUtil {
    
     dataStore.put(ssn, employee);
     dataStore.flush();
-    Employee after = dataStore.get(ssn, getFields(Employee.SCHEMA$.getFields()));
-    assertEquals(employee, after);
-    assertEquals(webpage, after.getWebpage()) ;
+    Employee after = dataStore.get(ssn, AvroUtils.getSchemaFieldNames(Employee.SCHEMA$));
+    assertEqualEmployeeObjects(employee, after);
+    assertEqualWebPageObjects(webpage, after.getWebpage());
   }
   
   public static void testGetEmployee3UnionField(DataStore<String, Employee> dataStore)
@@ -229,8 +228,8 @@ public class DataStoreTestUtil {
     String ssn = employee.getSsn().toString();
     dataStore.put(ssn, employee);
     dataStore.flush();
-    Employee after = dataStore.get(ssn, getFields(Employee.SCHEMA$.getFields()));
-    assertEquals(employee, after);
+    Employee after = dataStore.get(ssn, AvroUtils.getSchemaFieldNames(Employee.SCHEMA$));
+    assertEqualEmployeeObjects(employee, after);
     assertEquals("Real boss", ((Utf8)after.getBoss()).toString()) ;
   }
   
@@ -258,8 +257,118 @@ public class DataStoreTestUtil {
         expected.put(index, employee.get(index));
       }
 
-      assertEquals(expected, after);
+      assertEqualEmployeeObjects(expected, after);
     }
+  }
+  
+  /**
+   * Simple function which iterates through a before (put) and after (get) object
+   * in an attempt to verify if the same field's and values have been obtained.
+   * Within the original employee object we iterate from 1 instead of 0 due to the 
+   * removal of the '__g__' field at position 0 when we put objects into the datastore. 
+   * This field is used to identify whether fields within the object, and 
+   * consequently the object itself, are/is dirty however this field is not 
+   * required when persisting the object.
+   * We explicitly get values from each field as this makes it easier to debug 
+   * if tests go wrong.
+   * @param employee
+   * @param after
+   */
+  private static void assertEqualEmployeeObjects(Employee employee, Employee after) {
+    //for (int i = 1; i < employee.SCHEMA$.getFields().size(); i++) {
+    //  for (int j = 1; j < after.SCHEMA$.getFields().size(); j++) {
+    //    assertEquals(employee.SCHEMA$.getFields().get(i), after.SCHEMA$.getFields().get(j));
+    //  }
+    //}
+    //check name field
+    CharSequence beforeName = employee.getName();
+    CharSequence afterName = after.getName();
+    assertEquals(beforeName, afterName);
+    //check dateOfBirth field
+    Long beforeDOB = employee.getDateOfBirth();
+    Long afterDOB = after.getDateOfBirth();
+    assertEquals(beforeDOB, afterDOB);
+    //check ssn field
+    CharSequence beforeSsn = employee.getSsn();
+    CharSequence afterSsn = after.getSsn();
+    assertEquals(beforeSsn, afterSsn);
+    //check salary field
+    Integer beforeSalary = employee.getSalary();
+    Integer afterSalary = after.getSalary();
+    assertEquals(beforeSalary, afterSalary);
+    //check boss field
+    if (employee.getBoss() != null) {
+      if (employee.getBoss() instanceof Utf8) {
+        String beforeBoss = employee.getBoss().toString();
+        String afterBoss = after.getBoss().toString();
+        assertEquals("Boss String field values in UNION should be the same", 
+            beforeBoss, afterBoss);
+      } else {
+        Employee beforeBoss = (Employee) employee.getBoss();
+        Employee afterBoss = (Employee) after.getBoss();
+        assertEqualEmployeeObjects(beforeBoss, afterBoss);
+      }
+    }
+    //check webpage field
+    if (employee.getWebpage() != null) {
+      WebPage beforeWebPage = employee.getWebpage();
+      WebPage afterWebPage = after.getWebpage();
+      assertEqualWebPageObjects(beforeWebPage, afterWebPage);
+    }
+  }
+
+  /**
+   * Mimics {@link org.apache.gora.store.DataStoreTestUtil#assertEqualEmployeeObjects(Employee, Employee)}
+   * in that we pick our way through fields within before and after 
+   * {@link org.apache.gora.examples.generated.WebPage} objects comparing field values.
+   * @param beforeWebPage
+   * @param afterWebPage
+   */
+  private static void assertEqualWebPageObjects(WebPage beforeWebPage, WebPage afterWebPage) {
+    //check url field
+    CharSequence beforeUrl = beforeWebPage.getUrl();
+    CharSequence afterUrl = afterWebPage.getUrl();
+    assertEquals(beforeUrl, afterUrl);
+    //check content field
+    ByteBuffer beforeContent = beforeWebPage.getContent();
+    ByteBuffer afterContent = afterWebPage.getContent();
+    assertEquals(beforeContent, afterContent);
+    //check parsedContent field
+    List<CharSequence> beforeParsedContent = 
+        (List<CharSequence>) beforeWebPage.getParsedContent();
+    List<CharSequence> afterParsedContent = 
+        (List<CharSequence>) afterWebPage.getParsedContent();
+    assertEquals(beforeParsedContent, afterParsedContent);
+    //check outlinks field
+    Map<CharSequence, CharSequence> beforeOutlinks = 
+        (Map<java.lang.CharSequence,java.lang.CharSequence>) beforeWebPage.getOutlinks();
+    Map<CharSequence, CharSequence> afterOutlinks = 
+        (Map<java.lang.CharSequence,java.lang.CharSequence>) afterWebPage.getOutlinks();
+    assertEquals(beforeOutlinks, afterOutlinks);
+    //check metadata field
+    if (beforeWebPage.get(5) != null) {
+      Metadata beforeMetadata = beforeWebPage.getMetadata();
+      Metadata afterMetadata = afterWebPage.getMetadata();
+      assertEqualMetadataObjects(beforeMetadata, afterMetadata);
+    }
+  }
+
+  /**
+   * Mimics {@link org.apache.gora.store.DataStoreTestUtil#assertEqualEmployeeObjects(Employee, Employee)}
+   * in that we pick our way through fields within before and after 
+   * {@link org.apache.gora.examples.generated.Metadata} objects comparing field values.
+   * @param beforeMetadata
+   * @param afterMetadata
+   */
+  private static void assertEqualMetadataObjects(Metadata beforeMetadata, Metadata afterMetadata) {
+    //check version field
+    int beforeVersion = beforeMetadata.getVersion();
+    int afterVersion = afterMetadata.getVersion();
+    assertEquals(beforeVersion, afterVersion);
+    //check data field
+    Map<CharSequence, CharSequence> beforeData = beforeMetadata.getData();
+    Map<CharSequence, CharSequence> afterData =  afterMetadata.getData();
+    assertEquals(beforeData, afterData);
   }
 
   public static Employee testPutEmployee(DataStore<String, Employee> dataStore)
@@ -299,6 +408,16 @@ public class DataStoreTestUtil {
     assertNull(employee);
   }
 
+  /**
+   * Here we create 5 {@link org.apache.gora.examples.generated.Employee} objects
+   * before populating fields with data and flushing them to the datastore.
+   * We then update the 1st of the {@link org.apache.gora.examples.generated.Employee}'s
+   * with more data and flush this data. Assertions are then made over the updated
+   * {@link org.apache.gora.examples.generated.Employee} object.
+   * @param dataStore
+   * @throws IOException
+   * @throws Exception
+   */
   public static void testUpdateEmployee(DataStore<String, Employee> dataStore)
   throws IOException, Exception {
     dataStore.createSchema();
@@ -319,7 +438,7 @@ public class DataStoreTestUtil {
     for (int i = 0; i < 1; i++) {
       Employee employee = Employee.newBuilder().build();
       employee.setName(new Utf8("John Doe " + (i + 5)));
-      employee.setDateOfBirth(now - 18L *  YEAR_IN_MS);
+      employee.setDateOfBirth(now - 18L * YEAR_IN_MS);
       employee.setSalary(120000);
       employee.setSsn(new Utf8(Long.toString(ssn + i)));
       dataStore.put(employee.getSsn().toString(), employee);
@@ -330,12 +449,25 @@ public class DataStoreTestUtil {
     for (int i = 0; i < 1; i++) {
       String key = Long.toString(ssn + i);
       Employee employee = dataStore.get(key);
-      assertEquals(now - 18L * YEAR_IN_MS, employee.getDateOfBirth().intValue()); 
+      assertEquals(now - 18L * YEAR_IN_MS, employee.getDateOfBirth().longValue()); 
       assertEquals("John Doe " + (i + 5), employee.getName().toString());
       assertEquals(120000, employee.getSalary().intValue()); 
     }
   }
 
+  /**
+   * Here we create 7 {@link org.apache.gora.examples.generated.WebPage}
+   * objects and populate field data before flushing the objects to the 
+   * datastore. We then get the objects, adding data to the 'content' and
+   * 'parsedContent' fields before clearing the 'outlinks' field and 
+   * re-populating it. This data is then flushed to the datastore. 
+   * Finally we get the {@link org.apache.gora.examples.generated.WebPage}
+   * objects and make various assertions over verious fields. This tests 
+   * that we can update fields and that data can be written and read correctly.
+   * @param dataStore
+   * @throws IOException
+   * @throws Exception
+   */
   public static void testUpdateWebPage(DataStore<String, WebPage> dataStore)
   throws IOException, Exception {
     dataStore.createSchema();
@@ -390,7 +522,7 @@ public class DataStoreTestUtil {
         j++;
       }
       int count = 0;
-      for (j = 1; j < urls.length; j += 2) {
+      for (j = 0; j < urls.length; j++) {
         CharSequence link = webPage.getOutlinks().get(new Utf8(anchor + j));
         assertNotNull(link);
         assertEquals(urls[j], link.toString());
@@ -768,7 +900,8 @@ public class DataStoreTestUtil {
 
       assertNotNull(page.getUrl());
       assertEquals(page.getUrl().toString(), SORTED_URLS[i]);
-      assertEquals(0, page.getOutlinks().size());
+      assertNull("Map of Outlinks should be 'null' as the deleteByQuery "
+          + "not only removes the data but also the data structure.", page.getOutlinks());
       assertEquals(0, page.getParsedContent().size());
       if(page.getContent() != null) {
         System.out.println("url:" + page.getUrl().toString());

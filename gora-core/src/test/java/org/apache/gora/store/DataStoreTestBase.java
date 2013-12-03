@@ -237,7 +237,7 @@ public abstract class DataStoreTestBase {
 
   @Test
   /**
-   * Tests put and get a record with a double  nested recursive record
+   * Tests put and get a record with a double nested recursive record
    * Employee with a boss (nested).
    * @throws IOException
    * @throws Exception
@@ -249,8 +249,9 @@ public abstract class DataStoreTestBase {
 
   @Test
   /**
-   * Tests put and get a record with a nested record (not recursive)
-   * The webpage of an Employee
+   * Tests put and get of an {@link org.apache.gora.examples.generated.Employee} 
+   * record with a nested {@link org.apache.gora.examples.generated.WegPage} record (not recursive)
+   * the webpage of an Employee.
    * @throws IOException
    * @throws Exception
    */
