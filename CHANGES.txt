@@ -4,6 +4,8 @@
 
 Gora Change Log
 
+* GORA-281 More flexible file locations for cassandra's config and log4j (Nate McCall via hsaputra)
+
 * GORA-275 Update Gora stores to pass conf when creating instance of PartitionQueryImpl (Damien Raude-Morvan via hsaputra)
 
 * GORA-270 IOUtils static SerializationFactory field (Damien Raude-Morvan via hsaputra)
