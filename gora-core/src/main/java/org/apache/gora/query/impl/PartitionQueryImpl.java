@@ -131,7 +131,7 @@ public String[] getLocations() {
   @Override
   public void write(DataOutput out) throws IOException {
     super.write(out);
-    IOUtils.serialize(null, out, baseQuery);
+    IOUtils.serialize(getConf(), out, baseQuery);
     IOUtils.writeStringArray(out, locations);
   }
 
@@ -139,7 +139,7 @@ public String[] getLocations() {
   public void readFields(DataInput in) throws IOException {
     super.readFields(in);
     try {
-      baseQuery = IOUtils.deserialize(null, in, null);
+      baseQuery = IOUtils.deserialize(getConf(), in, null);
     } catch (ClassNotFoundException ex) {
       throw new IOException(ex);
     }

@@ -82,8 +82,8 @@ public class GoraCassandraTestDriver extends GoraTestDriver {
     try {
       cleanupDirectoriesFailover();
       FileUtils.createDirectory(baseDirectory);
-      System.setProperty("log4j.configuration", "file:target/test-classes/log4j-server.properties");
-      System.setProperty("cassandra.config", "file:target/test-classes/cassandra.yaml");
+      System.setProperty("log4j.configuration", "log4j-server.properties");
+      System.setProperty("cassandra.config", "cassandra.yaml");
       
       cassandraDaemon = new CassandraDaemon();
       cassandraDaemon.init(null);
