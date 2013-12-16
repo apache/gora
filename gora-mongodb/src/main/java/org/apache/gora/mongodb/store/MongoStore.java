@@ -676,6 +676,8 @@ public class MongoStore<K, T extends PersistentBase> extends
                     DocumentFieldType innerStoreType = mapping.getDocumentFieldType(innerSchema.getName());
                     LOG.debug("Load from DBObject (UNION), schemaType:{}, docField:{}, storeType:{}", new Object[]{innerSchema.getType(), docf, innerStoreType});
                     result = fromDBObject(innerSchema, innerStoreType, field, docf, easybson); // Deserialize as if schema was ["type"]
+                } else {
+                    throw new IllegalStateException("MongoStore doesn't support 3 types union field yet. Please update your mapping");
                 }
                 break;
             default:
@@ -905,6 +907,8 @@ public class MongoStore<K, T extends PersistentBase> extends
                     DocumentFieldType innerStoreType = mapping.getDocumentFieldType(innerSchema.getName());
                     LOG.debug("Transform value to DBObject (UNION), schemaType:{}, type1:{}, storeType:{}", new Object[]{innerSchema.getType(), type1, innerStoreType});
                     result = toDBObject(innerSchema, type1, innerStoreType, value); // Deserialize as if schema was ["type"]
+                } else {
+                    throw new IllegalStateException("MongoStore doesn't support 3 types union field yet. Please update your mapping");
                 }
                 break;
             case FIXED:
