@@ -371,18 +371,19 @@ public class MongoStore<K, T extends PersistentBase> extends
   @Override
   public void put(K key, T obj) {
     // Save the object in the database
-    if (obj.isNew() || obj.isDirty())
+    if (obj.isNew() || obj.isDirty()) {
       putUpdate(key, obj);
-    // TODO: why is Nutch marking objects as new ?
-    // putInsert(key, obj);
-    // else if ( obj.isDirty() )
-    // putUpdate(key, obj);
-    else
+      // TODO: why is Nutch marking objects as new ?
+      // putInsert(key, obj);
+      // else if ( obj.isDirty() )
+      // putUpdate(key, obj);
+    } else {
       LOG.info("Ignored putting object {} in the store as it is neither "
           + "new, neither dirty.", new Object[] { obj });
-    // Clear its state
-    obj.clearNew();
-    obj.clearDirty();
+      // Clear its state
+      obj.clearNew();
+      obj.clearDirty();
+    }
   }
 
   /**
@@ -402,15 +403,21 @@ public class MongoStore<K, T extends PersistentBase> extends
     BasicDBObject qUpdate = new BasicDBObject();
 
     BasicDBObject qUpdateSet = newUpdateSetInstance(obj);
-    if (qUpdateSet.size() > 0)
+    if (qUpdateSet.size() > 0) {
       qUpdate.put("$set", qUpdateSet);
+    }
 
     BasicDBObject qUpdateUnset = newUpdateUnsetInstance(obj);
-    if (qUpdateUnset.size() > 0)
+    if (qUpdateUnset.size() > 0) {
       qUpdate.put("$unset", qUpdateUnset);
+    }
 
-    // Execute the update
-    mongoClientColl.update(qSel, qUpdate, true, false);
+    // Execute the update (if there is at least one $set ot $unset
+    if (!qUpdate.isEmpty()) {
+      mongoClientColl.update(qSel, qUpdate, true, false);
+    } else {
+      LOG.debug("No update to perform, skip {}", key);
+    }
   }
 
   /**
