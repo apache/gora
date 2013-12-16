@@ -17,7 +17,7 @@
 -->
 <gora-orm>
 
-    <class document="frontier" keyClass="java.lang.String" name="org.apache.gora.mongodb.beans.tests.WebPage">
+    <class document="frontier" keyClass="java.lang.String" name="org.apache.gora.examples.generated.WebPage">
         <field name="baseUrl" docfield="baseUrl" type="string"/>
         <field name="status" docfield="status" type="int32"/>
         <field name="fetchTime" docfield="fetchTime" type="int64"/>
