@@ -224,6 +224,11 @@ public class TestHBaseStore extends DataStoreTestBase {
     table.close();
   }
 
+  @Test
+  public void assertScannerCachingValue() {
+    assertEquals(1000, ((HBaseStore<String,WebPage>)this.webPageStore).getScannerCaching()) ;
+    assertEquals(1000, ((HBaseStore<String,Employee>)this.employeeStore).getScannerCaching()) ;
+  }
 
   @Ignore("We need to skip this test since gora considers endRow inclusive, while its exclusive for HBase.")
   @Override
