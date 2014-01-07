@@ -48,6 +48,7 @@ import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.PartitionQueryImpl;
+import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.impl.DataStoreBase;
 
 import org.apache.hadoop.conf.Configurable;
@@ -87,6 +88,9 @@ implements Configurable {
   private static final String DEPRECATED_MAPPING_FILE = "hbase-mapping.xml";
   public static final String DEFAULT_MAPPING_FILE = "gora-hbase-mapping.xml";
 
+  private static final String SCANNER_CACHING_PROPERTIES_KEY = "scanner.caching" ;
+  private static final int SCANNER_CACHING_PROPERTIES_DEFAULT = 0 ;
+  
   private volatile HBaseAdmin admin;
 
   private volatile HBaseTableConnection table;
@@ -95,6 +99,8 @@ implements Configurable {
 
   private volatile HBaseMapping mapping;
 
+  private int scannerCaching = SCANNER_CACHING_PROPERTIES_DEFAULT ;
+  
   public HBaseStore()  {
   }
 
@@ -124,6 +130,17 @@ implements Configurable {
       } 
     } catch (Exception e) {
       throw new RuntimeException(e);
+    }
+    
+    // Set scanner caching option
+    try {
+      this.setScannerCaching(
+          Integer.valueOf(DataStoreFactory.findProperty(this.properties, this,
+              SCANNER_CACHING_PROPERTIES_KEY,
+              String.valueOf(SCANNER_CACHING_PROPERTIES_DEFAULT)))) ;
+    }catch(Exception e){
+      LOG.error("Can not load " + SCANNER_CACHING_PROPERTIES_KEY + " from gora.properties. Setting to default value: " + SCANNER_CACHING_PROPERTIES_DEFAULT, e) ;
+      this.setScannerCaching(SCANNER_CACHING_PROPERTIES_DEFAULT) ; // Default value if something is wrong
     }
     
     if(autoCreateSchema) {
@@ -436,6 +453,9 @@ implements Configurable {
 
   public ResultScanner createScanner(Query<K, T> query) throws IOException {
     final Scan scan = new Scan();
+    
+    scan.setCaching(this.getScannerCaching()) ; 
+    
     if (query.getStartKey() != null) {
       scan.setStartRow(toBytes(query.getStartKey()));
     }
@@ -699,4 +719,29 @@ implements Configurable {
     this.conf = conf;
   }
 
+  /**
+   * Gets the Scanner Caching optimization value
+   * @return The value used internally in {@link Scan#setCaching(int)}
+   */
+  public int getScannerCaching() {
+    return this.scannerCaching ;
+  }
+  
+  /**
+   * Sets the value for Scanner Caching optimization
+   * 
+   * @see Scan#setCaching(int)
+   * 
+   * @param numRows the number of rows for caching >= 0
+   * @return &lt;&lt;Fluent interface&gt;&gt;
+   */
+  public HBaseStore<K, T> setScannerCaching(int numRows) {
+    if (numRows < 0) {
+      LOG.warn("Invalid Scanner Caching optimization value. Cannot set to: " + numRows + ".") ;
+      return this ;
+    }
+    this.scannerCaching = numRows ;
+    return this ;
+  }
+  
 }
