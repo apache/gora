@@ -52,25 +52,24 @@ public class GoraRecordWriter<K, T> extends RecordWriter<K, T> {
   @Override
   public void close(TaskAttemptContext context) throws IOException,
       InterruptedException {
-	  try{
-		  store.close();
-	  }catch(Exception e){
-		  LOG.info("Exception at GoraRecordWriter.class while closing datastore." + e.getMessage());
-	  }
+    try{
+      store.close();
+    }catch(Exception e){
+      LOG.warn("Exception at GoraRecordWriter.class while closing datastore." + e.getMessage());
+    }
   }
 
   @Override
   public void write(K key, T value) throws IOException, InterruptedException {
-	  try{
-	    store.put(key, (Persistent) value);
-	    
-	    counter.increment();
-	    if (counter.isModulo()) {
-	      LOG.info("Flushing the datastore after " + counter.getRecordsNumber() + " records");
-	      store.flush();
-	    }
-	  }catch(Exception e){
-		  LOG.info("Exception at GoraRecordWriter.class while writing to datastore." + e.getMessage());
-	  }
+    try{
+      store.put(key, (Persistent) value);
+      counter.increment();
+      if (counter.isModulo()) {
+        LOG.info("Flushing the datastore after " + counter.getRecordsNumber() + " records");
+        store.flush();
+      }
+    }catch(Exception e){
+      LOG.warn("Exception at GoraRecordWriter.class while writing to datastore." + e.getMessage());
+    }
   }
 }

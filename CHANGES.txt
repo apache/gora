@@ -4,6 +4,8 @@
 
 Gora Change Log
 
+* GORA-285 Change logging at o.a.g.mapreduce.GoraRecordWriter from INFO to WARN (lewismc)
+
 * GORA-117 gora hbase does not have a mechanism to set the caching on a scanner, which makes for poor performance on map/reduce jobs (alfonsonishikawa)
 
 * GORA-281 More flexible file locations for cassandra's config and log4j (Nate McCall via hsaputra)
