@@ -6,7 +6,7 @@
 package org.apache.gora.examples.generated;  
 @SuppressWarnings("all")
 public class V2 extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"V2\",\"namespace\":\"org.apache.gora.examples.generated\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty.\",\"default\":\"AA==\"},{\"name\":\"v3\",\"type\":\"int\"}]}");
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"V2\",\"namespace\":\"org.apache.gora.examples.generated\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty.\",\"default\":\"AA==\"},{\"name\":\"v3\",\"type\":\"int\",\"default\":0}]}");
   /** Bytes used to represent weather or not a field is dirty. */
   private java.nio.ByteBuffer __g__dirty = java.nio.ByteBuffer.wrap(new byte[1]);
   private int v3;
@@ -19,12 +19,13 @@ public class V2 extends org.apache.gora.persistency.impl.PersistentBase implemen
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
+  
   // Used by DatumReader.  Applications should not call. 
   @SuppressWarnings(value="unchecked")
-  public void put(int field$, java.lang.Object value$) {
+  public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: __g__dirty = (java.nio.ByteBuffer)value$; break;
-    case 1: v3 = (java.lang.Integer)value$; break;
+    case 0: __g__dirty = (java.nio.ByteBuffer)(value); break;
+    case 1: v3 = (java.lang.Integer)(value); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -151,7 +152,7 @@ public class V2 extends org.apache.gora.persistency.impl.PersistentBase implemen
     public V2 build() {
       try {
         V2 record = new V2();
-        record.__g__dirty = fieldSetFlags()[0] ? this.__g__dirty : (java.nio.ByteBuffer) defaultValue(fields()[0]);
+        record.__g__dirty = fieldSetFlags()[0] ? this.__g__dirty : (java.nio.ByteBuffer) java.nio.ByteBuffer.wrap(new byte[1]);
         record.v3 = fieldSetFlags()[1] ? this.v3 : (java.lang.Integer) defaultValue(fields()[1]);
         return record;
       } catch (Exception e) {
@@ -162,6 +163,10 @@ public class V2 extends org.apache.gora.persistency.impl.PersistentBase implemen
   
   public V2.Tombstone getTombstone(){
   	return TOMBSTONE;
+  }
+
+  public V2 newInstance(){
+    return newBuilder().build();
   }
 
   private static final Tombstone TOMBSTONE = new Tombstone();

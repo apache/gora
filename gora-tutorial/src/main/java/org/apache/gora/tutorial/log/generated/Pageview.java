@@ -6,21 +6,8 @@
 package org.apache.gora.tutorial.log.generated;  
 @SuppressWarnings("all")
 public class Pageview extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Pageview\",\"namespace\":\"org.apache.gora.tutorial.log.generated\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty\",\"default\":\"AAA=\"},{\"name\":\"url\",\"type\":\"string\"},{\"name\":\"timestamp\",\"type\":\"long\"},{\"name\":\"ip\",\"type\":\"string\"},{\"name\":\"httpMethod\",\"type\":\"string\"},{\"name\":\"httpStatusCode\",\"type\":\"int\"},{\"name\":\"responseSize\",\"type\":\"int\"},{\"name\":\"referrer\",\"type\":\"string\"},{\"name\":\"userAgent\",\"type\":\"string\"}]}");
-  
-  public static final String[] _ALL_FIELDS = {
-  "__g__dirty",
-  "url",
-  "timestamp",
-  "ip",
-  "httpMethod",
-  "httpStatusCode",
-  "responseSize",
-  "referrer",
-  "userAgent",
-  };
-
-  /** Bytes used to represent weather or not a field is dirty */
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Pageview\",\"namespace\":\"org.apache.gora.tutorial.log.generated\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty.\",\"default\":\"AAA=\"},{\"name\":\"url\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"timestamp\",\"type\":\"long\",\"default\":0},{\"name\":\"ip\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"httpMethod\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"httpStatusCode\",\"type\":\"int\",\"default\":0},{\"name\":\"responseSize\",\"type\":\"int\",\"default\":0},{\"name\":\"referrer\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"userAgent\",\"type\":[\"null\",\"string\"],\"default\":null}]}");
+  /** Bytes used to represent weather or not a field is dirty. */
   private java.nio.ByteBuffer __g__dirty = java.nio.ByteBuffer.wrap(new byte[2]);
   private java.lang.CharSequence url;
   private long timestamp;
@@ -46,19 +33,20 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
+  
   // Used by DatumReader.  Applications should not call. 
   @SuppressWarnings(value="unchecked")
-  public void put(int field$, java.lang.Object value$) {
+  public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: __g__dirty = (java.nio.ByteBuffer)value$; break;
-    case 1: url = (java.lang.CharSequence)value$; break;
-    case 2: timestamp = (java.lang.Long)value$; break;
-    case 3: ip = (java.lang.CharSequence)value$; break;
-    case 4: httpMethod = (java.lang.CharSequence)value$; break;
-    case 5: httpStatusCode = (java.lang.Integer)value$; break;
-    case 6: responseSize = (java.lang.Integer)value$; break;
-    case 7: referrer = (java.lang.CharSequence)value$; break;
-    case 8: userAgent = (java.lang.CharSequence)value$; break;
+    case 0: __g__dirty = (java.nio.ByteBuffer)(value); break;
+    case 1: url = (java.lang.CharSequence)(value); break;
+    case 2: timestamp = (java.lang.Long)(value); break;
+    case 3: ip = (java.lang.CharSequence)(value); break;
+    case 4: httpMethod = (java.lang.CharSequence)(value); break;
+    case 5: httpStatusCode = (java.lang.Integer)(value); break;
+    case 6: responseSize = (java.lang.Integer)(value); break;
+    case 7: referrer = (java.lang.CharSequence)(value); break;
+    case 8: userAgent = (java.lang.CharSequence)(value); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -67,7 +55,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    * Gets the value of the 'url' field.
    */
   public java.lang.CharSequence getUrl() {
-    return url.toString();
+    return url;
   }
 
   /**
@@ -75,7 +63,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    * @param value the value to set.
    */
   public void setUrl(java.lang.CharSequence value) {
-    this.url = value.toString();
+    this.url = value;
     setDirty(1);
   }
   
@@ -115,7 +103,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    * Gets the value of the 'ip' field.
    */
   public java.lang.CharSequence getIp() {
-    return ip.toString();
+    return ip;
   }
 
   /**
@@ -123,7 +111,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    * @param value the value to set.
    */
   public void setIp(java.lang.CharSequence value) {
-    this.ip = value.toString();
+    this.ip = value;
     setDirty(3);
   }
   
@@ -139,7 +127,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    * Gets the value of the 'httpMethod' field.
    */
   public java.lang.CharSequence getHttpMethod() {
-    return httpMethod.toString();
+    return httpMethod;
   }
 
   /**
@@ -147,7 +135,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    * @param value the value to set.
    */
   public void setHttpMethod(java.lang.CharSequence value) {
-    this.httpMethod = value.toString();
+    this.httpMethod = value;
     setDirty(4);
   }
   
@@ -211,7 +199,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    * Gets the value of the 'referrer' field.
    */
   public java.lang.CharSequence getReferrer() {
-    return referrer.toString();
+    return referrer;
   }
 
   /**
@@ -219,7 +207,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    * @param value the value to set.
    */
   public void setReferrer(java.lang.CharSequence value) {
-    this.referrer = value.toString();
+    this.referrer = value;
     setDirty(7);
   }
   
@@ -235,7 +223,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    * Gets the value of the 'userAgent' field.
    */
   public java.lang.CharSequence getUserAgent() {
-    return userAgent.toString();
+    return userAgent;
   }
 
   /**
@@ -243,7 +231,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    * @param value the value to set.
    */
   public void setUserAgent(java.lang.CharSequence value) {
-    this.userAgent = value.toString();
+    this.userAgent = value;
     setDirty(8);
   }
   
@@ -561,7 +549,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
     public Pageview build() {
       try {
         Pageview record = new Pageview();
-        record.__g__dirty = fieldSetFlags()[0] ? this.__g__dirty : (java.nio.ByteBuffer) defaultValue(fields()[0]);
+        record.__g__dirty = fieldSetFlags()[0] ? this.__g__dirty : (java.nio.ByteBuffer) java.nio.ByteBuffer.wrap(new byte[2]);
         record.url = fieldSetFlags()[1] ? this.url : (java.lang.CharSequence) defaultValue(fields()[1]);
         record.timestamp = fieldSetFlags()[2] ? this.timestamp : (java.lang.Long) defaultValue(fields()[2]);
         record.ip = fieldSetFlags()[3] ? this.ip : (java.lang.CharSequence) defaultValue(fields()[3]);
@@ -579,6 +567,10 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
   
   public Pageview.Tombstone getTombstone(){
   	return TOMBSTONE;
+  }
+
+  public Pageview newInstance(){
+    return newBuilder().build();
   }
 
   private static final Tombstone TOMBSTONE = new Tombstone();

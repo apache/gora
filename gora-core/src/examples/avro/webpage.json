@@ -6,7 +6,7 @@
     {"name": "url", "type": ["null","string"], "default":null},
     {"name": "content", "type": ["null","bytes"],"default":null},
     {"name": "parsedContent", "type": {"type":"array", "items": "string"}, "default":null},
-    {"name": "outlinks", "type": {"type":"map", "values":"string"}, "default":null},
+    {"name": "outlinks", "type": {"type":"map", "values":"string"}, "default":{}},
     {"name": "metadata", "default":null, "type": {
       "name": "Metadata",
       "type": "record",

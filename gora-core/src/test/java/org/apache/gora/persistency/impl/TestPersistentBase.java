@@ -115,24 +115,20 @@ public class TestPersistentBase {
     WebPage page = WebPage.newBuilder().build();
    
     page.setUrl(new Utf8("http://foo.com"));
-    page.setParsedContent(new ArrayList<CharSequence>());
     page.getParsedContent().add(new Utf8("foo"));
-    page.setOutlinks(new HashMap<CharSequence, CharSequence>());
     page.getOutlinks().put(new Utf8("foo"), new Utf8("bar"));
     page.setContent(ByteBuffer.wrap("foo baz bar".getBytes()));
     
     page.clear();
     
     assertNull(page.getUrl());
-    assertNull(page.getParsedContent());
-    assertNull(page.getOutlinks());
+    assertEquals(0, page.getParsedContent().size());
+    assertEquals(0, page.getOutlinks().size());
     assertNull(page.getContent());
     
     //set fields again
     page.setUrl(new Utf8("http://bar.com"));
-    page.setParsedContent(new ArrayList<CharSequence>());
     page.getParsedContent().add(new Utf8("bar"));
-    page.setOutlinks(new HashMap<CharSequence, CharSequence>());
     page.getOutlinks().put(new Utf8("bar"), new Utf8("baz"));
     page.setContent(ByteBuffer.wrap("foo baz bar barbaz".getBytes()));
     

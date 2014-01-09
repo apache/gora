@@ -182,12 +182,7 @@ public abstract class PersistentBase extends SpecificRecordBase implements
     for (Field field : getSchema().getFields()) {
       if (!unmanagedFields.contains(field))
         continue;
-      /*
-       * TODO: Its more in the spirit of Gora's clear method to actually clear
-       * data structures, but since avro no-longer defaults to having empty
-       * structures the way to do this consistently would be complicated.
-       */
-      put(field.pos(), null);
+      put(field.pos(), PersistentData.get().deepCopy(field.schema(), PersistentData.get().getDefaultValue(field)));
     }
     clearDirty();
   }

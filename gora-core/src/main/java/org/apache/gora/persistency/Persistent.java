@@ -109,4 +109,11 @@ public interface Persistent extends SpecificRecord, Dirtyable {
 */
   public List<Field> getUnmanagedFields();
 
+  /**
+   * Constructs a new instance of the object by using appropriate builder. This
+   * method is intended to be used by Gora framework.
+   * 
+   * @return a new instance of the object
+   */
+  Persistent newInstance();
 }

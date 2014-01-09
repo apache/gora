@@ -16,15 +16,15 @@
           "fields" : [
            {"name": "url", "type": ["null","string"], "default":null},
            {"name": "content", "type": ["null","bytes"],"default":null},
-           {"name": "parsedContent", "type": {"type":"array", "items": "string"},"default":null},
-           {"name": "outlinks", "type": {"type":"map", "values":"string"},"default":null},
+           {"name": "parsedContent", "type": {"type":"array", "items": "string"},"default":{}},
+           {"name": "outlinks", "type": {"type":"map", "values":"string"},"default":{}},
            {"name": "metadata", "default":null, "type": {
             "name": "Metadata",
             "type": "record",
             "namespace": "org.apache.gora.examples.generated",
             "fields": [
              {"name": "version", "type": "int","default":0},
-             {"name": "data", "type": {"type": "map", "values": "string"},"default":null}
+             {"name": "data", "type": {"type": "map", "values": "string"},"default":{}}
             ]
           }}
           ]

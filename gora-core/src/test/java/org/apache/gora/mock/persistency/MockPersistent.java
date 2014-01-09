@@ -19,6 +19,7 @@
 package org.apache.gora.mock.persistency;
 
 import org.apache.avro.Schema;
+import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.Tombstone;
 import org.apache.gora.persistency.impl.PersistentBase;
 
@@ -79,5 +80,9 @@ public class MockPersistent extends PersistentBase {
     return new Tombstone(){};
   }
 
-  
+  @Override
+  public Persistent newInstance() {
+    return new MockPersistent();
+  }
+
 }

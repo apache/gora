@@ -7,7 +7,7 @@ package org.apache.gora.examples.generated;
 @SuppressWarnings("all")
 /** Record with only immutable or dirtyable fields, used for testing */
 public class ImmutableFields extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"ImmutableFields\",\"namespace\":\"org.apache.gora.examples.generated\",\"doc\":\"Record with only immutable or dirtyable fields, used for testing\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty.\",\"default\":\"AA==\"},{\"name\":\"v1\",\"type\":\"int\"},{\"name\":\"v2\",\"type\":[{\"type\":\"record\",\"name\":\"V2\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty.\",\"default\":\"AA==\"},{\"name\":\"v3\",\"type\":\"int\"}]},\"null\"]}]}");
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"ImmutableFields\",\"namespace\":\"org.apache.gora.examples.generated\",\"doc\":\"Record with only immutable or dirtyable fields, used for testing\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty.\",\"default\":\"AA==\"},{\"name\":\"v1\",\"type\":\"int\",\"default\":0},{\"name\":\"v2\",\"type\":[{\"type\":\"record\",\"name\":\"V2\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty.\",\"default\":\"AA==\"},{\"name\":\"v3\",\"type\":\"int\",\"default\":0}]},\"null\"],\"default\":null}]}");
   /** Bytes used to represent weather or not a field is dirty. */
   private java.nio.ByteBuffer __g__dirty = java.nio.ByteBuffer.wrap(new byte[1]);
   private int v1;
@@ -22,13 +22,14 @@ public class ImmutableFields extends org.apache.gora.persistency.impl.Persistent
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
+  
   // Used by DatumReader.  Applications should not call. 
   @SuppressWarnings(value="unchecked")
-  public void put(int field$, java.lang.Object value$) {
+  public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: __g__dirty = (java.nio.ByteBuffer)value$; break;
-    case 1: v1 = (java.lang.Integer)value$; break;
-    case 2: v2 = (org.apache.gora.examples.generated.V2)value$; break;
+    case 0: __g__dirty = (java.nio.ByteBuffer)(value); break;
+    case 1: v1 = (java.lang.Integer)(value); break;
+    case 2: v2 = (org.apache.gora.examples.generated.V2)(value); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -209,7 +210,7 @@ public class ImmutableFields extends org.apache.gora.persistency.impl.Persistent
     public ImmutableFields build() {
       try {
         ImmutableFields record = new ImmutableFields();
-        record.__g__dirty = fieldSetFlags()[0] ? this.__g__dirty : (java.nio.ByteBuffer) defaultValue(fields()[0]);
+        record.__g__dirty = fieldSetFlags()[0] ? this.__g__dirty : (java.nio.ByteBuffer) java.nio.ByteBuffer.wrap(new byte[1]);
         record.v1 = fieldSetFlags()[1] ? this.v1 : (java.lang.Integer) defaultValue(fields()[1]);
         record.v2 = fieldSetFlags()[2] ? this.v2 : (org.apache.gora.examples.generated.V2) defaultValue(fields()[2]);
         return record;
@@ -221,6 +222,10 @@ public class ImmutableFields extends org.apache.gora.persistency.impl.Persistent
   
   public ImmutableFields.Tombstone getTombstone(){
   	return TOMBSTONE;
+  }
+
+  public ImmutableFields newInstance(){
+    return newBuilder().build();
   }
 
   private static final Tombstone TOMBSTONE = new Tombstone();

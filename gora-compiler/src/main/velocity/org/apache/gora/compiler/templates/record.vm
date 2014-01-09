@@ -16,7 +16,7 @@
 ## limitations under the License.
 ##
 #if ($schema.getNamespace())
-package $schema.getNamespace();  
+package $schema.getNamespace();
 #end
 @SuppressWarnings("all")
 #if ($schema.getDoc())
@@ -35,7 +35,7 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
   public ${this.mangle($schema.getName())}() {
     super();
   }
-  
+
   public ${this.mangle($schema.getName())}(Object value) {
     super(value);
   }
@@ -50,7 +50,7 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
 
 #end
   public org.apache.avro.Schema getSchema() { return SCHEMA$; }
-  // Used by DatumWriter.  Applications should not call. 
+  // Used by DatumWriter.  Applications should not call.
   public java.lang.Object get(int field$) {
     switch (field$) {
 #set ($i = 0)
@@ -61,8 +61,8 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
-  
-  // Used by DatumReader.  Applications should not call. 
+
+  // Used by DatumReader.  Applications should not call.
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value) {
     switch (field$) {
@@ -94,7 +94,7 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
     this.${this.mangle($field.name(), $schema.isError())} = ${this.generateAppropriateWrapperOrValue($field.schema())};
     setDirty(${field.pos()});
   }
-  
+
   /**
    * Checks the dirty status of the '${this.mangle($field.name(), $schema.isError())}' field. A field is dirty if it represents a change that has not yet been written to the database.
 #if ($field.doc())   * $field.doc()#end
@@ -110,17 +110,17 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
   public static #if ($schema.getNamespace())$schema.getNamespace().#end${this.mangle($schema.getName())}.Builder newBuilder() {
     return new #if ($schema.getNamespace())$schema.getNamespace().#end${this.mangle($schema.getName())}.Builder();
   }
-  
+
   /** Creates a new ${this.mangle($schema.getName())} RecordBuilder by copying an existing Builder */
   public static #if ($schema.getNamespace())$schema.getNamespace().#end${this.mangle($schema.getName())}.Builder newBuilder(#if ($schema.getNamespace())$schema.getNamespace().#end${this.mangle($schema.getName())}.Builder other) {
     return new #if ($schema.getNamespace())$schema.getNamespace().#end${this.mangle($schema.getName())}.Builder(other);
   }
-  
+
   /** Creates a new ${this.mangle($schema.getName())} RecordBuilder by copying an existing $this.mangle($schema.getName()) instance */
   public static #if ($schema.getNamespace())$schema.getNamespace().#end${this.mangle($schema.getName())}.Builder newBuilder(#if ($schema.getNamespace())$schema.getNamespace().#end${this.mangle($schema.getName())} other) {
     return new #if ($schema.getNamespace())$schema.getNamespace().#end${this.mangle($schema.getName())}.Builder(other);
   }
-  
+
   private static java.nio.ByteBuffer deepCopyToWriteOnlyBuffer(
       java.nio.ByteBuffer input) {
     java.nio.ByteBuffer copy = java.nio.ByteBuffer.allocate(input.capacity());
@@ -143,7 +143,7 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
     copy.limit(limit);
     return copy.asReadOnlyBuffer();
   }
-  
+
   /**
    * RecordBuilder for ${this.mangle($schema.getName())} instances.
    */
@@ -159,12 +159,12 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
     private Builder() {
       super(#if ($schema.getNamespace())$schema.getNamespace().#end${this.mangle($schema.getName())}.SCHEMA$);
     }
-    
+
     /** Creates a Builder by copying an existing Builder */
     private Builder(#if ($schema.getNamespace())$schema.getNamespace().#end${this.mangle($schema.getName())}.Builder other) {
       super(other);
     }
-    
+
     /** Creates a Builder by copying an existing $this.mangle($schema.getName()) instance */
     private Builder(#if ($schema.getNamespace())$schema.getNamespace().#end${this.mangle($schema.getName())} other) {
       #if ($schema.isError())super(other)#else
@@ -183,7 +183,7 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
       super.setValue(value);
       return this;
     }
-    
+
     @Override
     public #if ($schema.getNamespace())$schema.getNamespace().#end${this.mangle($schema.getName())}.Builder clearValue() {
       super.clearValue();
@@ -195,7 +195,7 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
       super.setCause(cause);
       return this;
     }
-    
+
     @Override
     public #if ($schema.getNamespace())$schema.getNamespace().#end${this.mangle($schema.getName())}.Builder clearCause() {
       super.clearCause();
@@ -209,20 +209,20 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
     public ${this.javaType($field.schema())} ${this.generateGetMethod($schema, $field)}() {
       return ${this.mangle($field.name(), $schema.isError())};
     }
-    
+
     /** Sets the value of the '${this.mangle($field.name(), $schema.isError())}' field */
     public #if ($schema.getNamespace())$schema.getNamespace().#end${this.mangle($schema.getName())}.Builder ${this.generateSetMethod($schema, $field)}(${this.javaUnbox($field.schema())} value) {
       validate(fields()[$field.pos()], value);
       this.${this.mangle($field.name(), $schema.isError())} = value;
       fieldSetFlags()[$field.pos()] = true;
-      return this; 
+      return this;
     }
-    
+
     /** Checks whether the '${this.mangle($field.name(), $schema.isError())}' field has been set */
     public boolean ${this.generateHasMethod($schema, $field)}() {
       return fieldSetFlags()[$field.pos()];
     }
-    
+
     /** Clears the value of the '${this.mangle($field.name(), $schema.isError())}' field */
     public #if ($schema.getNamespace())$schema.getNamespace().#end${this.mangle($schema.getName())}.Builder ${this.generateClearMethod($schema, $field)}() {
 #if (${this.isUnboxedJavaTypeNullable($field.schema())})
@@ -231,7 +231,7 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
       fieldSetFlags()[$field.pos()] = false;
       return this;
     }
-    
+
 #end
 #end
     @Override
@@ -247,17 +247,21 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
       }
     }
   }
-  
+
   public ${this.mangle($schema.getName())}.Tombstone getTombstone(){
   	return TOMBSTONE;
   }
 
+  public ${this.mangle($schema.getName())} newInstance(){
+    return newBuilder().build();
+  }
+
   private static final Tombstone TOMBSTONE = new Tombstone();
-  
+
   public static final class Tombstone extends ${this.mangle($schema.getName())} implements org.apache.gora.persistency.Tombstone {
-  
+
       private Tombstone() { }
-  
+
 	  #foreach ($field in $schema.getFields())
 	#if ($this.isNotHiddenField($field.name()))
 	  /**
@@ -267,7 +271,7 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
 	  public ${this.javaType($field.schema())} ${this.generateGetMethod($schema, $field)}() {
 	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
 	  }
-	
+
 	  /**
 	   * Sets the value of the '${this.mangle($field.name(), $schema.isError())}' field.
 	#if ($field.doc())   * $field.doc()#end
@@ -276,7 +280,7 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
 	  public void ${this.generateSetMethod($schema, $field)}(${this.javaType($field.schema())} value) {
 	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
 	  }
-	  
+
 	  /**
 	   * Checks the dirty status of the '${this.mangle($field.name(), $schema.isError())}' field. A field is dirty if it represents a change that has not yet been written to the database.
 	#if ($field.doc())   * $field.doc()#end
@@ -285,10 +289,10 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
 	  public boolean ${this.generateDirtyMethod($schema, $field)}(${this.javaType($field.schema())} value) {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
 	  }
-	
+
 	#end
 	#end
-  
+
   }
-  
+
 }

@@ -6,14 +6,7 @@
 package org.apache.gora.examples.generated;  
 @SuppressWarnings("all")
 public class Metadata extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Metadata\",\"namespace\":\"org.apache.gora.examples.generated\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty.\",\"default\":\"AA==\"},{\"name\":\"version\",\"type\":\"int\",\"default\":0},{\"name\":\"data\",\"type\":{\"type\":\"map\",\"values\":\"string\"},\"default\":null}]}");
-  
-  public static final String[] _ALL_FIELDS = {
-  "__g__dirty",
-  "version",
-  "data",
-  };
-
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Metadata\",\"namespace\":\"org.apache.gora.examples.generated\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty.\",\"default\":\"AA==\"},{\"name\":\"version\",\"type\":\"int\",\"default\":0},{\"name\":\"data\",\"type\":{\"type\":\"map\",\"values\":\"string\"},\"default\":{}}]}");
   /** Bytes used to represent weather or not a field is dirty. */
   private java.nio.ByteBuffer __g__dirty = java.nio.ByteBuffer.wrap(new byte[1]);
   private int version;
@@ -28,13 +21,14 @@ public class Metadata extends org.apache.gora.persistency.impl.PersistentBase im
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
+  
   // Used by DatumReader.  Applications should not call. 
   @SuppressWarnings(value="unchecked")
-  public void put(int field$, java.lang.Object value$) {
+  public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: __g__dirty = (java.nio.ByteBuffer)value$; break;
-    case 1: version = (java.lang.Integer)value$; break;
-    case 2: data = (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>)value$; break;
+    case 0: __g__dirty = (java.nio.ByteBuffer)(value); break;
+    case 1: version = (java.lang.Integer)(value); break;
+    case 2: data = (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)value)); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -215,9 +209,9 @@ public class Metadata extends org.apache.gora.persistency.impl.PersistentBase im
     public Metadata build() {
       try {
         Metadata record = new Metadata();
-        record.__g__dirty = fieldSetFlags()[0] ? this.__g__dirty : (java.nio.ByteBuffer) defaultValue(fields()[0]);
+        record.__g__dirty = fieldSetFlags()[0] ? this.__g__dirty : (java.nio.ByteBuffer) java.nio.ByteBuffer.wrap(new byte[1]);
         record.version = fieldSetFlags()[1] ? this.version : (java.lang.Integer) defaultValue(fields()[1]);
-        record.data = fieldSetFlags()[2] ? this.data : (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>) defaultValue(fields()[2]);
+        record.data = fieldSetFlags()[2] ? this.data : (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>) new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)defaultValue(fields()[2]));
         return record;
       } catch (Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);
@@ -227,6 +221,10 @@ public class Metadata extends org.apache.gora.persistency.impl.PersistentBase im
   
   public Metadata.Tombstone getTombstone(){
   	return TOMBSTONE;
+  }
+
+  public Metadata newInstance(){
+    return newBuilder().build();
   }
 
   private static final Tombstone TOMBSTONE = new Tombstone();

@@ -6,17 +6,7 @@
 package org.apache.gora.examples.generated;  
 @SuppressWarnings("all")
 public class WebPage extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"WebPage\",\"namespace\":\"org.apache.gora.examples.generated\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty.\",\"default\":\"AA==\"},{\"name\":\"url\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"content\",\"type\":[\"null\",\"bytes\"],\"default\":null},{\"name\":\"parsedContent\",\"type\":{\"type\":\"array\",\"items\":\"string\"},\"default\":null},{\"name\":\"outlinks\",\"type\":{\"type\":\"map\",\"values\":\"string\"},\"default\":null},{\"name\":\"metadata\",\"type\":{\"type\":\"record\",\"name\":\"Metadata\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty.\",\"default\":\"AA==\"},{\"name\":\"version\",\"type\":\"int\",\"default\":0},{\"name\":\"data\",\"type\":{\"type\":\"map\",\"values\":\"string\"},\"default\":null}]},\"default\":null}]}");
-  
-  public static final String[] _ALL_FIELDS = {
-  "__g__dirty",
-  "url",
-  "content",
-  "parsedContent",
-  "outlinks",
-  "metadata",
-  };
-
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"WebPage\",\"namespace\":\"org.apache.gora.examples.generated\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty.\",\"default\":\"AA==\"},{\"name\":\"url\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"content\",\"type\":[\"null\",\"bytes\"],\"default\":null},{\"name\":\"parsedContent\",\"type\":{\"type\":\"array\",\"items\":\"string\"},\"default\":{}},{\"name\":\"outlinks\",\"type\":{\"type\":\"map\",\"values\":\"string\"},\"default\":{}},{\"name\":\"metadata\",\"type\":{\"type\":\"record\",\"name\":\"Metadata\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty.\",\"default\":\"AA==\"},{\"name\":\"version\",\"type\":\"int\",\"default\":0},{\"name\":\"data\",\"type\":{\"type\":\"map\",\"values\":\"string\"},\"default\":{}}]},\"default\":null}]}");
   /** Bytes used to represent weather or not a field is dirty. */
   private java.nio.ByteBuffer __g__dirty = java.nio.ByteBuffer.wrap(new byte[1]);
   private java.lang.CharSequence url;
@@ -37,16 +27,17 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
+  
   // Used by DatumReader.  Applications should not call. 
   @SuppressWarnings(value="unchecked")
-  public void put(int field$, java.lang.Object value$) {
+  public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: __g__dirty = (java.nio.ByteBuffer)value$; break;
-    case 1: url = (java.lang.CharSequence)value$; break;
-    case 2: content = (java.nio.ByteBuffer)value$; break;
-    case 3: parsedContent = (java.util.List<java.lang.CharSequence>)value$; break;
-    case 4: outlinks = (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>)value$; break;
-    case 5: metadata = (org.apache.gora.examples.generated.Metadata)value$; break;
+    case 0: __g__dirty = (java.nio.ByteBuffer)(value); break;
+    case 1: url = (java.lang.CharSequence)(value); break;
+    case 2: content = (java.nio.ByteBuffer)(value); break;
+    case 3: parsedContent = (java.util.List<java.lang.CharSequence>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyListWrapper((java.util.List)value)); break;
+    case 4: outlinks = (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)value)); break;
+    case 5: metadata = (org.apache.gora.examples.generated.Metadata)(value); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -390,12 +381,12 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
     public WebPage build() {
       try {
         WebPage record = new WebPage();
-        record.__g__dirty = fieldSetFlags()[0] ? this.__g__dirty : (java.nio.ByteBuffer) defaultValue(fields()[0]);
+        record.__g__dirty = fieldSetFlags()[0] ? this.__g__dirty : (java.nio.ByteBuffer) java.nio.ByteBuffer.wrap(new byte[1]);
         record.url = fieldSetFlags()[1] ? this.url : (java.lang.CharSequence) defaultValue(fields()[1]);
         record.content = fieldSetFlags()[2] ? this.content : (java.nio.ByteBuffer) defaultValue(fields()[2]);
-        record.parsedContent = fieldSetFlags()[3] ? this.parsedContent : (java.util.List<java.lang.CharSequence>) defaultValue(fields()[3]);
-        record.outlinks = fieldSetFlags()[4] ? this.outlinks : (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>) defaultValue(fields()[4]);
-        record.metadata = fieldSetFlags()[5] ? this.metadata : (org.apache.gora.examples.generated.Metadata) defaultValue(fields()[5]);
+        record.parsedContent = fieldSetFlags()[3] ? this.parsedContent : (java.util.List<java.lang.CharSequence>) new org.apache.gora.persistency.impl.DirtyListWrapper((java.util.List)defaultValue(fields()[3]));
+        record.outlinks = fieldSetFlags()[4] ? this.outlinks : (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>) new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)defaultValue(fields()[4]));
+        record.metadata = fieldSetFlags()[5] ? this.metadata : (org.apache.gora.examples.generated.Metadata) Metadata.newBuilder().build();
         return record;
       } catch (Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);
@@ -405,6 +396,10 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
   
   public WebPage.Tombstone getTombstone(){
   	return TOMBSTONE;
+  }
+
+  public WebPage newInstance(){
+    return newBuilder().build();
   }
 
   private static final Tombstone TOMBSTONE = new Tombstone();

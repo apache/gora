@@ -78,13 +78,7 @@ public class BeanFactoryImpl<K, T extends Persistent> implements BeanFactory<K, 
  
   @Override
   public T newPersistent() {
-    try {
-      return persistentClass.newInstance();
-    } catch (InstantiationException e) {
-      throw new RuntimeException(e);
-    } catch (IllegalAccessException e) {
-      throw new RuntimeException(e);
-    }
+    return (T) persistent.newInstance();
   }
   
   @Override

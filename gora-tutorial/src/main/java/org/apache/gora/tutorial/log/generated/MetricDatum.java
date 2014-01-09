@@ -6,7 +6,7 @@
 package org.apache.gora.tutorial.log.generated;  
 @SuppressWarnings("all")
 public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"MetricDatum\",\"namespace\":\"org.apache.gora.tutorial.log.generated\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty.\",\"default\":\"AA==\"},{\"name\":\"metricDimension\",\"type\":\"string\"},{\"name\":\"timestamp\",\"type\":\"long\"},{\"name\":\"metric\",\"type\":\"long\"}]}");
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"MetricDatum\",\"namespace\":\"org.apache.gora.tutorial.log.generated\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty.\",\"default\":\"AA==\"},{\"name\":\"metricDimension\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"timestamp\",\"type\":\"long\",\"default\":0},{\"name\":\"metric\",\"type\":\"long\",\"default\":0}]}");
   /** Bytes used to represent weather or not a field is dirty. */
   private java.nio.ByteBuffer __g__dirty = java.nio.ByteBuffer.wrap(new byte[1]);
   private java.lang.CharSequence metricDimension;
@@ -23,14 +23,15 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
+  
   // Used by DatumReader.  Applications should not call. 
   @SuppressWarnings(value="unchecked")
-  public void put(int field$, java.lang.Object value$) {
+  public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: __g__dirty = (java.nio.ByteBuffer)value$; break;
-    case 1: metricDimension = (java.lang.CharSequence)value$; break;
-    case 2: timestamp = (java.lang.Long)value$; break;
-    case 3: metric = (java.lang.Long)value$; break;
+    case 0: __g__dirty = (java.nio.ByteBuffer)(value); break;
+    case 1: metricDimension = (java.lang.CharSequence)(value); break;
+    case 2: timestamp = (java.lang.Long)(value); break;
+    case 3: metric = (java.lang.Long)(value); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -39,7 +40,7 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
    * Gets the value of the 'metricDimension' field.
    */
   public java.lang.CharSequence getMetricDimension() {
-    return metricDimension.toString();
+    return metricDimension;
   }
 
   /**
@@ -47,7 +48,7 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
    * @param value the value to set.
    */
   public void setMetricDimension(java.lang.CharSequence value) {
-    this.metricDimension = value.toString();
+    this.metricDimension = value;
     setDirty(1);
   }
   
@@ -264,7 +265,7 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
     public MetricDatum build() {
       try {
         MetricDatum record = new MetricDatum();
-        record.__g__dirty = fieldSetFlags()[0] ? this.__g__dirty : (java.nio.ByteBuffer) defaultValue(fields()[0]);
+        record.__g__dirty = fieldSetFlags()[0] ? this.__g__dirty : (java.nio.ByteBuffer) java.nio.ByteBuffer.wrap(new byte[1]);
         record.metricDimension = fieldSetFlags()[1] ? this.metricDimension : (java.lang.CharSequence) defaultValue(fields()[1]);
         record.timestamp = fieldSetFlags()[2] ? this.timestamp : (java.lang.Long) defaultValue(fields()[2]);
         record.metric = fieldSetFlags()[3] ? this.metric : (java.lang.Long) defaultValue(fields()[3]);
@@ -277,6 +278,10 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
   
   public MetricDatum.Tombstone getTombstone(){
   	return TOMBSTONE;
+  }
+
+  public MetricDatum newInstance(){
+    return newBuilder().build();
   }
 
   private static final Tombstone TOMBSTONE = new Tombstone();
