@@ -36,7 +36,7 @@ public abstract class CassandraColumn {
 
   public static final int SUB = 0;
   public static final int SUPER = 1;
-  
+
   private String family;
   private int type;
   private Field field;
@@ -49,7 +49,7 @@ public abstract class CassandraColumn {
   public int getUnionType(){
     return unionType;
   }
-  
+
   public String getFamily() {
     return family;
   }
@@ -65,19 +65,20 @@ public abstract class CassandraColumn {
   public void setField(Field field) {
     this.field = field;
   }
-  
+
   protected Field getField() {
     return this.field;
   }
-  
+
   public abstract ByteBuffer getName();
   public abstract Object getValue();
-  
+
   protected Object fromByteBuffer(Schema schema, ByteBuffer byteBuffer) {
     Object value = null;
     Serializer<?> serializer = GoraSerializerTypeInferer.getSerializer(schema);
     if (serializer == null) {
-      LOG.info("Schema is not supported: " + schema.toString());
+      LOG.warn("Schema: " + schema.getName() + " is not supported. No serializer "
+          + "could be found. Please report this to dev@gora.apache.org");
     } else {
       value = serializer.fromByteBuffer(byteBuffer);
     }

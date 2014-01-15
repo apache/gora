@@ -322,25 +322,24 @@ public class CassandraClient<K, T extends PersistentBase> {
   }
 
   /**
-   * Serialize value to ByteBuffer.
-   * @param value the member value
+   * Serialize value to ByteBuffer using 
+   * {@link org.apache.gora.cassandra.serializers.GoraSerializerTypeInferer#getSerializer(Object)}.
+   * @param value the member value {@link java.lang.Object}.
    * @return ByteBuffer object
    */
-  @SuppressWarnings("unchecked")
   public ByteBuffer toByteBuffer(Object value) {
     ByteBuffer byteBuffer = null;
-    Serializer serializer = GoraSerializerTypeInferer.getSerializer(value);
+    Serializer<Object> serializer = GoraSerializerTypeInferer.getSerializer(value);
     if (serializer == null) {
-      LOG.info("Serializer not found for: " + value.toString());
+      LOG.warn("Serializer not found for: " + value.toString());
     }
     else {
+      LOG.debug(serializer.getClass() + " selected as appropriate Serializer.");
       byteBuffer = serializer.toByteBuffer(value);
     }
-
     if (byteBuffer == null) {
-      LOG.info("value class=" + value.getClass().getName() + " value=" + value + " -> null");
+      LOG.warn("Serialization value for: " + value.getClass().getName() + " = null");
     }
-    
     return byteBuffer;
   }
 

@@ -21,7 +21,6 @@ package org.apache.gora.cassandra.query;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
-import me.prettyprint.cassandra.serializers.IntegerSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
@@ -29,7 +28,6 @@ import me.prettyprint.hector.api.beans.HSuperColumn;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
-import org.apache.avro.generic.GenericArray;
 import org.apache.avro.util.Utf8;
 import org.apache.gora.cassandra.serializers.Utf8Serializer;
 import org.apache.gora.persistency.ListGenericArray;
@@ -119,7 +117,7 @@ public class CassandraSuperColumn extends CassandraColumn {
         }
         break;
       default:
-        LOG.info("Type not supported: " + type);
+        LOG.warn("Type: " + type.name() + " not supported for field: " + field.name());
     }
     
     return value;
