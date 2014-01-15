@@ -66,7 +66,7 @@ import org.slf4j.LoggerFactory;
  * such as initialization, creating and deleting schemas (Cassandra Keyspaces), etc.  
  */
 public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
-  
+
   /** Logging implementation */
   public static final Logger LOG = LoggerFactory.getLogger(CassandraStore.class);
 
@@ -84,12 +84,12 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
    * We don't want to lock the entire collection before iterating over the keys, since in the meantime other threads are adding entries to the map.
    */
   private Map<K, T> buffer = Collections.synchronizedMap(new LinkedHashMap<K, T>());
-  
+
   /** The default constructor for CassandraStore */
   public CassandraStore() throws Exception {
     // this.cassandraClient.initialize();
   }
- 
+
   /** 
    * Initialize is called when then the call to 
    * {@link org.apache.gora.store.DataStoreFactory#createDataStore(Class<D> dataStoreClass, Class<K> keyClass, Class<T> persistent, org.apache.hadoop.conf.Configuration conf)}
@@ -144,19 +144,19 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
    */
   @Override
   public Result<K, T> execute(Query<K, T> query) {
-    
+
     Map<String, List<String>> familyMap = this.cassandraClient.getFamilyMap(query);
     Map<String, String> reverseMap = this.cassandraClient.getReverseMap(query);
-    
+
     CassandraQuery<K, T> cassandraQuery = new CassandraQuery<K, T>();
     cassandraQuery.setQuery(query);
     cassandraQuery.setFamilyMap(familyMap);
-    
+
     CassandraResult<K, T> cassandraResult = new CassandraResult<K, T>(this, query);
     cassandraResult.setReverseMap(reverseMap);
 
     CassandraResultSet<K> cassandraResultSet = new CassandraResultSet<K>();
-    
+
     // We query Cassandra keyspace by families.
     for (String family : familyMap.keySet()) {
       if (family == null) {
@@ -164,17 +164,17 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
       }
       if (this.cassandraClient.isSuper(family)) {
         addSuperColumns(family, cassandraQuery, cassandraResultSet);
-         
+
       } else {
         addSubColumns(family, cassandraQuery, cassandraResultSet);
       }
     }
-    
+
     cassandraResult.setResultSet(cassandraResultSet);
-    
+
     return cassandraResult;
   }
-  
+
   /**
    * When we add subcolumns, Gora keys are mapped to Cassandra partition keys only. 
    * This is because we follow the Cassandra logic where column family data is 
@@ -184,10 +184,10 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
       CassandraResultSet cassandraResultSet) {
     // select family columns that are included in the query
     List<Row<K, ByteBuffer, ByteBuffer>> rows = this.cassandraClient.execute(cassandraQuery, family);
-    
+
     for (Row<K, ByteBuffer, ByteBuffer> row : rows) {
       K key = row.getKey();
-      
+
       // find associated row in the resultset
       CassandraRow<K> cassandraRow = cassandraResultSet.getRow(key);
       if (cassandraRow == null) {
@@ -195,16 +195,16 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
         cassandraResultSet.putRow(key, cassandraRow);
         cassandraRow.setKey(key);
       }
-      
+
       ColumnSlice<ByteBuffer, ByteBuffer> columnSlice = row.getColumnSlice();
-      
+
       for (HColumn<ByteBuffer, ByteBuffer> hColumn : columnSlice.getColumns()) {
         CassandraSubColumn cassandraSubColumn = new CassandraSubColumn();
         cassandraSubColumn.setValue(hColumn);
         cassandraSubColumn.setFamily(family);
         cassandraRow.add(cassandraSubColumn);
       }
-      
+
     }
   }
 
@@ -215,7 +215,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
    */
   private void addSuperColumns(String family, CassandraQuery<K, T> cassandraQuery, 
       CassandraResultSet cassandraResultSet) {
-    
+
     List<SuperRow<K, String, ByteBuffer, ByteBuffer>> superRows = this.cassandraClient.executeSuper(cassandraQuery, family);
     for (SuperRow<K, String, ByteBuffer, ByteBuffer> superRow: superRows) {
       K key = superRow.getKey();
@@ -225,7 +225,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
         cassandraResultSet.putRow(key, cassandraRow);
         cassandraRow.setKey(key);
       }
-      
+
       SuperSlice<String, ByteBuffer, ByteBuffer> superSlice = superRow.getSuperSlice();
       for (HSuperColumn<String, ByteBuffer, ByteBuffer> hSuperColumn: superSlice.getSuperColumns()) {
         CassandraSuperColumn cassandraSuperColumn = new CassandraSuperColumn();
@@ -242,12 +242,12 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
    */
   @Override
   public void flush() {
-    
+
     Set<K> keys = this.buffer.keySet();
-    
+
     // this duplicates memory footprint
     K[] keyArray = (K[]) keys.toArray();
-    
+
     // iterating over the key set directly would throw ConcurrentModificationException with java.util.HashMap and subclasses
     for (K key: keyArray) {
       T value = this.buffer.get(key);
@@ -262,7 +262,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
         }
       }
     }
-    
+
     // remove flushed rows
     for (K key: keyArray) {
       this.buffer.remove(key);
@@ -297,7 +297,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
     partitions.add(pqi);
     return partitions;
   }
-  
+
   /**
    * In Cassandra Schemas are referred to as Keyspaces
    * @return Keyspace
@@ -326,51 +326,51 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
       int fieldPos = field.pos();
       if (value.isDirty(fieldPos)) {
         Object fieldValue = value.get(fieldPos);
-        
+
         // check if field has a nested structure (array, map, or record)
         Schema fieldSchema = field.schema();
         Type type = fieldSchema.getType();
         switch(type) {
-          case RECORD:
-            PersistentBase persistent = (PersistentBase) fieldValue;
-            PersistentBase newRecord = (PersistentBase) persistent.newInstance(new StateManagerImpl());
-            for (Field member: fieldSchema.getFields()) {
-              newRecord.put(member.pos(), persistent.get(member.pos()));
-            }
-            fieldValue = newRecord;
-            break;
-          case MAP:
-            StatefulHashMap map = (StatefulHashMap) fieldValue;
-            StatefulHashMap newMap = new StatefulHashMap();
-            for (Object mapKey : map.keySet()) {
-              newMap.put(mapKey, map.get(mapKey));
-              newMap.putState(mapKey, map.getState(mapKey));
-            }
-            fieldValue = newMap;
-            break;
-          case ARRAY:
-            GenericArray array = (GenericArray) fieldValue;
-            ListGenericArray newArray = new ListGenericArray(fieldSchema.getElementType());
-            Iterator iter = array.iterator();
-            while (iter.hasNext()) {
-              newArray.add(iter.next());
-            }
-            fieldValue = newArray;
-            break;
-          case UNION:
-            // storing the union selected schema, the actual value will be stored as soon as getting out of here
-            // TODO determine which schema we are using: int schemaPos = getUnionSchema(fieldValue,fieldSchema);
-            // and save it p.put( p.getFieldIndex(field.name() + CassandraStore.UNION_COL_SUFIX), schemaPos);
-            break;
+        case RECORD:
+          PersistentBase persistent = (PersistentBase) fieldValue;
+          PersistentBase newRecord = (PersistentBase) persistent.newInstance(new StateManagerImpl());
+          for (Field member: fieldSchema.getFields()) {
+            newRecord.put(member.pos(), persistent.get(member.pos()));
+          }
+          fieldValue = newRecord;
+          break;
+        case MAP:
+          StatefulHashMap map = (StatefulHashMap) fieldValue;
+          StatefulHashMap newMap = new StatefulHashMap();
+          for (Object mapKey : map.keySet()) {
+            newMap.put(mapKey, map.get(mapKey));
+            newMap.putState(mapKey, map.getState(mapKey));
+          }
+          fieldValue = newMap;
+          break;
+        case ARRAY:
+          GenericArray array = (GenericArray) fieldValue;
+          ListGenericArray newArray = new ListGenericArray(fieldSchema.getElementType());
+          Iterator iter = array.iterator();
+          while (iter.hasNext()) {
+            newArray.add(iter.next());
+          }
+          fieldValue = newArray;
+          break;
+        case UNION:
+          // storing the union selected schema, the actual value will be stored as soon as getting out of here
+          // TODO determine which schema we are using: int schemaPos = getUnionSchema(fieldValue,fieldSchema);
+          // and save it p.put( p.getFieldIndex(field.name() + CassandraStore.UNION_COL_SUFIX), schemaPos);
+          break;
         }
-        
+
         p.put(fieldPos, fieldValue);
       }
     }
-    
+
     // this performs a structural modification of the map
     this.buffer.put(key, p);
- }
+  }
 
   /**
    * Add a field to Cassandra according to its type.
@@ -381,67 +381,65 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
   private void addOrUpdateField(K key, Field field, Object value) {
     Schema schema = field.schema();
     Type type = schema.getType();
-      switch (type) {
-        case STRING:
-        case BOOLEAN:
-        case INT:
-        case LONG:
-        case BYTES:
-        case FLOAT:
-        case DOUBLE:
-        case FIXED:
-          this.cassandraClient.addColumn(key, field.name(), value);
-          break;
-        case RECORD:
-          if (value != null) {
-            if (value instanceof PersistentBase) {
-              PersistentBase persistentBase = (PersistentBase) value;
-              for (Field member: schema.getFields()) {
-                
-                // TODO: hack, do not store empty arrays
-                Object memberValue = persistentBase.get(member.pos());
-                if (memberValue instanceof GenericArray<?>) {
-                  if (((GenericArray)memberValue).size() == 0) {
-                    continue;
-                  }
-                }
-                this.cassandraClient.addSubColumn(key, field.name(), member.name(), memberValue);
+    switch (type) {
+    case STRING:
+    case BOOLEAN:
+    case INT:
+    case LONG:
+    case BYTES:
+    case FLOAT:
+    case DOUBLE:
+    case FIXED:
+      this.cassandraClient.addColumn(key, field.name(), value);
+      break;
+    case RECORD:
+      if (value != null) {
+        if (value instanceof PersistentBase) {
+          PersistentBase persistentBase = (PersistentBase) value;
+          for (Field member: schema.getFields()) {
+
+            // TODO: hack, do not store empty arrays
+            Object memberValue = persistentBase.get(member.pos());
+            if (memberValue instanceof GenericArray<?>) {
+              if (((GenericArray)memberValue).size() == 0) {
+                continue;
               }
-          } else {
-            LOG.info("Record not supported: " + value.toString());
-            
+            }
+            this.cassandraClient.addSubColumn(key, field.name(), member.name(), memberValue);
           }
+        } else {
+          LOG.warn("Record with value: " + value.toString() + " not supported for field: " + field.name()); 
         }
-        break;
-      case MAP:
-        if (value != null) {
-          if (value instanceof StatefulHashMap<?, ?>) {
-            this.cassandraClient.addStatefulHashMap(key, field.name(), (StatefulHashMap<Utf8,Object>)value);
-          } else {
-            LOG.info("Map not supported: " + value.toString());
-          }
+      }
+      break;
+    case MAP:
+      if (value != null) {
+        if (value instanceof StatefulHashMap<?, ?>) {
+          this.cassandraClient.addStatefulHashMap(key, field.name(), (StatefulHashMap<Utf8,Object>)value);
+        } else {
+          LOG.warn("Map with value: " + value.toString() + " not supported for field: " + field.name());
         }
-        break;
-      case ARRAY:
-        if (value != null) {
-          if (value instanceof GenericArray<?>) {
-            this.cassandraClient.addGenericArray(key, field.name(), (GenericArray)value);
-          } else {
-            LOG.info("Array not supported: " + value.toString());
-          }
+      }
+      break;
+    case ARRAY:
+      if (value != null) {
+        if (value instanceof GenericArray<?>) {
+          this.cassandraClient.addGenericArray(key, field.name(), (GenericArray)value);
+        } else {
+          LOG.warn("Array with value: " + value.toString() + " not supported for field: " + field.name());
         }
-        break;
-       case UNION:
-         if(value != null) {
-           LOG.info("Union being supported with value: " + value.toString());
-           // TODO add union schema index used
-           // adding union value
-           this.cassandraClient.addColumn(key, field.name(), value);
-         } else {
-           LOG.info("Union not supported: " + value.toString());
-         }
-      default:
-        LOG.info("Type not considered: " + type.name());      
+      }
+      break;
+    case UNION:
+      if(value != null) {
+        LOG.debug("Union with value: " + value.toString() + " at index: " + getUnionSchema(value, schema) + " supported for field: " + field.name());
+        this.cassandraClient.addColumn(key, field.name(), value);
+      } else {
+        LOG.warn("Union with value: " + value.toString() + " at index: " + getUnionSchema(value, schema) + " not supported for field: " + field.name());
+      }
+    default:
+      LOG.warn("Type: " + type.name() + " with value: " + value.toString() + 
+          " not considered for field: " + field.name() + ". Please report this to dev@gora.apache.org");
     }
   }
 
