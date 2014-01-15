@@ -37,7 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A ListSerializer translates the byte[] to and from List of Avro.
+ * A GenericArraySerializer translates the byte[] to and from GenericArray of Avro.
  */
 public class ListSerializer<T> extends AbstractSerializer<List<T>> {
 
@@ -93,12 +93,13 @@ public class ListSerializer<T> extends AbstractSerializer<List<T>> {
     elementSerializer = GoraSerializerTypeInferer.getSerializer(elementSchema);
   }
 
+  @SuppressWarnings("unchecked")
   public ListSerializer(Type elementType) {
     this.elementType = elementType;
     if (elementType != Type.FIXED) {
       elementSchema = Schema.create(elementType);
     }
-    clazz = TypeUtils.getClass(elementType);
+    clazz = (Class<T>) TypeUtils.getClass(elementType);
     size = TypeUtils.getFixedSize(elementType);
     elementSerializer = GoraSerializerTypeInferer.getSerializer(elementType);
   }
@@ -161,7 +162,6 @@ public class ListSerializer<T> extends AbstractSerializer<List<T>> {
       return null;
     }
     ArrayList<T> array = new ArrayList<T>();
-    int i = 0;
     while (true) {
       T element = null;
       try {

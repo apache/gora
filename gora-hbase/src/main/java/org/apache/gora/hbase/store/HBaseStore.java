@@ -239,10 +239,10 @@ implements Configurable {
       boolean hasDeletes = false;
       List<Field> fields = schema.getFields();
       for (int i = 1; i<fields.size(); i++) {
-        Field field = fields.get(i);
-        if (i==0 || !persistent.isDirty(i)) {
+        if (!persistent.isDirty(i)) {
           continue;
         }
+        Field field = fields.get(i);
         Type type = field.schema().getType();
         Object o = persistent.get(i);
         HBaseColumn hcol = mapping.getColumn(field.name());

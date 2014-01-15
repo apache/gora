@@ -207,10 +207,10 @@ public class CassandraMapping {
   }
 
   /**
-   * Add new column to CassandraMapping using the self-explanatory parameters
-   * @param pFamilyName
-   * @param pFieldName
-   * @param pColumnName
+   * Add new column to the CassandraMapping using the the below parameters
+   * @param pFamilyName the column family name
+   * @param pFieldName the Avro field from the Schema
+   * @param pColumnName the column name within the column family.
    */
   public void addColumn(String pFamilyName, String pFieldName, String pColumnName){
     this.familyMap.put(pFieldName, pFamilyName);

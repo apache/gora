@@ -57,7 +57,6 @@ public class CassandraSuperColumn extends CassandraColumn {
         List<Object> array = new ArrayList<Object>();
         
         for (HColumn<ByteBuffer, ByteBuffer> hColumn : this.hSuperColumn.getColumns()) {
-          ByteBuffer memberByteBuffer = hColumn.getValue();
           Object memberValue = fromByteBuffer(fieldSchema.getElementType(), hColumn.getValue());
           // int i = IntegerSerializer().get().fromByteBuffer(hColumn.getName());
           array.add(memberValue);      
@@ -69,7 +68,6 @@ public class CassandraSuperColumn extends CassandraColumn {
         Map<CharSequence, Object> map = new HashMap<CharSequence, Object>();
         
         for (HColumn<ByteBuffer, ByteBuffer> hColumn : this.hSuperColumn.getColumns()) {
-          ByteBuffer memberByteBuffer = hColumn.getValue();
           Object memberValue = null;
           memberValue = fromByteBuffer(fieldSchema.getValueType(), hColumn.getValue());
           map.put(CharSequenceSerializer.get().fromByteBuffer(hColumn.getName()), memberValue);      

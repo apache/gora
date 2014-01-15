@@ -968,7 +968,7 @@ public class DataStoreTestUtil {
     String url = "http://foo.com/";
 
     store.createSchema();
-    WebPage page = store.newPersistent();
+    WebPage page = WebPage.newBuilder().build();
     Metadata metadata = Metadata.newBuilder().build();
     metadata.setVersion(1);
     metadata.getData().put(new Utf8("foo"), new Utf8("baz"));

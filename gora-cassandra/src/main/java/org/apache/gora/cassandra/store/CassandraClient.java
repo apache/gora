@@ -20,7 +20,6 @@ package org.apache.gora.cassandra.store;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,21 +46,12 @@ import me.prettyprint.hector.api.query.RangeSuperSlicesQuery;
 import me.prettyprint.hector.api.HConsistencyLevel;
 import me.prettyprint.hector.api.Serializer;
 
-import org.apache.avro.Schema;
-import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericArray;
-import org.apache.avro.util.Utf8;
 import org.apache.gora.cassandra.query.CassandraQuery;
-import org.apache.gora.cassandra.serializers.GenericArraySerializer;
 import org.apache.gora.cassandra.serializers.GoraSerializerTypeInferer;
-import org.apache.gora.cassandra.serializers.TypeUtils;
 import org.apache.gora.mapreduce.GoraRecordReader;
-import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.impl.PersistentBase;
-import org.apache.gora.persistency.State;
-import org.apache.gora.persistency.StatefulHashMap;
 import org.apache.gora.query.Query;
-import org.apache.gora.util.ByteUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,7 +74,6 @@ public class CassandraClient<K, T extends PersistentBase> {
     // get cassandra mapping with persistent class
     this.persistentClass = persistentClass;
     this.cassandraMapping = CassandraMappingManager.getManager().get(persistentClass);
-    // LOG.info("persistentClass=" + persistentClass.getName() + " -> cassandraMapping=" + cassandraMapping);
 
     this.cluster = HFactory.getOrCreateCluster(this.cassandraMapping.getClusterName(), new CassandraHostConfigurator(this.cassandraMapping.getHostName()));
     
@@ -124,7 +113,8 @@ public class CassandraClient<K, T extends PersistentBase> {
         cfDef.setComparatorType(ComparatorType.BYTESTYPE);
       }
 
-      keyspaceDefinition = HFactory.createKeyspaceDefinition(this.cassandraMapping.getKeyspaceName(), "org.apache.cassandra.locator.SimpleStrategy", 1, columnFamilyDefinitions);      
+      keyspaceDefinition = HFactory.createKeyspaceDefinition(this.cassandraMapping.getKeyspaceName(), 
+          "org.apache.cassandra.locator.SimpleStrategy", 1, columnFamilyDefinitions);      
       this.cluster.addKeyspace(keyspaceDefinition, true);
       // LOG.info("Keyspace '" + this.cassandraMapping.getKeyspaceName() + "' in cluster '" + this.cassandraMapping.getClusterName() + "' was created on host '" + this.cassandraMapping.getHostName() + "'");
       
@@ -155,10 +145,11 @@ public class CassandraClient<K, T extends PersistentBase> {
           if (! comparatorType.equals(ComparatorType.BYTESTYPE)) {
             // GORA-197
             LOG.warn("The comparator type of " + cfDef.getName() + " column family is " + comparatorType.getTypeName()
-                   + ", not BytesType. It may cause a fatal error on column validation later.");
+              + ", not BytesType. It may cause a fatal error on column validation later.");
           }
           else {
-            // LOG.info("The comparator type of " + cfDef.getName() + " column family is " + comparatorType.getTypeName() + ".");
+            LOG.debug("The comparator type of " + cfDef.getName() + " column family is " 
+              + comparatorType.getTypeName() + ".");
           }
         }
       }
@@ -205,7 +196,6 @@ public class CassandraClient<K, T extends PersistentBase> {
    * @param columnName the column name (the member name, or the index of array)
    * @param value the member value
    */
-  @SuppressWarnings("unchecked")
   public void addSubColumn(K key, String fieldName, ByteBuffer columnName, Object value) {
     if (value == null) {
       return;
@@ -250,7 +240,6 @@ public class CassandraClient<K, T extends PersistentBase> {
    * @param fieldName the field name
    * @param columnName the column name (the member name, or the index of array)
    */
-  @SuppressWarnings("unchecked")
   public void deleteSubColumn(K key, String fieldName, ByteBuffer columnName) {
 
     String columnFamily = this.cassandraMapping.getFamily(fieldName);
@@ -266,19 +255,18 @@ public class CassandraClient<K, T extends PersistentBase> {
   }
 
 
-  @SuppressWarnings("unchecked")
-  public void addGenericArray(K key, String fieldName, GenericArray array) {
+  public void addGenericArray(K key, String fieldName, GenericArray<?> array) {
     if (isSuper( cassandraMapping.getFamily(fieldName) )) {
       int i= 0;
       for (Object itemValue: array) {
 
         // TODO: hack, do not store empty arrays
         if (itemValue instanceof GenericArray<?>) {
-          if (((List)itemValue).size() == 0) {
+          if (((List<?>)itemValue).size() == 0) {
             continue;
           }
         } else if (itemValue instanceof Map<?,?>) {
-          if (((Map)itemValue).size() == 0) {
+          if (((Map<?, ?>)itemValue).size() == 0) {
             continue;
           }
         }
@@ -291,24 +279,18 @@ public class CassandraClient<K, T extends PersistentBase> {
     }
   }
 
-  @SuppressWarnings("unchecked")
-  public void addStatefulHashMap(K key, String fieldName, StatefulHashMap<Utf8,Object> map) {
+  public void addStatefulHashMap(K key, String fieldName, Map<CharSequence,Object> map) {
     if (isSuper( cassandraMapping.getFamily(fieldName) )) {
-      int i= 0;
-      for (Utf8 mapKey: map.keySet()) {
-        if (map.getState(mapKey) == State.DELETED) {
-          deleteSubColumn(key, fieldName, mapKey.toString());
-          continue;
-        }
+      for (CharSequence mapKey: map.keySet()) {
 
         // TODO: hack, do not store empty arrays
         Object mapValue = map.get(mapKey);
         if (mapValue instanceof GenericArray<?>) {
-          if (((GenericArray)mapValue).size() == 0) {
+          if (((List<?>)mapValue).size() == 0) {
             continue;
           }
-        } else if (mapValue instanceof StatefulHashMap<?,?>) {
-          if (((StatefulHashMap)mapValue).size() == 0) {
+        } else if (mapValue instanceof Map<?,?>) {
+          if (((Map<?, ?>)mapValue).size() == 0) {
             continue;
           }
         }
@@ -322,25 +304,24 @@ public class CassandraClient<K, T extends PersistentBase> {
   }
 
   /**
-   * Serialize value to ByteBuffer.
-   * @param value the member value
+   * Serialize value to ByteBuffer using 
+   * {@link org.apache.gora.cassandra.serializers.GoraSerializerTypeInferer#getSerializer(Object)}.
+   * @param value the member value {@link java.lang.Object}.
    * @return ByteBuffer object
    */
-  @SuppressWarnings("unchecked")
   public ByteBuffer toByteBuffer(Object value) {
     ByteBuffer byteBuffer = null;
-    Serializer serializer = GoraSerializerTypeInferer.getSerializer(value);
+    Serializer<Object> serializer = GoraSerializerTypeInferer.getSerializer(value);
     if (serializer == null) {
-      LOG.info("Serializer not found for: " + value.toString());
+      LOG.warn("Serializer not found for: " + value.toString());
     }
     else {
+      LOG.debug(serializer.getClass() + " selected as appropriate Serializer.");
       byteBuffer = serializer.toByteBuffer(value);
     }
-
     if (byteBuffer == null) {
       LOG.info("value class=" + value.getClass().getName() + " value=" + value + " -> null");
     }
-    
     return byteBuffer;
   }
 
@@ -381,22 +362,28 @@ public class CassandraClient<K, T extends PersistentBase> {
   
   private String getMappingFamily(String pField){
     String family = null;
-    // TODO checking if it was a UNION field the one we are retrieving
+    // checking if it was a UNION field the one we are retrieving
+    if (pField.indexOf(CassandraStore.UNION_COL_SUFIX) > 0)
+      family = this.cassandraMapping.getFamily(pField.substring(0,pField.indexOf(CassandraStore.UNION_COL_SUFIX)));
+    else
       family = this.cassandraMapping.getFamily(pField);
-    return family;
-  }
-  
+     return family;
+   }
+ 
   private String getMappingColumn(String pField){
     String column = null;
-    // TODO checking if it was a UNION field the one we are retrieving e.g. column = pField;
+    if (pField.indexOf(CassandraStore.UNION_COL_SUFIX) > 0)
+      column = pField;
+    else
       column = this.cassandraMapping.getColumn(pField);
-    return column;
-  }
+      return column;
+    }
 
   /**
    * Select the families that contain at least one column mapped to a query field.
    * @param query indicates the columns to select
-   * @return a map which keys are the family names and values the corresponding column names required to get all the query fields.
+   * @return a map which keys are the family names and values the 
+   * corresponding column names required to get all the query fields.
    */
   public Map<String, List<String>> getFamilyMap(Query<K, T> query) {
     Map<String, List<String>> map = new HashMap<String, List<String>>();
@@ -421,17 +408,20 @@ public class CassandraClient<K, T extends PersistentBase> {
   }
 
   /**
-   * Retrieves the cassandraMapping which holds whatever was mapped from the gora-cassandra-mapping.xml
-   * @return
+   * Retrieves the cassandraMapping which holds whatever was mapped 
+   * from the gora-cassandra-mapping.xml
+   * @return 
    */
   public CassandraMapping getCassandraMapping(){
     return this.cassandraMapping;
   }
   
   /**
-   * Select the field names according to the column names, which format if fully qualified: "family:column"
+   * Select the field names according to the column names, which format 
+   * if fully qualified: "family:column"
    * @param query
-   * @return a map which keys are the fully qualified column names and values the query fields
+   * @return a map which keys are the fully qualified column 
+   * names and values the query fields
    */
   public Map<String, String> getReverseMap(Query<K, T> query) {
     Map<String, String> map = new HashMap<String, String>();

@@ -40,13 +40,13 @@ public class TypeUtils {
   public static final Logger LOG = LoggerFactory.getLogger(TypeUtils.class);
 
   // @SuppressWarnings({ "rawtypes", "unchecked" })
-  public static Class getClass(Object value) {
+  public static Class<? extends Object> getClass(Object value) {
     return value.getClass();
   }
 
   public static Schema getSchema(Object value) {
     if (value instanceof GenericArray) {
-      return Schema.createArray( getElementSchema((GenericArray)value) );
+      return Schema.createArray( getElementSchema((GenericArray<?>)value) );
     } else {
       return getSchema( getClass(value) );
     }
@@ -84,7 +84,7 @@ public class TypeUtils {
     }
   }
 
-  public static Class getClass(Type type) {
+  public static Class<?> getClass(Type type) {
     if (type == Type.STRING) {
       return Utf8.class;
     } else if (type == Type.BOOLEAN) {
@@ -113,7 +113,7 @@ public class TypeUtils {
     }
   }
 
-  public static Schema getSchema(Class clazz) {
+  public static Schema getSchema(Class<?> clazz) {
     Type type = getType(clazz);
     if (type == null) {
       return null;
@@ -156,7 +156,7 @@ public class TypeUtils {
     }
   }
 
-  public static Class getClass(Schema schema) {
+  public static Class<?> getClass(Schema schema) {
     Type type = schema.getType();
     if (type == null) {
       return null;
@@ -197,7 +197,7 @@ public class TypeUtils {
     }
   }
 
-  public static int getFixedSize(Class clazz) {
+  public static int getFixedSize(Class<?> clazz) {
     Type type = getType(clazz);
     if (type == Type.FIXED) {
       try {
@@ -214,11 +214,10 @@ public class TypeUtils {
     }
   }
 
-  public static Schema getElementSchema(GenericArray array) {
+  public static Schema getElementSchema(GenericArray<?> array) {
     Schema schema = array.getSchema();
     return (schema.getType() == Type.ARRAY) ? schema.getElementType() : schema;
   }
- 
 
   /*
   public static Schema getValueSchema(StatefulHashMap map) {

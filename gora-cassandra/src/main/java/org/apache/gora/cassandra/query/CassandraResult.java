@@ -98,18 +98,27 @@ public class CassandraResult<K, T extends PersistentBase> extends ResultBase<K, 
       
       // get field name
       String family = cassandraColumn.getFamily();
-      String fieldName = this.reverseMap.get(family + ":" + StringSerializer.get().fromByteBuffer(cassandraColumn.getName()));
+      String fieldName = this.reverseMap.get(family + ":" + 
+          StringSerializer.get().fromByteBuffer(cassandraColumn.getName()));
       
       if (fieldName != null ){
         // get field
-        int pos = this.persistent.getFieldIndex(fieldName);
+        int pos = this.persistent.getSchema().getField(fieldName).pos();
         Field field = fields.get(pos);
         Type fieldType = field.schema().getType();
-        System.out.println(StringSerializer.get().fromByteBuffer(cassandraColumn.getName()) + fieldName + " " + fieldType.name());
+        //LOG.info(StringSerializer.get().fromByteBuffer(cassandraColumn.getName()) + fieldName + " " + fieldType.name());
         if (fieldType == Type.UNION){
-          // TODO getting UNION stored type
-          // TODO get value of UNION stored type. This field does not need to be written back to the store
-          cassandraColumn.setUnionType(getNonNullTypePos(field.schema().getTypes()));
+          // getting UNION stored type
+          int posUnionType = this.persistent.getSchema().getField(fieldName + CassandraStore.UNION_COL_SUFIX).pos();
+          Field fieldUnionType = fields.get(posUnionType);
+          CassandraColumn cc = getUnionTypeColumn(fieldName + CassandraStore.UNION_COL_SUFIX, cassandraRow.toArray());
+          // get value of UNION stored type
+          cc.setField(fieldUnionType);
+          Object val = cc.getValue();
+          this.persistent.put(posUnionType, val);
+          // this field does not need to be written back to the store
+          this.persistent.clearDirty(posUnionType);
+          cassandraColumn.setUnionType(Integer.parseInt(val.toString()));
         }
 
         // get value

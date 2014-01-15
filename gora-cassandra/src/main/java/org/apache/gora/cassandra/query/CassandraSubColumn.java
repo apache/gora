@@ -19,29 +19,19 @@
 package org.apache.gora.cassandra.query;
 
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
+import java.util.List;
+import java.util.Map;
 
-import me.prettyprint.cassandra.serializers.FloatSerializer;
-import me.prettyprint.cassandra.serializers.DoubleSerializer;
-import me.prettyprint.cassandra.serializers.IntegerSerializer;
-import me.prettyprint.cassandra.serializers.LongSerializer;
-import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.beans.HColumn;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
-import org.apache.avro.generic.GenericArray;
-import org.apache.avro.generic.GenericData;
-import org.apache.avro.util.Utf8;
-import org.apache.gora.cassandra.serializers.GenericArraySerializer;
-import org.apache.gora.cassandra.serializers.StatefulHashMapSerializer;
-import org.apache.gora.cassandra.serializers.TypeUtils;
+import org.apache.gora.cassandra.serializers.ListSerializer;
+import org.apache.gora.cassandra.serializers.MapSerializer;
 import org.apache.gora.cassandra.store.CassandraStore;
-import org.apache.gora.persistency.StatefulHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,12 +66,12 @@ public class CassandraSubColumn extends CassandraColumn {
     }
     Object value = null;
     if (type == Type.ARRAY) {
-      ListSerializer serializer = ListSerializer.get(fieldSchema.getElementType());
-      List genericArray = serializer.fromByteBuffer(byteBuffer);
+      ListSerializer<?> serializer = ListSerializer.get(fieldSchema.getElementType());
+      List<?> genericArray = serializer.fromByteBuffer(byteBuffer);
       value = genericArray;
     } else if (type == Type.MAP) {
-      MapSerializer serializer = MapSerializer.get(fieldSchema.getValueType());
-      Map map = serializer.fromByteBuffer(byteBuffer);
+      MapSerializer<?> serializer = MapSerializer.get(fieldSchema.getValueType());
+      Map<?, ?> map = serializer.fromByteBuffer(byteBuffer);
       value = map;
     } else if (type == Type.UNION){
       // the selected union schema is obtained

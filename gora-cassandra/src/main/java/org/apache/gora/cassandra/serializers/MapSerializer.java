@@ -93,12 +93,13 @@ public class MapSerializer<T> extends AbstractSerializer<Map<CharSequence, T>> {
     valueSerializer = GoraSerializerTypeInferer.getSerializer(valueSchema);
   }
 
+  @SuppressWarnings("unchecked")
   public MapSerializer(Type valueType) {
     this.valueType = valueType;
     if (valueType != Type.FIXED) {
       valueSchema = Schema.create(valueType);
     }
-    clazz = TypeUtils.getClass(valueType);
+    clazz = (Class<T>) TypeUtils.getClass(valueType);
     size = TypeUtils.getFixedSize(valueType);
     valueSerializer = GoraSerializerTypeInferer.getSerializer(valueType);
   }
@@ -182,7 +183,6 @@ public class MapSerializer<T> extends AbstractSerializer<Map<CharSequence, T>> {
       return null;
     }
     Map<CharSequence, T> map = new HashMap<CharSequence, T>();
-    int i = 0;
     while (true) {
       CharSequence key = null;
       T value = null;

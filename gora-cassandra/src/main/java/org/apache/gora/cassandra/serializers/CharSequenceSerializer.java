@@ -27,7 +27,7 @@ import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.ddl.ComparatorType;
 
 /**
- * A Utf8Serializer translates the byte[] to and from Utf8 object of Avro.
+ * A CharSequenceSerializer translates the byte[] to and from CharSequenceSerializer object of Avro.
  */
 public final class CharSequenceSerializer extends AbstractSerializer<CharSequence> {
 
