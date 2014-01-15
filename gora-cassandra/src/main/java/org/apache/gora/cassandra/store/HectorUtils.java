@@ -28,12 +28,8 @@ import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.Mutator;
-import me.prettyprint.hector.api.Serializer;
 
 import org.apache.gora.persistency.Persistent;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This class it not thread safe.
@@ -42,8 +38,6 @@ import org.slf4j.LoggerFactory;
  */
 public class HectorUtils<K,T extends Persistent> {
 
-  public static final Logger LOG = LoggerFactory.getLogger(HectorUtils.class);
-  
   public static<K> void insertColumn(Mutator<K> mutator, K key, String columnFamily, ByteBuffer columnName, ByteBuffer columnValue) {
     mutator.insert(key, columnFamily, createColumn(columnName, columnValue));
   }
@@ -84,14 +78,17 @@ public class HectorUtils<K,T extends Persistent> {
   }
 
 
+  @SuppressWarnings("unchecked")
   public static<K> HSuperColumn<String,ByteBuffer,ByteBuffer> createSuperColumn(String superColumnName, ByteBuffer columnName, ByteBuffer columnValue) {
     return HFactory.createSuperColumn(superColumnName, Arrays.asList(createColumn(columnName, columnValue)), StringSerializer.get(), ByteBufferSerializer.get(), ByteBufferSerializer.get());
   }
 
+  @SuppressWarnings("unchecked")
   public static<K> HSuperColumn<String,String,ByteBuffer> createSuperColumn(String superColumnName, String columnName, ByteBuffer columnValue) {
     return HFactory.createSuperColumn(superColumnName, Arrays.asList(createColumn(columnName, columnValue)), StringSerializer.get(), StringSerializer.get(), ByteBufferSerializer.get());
   }
 
+  @SuppressWarnings("unchecked")
   public static<K> HSuperColumn<String,Integer,ByteBuffer> createSuperColumn(String superColumnName, Integer columnName, ByteBuffer columnValue) {
     return HFactory.createSuperColumn(superColumnName, Arrays.asList(createColumn(columnName, columnValue)), StringSerializer.get(), IntegerSerializer.get(), ByteBufferSerializer.get());
   }

@@ -320,7 +320,7 @@ public class CassandraClient<K, T extends PersistentBase> {
       byteBuffer = serializer.toByteBuffer(value);
     }
     if (byteBuffer == null) {
-      LOG.info("value class=" + value.getClass().getName() + " value=" + value + " -> null");
+      LOG.warn("Serialization value for: " + value.getClass().getName() + " = null");
     }
     return byteBuffer;
   }
