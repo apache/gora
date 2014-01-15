@@ -486,12 +486,11 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
           // adding union value
           this.cassandraClient.addColumn(key, field.name(), value);
         } else {
-          LOG.warn("Union with value: " + value.toString() + " at index: " + getUnionSchema(value, schema) + " not supported for field: " + field.name());
+          LOG.warn("Union with 'null' value not supported for field: " + field.name());
         }
         break;
       default:
-        LOG.warn("Type: " + type.name() + " with value: " + value.toString() + 
-            " not considered for field: " + field.name() + ". Please report this to dev@gora.apache.org");
+        LOG.warn("Type: " + type.name() + " not considered for field: " + field.name() + ". Please report this to dev@gora.apache.org");
       }
     }
   }
