@@ -95,8 +95,9 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
   @Override
   public void initialize( Class<K> keyClass, Class<T> persistentClass, Properties properties ) {
     super.initialize( keyClass, persistentClass, properties );
-    String mappingFile = DataStoreFactory.getMappingFile( properties, this, DEFAULT_MAPPING_FILE );
+
     try {
+      String mappingFile = DataStoreFactory.getMappingFile( properties, this, DEFAULT_MAPPING_FILE );
       mapping = readMapping( mappingFile );
     }
     catch ( IOException e ) {

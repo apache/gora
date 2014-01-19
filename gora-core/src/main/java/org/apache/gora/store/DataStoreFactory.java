@@ -363,8 +363,16 @@ public class DataStoreFactory{
   }
 
   public static String getMappingFile(Properties properties, DataStore<?,?> store
-      , String defaultValue) {
-    return findProperty(properties, store, MAPPING_FILE, defaultValue);
+      , String defaultValue) throws IOException {
+
+    String mappingFilename = findProperty(properties, store, MAPPING_FILE, defaultValue);
+
+    InputStream mappingFile = store.getClass().getClassLoader().getResourceAsStream(mappingFilename);
+
+    if (mappingFile == null)
+      throw new IOException("Unable to open mapping file: "+mappingFilename);
+
+    return mappingFilename;
   }
 
   private static String getDefaultDataStore(Properties properties) {
