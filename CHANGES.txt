@@ -4,6 +4,8 @@
 
 Gora Change Log
 
+* GORA-231 Provide better error handling in AccumuloStore.readMapping when file does not exist (Apostolos Giannakidis)
+
 * GORA-283 Specify field name for types not being considered in gora-cassandra (lewismc)
 
 * GORA-285 Change logging at o.a.g.mapreduce.GoraRecordWriter from INFO to WARN (lewismc)
