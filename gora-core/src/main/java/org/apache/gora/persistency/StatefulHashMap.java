@@ -55,10 +55,10 @@ public class StatefulHashMap<K, V> extends HashMap<K, V>
   
   @Override
   public V put(K key, V value) {
-    keyStates.remove(key);
     V old = super.put(key, value);
     //if old value is different or null, set state to dirty
     if (!value.equals(old)) {
+      keyStates.remove(key);
       keyStates.put(key, State.DIRTY);
     }
     return old;
