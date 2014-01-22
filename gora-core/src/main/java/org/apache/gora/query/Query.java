@@ -18,8 +18,7 @@
 
 package org.apache.gora.query;
 
-import java.io.IOException;
-
+import org.apache.gora.filter.Filter;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.store.DataStore;
 
@@ -71,6 +70,30 @@ public interface Query<K, T extends Persistent> {
   void setFields(String... fieldNames);
 
   String[] getFields();
+  
+  /**
+   * @param Set a filter on this query.
+   */
+  public void setFilter(Filter<K, T> filter);
+  
+  /**
+   * @return The filter on this query, or <code>null</code> if none.
+   */
+  public Filter<K, T> getFilter();
+  
+  /**
+   * Set whether the local filter is enabled. This is usually called by
+   * data store implementations that install the filter remotely
+   * (for efficiency reasons) and therefore disable the local filter.
+   * @param enable
+   */
+  void setLocalFilterEnabled(boolean enable);
+  
+  /**
+   * @return Whether the local filter is enabled.
+   * See {@link #setLocalFilterEnabled(boolean)}.
+   */
+  boolean isLocalFilterEnabled();
 
   /* Dimension : key */ 
   void setKey(K key);

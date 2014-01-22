@@ -18,15 +18,16 @@
 
 package org.apache.gora.query.ws.impl;
 
-import java.util.Arrays;
-
+import org.apache.gora.filter.Filter;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.store.DataStore;
 
+import java.util.Arrays;
+
 /**
- * Implementation for {@link PartitionQuery}.
+ * Webservices implementation for {@link PartitionQuery}.
  */
 //TODO this class should be reviewed when a web service backed datastore has the
 // ability to write partition queries
@@ -182,6 +183,27 @@ public class PartitionWSQueryImpl<K, T extends Persistent>
   public void setLimit(long limit) {
     baseQuery.setLimit(limit);
   }
+  
+  @Override
+  public Filter<K, T> getFilter() {
+    return filter;
+  }
+  
+  @Override
+  public void setFilter(Filter<K, T> filter) {
+    this.filter=filter;
+  }
+  
+  @Override
+  public boolean isLocalFilterEnabled() {
+    return localFilterEnabled;
+  }
+  
+  @Override
+  public void setLocalFilterEnabled(boolean enable) {
+    this.localFilterEnabled=enable;
+  }
+  
 
   @Override
   @SuppressWarnings({ "rawtypes" })
