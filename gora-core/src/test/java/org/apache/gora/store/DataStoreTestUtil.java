@@ -518,6 +518,10 @@ public class DataStoreTestUtil {
       for (int j = 1; j < urls.length; j += 2) {
         webPage.getOutlinks().put(new Utf8(anchor + j), new Utf8(urls[j]));
       }
+      //test for double put of same entries
+      for (int j = 1; j < urls.length; j += 2) {
+        webPage.getOutlinks().put(new Utf8(anchor + j), new Utf8(urls[j]));
+      }
       dataStore.put(webPage.getUrl().toString(), webPage);
     }
 
