@@ -22,7 +22,7 @@ import java.util.Arrays;
 /**
  * Store family, qualifier tuple 
  */
-class HBaseColumn {
+public class HBaseColumn {
   
   final byte[] family;
   final byte[] qualifier;
