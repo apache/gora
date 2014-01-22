@@ -237,6 +237,8 @@ public class HBaseByteInterface {
       return Bytes.toBytes((String) o);
     } else if (clazz.equals(Utf8.class)) {
       return ((Utf8) o).getBytes();
+    } else if (clazz.isArray() && clazz.getComponentType().equals(Byte.TYPE)) {
+      return (byte[])o;
     }
     throw new RuntimeException("Can't parse data as class: " + clazz);
   }

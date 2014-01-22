@@ -23,6 +23,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Arrays;
 
+import org.apache.gora.filter.Filter;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
@@ -126,6 +127,16 @@ public String[] getLocations() {
   @Override
   public void setLimit(long limit) {
     baseQuery.setLimit(limit);
+  }
+  
+  @Override
+  public Filter<K, T> getFilter() {
+    return baseQuery.getFilter();
+  }
+  
+  @Override
+  public void setFilter(Filter<K, T> filter) {
+    baseQuery.setFilter(filter);
   }
 
   @Override

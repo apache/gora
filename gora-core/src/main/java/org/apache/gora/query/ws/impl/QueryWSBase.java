@@ -21,6 +21,7 @@ package org.apache.gora.query.ws.impl;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.gora.filter.Filter;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
@@ -58,11 +59,8 @@ public abstract class QueryWSBase<K, T extends Persistent> implements Query<K,T>
   protected long startTime = -1;
   protected long endTime = -1;
 
-  /**
-   * Query filter
-   */
-  protected String filter;
-
+  protected Filter<K, T> filter;
+  protected boolean localFilterEnabled=true;
   /**
    * Max number of results to be retrieved
    */

@@ -18,12 +18,13 @@
 
 package org.apache.gora.query.impl;
 
-import java.io.IOException;
-
+import org.apache.gora.filter.Filter;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.store.DataStore;
+
+import java.io.IOException;
 
 /**
  * Base class for {@link Result} implementations.
@@ -102,17 +103,37 @@ public abstract class ResultBase<K, T extends Persistent>
   
   @Override
   public final boolean next() throws Exception, IOException {
-	  if(isLimitReached()) {
-		  return false;
-	  }
-	    
-	  clear();
+    if(isLimitReached()) {
+      return false;
+    }
+      
+    boolean ret;
+    do {
+      clear();
+      persistent = getOrCreatePersistent(persistent);
+      ret = nextInner();
+      if (ret == false) {
+        //this is the end
+        break;
+      }
+      //we keep looping until we get a row that is not filtered out
+    } while (filter(key, persistent));
     
-	  persistent = getOrCreatePersistent(persistent);
-	  boolean ret = nextInner();
-	  
-	  if(ret) ++offset;
-	  return ret;
+    if(ret) ++offset;
+    return ret;
+  }
+  
+  protected boolean filter(K key, T persistent) {
+    if (!query.isLocalFilterEnabled()) {
+      return false;
+    }
+    
+    Filter<K, T> filter = query.getFilter();
+    if (filter == null) {
+      return false;
+    }
+    
+    return filter.filter(key, persistent);
   }
   
   @Override
