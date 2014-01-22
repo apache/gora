@@ -117,7 +117,7 @@ public class CassandraSuperColumn extends CassandraColumn {
         }
         break;
       default:
-        LOG.warn("Type: " + type.name() + " not supported for field: " + field.name());
+        LOG.warn("Type: " + type.name() + " not supported for field: " + field.name() + ". Please report this to dev@gora.apache.org");
     }
     
     return value;
