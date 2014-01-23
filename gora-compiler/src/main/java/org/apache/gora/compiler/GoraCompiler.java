@@ -92,7 +92,7 @@ public class GoraCompiler extends SpecificCompiler {
         return "value";
     }
   }
-  
+
   public static String generateAppropriateWrapperOrValueForPut(Schema schema) {
     switch (schema.getType()) {
       case MAP:
@@ -105,7 +105,7 @@ public class GoraCompiler extends SpecificCompiler {
         return "value";
     }
   }
-  
+
   public static String generateAppropriateWrapper(Schema schema, Field field) {
     if (field.name() == "__g__dirty") {
       return "java.nio.ByteBuffer.wrap(new byte["
@@ -136,6 +136,24 @@ public class GoraCompiler extends SpecificCompiler {
       default:
         return "this."+field.name();
     }
+  }
+
+  /** Recognizes camel case */
+  public static String toUpperCase(String s) {
+    StringBuilder builder = new StringBuilder();
+
+    for (int i = 0; i < s.length(); i++) {
+      if (i > 0) {
+        if (Character.isUpperCase(s.charAt(i))
+            && Character.isLowerCase(s.charAt(i - 1))
+            && Character.isLetter(s.charAt(i))) {
+          builder.append("_");
+        }
+      }
+      builder.append(Character.toUpperCase(s.charAt(i)));
+    }
+
+    return builder.toString();
   }
 
   private static int getNumberOfBytesNeededForDirtyBits(Schema originalSchema) {
