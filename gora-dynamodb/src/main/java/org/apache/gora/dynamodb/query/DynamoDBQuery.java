@@ -21,6 +21,7 @@ package org.apache.gora.dynamodb.query;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.apache.gora.filter.Filter;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.ws.impl.QueryWSBase;
@@ -376,5 +377,29 @@ public class DynamoDBQuery<K, T extends Persistent> extends QueryWSBase<K, T> {
    */
   public static void setRangeCompOp(ComparisonOperator pRangeCompOp){
     rangeCompOp = pRangeCompOp;
+  }
+
+  @Override
+  public void setFilter(Filter<K, T> filter) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public Filter<K, T> getFilter() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public void setLocalFilterEnabled(boolean enable) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public boolean isLocalFilterEnabled() {
+    // TODO Auto-generated method stub
+    return false;
   }
 }

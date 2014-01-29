@@ -16,24 +16,17 @@
  * limitations under the License.
  */
 
-package org.apache.gora.hbase.query;
+package org.apache.gora.hbase.util;
 
+import org.apache.gora.filter.Filter;
+import org.apache.gora.hbase.store.HBaseStore;
 import org.apache.gora.persistency.impl.PersistentBase;
-import org.apache.gora.query.Query;
-import org.apache.gora.query.impl.QueryBase;
-import org.apache.gora.store.DataStore;
 
-/**
- * HBase specific implementation of the {@link Query} interface.
- */
-public class HBaseQuery<K, T extends PersistentBase> extends QueryBase<K, T> {
+import java.util.List;
 
-  public HBaseQuery() {
-    super(null);
-  }
-  
-  public HBaseQuery(DataStore<K, T> dataStore) {
-    super(dataStore);
-  }
-
+public interface FilterFactory <K, T extends PersistentBase> {
+  void setHBaseFitlerUtil(HBaseFilterUtil<K, T> util);
+  HBaseFilterUtil<K, T> getHbaseFitlerUtil();
+  List<String> getSupportedFilters();
+  org.apache.hadoop.hbase.filter.Filter createFilter(Filter<K, T> filter, HBaseStore<K, T> store);
 }

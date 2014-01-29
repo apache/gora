@@ -42,6 +42,7 @@ import org.apache.gora.hbase.query.HBaseQuery;
 import org.apache.gora.hbase.query.HBaseScannerResult;
 import org.apache.gora.hbase.store.HBaseMapping.HBaseMappingBuilder;
 import org.apache.gora.hbase.util.HBaseByteInterface;
+import org.apache.gora.hbase.util.HBaseFilterUtil;
 import org.apache.gora.persistency.impl.DirtyListWrapper;
 import org.apache.gora.persistency.impl.DirtyMapWrapper;
 import org.apache.gora.persistency.impl.PersistentBase;
@@ -98,6 +99,8 @@ implements Configurable {
   private final boolean autoCreateSchema = true;
 
   private volatile HBaseMapping mapping;
+  
+  private HBaseFilterUtil<K, T> filterUtil;
 
   private int scannerCaching = SCANNER_CACHING_PROPERTIES_DEFAULT ;
   
@@ -113,7 +116,7 @@ implements Configurable {
       this.conf = HBaseConfiguration.create(getConf());
       admin = new HBaseAdmin(this.conf);
       mapping = readMapping(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE));
-      
+      filterUtil = new HBaseFilterUtil<K, T>(this.conf);
     } catch (FileNotFoundException ex) {
       try {
         mapping = readMapping(getConf().get(PARSE_MAPPING_FILE_KEY, DEPRECATED_MAPPING_FILE));
@@ -159,6 +162,10 @@ implements Configurable {
   public String getSchemaName() {
     //return the name of this table
     return mapping.getTableName();
+  }
+  
+  public HBaseMapping getMapping() {
+    return mapping;
   }
 
   @Override
@@ -387,8 +394,7 @@ implements Configurable {
     }
     List<PartitionQuery<K,T>> partitions = new ArrayList<PartitionQuery<K,T>>(keys.getFirst().length);
     for (int i = 0; i < keys.getFirst().length; i++) {
-      String regionLocation = table.getRegionLocation(keys.getFirst()[i]).
-      getServerAddress().getHostname();
+      String regionLocation = table.getRegionLocation(keys.getFirst()[i]).getServerAddress().getHostname();
       byte[] startRow = query.getStartKey() != null ? toBytes(query.getStartKey())
           : HConstants.EMPTY_START_ROW;
       byte[] stopRow = query.getEndKey() != null ? toBytes(query.getEndKey())
@@ -440,7 +446,7 @@ implements Configurable {
         ResultScanner scanner = createScanner(query);
   
         org.apache.gora.query.Result<K,T> result
-            = new HBaseScannerResult<K,T>(this,query, scanner);
+            = new HBaseScannerResult<K,T>(this, query, scanner);
   
         return result;
       }
@@ -463,6 +469,13 @@ implements Configurable {
       scan.setStopRow(toBytes(query.getEndKey()));
     }
     addFields(scan, query);
+    if (query.getFilter() != null) {
+      boolean succeeded = filterUtil.setFilter(scan, query.getFilter(), this);
+      if (succeeded) {
+        // don't need local filter
+        query.setLocalFilterEnabled(false);
+      }
+    }
 
     return table.getScanner(scan);
   }

@@ -25,6 +25,7 @@ import java.io.IOException;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.gora.filter.Filter;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
@@ -56,7 +57,8 @@ public abstract class QueryBase<K, T extends PersistentBase>
   protected long startTime = -1;
   protected long endTime = -1;
 
-  protected String filter;
+  protected Filter<K, T> filter;
+  protected boolean localFilterEnabled=true;
 
   protected long limit = -1;
 
@@ -81,16 +83,6 @@ public abstract class QueryBase<K, T extends PersistentBase>
     return dataStore;
   }
 
-//  @Override
-//  public void setQueryString(String queryString) {
-//    this.queryString = queryString;
-//  }
-//
-//  @Override
-//  public String getQueryString() {
-//    return queryString;
-//  }
-
   @Override
   public void setFields(String... fields) {
     this.fields = fields;
@@ -100,7 +92,27 @@ public abstract class QueryBase<K, T extends PersistentBase>
 public String[] getFields() {
     return fields;
   }
-
+  
+  @Override
+  public Filter<K, T> getFilter() {
+    return filter;
+  }
+  
+  @Override
+  public void setFilter(Filter<K, T> filter) {
+    this.filter=filter;
+  }
+  
+  @Override
+  public boolean isLocalFilterEnabled() {
+    return localFilterEnabled;
+  }
+  
+  @Override
+  public void setLocalFilterEnabled(boolean enable) {
+    this.localFilterEnabled=enable;
+  }
+  
   @Override
   public void setKey(K key) {
     setKeyRange(key, key);
@@ -176,16 +188,6 @@ public String[] getFields() {
     return endTime;
   }
 
-//  @Override
-//  public void setFilter(String filter) {
-//    this.filter = filter;
-//  }
-//
-//  @Override
-//  public String getFilter() {
-//    return filter;
-//  }
-
   @Override
   public void setLimit(long limit) {
     this.limit = limit;
@@ -225,12 +227,20 @@ public String[] getFields() {
       startKey = IOUtils.deserialize(getConf(), in, null, dataStore.getKeyClass());
     if(!nullFields[3])
       endKey = IOUtils.deserialize(getConf(), in, null, dataStore.getKeyClass());
-    if(!nullFields[4])
-      filter = Text.readString(in);
+    if(!nullFields[4]) {
+      String filterClass = Text.readString(in);
+      try {
+        filter = (Filter<K, T>) ReflectionUtils.newInstance(ClassLoadingUtils.loadClass(filterClass), conf);
+        filter.readFields(in);
+      } catch (ClassNotFoundException e) {
+        throw new IOException(e);
+      }
+    }
 
     startTime = WritableUtils.readVLong(in);
     endTime = WritableUtils.readVLong(in);
     limit = WritableUtils.readVLong(in);
+    localFilterEnabled = in.readBoolean(); 
   }
 
   //@Override
@@ -250,12 +260,15 @@ public String[] getFields() {
       IOUtils.serialize(getConf(), out, startKey, dataStore.getKeyClass());
     if(endKey != null)
       IOUtils.serialize(getConf(), out, endKey, dataStore.getKeyClass());
-    if(filter != null)
-      Text.writeString(out, filter);
+    if(filter != null) {
+      Text.writeString(out, filter.getClass().getCanonicalName());
+      filter.write(out);
+    }
 
     WritableUtils.writeVLong(out, getStartTime());
     WritableUtils.writeVLong(out, getEndTime());
     WritableUtils.writeVLong(out, getLimit());
+    out.writeBoolean(localFilterEnabled);
   }
 
   @SuppressWarnings({ "rawtypes" })
@@ -271,6 +284,7 @@ public String[] getFields() {
       builder.append(endKey, that.endKey);
       builder.append(filter, that.filter);
       builder.append(limit, that.limit);
+      builder.append(localFilterEnabled, that.localFilterEnabled);
       return builder.isEquals();
     }
     return false;
@@ -286,6 +300,7 @@ public String[] getFields() {
     builder.append(endKey);
     builder.append(filter);
     builder.append(limit);
+    builder.append(localFilterEnabled);
     return builder.toHashCode();
   }
 
@@ -298,6 +313,7 @@ public String[] getFields() {
     builder.append("endKey", endKey);
     builder.append("filter", filter);
     builder.append("limit", limit);
+    builder.append("localFilterEnabled", localFilterEnabled);
 
     return builder.toString();
   }

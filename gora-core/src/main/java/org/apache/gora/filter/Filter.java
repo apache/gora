@@ -15,25 +15,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.gora.filter;
 
-package org.apache.gora.hbase.query;
-
-import org.apache.gora.persistency.impl.PersistentBase;
-import org.apache.gora.query.Query;
-import org.apache.gora.query.impl.QueryBase;
-import org.apache.gora.store.DataStore;
+import org.apache.gora.persistency.Persistent;
+import org.apache.hadoop.io.Writable;
 
 /**
- * HBase specific implementation of the {@link Query} interface.
+ * Defines filtering (possibly including modification) of rows. By default
+ * all filtering is done client side. (In generic Gora classes). Datastore
+ * implementations can decide if they install remote filters, when possible.
+ *  
+ * @param <K>
+ * @param <T>
  */
-public class HBaseQuery<K, T extends PersistentBase> extends QueryBase<K, T> {
-
-  public HBaseQuery() {
-    super(null);
-  }
+public interface Filter<K, T extends Persistent> extends Writable{
   
-  public HBaseQuery(DataStore<K, T> dataStore) {
-    super(dataStore);
-  }
-
+  /**
+   * Filter the key and persistent. Modification is possible.
+   * 
+   * @param key
+   * @param persistent
+   * @return <code>true</code> if the row is filtered out (excluded), 
+   * <code>false</code> otherwise.
+   */
+  public boolean filter(K key, T persistent);
 }

@@ -15,25 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.apache.gora.hbase.query;
-
-import org.apache.gora.persistency.impl.PersistentBase;
-import org.apache.gora.query.Query;
-import org.apache.gora.query.impl.QueryBase;
-import org.apache.gora.store.DataStore;
+package org.apache.gora.filter;
 
 /**
- * HBase specific implementation of the {@link Query} interface.
+ * Defines a set of common filter compare operations.
  */
-public class HBaseQuery<K, T extends PersistentBase> extends QueryBase<K, T> {
-
-  public HBaseQuery() {
-    super(null);
-  }
-  
-  public HBaseQuery(DataStore<K, T> dataStore) {
-    super(dataStore);
-  }
-
+public enum FilterOp {
+  EQUALS,
+  NOT_EQUALS,
+  LESS,
+  LESS_OR_EQUAL,
+  GREATER,
+  GREATER_OR_EQUAL,
 }
