@@ -18,6 +18,7 @@
 
 package org.apache.gora.cassandra.store;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Collections;
+import java.util.concurrent.ConcurrentHashMap;
 
 import me.prettyprint.hector.api.beans.ColumnSlice;
 import me.prettyprint.hector.api.beans.HColumn;
@@ -40,7 +42,13 @@ import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericArray;
+import org.apache.avro.generic.GenericData.Array;
+import org.apache.avro.io.BinaryEncoder;
+import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.specific.SpecificData;
+import org.apache.avro.specific.SpecificDatumWriter;
+import org.apache.avro.util.Utf8;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.gora.cassandra.query.CassandraQuery;
 import org.apache.gora.cassandra.query.CassandraResult;
 import org.apache.gora.cassandra.query.CassandraResultSet;
@@ -48,6 +56,7 @@ import org.apache.gora.cassandra.query.CassandraRow;
 import org.apache.gora.cassandra.query.CassandraSubColumn;
 import org.apache.gora.cassandra.query.CassandraSuperColumn;
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.DirtyListWrapper;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
@@ -60,7 +69,7 @@ import org.slf4j.LoggerFactory;
 /**
  * {@link org.apache.gora.cassandra.store.CassandraStore} is the primary class 
  * responsible for directing Gora CRUD operations into Cassandra. We (delegate) rely 
- * heavily on {@ link org.apache.gora.cassandra.store.CassandraClient} for many operations
+ * heavily on {@link org.apache.gora.cassandra.store.CassandraClient} for many operations
  * such as initialization, creating and deleting schemas (Cassandra Keyspaces), etc.  
  */
 public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
@@ -71,13 +80,13 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
   private CassandraClient<K, T>  cassandraClient = new CassandraClient<K, T>();
 
   /**
-   * Fixed string used to generate an extra column based on 
+   * Fixed string with value "UnionIndex" used to generate an extra column based on 
    * the original field's name
    */
   public static String UNION_COL_SUFIX = "UnionIndex";
 
   /**
-   * Default schema index used when AVRO Union data types are stored
+   * Default schema index with value "0" used when AVRO Union data types are stored
    */
   public static int DEFAULT_UNION_SCHEMA = 0;
 
@@ -90,9 +99,29 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
    */
   private Map<K, T> buffer = Collections.synchronizedMap(new LinkedHashMap<K, T>());
 
+  /**
+   * Threadlocals maintaining reusable binary decoders and encoders.
+   */
+  private static ThreadLocal<ByteArrayOutputStream> outputStream =
+      new ThreadLocal<ByteArrayOutputStream>();
+  
+  public static final ThreadLocal<BinaryEncoder> encoders =
+      new ThreadLocal<BinaryEncoder>();
+  
+  /**
+   * Create a {@link java.util.concurrent.ConcurrentHashMap} for the 
+   * datum readers and writers. 
+   * This is necessary because they are not thread safe, at least not before 
+   * Avro 1.4.0 (See AVRO-650).
+   * When they are thread safe, it is possible to maintain a single reader and
+   * writer pair for every schema, instead of one for every thread.
+   * @see <a href="https://issues.apache.org/jira/browse/AVRO-650">AVRO-650</a>
+   */
+  public static final ConcurrentHashMap<String, SpecificDatumWriter<?>> writerMap = 
+      new ConcurrentHashMap<String, SpecificDatumWriter<?>>();
+  
   /** The default constructor for CassandraStore */
   public CassandraStore() throws Exception {
-    // this.cassandraClient.initialize();
   }
 
   /** 
@@ -186,7 +215,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
    * partitioned across nodes based on row Key.
    */
   private void addSubColumns(String family, CassandraQuery<K, T> cassandraQuery,
-      CassandraResultSet cassandraResultSet) {
+      CassandraResultSet<K> cassandraResultSet) {
     // select family columns that are included in the query
     List<Row<K, ByteBuffer, ByteBuffer>> rows = this.cassandraClient.execute(cassandraQuery, family);
 
@@ -219,14 +248,14 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
    * partitioned across nodes based on row Key.
    */
   private void addSuperColumns(String family, CassandraQuery<K, T> cassandraQuery, 
-      CassandraResultSet cassandraResultSet) {
+      CassandraResultSet<K> cassandraResultSet) {
 
     List<SuperRow<K, String, ByteBuffer, ByteBuffer>> superRows = this.cassandraClient.executeSuper(cassandraQuery, family);
     for (SuperRow<K, String, ByteBuffer, ByteBuffer> superRow: superRows) {
       K key = superRow.getKey();
       CassandraRow<K> cassandraRow = cassandraResultSet.getRow(key);
       if (cassandraRow == null) {
-        cassandraRow = new CassandraRow();
+        cassandraRow = new CassandraRow<K>();
         cassandraResultSet.putRow(key, cassandraRow);
         cassandraRow.setKey(key);
       }
@@ -270,7 +299,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
 
       for (Field field: schema.getFields()) {
         if (value.isDirty(field.pos())) {
-          addOrUpdateField(key, field, value.get(field.pos()));
+          addOrUpdateField(key, field, field.schema(), value.get(field.pos()));
         }
       }
     }
@@ -287,7 +316,22 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
     CassandraQuery<K,T> query = new CassandraQuery<K,T>();
     query.setDataStore(this);
     query.setKeyRange(key, key);
-    query.setFields(fields);
+    
+    
+    // Generating UnionFields
+    ArrayList<String> unionFields = new ArrayList<String>();
+    for (String field: fields){
+      Field schemaField =this.fieldMap.get(field);
+      Type type = schemaField.schema().getType();
+      if (type.getName().equals("UNION".toLowerCase())){
+        unionFields.add(field+UNION_COL_SUFIX);
+      }
+    }
+    
+    String[] arr = unionFields.toArray(new String[unionFields.size()]);
+    String[] both = (String[]) ArrayUtils.addAll(fields, arr);
+    
+    query.setFields(both);
     query.setLimit(1);
     Result<K,T> result = execute(query);
     boolean hasResult = false;
@@ -339,17 +383,21 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
    * <li>Create a new duplicate instance of the object (explained in more detail below) **.</li>
    * <li>Obtain a {@link java.util.List} of the {@link org.apache.avro.Schema} 
    * {@link org.apache.avro.Schema.Field}'s.</li>
-   * <li>Iterate through the {@link java.util.List}. This allows us to process
-   * each item appropriately.</li>
-   * <li>Check to see if the {@link org.apache.avro.Schema.Field} is either at 
-   * position 0 OR it is NOT dirty. If one of these conditions is true then we DO NOT
-   * process this field.</li>
-   * <li>Obtain the element at the specified position in this list.</li>
+   * <li>Iterate through the field {@link java.util.List}. This allows us to 
+   * consequently process each item.</li>
+   * <li>Check to see if the {@link org.apache.avro.Schema.Field} is NOT dirty. 
+   * If this condition is true then we DO NOT process this field.</li>
+   * <li>Obtain the element at the specified position in this list so we can 
+   * directly operate on it.</li>
    * <li>Obtain the {@link org.apache.avro.Schema.Type} of the element obtained 
-   * above and process it accordingly. N.B. For nested type RECORD we shadow 
-   * the checks to see if the {@link org.apache.avro.Schema.Field} is either at 
+   * above and process it accordingly. N.B. For nested type ARRAY, MAP
+   * RECORD or UNION, we shadow the checks in bullet point 5 above to infer that the 
+   * {@link org.apache.avro.Schema.Field} is either at 
    * position 0 OR it is NOT dirty. If one of these conditions is true then we DO NOT
-   * process this field.</li>
+   * process this field. This is carried out in 
+   * {@link org.apache.gora.cassandra.store.CassandraStore#getFieldValue(Schema, Type, Object)}</li>
+   * <li>We then insert the Key and Object into the {@link java.util.LinkedHashMap} buffer 
+   * before being flushed. This performs a structural modification of the map.</li>
    * </ol>
    * ** We create a duplicate instance of the object to be persisted and insert processed
    * objects into a synchronized {@link java.util.LinkedHashMap}. This allows 
@@ -372,37 +420,9 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
       Field field = fields.get(i);
       Type type = field.schema().getType();
       Object fieldValue = value.get(field.pos());
+      Schema fieldSchema = field.schema();
       // check if field has a nested structure (array, map, record or union)
-
-      switch(type) {
-      case RECORD:
-        Persistent persistent = (Persistent) fieldValue;
-        Persistent newRecord = (Persistent) SpecificData.get().newRecord(persistent, persistent.getSchema());
-        for (Field member: field.schema().getFields()) {
-          if (member.pos() == 0 || !persistent.isDirty()) {
-            continue;
-          }
-          newRecord.put(member.pos(), persistent.get(member.pos()));
-        }
-        fieldValue = newRecord;
-        break;
-      case MAP:
-        Map<?, ?> map = (Map<?, ?>) fieldValue;
-        fieldValue = map;
-        break;
-      case ARRAY:
-        fieldValue = (List<?>) fieldValue;
-        break;
-      case UNION:
-        // storing the union selected schema, the actual value will 
-        // be stored as soon as we get break out.
-        int schemaPos = getUnionSchema(fieldValue,field.schema());
-        p.put( schemaPos, p.getSchema().getField(field.name() + CassandraStore.UNION_COL_SUFIX));
-        //p.put(fieldPos, fieldValue);
-        break;
-      default:
-        break;
-      }
+      fieldValue = getFieldValue(fieldSchema, type, fieldValue);
       p.put(field.pos(), fieldValue);
     }
     // this performs a structural modification of the map
@@ -410,14 +430,64 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
   }
 
   /**
+   * For every field within an object, we pass in a field schema, Type and value.
+   * This enables us to process fields (based on their characteristics) 
+   * preparing them for persistence.
+   * @param fieldSchema the associated field schema
+   * @param type the field type
+   * @param fieldValue the field value.
+   * @return
+   */
+  private Object getFieldValue(Schema fieldSchema, Type type, Object fieldValue ){
+    switch(type) {
+    case RECORD:
+      Persistent persistent = (Persistent) fieldValue;
+      Persistent newRecord = (Persistent) SpecificData.get().newRecord(persistent, persistent.getSchema());
+      for (Field member: fieldSchema.getFields()) {
+        if (member.pos() == 0 || !persistent.isDirty()) {
+          continue;
+        }
+        Schema memberSchema = member.schema();
+        Type memberType = memberSchema.getType();
+        Object memberValue = persistent.get(member.pos());
+        newRecord.put(member.pos(), getFieldValue(memberSchema, memberType, memberValue));
+      }
+      fieldValue = newRecord;
+      break;
+    case MAP:
+      Map<?, ?> map = (Map<?, ?>) fieldValue;
+      fieldValue = map;
+      break;
+    case ARRAY:
+      fieldValue = (List<?>) fieldValue;
+      break;
+    case UNION:
+      // storing the union selected schema, the actual value will 
+      // be stored as soon as we get break out.
+      if (fieldValue != null){
+        int schemaPos = getUnionSchema(fieldValue,fieldSchema);
+        Schema unionSchema = fieldSchema.getTypes().get(schemaPos);
+        Type unionType = unionSchema.getType();
+        fieldValue = getFieldValue(unionSchema, unionType, fieldValue);
+      }
+      //p.put( schemaPos, p.getSchema().getField(field.name() + CassandraStore.UNION_COL_SUFIX));
+      //p.put(fieldPos, fieldValue);
+      break;
+    default:
+      break;
+    }    
+    return fieldValue;
+  }
+  
+  /**
    * Add a field to Cassandra according to its type.
    * @param key     the key of the row where the field should be added
    * @param field   the Avro field representing a datum
    * @param value   the field value
    */
-  @SuppressWarnings({ "unchecked", "null" })
-  private void addOrUpdateField(K key, Field field, Object value) {
-    Schema schema = field.schema();
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  private void addOrUpdateField(K key, Field field, Schema schema, Object value) {
+    //Schema schema = field.schema();
     Type type = schema.getType();
     // checking if the value to be updated is used for saving union schema
     if (field.name().indexOf(CassandraStore.UNION_COL_SUFIX) < 0){
@@ -436,22 +506,74 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
         if (value != null) {
           if (value instanceof PersistentBase) {
             PersistentBase persistentBase = (PersistentBase) value;
-            for (Field member: schema.getFields()) {
-
-              // TODO: hack, do not store empty arrays
-              Object memberValue = persistentBase.get(member.pos());
-              if (memberValue instanceof List<?>) {
-                if (((List<?>)memberValue).size() == 0) {
-                  continue;
-                }
-              } else if (memberValue instanceof Map<?,?>) {
-                if (((Map<?, ?>)memberValue).size() == 0) {
-                  continue;
-                }
-              }
-              this.cassandraClient.addSubColumn(key, field.name(), 
-                  member.name(), memberValue);
+            
+            SpecificDatumWriter writer = (SpecificDatumWriter<?>) writerMap.get(schema.getFullName());
+            if (writer == null) {
+              writer = new SpecificDatumWriter(schema);// ignore dirty bits
+              writerMap.put(schema.getFullName(),writer);
             }
+            
+            BinaryEncoder encoderFromCache = encoders.get();
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            outputStream.set(bos);
+            BinaryEncoder encoder = EncoderFactory.get().directBinaryEncoder(bos, null);
+            if (encoderFromCache == null) {
+              encoders.set(encoder);
+            }
+            
+            //reset the buffers
+            ByteArrayOutputStream os = outputStream.get();
+            os.reset();
+            
+            try {
+              writer.write(persistentBase, encoder);
+              encoder.flush();
+            } catch (IOException e) {
+              // TODO Auto-generated catch block
+              e.printStackTrace();
+            }
+            byte[] byteValue = os.toByteArray();
+          
+            //String familyName = this.cassandraClient.getCassandraMapping().getFamily(field.name());
+//            if (this.cassandraClient.isSuper( familyName )){
+//              this.cassandraClient.addSubColumn(key, columnName, columnName, schemaPos);            
+//            }else{
+//              
+//              
+//            }            
+            this.cassandraClient.addColumn(key, field.name(), byteValue);
+            
+//            for (Field member: schema.getFields()) {
+//              if (member.pos() == 0) {
+//                continue;
+//              }
+//              // TODO: hack, do not store empty arrays
+//              Object memberValue = persistentBase.get(member.pos());
+//              if (memberValue instanceof List<?>) {
+//                if (((List<?>)memberValue).size() == 0) {
+//                  continue;
+//                }
+//              } else if (memberValue instanceof Map<?,?>) {
+//                if (((Map<?, ?>)memberValue).size() == 0) {
+//                  continue;
+//                }
+//              }
+//              if (memberValue == null){
+//                continue;
+//              }
+//              
+//              // Get type for Union Fields
+//              Schema memberSchema = member.schema();
+//              Type fieldType = memberSchema.getType();
+//              if (fieldType.equals(Type.UNION)){
+//                int schemaPos = getUnionSchema(memberValue, memberSchema);
+//                this.cassandraClient.addSubColumn(key, field.name(), 
+//                    member.name()+UNION_COL_SUFIX, schemaPos);
+//              }
+//              
+//              this.cassandraClient.addSubColumn(key, field.name(), 
+//                  member.name(), memberValue);
+//            }
           } else {
             LOG.warn("Record with value: " + value.toString() + " not supported for field: " + field.name());
           }
@@ -468,8 +590,13 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
         break;
       case ARRAY:
         if (value != null) {
-          if (value instanceof GenericArray<?>) {
-            this.cassandraClient.addGenericArray(key, field.name(), (GenericArray<?>)value);
+          if (value instanceof DirtyListWrapper<?>) {
+            DirtyListWrapper fieldValue = (DirtyListWrapper<?>)value;
+            GenericArray valueArray = new Array(fieldValue.size(), schema);
+            for (int i = 0; i < fieldValue.size(); i++) {
+              valueArray.add(i, fieldValue.get(i));
+            }
+            this.cassandraClient.addGenericArray(key, field.name(), (GenericArray<?>)valueArray);
           } else {
             LOG.warn("Array with value: " + value.toString() + " not supported for field: " + field.name());
           }
@@ -477,14 +604,23 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
         break;
       case UNION:
         if(value != null) {
-          LOG.debug("Union with value: " + value.toString() + " at index: " + getUnionSchema(value, schema) + " supported for field: " + field.name());
+          int schemaPos = getUnionSchema(value, schema);
+          LOG.debug("Union with value: " + value.toString() + " at index: " + schemaPos + " supported for field: " + field.name());
           // adding union schema index
           String columnName = field.name() + UNION_COL_SUFIX;
           String familyName = this.cassandraClient.getCassandraMapping().getFamily(field.name());
           this.cassandraClient.getCassandraMapping().addColumn(familyName, columnName, columnName);
-          this.cassandraClient.addColumn(key, columnName, getUnionSchema(value, schema));
+          if (this.cassandraClient.isSuper( familyName )){
+            this.cassandraClient.addSubColumn(key, columnName, columnName, schemaPos);            
+          }else{
+            this.cassandraClient.addColumn(key, columnName, schemaPos);
+            
+          }
+//          this.cassandraClient.getCassandraMapping().addColumn(familyName, columnName, columnName);
           // adding union value
-          this.cassandraClient.addColumn(key, field.name(), value);
+          Schema unioSchema = schema.getTypes().get(schemaPos);
+          addOrUpdateField(key, field, unioSchema, value);
+          //this.cassandraClient.addColumn(key, field.name(), value);
         } else {
           LOG.warn("Union with 'null' value not supported for field: " + field.name());
         }
@@ -506,24 +642,30 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
    */
   private int getUnionSchema(Object pValue, Schema pUnionSchema){
     int unionSchemaPos = 0;
-    String valueType = pValue.getClass().getSimpleName();
+//    String valueType = pValue.getClass().getSimpleName();
     Iterator<Schema> it = pUnionSchema.getTypes().iterator();
     while ( it.hasNext() ){
-      String schemaName = it.next().getName();
-      if (valueType.equals("Utf8") && schemaName.equals(Type.STRING.name().toLowerCase()))
+      Type schemaType = it.next().getType();
+      if (pValue instanceof Utf8 && schemaType.equals(Type.STRING))
         return unionSchemaPos;
-      else if (valueType.equals("HeapByteBuffer") && schemaName.equals(Type.STRING.name().toLowerCase()))
+      else if (pValue instanceof ByteBuffer && schemaType.equals(Type.BYTES))
         return unionSchemaPos;
-      else if (valueType.equals("Integer") && schemaName.equals(Type.INT.name().toLowerCase()))
+      else if (pValue instanceof Integer && schemaType.equals(Type.INT))
         return unionSchemaPos;
-      else if (valueType.equals("Long") && schemaName.equals(Type.LONG.name().toLowerCase()))
+      else if (pValue instanceof Long && schemaType.equals(Type.LONG))
         return unionSchemaPos;
-      else if (valueType.equals("Double") && schemaName.equals(Type.DOUBLE.name().toLowerCase()))
+      else if (pValue instanceof Double && schemaType.equals(Type.DOUBLE))
         return unionSchemaPos;
-      else if (valueType.equals("Float") && schemaName.equals(Type.FLOAT.name().toLowerCase()))
+      else if (pValue instanceof Float && schemaType.equals(Type.FLOAT))
         return unionSchemaPos;
-      else if (valueType.equals("Boolean") && schemaName.equals(Type.BOOLEAN.name().toLowerCase()))
+      else if (pValue instanceof Boolean && schemaType.equals(Type.BOOLEAN))
         return unionSchemaPos;
+      else if (pValue instanceof Map && schemaType.equals(Type.MAP))
+        return unionSchemaPos;  
+      else if (pValue instanceof List && schemaType.equals(Type.ARRAY))
+        return unionSchemaPos;        
+      else if (pValue instanceof Persistent && schemaType.equals(Type.RECORD))
+        return unionSchemaPos;          
       unionSchemaPos ++;
     }
     // if we weren't able to determine which data type it is, then we return the default

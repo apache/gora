@@ -19,8 +19,6 @@
 package org.apache.gora.cassandra.query;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetEncoder;
 import java.util.List;
 import java.util.Map;
 
@@ -38,11 +36,6 @@ import org.slf4j.LoggerFactory;
 public class CassandraSubColumn extends CassandraColumn {
   public static final Logger LOG = LoggerFactory.getLogger(CassandraSubColumn.class);
 
-  private static final String ENCODING = "UTF-8";
-  
-  private static CharsetEncoder charsetEncoder = Charset.forName(ENCODING).newEncoder();;
-
-
   /**
    * Key-value pair containing the raw data.
    */
@@ -50,6 +43,32 @@ public class CassandraSubColumn extends CassandraColumn {
 
   public ByteBuffer getName() {
     return hColumn.getName();
+  }
+
+  private Object getFieldValue(Type type, Schema fieldSchema, ByteBuffer byteBuffer){
+    Object value = null;
+    if (type.equals(Type.ARRAY)) {
+      ListSerializer<?> serializer = ListSerializer.get(fieldSchema.getElementType());
+      List<?> genericArray = serializer.fromByteBuffer(byteBuffer);
+      value = genericArray;
+    } else if (type.equals(Type.MAP)) {
+      MapSerializer<?> serializer = MapSerializer.get(fieldSchema.getValueType());
+      Map<?, ?> map = serializer.fromByteBuffer(byteBuffer);
+      value = map;
+    } else if (type.equals(Type.RECORD)){
+      value = fromByteBuffer(fieldSchema, byteBuffer);
+      //TODO: Avro dan geri getirmek lazim.
+    } else if (type.equals(Type.UNION)){
+      // the selected union schema is obtained
+      Schema unionFieldSchema = getUnionSchema(super.getUnionType(), fieldSchema);
+      Type unionFieldType = unionFieldSchema.getType();
+      // we use the selected union schema to deserialize our actual value
+      //value = fromByteBuffer(unionFieldSchema, byteBuffer);
+      value = getFieldValue(unionFieldType, unionFieldSchema, byteBuffer);
+    } else {
+      value = fromByteBuffer(fieldSchema, byteBuffer);
+    }
+    return value;
   }
 
   /**
@@ -64,24 +83,8 @@ public class CassandraSubColumn extends CassandraColumn {
     if (byteBuffer == null) {
       return null;
     }
-    Object value = null;
-    if (type == Type.ARRAY) {
-      ListSerializer<?> serializer = ListSerializer.get(fieldSchema.getElementType());
-      List<?> genericArray = serializer.fromByteBuffer(byteBuffer);
-      value = genericArray;
-    } else if (type == Type.MAP) {
-      MapSerializer<?> serializer = MapSerializer.get(fieldSchema.getValueType());
-      Map<?, ?> map = serializer.fromByteBuffer(byteBuffer);
-      value = map;
-    } else if (type == Type.UNION){
-      // the selected union schema is obtained
-      Schema unionFieldSchema = getUnionSchema(super.getUnionType(), field.schema());
-      // we use the selected union schema to deserialize our actual value
-      value = fromByteBuffer(unionFieldSchema, byteBuffer);
-    } else {
-      value = fromByteBuffer(fieldSchema, byteBuffer);
-    }
 
+    Object value = getFieldValue(type, fieldSchema, byteBuffer);
     return value;
   }
   

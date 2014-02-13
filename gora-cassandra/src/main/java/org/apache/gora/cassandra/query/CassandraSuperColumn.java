@@ -32,6 +32,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
 import org.apache.gora.cassandra.serializers.CharSequenceSerializer;
+import org.apache.gora.cassandra.store.CassandraStore;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,11 +46,7 @@ public class CassandraSuperColumn extends CassandraColumn {
     return StringSerializer.get().toByteBuffer(hSuperColumn.getName());
   }
 
-  public Object getValue() {
-    Field field = getField();
-    Schema fieldSchema = field.schema();
-    Type type = fieldSchema.getType();
-    
+ private Object getSuperValue(Field field, Schema fieldSchema, Type type){
     Object value = null;
     
     switch (type) {
@@ -102,21 +99,76 @@ public class CassandraSuperColumn extends CassandraColumn {
 
           for (HColumn<ByteBuffer, ByteBuffer> hColumn : this.hSuperColumn.getColumns()) {
             String memberName = StringSerializer.get().fromByteBuffer(hColumn.getName());
+            if (memberName.indexOf(CassandraStore.UNION_COL_SUFIX) < 0) {
+              
             if (memberName == null || memberName.length() == 0) {
               LOG.warn("member name is null or empty.");
               continue;
             }
             Field memberField = fieldSchema.getField(memberName);
+            Schema memberSchema = memberField.schema();
+            Type memberType = memberSchema.getType();
+            
             CassandraSubColumn cassandraColumn = new CassandraSubColumn();
             cassandraColumn.setField(memberField);
             cassandraColumn.setValue(hColumn);
+            
+            if (memberType.equals(Type.UNION)){
+              HColumn<ByteBuffer, ByteBuffer> hc = getUnionTypeColumn(memberField.name()
+                  + CassandraStore.UNION_COL_SUFIX, this.hSuperColumn.getColumns().toArray());
+              Field unionField = new Field(memberField.name()
+                  + CassandraStore.UNION_COL_SUFIX, Schema.create(Type.INT),
+                  null, null);
+              
+              CassandraSubColumn unionColumn = new CassandraSubColumn();
+              
+              // get value of UNION stored type
+              unionColumn.setField(unionField);
+              unionColumn.setValue(hc);
+              Object val = unionColumn.getValue();
+              cassandraColumn.setUnionType(Integer.parseInt(val.toString()));
+            }
+            
             record.put(record.getSchema().getField(memberName).pos(), cassandraColumn.getValue());
+          }
           }
         }
         break;
+      case UNION:
+        int schemaPos = this.getUnionType();
+        Schema unioSchema = fieldSchema.getTypes().get(schemaPos);
+        Type unionType = unioSchema.getType();
+        value = getSuperValue(field, unioSchema, unionType);
+        break;
       default:
+        Object memberValue = null;
+        // Using for UnionIndex of Union type field get value. UnionIndex always Integer.  
+        for (HColumn<ByteBuffer, ByteBuffer> hColumn : this.hSuperColumn.getColumns()) {
+          memberValue = fromByteBuffer(fieldSchema, hColumn.getValue());      
+        }
+        value = memberValue;
         LOG.warn("Type: " + type.name() + " not supported for field: " + field.name());
     }
+    return value;
+  }
+
+  private HColumn<ByteBuffer, ByteBuffer> getUnionTypeColumn(String fieldName, Object[] hColumns) {
+    for (int iCnt = 0; iCnt < hColumns.length; iCnt++){
+      @SuppressWarnings("unchecked")
+      HColumn<ByteBuffer, ByteBuffer> hColumn = (HColumn<ByteBuffer, ByteBuffer>)hColumns[iCnt];
+      String columnName = StringSerializer.get().fromByteBuffer(hColumn.getNameBytes().duplicate());
+      if (fieldName.equals(columnName))
+        return hColumn;
+    }
+    return null;
+}
+
+  public Object getValue() {
+    Field field = getField();
+    Schema fieldSchema = field.schema();
+    Type type = fieldSchema.getType();
+    
+    Object value = getSuperValue(field, fieldSchema, type);
     
     return value;
   }

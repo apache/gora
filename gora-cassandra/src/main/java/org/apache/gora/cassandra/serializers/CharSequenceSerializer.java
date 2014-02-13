@@ -22,6 +22,8 @@ import static me.prettyprint.hector.api.ddl.ComparatorType.UTF8TYPE;
 
 import java.nio.ByteBuffer;
 
+import org.apache.avro.util.Utf8;
+
 import me.prettyprint.cassandra.serializers.AbstractSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.ddl.ComparatorType;
@@ -46,11 +48,12 @@ public final class CharSequenceSerializer extends AbstractSerializer<CharSequenc
   }
 
   @Override
-  public CharSequence fromByteBuffer(ByteBuffer byteBuffer) {
+  //TODO: CharSequence cause Test Fail. All tests set UTF8. When change test set type. This will be CharSequence 
+  public Utf8 fromByteBuffer(ByteBuffer byteBuffer) {
     if (byteBuffer == null) {
       return null;
     }
-    return StringSerializer.get().fromByteBuffer(byteBuffer);
+    return new Utf8(StringSerializer.get().fromByteBuffer(byteBuffer));
   }
 
   @Override

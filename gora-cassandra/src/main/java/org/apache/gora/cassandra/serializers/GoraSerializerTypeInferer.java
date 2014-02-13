@@ -28,6 +28,7 @@ import me.prettyprint.cassandra.serializers.DoubleSerializer;
 import me.prettyprint.cassandra.serializers.FloatSerializer;
 import me.prettyprint.cassandra.serializers.IntegerSerializer;
 import me.prettyprint.cassandra.serializers.LongSerializer;
+import me.prettyprint.cassandra.serializers.ObjectSerializer;
 import me.prettyprint.cassandra.serializers.SerializerTypeInferer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.Serializer;
@@ -37,6 +38,7 @@ import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericArray;
 import org.apache.avro.specific.SpecificFixed;
 import org.apache.avro.util.Utf8;
+import org.apache.gora.persistency.Persistent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,7 +91,10 @@ public class GoraSerializerTypeInferer {
         Schema schema = TypeUtils.getSchema(value0);
         serializer = MapSerializer.get(schema);
       }
-    } else {
+    } else if (value instanceof Persistent){
+      serializer = ObjectSerializer.get();
+    }
+    else {
       serializer = SerializerTypeInferer.getSerializer(value);
     }
     return serializer;
@@ -124,30 +129,32 @@ public class GoraSerializerTypeInferer {
   public static <T> Serializer<T> getSerializer(Schema schema) {
     Serializer serializer = null;
     Type type = schema.getType();
-    if (type == Type.STRING) {
+    if (type.equals(Type.STRING)) {
       serializer = CharSequenceSerializer.get();
-    } else if (type == Type.BOOLEAN) {
+    } else if (type.equals(Type.BOOLEAN)) {
       serializer = BooleanSerializer.get();
-    } else if (type == Type.BYTES) {
+    } else if (type.equals(Type.BYTES)) {
       serializer = ByteBufferSerializer.get();
-    } else if (type == Type.DOUBLE) {
+    } else if (type.equals(Type.DOUBLE)) {
       serializer = DoubleSerializer.get();
-    } else if (type == Type.FLOAT) {
+    } else if (type.equals(Type.FLOAT)) {
       serializer = FloatSerializer.get();
-    } else if (type == Type.INT) {
+    } else if (type.equals(Type.INT)) {
       serializer = IntegerSerializer.get();
-    } else if (type == Type.LONG) {
+    } else if (type.equals(Type.LONG)) {
       serializer = LongSerializer.get();
-    } else if (type == Type.FIXED) {
+    } else if (type.equals(Type.FIXED)) {
       Class clazz = TypeUtils.getClass(schema);
       serializer = SpecificFixedSerializer.get(clazz);
       // serializer = SpecificFixedSerializer.get(schema);
-    } else if (type == Type.ARRAY) {
+    } else if (type.equals(Type.ARRAY)) {
       serializer = ListSerializer.get(schema.getElementType());
-    } else if (type == Type.MAP) {
+    } else if (type.equals(Type.MAP)) {
     	serializer = MapSerializer.get(schema.getValueType());
-    } else if (type == Type.UNION){
+    } else if (type.equals(Type.UNION)){
       serializer = ByteBufferSerializer.get();
+    } else if (type.equals(Type.RECORD)){
+      serializer = BytesArraySerializer.get();
     } else {
       serializer = null;
     }

@@ -68,8 +68,6 @@ public class TestCassandraStore extends DataStoreTestBase{
   }
 
 
-  //We need to skip the following tests for a while until we fix some issues..
-
   @Ignore("skipped until some bugs are fixed")
   @Override
   public void testGetWebPageDefaultFields() throws IOException {}
@@ -88,16 +86,16 @@ public class TestCassandraStore extends DataStoreTestBase{
   @Ignore("skipped until some bugs are fixed")
   @Override
   public void testQueryWebPageSingleKeyDefaultFields() throws IOException {}
-  @Ignore("skipped until some bugs are fixed")
+  @Ignore("GORA-154 delete() and deleteByQuery() methods are not implemented at CassandraStore, and always returns false or 0")
   @Override
   public void testDelete() throws IOException {}
-  @Ignore("skipped until some bugs are fixed")
+  @Ignore("GORA-154 delete() and deleteByQuery() methods are not implemented at CassandraStore, and always returns false or 0")
   @Override
   public void testDeleteByQuery() throws IOException {}
-  @Ignore("skipped until some bugs are fixed")
+  @Ignore("GORA-154 delete() and deleteByQuery() methods are not implemented at CassandraStore, and always returns false or 0")
   @Override
   public void testDeleteByQueryFields() throws IOException {}
-  @Ignore("skipped until some bugs are fixed")
+  @Ignore("GORA-298 Implement CassandraStore#getPartitions")
   @Override
   public void testGetPartitions() throws IOException {}
   @Ignore("skipped until some bugs are fixed")
