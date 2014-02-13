@@ -4,6 +4,8 @@
 
 Gora Change Log
 
+* GORA-171 Implement Daily Rolling File Appender for localised Gora logging (lewismc)
+
 * GORA-119 implement a filter enabled scan in gora (ferdy, kturner, enis, Tien Nguyen Manh via lewismc)
 
 * GORA-290 StatefulHashMap removes the entry when put with same value (Alparslan Avci via hsaputra)
