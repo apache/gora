@@ -232,7 +232,7 @@ public class DataStoreTestUtil {
 
     Employee employee = DataStoreTestUtil.createEmployee(dataStore);
     employee.setBoss(new Utf8("Real boss")) ;
-    
+
     String ssn = employee.getSsn().toString();
     dataStore.put(ssn, employee);
     dataStore.flush();
@@ -313,7 +313,7 @@ public class DataStoreTestUtil {
       if (employee.getBoss() instanceof Utf8) {
         String beforeBoss = employee.getBoss().toString();
         String afterBoss = after.getBoss().toString();
-        assertEquals("Boss String field values in UNION should be the same", 
+        assertEquals("Boss String field values in UNION should be the same",
             beforeBoss, afterBoss);
       } else {
         Employee beforeBoss = (Employee) employee.getBoss();
@@ -480,15 +480,14 @@ public class DataStoreTestUtil {
    * @throws IOException
    * @throws Exception
    */
-  public static void testUpdateWebPage(DataStore<String, WebPage> dataStore)
+  public static void testUpdateWebPagePutToArray(DataStore<String, WebPage> dataStore)
   throws IOException, Exception {
     dataStore.createSchema();
 
     String[] urls = {"http://a.com/a", "http://b.com/b", "http://c.com/c",
-        "http://d.com/d", "http://e.com/e", "http://f.com/f", "http://g.com/g"};
+        "http://d.com/d", "http://e.com/e", "http://f.com/f", "http://g.com/g" };
     String content = "content";
     String parsedContent = "parsedContent";
-    String anchor = "anchor";
 
     int parsedContentCount = 0;
 
@@ -496,12 +495,8 @@ public class DataStoreTestUtil {
     for (int i = 0; i < urls.length; i++) {
       WebPage webPage = WebPage.newBuilder().build();
       webPage.setUrl(new Utf8(urls[i]));
-      webPage.setParsedContent(new ArrayList<CharSequence>());
       for (parsedContentCount = 0; parsedContentCount < 5; parsedContentCount++) {
         webPage.getParsedContent().add(new Utf8(parsedContent + i + "," + parsedContentCount));
-      }
-      for (int j = 0; j < urls.length; j += 2) {
-        webPage.getOutlinks().put(new Utf8(anchor + j), new Utf8(urls[j]));
       }
       dataStore.put(webPage.getUrl().toString(), webPage);
     }
@@ -513,14 +508,6 @@ public class DataStoreTestUtil {
       webPage.setContent(ByteBuffer.wrap(ByteUtils.toBytes(content + i)));
       for (parsedContentCount = 5; parsedContentCount < 10; parsedContentCount++) {
         webPage.getParsedContent().add(new Utf8(parsedContent + i + "," + parsedContentCount));
-      }
-      webPage.getOutlinks().clear();
-      for (int j = 1; j < urls.length; j += 2) {
-        webPage.getOutlinks().put(new Utf8(anchor + j), new Utf8(urls[j]));
-      }
-      //test for double put of same entries
-      for (int j = 1; j < urls.length; j += 2) {
-        webPage.getOutlinks().put(new Utf8(anchor + j), new Utf8(urls[j]));
       }
       dataStore.put(webPage.getUrl().toString(), webPage);
     }
@@ -536,18 +523,20 @@ public class DataStoreTestUtil {
         assertEquals(parsedContent + i + "," + j, pc.toString());
         j++;
       }
-      int count = 0;
-      for (j = 0; j < urls.length; j++) {
-        CharSequence link = webPage.getOutlinks().get(new Utf8(anchor + j));
-        assertNotNull(link);
-        assertEquals(urls[j], link.toString());
-        count++;
-      }
-      assertEquals(count, webPage.getOutlinks().size());
     }
+  }
+
+  public static void testUpdateWebPagePutToNotNullableMap(DataStore<String, WebPage> dataStore)
+  throws IOException, Exception {
+    dataStore.createSchema();
+
+    String[] urls = {"http://a.com/a", "http://b.com/b", "http://c.com/c",
+        "http://d.com/d", "http://e.com/e", "http://f.com/f", "http://g.com/g" };
+    String anchor = "anchor";
 
     for (int i = 0; i < urls.length; i++) {
-      WebPage webPage = dataStore.get(urls[i]);
+      WebPage webPage = WebPage.newBuilder().build();
+      webPage.setUrl(new Utf8(urls[i]));
       for (int j = 0; j < urls.length; j += 2) {
         webPage.getOutlinks().put(new Utf8(anchor + j), new Utf8(urls[j]));
       }
@@ -558,13 +547,158 @@ public class DataStoreTestUtil {
 
     for (int i = 0; i < urls.length; i++) {
       WebPage webPage = dataStore.get(urls[i]);
+      webPage.getOutlinks().clear();
+      for (int j = 1; j < urls.length; j += 2) {
+        webPage.getOutlinks().put(new Utf8(anchor + j), new Utf8(urls[j]));
+      }
+      // test for double put of same entries
+      for (int j = 1; j < urls.length; j += 2) {
+        webPage.getOutlinks().put(new Utf8(anchor + j), new Utf8(urls[j]));
+      }
+      dataStore.put(webPage.getUrl().toString(), webPage);
+    }
+
+    dataStore.flush();
+
+    for (int i = 0; i < urls.length; i++) {
+      WebPage webPage = dataStore.get(urls[i]);
+      int j = 0;
       int count = 0;
-      for (int j = 0; j < urls.length; j++) {
+      for (j = 0; j < urls.length; j++) {  //TODO j++ or j+=2 ?
         CharSequence link = webPage.getOutlinks().get(new Utf8(anchor + j));
         assertNotNull(link);
         assertEquals(urls[j], link.toString());
         count++;
       }
+      assertEquals(count, webPage.getOutlinks().size());
+    }
+  }
+
+  public static void testUpdateWebPagePutToNullableMap(DataStore<String, WebPage> dataStore)
+  throws IOException, Exception {
+    dataStore.createSchema();
+
+    String[] urls = {"http://a.com/a", "http://b.com/b", "http://c.com/c",
+        "http://d.com/d", "http://e.com/e", "http://f.com/f", "http://g.com/g" };
+    String header = "header";
+    String[] headers = { "firstHeader", "secondHeader", "thirdHeader",
+        "fourthHeader", "fifthHeader", "sixthHeader" };
+
+    for (int i = 0; i < urls.length; i++) {
+      WebPage webPage = WebPage.newBuilder().build();
+      webPage.setUrl(new Utf8(urls[i]));
+      //test put for nullable map field
+      webPage.setHeaders(new HashMap<CharSequence, CharSequence>());
+      for (int j = 0; j < headers.length; j += 2) {
+        webPage.getHeaders().put(new Utf8(header + j), new Utf8(headers[j]));
+      }
+      dataStore.put(webPage.getUrl().toString(), webPage);
+    }
+
+    dataStore.flush();
+
+    for (int i = 0; i < urls.length; i++) {
+      WebPage webPage = dataStore.get(urls[i]);
+      webPage.getHeaders().clear(); //TODO clear method does not work
+      for (int j = 1; j < headers.length; j += 2) {
+        webPage.getHeaders().put(new Utf8(header + j), new Utf8(headers[j]));
+      }
+      dataStore.put(webPage.getUrl().toString(), webPage);
+    }
+
+    dataStore.flush();
+
+    for (int i = 0; i < urls.length; i++) {
+      WebPage webPage = dataStore.get(urls[i]);
+      int j = 0;
+      int count = 0;
+      for (j = 0; j < headers.length; j++) {  //TODO j++ or j+=2 ?
+        CharSequence headerSample = webPage.getHeaders().get(new Utf8(header + j));
+        assertNotNull(headerSample);
+        assertEquals(headers[j], headerSample.toString());
+        count++;
+      }
+      assertEquals(count, webPage.getHeaders().size());
+    }
+  }
+
+  public static void testUpdateWebPageRemoveMapEntry(DataStore<String, WebPage> dataStore)
+  throws IOException, Exception {
+    dataStore.createSchema();
+
+    String[] urls = {"http://a.com/a", "http://b.com/b", "http://c.com/c",
+        "http://d.com/d", "http://e.com/e", "http://f.com/f", "http://g.com/g" };
+    String anchor = "anchor";
+
+    for (int i = 0; i < urls.length; i++) {
+      WebPage webPage = WebPage.newBuilder().build();
+      webPage.setUrl(new Utf8(urls[i]));
+      for (int j = 0; j < urls.length; j++) {
+        webPage.getOutlinks().put(new Utf8(anchor + j), new Utf8(urls[j]));
+      }
+      dataStore.put(webPage.getUrl().toString(), webPage);
+    }
+
+    dataStore.flush();
+
+    // map entry removal test
+    for (int i = 0; i < urls.length; i++) {
+      WebPage webPage = dataStore.get(urls[i]);
+      for (int j = 1; j < urls.length; j += 2) {
+        webPage.getOutlinks().put(new Utf8(anchor + j), null);
+      }
+      dataStore.put(webPage.getUrl().toString(), webPage);
+    }
+
+    dataStore.flush();
+
+    for (int i = 0; i < urls.length; i++) {
+      int count = 0;
+      WebPage webPage = dataStore.get(urls[i]);
+      for (int j = 1; j < urls.length; j += 2) {
+        CharSequence link = webPage.getOutlinks().get(new Utf8(anchor + j));
+        assertNull(link);
+        count++;
+      }
+      assertEquals(urls.length - count, webPage.getOutlinks().size());
+    }
+  }
+
+  public static void testUpdateWebPageRemoveField(DataStore<String, WebPage> dataStore)
+  throws IOException, Exception {
+    dataStore.createSchema();
+
+    String[] urls = {"http://a.com/a", "http://b.com/b", "http://c.com/c",
+        "http://d.com/d", "http://e.com/e", "http://f.com/f", "http://g.com/g" };
+    String anchor = "anchor";
+    String header = "header";
+    String[] headers = { "firstHeader", "secondHeader", "thirdHeader",
+        "fourthHeader", "fifthHeader", "sixthHeader" };
+
+    for (int i = 0; i < urls.length; i++) {
+      WebPage webPage = WebPage.newBuilder().build();
+      webPage.setUrl(new Utf8(urls[i]));
+      webPage.setHeaders(new HashMap<CharSequence, CharSequence>());
+      for (int j = 0; j < headers.length; j++) {
+        webPage.getHeaders().put(new Utf8(header + j), new Utf8(headers[j]));
+      }
+      dataStore.put(webPage.getUrl().toString(), webPage);
+    }
+
+    dataStore.flush();
+
+    // nullable map field removal test
+    for (int i = 0; i < urls.length; i++) {
+      WebPage webPage = dataStore.get(urls[i]);
+      webPage.setHeaders(null);
+      dataStore.put(webPage.getUrl().toString(), webPage);
+    }
+
+    dataStore.flush();
+
+    for (int i = 0; i < urls.length; i++) {
+      WebPage webPage = dataStore.get(urls[i]);
+      assertNull(webPage.getHeaders());
     }
   }
 

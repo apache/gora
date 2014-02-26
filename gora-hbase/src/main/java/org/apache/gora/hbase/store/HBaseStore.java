@@ -224,95 +224,108 @@ implements Configurable {
   }
 
   /**
-   * {@inheritDoc}
-   * Serializes the Persistent data and saves in HBase.
-   * Topmost fields of the record are persisted in "raw" format (not avro serialized). This behavior happens
-   * in maps and arrays too.
+   * {@inheritDoc} Serializes the Persistent data and saves in HBase. Topmost
+   * fields of the record are persisted in "raw" format (not avro serialized).
+   * This behavior happens in maps and arrays too.
    * 
-   * ["null","type"] type (a.k.a. optional field) is persisted like as if it is ["type"], but the column get
-   * deleted if value==null (so value read after will be null).
+   * ["null","type"] type (a.k.a. optional field) is persisted like as if it is
+   * ["type"], but the column get deleted if value==null (so value read after
+   * will be null).
    * 
-   * @param persistent Record to be persisted in HBase
+   * @param persistent
+   *          Record to be persisted in HBase
    */
   @SuppressWarnings({ "unchecked", "rawtypes" })
   @Override
   public void put(K key, T persistent) {
-    try{
+    try {
       Schema schema = persistent.getSchema();
       byte[] keyRaw = toBytes(key);
       Put put = new Put(keyRaw);
       Delete delete = new Delete(keyRaw);
-      boolean hasPuts = false;
-      boolean hasDeletes = false;
       List<Field> fields = schema.getFields();
-      for (int i = 1; i<fields.size(); i++) {
+      for (int i = 1; i < fields.size(); i++) {
         if (!persistent.isDirty(i)) {
           continue;
         }
         Field field = fields.get(i);
-        Type type = field.schema().getType();
         Object o = persistent.get(i);
         HBaseColumn hcol = mapping.getColumn(field.name());
         if (hcol == null) {
-          throw new RuntimeException("HBase mapping for field ["+ persistent.getClass().getName() +
-              "#"+ field.name()+"] not found. Wrong gora-hbase-mapping.xml?");
+          throw new RuntimeException("HBase mapping for field ["
+              + persistent.getClass().getName() + "#" + field.name()
+              + "] not found. Wrong gora-hbase-mapping.xml?");
         }
-        switch(type) {
-          case MAP:
-            Set<Map.Entry> set = ((Map)o).entrySet();
-            for(Entry entry: set) {
-              byte[] qual = toBytes(entry.getKey());
-              byte[] val = toBytes(entry.getValue(), field.schema().getValueType());
-              // Gora 207: Top-most record level ["null","type"] must be saved raw. "null"=>delete
-              if (val == null) { // value == null => must delete the column
-                delete.deleteColumn(hcol.getFamily(), qual);
-                hasDeletes = true;
-              } else {
-                put.add(hcol.getFamily(), qual, val);
-                hasPuts = true;
-              }
-            }
-            break;
-          case ARRAY:
-            List<?> array = (List<?>) o;
-            int j=0;
-            for(Object item : array) {
-              byte[] val = toBytes(item);
-              // Gora 207: Top-most record level ["null","type"] 
-              // must be saved raw. "null"=>delete
-              if (val == null) { // value == null => must delete the column
-                delete.deleteColumn(hcol.getFamily(), Bytes.toBytes(j++));
-                hasDeletes = true;
-              } else {
-                put.add(hcol.getFamily(), Bytes.toBytes(j++), val);
-                hasPuts = true;
-              }
-            }
-            break;
-          default:
-            // Gora 207: Top-most record level ["null","type"] 
-            // must be saved raw. "null"=>delete
-            byte[] serializedBytes = toBytes(o, field.schema()) ;
-            if (serializedBytes == null) { // value == null => must delete the column
-              delete.deleteColumn(hcol.getFamily(), hcol.getQualifier());
-              hasDeletes = true;
-            } else {
-              put.add(hcol.getFamily(), hcol.getQualifier(), serializedBytes);
-              hasPuts = true;
-            }
-            break;
-        }
+        addPutsAndDeletes(put, delete, o, field.schema().getType(),
+            field.schema(), hcol, hcol.getQualifier());
       }
-      if (hasPuts) {
+      if (put.size() > 0) {
         table.put(put);
       }
-      if (hasDeletes) {
+      if (delete.size() > 0) {
         table.delete(delete);
+        table.delete(delete);
+        table.delete(delete); // HBase sometimes does not delete arbitrarily
       }
-    } catch(IOException ex2){
+    } catch (IOException ex2) {
       LOG.error(ex2.getMessage());
       LOG.error(ex2.getStackTrace().toString());
     }
+  }
+
+  private void addPutsAndDeletes(Put put, Delete delete, Object o, Type type,
+      Schema schema, HBaseColumn hcol, byte[] qualifier) throws IOException {
+    switch (type) {
+    case UNION:
+      if (isNullable(schema) && o == null) {
+        if (qualifier == null) {
+          delete.deleteFamily(hcol.getFamily());
+        } else {
+          delete.deleteColumn(hcol.getFamily(), qualifier);
+        }
+      } else {
+//        int index = GenericData.get().resolveUnion(schema, o);
+        int index = getResolvedUnionIndex(schema);
+        if (index > 1) {  //if more than 2 type in union, serialize directly for now
+          byte[] serializedBytes = toBytes(o, schema);
+          put.add(hcol.getFamily(), qualifier, serializedBytes);
+        } else {
+          Schema resolvedSchema = schema.getTypes().get(index);
+          addPutsAndDeletes(put, delete, o, resolvedSchema.getType(),
+              resolvedSchema, hcol, qualifier);
+        }
+      }
+      break;
+    case MAP:
+      Set<Entry> set = ((Map) o).entrySet();
+      for (Entry entry : set) {
+        byte[] qual = toBytes(entry.getKey());
+        addPutsAndDeletes(put, delete, entry.getValue(), schema.getValueType()
+            .getType(), schema.getValueType(), hcol, qual);
+      }
+      break;
+    case ARRAY:
+      List<?> array = (List<?>) o;
+      int j = 0;
+      for (Object item : array) {
+        addPutsAndDeletes(put, delete, item, schema.getElementType().getType(),
+            schema.getElementType(), hcol, Bytes.toBytes(j++));
+      }
+      break;
+    default:
+      byte[] serializedBytes = toBytes(o, schema);
+      put.add(hcol.getFamily(), qualifier, serializedBytes);
+      break;
+    }
+  }
+
+  private boolean isNullable(Schema unionSchema) {
+    for (Schema innerSchema : unionSchema.getTypes()) {
+      if (innerSchema.getType().equals(Schema.Type.NULL)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public void delete(T obj) {
@@ -488,18 +501,28 @@ implements Configurable {
             "Wrong gora-hbase-mapping.xml?");
       }
       Schema fieldSchema = fieldMap.get(f).schema();
-      switch (fieldSchema.getType()) {
-        case MAP:
-        case ARRAY:
-          get.addFamily(col.family); break;
-        default:
-          get.addColumn(col.family, col.qualifier); break;
-      }
+      addFamilyOrColumn(get, col, fieldSchema);
     }
   }
 
-  private void addFields(Scan scan, Query<K,T> query)
-  throws IOException {
+  private void addFamilyOrColumn(Get get, HBaseColumn col, Schema fieldSchema) {
+    switch (fieldSchema.getType()) {
+    case UNION:
+      int index = getResolvedUnionIndex(fieldSchema);
+      Schema resolvedSchema = fieldSchema.getTypes().get(index);
+      addFamilyOrColumn(get, col, resolvedSchema);
+      break;
+    case MAP:
+    case ARRAY:
+      get.addFamily(col.family);
+      break;
+    default:
+      get.addColumn(col.family, col.qualifier);
+      break;
+    }
+  }
+
+  private void addFields(Scan scan, Query<K, T> query) throws IOException {
     String[] fields = query.getFields();
     for (String f : fields) {
       HBaseColumn col = mapping.getColumn(f);
@@ -508,19 +531,30 @@ implements Configurable {
             "Wrong gora-hbase-mapping.xml?");
       }
       Schema fieldSchema = fieldMap.get(f).schema();
-      switch (fieldSchema.getType()) {
-        case MAP:
-        case ARRAY:
-          scan.addFamily(col.family); break;
-        default:
-          scan.addColumn(col.family, col.qualifier); break;
-      }
+      addFamilyOrColumn(scan, col, fieldSchema);
     }
   }
 
-  //TODO: HBase Get, Scan, Delete should extend some common interface with addFamily, etc
-  private void addFields(Delete delete, Query<K,T> query)
-    throws IOException {
+  private void addFamilyOrColumn(Scan scan, HBaseColumn col, Schema fieldSchema) {
+    switch (fieldSchema.getType()) {
+    case UNION:
+      int index = getResolvedUnionIndex(fieldSchema);
+      Schema resolvedSchema = fieldSchema.getTypes().get(index);
+      addFamilyOrColumn(scan, col, resolvedSchema);
+      break;
+    case MAP:
+    case ARRAY:
+      scan.addFamily(col.family);
+      break;
+    default:
+      scan.addColumn(col.family, col.qualifier);
+      break;
+    }
+  }
+
+  // TODO: HBase Get, Scan, Delete should extend some common interface with
+  // addFamily, etc
+  private void addFields(Delete delete, Query<K, T> query)    throws IOException {
     String[] fields = query.getFields();
     for (String f : fields) {
       HBaseColumn col = mapping.getColumn(f);
@@ -529,13 +563,25 @@ implements Configurable {
             "Wrong gora-hbase-mapping.xml?");
       }
       Schema fieldSchema = fieldMap.get(f).schema();
-      switch (fieldSchema.getType()) {
-        case MAP:
-        case ARRAY:
-          delete.deleteFamily(col.family); break;
-        default:
-          delete.deleteColumn(col.family, col.qualifier); break;
-      }
+      addFamilyOrColumn(delete, col, fieldSchema);
+    }
+  }
+
+  private void addFamilyOrColumn(Delete delete, HBaseColumn col,
+      Schema fieldSchema) {
+    switch (fieldSchema.getType()) {
+    case UNION:
+      int index = getResolvedUnionIndex(fieldSchema);
+      Schema resolvedSchema = fieldSchema.getTypes().get(index);
+      addFamilyOrColumn(delete, col, resolvedSchema);
+      break;
+    case MAP:
+    case ARRAY:
+      delete.deleteFamily(col.family);
+      break;
+    default:
+      delete.deleteColumn(col.family, col.qualifier);
+      break;
     }
   }
 
@@ -574,45 +620,85 @@ implements Configurable {
       }
       Field field = fieldMap.get(f);
       Schema fieldSchema = field.schema();
-      switch(fieldSchema.getType()) {
-        case MAP:
-          NavigableMap<byte[], byte[]> qualMap =
-            result.getNoVersionMap().get(col.getFamily());
-          if (qualMap == null) {
-            continue;
-          }
-          Schema valueSchema = fieldSchema.getValueType();
-          Map map = new HashMap();
-          for (Entry<byte[], byte[]> e : qualMap.entrySet()) {
-            map.put(new Utf8(Bytes.toString(e.getKey())),
-                fromBytes(valueSchema, e.getValue()));
-          }
-          setField(persistent, field, map);
-          break;
-        case ARRAY:
-          qualMap = result.getFamilyMap(col.getFamily());
-          if (qualMap == null) {
-            continue;
-          }
-          valueSchema = fieldSchema.getElementType();
-          ArrayList arrayList = new ArrayList();
-          DirtyListWrapper dirtyListWrapper = new DirtyListWrapper(arrayList);
-          for (Entry<byte[], byte[]> e : qualMap.entrySet()) {
-            dirtyListWrapper.add(fromBytes(valueSchema, e.getValue()));
-          }
-          setField(persistent, field, arrayList);
-          break;
-        default:
-          byte[] val = result.getValue(col.getFamily(), col.getQualifier());
-          if (val == null) {
-            continue;
-          }
-          setField(persistent, field, val);
-          break;
-      }
+      setField(result,persistent, col, field, fieldSchema);
     }
     persistent.clearDirty();
     return persistent;
+  }
+
+  private void setField(Result result, T persistent, HBaseColumn col,
+      Field field, Schema fieldSchema) throws IOException {
+    switch (fieldSchema.getType()) {
+    case UNION:
+      int index = getResolvedUnionIndex(fieldSchema);
+      if (index > 1) { //if more than 2 type in union, deserialize directly for now
+        byte[] val = result.getValue(col.getFamily(), col.getQualifier());
+        if (val == null) {
+          return;
+        }
+        setField(persistent, field, val);
+      } else {
+        Schema resolvedSchema = fieldSchema.getTypes().get(index);
+        setField(result, persistent, col, field, resolvedSchema);
+      }
+      break;
+    case MAP:
+      NavigableMap<byte[], byte[]> qualMap = result.getNoVersionMap().get(
+          col.getFamily());
+      if (qualMap == null) {
+        return;
+      }
+      Schema valueSchema = fieldSchema.getValueType();
+      Map map = new HashMap();
+      for (Entry<byte[], byte[]> e : qualMap.entrySet()) {
+        map.put(new Utf8(Bytes.toString(e.getKey())),
+            fromBytes(valueSchema, e.getValue()));
+      }
+      setField(persistent, field, map);
+      break;
+    case ARRAY:
+      qualMap = result.getFamilyMap(col.getFamily());
+      if (qualMap == null) {
+        return;
+      }
+      valueSchema = fieldSchema.getElementType();
+      ArrayList arrayList = new ArrayList();
+      DirtyListWrapper dirtyListWrapper = new DirtyListWrapper(arrayList);
+      for (Entry<byte[], byte[]> e : qualMap.entrySet()) {
+        dirtyListWrapper.add(fromBytes(valueSchema, e.getValue()));
+      }
+      setField(persistent, field, arrayList);
+      break;
+    default:
+      byte[] val = result.getValue(col.getFamily(), col.getQualifier());
+      if (val == null) {
+        return;
+      }
+      setField(persistent, field, val);
+      break;
+    }
+  }
+
+  //TODO temporary solution, has to be changed after implementation of saving the index of union type
+  private int getResolvedUnionIndex(Schema unionScema) {
+    if (unionScema.getTypes().size() == 2) {
+
+      // schema [type0, type1]
+      Type type0 = unionScema.getTypes().get(0).getType();
+      Type type1 = unionScema.getTypes().get(1).getType();
+
+      // Check if types are different and there's a "null", like ["null","type"]
+      // or ["type","null"]
+      if (!type0.equals(type1)
+          && (type0.equals(Schema.Type.NULL) || type1.equals(Schema.Type.NULL))) {
+
+        if (type0.equals(Schema.Type.NULL))
+          return 1;
+        else
+          return 0;
+      }
+    }
+    return 2;
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })

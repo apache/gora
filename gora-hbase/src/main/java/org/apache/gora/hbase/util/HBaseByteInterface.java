@@ -232,41 +232,13 @@ public class HBaseByteInterface {
     case BOOLEAN: return (Boolean)o ? new byte[] {1} : new byte[] {0};
     case ENUM:    return new byte[] { (byte)((Enum<?>) o).ordinal() };
     case UNION:
-      // XXX Special case: When writing the top-level field of a record we must handle the
-      // special case ["null","type"] definitions: this will be written as if it was ["type"]
-      // if not in a special case, will execute "case RECORD".
-      
-      if (schema.getTypes().size() == 2) {
-        
-        // schema [type0, type1]
-        Type type0 = schema.getTypes().get(0).getType() ;
-        Type type1 = schema.getTypes().get(1).getType() ;
-        
-        // Check if types are different and there's a "null", like ["null","type"] or ["type","null"]
-        if (!type0.equals(type1)
-            && (   type0.equals(Schema.Type.NULL)
-                || type1.equals(Schema.Type.NULL))) {
-
-          if (o == null) return null ;
-          
-          int index = GenericData.get().resolveUnion(schema, o);
-          schema = schema.getTypes().get(index) ;
-          
-          return toBytes(o, schema) ; // Serialize as if schema was ["type"] 
-        }
-        
-      }
-      // else
-      //   type = [type0,type1] where type0=type1
-      // => Serialize like "case RECORD" with Avro
-      
     case RECORD:
       SpecificDatumWriter writer = (SpecificDatumWriter<?>) writerMap.get(schema.getFullName());
       if (writer == null) {
         writer = new SpecificDatumWriter(schema);// ignore dirty bits
         writerMap.put(schema.getFullName(),writer);
       }
-      
+
       BinaryEncoder encoderFromCache = encoders.get();
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
       outputStream.set(bos);
@@ -274,11 +246,11 @@ public class HBaseByteInterface {
       if (encoderFromCache == null) {
         encoders.set(encoder);
       }
-      
+
       //reset the buffers
       ByteArrayOutputStream os = outputStream.get();
       os.reset();
-      
+
       writer.write(o, encoder);
       encoder.flush();
       return os.toByteArray();

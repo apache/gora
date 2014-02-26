@@ -210,7 +210,11 @@ public abstract class DataStoreTestBase {
   public void testUpdate() throws IOException, Exception {
     log.info("test method: testUpdate");
     DataStoreTestUtil.testUpdateEmployee(employeeStore);
-    DataStoreTestUtil.testUpdateWebPage(webPageStore);
+    DataStoreTestUtil.testUpdateWebPagePutToArray(webPageStore);
+    DataStoreTestUtil.testUpdateWebPagePutToNotNullableMap(webPageStore);
+    DataStoreTestUtil.testUpdateWebPagePutToNullableMap(webPageStore);
+    DataStoreTestUtil.testUpdateWebPageRemoveMapEntry(webPageStore);
+    DataStoreTestUtil.testUpdateWebPageRemoveField(webPageStore);
   }
 
   public void testEmptyUpdate() throws IOException, Exception {
