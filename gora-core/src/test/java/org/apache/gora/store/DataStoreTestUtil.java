@@ -587,7 +587,8 @@ public class DataStoreTestUtil {
     for (int i = 0; i < urls.length; i++) {
       WebPage webPage = WebPage.newBuilder().build();
       webPage.setUrl(new Utf8(urls[i]));
-      //test put for nullable map field
+      //test put for nullable map field 
+      // we put data to the 'headers' field which is a Map with default value of 'null'
       webPage.setHeaders(new HashMap<CharSequence, CharSequence>());
       for (int j = 0; j < headers.length; j += 2) {
         webPage.getHeaders().put(new Utf8(header + j), new Utf8(headers[j]));
@@ -670,7 +671,6 @@ public class DataStoreTestUtil {
 
     String[] urls = {"http://a.com/a", "http://b.com/b", "http://c.com/c",
         "http://d.com/d", "http://e.com/e", "http://f.com/f", "http://g.com/g" };
-    String anchor = "anchor";
     String header = "header";
     String[] headers = { "firstHeader", "secondHeader", "thirdHeader",
         "fourthHeader", "fifthHeader", "sixthHeader" };

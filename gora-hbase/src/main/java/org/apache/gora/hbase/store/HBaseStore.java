@@ -36,7 +36,6 @@ import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.util.Utf8;
-
 import org.apache.gora.hbase.query.HBaseGetResult;
 import org.apache.gora.hbase.query.HBaseQuery;
 import org.apache.gora.hbase.query.HBaseScannerResult;
@@ -51,7 +50,6 @@ import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.PartitionQueryImpl;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.impl.DataStoreBase;
-
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -66,11 +64,9 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.util.Pair;
-
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -235,7 +231,6 @@ implements Configurable {
    * @param persistent
    *          Record to be persisted in HBase
    */
-  @SuppressWarnings({ "unchecked", "rawtypes" })
   @Override
   public void put(K key, T persistent) {
     try {
@@ -297,8 +292,9 @@ implements Configurable {
       }
       break;
     case MAP:
+      @SuppressWarnings({ "rawtypes", "unchecked" })
       Set<Entry> set = ((Map) o).entrySet();
-      for (Entry entry : set) {
+      for (@SuppressWarnings("rawtypes") Entry entry : set) {
         byte[] qual = toBytes(entry.getKey());
         addPutsAndDeletes(put, delete, entry.getValue(), schema.getValueType()
             .getType(), schema.getValueType(), hcol, qual);
@@ -597,7 +593,6 @@ implements Configurable {
     }
   }
 
-  @SuppressWarnings({ "unchecked", "rawtypes" })
   /**
    * Creates a new Persistent instance with the values in 'result' for the fields listed.
    * @param result result form a HTable#get()
@@ -649,7 +644,7 @@ implements Configurable {
         return;
       }
       Schema valueSchema = fieldSchema.getValueType();
-      Map map = new HashMap();
+      Map<Utf8, Object> map = new HashMap<Utf8, Object>();
       for (Entry<byte[], byte[]> e : qualMap.entrySet()) {
         map.put(new Utf8(Bytes.toString(e.getKey())),
             fromBytes(valueSchema, e.getValue()));
@@ -662,8 +657,8 @@ implements Configurable {
         return;
       }
       valueSchema = fieldSchema.getElementType();
-      ArrayList arrayList = new ArrayList();
-      DirtyListWrapper dirtyListWrapper = new DirtyListWrapper(arrayList);
+      ArrayList<Object> arrayList = new ArrayList<Object>();
+      DirtyListWrapper<Object> dirtyListWrapper = new DirtyListWrapper<Object>(arrayList);
       for (Entry<byte[], byte[]> e : qualMap.entrySet()) {
         dirtyListWrapper.add(fromBytes(valueSchema, e.getValue()));
       }

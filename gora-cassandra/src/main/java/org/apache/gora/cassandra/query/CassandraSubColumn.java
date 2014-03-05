@@ -52,12 +52,12 @@ public class CassandraSubColumn extends CassandraColumn {
       List<?> genericArray = serializer.fromByteBuffer(byteBuffer);
       value = genericArray;
     } else if (type.equals(Type.MAP)) {
-      MapSerializer<?> serializer = MapSerializer.get(fieldSchema.getValueType());
-      Map<?, ?> map = serializer.fromByteBuffer(byteBuffer);
-      value = map;
+//      MapSerializer<?> serializer = MapSerializer.get(fieldSchema.getValueType());
+//      Map<?, ?> map = serializer.fromByteBuffer(byteBuffer);
+//      value = map;
+      value = fromByteBuffer(fieldSchema, byteBuffer);
     } else if (type.equals(Type.RECORD)){
       value = fromByteBuffer(fieldSchema, byteBuffer);
-      //TODO: Avro dan geri getirmek lazim.
     } else if (type.equals(Type.UNION)){
       // the selected union schema is obtained
       Schema unionFieldSchema = getUnionSchema(super.getUnionType(), fieldSchema);

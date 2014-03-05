@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import me.prettyprint.cassandra.serializers.IntegerSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
@@ -31,6 +32,7 @@ import me.prettyprint.hector.api.beans.HSuperColumn;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
+import org.apache.avro.util.Utf8;
 import org.apache.gora.cassandra.serializers.CharSequenceSerializer;
 import org.apache.gora.cassandra.store.CassandraStore;
 import org.apache.gora.persistency.impl.PersistentBase;
@@ -63,11 +65,25 @@ public class CassandraSuperColumn extends CassandraColumn {
         break;
       case MAP:
         Map<CharSequence, Object> map = new HashMap<CharSequence, Object>();
-        
+
         for (HColumn<ByteBuffer, ByteBuffer> hColumn : this.hSuperColumn.getColumns()) {
-          Object memberValue = null;
-          memberValue = fromByteBuffer(fieldSchema.getValueType(), hColumn.getValue());
-          map.put(CharSequenceSerializer.get().fromByteBuffer(hColumn.getName()), memberValue);      
+          CharSequence mapKey = CharSequenceSerializer.get().fromByteBuffer(hColumn.getName());
+          if (mapKey.toString().indexOf(CassandraStore.UNION_COL_SUFIX) < 0) {
+            Object memberValue = null;
+            // We need detect real type for UNION Fields
+            if (fieldSchema.getValueType().getType().equals(Type.UNION)){
+              
+              HColumn<ByteBuffer, ByteBuffer> cc = getUnionTypeColumn(mapKey
+                  + CassandraStore.UNION_COL_SUFIX, this.hSuperColumn.getColumns());
+              Integer unionIndex = getUnionIndex(mapKey.toString(), cc);
+              Schema realSchema = fieldSchema.getValueType().getTypes().get(unionIndex);
+              memberValue = fromByteBuffer(realSchema, hColumn.getValue());
+              
+            }else{
+              memberValue = fromByteBuffer(fieldSchema.getValueType(), hColumn.getValue());            
+            }            
+            map.put(mapKey, memberValue);      
+          }
         }
         value = map;
         
@@ -116,17 +132,8 @@ public class CassandraSuperColumn extends CassandraColumn {
             if (memberType.equals(Type.UNION)){
               HColumn<ByteBuffer, ByteBuffer> hc = getUnionTypeColumn(memberField.name()
                   + CassandraStore.UNION_COL_SUFIX, this.hSuperColumn.getColumns().toArray());
-              Field unionField = new Field(memberField.name()
-                  + CassandraStore.UNION_COL_SUFIX, Schema.create(Type.INT),
-                  null, null);
-              
-              CassandraSubColumn unionColumn = new CassandraSubColumn();
-              
-              // get value of UNION stored type
-              unionColumn.setField(unionField);
-              unionColumn.setValue(hc);
-              Object val = unionColumn.getValue();
-              cassandraColumn.setUnionType(Integer.parseInt(val.toString()));
+              Integer unionIndex = getUnionIndex(memberField.name(),hc);
+              cassandraColumn.setUnionType(unionIndex);
             }
             
             record.put(record.getSchema().getField(memberName).pos(), cassandraColumn.getValue());
@@ -151,6 +158,16 @@ public class CassandraSuperColumn extends CassandraColumn {
     }
     return value;
   }
+
+ private Integer getUnionIndex(String fieldName, HColumn<ByteBuffer, ByteBuffer> uc){
+   Integer val = IntegerSerializer.get().fromByteBuffer(uc.getValue());
+   return Integer.parseInt(val.toString());
+ }
+ 
+  private HColumn<ByteBuffer, ByteBuffer> getUnionTypeColumn(String fieldName,
+    List<HColumn<ByteBuffer, ByteBuffer>> columns) {
+    return getUnionTypeColumn(fieldName, columns.toArray());
+}
 
   private HColumn<ByteBuffer, ByteBuffer> getUnionTypeColumn(String fieldName, Object[] hColumns) {
     for (int iCnt = 0; iCnt < hColumns.length; iCnt++){

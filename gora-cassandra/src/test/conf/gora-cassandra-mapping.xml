@@ -47,6 +47,7 @@
     <field name="content" family="p" qualifier="p:cnt:c"/>
     <field name="parsedContent" family="sc" qualifier="p:parsedContent"/>
     <field name="outlinks" family="sc" qualifier="p:outlinks"/>
+    <field name="headers" family="sc" qualifier="p:headers"/>
     <field name="metadata" family="p" qualifier="c:mt"/>
   </class>
 

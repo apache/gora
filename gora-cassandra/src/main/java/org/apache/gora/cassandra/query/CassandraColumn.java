@@ -30,6 +30,7 @@ import org.apache.avro.Schema.Type;
 import org.apache.avro.io.BinaryDecoder;
 import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.specific.SpecificDatumReader;
+import org.apache.gora.cassandra.serializers.AvroSerializerUtil;
 import org.apache.gora.cassandra.serializers.GoraSerializerTypeInferer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,19 +48,6 @@ public abstract class CassandraColumn {
   private int type;
   private Field field;
   private int unionType;
-  
-  public static final ThreadLocal<BinaryDecoder> decoders =
-      new ThreadLocal<BinaryDecoder>();
-
-  /*
-   * Create a threadlocal map for the datum readers and writers, because
-   * they are not thread safe, at least not before Avro 1.4.0 (See AVRO-650).
-   * When they are thread safe, it is possible to maintain a single reader and
-   * writer pair for every schema, instead of one for every thread.
-   */
-  
-  public static final ConcurrentHashMap<String, SpecificDatumReader<?>> readerMap = 
-      new ConcurrentHashMap<String, SpecificDatumReader<?>>();
   
   public void setUnionType(int pUnionType){
     this.unionType = pUnionType;
@@ -92,7 +80,6 @@ public abstract class CassandraColumn {
   public abstract ByteBuffer getName();
   public abstract Object getValue();
   
-  @SuppressWarnings({ "rawtypes" })
   protected Object fromByteBuffer(Schema schema, ByteBuffer byteBuffer) {
     Object value = null;
     Serializer<?> serializer = GoraSerializerTypeInferer.getSerializer(schema);
@@ -101,34 +88,14 @@ public abstract class CassandraColumn {
           + "could be found. Please report this to dev@gora.apache.org");
     } else {
       value = serializer.fromByteBuffer(byteBuffer);
-      if (schema.getType().equals(Type.RECORD)){
-        String schemaId = schema.getFullName();      
-        
-        SpecificDatumReader<?> reader = (SpecificDatumReader<?>)readerMap.get(schemaId);
-        if (reader == null) {
-          reader = new SpecificDatumReader(schema);// ignore dirty bits
-          SpecificDatumReader localReader=null;
-          if((localReader=readerMap.putIfAbsent(schemaId, reader))!=null) {
-            reader = localReader;
-          }
-        }
-        
-        // initialize a decoder, possibly reusing previous one
-        BinaryDecoder decoderFromCache = decoders.get();
-        BinaryDecoder decoder = DecoderFactory.get().binaryDecoder((byte[])value, null);
-        // put in threadlocal cache if the initial get was empty
-        if (decoderFromCache==null) {
-          decoders.set(decoder);
-        }
+      if (schema.getType().equals(Type.RECORD) || schema.getType().equals(Type.MAP) ){
         try {
-          value = reader.read(null, decoder);
+          value = AvroSerializerUtil.deserializer(value, schema);
         } catch (IOException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        }        
+          LOG.warn(field.name() + " named field could not be deserialized.");
+        }
       }
     }
     return value;
   }
-
 }
