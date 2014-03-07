@@ -36,6 +36,7 @@ import org.apache.gora.persistency.Persistent;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
+import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.ws.impl.WSDataStoreBase;
 import org.apache.gora.util.GoraException;
 import org.slf4j.Logger;
@@ -161,11 +162,11 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
       LOG.debug("Initializing DynamoDB store");
       getCredentials();
       setWsProvider(wsProvider);
-      preferredSchema = properties.getProperty(PREF_SCH_NAME);
-      dynamoDBClient = getClient(properties.getProperty(CLI_TYP_PROP),(AWSCredentials)getConf());
-      dynamoDBClient.setEndpoint(properties.getProperty(ENDPOINT_PROP));
+      preferredSchema = DataStoreFactory.findProperty(properties, this, PREF_SCH_NAME, null);
+      dynamoDBClient = getClient(DataStoreFactory.findProperty(properties, this, CLI_TYP_PROP, null),(AWSCredentials)getConf());
+      dynamoDBClient.setEndpoint(DataStoreFactory.findProperty(properties, this, ENDPOINT_PROP, null));
       mapping = readMapping();
-      consistency = properties.getProperty(CONSISTENCY_READS);
+      consistency = DataStoreFactory.findProperty(properties, this, CONSISTENCY_READS, null);
       persistentClass = pPersistentClass;
     }
     catch (Exception e) {
