@@ -333,7 +333,7 @@ public class DataStoreFactory{
     String val = findProperty(properties, store, baseKey, null);
     if(val == null) {
       throw new IOException("Property with base name \""+baseKey+"\" could not be found, make " +
-      		"sure to include this property in gora.properties file");
+          "sure to include this property in gora.properties file");
     }
     return val;
   }
