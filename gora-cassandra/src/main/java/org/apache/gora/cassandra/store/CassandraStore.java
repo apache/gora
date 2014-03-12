@@ -148,8 +148,8 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
 
   @Override
   public boolean delete(K key) {
-    LOG.debug("delete " + key);
-    return false;
+    this.cassandraClient.deleteByKey(key);
+    return true;
   }
 
   @Override
@@ -580,7 +580,8 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
           addOrUpdateField(key, field, unionSchema, value);
           //this.cassandraClient.addColumn(key, field.name(), value);
         } else {
-          LOG.warn("Union with 'null' value not supported for field: " + field.name());
+          LOG.warn("Setting content of: " + field.name() + " to null.");
+          delete(key);
         }
         break;
       default:

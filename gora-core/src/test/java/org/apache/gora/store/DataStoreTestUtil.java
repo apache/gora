@@ -57,6 +57,8 @@ import org.apache.gora.util.AvroUtils;
 import org.apache.gora.util.ByteUtils;
 import org.apache.gora.util.StringUtils;
 
+import com.sun.istack.logging.Logger;
+
 /**
  * Test utilities for DataStores. This utility class provides everything
  * necessary for convenience tests in {@link DataStoreTestBase} to execute cleanly.
@@ -542,7 +544,6 @@ public class DataStoreTestUtil {
       }
       dataStore.put(webPage.getUrl().toString(), webPage);
     }
-
     dataStore.flush();
 
     for (int i = 0; i < urls.length; i++) {
@@ -557,14 +558,12 @@ public class DataStoreTestUtil {
       }
       dataStore.put(webPage.getUrl().toString(), webPage);
     }
-
     dataStore.flush();
 
     for (int i = 0; i < urls.length; i++) {
       WebPage webPage = dataStore.get(urls[i]);
-      int j = 0;
       int count = 0;
-      for (j = 0; j < urls.length; j++) {  //TODO j++ or j+=2 ?
+      for (int j = 1; j < urls.length; j += 2) {
         CharSequence link = webPage.getOutlinks().get(new Utf8(anchor + j));
         assertNotNull(link);
         assertEquals(urls[j], link.toString());
@@ -613,7 +612,7 @@ public class DataStoreTestUtil {
       WebPage webPage = dataStore.get(urls[i]);
       int j = 0;
       int count = 0;
-      for (j = 0; j < headers.length; j++) {  //TODO j++ or j+=2 ?
+      for (j = 0; j < headers.length; j+=2) {  //TODO j++ or j+=2 ?
         CharSequence headerSample = webPage.getHeaders().get(new Utf8(header + j));
         assertNotNull(headerSample);
         assertEquals(headers[j], headerSample.toString());
@@ -645,8 +644,10 @@ public class DataStoreTestUtil {
     // map entry removal test
     for (int i = 0; i < urls.length; i++) {
       WebPage webPage = dataStore.get(urls[i]);
+      webPage.getOutlinks().clear();
+      //webPage.setOutlinks(new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)new HashMap<CharSequence, CharSequence>()));
       for (int j = 1; j < urls.length; j += 2) {
-        webPage.getOutlinks().put(new Utf8(anchor + j), null);
+        webPage.getOutlinks().put(new Utf8(anchor + j), new Utf8(urls[j]));
       }
       dataStore.put(webPage.getUrl().toString(), webPage);
     }
@@ -658,10 +659,11 @@ public class DataStoreTestUtil {
       WebPage webPage = dataStore.get(urls[i]);
       for (int j = 1; j < urls.length; j += 2) {
         CharSequence link = webPage.getOutlinks().get(new Utf8(anchor + j));
-        assertNull(link);
+        assertNotNull(link);
+        assertEquals(urls[j], link.toString());
         count++;
       }
-      assertEquals(urls.length - count, webPage.getOutlinks().size());
+      assertEquals(count, webPage.getOutlinks().size());
     }
   }
 

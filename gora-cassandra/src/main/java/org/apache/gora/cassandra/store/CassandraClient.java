@@ -106,7 +106,7 @@ public class CassandraClient<K, T extends PersistentBase> {
     // "describe keyspace <keyspaceName>;" query
     KeyspaceDefinition keyspaceDefinition = this.cluster.describeKeyspace(this.cassandraMapping.getKeyspaceName());
     if (keyspaceDefinition == null) {
-      List<ColumnFamilyDefinition> columnFamilyDefinitions = this.cassandraMapping.getColumnFamilyDefinitions();      
+      List<ColumnFamilyDefinition> columnFamilyDefinitions = this.cassandraMapping.getColumnFamilyDefinitions();
 
       // GORA-197
       for (ColumnFamilyDefinition cfDef : columnFamilyDefinitions) {
@@ -155,12 +155,11 @@ public class CassandraClient<K, T extends PersistentBase> {
       }
     }
   }
-  
+
   /**
    * Drop keyspace.
    */
   public void dropKeyspace() {
-    // "drop keyspace <keyspaceName>;" query
     this.cluster.dropKeyspace(this.cassandraMapping.getKeyspaceName());
   }
 
@@ -178,15 +177,38 @@ public class CassandraClient<K, T extends PersistentBase> {
     ByteBuffer byteBuffer = toByteBuffer(value);
     String columnFamily = this.cassandraMapping.getFamily(fieldName);
     String columnName = this.cassandraMapping.getColumn(fieldName);
+    String ttlAttr = this.cassandraMapping.getColumnsAttribs().get(fieldName);
+    if (ttlAttr == null)
+      ttlAttr = CassandraMapping.DEFAULT_COLUMNS_TTL;
 
     if (columnName == null) {
       LOG.warn("Column name is null for field=" + fieldName + " with value=" + value.toString());
       return;
     }
-    
     synchronized(mutator) {
-      HectorUtils.insertColumn(mutator, key, columnFamily, columnName, byteBuffer);
+      HectorUtils.insertColumn(mutator, key, columnFamily, columnName, byteBuffer, ttlAttr);
     }
+  }
+
+  /**
+   * Delete a row within the keyspace.
+   * @param key
+   * @param fieldName
+   * @param columnName
+   */
+  public void deleteColumn(K key, String familyName, ByteBuffer columnName) {
+    synchronized(mutator) {
+      HectorUtils.deleteColumn(mutator, key, familyName, columnName);
+    }
+  }
+
+  /**
+   * Deletes an entry based on its key.
+   * @param key
+   */
+  public void deleteByKey(K key) {
+    Map<String, String> familyMap = this.cassandraMapping.getFamilyMap();
+    deleteColumn(key, familyMap.values().iterator().next().toString(), null);
   }
 
   /**
@@ -205,9 +227,11 @@ public class CassandraClient<K, T extends PersistentBase> {
     
     String columnFamily = this.cassandraMapping.getFamily(fieldName);
     String superColumnName = this.cassandraMapping.getColumn(fieldName);
-    
+    String ttlAttr = this.cassandraMapping.getColumnsAttribs().get(fieldName);
+    if (ttlAttr == null)
+      ttlAttr = CassandraMapping.DEFAULT_COLUMNS_TTL;
     synchronized(mutator) {
-      HectorUtils.insertSubColumn(mutator, key, columnFamily, superColumnName, columnName, byteBuffer);
+      HectorUtils.insertSubColumn(mutator, key, columnFamily, superColumnName, columnName, byteBuffer, ttlAttr);
     }
   }
 
@@ -250,10 +274,28 @@ public class CassandraClient<K, T extends PersistentBase> {
     }
   }
 
+  /**
+   * Deletes a subColumn 
+   * @param key
+   * @param fieldName
+   * @param columnName
+   */
   public void deleteSubColumn(K key, String fieldName, String columnName) {
     deleteSubColumn(key, fieldName, StringSerializer.get().toByteBuffer(columnName));
   }
 
+  /**
+   * Deletes all subcolumns from a super column.
+   * @param key the row key.
+   * @param fieldName the field name.
+   */
+  public void deleteSubColumn(K key, String fieldName) {
+    String columnFamily = this.cassandraMapping.getFamily(fieldName);
+    String superColumnName = this.cassandraMapping.getColumn(fieldName);
+    synchronized(mutator) {
+      HectorUtils.deleteSubColumn(mutator, key, columnFamily, superColumnName, null);
+    }
+  }
 
   public void addGenericArray(K key, String fieldName, GenericArray<?> array) {
     if (isSuper( cassandraMapping.getFamily(fieldName) )) {
@@ -281,21 +323,25 @@ public class CassandraClient<K, T extends PersistentBase> {
 
   public void addStatefulHashMap(K key, String fieldName, Map<CharSequence,Object> map) {
     if (isSuper( cassandraMapping.getFamily(fieldName) )) {
-      for (CharSequence mapKey: map.keySet()) {
-
-        // TODO: hack, do not store empty arrays
-        Object mapValue = map.get(mapKey);
-        if (mapValue instanceof GenericArray<?>) {
-          if (((List<?>)mapValue).size() == 0) {
-            continue;
+      // as we don't know what has changed inside the map or If it's an empty map, then delete its content.
+      deleteSubColumn(key, fieldName);
+      // update if there is anything to update.
+      if (!map.isEmpty()) {
+        // If it's not empty, then update its content.
+        for (CharSequence mapKey: map.keySet()) {
+          // TODO: hack, do not store empty arrays
+          Object mapValue = map.get(mapKey);
+          if (mapValue instanceof GenericArray<?>) {
+            if (((List<?>)mapValue).size() == 0) {
+              continue;
+            }
+          } else if (mapValue instanceof Map<?,?>) {
+            if (((Map<?, ?>)mapValue).size() == 0) {
+              continue;
+            }
           }
-        } else if (mapValue instanceof Map<?,?>) {
-          if (((Map<?, ?>)mapValue).size() == 0) {
-            continue;
-          }
+          addSubColumn(key, fieldName, mapKey.toString(), mapValue);
         }
-
-        addSubColumn(key, fieldName, mapKey.toString(), mapValue);
       }
     }
     else {
@@ -356,7 +402,6 @@ public class CassandraClient<K, T extends PersistentBase> {
     QueryResult<OrderedRows<K, ByteBuffer, ByteBuffer>> queryResult = rangeSlicesQuery.execute();
     OrderedRows<K, ByteBuffer, ByteBuffer> orderedRows = queryResult.get();
     
-    
     return orderedRows.getList();
   }
   
@@ -397,11 +442,9 @@ public class CassandraClient<K, T extends PersistentBase> {
         list = new ArrayList<String>();
         map.put(family, list);
       }
-      
       if (column != null) {
         list.add(column);
       }
-      
     }
     
     return map;
@@ -434,7 +477,12 @@ public class CassandraClient<K, T extends PersistentBase> {
     
     return map;
   }
-  
+
+  /**
+   * Determines if a column is a superColumn or not.
+   * @param family
+   * @return boolean
+   */
   public boolean isSuper(String family) {
     return this.cassandraMapping.isSuper(family);
   }
