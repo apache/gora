@@ -27,6 +27,7 @@ import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
 import me.prettyprint.hector.api.factory.HFactory;
+import me.prettyprint.hector.api.mutation.MutationResult;
 import me.prettyprint.hector.api.mutation.Mutator;
 
 import org.apache.gora.persistency.Persistent;
@@ -38,59 +39,65 @@ import org.apache.gora.persistency.Persistent;
  */
 public class HectorUtils<K,T extends Persistent> {
 
-  public static<K> void insertColumn(Mutator<K> mutator, K key, String columnFamily, ByteBuffer columnName, ByteBuffer columnValue) {
-    mutator.insert(key, columnFamily, createColumn(columnName, columnValue));
+  /** Methods to insert columns. */
+  public static<K> void insertColumn(Mutator<K> mutator, K key, String columnFamily, ByteBuffer columnName, ByteBuffer columnValue, String ttlAttr) {
+    mutator.insert(key, columnFamily, createColumn(columnName, columnValue, ttlAttr));
   }
 
-  public static<K> void insertColumn(Mutator<K> mutator, K key, String columnFamily, String columnName, ByteBuffer columnValue) {
-    mutator.insert(key, columnFamily, createColumn(columnName, columnValue));
+  public static<K> void insertColumn(Mutator<K> mutator, K key, String columnFamily, String columnName, ByteBuffer columnValue, String ttlAttr) {
+    mutator.insert(key, columnFamily, createColumn(columnName, columnValue, ttlAttr));
   }
 
-
-  public static<K> HColumn<ByteBuffer,ByteBuffer> createColumn(ByteBuffer name, ByteBuffer value) {
-    return HFactory.createColumn(name, value, ByteBufferSerializer.get(), ByteBufferSerializer.get());
+  /** Methods to create columns. */
+  public static<K> HColumn<ByteBuffer,ByteBuffer> createColumn(ByteBuffer name, ByteBuffer value, String ttlAttr) {
+    return HFactory.createColumn(name, value, ByteBufferSerializer.get(), ByteBufferSerializer.get()).setTtl(Integer.parseInt(ttlAttr));
   }
 
-  public static<K> HColumn<String,ByteBuffer> createColumn(String name, ByteBuffer value) {
-    return HFactory.createColumn(name, value, StringSerializer.get(), ByteBufferSerializer.get());
+  public static<K> HColumn<String,ByteBuffer> createColumn(String name, ByteBuffer value, String ttlAttr) {
+    return HFactory.createColumn(name, value, StringSerializer.get(), ByteBufferSerializer.get()).setTtl(Integer.parseInt(ttlAttr));
   }
 
-  public static<K> HColumn<Integer,ByteBuffer> createColumn(Integer name, ByteBuffer value) {
-    return HFactory.createColumn(name, value, IntegerSerializer.get(), ByteBufferSerializer.get());
+  public static<K> HColumn<Integer,ByteBuffer> createColumn(Integer name, ByteBuffer value, String ttlAttr) {
+    return HFactory.createColumn(name, value, IntegerSerializer.get(), ByteBufferSerializer.get()).setTtl(Integer.parseInt(ttlAttr));
   }
 
-
-  public static<K> void insertSubColumn(Mutator<K> mutator, K key, String columnFamily, String superColumnName, ByteBuffer columnName, ByteBuffer columnValue) {
-    mutator.insert(key, columnFamily, createSuperColumn(superColumnName, columnName, columnValue));
+  /** Methods to create subColumns. */
+  public static<K> void insertSubColumn(Mutator<K> mutator, K key, String columnFamily, String superColumnName, ByteBuffer columnName, ByteBuffer columnValue, String ttlAttr) {
+    mutator.insert(key, columnFamily, createSuperColumn(superColumnName, columnName, columnValue, ttlAttr));
   }
 
-  public static<K> void insertSubColumn(Mutator<K> mutator, K key, String columnFamily, String superColumnName, String columnName, ByteBuffer columnValue) {
-    mutator.insert(key, columnFamily, createSuperColumn(superColumnName, columnName, columnValue));
+  public static<K> void insertSubColumn(Mutator<K> mutator, K key, String columnFamily, String superColumnName, String columnName, ByteBuffer columnValue, String ttlAttr) {
+    mutator.insert(key, columnFamily, createSuperColumn(superColumnName, columnName, columnValue, ttlAttr));
   }
 
-  public static<K> void insertSubColumn(Mutator<K> mutator, K key, String columnFamily, String superColumnName, Integer columnName, ByteBuffer columnValue) {
-    mutator.insert(key, columnFamily, createSuperColumn(superColumnName, columnName, columnValue));
+  public static<K> void insertSubColumn(Mutator<K> mutator, K key, String columnFamily, String superColumnName, Integer columnName, ByteBuffer columnValue, String ttlAttr) {
+    mutator.insert(key, columnFamily, createSuperColumn(superColumnName, columnName, columnValue, ttlAttr));
   }
 
-
+  /** Methods to delete subColumns. */
   public static<K> void deleteSubColumn(Mutator<K> mutator, K key, String columnFamily, String superColumnName, ByteBuffer columnName) {
     mutator.subDelete(key, columnFamily, superColumnName, columnName, StringSerializer.get(), ByteBufferSerializer.get());
   }
 
+  /** Methods do delete columns. */
+  public static<K> void deleteColumn(Mutator<K> mutator, K key, String columnFamily, ByteBuffer columnName){
+    MutationResult mr = mutator.delete(key, columnFamily, columnName, ByteBufferSerializer.get());
+    System.out.println(mr.toString());
+  }
 
+  /** Methods to create superColumns. */
   @SuppressWarnings("unchecked")
-  public static<K> HSuperColumn<String,ByteBuffer,ByteBuffer> createSuperColumn(String superColumnName, ByteBuffer columnName, ByteBuffer columnValue) {
-    return HFactory.createSuperColumn(superColumnName, Arrays.asList(createColumn(columnName, columnValue)), StringSerializer.get(), ByteBufferSerializer.get(), ByteBufferSerializer.get());
+  public static<K> HSuperColumn<String,ByteBuffer,ByteBuffer> createSuperColumn(String superColumnName, ByteBuffer columnName, ByteBuffer columnValue, String ttlAttr) {
+    return HFactory.createSuperColumn(superColumnName, Arrays.asList(createColumn(columnName, columnValue, ttlAttr)), StringSerializer.get(), ByteBufferSerializer.get(), ByteBufferSerializer.get());
   }
 
   @SuppressWarnings("unchecked")
-  public static<K> HSuperColumn<String,String,ByteBuffer> createSuperColumn(String superColumnName, String columnName, ByteBuffer columnValue) {
-    return HFactory.createSuperColumn(superColumnName, Arrays.asList(createColumn(columnName, columnValue)), StringSerializer.get(), StringSerializer.get(), ByteBufferSerializer.get());
+  public static<K> HSuperColumn<String,String,ByteBuffer> createSuperColumn(String superColumnName, String columnName, ByteBuffer columnValue, String ttlAttr) {
+    return HFactory.createSuperColumn(superColumnName, Arrays.asList(createColumn(columnName, columnValue, ttlAttr)), StringSerializer.get(), StringSerializer.get(), ByteBufferSerializer.get());
   }
 
   @SuppressWarnings("unchecked")
-  public static<K> HSuperColumn<String,Integer,ByteBuffer> createSuperColumn(String superColumnName, Integer columnName, ByteBuffer columnValue) {
-    return HFactory.createSuperColumn(superColumnName, Arrays.asList(createColumn(columnName, columnValue)), StringSerializer.get(), IntegerSerializer.get(), ByteBufferSerializer.get());
+  public static<K> HSuperColumn<String,Integer,ByteBuffer> createSuperColumn(String superColumnName, Integer columnName, ByteBuffer columnValue, String ttlAttr) {
+    return HFactory.createSuperColumn(superColumnName, Arrays.asList(createColumn(columnName, columnValue, ttlAttr)), StringSerializer.get(), IntegerSerializer.get(), ByteBufferSerializer.get());
   }
-
 }
