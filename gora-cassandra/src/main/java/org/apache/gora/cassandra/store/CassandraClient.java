@@ -244,6 +244,10 @@ public class CassandraClient<K, T extends PersistentBase> {
     ByteBuffer byteBuffer = toByteBuffer(value);
     String columnFamily = this.cassandraMapping.getFamily(fieldName);
     String columnName = this.cassandraMapping.getColumn(fieldName);
+    String ttlAttr = this.cassandraMapping.getColumnsAttribs().get(fieldName);
+    if (ttlAttr == null) {
+      ttlAttr = CassandraMapping.DEFAULT_COLUMNS_TTL;
+    }
 
     if (columnName == null) {
       LOG.warn("Column name is null for field=" + fieldName + " with value=" + value.toString());
@@ -251,7 +255,7 @@ public class CassandraClient<K, T extends PersistentBase> {
     }
 
     synchronized(mutator) {
-      HectorUtils.insertColumn(mutator, key, columnFamily, columnName, byteBuffer);
+      HectorUtils.insertColumn(mutator, key, columnFamily, columnName, byteBuffer, ttlAttr);
     }
   }
 
@@ -271,9 +275,13 @@ public class CassandraClient<K, T extends PersistentBase> {
 
     String columnFamily = this.cassandraMapping.getFamily(fieldName);
     String superColumnName = this.cassandraMapping.getColumn(fieldName);
+    String ttlAttr = this.cassandraMapping.getColumnsAttribs().get(fieldName);
+    if (ttlAttr  == null) {
+      ttlAttr = CassandraMapping.DEFAULT_COLUMNS_TTL;
+    }
 
     synchronized(mutator) {
-      HectorUtils.insertSubColumn(mutator, key, columnFamily, superColumnName, columnName, byteBuffer);
+      HectorUtils.insertSubColumn(mutator, key, columnFamily, superColumnName, columnName, byteBuffer, ttlAttr);
     }
   }
 
@@ -316,10 +324,36 @@ public class CassandraClient<K, T extends PersistentBase> {
     }
   }
 
+  /**
+   * Deletes a subColumn which is a field inside a column.
+   * @param key Identifying the row.
+   * @param fieldName The field's name.
+   * @param columnName The column's name.
+   */
   public void deleteSubColumn(K key, String fieldName, String columnName) {
     deleteSubColumn(key, fieldName, StringSerializer.get().toByteBuffer(columnName));
   }
 
+  /**
+   * Delete a row within the keyspace.
+    * @param key
+    * @param fieldName
+    * @param columnName
+    */
+  public void deleteColumn(K key, String familyName, ByteBuffer columnName) {
+    synchronized(mutator) {
+      HectorUtils.deleteColumn(mutator, key, familyName, columnName);
+      }
+    }
+
+  /**
+   * Delete all content related to a key.
+   * @param key
+   */
+  public void deleteByKey(K key) {
+    Map<String, String> familyMap = this.cassandraMapping.getFamilyMap();
+    deleteColumn(key, familyMap.values().iterator().next().toString(), null);
+  }
 
   public void addGenericArray(K key, String fieldName, GenericArray<?> array) {
     if (isSuper( cassandraMapping.getFamily(fieldName) )) {
@@ -336,7 +370,6 @@ public class CassandraClient<K, T extends PersistentBase> {
             continue;
           }
         }
-
         addSubColumn(key, fieldName, i++, itemValue);
       }
     }
@@ -365,7 +398,6 @@ public class CassandraClient<K, T extends PersistentBase> {
             continue;
           }
         }
-
         addSubColumn(key, fieldName, mapKey.toString(), mapValue);
       }
     }
@@ -427,7 +459,6 @@ public class CassandraClient<K, T extends PersistentBase> {
 
     QueryResult<OrderedRows<K, ByteBuffer, ByteBuffer>> queryResult = rangeSlicesQuery.execute();
     OrderedRows<K, ByteBuffer, ByteBuffer> orderedRows = queryResult.get();
-
 
     return orderedRows.getList();
   }
@@ -495,7 +526,6 @@ public class CassandraClient<K, T extends PersistentBase> {
 
       map.put(family + ":" + column, field);
     }
-
     return map;
   }
 
@@ -521,7 +551,6 @@ public class CassandraClient<K, T extends PersistentBase> {
     rangeSuperSlicesQuery.setRange("", "", false, GoraRecordReader.BUFFER_LIMIT_READ_VALUE);
     rangeSuperSlicesQuery.setRowCount(limit);
     rangeSuperSlicesQuery.setColumnNames(columnNames);
-
 
     QueryResult<OrderedSuperRows<K, String, ByteBuffer, ByteBuffer>> queryResult = rangeSuperSlicesQuery.execute();
     OrderedSuperRows<K, String, ByteBuffer, ByteBuffer> orderedRows = queryResult.get();
