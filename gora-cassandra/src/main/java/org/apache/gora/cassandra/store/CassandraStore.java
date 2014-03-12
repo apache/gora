@@ -144,7 +144,8 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
   @Override
   public boolean delete(K key) {
     LOG.debug("delete " + key);
-    return false;
+    this.cassandraClient.deleteByKey(key);
+    return true;
   }
 
   @Override
