@@ -576,7 +576,7 @@
         <module>gora-compiler-cli</module>
         <module>gora-core</module>
         <module>gora-hbase</module>
-        <!--module>gora-accumulo</module-->
+        <module>gora-accumulo</module>
         <module>gora-cassandra</module>
         <!-- module>gora-solr</module-->
         <!--module>gora-dynamodb</module-->
