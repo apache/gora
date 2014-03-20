@@ -130,7 +130,7 @@ implements Configurable {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-    
+
     // Set scanner caching option
     try {
       this.setScannerCaching(
@@ -141,7 +141,7 @@ implements Configurable {
       LOG.error("Can not load " + SCANNER_CACHING_PROPERTIES_KEY + " from gora.properties. Setting to default value: " + SCANNER_CACHING_PROPERTIES_DEFAULT, e) ;
       this.setScannerCaching(SCANNER_CACHING_PROPERTIES_DEFAULT) ; // Default value if something is wrong
     }
-    
+
     if(autoCreateSchema) {
       createSchema();
     }
@@ -292,6 +292,13 @@ implements Configurable {
       }
       break;
     case MAP:
+      // if it's a map that has been modified, then the content should be replaced by the new one
+      // This is because we don't know if the content has changed or not.
+      if (qualifier == null) {
+        delete.deleteFamily(hcol.getFamily());
+      } else {
+        delete.deleteColumn(hcol.getFamily(), qualifier);
+      }
       @SuppressWarnings({ "rawtypes", "unchecked" })
       Set<Entry> set = ((Map) o).entrySet();
       for (@SuppressWarnings("rawtypes") Entry entry : set) {
@@ -749,15 +756,17 @@ implements Configurable {
             keyClass.getCanonicalName())
             && classElement.getAttributeValue("name").equals(
                 persistentClass.getCanonicalName())) {
+          LOG.debug("Keyclass and nameclass match.");
 
           String tableNameFromMapping = classElement.getAttributeValue("table");
           String tableName = getSchemaName(tableNameFromMapping, persistentClass);
           
           //tableNameFromMapping could be null here
           if (!tableName.equals(tableNameFromMapping)) {
-            LOG.info("Keyclass and nameclass match but mismatching table names " 
-                + " mappingfile schema is '" + tableNameFromMapping 
-                + "' vs actual schema '" + tableName + "' , assuming they are the same.");
+          //TODO this might not be the desired behavior as the user might have actually made a mistake.
+            LOG.warn("Mismatching schema's names. Mappingfile schema: '" + tableNameFromMapping 
+                + "'. PersistentClass schema's name: '" + tableName + "'"
+                + "Assuming they are the same.");
             if (tableNameFromMapping != null) {
               mappingBuilder.renameTable(tableNameFromMapping, tableName);
             }
@@ -772,9 +781,6 @@ implements Configurable {
             mappingBuilder.addField(fieldName, family, qualifier);
             mappingBuilder.addColumnFamily(tableName, family);
           }
-          
-          
-          
           //we found a matching key and value class definition,
           //do not continue on other class definitions
           break;
@@ -837,5 +843,4 @@ implements Configurable {
     this.scannerCaching = numRows ;
     return this ;
   }
-  
 }
