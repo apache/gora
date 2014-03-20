@@ -297,6 +297,10 @@ public class CassandraClient<K, T extends PersistentBase> {
     }
   }
 
+  public void deleteGenericArray(K key, String fieldName) {
+    //TODO Verify this. Everything that goes inside a genericArray will go inside a column so let's just delete that.
+    deleteColumn(key, cassandraMapping.getFamily(fieldName), toByteBuffer(fieldName));
+  }
   public void addGenericArray(K key, String fieldName, GenericArray<?> array) {
     if (isSuper( cassandraMapping.getFamily(fieldName) )) {
       int i= 0;
@@ -318,6 +322,14 @@ public class CassandraClient<K, T extends PersistentBase> {
     }
     else {
       addColumn(key, fieldName, array);
+    }
+  }
+
+  public void deleteStatefulHashMap(K key, String fieldName) {
+    if (isSuper( cassandraMapping.getFamily(fieldName) )) {
+      deleteSubColumn(key, fieldName);
+    } else {
+      deleteColumn(key, cassandraMapping.getFamily(fieldName), toByteBuffer(fieldName));
     }
   }
 

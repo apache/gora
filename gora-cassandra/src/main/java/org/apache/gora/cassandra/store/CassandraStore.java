@@ -509,6 +509,10 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
           } else {
             LOG.warn("Record with value: " + value.toString() + " not supported for field: " + field.name());
           }
+        } else {
+          LOG.warn("Setting content of: " + field.name() + " to null.");
+          String familyName =  this.cassandraClient.getCassandraMapping().getFamily(field.name());
+          this.cassandraClient.deleteColumn(key, familyName, this.cassandraClient.toByteBuffer(field.name()));
         }
         break;
       case MAP:
@@ -544,6 +548,10 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
           } else {
             LOG.warn("Map with value: " + value.toString() + " not supported for field: " + field.name());
           }
+        } else {
+          // delete map
+          LOG.warn("Setting content of: " + field.name() + " to null.");
+          this.cassandraClient.deleteStatefulHashMap(key, field.name());
         }
         break;
       case ARRAY:
@@ -558,15 +566,18 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
           } else {
             LOG.warn("Array with value: " + value.toString() + " not supported for field: " + field.name());
           }
+        } else {
+          LOG.warn("Setting content of: " + field.name() + " to null.");
+          this.cassandraClient.deleteGenericArray(key, field.name());
         }
         break;
       case UNION:
+     // adding union schema index
+        String columnName = field.name() + UNION_COL_SUFIX;
+        String familyName = this.cassandraClient.getCassandraMapping().getFamily(field.name());
         if(value != null) {
           int schemaPos = getUnionSchema(value, schema);
           LOG.debug("Union with value: " + value.toString() + " at index: " + schemaPos + " supported for field: " + field.name());
-          // adding union schema index
-          String columnName = field.name() + UNION_COL_SUFIX;
-          String familyName = this.cassandraClient.getCassandraMapping().getFamily(field.name());
           this.cassandraClient.getCassandraMapping().addColumn(familyName, columnName, columnName);
           if (this.cassandraClient.isSuper( familyName )){
             this.cassandraClient.addSubColumn(key, columnName, columnName, schemaPos);
@@ -574,14 +585,18 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
             this.cassandraClient.addColumn(key, columnName, schemaPos);
             
           }
-//          this.cassandraClient.getCassandraMapping().addColumn(familyName, columnName, columnName);
+          //this.cassandraClient.getCassandraMapping().addColumn(familyName, columnName, columnName);
           // adding union value
           Schema unionSchema = schema.getTypes().get(schemaPos);
           addOrUpdateField(key, field, unionSchema, value);
           //this.cassandraClient.addColumn(key, field.name(), value);
         } else {
           LOG.warn("Setting content of: " + field.name() + " to null.");
-          delete(key);
+          if (this.cassandraClient.isSuper( familyName )){
+            this.cassandraClient.deleteSubColumn(key, field.name());
+          } else {
+            this.cassandraClient.deleteColumn(key, familyName, this.cassandraClient.toByteBuffer(field.name()));
+          }
         }
         break;
       default:
