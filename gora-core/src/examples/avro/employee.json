@@ -5,7 +5,7 @@
     "fields" : [
       {"name": "name", "type": ["null","string"],"default":null},
       {"name": "dateOfBirth", "type": "long","default":0},
-      {"name": "ssn", "type": ["null","string"],"default":null},
+      {"name": "ssn", "type": "string", "default":""},
       {"name": "salary", "type": "int","default":0},
       {"name": "boss", "type":["null","Employee","string"],"default":null},
       {"name": "webpage","default":null, "type":["null",

@@ -4,6 +4,8 @@
 
 Gora Change Log
 
+* GORA-306 Ssn field is not nullable in Employee's Avro Schema (Talat UYARER via lewismc)
+
 * GORA-171 Implement Daily Rolling File Appender for localised Gora logging (lewismc)
 
 * GORA-119 implement a filter enabled scan in gora (ferdy, kturner, enis, Tien Nguyen Manh via lewismc)
