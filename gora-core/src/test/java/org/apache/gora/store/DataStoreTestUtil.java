@@ -536,6 +536,7 @@ public class DataStoreTestUtil {
         "http://d.com/d", "http://e.com/e", "http://f.com/f", "http://g.com/g" };
     String anchor = "anchor";
 
+    // putting evens
     for (int i = 0; i < urls.length; i++) {
       WebPage webPage = WebPage.newBuilder().build();
       webPage.setUrl(new Utf8(urls[i]));
@@ -546,6 +547,7 @@ public class DataStoreTestUtil {
     }
     dataStore.flush();
 
+    // putting odds
     for (int i = 0; i < urls.length; i++) {
       WebPage webPage = dataStore.get(urls[i]);
       webPage.getOutlinks().clear();
@@ -599,7 +601,8 @@ public class DataStoreTestUtil {
 
     for (int i = 0; i < urls.length; i++) {
       WebPage webPage = dataStore.get(urls[i]);
-      webPage.getHeaders().clear(); //TODO clear method does not work
+      //webPage.getHeaders().clear(); //TODO clear method does not work
+      webPage.setHeaders(new HashMap<CharSequence, CharSequence>());
       for (int j = 1; j < headers.length; j += 2) {
         webPage.getHeaders().put(new Utf8(header + j), new Utf8(headers[j]));
       }
@@ -610,9 +613,8 @@ public class DataStoreTestUtil {
 
     for (int i = 0; i < urls.length; i++) {
       WebPage webPage = dataStore.get(urls[i]);
-      int j = 0;
       int count = 0;
-      for (j = 0; j < headers.length; j+=2) {  //TODO j++ or j+=2 ?
+      for (int j = 1; j < headers.length; j += 2) {
         CharSequence headerSample = webPage.getHeaders().get(new Utf8(header + j));
         assertNotNull(headerSample);
         assertEquals(headers[j], headerSample.toString());
@@ -644,10 +646,8 @@ public class DataStoreTestUtil {
     // map entry removal test
     for (int i = 0; i < urls.length; i++) {
       WebPage webPage = dataStore.get(urls[i]);
-      webPage.getOutlinks().clear();
-      //webPage.setOutlinks(new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)new HashMap<CharSequence, CharSequence>()));
       for (int j = 1; j < urls.length; j += 2) {
-        webPage.getOutlinks().put(new Utf8(anchor + j), new Utf8(urls[j]));
+        webPage.getOutlinks().remove(new Utf8(anchor + j));
       }
       dataStore.put(webPage.getUrl().toString(), webPage);
     }
@@ -659,11 +659,11 @@ public class DataStoreTestUtil {
       WebPage webPage = dataStore.get(urls[i]);
       for (int j = 1; j < urls.length; j += 2) {
         CharSequence link = webPage.getOutlinks().get(new Utf8(anchor + j));
-        assertNotNull(link);
-        assertEquals(urls[j], link.toString());
+        assertNull(link);
+        //assertEquals(urls[j], link.toString());
         count++;
       }
-      assertEquals(count, webPage.getOutlinks().size());
+      assertEquals(urls.length - count, webPage.getOutlinks().size());
     }
   }
 
