@@ -700,15 +700,17 @@ implements Configurable {
             keyClass.getCanonicalName())
             && classElement.getAttributeValue("name").equals(
                 persistentClass.getCanonicalName())) {
+          LOG.debug("Keyclass and nameclass match.");
 
           String tableNameFromMapping = classElement.getAttributeValue("table");
           String tableName = getSchemaName(tableNameFromMapping, persistentClass);
           
           //tableNameFromMapping could be null here
           if (!tableName.equals(tableNameFromMapping)) {
-            LOG.info("Keyclass and nameclass match but mismatching table names " 
-                + " mappingfile schema is '" + tableNameFromMapping 
-                + "' vs actual schema '" + tableName + "' , assuming they are the same.");
+          //TODO this might not be the desired behavior as the user might have actually made a mistake.
+            LOG.warn("Mismatching schema's names. Mappingfile schema: '" + tableNameFromMapping 
+                + "'. PersistentClass schema's name: '" + tableName + "'"
+                + "Assuming they are the same.");
             if (tableNameFromMapping != null) {
               mappingBuilder.renameTable(tableNameFromMapping, tableName);
             }
@@ -723,8 +725,6 @@ implements Configurable {
             mappingBuilder.addField(fieldName, family, qualifier);
             mappingBuilder.addColumnFamily(tableName, family);
           }
-          
-          
           
           //we found a matching key and value class definition,
           //do not continue on other class definitions
@@ -788,5 +788,4 @@ implements Configurable {
     this.scannerCaching = numRows ;
     return this ;
   }
-  
 }
