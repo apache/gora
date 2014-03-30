@@ -54,6 +54,7 @@ public class GoraCompilerCLI {
     }
     try {
       GoraCompiler.compileSchema(inputs, outputDir);
+      System.out.println("Compiler executed SUCCESSFULL.");
     } catch (IOException e) {
       System.err.println("Error while compiling schema files. Check that the schemas are properly formatted.");
       printHelp();
