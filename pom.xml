@@ -578,7 +578,7 @@
         <module>gora-hbase</module>
         <module>gora-accumulo</module>
         <module>gora-cassandra</module>
-        <!-- module>gora-solr</module-->
+        <module>gora-solr</module>
         <!--module>gora-dynamodb</module-->
         <!--module>gora-sql</module-->
         <module>gora-tutorial</module>
@@ -670,7 +670,7 @@
             <type>test-jar</type>
           </dependency>
           
-          <!--dependency>
+          <dependency>
             <groupId>org.apache.gora</groupId>
             <artifactId>gora-solr</artifactId>
             <version>${project.version}</version>
@@ -680,7 +680,7 @@
             <artifactId>gora-solr</artifactId>
             <version>${project.version}</version>
             <classifier>tests</classifier>
-          </dependency-->
+          </dependency>
 
           <dependency>
             <groupId>org.apache.gora</groupId>
@@ -905,7 +905,7 @@
             </dependency>
 
             <!-- Solr Dependencies -->
-            <!--dependency>
+            <dependency>
               <groupId>org.apache.solr</groupId>
               <artifactId>solr-core</artifactId>
               <version>${lucene-solr.version}</version>
@@ -1194,7 +1194,7 @@
               <groupId>com.carrotsearch.randomizedtesting</groupId>
               <artifactId>randomizedtesting-runner</artifactId>
               <version>2.0.10</version>
-            </dependency-->
+            </dependency>
               
             <!-- Amazon Dependencies -->
             <dependency>

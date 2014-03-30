@@ -165,6 +165,18 @@ public class IOUtils {
   /**
    * Serializes the field object using the datumWriter.
    */
+  public static<T> void serialize(OutputStream os,
+      SpecificDatumWriter<T> datumWriter, Schema schema, T object)
+      throws IOException {
+
+    BinaryEncoder encoder = EncoderFactory.get().binaryEncoder(os, null);
+    datumWriter.write(object, encoder);
+    encoder.flush();
+  }
+  
+  /**
+   * Serializes the field object using the datumWriter.
+   */
   public static<T extends SpecificRecord> byte[] serialize(SpecificDatumWriter<T> datumWriter
       , Schema schema, T object) throws IOException {
     ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -172,6 +184,16 @@ public class IOUtils {
     return os.toByteArray();
   }
 
+  /**
+   * Serializes the field object using the datumWriter.
+   */
+  public static<T> byte[] serialize(SpecificDatumWriter<T> datumWriter
+      , Schema schema, T object) throws IOException {
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    serialize(os, datumWriter, schema, object);
+    return os.toByteArray();
+  }
+  
   /** Deserializes the object in the given datainput using
    * available Hadoop serializations.
    * @throws IOException
@@ -257,6 +279,16 @@ public class IOUtils {
     return (T)datumReader.read(object, decoder);
   }
 
+  /**
+   * Deserializes the field object using the datumReader.
+   */
+  public static<K, T> T deserialize(byte[] bytes,
+      SpecificDatumReader<T> datumReader, Schema schema, T object)
+      throws IOException {
+    decoder = DecoderFactory.get().binaryDecoder(bytes, decoder);
+    return (T)datumReader.read(object, decoder);
+  }
+  
   /**
    * Writes a byte[] to the output, representing whether each given field is null
    * or not. A Vint and ceil( fields.length / 8 ) bytes are written to the output.
