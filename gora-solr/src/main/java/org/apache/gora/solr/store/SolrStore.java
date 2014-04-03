@@ -29,7 +29,6 @@ import org.apache.avro.Schema.Type;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.avro.util.Utf8;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
@@ -387,6 +386,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
     return writer;
   }
 
+  @SuppressWarnings("unchecked")
   private Object deserializeFieldValue(Field field, Schema fieldSchema,
       Object solrValue, T persistent) throws IOException {
     Object fieldValue = null;
@@ -394,6 +394,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
     case MAP:
     case ARRAY:
     case RECORD:
+      @SuppressWarnings("rawtypes")
       SpecificDatumReader reader = getDatumReader(fieldSchema.getFullName(),
           fieldSchema);
       fieldValue = IOUtils.deserialize((byte[]) solrValue, reader, fieldSchema,
@@ -430,6 +431,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
         fieldValue = deserializeFieldValue(field, fieldSchema, solrValue,
             persistent);
       } else {
+        @SuppressWarnings("rawtypes")
         SpecificDatumReader unionReader = getDatumReader(
             String.valueOf(fieldSchema.hashCode()), fieldSchema);
         fieldValue = IOUtils.deserialize((byte[]) solrValue, unionReader,
@@ -483,6 +485,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
     }
   }
 
+  @SuppressWarnings("unchecked")
   private Object serializeFieldValue(Schema fieldSchema, Object fieldValue) {
     switch (fieldSchema.getType()) {
     case MAP:
@@ -490,6 +493,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
     case RECORD:
       byte[] data = null;
       try {
+        @SuppressWarnings("rawtypes")
         SpecificDatumWriter writer = getDatumWriter(fieldSchema.getFullName(),
             fieldSchema);
         data = IOUtils.serialize(writer, fieldSchema, fieldValue);
@@ -506,8 +510,8 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       fieldValue = fieldValue.toString();
       break;
     case UNION:
-      // TODO: If field's schema is null and one type, We do not serialization.
-      // Other all types serialize.
+      // If field's schema is null and one type, we do undertake serialization.
+      // All other types are serialized.
       if (fieldSchema.getTypes().size() == 2 && isNullable(fieldSchema)) {
         int schemaPos = getUnionSchema(fieldValue, fieldSchema);
         Schema unionSchema = fieldSchema.getTypes().get(schemaPos);
@@ -515,6 +519,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       } else {
         byte[] serilazeData = null;
         try {
+          @SuppressWarnings("rawtypes")
           SpecificDatumWriter writer = getDatumWriter(
               String.valueOf(fieldSchema.hashCode()), fieldSchema);
           serilazeData = IOUtils.serialize(writer, fieldSchema, fieldValue);

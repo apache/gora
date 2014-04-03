@@ -57,8 +57,6 @@ import org.apache.gora.util.AvroUtils;
 import org.apache.gora.util.ByteUtils;
 import org.apache.gora.util.StringUtils;
 
-import com.sun.istack.logging.Logger;
-
 /**
  * Test utilities for DataStores. This utility class provides everything
  * necessary for convenience tests in {@link DataStoreTestBase} to execute cleanly.
