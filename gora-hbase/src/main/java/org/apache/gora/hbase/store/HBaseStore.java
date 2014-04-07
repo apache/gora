@@ -729,6 +729,8 @@ implements Configurable {
           //we found a matching key and value class definition,
           //do not continue on other class definitions
           break;
+        } else {
+          LOG.error("KeyClass in gora-hbase-mapping is not the same as the one in the databean.");
         }
       }
     } catch(IOException ex) {
