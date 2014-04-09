@@ -723,6 +723,19 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
   }
 
   private int putMap(Mutation m, int count, Schema valueType, Object o, Pair<Text, Text> col) throws GoraException {
+
+    // First of all we delete map field on accumulo store
+    Text rowKey = new Text(m.getRow());
+    Query<K, T> query = newQuery();
+    query.setFields(col.getFirst().toString());
+    query.setStartKey((K)rowKey.toString());
+    query.setEndKey((K)rowKey.toString());
+    deleteByQuery(query);
+    flush();
+    if (o == null){
+      return 0;
+    }
+    
     Set<?> es = ((Map<?, ?>)o).entrySet();
     for (Object entry : es) {
       Object mapKey = ((Entry<?, ?>) entry).getKey();
@@ -738,6 +751,19 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
   }
 
   private int putArray(Mutation m, int count, Object o, Pair<Text, Text> col) {
+
+    // First of all we delete array field on accumulo store
+    Text rowKey = new Text(m.getRow());
+    Query<K, T> query = newQuery();
+    query.setFields(col.getFirst().toString());
+    query.setStartKey((K)rowKey.toString());
+    query.setEndKey((K)rowKey.toString());
+    deleteByQuery(query);
+    flush();
+    if (o == null){
+      return 0;
+    }
+    
     List<?> array = (List<?>) o;  // both GenericArray and DirtyListWrapper
     int j = 0;
     for (Object item : array) {
