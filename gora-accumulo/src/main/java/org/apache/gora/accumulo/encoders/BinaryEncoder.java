@@ -33,6 +33,7 @@ public class BinaryEncoder implements Encoder {
   
   public byte[] encodeShort(short s, byte ret[]) {
     try {
+      @SuppressWarnings("resource")
       DataOutputStream dos = new DataOutputStream(new FixedByteArrayOutputStream(ret));
       dos.writeShort(s);
       return ret;
@@ -57,6 +58,7 @@ public class BinaryEncoder implements Encoder {
   
   public byte[] encodeInt(int i, byte ret[]) {
     try {
+      @SuppressWarnings("resource")
       DataOutputStream dos = new DataOutputStream(new FixedByteArrayOutputStream(ret));
       dos.writeInt(i);
       return ret;
@@ -81,6 +83,7 @@ public class BinaryEncoder implements Encoder {
   
   public byte[] encodeLong(long l, byte ret[]) {
     try {
+      @SuppressWarnings("resource")
       DataOutputStream dos = new DataOutputStream(new FixedByteArrayOutputStream(ret));
       dos.writeLong(l);
       return ret;
@@ -106,6 +109,7 @@ public class BinaryEncoder implements Encoder {
   public byte[] encodeDouble(double d, byte[] ret) {
     try {
       long l = Double.doubleToRawLongBits(d);
+      @SuppressWarnings("resource")
       DataOutputStream dos = new DataOutputStream(new FixedByteArrayOutputStream(ret));
       dos.writeLong(l);
       return ret;
@@ -131,6 +135,7 @@ public class BinaryEncoder implements Encoder {
   public byte[] encodeFloat(float f, byte[] ret) {
     try {
       int i = Float.floatToRawIntBits(f);
+      @SuppressWarnings("resource")
       DataOutputStream dos = new DataOutputStream(new FixedByteArrayOutputStream(ret));
       dos.writeInt(i);
       return ret;
@@ -177,6 +182,7 @@ public class BinaryEncoder implements Encoder {
   
   public byte[] encodeBoolean(boolean b, byte[] ret) {
     try {
+      @SuppressWarnings("resource")
       DataOutputStream dos = new DataOutputStream(new FixedByteArrayOutputStream(ret));
       dos.writeBoolean(b);
       return ret;

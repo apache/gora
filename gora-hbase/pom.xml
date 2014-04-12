@@ -100,6 +100,7 @@
         <dependency>
             <groupId>org.apache.gora</groupId>
             <artifactId>gora-core</artifactId>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
@@ -108,45 +109,49 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
-
-        <!-- Hadoop Dependencies -->
-        <dependency>
-            <groupId>org.apache.hbase</groupId>
-            <artifactId>hbase</artifactId>
-        </dependency>
+        <!-- END of Gora Internal Dependencies -->
 
         <dependency>
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase</artifactId>
-            <type>test-jar</type>
+            <scope>compile</scope>
         </dependency>
 
-
         <dependency>
-            <groupId>org.apache.hadoop</groupId>
+            <groupId>org.apache.avro</groupId>
             <artifactId>avro</artifactId>
+            <scope>compile</scope>
         </dependency>
 
         <!-- Misc Dependencies -->
         <dependency>
             <groupId>org.jdom</groupId>
             <artifactId>jdom</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <scope>compile</scope>
         </dependency>
 
         <!-- Logging Dependencies -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
+            <scope>runtime</scope>
 	        <exclusions>
 	          <exclusion>
                 <groupId>javax.jms</groupId>
@@ -154,18 +159,28 @@
 	          </exclusion>
             </exclusions>
         </dependency>
+        <!-- END of Logging Dependencies -->
 
         <!-- Testing Dependencies -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-test</artifactId>
+            <scope>test</scope>
         </dependency>
-
+        
+        <dependency>
+            <groupId>org.apache.hbase</groupId>
+            <artifactId>hbase</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <!-- END of Testing Dependencies -->
     </dependencies>
 
 </project>

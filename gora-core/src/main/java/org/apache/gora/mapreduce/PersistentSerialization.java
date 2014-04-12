@@ -17,13 +17,13 @@
  */
 package org.apache.gora.mapreduce;
 
-import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.persistency.Persistent;
 import org.apache.hadoop.io.serializer.Deserializer;
 import org.apache.hadoop.io.serializer.Serialization;
 import org.apache.hadoop.io.serializer.Serializer;
 
-public class PersistentSerialization implements Serialization<PersistentBase> {
+public class PersistentSerialization
+implements Serialization<Persistent> {
 
   @Override
   public boolean accept(Class<?> c) {
@@ -31,12 +31,12 @@ public class PersistentSerialization implements Serialization<PersistentBase> {
   }
 
   @Override
-  public Deserializer<PersistentBase> getDeserializer(Class<PersistentBase> c) {
+  public Deserializer<Persistent> getDeserializer(Class<Persistent> c) {
     return new PersistentDeserializer(c, true);
   }
 
   @Override
-  public Serializer<PersistentBase> getSerializer(Class<PersistentBase> c) {
+  public Serializer<Persistent> getSerializer(Class<Persistent> c) {
     return new PersistentSerializer();
   }
 }

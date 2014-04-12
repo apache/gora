@@ -28,7 +28,8 @@
     <field name="parsedContent" type="binary" stored="true" /> 
     <field name="content"       type="binary" stored="true" /> 
     <field name="outlinks"      type="binary" stored="true" /> 
-    <field name="metadata"      type="binary" stored="true" />    
+    <field name="headers"       type="binary" stored="true" />     
+    <field name="metadata"      type="binary" stored="true" />
 
   </fields>
 

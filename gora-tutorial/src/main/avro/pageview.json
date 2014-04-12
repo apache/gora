@@ -1,15 +1,15 @@
 {
   "type": "record",
-  "name": "Pageview",
+  "name": "Pageview", "default":null,
   "namespace": "org.apache.gora.tutorial.log.generated",
   "fields" : [
-    {"name": "url", "type": "string"},
-    {"name": "timestamp", "type": "long"},
-    {"name": "ip", "type": "string"},
-    {"name": "httpMethod", "type": "string"},
-    {"name": "httpStatusCode", "type": "int"},
-    {"name": "responseSize", "type": "int"},
-    {"name": "referrer", "type": "string"},
-    {"name": "userAgent", "type": "string"}
+    {"name": "url", "type": ["null","string"], "default":null},
+    {"name": "timestamp", "type": "long", "default":0},
+    {"name": "ip", "type": ["null","string"], "default":null},
+    {"name": "httpMethod", "type": ["null","string"], "default":null},
+    {"name": "httpStatusCode", "type": "int", "default":0},
+    {"name": "responseSize", "type": "int", "default":0},
+    {"name": "referrer", "type": ["null","string"], "default":null},
+    {"name": "userAgent", "type": ["null","string"], "default":null}
   ]
 }

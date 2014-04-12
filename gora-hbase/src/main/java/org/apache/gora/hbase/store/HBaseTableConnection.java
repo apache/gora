@@ -19,12 +19,14 @@ package org.apache.gora.hbase.store;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HRegionLocation;
 import org.apache.hadoop.hbase.HTableDescriptor;
+import org.apache.hadoop.hbase.client.Append;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTable;
@@ -35,7 +37,11 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Row;
 import org.apache.hadoop.hbase.client.RowLock;
+import org.apache.hadoop.hbase.client.RowMutations;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.coprocessor.Batch.Call;
+import org.apache.hadoop.hbase.client.coprocessor.Batch.Callback;
+import org.apache.hadoop.hbase.ipc.CoprocessorProtocol;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.util.Pair;
 
@@ -145,18 +151,6 @@ public class HBaseTableConnection implements HTableInterface {
   }
 
   @Override
-  public void batch(List<Row> actions, Object[] results) throws IOException,
-      InterruptedException {
-    getTable().batch(actions, results);
-  }
-
-  @Override
-  public Object[] batch(List<Row> actions) throws IOException,
-      InterruptedException {
-    return getTable().batch(actions);
-  }
-
-  @Override
   public Result get(Get get) throws IOException {
     return getTable().get(get);
   }
@@ -253,5 +247,79 @@ public class HBaseTableConnection implements HTableInterface {
   @Override
   public void unlockRow(RowLock rl) throws IOException {
     getTable().unlockRow(rl);
+  }
+
+  @Override
+  public void batch(List<? extends Row> actions, Object[] results)
+      throws IOException, InterruptedException {
+    // TODO Auto-generated method stub
+    getTable().batch(actions, results);
+    
+  }
+
+  @Override
+  public Object[] batch(List<? extends Row> actions) throws IOException,
+      InterruptedException {
+    // TODO Auto-generated method stub
+    return getTable().batch(actions);
+  }
+
+  @Override
+  public void mutateRow(RowMutations rm) throws IOException {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public Result append(Append append) throws IOException {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public <T extends CoprocessorProtocol> T coprocessorProxy(Class<T> protocol,
+      byte[] row) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public <T extends CoprocessorProtocol, R> Map<byte[], R> coprocessorExec(
+      Class<T> protocol, byte[] startKey, byte[] endKey, Call<T, R> callable)
+      throws IOException, Throwable {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public <T extends CoprocessorProtocol, R> void coprocessorExec(
+      Class<T> protocol, byte[] startKey, byte[] endKey, Call<T, R> callable,
+      Callback<R> callback) throws IOException, Throwable {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void setAutoFlush(boolean autoFlush) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void setAutoFlush(boolean autoFlush, boolean clearBufferOnFail) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public long getWriteBufferSize() {
+    // TODO Auto-generated method stub
+    return 0;
+  }
+
+  @Override
+  public void setWriteBufferSize(long writeBufferSize) throws IOException {
+    // TODO Auto-generated method stub
+    
   }
 }

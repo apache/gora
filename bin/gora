@@ -110,9 +110,9 @@ fi
 
 # figure out which class to run
 if [ "$COMMAND" = "goracompiler" ] ; then
-  MODULE=gora-core
+  MODULE=gora-compiler-cli
   CLASSPATH=$CLASSPATH:$GORA_HOME/$MODULE/target/classes/
-  CLASS=org.apache.gora.compiler.GoraCompiler
+  CLASS=org.apache.gora.compiler.cli.GoraCompilerCLI
 elif [ "$COMMAND" = "specificcompiler" ] ; then
   MODULE=gora-core
   CLASSPATH=$CLASSPATH:$GORA_HOME/$MODULE/target/classes/

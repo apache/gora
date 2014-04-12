@@ -19,22 +19,16 @@
 package org.apache.gora.store;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-
-import org.apache.avro.util.Utf8;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.gora.GoraTestDriver;
 import org.apache.gora.examples.generated.Employee;
-import org.apache.gora.examples.generated.Metadata;
 import org.apache.gora.examples.generated.WebPage;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * A base class for {@link DataStore} tests. This is just a convenience
@@ -216,7 +210,11 @@ public abstract class DataStoreTestBase {
   public void testUpdate() throws IOException, Exception {
     log.info("test method: testUpdate");
     DataStoreTestUtil.testUpdateEmployee(employeeStore);
-    DataStoreTestUtil.testUpdateWebPage(webPageStore);
+    DataStoreTestUtil.testUpdateWebPagePutToArray(webPageStore);
+    DataStoreTestUtil.testUpdateWebPagePutToNotNullableMap(webPageStore);
+    DataStoreTestUtil.testUpdateWebPagePutToNullableMap(webPageStore);
+    DataStoreTestUtil.testUpdateWebPageRemoveMapEntry(webPageStore);
+    DataStoreTestUtil.testUpdateWebPageRemoveField(webPageStore);
   }
 
   public void testEmptyUpdate() throws IOException, Exception {
@@ -243,7 +241,7 @@ public abstract class DataStoreTestBase {
 
   @Test
   /**
-   * Tests put and get a record with a double  nested recursive record
+   * Tests put and get a record with a double nested recursive record
    * Employee with a boss (nested).
    * @throws IOException
    * @throws Exception
@@ -255,8 +253,9 @@ public abstract class DataStoreTestBase {
 
   @Test
   /**
-   * Tests put and get a record with a nested record (not recursive)
-   * The webpage of an Employee
+   * Tests put and get of an {@link org.apache.gora.examples.generated.Employee} 
+   * record with a nested {@link org.apache.gora.examples.generated.WegPage} record (not recursive)
+   * the webpage of an Employee.
    * @throws IOException
    * @throws Exception
    */

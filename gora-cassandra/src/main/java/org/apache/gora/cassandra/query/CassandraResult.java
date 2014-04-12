@@ -72,7 +72,7 @@ public class CassandraResult<K, T extends PersistentBase> extends ResultBase<K, 
     
     for (int iCnt = 0; iCnt < pCassandraRow.length; iCnt++){
       CassandraColumn cColumn = (CassandraColumn)pCassandraRow[iCnt];
-      String columnName = StringSerializer.get().fromByteBuffer(cColumn.getName());
+      String columnName = StringSerializer.get().fromByteBuffer(cColumn.getName().duplicate());
       if (pFieldName.equals(columnName))
         return cColumn;
     }
@@ -95,37 +95,50 @@ public class CassandraResult<K, T extends PersistentBase> extends ResultBase<K, 
     List<Field> fields = schema.getFields();
     
     for (CassandraColumn cassandraColumn: cassandraRow) {
-      
       // get field name
-      String family = cassandraColumn.getFamily();
-      String fieldName = this.reverseMap.get(family + ":" + StringSerializer.get().fromByteBuffer(cassandraColumn.getName()));
+      String family = cassandraColumn.getFamily();  
       
-      if (fieldName != null ){
+      String fieldName = this.reverseMap.get(family + ":" + StringSerializer.get().fromByteBuffer(cassandraColumn.getName().duplicate()));
+      
+      if (fieldName != null) {
         // get field
-        int pos = this.persistent.getFieldIndex(fieldName);
-        Field field = fields.get(pos);
-        Type fieldType = field.schema().getType();
-        System.out.println(StringSerializer.get().fromByteBuffer(cassandraColumn.getName()) + fieldName + " " + fieldType.name());
-        if (fieldType == Type.UNION){
-          // TODO getting UNION stored type
-          // TODO get value of UNION stored type. This field does not need to be written back to the store
-          cassandraColumn.setUnionType(getNonNullTypePos(field.schema().getTypes()));
+        if (fieldName.indexOf(CassandraStore.UNION_COL_SUFIX) < 0) {
+
+          int pos = this.persistent.getSchema().getField(fieldName).pos();
+          Field field = fields.get(pos);
+          Type fieldType = field.schema().getType();
+          // LOG.info(StringSerializer.get().fromByteBuffer(cassandraColumn.getName())
+          // + fieldName + " " + fieldType.name());
+          if (fieldType.equals(Type.UNION)) {
+            //getting UNION stored type
+            CassandraColumn cc = getUnionTypeColumn(fieldName
+                + CassandraStore.UNION_COL_SUFIX, cassandraRow.toArray());
+            //creating temporary UNION Field
+            Field unionField = new Field(fieldName
+                + CassandraStore.UNION_COL_SUFIX, Schema.create(Type.INT),
+                null, null);
+            // get value of UNION stored type
+            cc.setField(unionField);
+            Object val = cc.getValue();
+            cassandraColumn.setUnionType(Integer.parseInt(val.toString()));
+          }
+
+          // get value
+          cassandraColumn.setField(field);
+          Object value = cassandraColumn.getValue();
+
+          this.persistent.put(pos, value);
+          // this field does not need to be written back to the store
+          this.persistent.clearDirty(pos);
         }
-
-        // get value
-        cassandraColumn.setField(field);
-        Object value = cassandraColumn.getValue();
-
-        this.persistent.put(pos, value);
-        // this field does not need to be written back to the store
-        this.persistent.clearDirty(pos);
-      }
-      else
+      } else
         LOG.debug("FieldName was null while iterating CassandraRow and using Avro Union type");
     }
 
   }
 
+  //TODO Should we remove this method?
+  @SuppressWarnings("unused")
   private int getNonNullTypePos(List<Schema> pTypes){
     int iCnt = 0;
     for (Schema sch :  pTypes)

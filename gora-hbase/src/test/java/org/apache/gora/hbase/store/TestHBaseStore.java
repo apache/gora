@@ -56,7 +56,7 @@ public class TestHBaseStore extends DataStoreTestBase {
   @Override
   public void setUp() throws Exception {
     super.setUp();
-    conf = getTestDriver().getHbaseUtil().getConfiguration();
+    conf = getTestDriver().getConf();
   }
     
   @SuppressWarnings("unchecked")
@@ -87,7 +87,7 @@ public class TestHBaseStore extends DataStoreTestBase {
 
   @Override
   public void assertPutArray() throws IOException { 
-    HTable table = new HTable("WebPage");
+    HTable table = new HTable(conf,"WebPage");
     Get get = new Get(Bytes.toBytes("com.example/http"));
     org.apache.hadoop.hbase.client.Result result = table.get(get);
     
@@ -109,7 +109,7 @@ public class TestHBaseStore extends DataStoreTestBase {
   public void assertPutBytes(byte[] contentBytes) throws IOException {    
 
     // Check first the parameter "contentBytes" if written+read right.
-    HTable table = new HTable("WebPage");
+    HTable table = new HTable(conf,"WebPage");
     Get get = new Get(Bytes.toBytes("com.example/http"));
     org.apache.hadoop.hbase.client.Result result = table.get(get);
     
@@ -130,14 +130,15 @@ public class TestHBaseStore extends DataStoreTestBase {
     page = webPageStore.get("com.example/http") ;
     assertNull(page.getContent()) ;
     // Check directly with HBase
-    table = new HTable("WebPage");
+    table = new HTable(conf,"WebPage");
     get = new Get(Bytes.toBytes("com.example/http"));
     result = table.get(get);
     actualBytes = result.getValue(Bytes.toBytes("content"), null);
     assertNull(actualBytes);
     table.close();
     
-    // Test writing+reading an empty bytes field. FIELD in HBASE MUST become EMPTY (byte[0])
+    // Test writing+reading an empty bytes field. FIELD in HBASE MUST 
+    // become EMPTY (byte[0])
     page = webPageStore.get("com.example/http") ;
     page.setContent(ByteBuffer.wrap("".getBytes())) ;
     webPageStore.put("com.example/http", page) ;
@@ -146,7 +147,7 @@ public class TestHBaseStore extends DataStoreTestBase {
     page = webPageStore.get("com.example/http") ;
     assertTrue(Arrays.equals("".getBytes(),page.getContent().array())) ;
     // Check directly with HBase
-    table = new HTable("WebPage");
+    table = new HTable(conf,"WebPage");
     get = new Get(Bytes.toBytes("com.example/http"));
     result = table.get(get);
     actualBytes = result.getValue(Bytes.toBytes("content"), null);
@@ -156,15 +157,16 @@ public class TestHBaseStore extends DataStoreTestBase {
   }
   
   /**
-   * Checks that when writing a top level union <code>['null','type']</code> the value is written in raw format
+   * Checks that when writing a top level union <code>['null','type']</code> 
+   * the value is written in raw format
    * @throws Exception
    */
   @Test
   public void assertTopLevelUnions() throws Exception {
     WebPage page = webPageStore.newPersistent();
-
+    
     // Write webpage data
-    page.setUrl(new Utf8("http://example.com"));
+    page.setUrl((CharSequence) new Utf8("http://example.com"));
     byte[] contentBytes = "example content in example.com".getBytes();
     ByteBuffer buff = ByteBuffer.wrap(contentBytes);
     page.setContent(buff);
@@ -172,7 +174,7 @@ public class TestHBaseStore extends DataStoreTestBase {
     webPageStore.flush() ;
     
     // Read directly from HBase
-    HTable table = new HTable("WebPage");
+    HTable table = new HTable(conf,"WebPage");
     Get get = new Get(Bytes.toBytes("com.example/http"));
     org.apache.hadoop.hbase.client.Result result = table.get(get);
 
@@ -180,11 +182,14 @@ public class TestHBaseStore extends DataStoreTestBase {
     
     assertNotNull(bytesRead) ;
     assertTrue(Arrays.equals(bytesRead, contentBytes));
+    table.close();
   }
   
   /**
-   * Checks that when writing a top level union <code>['null','type']</code> with the option <code>RAW_ROOT_FIELDS_OPTION=true</code>
-   * the column is not created, and when <code>RAW_ROOT_FIELDS_OPTION=false</code> the <code>null</code> value is serialized
+   * Checks that when writing a top level union <code>['null','type']</code> 
+   * with the option <code>RAW_ROOT_FIELDS_OPTION=true</code>
+   * the column is not created, and when <code>RAW_ROOT_FIELDS_OPTION=false</code> 
+   * the <code>null</code> value is serialized
    * with Avro.
    * @throws Exception
    */
@@ -193,17 +198,17 @@ public class TestHBaseStore extends DataStoreTestBase {
     WebPage page = webPageStore.newPersistent();
     
     // Write webpage data
-    page.setUrl(new Utf8("http://example.com"));
+    page.setUrl((CharSequence) new Utf8("http://example.com"));
     page.setContent(null);     // This won't change internal field status to dirty, so
     page.setDirty("content") ; // need to change it manually
     webPageStore.put("com.example/http", page);
     webPageStore.flush() ;
     
     // Read directly from HBase
-    HTable table = new HTable("WebPage");
+    HTable table = new HTable(conf,"WebPage");
     Get get = new Get(Bytes.toBytes("com.example/http"));
     org.apache.hadoop.hbase.client.Result result = table.get(get);
-        
+    table.close();
     byte[] contentBytes = result.getValue(Bytes.toBytes("content"), null);
 
     assertNull(webPageStore.get("com.example/http", new String[]{"content"})) ;
@@ -212,7 +217,7 @@ public class TestHBaseStore extends DataStoreTestBase {
   
   @Override
   public void assertPutMap() throws IOException {
-    HTable table = new HTable("WebPage");
+    HTable table = new HTable(conf,"WebPage");
     Get get = new Get(Bytes.toBytes("com.example/http"));
     org.apache.hadoop.hbase.client.Result result = table.get(get);
     
