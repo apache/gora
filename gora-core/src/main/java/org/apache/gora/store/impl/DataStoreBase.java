@@ -22,16 +22,19 @@ import java.io.Closeable;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
+import org.apache.avro.specific.SpecificDatumReader;
+import org.apache.avro.specific.SpecificDatumWriter; 
 import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.gora.avro.PersistentDatumReader;
-import org.apache.gora.avro.PersistentDatumWriter;
 import org.apache.gora.avro.store.AvroStore;
 import org.apache.gora.persistency.BeanFactory;
+import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.impl.BeanFactoryImpl;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.store.DataStore;
@@ -70,9 +73,9 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
 
   protected Properties properties;
 
-  protected PersistentDatumReader<T> datumReader;
+  protected SpecificDatumReader<T> datumReader;
 
-  protected PersistentDatumWriter<T> datumWriter;
+  protected SpecificDatumWriter<T> datumWriter;
   
   public static final Logger LOG = LoggerFactory.getLogger(AvroStore.class);
 
@@ -93,8 +96,8 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
     autoCreateSchema = DataStoreFactory.getAutoCreateSchema(properties, this);
     this.properties = properties;
 
-    datumReader = new PersistentDatumReader<T>(schema, false);
-    datumWriter = new PersistentDatumWriter<T>(schema, false);
+    datumReader = new SpecificDatumReader<T>(schema);
+    datumWriter = new SpecificDatumWriter<T>(schema);
   }
 
   @Override
@@ -164,7 +167,26 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
     if(fields != null) {
       return fields;
     }
-    return beanFactory.getCachedPersistent().getFields();
+    return getFields();
+  }
+  
+  protected String[] getFields() {
+    List<Field> schemaFields = beanFactory.getCachedPersistent().getSchema().getFields();
+    
+    List<Field> list = new ArrayList<Field>();
+    for (Field field : schemaFields) {
+      if (!Persistent.DIRTY_BYTES_FIELD_NAME.equalsIgnoreCase(field.name())) {
+        list.add(field);
+      }
+    }
+    schemaFields = list;
+    
+    String[] fieldNames = new String[schemaFields.size()];
+    for(int i = 0; i<fieldNames.length; i++ ){
+      fieldNames[i] = schemaFields.get(i).name();
+    }
+    
+    return fieldNames;
   }
 
   @Override
@@ -234,25 +256,28 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
   /**
    * Returns the name of the schema to use for the persistent class. 
    * 
-   * The schema name is prefixed with schema.prefix from {@link Configuration}.
-   * The schema name in the defined properties is returned. If null then
+   * First the schema name in the {@link Configuration} is used. If null,
+   * the schema name in the defined properties is returned. If null then
    * the provided mappingSchemaName is returned. If this is null too,
    * the class name, without the package, of the persistent class is returned.
    * @param mappingSchemaName the name of the schema as read from the mapping file
    * @param persistentClass persistent class
    */
   protected String getSchemaName(String mappingSchemaName, Class<?> persistentClass) {
-    String prefix = getOrCreateConf().get("schema.prefix","");
+    String confSchemaName = getOrCreateConf().get("preferred.schema.name");
+    if (confSchemaName != null) {
+      return confSchemaName;
+    }
     
     String schemaName = DataStoreFactory.getDefaultSchemaName(properties, this);
     if(schemaName != null) {
-      return prefix+schemaName;
+      return schemaName;
     }
 
     if(mappingSchemaName != null) {
-      return prefix+mappingSchemaName;
+      return mappingSchemaName;
     }
 
-    return prefix+StringUtils.getClassname(persistentClass);
+    return StringUtils.getClassname(persistentClass);
   }
 }

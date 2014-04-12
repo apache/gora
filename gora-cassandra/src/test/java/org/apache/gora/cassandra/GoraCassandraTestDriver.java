@@ -23,17 +23,13 @@
 
 package org.apache.gora.cassandra;
 
-import java.io.IOException;
-
 import org.apache.gora.GoraTestDriver;
 import org.apache.gora.cassandra.store.CassandraStore;
-
-import org.apache.hadoop.conf.Configuration;
 
 import java.io.File;
 
 import org.apache.cassandra.io.util.FileUtils;
-import org.apache.cassandra.thrift.CassandraDaemon;
+import org.apache.cassandra.service.CassandraDaemon;
 
 // Logging imports
 import org.slf4j.Logger;
@@ -70,7 +66,7 @@ public class GoraCassandraTestDriver extends GoraTestDriver {
   }
 	
   /**
-   * starts embedded Cassandra server.
+   * Starts embedded Cassandra server.
    *
    * @throws Exception
    * 	if an error occurs
@@ -91,21 +87,21 @@ public class GoraCassandraTestDriver extends GoraTestDriver {
 	
         public void run() {
           try {
-	    cassandraDaemon.start();
-	  } catch (Exception e) {
-	    log.error("Embedded casandra server run failed!", e);
-	  }
+            cassandraDaemon.start();
+          } catch (Exception e) {
+            log.error("Embedded casandra server run failed!", e);
+          }
         }
       });
 	
       cassandraThread.setDaemon(true);
       cassandraThread.start();
-      } catch (Exception e) {
-	log.error("Embedded casandra server start failed!", e);
+    } catch (Exception e) {
+      log.error("Embedded casandra server start failed!", e);
 
-	// cleanup
-	tearDownClass();
-      }
+      // cleanup
+      tearDownClass();
+    }
   }
 
   /**
@@ -136,15 +132,15 @@ public class GoraCassandraTestDriver extends GoraTestDriver {
     int tries = 3;
     while (tries-- > 0) {
       try {
-	cleanupDirectories();
-	break;
+        cleanupDirectories();
+        break;
       } catch (Exception e) {
-	// ignore exception
-	try {
-	  Thread.sleep(250);
-	} catch (InterruptedException e1) {
-	  // ignore exception
-	}
+        // ignore exception
+        try {
+          Thread.sleep(250);
+        } catch (InterruptedException e1) {
+          // ignore exception
+        }
       }
     }
   }

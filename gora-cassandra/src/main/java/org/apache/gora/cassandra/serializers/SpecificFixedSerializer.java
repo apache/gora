@@ -25,15 +25,10 @@ import java.util.Map;
 
 import me.prettyprint.cassandra.serializers.AbstractSerializer;
 import me.prettyprint.cassandra.serializers.BytesArraySerializer;
-import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.ddl.ComparatorType;
 import static me.prettyprint.hector.api.ddl.ComparatorType.BYTESTYPE;
 
 import org.apache.avro.specific.SpecificFixed;
-import org.apache.avro.Schema;
-import org.apache.avro.Schema.Type;
-import org.apache.avro.util.Utf8;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

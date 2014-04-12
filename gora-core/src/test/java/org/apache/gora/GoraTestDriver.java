@@ -18,7 +18,6 @@
 
 package org.apache.gora;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Properties;
 
@@ -40,15 +39,15 @@ public class GoraTestDriver {
 
   protected static final Logger log = LoggerFactory.getLogger(GoraTestDriver.class);
 
-  protected Class<? extends DataStore> dataStoreClass;
+  protected Class<? extends DataStore<?, ?>> dataStoreClass;
   protected Configuration conf = new Configuration();
 
   @SuppressWarnings("rawtypes")
   protected HashSet<DataStore> dataStores;
 
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   protected GoraTestDriver(Class<? extends DataStore> dataStoreClass) {
-    this.dataStoreClass = dataStoreClass;
+    this.dataStoreClass = (Class<? extends DataStore<?, ?>>) dataStoreClass;
     this.dataStores = new HashSet<DataStore>();
   }
 
@@ -71,7 +70,7 @@ public class GoraTestDriver {
    */
   public void setUp() throws Exception {
     log.info("setting up test");
-    for(DataStore store : dataStores) {
+    for(DataStore<?, ?> store : dataStores) {
       store.truncateSchema();
     }
   }
@@ -111,5 +110,9 @@ public class GoraTestDriver {
   
   public Class<?> getDataStoreClass() {
     return dataStoreClass;
+  }
+  
+  public Configuration getConfiguration() {
+    return this.conf;
   }
 }

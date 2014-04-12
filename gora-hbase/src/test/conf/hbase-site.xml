@@ -119,7 +119,6 @@
     <description>
     Maximum desired file size for an HRegion.  If filesize exceeds
     value + (value / 2), the HRegion is split in two.  Default: 256M.
-
     Keep the maximum filesize small so we split more often in tests.
     </description>
   </property>
@@ -129,9 +128,14 @@
   </property>
   <property>
     <name>hbase.zookeeper.property.clientPort</name>
-    <value>21818</value>
+    <value>2181</value>
     <description>Property from ZooKeeper's config zoo.cfg.
     The port at which the clients will connect.
     </description>
+  </property>
+  <property>
+    <name>hbase.zookeeper.quorum</name>
+    <value>localhost</value>
+    <description>The directory shared by region servers.</description>
   </property>
 </configuration>

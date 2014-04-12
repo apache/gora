@@ -49,7 +49,7 @@ public class CassandraMappingManager {
     return manager;
   }
 
-  /**
+ /**
   * Objects to maintain mapped keyspaces
   */
   private Map<String, Element> keyspaceMap = null;
@@ -78,7 +78,7 @@ public class CassandraMappingManager {
     }
     String keyspaceName = mappingElement.getAttributeValue(KEYSPACE_ELEMENT);
     if (LOG.isDebugEnabled()) {
-      LOG.debug("className=" + className + " -> keyspaceName=" + keyspaceName);
+      LOG.debug("persistentClassName=" + className + " -> keyspaceName=" + keyspaceName);
     }
     Element keyspaceElement = keyspaceMap.get(keyspaceName);
     if (keyspaceElement == null) {

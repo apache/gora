@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
  * class, which actually only uses {@link MapReduceTestUtils} methods to
  * run the tests.
  */
-@SuppressWarnings("deprecation")
 public abstract class DataStoreMapReduceTestBase extends HadoopTestCase {
   public static final Logger LOG = LoggerFactory.getLogger(DataStoreMapReduceTestBase.class);
 
@@ -71,8 +70,8 @@ public abstract class DataStoreMapReduceTestBase extends HadoopTestCase {
   @Override
   public void tearDown() throws Exception {
     LOG.info("Tearing down Hadoop Test Case...");
-    super.tearDown();
     webPageStore.close();
+    super.tearDown();
   }
 
   protected abstract DataStore<String, WebPage> createWebPageDataStore()

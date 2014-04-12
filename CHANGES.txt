@@ -4,13 +4,29 @@
 
 Gora Change Log
 
+* GORA-106 Migrate Gora website documentation to Apache CMS (lewismc)
+
+* GORA-296 Improve 'Keyclass and nameclass match' logging in HBaseStore (rmarroquin via lewismc)
+
+* GORA-246 Upgrade to Avro 1.7.X in gora-hbase (Alparslan Avcı, rmarroquin, lewismc via lewismc)
+
+* GORA-154 delete() method is not implemented at CassandraStore, and always returns false or 0 (rmarroquin via Kazuomi Kashii)
+
+* GORA-204 Don't store empty arrays in CassandraClient#addGenericArray(), addStatefulHashMap() and CassandraStore#addOrUpdateField(rmarroquin via lewismc)
+
+* GORA-303 Upgrade to Avro 1.7.X in gora-solr (Talat UYARER)
+
+* GORA-253 Add Facebook, Linkedin, Google+, Twitter, etc plugins to website (lewismc)
+
+* GORA-244 Upgrade to Avro 1.7.X in gora-accumulo (Akber Choudhry via lewismc)
+
+* GORA-306 Ssn field is not nullable in Employee's Avro Schema (Talat UYARER via lewismc)
+
 * GORA-171 Implement Daily Rolling File Appender for localised Gora logging (lewismc)
 
 * GORA-119 implement a filter enabled scan in gora (ferdy, kturner, enis, Tien Nguyen Manh via lewismc)
 
-* GORA-290 StatefulHashMap removes the entry when put with same value (Alparslan Avci via hsaputra)
-
-* GORA-231 Provide better error handling in AccumuloStore.readMapping when file does not exist (Apostolos Giannakidis)
+* GORA-231 Provide better error handling in AccumuloStore.readMapping when file does not exist. (apgiannakidis via lewismc)
 
 * GORA-283 Specify field name for types not being considered in gora-cassandra (lewismc)
 

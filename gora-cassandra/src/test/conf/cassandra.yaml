@@ -7,7 +7,7 @@
 
 # The name of the cluster. This is mainly used to prevent machines in
 # one logical cluster from joining another.
-cluster_name: 'Gora Cassandra Test Cluster'
+cluster_name: "Gora Cassandra Test Cluster"
 
 # You should always specify InitialToken when setting up a production
 # cluster for the first time, and often when adding capacity later.
@@ -27,13 +27,13 @@ hinted_handoff_enabled: true
 # generated. After it has been dead this long, hints will be dropped.
 max_hint_window_in_ms: 3600000 # one hour
 # Sleep this long after delivering each row or row fragment
-hinted_handoff_throttle_delay_in_ms: 50
+#hinted_handoff_throttle_delay_in_ms: 50 (deprecated in 2.0.2)
 
 # authentication backend, implementing IAuthenticator; used to identify users
 authenticator: org.apache.cassandra.auth.AllowAllAuthenticator
 
 # authorization backend, implementing IAuthority; used to limit access/provide permissions
-authority: org.apache.cassandra.auth.AllowAllAuthority
+authorizer: org.apache.cassandra.auth.AllowAllAuthorizer
 
 # The partitioner is responsible for distributing rows (by key) across
 # nodes in the cluster. Any IPartitioner may be used, including your
@@ -109,7 +109,7 @@ seed_provider:
 # it is most effective under light to moderate load, or read-heavy
 # workloads; under truly massive write load, it will often be too
 # little, too late.
-flush_largest_memtables_at: 0.75
+#flush_largest_memtables_at: 0.75 (deprecated in 2.0.2)
 
 # emergency pressure valve #2: the first time heap usage after a full
 # (CMS) garbage collection is above this fraction of the max,
@@ -120,8 +120,8 @@ flush_largest_memtables_at: 0.75
 #
 # Set to 1.0 to disable. Setting this lower than
 # CMSInitiatingOccupancyFraction is not likely to be useful.
-reduce_cache_sizes_at: 0.85
-reduce_cache_capacity_to: 0.6
+#reduce_cache_sizes_at: 0.85 (deprecated in 2.0.2)
+#reduce_cache_capacity_to: 0.6 (deprecated in 2.0.2)
 
 # For workloads with more data than can fit in memory, Cassandra's
 # bottleneck will be reads that need to fetch data from
@@ -311,7 +311,7 @@ compaction_preheat_key_cache: true
 # stream_throughput_outbound_megabits_per_sec: 400
 
 # Time to wait for a reply from other nodes before failing the command
-rpc_timeout_in_ms: 10000
+#rpc_timeout_in_ms: 10000 (deprecated in 2.0.2)
 
 # phi value that must be reached for a host to be marked down.
 # most users should never need to adjust this.
@@ -410,7 +410,7 @@ index_interval: 128
 # The passwords used in these options must match the passwords used when generating
 # the keystore and truststore. For instructions on generating these files, see:
 # http://download.oracle.com/javase/6/docs/technotes/guides/security/jsse/JSSERefGuide.html#CreateKeystore
-encryption_options:
+server_encryption_options:
     internode_encryption: none
     keystore: conf/.keystore
     keystore_password: cassandra

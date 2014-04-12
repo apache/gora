@@ -43,9 +43,10 @@ import java.nio.ByteBuffer;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.reflect.ReflectData;
+import org.apache.avro.specific.SpecificDatumReader;
+import org.apache.avro.specific.SpecificDatumWriter;
+import org.apache.avro.specific.SpecificRecord;
 import org.apache.avro.util.Utf8;
-import org.apache.gora.avro.PersistentDatumReader;
-import org.apache.gora.avro.PersistentDatumWriter;
 import org.apache.hadoop.io.WritableUtils;
 
 //  This code is copied almost directly from HBase project's Bytes class.
@@ -677,30 +678,31 @@ public class ByteUtils {
   }
 
   @SuppressWarnings("unchecked")
-  public static Object fromBytes( byte[] val, Schema schema
-      , PersistentDatumReader<?> datumReader, Object object)
+  public static <T> T fromBytes( byte[] val, Schema schema
+      , SpecificDatumReader<T> datumReader, T object)
   throws IOException {
     Type type = schema.getType();
     switch (type) {
     case ENUM:
       String symbol = schema.getEnumSymbols().get(val[0]);
-      return Enum.valueOf(ReflectData.get().getClass(schema), symbol);
-    case STRING:  return new Utf8(toString(val));
-    case BYTES:   return ByteBuffer.wrap(val);
-    case INT:     return bytesToVint(val);
-    case LONG:    return bytesToVlong(val);
-    case FLOAT:   return toFloat(val);
-    case DOUBLE:  return toDouble(val);
-    case BOOLEAN: return val[0] != 0;
+      return (T)Enum.valueOf(ReflectData.get().getClass(schema), symbol);
+    case STRING:  return (T)new Utf8(toString(val));
+    case BYTES:   return (T)ByteBuffer.wrap(val);
+    case INT:     return (T)Integer.valueOf(bytesToVint(val));
+    case LONG:    return (T)Long.valueOf(bytesToVlong(val));
+    case FLOAT:   return (T)Float.valueOf(toFloat(val));
+    case DOUBLE:  return (T)Double.valueOf(toDouble(val));
+    case BOOLEAN: return (T)Boolean.valueOf(val[0] != 0);
     case RECORD:  //fall
     case MAP:
-    case ARRAY:   return IOUtils.deserialize(val, datumReader, schema, object);
+    case ARRAY:   return (T)IOUtils.deserialize(val, (SpecificDatumReader<SpecificRecord>)datumReader, schema, (SpecificRecord)object);
     default: throw new RuntimeException("Unknown type: "+type);
     }
   }
 
-  public static byte[] toBytes(Object o, Schema schema
-      , PersistentDatumWriter<?> datumWriter)
+  @SuppressWarnings("unchecked")
+  public static <T> byte[] toBytes(T o, Schema schema
+      , SpecificDatumWriter<T> datumWriter)
   throws IOException {
     Type type = schema.getType();
     switch (type) {
@@ -714,7 +716,7 @@ public class ByteUtils {
     case ENUM:    return new byte[] { (byte)((Enum<?>) o).ordinal() };
     case RECORD:  //fall
     case MAP:
-    case ARRAY:   return IOUtils.serialize(datumWriter, schema, o);
+    case ARRAY:   return IOUtils.serialize((SpecificDatumWriter<SpecificRecord>)datumWriter, schema, (SpecificRecord)o);
     default: throw new RuntimeException("Unknown type: "+type);
     }
   }

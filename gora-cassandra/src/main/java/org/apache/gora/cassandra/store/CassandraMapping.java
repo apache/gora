@@ -53,6 +53,7 @@ public class CassandraMapping {
   private String clusterName;
   private String keyspaceName;
   
+  
   /**
    * List of the super column families.
    */
@@ -168,9 +169,10 @@ public class CassandraMapping {
         LOG.warn("Using default set to: " + DEFAULT_GCGRACE_SECONDS);
       } else {
         if (LOG.isDebugEnabled()) {
-          LOG.debug("Located gc_grace_seconds: '" + gcgrace_scs + "'" );
+        LOG.debug("Located gc_grace_seconds: '" + gcgrace_scs + "'" );
         }
       }
+
       String superAttribute = element.getAttributeValue(SUPER_ATTRIBUTE);
       if (superAttribute != null) {
         if (LOG.isDebugEnabled()) {
@@ -183,11 +185,12 @@ public class CassandraMapping {
         cfDef.setColumnType(ColumnType.SUPER);
         cfDef.setSubComparatorType(ComparatorType.BYTESTYPE);
       }
-      
+
       cfDef.setKeyspaceName(this.keyspaceName);
       cfDef.setName(familyName);
       cfDef.setComparatorType(ComparatorType.BYTESTYPE);
       cfDef.setDefaultValidationClass(ComparatorType.BYTESTYPE.getClassName());
+
       cfDef.setGcGraceSeconds(gcgrace_scs!=null?Integer.parseInt(gcgrace_scs):DEFAULT_GCGRACE_SECONDS);
       this.columnFamilyDefinitions.put(familyName, cfDef);
 
@@ -200,7 +203,6 @@ public class CassandraMapping {
       String familyName = element.getAttributeValue(FAMILY_ATTRIBUTE);
       String columnName = element.getAttributeValue(COLUMN_ATTRIBUTE);
       String ttlValue = element.getAttributeValue(COLUMNS_TTL_ATTRIBUTE);
-
       if (fieldName == null) {
        LOG.error("Field name is not declared.");
         continue;
@@ -221,55 +223,37 @@ public class CassandraMapping {
       if (columnFamilyDefinition == null) {
         LOG.warn("Family " + familyName + " was not declared in the keyspace.");
       }
-      
+
       this.familyMap.put(fieldName, familyName);
       this.columnMap.put(fieldName, columnName);
-      // TODO we should find a way of storing more values into this map i.e. more column attributes
+      // TODO we should find a way of storing more values into this map
       this.columnAttrMap.put(columnName, ttlValue!=null?ttlValue:DEFAULT_COLUMNS_TTL);
     }
   }
 
   /**
-   * Add new column to CassandraMapping using the self-explanatory parameters
-   * @param pFamilyName
-   * @param pFieldName
-   * @param pColumnName
+   * Add new column to the CassandraMapping using the the below parameters
+   * @param pFamilyName the column family name
+   * @param pFieldName the Avro field from the Schema
+   * @param pColumnName the column name within the column family.
    */
   public void addColumn(String pFamilyName, String pFieldName, String pColumnName){
     this.familyMap.put(pFieldName, pFamilyName);
     this.columnMap.put(pFieldName, pColumnName);
   }
 
-  /**
-   * Gets the columnFamily related to the column name.
-   * @param name
-   * @return
-   */
   public String getFamily(String name) {
     return this.familyMap.get(name);
   }
 
-  /**
-   * Gets the column related to a field.
-   * @param name
-   * @return
-   */
   public String getColumn(String name) {
     return this.columnMap.get(name);
   }
 
-  /**
-   * Gets all the columnFamilies defined.
-   * @return
-   */
   public Map<String,String> getFamilyMap(){
     return this.familyMap;
   }
 
-  /**
-   * Gets all attributes related to a column.
-   * @return
-   */
   public Map<String, String> getColumnsAttribs(){
     return this.columnAttrMap;
   }

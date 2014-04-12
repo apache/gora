@@ -75,7 +75,7 @@ public class AccumuloResult<K,T extends PersistentBase> extends ResultBase<K,T> 
     
     Iterator<Entry<Key,Value>> nextRow = iterator.next();
     ByteSequence row = getDataStore().populate(nextRow, persistent);
-    key = (K) ((AccumuloStore) dataStore).fromBytes(getKeyClass(), row.toArray());
+    key = (K) ((AccumuloStore<K, T>) dataStore).fromBytes(getKeyClass(), row.toArray());
     
     return true;
   }

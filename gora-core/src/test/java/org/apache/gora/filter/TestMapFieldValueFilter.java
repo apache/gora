@@ -32,6 +32,7 @@ public class TestMapFieldValueFilter {
   @Test
   public void testSerialization() throws IOException {
     MapFieldValueFilter<String, WebPage> filter = new MapFieldValueFilter<String, WebPage>();
+    //set filter field name as metadata
     filter.setFieldName(WebPage.Field.METADATA.toString());
     filter.setMapKey(new Utf8("fetchTime"));
     filter.setFilterOp(FilterOp.EQUALS);
@@ -50,16 +51,17 @@ public class TestMapFieldValueFilter {
   @Test
   public void testFilterBasics() {
     MapFieldValueFilter<String, WebPage> filter = new MapFieldValueFilter<String, WebPage>();
+    //set filter field name as outlinks
     filter.setFieldName(WebPage.Field.OUTLINKS.toString());
     filter.setMapKey(new Utf8("example"));
     filter.setFilterOp(FilterOp.EQUALS);
     filter.setFilterIfMissing(true);
     filter.getOperands().add(new Utf8("http://example.org"));
     
-    WebPage page = new WebPage();
-    page.putToOutlinks(new Utf8("example"), new Utf8("http://example.org"));
+    WebPage page = WebPage.newBuilder().build();
+    page.getOutlinks().put(new Utf8("example"), new Utf8("http://example.org"));
     assertFalse(filter.filter("irrelevant", page));
-    page.putToOutlinks(new Utf8("example"), new Utf8("http://example2.com"));
+    page.getOutlinks().put(new Utf8("example"), new Utf8("http://example2.com"));
     assertTrue(filter.filter("irrelevant", page));
     page = new WebPage();
     assertTrue(filter.filter("irrelevant", page));
@@ -71,17 +73,18 @@ public class TestMapFieldValueFilter {
   @Test
   public void testFilterEntryInMap() {
     MapFieldValueFilter<String, WebPage> filter = new MapFieldValueFilter<String, WebPage>();
+    //set filter field name as outlinks
     filter.setFieldName(WebPage.Field.OUTLINKS.toString());
     filter.setMapKey(new Utf8("foobar.whatever"));
     filter.setFilterOp(FilterOp.EQUALS);
     filter.setFilterIfMissing(true);
     filter.getOperands().add(new Utf8("Click here for foobar!"));
     
-    WebPage page = new WebPage();
+    WebPage page = WebPage.newBuilder().build();
     assertTrue(filter.filter("irrelevant", page));
-    page.putToOutlinks(new Utf8("foobar.whatever"), new Utf8("Mismatch!"));
+    page.getOutlinks().put(new Utf8("foobar.whatever"), new Utf8("Mismatch!"));
     assertTrue(filter.filter("irrelevant", page));
-    page.putToOutlinks(new Utf8("foobar.whatever"), new Utf8("Click here for foobar!"));
+    page.getOutlinks().put(new Utf8("foobar.whatever"), new Utf8("Click here for foobar!"));
     assertFalse(filter.filter("irrelevant", page));
   }
 

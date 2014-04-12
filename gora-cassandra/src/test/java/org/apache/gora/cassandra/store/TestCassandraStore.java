@@ -68,49 +68,37 @@ public class TestCassandraStore extends DataStoreTestBase{
   }
 
 
-  //We need to skip the following tests for a while until we fix some issues..
-
-  @Ignore("skipped until some bugs are fixed")
-  @Override
-  public void testGetWebPageDefaultFields() throws IOException {}
-  @Ignore("skipped until some bugs are fixed")
+  @Ignore("GORA-299 o.a.g.cassandra.CassandraStore#newQuery() should not use query.setFields(getFieldsToQuery(null));")
   @Override
   public void testQuery() throws IOException {}
-  @Ignore("skipped until some bugs are fixed")
+  @Ignore("GORA-299 o.a.g.cassandra.CassandraStore#newQuery() should not use query.setFields(getFieldsToQuery(null));")
   @Override
   public void testQueryStartKey() throws IOException {}
-  @Ignore("skipped until some bugs are fixed")
+  @Ignore("GORA-299 o.a.g.cassandra.CassandraStore#newQuery() should not use query.setFields(getFieldsToQuery(null));")
   @Override
   public void testQueryEndKey() throws IOException {}
-  @Ignore("skipped until some bugs are fixed")
+  @Ignore("GORA-299 o.a.g.cassandra.CassandraStore#newQuery() should not use query.setFields(getFieldsToQuery(null));")
   @Override
   public void testQueryKeyRange() throws IOException {}
-  @Ignore("skipped until some bugs are fixed")
+  @Ignore("GORA-299 o.a.g.cassandra.CassandraStore#newQuery() should not use query.setFields(getFieldsToQuery(null));")
+  @Override
+  public void testQueryWebPageSingleKey() throws IOException {}
+  @Ignore("GORA-299 o.a.g.cassandra.CassandraStore#newQuery() should not use query.setFields(getFieldsToQuery(null));")
   @Override
   public void testQueryWebPageSingleKeyDefaultFields() throws IOException {}
-  @Ignore("skipped until some bugs are fixed")
+  @Ignore("GORA-299 o.a.g.cassandra.CassandraStore#newQuery() should not use query.setFields(getFieldsToQuery(null));")
+  @Override
+  public void testQueryWebPageQueryEmptyResults() throws IOException {}
+  @Ignore("GORA-154 delete() and deleteByQuery() methods are not implemented at CassandraStore, and always returns false or 0")
   @Override
   public void testDelete() throws IOException {}
-  @Ignore("skipped until some bugs are fixed")
+  @Ignore("GORA-154 delete() and deleteByQuery() methods are not implemented at CassandraStore, and always returns false or 0")
   @Override
   public void testDeleteByQuery() throws IOException {}
-  @Ignore("skipped until some bugs are fixed")
+  @Ignore("GORA-154 delete() and deleteByQuery() methods are not implemented at CassandraStore, and always returns false or 0")
   @Override
   public void testDeleteByQueryFields() throws IOException {}
-  @Ignore("skipped until some bugs are fixed")
+  @Ignore("GORA-298 Implement CassandraStore#getPartitions")
   @Override
   public void testGetPartitions() throws IOException {}
-  @Ignore("skipped until some bugs are fixed")
-  @Override
-  public void testGetRecursive() throws IOException {}
-  @Ignore("skipped until some bugs are fixed")
-  @Override
-  public void testGetDoubleRecursive() throws IOException{}
-  @Ignore("skipped until some bugs are fixed")
-  @Override
-  public void testGetNested() throws IOException {}
-  @Ignore("skipped until some bugs are fixed")
-  @Override
-  public void testGet3UnionField() throws IOException {}
-
 }
