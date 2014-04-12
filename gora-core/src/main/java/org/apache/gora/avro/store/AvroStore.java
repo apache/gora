@@ -23,14 +23,12 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Properties;
 
-import org.apache.avro.io.BinaryDecoder;
-import org.apache.avro.io.BinaryEncoder;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.io.Decoder;
+import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.Encoder;
-import org.apache.avro.io.JsonDecoder;
-import org.apache.avro.io.JsonEncoder;
+import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.gora.avro.query.AvroQuery;
@@ -220,20 +218,19 @@ public class AvroStore<K, T extends PersistentBase>
   protected Encoder createEncoder() throws IOException {
     switch(codecType) {
       case BINARY:
-        return new BinaryEncoder(getOrCreateOutputStream());
+        return EncoderFactory.get().binaryEncoder(getOrCreateOutputStream(), null);
       case JSON:
-        return new JsonEncoder(schema, getOrCreateOutputStream());
+        return EncoderFactory.get().jsonEncoder(schema, getOrCreateOutputStream());
     }
     return null;
   }
 
-  @SuppressWarnings("deprecation")
   protected Decoder createDecoder() throws IOException {
     switch(codecType) {
       case BINARY:
-        return new BinaryDecoder(getOrCreateInputStream());
+        return DecoderFactory.get().binaryDecoder(getOrCreateInputStream(), null);
       case JSON:
-        return new JsonDecoder(schema, getOrCreateInputStream());
+        return DecoderFactory.get().jsonDecoder(schema, getOrCreateInputStream());
     }
     return null;
   }

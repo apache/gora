@@ -106,7 +106,8 @@ public class MapFieldValueFilter<K, T extends PersistentBase> implements Filter<
 
   @Override
   public boolean filter(K key, T persistent) {
-    int fieldIndex = persistent.getFieldIndex(fieldName);
+    int fieldIndex = persistent.getSchema().getField(fieldName).pos();
+    @SuppressWarnings("unchecked")
     Map<Utf8, ?> fieldValue = (Map<Utf8, ?>) persistent.get(fieldIndex);
     if (fieldValue == null) {
       return filterIfMissing;

@@ -44,13 +44,17 @@ public class GoraMapReduceUtils {
     }
   }
   
+  /**
+   * Add our own serializer (obtained via the {@link PersistentSerialization} 
+   * wrapper) to any other <code>io.serializations</code> which may be specified 
+   * within existing Hadoop configuration.
+   * 
+   * @param conf the Hadoop configuration object
+   * @param reuseObjects boolean parameter to reuse objects
+   */
   public static void setIOSerializations(Configuration conf, boolean reuseObjects) {
     String serializationClass =
       PersistentSerialization.class.getCanonicalName();
-    if (!reuseObjects) {
-      serializationClass =
-        PersistentNonReusingSerialization.class.getCanonicalName();
-    }
     String[] serializations = StringUtils.joinStringArrays(
         conf.getStrings("io.serializations"), 
         "org.apache.hadoop.io.serializer.WritableSerialization",

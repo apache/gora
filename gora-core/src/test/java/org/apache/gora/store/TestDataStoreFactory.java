@@ -20,9 +20,9 @@ package org.apache.gora.store;
 
 import java.util.Properties;
 
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotSame;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 
 import org.apache.gora.avro.store.DataFileAvroStore;
 import org.apache.gora.mock.persistency.MockPersistent;

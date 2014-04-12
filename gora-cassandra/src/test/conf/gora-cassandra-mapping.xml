@@ -47,7 +47,8 @@
     <field name="content" family="p" qualifier="p:cnt:c" ttl="10"/>
     <field name="parsedContent" family="sc" qualifier="p:parsedContent" ttl="10"/>
     <field name="outlinks" family="sc" qualifier="p:outlinks" ttl="10"/>
-    <field name="metadata" family="sc" qualifier="c:mt" ttl="10"/>
+    <field name="headers" family="sc" qualifier="p:headers" ttl="10"/>
+    <field name="metadata" family="p" qualifier="c:mt" ttl="10"/>
   </class>
 
   <class name="org.apache.gora.examples.generated.TokenDatum" keyClass="java.lang.String" keyspace="TokenDatum">

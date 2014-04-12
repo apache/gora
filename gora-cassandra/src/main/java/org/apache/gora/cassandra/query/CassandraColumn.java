@@ -18,12 +18,19 @@
 
 package org.apache.gora.cassandra.query;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.concurrent.ConcurrentHashMap;
 
 import me.prettyprint.hector.api.Serializer;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
+import org.apache.avro.Schema.Type;
+import org.apache.avro.io.BinaryDecoder;
+import org.apache.avro.io.DecoderFactory;
+import org.apache.avro.specific.SpecificDatumReader;
+import org.apache.gora.cassandra.serializers.AvroSerializerUtil;
 import org.apache.gora.cassandra.serializers.GoraSerializerTypeInferer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +48,7 @@ public abstract class CassandraColumn {
   private int type;
   private Field field;
   private int unionType;
-
+  
   public void setUnionType(int pUnionType){
     this.unionType = pUnionType;
   }
@@ -72,7 +79,7 @@ public abstract class CassandraColumn {
 
   public abstract ByteBuffer getName();
   public abstract Object getValue();
-
+  
   protected Object fromByteBuffer(Schema schema, ByteBuffer byteBuffer) {
     Object value = null;
     Serializer<?> serializer = GoraSerializerTypeInferer.getSerializer(schema);
@@ -81,8 +88,14 @@ public abstract class CassandraColumn {
           + "could be found. Please report this to dev@gora.apache.org");
     } else {
       value = serializer.fromByteBuffer(byteBuffer);
+      if (schema.getType().equals(Type.RECORD) || schema.getType().equals(Type.MAP) ){
+        try {
+          value = AvroSerializerUtil.deserializer(value, schema);
+        } catch (IOException e) {
+          LOG.warn(field.name() + " named field could not be deserialized.");
+        }
+      }
     }
     return value;
   }
-
 }

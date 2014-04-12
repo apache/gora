@@ -33,6 +33,7 @@ public class TestSingleFieldValueFilter {
   @Test
   public void testSerialization() throws IOException {
     SingleFieldValueFilter<String, WebPage> filter = new SingleFieldValueFilter<String, WebPage>();
+    //set filter field to url
     filter.setFieldName(WebPage.Field.URL.toString());
     filter.setFilterOp(FilterOp.EQUALS);
     filter.setFilterIfMissing(true);
@@ -49,12 +50,13 @@ public class TestSingleFieldValueFilter {
   @Test
   public void testFilterBasics() {
     SingleFieldValueFilter<String, WebPage> filter = new SingleFieldValueFilter<String, WebPage>();
+    //set filter field to url
     filter.setFieldName(WebPage.Field.URL.toString());
     filter.setFilterOp(FilterOp.EQUALS);
     filter.setFilterIfMissing(true);
     filter.getOperands().add(new Utf8("example.org"));
     
-    WebPage page = new WebPage();
+    WebPage page = WebPage.newBuilder().build();
     page.setUrl(new Utf8("example.org"));
     assertFalse(filter.filter("irrelevant", page));
     page.setUrl(new Utf8("mismatch.whatever"));
@@ -70,12 +72,13 @@ public class TestSingleFieldValueFilter {
   @Test
   public void testFilterInequals() {
     SingleFieldValueFilter<String, WebPage> filter = new SingleFieldValueFilter<String, WebPage>();
+    //set filter field to url
     filter.setFieldName(WebPage.Field.URL.toString());
     filter.setFilterOp(FilterOp.NOT_EQUALS);
     filter.setFilterIfMissing(true);
     filter.getOperands().add(new Utf8("example.org"));
     
-    WebPage page = new WebPage();
+    WebPage page = WebPage.newBuilder().build();
     page.setUrl(new Utf8("example.org"));
     assertTrue(filter.filter("irrelevant", page));
     

@@ -91,7 +91,7 @@ public class BeanFactoryWSImpl<K, T extends Persistent> implements BeanFactory<K
   public K newKey() throws Exception {
     // TODO this method should be checked to see how object states will be managed
     if(isKeyPersistent)
-      return (K)((Persistent)key).newInstance(new StateManagerWSImpl());
+      return keyClass.newInstance();
     else if(keyConstructor == null) {
       throw new RuntimeException("Key class does not have a no-arg constructor");
     }
@@ -99,13 +99,19 @@ public class BeanFactoryWSImpl<K, T extends Persistent> implements BeanFactory<K
       return keyConstructor.newInstance(ReflectionUtils.EMPTY_OBJECT_ARRAY);
   }
  
-  @SuppressWarnings("unchecked")
   @Override
   /**
    * Creates a new persistent object
    */
   public T newPersistent() {
-    return (T) persistent.newInstance(new StateManagerWSImpl());
+    try {
+      return (T) persistentClass.newInstance();
+    } catch (InstantiationException e) {
+      throw new RuntimeException(e);
+    } catch (IllegalAccessException e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
+    }
   }
   
   @Override

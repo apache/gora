@@ -28,7 +28,9 @@
     <field name="name"        type="string" indexed="true" stored="true" />
     <field name="dateOfBirth" type="long" stored="true" /> 
     <field name="salary"      type="int" stored="true" /> 
-
+    <field name="boss"        type="binary" stored="true" />
+    <field name="webpage"     type="binary" stored="true" />
+    
   </fields>
 
   <uniqueKey>ssn</uniqueKey>
@@ -37,6 +39,7 @@
     <fieldType name="string" class="solr.StrField" sortMissingLast="true" />
     <fieldType name="int" class="solr.TrieIntField" precisionStep="0" positionIncrementGap="0"/>
     <fieldType name="long" class="solr.TrieLongField" precisionStep="0" positionIncrementGap="0"/>
+    <fieldtype name="binary" class="solr.BinaryField"/>
   </types>  
 
 </schema>

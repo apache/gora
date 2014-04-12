@@ -25,6 +25,7 @@ import org.apache.gora.solr.GoraSolrTestDriver;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.DataStoreTestBase;
+import org.junit.Ignore;
 
 public class TestSolrStore extends DataStoreTestBase {
   
@@ -49,46 +50,7 @@ public class TestSolrStore extends DataStoreTestBase {
   }
 
 
-  public void testGetRecursive() {
-  }
-
-  public void testGetDoubleRecursive() {
-  }
-
-  public void testGetNested() {
-  }
-
-  public void testGet3UnionField() {
-  }
-
-  public void testQuery() {
-  }
-
-  public void testQueryStartKey() {
-  }
-
-  public void testQueryEndKey() {
-  }
-
-  public void testQueryKeyRange() {
-  }
-
-  public void testQueryWebPageSingleKey() {
-  }
-
-  public void testQueryWebPageSingleKeyDefaultFields() {
-  }
-
-  public void testDeleteByQuery() {
-  }
-
-  public void testGetPartitions() {
-  }
-
-  public void testUpdate() {
-  }
-
-  public void testDeleteByQueryFields() {
-  }
-
+  @Ignore("GORA-310 and GORA-311 issues are not fixed at SolrStore")
+  @Override
+  public void testDeleteByQueryFields() throws IOException {}
 }

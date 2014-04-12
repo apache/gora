@@ -101,7 +101,7 @@ public class SingleFieldValueFilter<K, T extends PersistentBase> implements Filt
 
   @Override
   public boolean filter(K key, T persistent) {
-    int fieldIndex = persistent.getFieldIndex(fieldName);
+    int fieldIndex = persistent.getSchema().getField(fieldName).pos(); //.getIndexNamed(fieldName); throws org.apache.avro.AvroRuntimeException: Not a union:
     Object fieldValue = persistent.get(fieldIndex);
     Object operand = operands.get(0);
     if (fieldValue == null) {

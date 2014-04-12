@@ -77,7 +77,7 @@ public class LogAnalytics extends Configured implements Tool {
     protected void map(Long key, Pageview pageview, Context context)
         throws IOException ,InterruptedException {
       
-      Utf8 url = pageview.getUrl();
+      CharSequence url = pageview.getUrl();
       long day = getDay(pageview.getTimestamp());
       
       tuple.getKey().set(url.toString());

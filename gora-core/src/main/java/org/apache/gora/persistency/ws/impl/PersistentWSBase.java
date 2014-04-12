@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.gora.persistency.Persistent;
-import org.apache.gora.persistency.StateManager;
 
 /**
  * Base classs implementing common functionality for Web services 
@@ -43,26 +42,6 @@ public abstract class PersistentWSBase implements Persistent  {
   protected static Map<Class<?>, String[]> FIELDS =
     new HashMap<Class<?>, String[]>();
     
-  /**
-   * Object used to manage the state of fields
-   */
-  private StateManager stateManager;
-
-  /**
-   * Constructor
-   */
-  protected PersistentWSBase() {
-    this(new StateManagerWSImpl());
-  }
-
-  /**
-   * Constructor using a stateManager object
-   * @param stateManager
-   */
-  protected PersistentWSBase(StateManager stateManager) {
-    this.stateManager = stateManager;
-    stateManager.setManagedPersistent(this);
-  }
 
   /** Subclasses should call this function for all the persistable fields
    * in the class to register them.
@@ -80,15 +59,6 @@ public abstract class PersistentWSBase implements Persistent  {
     FIELD_MAP.put(clazz, map);
   }
 
-  @Override
-  /**
-   * Gets the state manager
-   */
-  public StateManager getStateManager() {
-    return stateManager;
-  }
-
-  @Override
   /**
    * Gets fields using a specific class
    */
@@ -96,7 +66,6 @@ public abstract class PersistentWSBase implements Persistent  {
     return FIELDS.get(getClass());
   }
 
-  @Override
   /**
    * Gets a specific field from the fields map
    */
@@ -104,7 +73,6 @@ public abstract class PersistentWSBase implements Persistent  {
     return FIELDS.get(getClass())[index];
   }
 
-  @Override
   /**
    * Gets a field index based on the field name
    */
@@ -122,36 +90,17 @@ public abstract class PersistentWSBase implements Persistent  {
     clearReadable();
   }
 
-  @Override
-  /**
-   * Determines if a class is new or not
-   */
-  public boolean isNew() {
-    return getStateManager().isNew(this);
+  private void clearReadable() {
+	  // TODO Auto-generated method stub
+	  
   }
 
-  @Override
-  /**
-   * Sets this element as a new one inside the stateManager object
-   */
-  public void setNew() {
-    getStateManager().setNew(this);
-  }
-
-  @Override
-  /**
-   * Clears a new object from the stateManager
-   */
-  public void clearNew() {
-    getStateManager().clearNew(this);
-  }
-
-  @Override
+	@Override
   /**
    * Determines if an object has been modified or not
    */
   public boolean isDirty() {
-    return getStateManager().isDirty(this);
+    return true;
   }
 
   @Override
@@ -160,7 +109,7 @@ public abstract class PersistentWSBase implements Persistent  {
    * based on its field index
    */
   public boolean isDirty(int fieldIndex) {
-    return getStateManager().isDirty(this, fieldIndex);
+    return true;
   }
 
   @Override
@@ -170,112 +119,6 @@ public abstract class PersistentWSBase implements Persistent  {
    */
   public boolean isDirty(String field) {
     return isDirty(getFieldIndex(field));
-  }
-
-  @Override
-  /**
-   * Sets this class as dirty
-   */
-  public void setDirty() {
-    getStateManager().setDirty(this);
-  }
-
-  @Override
-  /**
-   * Sets a specific field as dirty using its index
-   */
-  public void setDirty(int fieldIndex) {
-    getStateManager().setDirty(this, fieldIndex);
-  }
-
-  @Override
-  /**
-   * Sets a specific field as dirty using its name
-   */
-  public void setDirty(String field) {
-    setDirty(getFieldIndex(field));
-  }
-
-  @Override
-  /**
-   * Clears dirty fields using its index
-   */
-  public void clearDirty(int fieldIndex) {
-    getStateManager().clearDirty(this, fieldIndex);
-  }
-
-  @Override
-  /**
-   * Clears dirty fields using its name
-   */
-  public void clearDirty(String field) {
-    clearDirty(getFieldIndex(field));
-  }
-
-  @Override
-  /**
-   * Clears dirty fields from the state manager
-   */
-  public void clearDirty() {
-    getStateManager().clearDirty(this);
-  }
-
-  @Override
-  /**
-   * Checks if a field is readable using its index
-   */
-  public boolean isReadable(int fieldIndex) {
-    return getStateManager().isReadable(this, fieldIndex);
-  }
-
-  @Override
-  /**
-   * Checks if a field is readable using its name
-   */
-  public boolean isReadable(String field) {
-    return isReadable(getFieldIndex(field));
-  }
-
-  @Override
-  /**
-   * Sets a field as readable using its index
-   */
-  public void setReadable(int fieldIndex) {
-    getStateManager().setReadable(this, fieldIndex);
-  }
-
-  @Override
-  /**
-   * Sets a field as readable using its name
-   */
-  public void setReadable(String field) {
-    setReadable(getFieldIndex(field));
-  }
-
-  @Override
-  /**
-   * Clears this readable object from the state manager
-   */
-  public void clearReadable() {
-    getStateManager().clearReadable(this);
-  }
-
-  @Override
-  /**
-   * Clears a readable object based on its field index
-   * using a stateManager object
-   */
-  public void clearReadable(int fieldIndex) {
-    getStateManager().clearReadable(this, fieldIndex);
-  }
-
-  @Override
-  /**
-   * Clears a readable object based on its field name
-   * using a stateManager object
-   */
-  public void clearReadable(String field) {
-    clearReadable(getFieldIndex(field));
   }
 
   @Override
