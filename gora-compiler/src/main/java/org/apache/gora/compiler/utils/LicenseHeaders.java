@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.gora.util;
+package org.apache.gora.compiler.utils;
 
 import java.util.HashMap;
 
@@ -42,6 +42,7 @@ public class LicenseHeaders {
   private HashMap<String, String> relatedLicenses;
 
   // ASLv2 license header
+  @SuppressWarnings("unused")
   private static final String ASLv2 = 
     "/**\n" +
     " *Licensed to the Apache Software Foundation (ASF) under one\n" +
@@ -62,6 +63,7 @@ public class LicenseHeaders {
     " */\n";
   
   // AGPLv3 license header
+  @SuppressWarnings("unused")
   private static final String AGPLv3 =
     "/**\n" +
     " * This program is free software: you can redistribute it and/or modify\n" +
@@ -76,6 +78,7 @@ public class LicenseHeaders {
     " */\n";
     
   // CDDLv1 license header
+  @SuppressWarnings("unused")
   private static final String CDDLv1 =
     "/**\n" +
     " * COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0\n" +
@@ -96,6 +99,7 @@ public class LicenseHeaders {
     " */\n";
     
   // FDLv1.3 license header
+  @SuppressWarnings("unused")
   private static final String FDLv13 =
     "/**\n" +
     " * This program is free software: you can redistribute it and/or modify\n" +
@@ -113,6 +117,7 @@ public class LicenseHeaders {
     " */\n";
 
   // GPLv1 license header
+  @SuppressWarnings("unused")
   private static final String GPLv1 =
     "/**\n" +
     " * This program is free software: you can redistribute it and/or modify\n" +
@@ -131,6 +136,7 @@ public class LicenseHeaders {
     " */\n";
 
   // GPLv2 license header
+  @SuppressWarnings("unused")
   private static final String GPLv2 =
     "/**\n" +
     " * This program is free software: you can redistribute it and/or modify\n" +
@@ -149,6 +155,7 @@ public class LicenseHeaders {
     " */\n";    
 
   // GPLv3 license header
+  @SuppressWarnings("unused")
   private static final String GPLv3 =
     "/**\n" +
     " * This program is free software: you can redistribute it and/or modify\n" +
@@ -167,6 +174,7 @@ public class LicenseHeaders {
     " */\n";  
 
   // LGPLv21 license header
+  @SuppressWarnings("unused")
   private static final String LGPLv21 =
     "/**\n" +
     " * This program is free software: you can redistribute it and/or modify\n" +
@@ -185,6 +193,7 @@ public class LicenseHeaders {
     " */\n";  
 
   // LGPLv3 license header
+  @SuppressWarnings("unused")
   private static final String LGPLv3 =
     "/**\n" +
     " * This program is free software: you can redistribute it and/or modify\n" +
