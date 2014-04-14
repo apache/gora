@@ -56,7 +56,8 @@ public class MockPersistent extends PersistentBase {
 
   @Override
   public Schema getSchema() {
-    return Schema.parse("{\"type\":\"record\",\"name\":\"MockPersistent\",\"namespace\":\"org.apache.gora.mock.persistency\",\"fields\":[{\"name\":\"foo\",\"type\":\"int\"},{\"name\":\"baz\",\"type\":\"int\"}]}");
+    Schema.Parser parser = new Schema.Parser();
+    return parser.parse("{\"type\":\"record\",\"name\":\"MockPersistent\",\"namespace\":\"org.apache.gora.mock.persistency\",\"fields\":[{\"name\":\"foo\",\"type\":\"int\"},{\"name\":\"baz\",\"type\":\"int\"}]}");
   }
   
   public void setFoo(int foo) {
