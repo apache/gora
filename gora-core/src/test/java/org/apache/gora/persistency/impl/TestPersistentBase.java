@@ -20,8 +20,6 @@ package org.apache.gora.persistency.impl;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.util.Utf8;
