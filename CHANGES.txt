@@ -2,7 +2,16 @@
  ==CHANGES.txt
  =======================================================================
 
-Gora Change Log
+Gora 0.4 release: (14/04/2014)
+Release Report: http://s.apache.org/4lx
+
+* GORA-201 Upgrade HBase to 0.94.13 (various)
+
+* GORA-292 Upgrade dependency to Accumulo 1.5 (Akber Choudhry via lewismc)
+
+* GORA-245 Upgrade to Avro 1.7.X in gora-cassandra (lewismc, Talat, Uyarer, rmarroquin)
+
+* GORA-94 Upgrade to Apache Avro 1.7.x (Ed Kohlwey, lewismc, ferdy, yasin tamer, alparslanavci, Talat Uyarer, rmarroquin)
 
 * GORA-106 Migrate Gora website documentation to Apache CMS (lewismc)
 
