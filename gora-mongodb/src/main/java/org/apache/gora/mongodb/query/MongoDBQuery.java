@@ -71,7 +71,10 @@ public class MongoDBQuery<K, T extends PersistentBase> extends QueryBase<K, T> {
     BasicDBObject proj = new BasicDBObject();
 
       for (String k : fields) {
-        proj.put(mapping.getDocumentField(k), true);
+          String dbFieldName = mapping.getDocumentField(k);
+          if (dbFieldName != null && dbFieldName.length() > 0) {
+              proj.put(dbFieldName, true);
+          }
       }
 
     return proj;

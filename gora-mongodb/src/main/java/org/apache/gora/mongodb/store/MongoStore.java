@@ -37,13 +37,11 @@ import org.apache.gora.mongodb.utils.BSONDecorator;
 import org.apache.gora.mongodb.utils.GoraDBEncoder;
 import org.apache.gora.mongodb.query.MongoDBQuery;
 import org.apache.gora.mongodb.query.MongoDBResult;
-import org.apache.gora.persistency.ListGenericArray;
+import org.apache.gora.persistency.impl.DirtyListWrapper;
 import org.apache.gora.persistency.Persistent;
-import org.apache.gora.persistency.StateManager;
-import org.apache.gora.persistency.StatefulHashMap;
+import org.apache.gora.persistency.impl.DirtyMapWrapper;
 import org.apache.gora.persistency.impl.BeanFactoryImpl;
 import org.apache.gora.persistency.impl.PersistentBase;
-import org.apache.gora.persistency.impl.StateManagerImpl;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
@@ -353,7 +351,6 @@ public class MongoStore<K, T extends PersistentBase> extends
     // Build the corresponding persistent and clears its states
     final T persistent = newInstance(res, fields);
     if (persistent != null) {
-      persistent.clearNew();
       persistent.clearDirty();
     }
     // Done
@@ -371,7 +368,7 @@ public class MongoStore<K, T extends PersistentBase> extends
   @Override
   public void put(K key, T obj) {
     // Save the object in the database
-    if (obj.isNew() || obj.isDirty()) {
+    if (obj.isDirty()) {
       putUpdate(key, obj);
       // TODO: why is Nutch marking objects as new ?
       // putInsert(key, obj);
@@ -381,7 +378,6 @@ public class MongoStore<K, T extends PersistentBase> extends
       LOG.info("Ignored putting object {} in the store as it is neither "
           + "new, neither dirty.", new Object[] { obj });
       // Clear its state
-      obj.clearNew();
       obj.clearDirty();
     }
   }
@@ -524,7 +520,6 @@ public class MongoStore<K, T extends PersistentBase> extends
     BSONDecorator easybson = new BSONDecorator(obj);
     // Create new empty persistent bean instance
     T persistent = newPersistent();
-    StateManager stateManager = persistent.getStateManager();
     fields = getFieldsToQuery(fields);
 
     // Populate each field
@@ -546,7 +541,7 @@ public class MongoStore<K, T extends PersistentBase> extends
       Object result = fromDBObject(fieldSchema, storeType, field, docf, easybson);
       persistent.put(field.pos(), result);
     }
-    stateManager.clearDirty(persistent);
+      persistent.clearDirty();
     return persistent;
   }
 
@@ -555,7 +550,7 @@ public class MongoStore<K, T extends PersistentBase> extends
         switch (fieldSchema.getType()) {
             case MAP:
                 BasicDBObject map = easybson.getDBObject(docf);
-                StatefulHashMap<Utf8, Object> rmap = new StatefulHashMap<Utf8, Object>();
+                Map<Utf8, Object> rmap = new HashMap<Utf8, Object>();
                 for (Entry<String, Object> e : map.entrySet()) {
                     // ensure Key decoding -> middle dots replaced with dots
                     // FIXME: better approach ?
@@ -573,31 +568,28 @@ public class MongoStore<K, T extends PersistentBase> extends
                             break;
                     }
                 }
-                rmap.clearStates();
-                result = rmap;
+                result = new DirtyMapWrapper(rmap);
                 break;
             case ARRAY:
                 List<Object> list = easybson.getDBList(docf);
                 switch (fieldSchema.getElementType().getType()) {
                     case STRING:
-                        ListGenericArray<Utf8> arrS = new ListGenericArray<Utf8>(fieldSchema);
+                        List<Utf8> arrS = new ArrayList<Utf8>();
                         for (Object o : list)
                             arrS.add(new Utf8((String) o));
-                        result = arrS;
+                        result = new DirtyListWrapper<Utf8>(arrS);
                         break;
                     case BYTES:
-                        ListGenericArray<ByteBuffer> arrB = new ListGenericArray<ByteBuffer>(
-                                fieldSchema);
+                        List<ByteBuffer> arrB = new ArrayList<ByteBuffer>();
                         for (Object o : list)
                             arrB.add(ByteBuffer.wrap((byte[]) o));
-                        result = arrB;
+                        result = new DirtyListWrapper<ByteBuffer>(arrB);
                         break;
                     default:
-                        ListGenericArray<Object> arrT = new ListGenericArray<Object>(
-                                fieldSchema);
+                        List<Object> arrT = new ArrayList<Object>();
                         for (Object o : list)
                             arrT.add(o);
-                        result = arrT;
+                        result = new DirtyListWrapper<Object>(arrT);
                         break;
                 }
                 break;
@@ -756,8 +748,7 @@ public class MongoStore<K, T extends PersistentBase> extends
   private BasicDBObject newUpdateSetInstance(T persistent) {
     BasicDBObject result = new BasicDBObject();
     for (Field f : persistent.getSchema().getFields()) {
-      if (persistent.isReadable(f.pos()) && persistent.isDirty(f.pos())
-          && (persistent.get(f.pos()) != null)) {
+      if (persistent.isDirty(f.pos()) && (persistent.get(f.pos()) != null)) {
         String docf = mapping.getDocumentField(f.name());
         Object value = persistent.get(f.pos());
         DocumentFieldType storeType = mapping.getDocumentFieldType(docf);
@@ -791,8 +782,7 @@ public class MongoStore<K, T extends PersistentBase> extends
   private BasicDBObject newUpdateUnsetInstance(T persistent) {
     BasicDBObject result = new BasicDBObject();
     for (Field f : persistent.getSchema().getFields()) {
-      if (persistent.isReadable(f.pos()) && persistent.isDirty(f.pos())
-          && (persistent.get(f.pos()) == null)) {
+      if (persistent.isDirty(f.pos()) && (persistent.get(f.pos()) == null)) {
         String docf = mapping.getDocumentField(f.name());
         Object value = persistent.get(f.pos());
         DocumentFieldType storeType = mapping.getDocumentFieldType(docf);
@@ -825,7 +815,7 @@ public class MongoStore<K, T extends PersistentBase> extends
                                     + ": To store a Gora 'array', target Mongo mapping have to be of 'list' type");
                 }
                 Schema elementSchema = fieldSchema.getElementType();
-                result = toMongoList((GenericArray<?>) value, elementSchema.getType());
+                result = toMongoList((List<?>) value, elementSchema.getType());
                 break;
             case BYTES:
                 // Beware of ByteBuffer not being safely serialized
@@ -957,7 +947,7 @@ public class MongoStore<K, T extends PersistentBase> extends
     case ARRAY:
       easybson.put(
           key,
-          toMongoList((GenericArray<?>) value, field.schema().getElementType()
+          toMongoList((List<?>) value, field.schema().getElementType()
               .getType()));
       break;
     case BYTES:
@@ -990,7 +980,7 @@ public class MongoStore<K, T extends PersistentBase> extends
         case ARRAY:
           record.put(
               member.name(),
-              toMongoList((GenericArray<?>) recValue, member.schema()
+              toMongoList((List<?>) recValue, member.schema()
                   .getElementType().getType()));
           break;
         case LONG:
@@ -1077,7 +1067,7 @@ public class MongoStore<K, T extends PersistentBase> extends
    * @return a {@link BasicDBList} version of the {@link GenericArray} that can
    *         be safely serialized into MongoDB.
    */
-  private BasicDBList toMongoList(GenericArray<?> array, Type type) {
+  private BasicDBList toMongoList(Collection<?> array, Type type) {
     // Handle null case
     if (array == null)
       return null;

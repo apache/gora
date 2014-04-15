@@ -31,6 +31,7 @@
     <field name="content" docfield="content" type="binary"/>
     <field name="parsedContent" docfield="pContent" type="list"/>
     <field name="outlinks" docfield="links.out" type="document"/>
+    <field name="headers" docfield="headers" type="document"/>
     <field name="metadata" docfield="metadata" type="document"/>
   </class>
   

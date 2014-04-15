@@ -75,7 +75,6 @@ public class MongoDBResult<K, T extends PersistentBase> extends ResultBase<K, T>
     persistent = ((MongoStore<K, T>) getDataStore()).newInstance(obj,
             getQuery().getFields());
     if (persistent != null) {
-      persistent.clearNew();
       persistent.clearDirty();
     }
 
