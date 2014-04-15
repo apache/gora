@@ -25,7 +25,10 @@ package org.apache.gora.mongodb;
 
 import com.mongodb.Mongo;
 
-import de.flapdoodle.embed.mongo.config.MongodConfig;
+import com.mongodb.MongoClient;
+import de.flapdoodle.embed.mongo.config.IMongodConfig;
+import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
+import de.flapdoodle.embed.mongo.config.Net;
 import de.flapdoodle.embed.mongo.distribution.Version;
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodProcess;
@@ -43,8 +46,7 @@ public class GoraMongodbTestDriver extends GoraTestDriver {
 
   private MongodExecutable _mongodExe;
   private MongodProcess _mongod;
-
-  private Mongo _mongo;
+  private MongoClient _mongo;
 
   
   /**
@@ -60,13 +62,21 @@ public class GoraMongodbTestDriver extends GoraTestDriver {
   @Override
   public void setUpClass() throws Exception {
     super.setUpClass();
-    log.info("Starting embedded Mongodb server on the default port: 27017");
-    try {
       MongodStarter runtime = MongodStarter.getDefaultInstance();
-      _mongodExe = runtime.prepare(new MongodConfig(Version.Main.PRODUCTION, 27017, Network.localhostIsIPv6()));
+
+      int port = 27017;
+      IMongodConfig mongodConfig = new MongodConfigBuilder()
+              .version(Version.Main.PRODUCTION)
+              .net(new Net(port, Network.localhostIsIPv6()))
+              .build();
+
+    log.info("Starting embedded Mongodb server on the default port: {}" + port);
+    try {
+
+        _mongodExe = runtime.prepare(mongodConfig);
       _mongod = _mongodExe.start();
 
-      _mongo = new Mongo("localhost", 27017);
+       _mongo = new MongoClient("localhost", port);
     } catch (Exception e) {
       log.error("Error starting embedded Mongodb server... tearing down test driver.");
       tearDownClass();
