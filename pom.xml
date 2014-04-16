@@ -49,6 +49,15 @@
     
   <developers>
     <developer>
+      <id>alparslanavci</id>
+      <name>Alparslan Avci</name>
+      <email>alparslanavci [at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
       <id>ab</id>
       <name>Andrzej Bialecki</name>
       <email>ab [at] apache [dot] org</email>
