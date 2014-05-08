@@ -30,7 +30,6 @@ import org.junit.Ignore;
 import java.io.IOException;
 
 public class TestMongoStore extends DataStoreTestBase {
-//public class TestMongoStore {
 
   private Configuration conf;
   
