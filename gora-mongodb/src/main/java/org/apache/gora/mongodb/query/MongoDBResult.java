@@ -20,7 +20,6 @@ package org.apache.gora.mongodb.query;
 import java.io.IOException;
 
 import org.apache.gora.mongodb.store.MongoStore;
-import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.ResultBase;
@@ -36,7 +35,8 @@ import com.mongodb.DBObject;
  * @author Fabien Poulard <fpoulard@dictanova.com>
  * @author Damien Raude-Morvan <draudemorvan@dictanova.com>
  */
-public class MongoDBResult<K, T extends PersistentBase> extends ResultBase<K, T> {
+public class MongoDBResult<K, T extends PersistentBase> extends
+    ResultBase<K, T> {
 
   /**
    * Reference to the cursor pointing to the results
@@ -73,7 +73,7 @@ public class MongoDBResult<K, T extends PersistentBase> extends ResultBase<K, T>
     DBObject obj = cursor.next();
     key = (K) obj.get("_id");
     persistent = ((MongoStore<K, T>) getDataStore()).newInstance(obj,
-            getQuery().getFields());
+        getQuery().getFields());
     if (persistent != null) {
       persistent.clearDirty();
     }

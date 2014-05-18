@@ -16,28 +16,28 @@
   limitations under the License.
 -->
 <gora-orm>
-   
-  <class name="org.apache.gora.examples.generated.Employee" keyClass="java.lang.String" document="frontier">
-    <field name="name" docfield="name" type="string"/>
-    <field name="dateOfBirth" docfield="dateOfBirth" type="int64"/>
-    <field name="ssn" docfield="ssn" type="string"/>
-    <field name="salary" docfield="salary" type="int32"/>
-    <field name="boss" docfield="boss" type="document"/>
-    <field name="webpage" docfield="webpage" type="document"/>
-  </class>
 
-  <class name="org.apache.gora.examples.generated.WebPage" keyClass="java.lang.String" document="webpage">
-    <field name="url" docfield="url" type="string"/>
-    <field name="content" docfield="content" type="binary"/>
-    <field name="parsedContent" docfield="pContent" type="list"/>
-    <field name="outlinks" docfield="links.out" type="document"/>
-    <field name="headers" docfield="headers" type="document"/>
-    <field name="metadata" docfield="metadata" type="document"/>
-  </class>
-  
-  <class name="org.apache.gora.examples.generated.TokenDatum" keyClass="java.lang.String" keyspace="TokenDatum">
-    <field name="count" docfield="count" qualifier="int32"/>
-  </class>
-  
+    <class name="org.apache.gora.examples.generated.Employee" keyClass="java.lang.String" document="frontier">
+        <field name="name" docfield="name" type="string"/>
+        <field name="dateOfBirth" docfield="dateOfBirth" type="int64"/>
+        <field name="ssn" docfield="ssn" type="string"/>
+        <field name="salary" docfield="salary" type="int32"/>
+        <field name="boss" docfield="boss" type="document"/>
+        <field name="webpage" docfield="webpage" type="document"/>
+    </class>
+
+    <class name="org.apache.gora.examples.generated.WebPage" keyClass="java.lang.String" document="webpage">
+        <field name="url" docfield="url" type="string"/>
+        <field name="content" docfield="content" type="binary"/>
+        <field name="parsedContent" docfield="pContent" type="list"/>
+        <field name="outlinks" docfield="links.out" type="document"/>
+        <field name="headers" docfield="headers" type="document"/>
+        <field name="metadata" docfield="metadata" type="document"/>
+    </class>
+
+    <class name="org.apache.gora.examples.generated.TokenDatum" keyClass="java.lang.String" keyspace="TokenDatum">
+        <field name="count" docfield="count" qualifier="int32"/>
+    </class>
+
 
 </gora-orm>

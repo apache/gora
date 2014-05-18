@@ -17,15 +17,16 @@
  */
 package org.apache.gora.mongodb;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.BasicDBObjectBuilder;
-import com.mongodb.DBObject;
-import org.apache.gora.mongodb.utils.BSONDecorator;
-import org.junit.Test;
+import static org.junit.Assert.*;
 
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.*;
+import org.apache.gora.mongodb.utils.BSONDecorator;
+import org.junit.Test;
+
+import com.mongodb.BasicDBObject;
+import com.mongodb.BasicDBObjectBuilder;
+import com.mongodb.DBObject;
 
 public class TestBSONDecorator {
 
@@ -37,7 +38,7 @@ public class TestBSONDecorator {
         .add("root0", "value")
         .add("root1", new BasicDBObject("leaf1", 1))
         .add("root2",
-                new BasicDBObject("parent1", new BasicDBObject("leaf2", "test")))
+            new BasicDBObject("parent1", new BasicDBObject("leaf2", "test")))
         .get();
     BSONDecorator dboc = new BSONDecorator(dbo1);
 
@@ -71,9 +72,9 @@ public class TestBSONDecorator {
         .add("root0", "value")
         .add("root1", new BasicDBObject("leaf1", "abcdefgh".getBytes()))
         .add(
-                "root2",
-                new BasicDBObject("parent1", new BasicDBObject("leaf2", "test"
-                        .getBytes())))
+            "root2",
+            new BasicDBObject("parent1", new BasicDBObject("leaf2", "test"
+                .getBytes())))
         .add("root3", ByteBuffer.wrap("test2".getBytes())).get();
     BSONDecorator dboc = new BSONDecorator(dbo1);
 

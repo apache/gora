@@ -17,13 +17,14 @@
  */
 package org.apache.gora.mongodb.query;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 import org.apache.gora.mongodb.store.MongoMapping;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.QueryBase;
 import org.apache.gora.store.DataStore;
+
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 
 /**
  * MongoDB specific implementation of the {@link Query} interface.
@@ -70,12 +71,12 @@ public class MongoDBQuery<K, T extends PersistentBase> extends QueryBase<K, T> {
   public static DBObject toProjection(String[] fields, MongoMapping mapping) {
     BasicDBObject proj = new BasicDBObject();
 
-      for (String k : fields) {
-          String dbFieldName = mapping.getDocumentField(k);
-          if (dbFieldName != null && dbFieldName.length() > 0) {
-              proj.put(dbFieldName, true);
-          }
+    for (String k : fields) {
+      String dbFieldName = mapping.getDocumentField(k);
+      if (dbFieldName != null && dbFieldName.length() > 0) {
+        proj.put(dbFieldName, true);
       }
+    }
 
     return proj;
   }

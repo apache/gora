@@ -67,8 +67,7 @@ public class GoraMongodbTestDriver extends GoraTestDriver {
     int port = Network.getFreeServerPort();
     IMongodConfig mongodConfig = new MongodConfigBuilder()
         .version(Version.Main.PRODUCTION)
-        .net(new Net(port, Network.localhostIsIPv6()))
-        .build();
+        .net(new Net(port, Network.localhostIsIPv6())).build();
 
     // Store Mongo server "host:port" in Hadoop configuration
     // so that MongoStore will be able to get it latter

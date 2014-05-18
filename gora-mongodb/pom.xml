@@ -67,13 +67,13 @@
         <testSourceDirectory>src/test/java</testSourceDirectory>
         <sourceDirectory>src/main/java</sourceDirectory>
         <testResources>
-          <testResource>
-            <directory>${project.basedir}/src/test/conf</directory>
-            <includes>
-              <include>**/*</include>
-            </includes>
-            <!--targetPath>${project.basedir}/target/classes/</targetPath-->
-          </testResource>
+            <testResource>
+                <directory>${project.basedir}/src/test/conf</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+                <!--targetPath>${project.basedir}/target/classes/</targetPath-->
+            </testResource>
         </testResources>
         <plugins>
             <plugin>
@@ -148,11 +148,11 @@
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
-	        <exclusions>
-	          <exclusion>
-                <groupId>javax.jms</groupId>
-	            <artifactId>jms</artifactId>
-	          </exclusion>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.jms</groupId>
+                    <artifactId>jms</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -166,7 +166,7 @@
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-test</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>de.flapdoodle.embed</groupId>
             <artifactId>de.flapdoodle.embed.mongo</artifactId>

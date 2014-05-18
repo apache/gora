@@ -17,15 +17,15 @@
  */
 package org.apache.gora.mongodb.store;
 
-import org.apache.gora.persistency.impl.PersistentBase;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.input.SAXBuilder;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+
+import org.apache.gora.persistency.impl.PersistentBase;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.input.SAXBuilder;
 
 /**
  * A builder for creating the mapper. This will allow building a thread safe
@@ -154,9 +154,9 @@ public class MongoMappingBuilder<K, T extends PersistentBase> {
     if (!collName.equals(docNameFromMapping)) {
       MongoStore.LOG
           .info("Keyclass and nameclass match but mismatching table names "
-                  + " mappingfile schema is '" + docNameFromMapping
-                  + "' vs actual schema '" + collName
-                  + "' , assuming they are the same.");
+              + " mappingfile schema is '" + docNameFromMapping
+              + "' vs actual schema '" + collName
+              + "' , assuming they are the same.");
       if (docNameFromMapping != null) {
         mapping.renameCollection(docNameFromMapping, collName);
       }
@@ -168,8 +168,8 @@ public class MongoMappingBuilder<K, T extends PersistentBase> {
     for (Element field : fields) {
       mapping
           .addClassField(docNameFromMapping, field.getAttributeValue(ATT_NAME),
-                  field.getAttributeValue(ATT_FIELD),
-                  field.getAttributeValue(ATT_TYPE));
+              field.getAttributeValue(ATT_FIELD),
+              field.getAttributeValue(ATT_TYPE));
     }
   }
 
