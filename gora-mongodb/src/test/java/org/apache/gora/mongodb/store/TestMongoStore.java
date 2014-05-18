@@ -17,6 +17,8 @@
  */
 package org.apache.gora.mongodb.store;
 
+import java.io.IOException;
+
 import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.mongodb.GoraMongodbTestDriver;
@@ -27,12 +29,10 @@ import org.apache.hadoop.conf.Configuration;
 import org.junit.Before;
 import org.junit.Ignore;
 
-import java.io.IOException;
-
 public class TestMongoStore extends DataStoreTestBase {
 
   private Configuration conf;
-  
+
   static {
     setTestDriver(new GoraMongodbTestDriver());
   }
@@ -41,19 +41,23 @@ public class TestMongoStore extends DataStoreTestBase {
   public void setUp() throws Exception {
     super.setUp();
   }
-  
+
   @SuppressWarnings("unchecked")
   @Override
-  protected DataStore<String, Employee> createEmployeeDataStore() throws IOException {
-    return DataStoreFactory.getDataStore(MongoStore.class, String.class, Employee.class, conf);
+  protected DataStore<String, Employee> createEmployeeDataStore()
+      throws IOException {
+    return DataStoreFactory.getDataStore(MongoStore.class, String.class,
+        Employee.class, conf);
   }
-  
+
   @SuppressWarnings("unchecked")
   @Override
-  protected DataStore<String, WebPage> createWebPageDataStore() throws IOException {
-    return DataStoreFactory.getDataStore(MongoStore.class, String.class, WebPage.class, conf);
+  protected DataStore<String, WebPage> createWebPageDataStore()
+      throws IOException {
+    return DataStoreFactory.getDataStore(MongoStore.class, String.class,
+        WebPage.class, conf);
   }
-  
+
   public GoraMongodbTestDriver getTestDriver() {
     return (GoraMongodbTestDriver) testDriver;
   }
@@ -61,32 +65,26 @@ public class TestMongoStore extends DataStoreTestBase {
   @Ignore("Skip until GORA-66 is fixed: need better semantic for end/start keys")
   @Override
   public void testDeleteByQueryFields() throws IOException {
-      // Skip until GORA-66 is fixed: need better semantic for end/start keys
+    // Skip until GORA-66 is fixed: need better semantic for end/start keys
   }
 
   @Ignore("Skip until GORA-66 is fixed: need better semantic for end/start keys")
   @Override
   public void testQueryKeyRange() throws IOException, Exception {
-      // Skip until GORA-66 is fixed: need better semantic for end/start keys
+    // Skip until GORA-66 is fixed: need better semantic for end/start keys
   }
 
   @Ignore("MongoStore doesn't support 3 types union field yet")
   @Override
   public void testGet3UnionField() throws IOException, Exception {
-      // MongoStore doesn't support 3 types union field yet
+    // MongoStore doesn't support 3 types union field yet
   }
 
-  @Ignore("DataStoreTestUtil.testUpdateWebPage use webPage.getOutlinks().clear() but this don't update StateManager !")
-  @Override
-  public void testUpdate() throws IOException, Exception {
-     // DataStoreTestUtil.testUpdateWebPage use webPage.getOutlinks().clear() but this don't update StateManager !
-  }
-  
-  public static void main (String[] args) throws Exception {
+  public static void main(String[] args) throws Exception {
     TestMongoStore test = new TestMongoStore();
     TestMongoStore.setUpClass();
     test.setUp();
-    
+
     test.tearDown();
     TestMongoStore.tearDownClass();
   }
