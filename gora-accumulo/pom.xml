@@ -33,11 +33,6 @@
     	<name>The Apache Software Foundation</name>
     	<url>http://www.apache.org/</url>
     </organization>
-    <scm>
-    	<url>http://svn.apache.org/viewvc/gora/trunk/gora-accumulo/</url>
-    	<connection>scm:svn:http://svn.apache.org/repos/asf/gora/trunk/gora-accumulo/</connection>
-    	<developerConnection>scm:svn:https://svn.apache.org/repos/asf/gora/trunk/gora-accumulo/</developerConnection>
-    </scm>
     <issueManagement>
     	<system>JIRA</system>
     	<url>https://issues.apache.org/jira/browse/GORA</url>
