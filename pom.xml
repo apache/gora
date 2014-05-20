@@ -241,15 +241,9 @@
   </mailingLists>
        
   <scm>
-<<<<<<< HEAD
-    <connection>scm:svn:http://svn.apache.org/repos/asf/gora/trunk/</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/gora/trunk/</developerConnection>
-    <url>http://svn.apache.org/viewvc/gora/trunk/</url>
-=======
     <connection>scm:git:http://git-wip-us.apache.org/repos/asf/gora.git</connection>
     <developerConnection>scm:git:http://git-wip-us.apache.org/repos/asf/gora.git</developerConnection>
     <url>https://git-wip-us.apache.org/repos/asf/gora.git</url>
->>>>>>> upstream/master
   </scm>
   <issueManagement>
     <system>JIRA</system>
