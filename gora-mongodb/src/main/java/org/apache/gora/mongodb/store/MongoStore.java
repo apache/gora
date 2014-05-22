@@ -345,8 +345,12 @@ public class MongoStore<K, T extends PersistentBase> extends
     // Prepare the MongoDB query
     BasicDBObject q = new BasicDBObject("_id", key);
     BasicDBObject proj = new BasicDBObject();
-    for (String field : fields)
-      proj.put(mapping.getDocumentField(field), true);
+    for (String field : fields) {
+      final String docf = mapping.getDocumentField(field);
+      if (docf != null) {
+        proj.put(docf, true);
+      }
+    }
     // Execute the query
     DBObject res = mongoClientColl.findOne(q, proj);
     // Build the corresponding persistent and clears its states
@@ -528,11 +532,7 @@ public class MongoStore<K, T extends PersistentBase> extends
     for (String f : fields) {
       // Check the field exists in the mapping and in the db
       String docf = mapping.getDocumentField(f);
-      if (docf == null) {
-        throw new RuntimeException("Mongo mapping for field [" + f
-            + "] not found. " + "Wrong gora-mongo-mapping.xml?");
-      }
-      if (!easybson.containsField(docf))
+      if (docf == null || !easybson.containsField(docf))
         continue;
 
       DocumentFieldType storeType = mapping.getDocumentFieldType(docf);
