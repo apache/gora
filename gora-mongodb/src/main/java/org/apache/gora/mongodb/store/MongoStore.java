@@ -689,13 +689,11 @@ public class MongoStore<K, T extends PersistentBase> extends
       if (!type0.equals(type1)
           && (type0.equals(Type.NULL) || type1.equals(Type.NULL))) {
         Schema innerSchema = fieldSchema.getTypes().get(1);
-        DocumentFieldType innerStoreType = mapping
-            .getDocumentFieldType(innerSchema.getName());
         LOG.debug(
             "Load from DBObject (UNION), schemaType:{}, docField:{}, storeType:{}",
-            new Object[] { innerSchema.getType(), docf, innerStoreType });
-        result = fromDBObject(innerSchema, innerStoreType, field, docf,
-            easybson); // Deserialize as if schema was ["type"]
+            new Object[] { innerSchema.getType(), docf, storeType });
+        // Deserialize as if schema was ["type"]
+        result = fromDBObject(innerSchema, storeType, field, docf, easybson);
       } else {
         throw new IllegalStateException(
             "MongoStore doesn't support 3 types union field yet. Please update your mapping");
@@ -937,16 +935,11 @@ public class MongoStore<K, T extends PersistentBase> extends
       if (!type0.equals(type1)
           && (type0.equals(Schema.Type.NULL) || type1.equals(Schema.Type.NULL))) {
         Schema innerSchema = fieldSchema.getTypes().get(1);
-        DocumentFieldType innerStoreType = mapping
-            .getDocumentFieldType(innerSchema.getName());
         LOG.debug(
             "Transform value to DBObject (UNION), schemaType:{}, type1:{}, storeType:{}",
-            new Object[] { innerSchema.getType(), type1, innerStoreType });
-        result = toDBObject(innerSchema, type1, innerStoreType, value); // Deserialize
-                                                                        // as if
-                                                                        // schema
-                                                                        // was
-                                                                        // ["type"]
+            new Object[] { innerSchema.getType(), type1, storeType });
+        // Deserialize as if schema was ["type"]
+        result = toDBObject(innerSchema, type1, storeType, value);
       } else {
         throw new IllegalStateException(
             "MongoStore doesn't support 3 types union field yet. Please update your mapping");
