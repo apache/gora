@@ -539,19 +539,17 @@ public class MongoStore<K, T extends PersistentBase> extends
       if (map != null) {
         Map<Utf8, Object> rmap = new HashMap<Utf8, Object>();
         for (Entry<String, Object> e : map.entrySet()) {
-          // ensure Key decoding -> middle dots replaced with dots
-          // FIXME: better approach ?
-          String oKey = e.getKey().replace("\u00B7", ".");
-
+          String mKey = decodeFieldKey(e.getKey());
+          Object mValue = e.getValue();
           switch (fieldSchema.getValueType().getType()) {
           case STRING:
-            rmap.put(new Utf8(oKey), new Utf8((String) e.getValue()));
+            rmap.put(new Utf8(mKey), new Utf8((String) mValue));
             break;
           case BYTES:
-            rmap.put(new Utf8(oKey), ByteBuffer.wrap((byte[]) e.getValue()));
+            rmap.put(new Utf8(mKey), ByteBuffer.wrap((byte[]) mValue));
             break;
           default:
-            rmap.put(new Utf8(oKey), e.getValue());
+            rmap.put(new Utf8(mKey), mValue);
             break;
           }
         }
@@ -604,7 +602,7 @@ public class MongoStore<K, T extends PersistentBase> extends
             "Load from DBObject (RECORD), field:{}, schemaType:{}, docField:{}, storeType:{}",
             new Object[] { recField.name(), innerSchema.getType(), fieldPath,
                 innerStoreType });
-        ((PersistentBase) record).put(
+        record.put(
             recField.pos(),
             fromDBObject(innerSchema, innerStoreType, recField, innerDocField,
                 innerBson));
@@ -900,17 +898,17 @@ public class MongoStore<K, T extends PersistentBase> extends
     // Handle regular cases
     BasicDBObject map = new BasicDBObject();
     for (Entry<CharSequence, ?> e : jmap.entrySet()) {
-      // ensure Key encoding -> dots replaced with middle dot
-      // FIXME: better approach ?
-      String vKey = e.getKey().toString().replace(".", "\u00B7");
+      String mKey = encodeFieldKey(e.getKey().toString());
+      Object mValue = e.getValue();
       switch (type) {
       case STRING:
         // Beware of Utf8 not being safely serialized
-        map.put(vKey, e.getValue().toString());
+        map.put(mKey, mValue.toString());
         break;
       case BYTES:
         // Beware of ByteBuffer not being safely serialized
-        map.put(vKey, ((ByteBuffer) e.getValue()).array());
+        map.put(mKey, ((ByteBuffer) mValue).array());
+        break;
         break;
       // FIXME Record ?
       default:
@@ -957,6 +955,33 @@ public class MongoStore<K, T extends PersistentBase> extends
     return list;
   }
 
-  // //////////////////////////////////////////////////////// MAPPING BUILDER
+  // //////////////////////////////////////////////////////// CLEANUP
 
+  /**
+   * Ensure Key encoding -> dots replaced with middle dots
+   * 
+   * @param key
+   *          char with only dots.
+   * @return encoded string with "\u00B7" chars..
+   */
+  protected String encodeFieldKey(final String key) {
+    if (key == null) {
+      return null;
+    }
+    return key.replace(".", "\u00B7");
+  }
+
+  /**
+   * Ensure Key decoding -> middle dots replaced with dots
+   * 
+   * @param key
+   *          encoded string with "\u00B7" chars.
+   * @return Cleanup up char with only dots.
+   */
+  protected String decodeFieldKey(final String key) {
+    if (key == null) {
+      return null;
+    }
+    return key.replace("\u00B7", ".");
+  }
 }
