@@ -374,11 +374,7 @@ public class MongoStore<K, T extends PersistentBase> extends
   public void put(K key, T obj) {
     // Save the object in the database
     if (obj.isDirty()) {
-      putUpdate(key, obj);
-      // TODO: why is Nutch marking objects as new ?
-      // putInsert(key, obj);
-      // else if ( obj.isDirty() )
-      // putUpdate(key, obj);
+      performPut(key, obj);
     } else {
       LOG.info("Ignored putting object {} in the store as it is neither "
           + "new, neither dirty.", new Object[] { obj });
@@ -396,7 +392,7 @@ public class MongoStore<K, T extends PersistentBase> extends
    * @param obj
    *          the object to be inserted
    */
-  private void putUpdate(K key, T obj) {
+  private void performPut(K key, T obj) {
     // Build the query to select the object to be updated
     DBObject qSel = new BasicDBObject("_id", key);
 
@@ -420,22 +416,6 @@ public class MongoStore<K, T extends PersistentBase> extends
     } else {
       LOG.debug("No update to perform, skip {}", key);
     }
-  }
-
-  /**
-   * Insert a new object into the store. The object must be new or the insert
-   * may fail.
-   * 
-   * @param key
-   *          identifier of the object in the store
-   * @param obj
-   *          the object to be inserted
-   */
-  private void putInsert(K key, T obj) {
-    // New object, insert as such
-    DBObject o = newInstance(obj);
-    o.put("_id", key);
-    mongoClientColl.insert(o);
   }
 
   @Override
@@ -710,54 +690,9 @@ public class MongoStore<K, T extends PersistentBase> extends
 
   /**
    * Build a new instance of {@link DBObject} from the persistence class
-   * instance in parameter.
-   * 
-   * @param persistent
-   *          a persistence class instance which content is to be serialized as
-   *          a {@link DBObject} to be persisted in the database
-   * @return a {@link DBObject} which content corresponds to the one of the
-   *         persistence class instance, according to the mapping
-   */
-  private DBObject newInstance(T persistent) {
-    if (persistent == null)
-      return null;
-    Schema schema = persistent.getSchema();
-    // StateManager stateManager = persistent.getStateManager();
-
-    // Create a new empty DB object
-    // BasicDBObject obj = new BasicDBObject();
-    BSONDecorator easybson = new BSONDecorator(new BasicDBObject());
-
-    // Populate fields
-    Iterator<Field> iter = schema.getFields().iterator();
-    for (int i = 0; iter.hasNext(); i++) {
-      Field field = iter.next();
-      // if (!stateManager.isDirty(persistent, i)) continue;
-
-      String docf = mapping.getDocumentField(field.name());
-      if (docf == null)
-        throw new RuntimeException("Mongo mapping for field ["
-            + persistent.getClass().getName() + "#" + field.name()
-            + "] not found. Wrong gora-mongo-mapping.xml?");
-
-      putAsMongoObject(field, easybson, docf, persistent.get(i));
-    }
-    return easybson.asDBObject();
-  }
-
-  /**
-   * Build a new instance of {@link DBObject} from the persistence class
    * instance in parameter. Limit the {@link DBObject} to the fields that are
    * dirty and not null, that is the fields that will need to be updated in the
    * store.
-   * <p/>
-   * This implementation mainly differs from the
-   * {@link MongoStore#newInstance(org.apache.gora.persistency.impl.PersistentBase)}
-   * one from two points:
-   * <ol>
-   * <li>the restriction to fields that are dirty and then need an update</li>
-   * <li>the qualification of field names as fully qualified names</li>
-   * </ol>
    * 
    * @param persistent
    *          a persistence class instance which content is to be serialized as
@@ -788,14 +723,6 @@ public class MongoStore<K, T extends PersistentBase> extends
    * instance in parameter. Limit the {@link DBObject} to the fields that are
    * dirty and null, that is the fields that will need to be updated in the
    * store by being removed.
-   * <p/>
-   * This implementation mainly differs from the
-   * {@link MongoStore#newInstance(org.apache.gora.persistency.impl.PersistentBase)}
-   * one from two points:
-   * <ol>
-   * <li>the restriction to fields that are dirty and then need an update</li>
-   * <li>the qualification of field names as fully qualified names</li>
-   * </ol>
    * 
    * @param persistent
    *          a persistence class instance which content is to be serialized as
@@ -955,103 +882,6 @@ public class MongoStore<K, T extends PersistentBase> extends
     }
 
     return result;
-  }
-
-  /**
-   * Put a key/value pair in a {@link BSONDecorator} as a valid Mongo object
-   * that will be safely serialized in base.
-   * 
-   * @param field
-   *          the original {@link Field} from which the value comes from in the
-   *          persistent instance
-   * @param easybson
-   *          the {@link BSONDecorator} where to put the key/value pair
-   * @param key
-   *          key of the field where to put the value in the Mongo object
-   * @param value
-   *          the value to be put
-   */
-  @SuppressWarnings({ "unchecked" })
-  private void putAsMongoObject(final Field field,
-      final BSONDecorator easybson, final String key, final Object value) {
-    switch (field.schema().getType()) {
-    case MAP:
-      easybson.put(
-          key,
-          toMongoMap((Map<CharSequence, ?>) value, field.schema()
-              .getValueType().getType()));
-      break;
-    case ARRAY:
-      easybson.put(
-          key,
-          toMongoList((List<?>) value, field.schema().getElementType()
-              .getType()));
-      break;
-    case BYTES:
-      // Beware of ByteBuffer not being safely serialized
-      if (value != null)
-        easybson.put(key, ((ByteBuffer) value).array());
-      break;
-    case STRING:
-      // Beware of Utf8 not being safely serialized
-      if (value != null)
-        easybson.put(key, value.toString());
-      break;
-    case LONG:
-    case INT:
-      easybson.put(key, value);
-      break;
-    case RECORD:
-      if (value == null)
-        break;
-      // FIXME Handle subtypes... certainly a better way to do that!
-      BasicDBObject record = new BasicDBObject();
-      for (Field member : field.schema().getFields()) {
-        Object recValue = ((PersistentBase) value).get(member.pos());
-        switch (member.schema().getType()) {
-        case MAP:
-          record.put(
-              member.name(),
-              toMongoMap((Map<CharSequence, ?>) recValue, member.schema()
-                  .getElementType().getType()));
-        case ARRAY:
-          record.put(
-              member.name(),
-              toMongoList((List<?>) recValue, member.schema().getElementType()
-                  .getType()));
-          break;
-        case LONG:
-        case INT:
-          easybson.put(key, value);
-          break;
-        case STRING:
-          if (recValue != null)
-            record.put(member.name(), recValue.toString());
-          break;
-        case BYTES:
-          if (recValue != null)
-            record.put(member.name(), ((ByteBuffer) recValue).array());
-          break;
-        case RECORD:
-          LOG.error("A record in a record! Seriously? Fuck it, it's not supported yet.");
-          break;
-        case UNION:
-          LOG.error("Union is not supported");
-          break;
-        default:
-          LOG.error("Unknown field type: " + member.schema().getType());
-          break;
-        }
-      }
-      easybson.put(key, record);
-      break;
-    case UNION:
-      LOG.error("Union is not supported");
-      break;
-    default:
-      LOG.error("Unknown field type: " + field.schema().getType());
-      break;
-    }
   }
 
   /**
