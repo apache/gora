@@ -198,9 +198,9 @@ public class MongoStore<K, T extends PersistentBase> extends
           // No server, use default
           addrs.add(new ServerAddress());
         } else {
-          final String host = paramsIterator.next();
+          String host = paramsIterator.next();
           if (paramsIterator.hasNext()) {
-            final String port = paramsIterator.next();
+            String port = paramsIterator.next();
             addrs.add(new ServerAddress(host, Integer.parseInt(port)));
           } else {
             addrs.add(new ServerAddress(host));
@@ -231,7 +231,7 @@ public class MongoStore<K, T extends PersistentBase> extends
     // Get reference to Mongo DB
     if (!mapsOfClients.containsKey(servers))
       mapsOfClients.put(servers, getClient(servers));
-    final DB db = mapsOfClients.get(servers).getDB(dbname);
+    DB db = mapsOfClients.get(servers).getDB(dbname);
     // By default, we are authenticated
     boolean auth = true;
     // If configuration contains a login + secret, try to authenticated with DB
@@ -346,7 +346,7 @@ public class MongoStore<K, T extends PersistentBase> extends
     BasicDBObject q = new BasicDBObject("_id", key);
     BasicDBObject proj = new BasicDBObject();
     for (String field : fields) {
-      final String docf = mapping.getDocumentField(field);
+      String docf = mapping.getDocumentField(field);
       if (docf != null) {
         proj.put(docf, true);
       }
@@ -354,7 +354,7 @@ public class MongoStore<K, T extends PersistentBase> extends
     // Execute the query
     DBObject res = mongoClientColl.findOne(q, proj);
     // Build the corresponding persistent and clears its states
-    final T persistent = newInstance(res, fields);
+    T persistent = newInstance(res, fields);
     if (persistent != null) {
       persistent.clearDirty();
     }
@@ -421,7 +421,7 @@ public class MongoStore<K, T extends PersistentBase> extends
   @Override
   public boolean delete(K key) {
     DBObject removeKey = new BasicDBObject("_id", key);
-    final WriteResult writeResult = mongoClientColl.remove(removeKey);
+    WriteResult writeResult = mongoClientColl.remove(removeKey);
     return writeResult != null && writeResult.getN() > 0;
   }
 
@@ -429,7 +429,7 @@ public class MongoStore<K, T extends PersistentBase> extends
   public long deleteByQuery(Query<K, T> query) {
     // Build the actual MongoDB query
     DBObject q = MongoDBQuery.toDBQuery(query);
-    final WriteResult writeResult = mongoClientColl.remove(q);
+    WriteResult writeResult = mongoClientColl.remove(q);
     if (writeResult != null) {
       return writeResult.getN();
     }
@@ -632,11 +632,11 @@ public class MongoStore<K, T extends PersistentBase> extends
       if (storeType == DocumentFieldType.OBJECTID) {
         // Try auto-conversion of BSON data to ObjectId
         // It will work if data is stored as String or as ObjectId
-        final Object bin = easybson.get(docf);
-        final ObjectId id = ObjectId.massageToObjectId(bin);
+        Object bin = easybson.get(docf);
+        ObjectId id = ObjectId.massageToObjectId(bin);
         result = new Utf8(id.toString());
       } else if (storeType == DocumentFieldType.DATE) {
-        final Object bin = easybson.get(docf);
+        Object bin = easybson.get(docf);
         if (bin instanceof Date) {
           Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
           calendar.setTime((Date) bin);
