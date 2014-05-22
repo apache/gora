@@ -416,6 +416,7 @@ public class MongoStore<K, T extends PersistentBase> extends
     // Execute the update (if there is at least one $set ot $unset
     if (!qUpdate.isEmpty()) {
       mongoClientColl.update(qSel, qUpdate, true, false);
+      obj.clearDirty();
     } else {
       LOG.debug("No update to perform, skip {}", key);
     }
