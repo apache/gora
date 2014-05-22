@@ -274,7 +274,7 @@ public class MongoStore<K, T extends PersistentBase> extends
     // If initialized create the collection
     mongoClientColl = mongoClientDB.createCollection(
         mapping.getCollectionName(), new BasicDBObject()); // send a DBObject to
-                                                           // force creation
+    // force creation
     // otherwise creation is deferred
     mongoClientColl.setDBEncoderFactory(GoraDBEncoder.FACTORY);
 
@@ -835,7 +835,7 @@ public class MongoStore<K, T extends PersistentBase> extends
                 + ": to store a Gora 'map', target Mongo mapping have to be of 'document' type");
       }
       Schema valueSchema = fieldSchema.getValueType();
-      result = toMongoMap((Map<Utf8, ?>) value, valueSchema.getType());
+      result = toMongoMap((Map<CharSequence, ?>) value, valueSchema.getType());
       break;
     case ARRAY:
       if (storeType != null && storeType != DocumentFieldType.LIST) {
@@ -984,8 +984,8 @@ public class MongoStore<K, T extends PersistentBase> extends
     case MAP:
       easybson.put(
           key,
-          toMongoMap((Map<Utf8, ?>) value, field.schema().getValueType()
-              .getType()));
+          toMongoMap((Map<CharSequence, ?>) value, field.schema()
+              .getValueType().getType()));
       break;
     case ARRAY:
       easybson.put(
@@ -1018,7 +1018,7 @@ public class MongoStore<K, T extends PersistentBase> extends
         case MAP:
           record.put(
               member.name(),
-              toMongoMap((Map<Utf8, ?>) recValue, member.schema()
+              toMongoMap((Map<CharSequence, ?>) recValue, member.schema()
                   .getElementType().getType()));
         case ARRAY:
           record.put(
@@ -1071,13 +1071,13 @@ public class MongoStore<K, T extends PersistentBase> extends
    * @return a {@link BasicDBObject} version of the {@link Map} that can be
    *         safely serialized into MongoDB.
    */
-  private BasicDBObject toMongoMap(Map<Utf8, ?> jmap, Type type) {
+  private BasicDBObject toMongoMap(Map<CharSequence, ?> jmap, Type type) {
     // Handle null case
     if (jmap == null)
       return null;
     // Handle regular cases
     BasicDBObject map = new BasicDBObject();
-    for (Entry<Utf8, ?> e : jmap.entrySet()) {
+    for (Entry<CharSequence, ?> e : jmap.entrySet()) {
       // ensure Key encoding -> dots replaced with middle dot
       // FIXME: better approach ?
       String vKey = e.getKey().toString().replace(".", "\u00B7");
