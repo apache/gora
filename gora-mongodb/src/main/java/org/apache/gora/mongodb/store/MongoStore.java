@@ -378,8 +378,6 @@ public class MongoStore<K, T extends PersistentBase> extends
     } else {
       LOG.info("Ignored putting object {} in the store as it is neither "
           + "new, neither dirty.", new Object[] { obj });
-      // Clear its state
-      obj.clearDirty();
     }
   }
 
