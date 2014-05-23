@@ -791,7 +791,6 @@ public class MongoStore<K, T extends PersistentBase> extends
       result = listToMongo((List<?>) value, elementSchema.getType());
       break;
     case BYTES:
-      // Beware of ByteBuffer not being safely serialized
       if (value != null) {
         result = ((ByteBuffer) value).array();
       }
@@ -807,7 +806,6 @@ public class MongoStore<K, T extends PersistentBase> extends
       result = stringToMongo(fieldSchema, storeType, value);
       break;
     case ENUM:
-      // Beware of Utf8 not being safely serialized
       if (value != null)
         result = value.toString();
       break;
@@ -900,7 +898,6 @@ public class MongoStore<K, T extends PersistentBase> extends
         result = calendar.getTime();
       }
     } else {
-      // Beware of Utf8 not being safely serialized
       if (value != null) {
         result = value.toString();
       }
@@ -930,11 +927,9 @@ public class MongoStore<K, T extends PersistentBase> extends
       Object mValue = e.getValue();
       switch (type) {
       case STRING:
-        // Beware of Utf8 not being safely serialized
         map.put(mKey, mValue.toString());
         break;
       case BYTES:
-        // Beware of ByteBuffer not being safely serialized
         map.put(mKey, ((ByteBuffer) mValue).array());
         break;
       // FIXME Record ?
@@ -966,11 +961,9 @@ public class MongoStore<K, T extends PersistentBase> extends
     for (Object item : array) {
       switch (type) {
       case STRING:
-        // Beware of Utf8 not being safely serialized
         list.add(item.toString());
         break;
       case BYTES:
-        // Beware of ByteBuffer not being safely serialized
         list.add(((ByteBuffer) item).array());
         break;
       // FIXME Record ?
