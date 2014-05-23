@@ -126,8 +126,8 @@ public class MongoStore<K, T extends PersistentBase> extends
    * Initialize the data store by reading the credentials, setting the client's
    * properties up and reading the mapping file.
    */
-  public void initialize(Class<K> keyClass, Class<T> pPersistentClass,
-      Properties properties) {
+  public void initialize(final Class<K> keyClass,
+      final Class<T> pPersistentClass, final Properties properties) {
     try {
       LOG.debug("Initializing MongoDB store");
 
@@ -182,7 +182,8 @@ public class MongoStore<K, T extends PersistentBase> extends
    * @return a {@link Mongo} instance connected to the server
    * @throws UnknownHostException
    */
-  private MongoClient getClient(String servers) throws UnknownHostException {
+  private MongoClient getClient(final String servers)
+      throws UnknownHostException {
     // Configure options
     MongoClientOptions opts = new MongoClientOptions.Builder()
         .dbEncoderFactory(GoraDBEncoder.FACTORY) // Utf8 serialization!
@@ -225,8 +226,8 @@ public class MongoStore<K, T extends PersistentBase> extends
    * @return a {@link DB} instance from <tt>mongoClient</tt> or null if
    *         authentication request failed.
    */
-  private DB getDB(String servers, String dbname, String login, String secret)
-      throws UnknownHostException {
+  private DB getDB(final String servers, final String dbname,
+      final String login, final String secret) throws UnknownHostException {
 
     // Get reference to Mongo DB
     if (!mapsOfClients.containsKey(servers))
@@ -255,7 +256,8 @@ public class MongoStore<K, T extends PersistentBase> extends
   }
 
   @Override
-  public String getSchemaName(String mappingSchemaName, Class<?> persistentClass) {
+  public String getSchemaName(final String mappingSchemaName,
+      final Class<?> persistentClass) {
     return super.getSchemaName(mappingSchemaName, persistentClass);
   }
 
@@ -340,12 +342,12 @@ public class MongoStore<K, T extends PersistentBase> extends
    * @throws IOException
    */
   @Override
-  public T get(K key, String[] fields) {
-    fields = getFieldsToQuery(fields);
+  public T get(final K key, final String[] fields) {
+    String[] dbFields = getFieldsToQuery(fields);
     // Prepare the MongoDB query
     BasicDBObject q = new BasicDBObject("_id", key);
     BasicDBObject proj = new BasicDBObject();
-    for (String field : fields) {
+    for (String field : dbFields) {
       String docf = mapping.getDocumentField(field);
       if (docf != null) {
         proj.put(docf, true);
@@ -354,7 +356,7 @@ public class MongoStore<K, T extends PersistentBase> extends
     // Execute the query
     DBObject res = mongoClientColl.findOne(q, proj);
     // Build the corresponding persistent and clears its states
-    T persistent = newInstance(res, fields);
+    T persistent = newInstance(res, dbFields);
     if (persistent != null) {
       persistent.clearDirty();
     }
@@ -371,7 +373,7 @@ public class MongoStore<K, T extends PersistentBase> extends
    *          the object to be inserted
    */
   @Override
-  public void put(K key, T obj) {
+  public void put(final K key, final T obj) {
     // Save the object in the database
     if (obj.isDirty()) {
       performPut(key, obj);
@@ -390,7 +392,7 @@ public class MongoStore<K, T extends PersistentBase> extends
    * @param obj
    *          the object to be inserted
    */
-  private void performPut(K key, T obj) {
+  private void performPut(final K key, final T obj) {
     // Build the query to select the object to be updated
     DBObject qSel = new BasicDBObject("_id", key);
 
@@ -417,14 +419,14 @@ public class MongoStore<K, T extends PersistentBase> extends
   }
 
   @Override
-  public boolean delete(K key) {
+  public boolean delete(final K key) {
     DBObject removeKey = new BasicDBObject("_id", key);
     WriteResult writeResult = mongoClientColl.remove(removeKey);
     return writeResult != null && writeResult.getN() > 0;
   }
 
   @Override
-  public long deleteByQuery(Query<K, T> query) {
+  public long deleteByQuery(final Query<K, T> query) {
     // Build the actual MongoDB query
     DBObject q = MongoDBQuery.toDBQuery(query);
     WriteResult writeResult = mongoClientColl.remove(q);
@@ -438,7 +440,7 @@ public class MongoStore<K, T extends PersistentBase> extends
    * Execute the query and return the result.
    */
   @Override
-  public Result<K, T> execute(Query<K, T> query) {
+  public Result<K, T> execute(final Query<K, T> query) {
 
     String[] fields = getFieldsToQuery(query.getFields());
     // Build the actual MongoDB query
@@ -473,7 +475,7 @@ public class MongoStore<K, T extends PersistentBase> extends
    * will execute on local data.
    */
   @Override
-  public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query)
+  public List<PartitionQuery<K, T>> getPartitions(final Query<K, T> query)
       throws IOException {
     // FIXME: for now, there is only one partition as we do not handle
     // MongoDB sharding configuration
@@ -499,16 +501,16 @@ public class MongoStore<K, T extends PersistentBase> extends
    *         the {@link DBObject}
    * @throws IOException
    */
-  public T newInstance(DBObject obj, String[] fields) {
+  public T newInstance(final DBObject obj, final String[] fields) {
     if (obj == null)
       return null;
     BSONDecorator easybson = new BSONDecorator(obj);
     // Create new empty persistent bean instance
     T persistent = newPersistent();
-    fields = getFieldsToQuery(fields);
+    String[] dbFields = getFieldsToQuery(fields);
 
     // Populate each field
-    for (String f : fields) {
+    for (String f : dbFields) {
       // Check the field exists in the mapping and in the db
       String docf = mapping.getDocumentField(f);
       if (docf == null || !easybson.containsField(docf))
@@ -549,32 +551,10 @@ public class MongoStore<K, T extends PersistentBase> extends
     case RECORD:
       DBObject rec = easybson.getDBObject(docf);
       if (rec == null) {
-        return result;
+        result = null;
+        break;
       }
-      BSONDecorator innerBson = new BSONDecorator(rec);
-      Class<?> clazz = null;
-      try {
-        clazz = ClassLoadingUtils.loadClass(fieldSchema.getFullName());
-      } catch (ClassNotFoundException e) {
-      }
-      Persistent record = new BeanFactoryImpl(keyClass, clazz).newPersistent();
-      for (Field recField : fieldSchema.getFields()) {
-        Schema innerSchema = recField.schema();
-        DocumentFieldType innerStoreType = mapping
-            .getDocumentFieldType(innerSchema.getName());
-        String innerDocField = mapping.getDocumentField(recField.name()) != null ? mapping
-            .getDocumentField(recField.name()) : recField.name();
-        String fieldPath = docf + "." + innerDocField;
-        LOG.debug(
-            "Load from DBObject (RECORD), field:{}, schemaType:{}, docField:{}, storeType:{}",
-            new Object[] { recField.name(), innerSchema.getType(), fieldPath,
-                innerStoreType });
-        record.put(
-            recField.pos(),
-            fromDBObject(innerSchema, innerStoreType, recField, innerDocField,
-                innerBson));
-      }
-      result = record;
+      result = fromMongoRecord(fieldSchema, docf, rec);
       break;
     case BOOLEAN:
       result = easybson.getBoolean(docf);
@@ -606,24 +586,7 @@ public class MongoStore<K, T extends PersistentBase> extends
       result = null;
       break;
     case UNION:
-      // schema [type0, type1]
-      Type type0 = fieldSchema.getTypes().get(0).getType();
-      Type type1 = fieldSchema.getTypes().get(1).getType();
-
-      // Check if types are different and there's a "null", like ["null","type"]
-      // or ["type","null"]
-      if (!type0.equals(type1)
-          && (type0.equals(Type.NULL) || type1.equals(Type.NULL))) {
-        Schema innerSchema = fieldSchema.getTypes().get(1);
-        LOG.debug(
-            "Load from DBObject (UNION), schemaType:{}, docField:{}, storeType:{}",
-            new Object[] { innerSchema.getType(), docf, storeType });
-        // Deserialize as if schema was ["type"]
-        result = fromDBObject(innerSchema, storeType, field, docf, easybson);
-      } else {
-        throw new IllegalStateException(
-            "MongoStore doesn't support 3 types union field yet. Please update your mapping");
-      }
+      result = fromMongoUnion(fieldSchema, storeType, field, docf, easybson);
       break;
     default:
       LOG.warn("Unable to read {}", docf);
@@ -632,7 +595,61 @@ public class MongoStore<K, T extends PersistentBase> extends
     return result;
   }
 
-  private Object fromMongoList(Schema fieldSchema, List<Object> list) {
+  private Object fromMongoUnion(final Schema fieldSchema,
+      final DocumentFieldType storeType, final Field field, final String docf,
+      final BSONDecorator easybson) {
+    Object result;// schema [type0, type1]
+    Type type0 = fieldSchema.getTypes().get(0).getType();
+    Type type1 = fieldSchema.getTypes().get(1).getType();
+
+    // Check if types are different and there's a "null", like ["null","type"]
+    // or ["type","null"]
+    if (!type0.equals(type1)
+        && (type0.equals(Type.NULL) || type1.equals(Type.NULL))) {
+      Schema innerSchema = fieldSchema.getTypes().get(1);
+      LOG.debug(
+          "Load from DBObject (UNION), schemaType:{}, docField:{}, storeType:{}",
+          new Object[] { innerSchema.getType(), docf, storeType });
+      // Deserialize as if schema was ["type"]
+      result = fromDBObject(innerSchema, storeType, field, docf, easybson);
+    } else {
+      throw new IllegalStateException(
+          "MongoStore doesn't support 3 types union field yet. Please update your mapping");
+    }
+    return result;
+  }
+
+  private Object fromMongoRecord(final Schema fieldSchema, final String docf,
+      final DBObject rec) {
+    Object result;
+    BSONDecorator innerBson = new BSONDecorator(rec);
+    Class<?> clazz = null;
+    try {
+      clazz = ClassLoadingUtils.loadClass(fieldSchema.getFullName());
+    } catch (ClassNotFoundException e) {
+    }
+    Persistent record = new BeanFactoryImpl(keyClass, clazz).newPersistent();
+    for (Field recField : fieldSchema.getFields()) {
+      Schema innerSchema = recField.schema();
+      DocumentFieldType innerStoreType = mapping
+          .getDocumentFieldType(innerSchema.getName());
+      String innerDocField = mapping.getDocumentField(recField.name()) != null ? mapping
+          .getDocumentField(recField.name()) : recField.name();
+      String fieldPath = docf + "." + innerDocField;
+      LOG.debug(
+          "Load from DBObject (RECORD), field:{}, schemaType:{}, docField:{}, storeType:{}",
+          new Object[] { recField.name(), innerSchema.getType(), fieldPath,
+              innerStoreType });
+      record.put(
+          recField.pos(),
+          fromDBObject(innerSchema, innerStoreType, recField, innerDocField,
+              innerBson));
+    }
+    result = record;
+    return result;
+  }
+
+  private Object fromMongoList(final Schema fieldSchema, final List<Object> list) {
     Object result;
     switch (fieldSchema.getElementType().getType()) {
     case STRING:
@@ -657,7 +674,7 @@ public class MongoStore<K, T extends PersistentBase> extends
     return result;
   }
 
-  private Object fromMongoMap(Schema fieldSchema, BasicDBObject map) {
+  private Object fromMongoMap(final Schema fieldSchema, final BasicDBObject map) {
     Object result;
     Map<Utf8, Object> rmap = new HashMap<Utf8, Object>();
     for (Entry<String, Object> e : map.entrySet()) {
@@ -718,7 +735,7 @@ public class MongoStore<K, T extends PersistentBase> extends
    *         have to be updated... and formatted to be passed in parameter of a
    *         $set operator
    */
-  private BasicDBObject newUpdateSetInstance(T persistent) {
+  private BasicDBObject newUpdateSetInstance(final T persistent) {
     BasicDBObject result = new BasicDBObject();
     for (Field f : persistent.getSchema().getFields()) {
       if (persistent.isDirty(f.pos()) && (persistent.get(f.pos()) != null)) {
@@ -748,7 +765,7 @@ public class MongoStore<K, T extends PersistentBase> extends
    *         have to be updated... and formated to be passed in parameter of a
    *         $unset operator
    */
-  private BasicDBObject newUpdateUnsetInstance(T persistent) {
+  private BasicDBObject newUpdateUnsetInstance(final T persistent) {
     BasicDBObject result = new BasicDBObject();
     for (Field f : persistent.getSchema().getFields()) {
       if (persistent.isDirty(f.pos()) && (persistent.get(f.pos()) == null)) {
@@ -766,8 +783,8 @@ public class MongoStore<K, T extends PersistentBase> extends
     return result;
   }
 
-  private Object toDBObject(Schema fieldSchema, Type fieldType,
-      DocumentFieldType storeType, Object value) {
+  private Object toDBObject(final Schema fieldSchema, final Type fieldType,
+      final DocumentFieldType storeType, final Object value) {
     Object result = null;
     switch (fieldType) {
     case MAP:
@@ -812,41 +829,10 @@ public class MongoStore<K, T extends PersistentBase> extends
     case RECORD:
       if (value == null)
         break;
-      BasicDBObject record = new BasicDBObject();
-      for (Field member : fieldSchema.getFields()) {
-        Object innerValue = ((PersistentBase) value).get(member.pos());
-        String innerDoc = mapping.getDocumentField(member.name());
-        Type innerType = member.schema().getType();
-        DocumentFieldType innerStoreType = mapping
-            .getDocumentFieldType(innerDoc);
-        LOG.debug(
-            "Transform value to DBObject (RECORD), docField:{}, schemaType:{}, storeType:{}",
-            new Object[] { member.name(), member.schema().getType(),
-                innerStoreType });
-        record.put(member.name(),
-            toDBObject(member.schema(), innerType, innerStoreType, innerValue));
-      }
-      result = record;
+      result = recordToMongo(fieldSchema, value);
       break;
     case UNION:
-      // schema [type0, type1]
-      Type type0 = fieldSchema.getTypes().get(0).getType();
-      Type type1 = fieldSchema.getTypes().get(1).getType();
-
-      // Check if types are different and there's a "null", like ["null","type"]
-      // or ["type","null"]
-      if (!type0.equals(type1)
-          && (type0.equals(Schema.Type.NULL) || type1.equals(Schema.Type.NULL))) {
-        Schema innerSchema = fieldSchema.getTypes().get(1);
-        LOG.debug(
-            "Transform value to DBObject (UNION), schemaType:{}, type1:{}, storeType:{}",
-            new Object[] { innerSchema.getType(), type1, storeType });
-        // Deserialize as if schema was ["type"]
-        result = toDBObject(innerSchema, type1, storeType, value);
-      } else {
-        throw new IllegalStateException(
-            "MongoStore doesn't support 3 types union field yet. Please update your mapping");
-      }
+      result = unionToMongo(fieldSchema, storeType, value);
       break;
     case FIXED:
       result = value;
@@ -858,6 +844,47 @@ public class MongoStore<K, T extends PersistentBase> extends
     }
 
     return result;
+  }
+
+  private Object unionToMongo(final Schema fieldSchema,
+      final DocumentFieldType storeType, final Object value) {
+    Object result;// schema [type0, type1]
+    Type type0 = fieldSchema.getTypes().get(0).getType();
+    Type type1 = fieldSchema.getTypes().get(1).getType();
+
+    // Check if types are different and there's a "null", like ["null","type"]
+    // or ["type","null"]
+    if (!type0.equals(type1)
+        && (type0.equals(Type.NULL) || type1.equals(Type.NULL))) {
+      Schema innerSchema = fieldSchema.getTypes().get(1);
+      LOG.debug(
+          "Transform value to DBObject (UNION), schemaType:{}, type1:{}, storeType:{}",
+          new Object[] { innerSchema.getType(), type1, storeType });
+      // Deserialize as if schema was ["type"]
+      result = toDBObject(innerSchema, type1, storeType, value);
+    } else {
+      throw new IllegalStateException(
+          "MongoStore doesn't support 3 types union field yet. Please update your mapping");
+    }
+    return result;
+  }
+
+  private BasicDBObject recordToMongo(final Schema fieldSchema,
+      final Object value) {
+    BasicDBObject record = new BasicDBObject();
+    for (Field member : fieldSchema.getFields()) {
+      Object innerValue = ((PersistentBase) value).get(member.pos());
+      String innerDoc = mapping.getDocumentField(member.name());
+      Type innerType = member.schema().getType();
+      DocumentFieldType innerStoreType = mapping.getDocumentFieldType(innerDoc);
+      LOG.debug(
+          "Transform value to DBObject (RECORD), docField:{}, schemaType:{}, storeType:{}",
+          new Object[] { member.name(), member.schema().getType(),
+              innerStoreType });
+      record.put(member.name(),
+          toDBObject(member.schema(), innerType, innerStoreType, innerValue));
+    }
+    return record;
   }
 
   private Object stringToMongo(final Schema fieldSchema,
@@ -916,7 +943,8 @@ public class MongoStore<K, T extends PersistentBase> extends
    * @return a {@link BasicDBObject} version of the {@link Map} that can be
    *         safely serialized into MongoDB.
    */
-  private BasicDBObject mapToMongo(Map<CharSequence, ?> jmap, Type type) {
+  private BasicDBObject mapToMongo(final Map<CharSequence, ?> jmap,
+      final Type type) {
     // Handle null case
     if (jmap == null)
       return null;
@@ -952,7 +980,7 @@ public class MongoStore<K, T extends PersistentBase> extends
    * @return a {@link BasicDBList} version of the {@link GenericArray} that can
    *         be safely serialized into MongoDB.
    */
-  private BasicDBList listToMongo(Collection<?> array, Type type) {
+  private BasicDBList listToMongo(final Collection<?> array, final Type type) {
     // Handle null case
     if (array == null)
       return null;
