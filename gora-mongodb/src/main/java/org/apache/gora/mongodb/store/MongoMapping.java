@@ -17,11 +17,17 @@
  */
 package org.apache.gora.mongodb.store;
 
+import static org.apache.gora.mongodb.store.MongoMapping.DocumentFieldType.DOCUMENT;
+import static org.apache.gora.mongodb.store.MongoMapping.DocumentFieldType.LIST;
+import static org.apache.gora.mongodb.store.MongoMapping.DocumentFieldType.valueOf;
+
 import java.util.HashMap;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * @author Fabien Poulard <fpoulard@dictanova.com>
@@ -114,7 +120,8 @@ public class MongoMapping {
       // Check field exists or not and is of valid type
       String intermediateFieldName = partialFieldName.toString();
       if (documentFields.containsKey(intermediateFieldName)) {
-        if (documentFields.get(intermediateFieldName) != DocumentFieldType.DOCUMENT)
+        if (!ImmutableList.of(DOCUMENT, LIST).contains(
+            documentFields.get(intermediateFieldName)))
           throw new IllegalStateException("The field '" + intermediateFieldName
               + "' is already registered in "
               + "a type not compatible with the new definition of " + "field '"
@@ -164,8 +171,7 @@ public class MongoMapping {
       String docFieldName, String fieldType) {
     try {
       // Register a new field for the mongo document
-      newDocumentField(docFieldName,
-          DocumentFieldType.valueOf(fieldType.toUpperCase()));
+      newDocumentField(docFieldName, valueOf(fieldType.toUpperCase()));
     } catch (final IllegalArgumentException e) {
       throw new IllegalStateException("Declared '" + fieldType
           + "' for class field '" + classFieldName

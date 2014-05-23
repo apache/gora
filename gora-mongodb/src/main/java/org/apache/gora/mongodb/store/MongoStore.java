@@ -537,46 +537,13 @@ public class MongoStore<K, T extends PersistentBase> extends
     case MAP:
       BasicDBObject map = easybson.getDBObject(docf);
       if (map != null) {
-        Map<Utf8, Object> rmap = new HashMap<Utf8, Object>();
-        for (Entry<String, Object> e : map.entrySet()) {
-          String mKey = decodeFieldKey(e.getKey());
-          Object mValue = e.getValue();
-          switch (fieldSchema.getValueType().getType()) {
-          case STRING:
-            rmap.put(new Utf8(mKey), new Utf8((String) mValue));
-            break;
-          case BYTES:
-            rmap.put(new Utf8(mKey), ByteBuffer.wrap((byte[]) mValue));
-            break;
-          default:
-            rmap.put(new Utf8(mKey), mValue);
-            break;
-          }
-        }
-        result = new DirtyMapWrapper(rmap);
+        result = fromMongoMap(fieldSchema, map);
       }
       break;
     case ARRAY:
       List<Object> list = easybson.getDBList(docf);
-      switch (fieldSchema.getElementType().getType()) {
-      case STRING:
-        List<Utf8> arrS = new ArrayList<Utf8>();
-        for (Object o : list)
-          arrS.add(new Utf8((String) o));
-        result = new DirtyListWrapper<Utf8>(arrS);
-        break;
-      case BYTES:
-        List<ByteBuffer> arrB = new ArrayList<ByteBuffer>();
-        for (Object o : list)
-          arrB.add(ByteBuffer.wrap((byte[]) o));
-        result = new DirtyListWrapper<ByteBuffer>(arrB);
-        break;
-      default:
-        List<Object> arrT = new ArrayList<Object>();
-        for (Object o : list)
-          arrT.add(o);
-        result = new DirtyListWrapper<Object>(arrT);
-        break;
+      if (list != null) {
+        result = fromMongoList(fieldSchema, list);
       }
       break;
     case RECORD:
@@ -625,24 +592,7 @@ public class MongoStore<K, T extends PersistentBase> extends
       result = easybson.getLong(docf);
       break;
     case STRING:
-      if (storeType == DocumentFieldType.OBJECTID) {
-        // Try auto-conversion of BSON data to ObjectId
-        // It will work if data is stored as String or as ObjectId
-        Object bin = easybson.get(docf);
-        ObjectId id = ObjectId.massageToObjectId(bin);
-        result = new Utf8(id.toString());
-      } else if (storeType == DocumentFieldType.DATE) {
-        Object bin = easybson.get(docf);
-        if (bin instanceof Date) {
-          Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-          calendar.setTime((Date) bin);
-          result = new Utf8(DatatypeConverter.printDateTime(calendar));
-        } else {
-          result = new Utf8(bin.toString());
-        }
-      } else {
-        result = easybson.getUtf8String(docf);
-      }
+      result = fromMongoString(storeType, docf, easybson);
       break;
     case ENUM:
       result = AvroUtils.getEnumValue(fieldSchema, easybson.getUtf8String(docf)
@@ -678,6 +628,77 @@ public class MongoStore<K, T extends PersistentBase> extends
     default:
       LOG.warn("Unable to read {}", docf);
       break;
+    }
+    return result;
+  }
+
+  private Object fromMongoList(Schema fieldSchema, List<Object> list) {
+    Object result;
+    switch (fieldSchema.getElementType().getType()) {
+    case STRING:
+      List<Utf8> arrS = new ArrayList<Utf8>();
+      for (Object o : list)
+        arrS.add(new Utf8((String) o));
+      result = new DirtyListWrapper<Utf8>(arrS);
+      break;
+    case BYTES:
+      List<ByteBuffer> arrB = new ArrayList<ByteBuffer>();
+      for (Object o : list)
+        arrB.add(ByteBuffer.wrap((byte[]) o));
+      result = new DirtyListWrapper<ByteBuffer>(arrB);
+      break;
+    default:
+      List<Object> arrT = new ArrayList<Object>();
+      for (Object o : list)
+        arrT.add(o);
+      result = new DirtyListWrapper<Object>(arrT);
+      break;
+    }
+    return result;
+  }
+
+  private Object fromMongoMap(Schema fieldSchema, BasicDBObject map) {
+    Object result;
+    Map<Utf8, Object> rmap = new HashMap<Utf8, Object>();
+    for (Entry<String, Object> e : map.entrySet()) {
+      String mKey = decodeFieldKey(e.getKey());
+      Object mValue = e.getValue();
+      switch (fieldSchema.getValueType().getType()) {
+      case STRING:
+        rmap.put(new Utf8(mKey), new Utf8((String) mValue));
+        break;
+      case BYTES:
+        rmap.put(new Utf8(mKey), ByteBuffer.wrap((byte[]) mValue));
+        break;
+      default:
+        rmap.put(new Utf8(mKey), mValue);
+        break;
+      }
+    }
+    result = new DirtyMapWrapper(rmap);
+    return result;
+  }
+
+  private Object fromMongoString(final DocumentFieldType storeType,
+      final String docf, final BSONDecorator easybson) {
+    Object result;
+    if (storeType == DocumentFieldType.OBJECTID) {
+      // Try auto-conversion of BSON data to ObjectId
+      // It will work if data is stored as String or as ObjectId
+      Object bin = easybson.get(docf);
+      ObjectId id = ObjectId.massageToObjectId(bin);
+      result = new Utf8(id.toString());
+    } else if (storeType == DocumentFieldType.DATE) {
+      Object bin = easybson.get(docf);
+      if (bin instanceof Date) {
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        calendar.setTime((Date) bin);
+        result = new Utf8(DatatypeConverter.printDateTime(calendar));
+      } else {
+        result = new Utf8(bin.toString());
+      }
+    } else {
+      result = easybson.getUtf8String(docf);
     }
     return result;
   }
@@ -757,7 +778,7 @@ public class MongoStore<K, T extends PersistentBase> extends
                 + ": to store a Gora 'map', target Mongo mapping have to be of 'document' type");
       }
       Schema valueSchema = fieldSchema.getValueType();
-      result = toMongoMap((Map<CharSequence, ?>) value, valueSchema.getType());
+      result = mapToMongo((Map<CharSequence, ?>) value, valueSchema.getType());
       break;
     case ARRAY:
       if (storeType != null && storeType != DocumentFieldType.LIST) {
@@ -767,7 +788,7 @@ public class MongoStore<K, T extends PersistentBase> extends
                 + ": To store a Gora 'array', target Mongo mapping have to be of 'list' type");
       }
       Schema elementSchema = fieldSchema.getElementType();
-      result = toMongoList((List<?>) value, elementSchema.getType());
+      result = listToMongo((List<?>) value, elementSchema.getType());
       break;
     case BYTES:
       // Beware of ByteBuffer not being safely serialized
@@ -783,46 +804,7 @@ public class MongoStore<K, T extends PersistentBase> extends
       result = value;
       break;
     case STRING:
-      if (storeType == DocumentFieldType.OBJECTID) {
-        if (value != null) {
-          ObjectId id;
-          try {
-            id = new ObjectId(value.toString());
-          } catch (IllegalArgumentException e1) {
-            // Unable to parse anything from Utf8 value, throw error
-            throw new IllegalStateException("Field " + fieldSchema.getType()
-                + ": Invalid string: unable to convert to ObjectId");
-          }
-          result = id;
-        }
-      } else if (storeType == DocumentFieldType.DATE) {
-        if (value != null) {
-          // Try to parse date from Utf8 value
-          Calendar calendar = null;
-          try {
-            // Parse as date + time
-            calendar = DatatypeConverter.parseDateTime(value.toString());
-          } catch (IllegalArgumentException e1) {
-            try {
-              // Parse as date only
-              calendar = DatatypeConverter.parseDate(value.toString());
-            } catch (IllegalArgumentException e2) {
-              // No-op
-            }
-          }
-          if (calendar == null) {
-            // Unable to parse anything from Utf8 value, throw error
-            throw new IllegalStateException("Field " + fieldSchema.getType()
-                + ": Invalid date format '" + value + "'");
-          }
-          result = calendar.getTime();
-        }
-      } else {
-        // Beware of Utf8 not being safely serialized
-        if (value != null) {
-          result = value.toString();
-        }
-      }
+      result = stringToMongo(fieldSchema, storeType, value);
       break;
     case ENUM:
       // Beware of Utf8 not being safely serialized
@@ -880,6 +862,52 @@ public class MongoStore<K, T extends PersistentBase> extends
     return result;
   }
 
+  private Object stringToMongo(final Schema fieldSchema,
+      final DocumentFieldType storeType, final Object value) {
+    Object result = null;
+    if (storeType == DocumentFieldType.OBJECTID) {
+      if (value != null) {
+        ObjectId id;
+        try {
+          id = new ObjectId(value.toString());
+        } catch (IllegalArgumentException e1) {
+          // Unable to parse anything from Utf8 value, throw error
+          throw new IllegalStateException("Field " + fieldSchema.getType()
+              + ": Invalid string: unable to convert to ObjectId");
+        }
+        result = id;
+      }
+    } else if (storeType == DocumentFieldType.DATE) {
+      if (value != null) {
+        // Try to parse date from Utf8 value
+        Calendar calendar = null;
+        try {
+          // Parse as date + time
+          calendar = DatatypeConverter.parseDateTime(value.toString());
+        } catch (IllegalArgumentException e1) {
+          try {
+            // Parse as date only
+            calendar = DatatypeConverter.parseDate(value.toString());
+          } catch (IllegalArgumentException e2) {
+            // No-op
+          }
+        }
+        if (calendar == null) {
+          // Unable to parse anything from Utf8 value, throw error
+          throw new IllegalStateException("Field " + fieldSchema.getType()
+              + ": Invalid date format '" + value + "'");
+        }
+        result = calendar.getTime();
+      }
+    } else {
+      // Beware of Utf8 not being safely serialized
+      if (value != null) {
+        result = value.toString();
+      }
+    }
+    return result;
+  }
+
   /**
    * Convert a Java Map as used in Gora generated classes to a Map that can
    * safely be serialized into MongoDB.
@@ -891,7 +919,7 @@ public class MongoStore<K, T extends PersistentBase> extends
    * @return a {@link BasicDBObject} version of the {@link Map} that can be
    *         safely serialized into MongoDB.
    */
-  private BasicDBObject toMongoMap(Map<CharSequence, ?> jmap, Type type) {
+  private BasicDBObject mapToMongo(Map<CharSequence, ?> jmap, Type type) {
     // Handle null case
     if (jmap == null)
       return null;
@@ -909,10 +937,9 @@ public class MongoStore<K, T extends PersistentBase> extends
         // Beware of ByteBuffer not being safely serialized
         map.put(mKey, ((ByteBuffer) mValue).array());
         break;
-        break;
       // FIXME Record ?
       default:
-        map.put(vKey, e.getValue());
+        map.put(mKey, e.getValue());
         break;
       }
     }
@@ -930,7 +957,7 @@ public class MongoStore<K, T extends PersistentBase> extends
    * @return a {@link BasicDBList} version of the {@link GenericArray} that can
    *         be safely serialized into MongoDB.
    */
-  private BasicDBList toMongoList(Collection<?> array, Type type) {
+  private BasicDBList listToMongo(Collection<?> array, Type type) {
     // Handle null case
     if (array == null)
       return null;
