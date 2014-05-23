@@ -537,16 +537,10 @@ public class MongoStore<K, T extends PersistentBase> extends
     Object result = null;
     switch (fieldSchema.getType()) {
     case MAP:
-      BasicDBObject map = easybson.getDBObject(docf);
-      if (map != null) {
-        result = fromMongoMap(fieldSchema, map);
-      }
+      result = fromMongoMap(docf, fieldSchema, easybson, field);
       break;
     case ARRAY:
-      List<Object> list = easybson.getDBList(docf);
-      if (list != null) {
-        result = fromMongoList(fieldSchema, list);
-      }
+      result = fromMongoList(docf, fieldSchema, easybson, field);
       break;
     case RECORD:
       DBObject rec = easybson.getDBObject(docf);
@@ -649,51 +643,41 @@ public class MongoStore<K, T extends PersistentBase> extends
     return result;
   }
 
-  private Object fromMongoList(final Schema fieldSchema, final List<Object> list) {
-    Object result;
-    switch (fieldSchema.getElementType().getType()) {
-    case STRING:
-      List<Utf8> arrS = new ArrayList<Utf8>();
-      for (Object o : list)
-        arrS.add(new Utf8((String) o));
-      result = new DirtyListWrapper<Utf8>(arrS);
-      break;
-    case BYTES:
-      List<ByteBuffer> arrB = new ArrayList<ByteBuffer>();
-      for (Object o : list)
-        arrB.add(ByteBuffer.wrap((byte[]) o));
-      result = new DirtyListWrapper<ByteBuffer>(arrB);
-      break;
-    default:
-      List<Object> arrT = new ArrayList<Object>();
-      for (Object o : list)
-        arrT.add(o);
-      result = new DirtyListWrapper<Object>(arrT);
-      break;
+  private Object fromMongoList(final String docf, final Schema fieldSchema,
+      final BSONDecorator easybson, final Field f) {
+    List<Object> list = easybson.getDBList(docf);
+    if (list == null) {
+      return null;
     }
-    return result;
+
+    List<Object> rlist = new ArrayList<Object>();
+
+    for (Object item : list) {
+      DocumentFieldType storeType = mapping.getDocumentFieldType(docf);
+      Object o = fromDBObject(fieldSchema.getElementType(), storeType, f,
+          "item", new BSONDecorator(new BasicDBObject("item", item)));
+      rlist.add(o);
+    }
+    return new DirtyListWrapper(rlist);
   }
 
-  private Object fromMongoMap(final Schema fieldSchema, final BasicDBObject map) {
-    Object result;
+  private Object fromMongoMap(final String docf, final Schema fieldSchema,
+      final BSONDecorator easybson, final Field f) {
+    BasicDBObject map = easybson.getDBObject(docf);
+    if (map == null) {
+      return null;
+    }
     Map<Utf8, Object> rmap = new HashMap<Utf8, Object>();
     for (Entry<String, Object> e : map.entrySet()) {
-      String mKey = decodeFieldKey(e.getKey());
-      Object mValue = e.getValue();
-      switch (fieldSchema.getValueType().getType()) {
-      case STRING:
-        rmap.put(new Utf8(mKey), new Utf8((String) mValue));
-        break;
-      case BYTES:
-        rmap.put(new Utf8(mKey), ByteBuffer.wrap((byte[]) mValue));
-        break;
-      default:
-        rmap.put(new Utf8(mKey), mValue);
-        break;
-      }
+      String mapKey = e.getKey();
+      String decodedMapKey = decodeFieldKey(mapKey);
+
+      DocumentFieldType storeType = mapping.getDocumentFieldType(docf);
+      Object o = fromDBObject(fieldSchema.getValueType(), storeType, f, mapKey,
+          new BSONDecorator(map));
+      rmap.put(new Utf8(decodedMapKey), o);
     }
-    result = new DirtyMapWrapper(rmap);
-    return result;
+    return new DirtyMapWrapper(rmap);
   }
 
   private Object fromMongoString(final DocumentFieldType storeType,
@@ -745,8 +729,9 @@ public class MongoStore<K, T extends PersistentBase> extends
         LOG.debug(
             "Transform value to DBObject (MAIN), docField:{}, schemaType:{}, storeType:{}",
             new Object[] { docf, f.schema().getType(), storeType });
-        result.put(docf,
-            toDBObject(f.schema(), f.schema().getType(), storeType, value));
+        Object o = toDBObject(docf, f.schema(), f.schema().getType(),
+            storeType, value);
+        result.put(docf, o);
       }
     }
     return result;
@@ -775,16 +760,17 @@ public class MongoStore<K, T extends PersistentBase> extends
         LOG.debug(
             "Transform value to DBObject (MAIN), docField:{}, schemaType:{}, storeType:{}",
             new Object[] { docf, f.schema().getType(), storeType });
-        Object o = toDBObject(f.schema(), f.schema().getType(), storeType,
-            value);
+        Object o = toDBObject(docf, f.schema(), f.schema().getType(),
+            storeType, value);
         result.put(docf, o);
       }
     }
     return result;
   }
 
-  private Object toDBObject(final Schema fieldSchema, final Type fieldType,
-      final DocumentFieldType storeType, final Object value) {
+  private Object toDBObject(final String docf, final Schema fieldSchema,
+      final Type fieldType, final DocumentFieldType storeType,
+      final Object value) {
     Object result = null;
     switch (fieldType) {
     case MAP:
@@ -795,7 +781,8 @@ public class MongoStore<K, T extends PersistentBase> extends
                 + ": to store a Gora 'map', target Mongo mapping have to be of 'document' type");
       }
       Schema valueSchema = fieldSchema.getValueType();
-      result = mapToMongo((Map<CharSequence, ?>) value, valueSchema.getType());
+      result = mapToMongo(docf, (Map<CharSequence, ?>) value, valueSchema,
+          valueSchema.getType());
       break;
     case ARRAY:
       if (storeType != null && storeType != DocumentFieldType.LIST) {
@@ -805,7 +792,8 @@ public class MongoStore<K, T extends PersistentBase> extends
                 + ": To store a Gora 'array', target Mongo mapping have to be of 'list' type");
       }
       Schema elementSchema = fieldSchema.getElementType();
-      result = listToMongo((List<?>) value, elementSchema.getType());
+      result = listToMongo(docf, (List<?>) value, elementSchema,
+          elementSchema.getType());
       break;
     case BYTES:
       if (value != null) {
@@ -829,24 +817,24 @@ public class MongoStore<K, T extends PersistentBase> extends
     case RECORD:
       if (value == null)
         break;
-      result = recordToMongo(fieldSchema, value);
+      result = recordToMongo(docf, fieldSchema, value);
       break;
     case UNION:
-      result = unionToMongo(fieldSchema, storeType, value);
+      result = unionToMongo(docf, fieldSchema, storeType, value);
       break;
     case FIXED:
       result = value;
       break;
 
     default:
-      LOG.error("Unknown field type: " + fieldSchema.getType());
+      LOG.error("Unknown field type: {}", fieldSchema.getType());
       break;
     }
 
     return result;
   }
 
-  private Object unionToMongo(final Schema fieldSchema,
+  private Object unionToMongo(final String docf, final Schema fieldSchema,
       final DocumentFieldType storeType, final Object value) {
     Object result;// schema [type0, type1]
     Type type0 = fieldSchema.getTypes().get(0).getType();
@@ -861,7 +849,7 @@ public class MongoStore<K, T extends PersistentBase> extends
           "Transform value to DBObject (UNION), schemaType:{}, type1:{}, storeType:{}",
           new Object[] { innerSchema.getType(), type1, storeType });
       // Deserialize as if schema was ["type"]
-      result = toDBObject(innerSchema, type1, storeType, value);
+      result = toDBObject(docf, innerSchema, type1, storeType, value);
     } else {
       throw new IllegalStateException(
           "MongoStore doesn't support 3 types union field yet. Please update your mapping");
@@ -869,8 +857,8 @@ public class MongoStore<K, T extends PersistentBase> extends
     return result;
   }
 
-  private BasicDBObject recordToMongo(final Schema fieldSchema,
-      final Object value) {
+  private BasicDBObject recordToMongo(final String docf,
+      final Schema fieldSchema, final Object value) {
     BasicDBObject record = new BasicDBObject();
     for (Field member : fieldSchema.getFields()) {
       Object innerValue = ((PersistentBase) value).get(member.pos());
@@ -881,8 +869,10 @@ public class MongoStore<K, T extends PersistentBase> extends
           "Transform value to DBObject (RECORD), docField:{}, schemaType:{}, storeType:{}",
           new Object[] { member.name(), member.schema().getType(),
               innerStoreType });
-      record.put(member.name(),
-          toDBObject(member.schema(), innerType, innerStoreType, innerValue));
+      record.put(
+          member.name(),
+          toDBObject(docf, member.schema(), innerType, innerStoreType,
+              innerValue));
     }
     return record;
   }
@@ -936,36 +926,33 @@ public class MongoStore<K, T extends PersistentBase> extends
    * Convert a Java Map as used in Gora generated classes to a Map that can
    * safely be serialized into MongoDB.
    * 
-   * @param jmap
+   * @param value
    *          the Java Map that must be serialized into a MongoDB object
-   * @param type
+   * @param fieldType
    *          type of the values within the map
    * @return a {@link BasicDBObject} version of the {@link Map} that can be
    *         safely serialized into MongoDB.
    */
-  private BasicDBObject mapToMongo(final Map<CharSequence, ?> jmap,
-      final Type type) {
+  private BasicDBObject mapToMongo(final String docf,
+      final Map<CharSequence, ?> value, final Schema fieldSchema,
+      final Type fieldType) {
     // Handle null case
-    if (jmap == null)
+    if (value == null)
       return null;
+
     // Handle regular cases
     BasicDBObject map = new BasicDBObject();
-    for (Entry<CharSequence, ?> e : jmap.entrySet()) {
-      String mKey = encodeFieldKey(e.getKey().toString());
-      Object mValue = e.getValue();
-      switch (type) {
-      case STRING:
-        map.put(mKey, mValue.toString());
-        break;
-      case BYTES:
-        map.put(mKey, ((ByteBuffer) mValue).array());
-        break;
-      // FIXME Record ?
-      default:
-        map.put(mKey, e.getValue());
-        break;
-      }
+    for (Entry<CharSequence, ?> e : value.entrySet()) {
+      String mapKey = e.getKey().toString();
+      String encodedMapKey = encodeFieldKey(mapKey);
+      Object mapValue = e.getValue();
+
+      DocumentFieldType storeType = mapping.getDocumentFieldType(docf);
+      Object result = toDBObject(docf, fieldSchema, fieldType, storeType,
+          mapValue);
+      map.put(encodedMapKey, result);
     }
+
     return map;
   }
 
@@ -975,31 +962,25 @@ public class MongoStore<K, T extends PersistentBase> extends
    * 
    * @param array
    *          the {@link GenericArray} to be serialized
-   * @param type
+   * @param fieldType
    *          type of the elements within the array
    * @return a {@link BasicDBList} version of the {@link GenericArray} that can
    *         be safely serialized into MongoDB.
    */
-  private BasicDBList listToMongo(final Collection<?> array, final Type type) {
+  private BasicDBList listToMongo(final String docf, final Collection<?> array,
+      final Schema fieldSchema, final Type fieldType) {
     // Handle null case
     if (array == null)
       return null;
+
     // Handle regular cases
     BasicDBList list = new BasicDBList();
     for (Object item : array) {
-      switch (type) {
-      case STRING:
-        list.add(item.toString());
-        break;
-      case BYTES:
-        list.add(((ByteBuffer) item).array());
-        break;
-      // FIXME Record ?
-      default:
-        list.add(item);
-        break;
-      }
+      DocumentFieldType storeType = mapping.getDocumentFieldType(docf);
+      Object result = toDBObject(docf, fieldSchema, fieldType, storeType, item);
+      list.add(result);
     }
+
     return list;
   }
 
