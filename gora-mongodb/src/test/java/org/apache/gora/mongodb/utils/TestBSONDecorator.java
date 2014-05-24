@@ -15,13 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.gora.mongodb;
+package org.apache.gora.mongodb.utils;
 
 import static org.junit.Assert.*;
 
 import java.nio.ByteBuffer;
 
-import org.apache.gora.mongodb.utils.BSONDecorator;
 import org.junit.Test;
 
 import com.mongodb.BasicDBObject;
