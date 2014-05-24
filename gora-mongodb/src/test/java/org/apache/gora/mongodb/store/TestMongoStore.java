@@ -23,39 +23,33 @@ import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.mongodb.GoraMongodbTestDriver;
 import org.apache.gora.store.DataStore;
-import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.DataStoreTestBase;
-import org.apache.hadoop.conf.Configuration;
 import org.junit.Before;
 import org.junit.Ignore;
 
 public class TestMongoStore extends DataStoreTestBase {
 
-  private Configuration conf;
-
   static {
     setTestDriver(new GoraMongodbTestDriver());
+  }
+
+  @Deprecated
+  @Override
+  protected DataStore<String, Employee> createEmployeeDataStore()
+      throws IOException {
+    throw new UnsupportedOperationException();
+  }
+
+  @Deprecated
+  @Override
+  protected DataStore<String, WebPage> createWebPageDataStore()
+      throws IOException {
+    throw new UnsupportedOperationException();
   }
 
   @Before
   public void setUp() throws Exception {
     super.setUp();
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  protected DataStore<String, Employee> createEmployeeDataStore()
-      throws IOException {
-    return DataStoreFactory.getDataStore(MongoStore.class, String.class,
-        Employee.class, conf);
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  protected DataStore<String, WebPage> createWebPageDataStore()
-      throws IOException {
-    return DataStoreFactory.getDataStore(MongoStore.class, String.class,
-        WebPage.class, conf);
   }
 
   public GoraMongodbTestDriver getTestDriver() {
@@ -78,15 +72,6 @@ public class TestMongoStore extends DataStoreTestBase {
   @Override
   public void testGet3UnionField() throws IOException, Exception {
     // MongoStore doesn't support 3 types union field yet
-  }
-
-  public static void main(String[] args) throws Exception {
-    TestMongoStore test = new TestMongoStore();
-    TestMongoStore.setUpClass();
-    test.setUp();
-
-    test.tearDown();
-    TestMongoStore.tearDownClass();
   }
 
 }
