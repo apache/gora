@@ -17,9 +17,7 @@
  */
 package org.apache.gora.mongodb.store;
 
-import static org.apache.gora.mongodb.store.MongoMapping.DocumentFieldType.DOCUMENT;
-import static org.apache.gora.mongodb.store.MongoMapping.DocumentFieldType.LIST;
-import static org.apache.gora.mongodb.store.MongoMapping.DocumentFieldType.valueOf;
+import static org.apache.gora.mongodb.store.MongoMapping.DocumentFieldType.*;
 
 import java.util.HashMap;
 import java.util.regex.Pattern;
@@ -148,10 +146,6 @@ public class MongoMapping {
    */
   private boolean isValidFieldName(String f) {
     return validMongoDocumentField.matcher(f).matches();
-  }
-
-  public void addDocumentField(String document, String field, String type) {
-    // Just ignore for now
   }
 
   /**

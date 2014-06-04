@@ -33,6 +33,7 @@ import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericArray;
 import org.apache.avro.util.Utf8;
+import org.apache.gora.mongodb.filters.MongoFilterUtil;
 import org.apache.gora.mongodb.query.MongoDBQuery;
 import org.apache.gora.mongodb.query.MongoDBResult;
 import org.apache.gora.mongodb.utils.BSONDecorator;
@@ -122,6 +123,13 @@ public class MongoStore<K, T extends PersistentBase> extends
    */
   private MongoMapping mapping;
 
+  private MongoFilterUtil<K, T> filterUtil;
+
+  public MongoStore() {
+    // Create a default mapping that will be overriden in initialize method
+    this.mapping = new MongoMapping();
+  }
+
   /**
    * Initialize the data store by reading the credentials, setting the client's
    * properties up and reading the mapping file.
@@ -149,6 +157,8 @@ public class MongoStore<K, T extends PersistentBase> extends
         vPropMongoDb = getConf().get(PROP_MONGO_DB, vPropMongoDb);
       }
       super.initialize(keyClass, pPersistentClass, properties);
+
+      filterUtil = new MongoFilterUtil<K, T>(getConf());
 
       // Load the mapping
       MongoMappingBuilder<K, T> builder = new MongoMappingBuilder<K, T>(this);
@@ -245,6 +255,10 @@ public class MongoStore<K, T extends PersistentBase> extends
     } else {
       return null;
     }
+  }
+
+  public MongoMapping getMapping() {
+    return mapping;
   }
 
   /**
@@ -446,6 +460,14 @@ public class MongoStore<K, T extends PersistentBase> extends
     // Build the actual MongoDB query
     DBObject q = MongoDBQuery.toDBQuery(query);
     DBObject p = MongoDBQuery.toProjection(fields, mapping);
+
+    if (query.getFilter() != null) {
+      boolean succeeded = filterUtil.setFilter(q, query.getFilter(), this);
+      if (succeeded) {
+        // don't need local filter
+        query.setLocalFilterEnabled(false);
+      }
+    }
 
     // Execute the query on the collection
     DBCursor cursor = mongoClientColl.find(q, p);
@@ -993,7 +1015,7 @@ public class MongoStore<K, T extends PersistentBase> extends
    *          char with only dots.
    * @return encoded string with "\u00B7" chars..
    */
-  protected String encodeFieldKey(final String key) {
+  public String encodeFieldKey(final String key) {
     if (key == null) {
       return null;
     }
@@ -1007,7 +1029,7 @@ public class MongoStore<K, T extends PersistentBase> extends
    *          encoded string with "\u00B7" chars.
    * @return Cleanup up char with only dots.
    */
-  protected String decodeFieldKey(final String key) {
+  public String decodeFieldKey(final String key) {
     if (key == null) {
       return null;
     }
