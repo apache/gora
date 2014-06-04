@@ -2,6 +2,16 @@
  ==CHANGES.txt
  =======================================================================
 
+Current Development 0.5-SNAPSHOT
+
+* GORA-199 MongoDB support for Gora ( Damien Raude-Morvan)
+
+* GORA-333 Move README to markdown for better rendering on Github (lewismc)
+
+* GORA-329 Update all SCM links in * pom.xml's (lewismc)
+
+* GORA-325 Add Gora 0.4 Javadoc to site (lewismc)
+
 Gora 0.4 release: (14/04/2014)
 Release Report: http://s.apache.org/4lx
 
