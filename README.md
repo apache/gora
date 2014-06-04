@@ -1,13 +1,13 @@
-Apache Gora Project
-===================
+#Apache Gora Project
+
+<img src="http://gora.apache.org/resources/img/powered-by-gora.png" align="right" width="300" />
  
 The Apache Gora open source framework provides an in-memory data model 
 and persistence for big data. Gora supports persisting to column stores, 
 key value stores, document stores and RDBMSs, and analyzing the data 
 with extensive Apache Hadoop MapReduce support. 
 
-Why Gora?
----------
+##Why Gora?
 
 Although there are various excellent ORM frameworks for relational
 databases, data modeling in NoSQL data stores differ profoundly
@@ -38,8 +38,7 @@ grouped as follows.
 * MapReduce support : Out-of-the-box and extensive MapReduce (Apache
   Hadoop) support for data in the data store.
 
-Background
-----------
+#Background
 
 ORM stands for Object Relation Mapping. It is a technology which
 abstacts the persistency layer (mostly Relational Databases) so
@@ -67,6 +66,6 @@ from current solutions in that:
  
    http://gora.apache.org
  
-License
--------
+#License
+
 Gora is provided under Apache License version 2.0. See LICENSE.txt for more details.
