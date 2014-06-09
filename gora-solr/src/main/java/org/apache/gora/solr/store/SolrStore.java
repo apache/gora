@@ -15,6 +15,7 @@
 package org.apache.gora.solr.store;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -41,9 +42,13 @@ import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.AvroUtils;
 import org.apache.gora.util.IOUtils;
+import org.apache.hadoop.util.StringUtils;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.impl.CloudSolrServer;
+import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrServer;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
+import org.apache.solr.client.solrj.impl.LBHttpSolrServer;
 import org.apache.solr.client.solrj.request.CoreAdminRequest;
 import org.apache.solr.client.solrj.response.CoreAdminResponse;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -72,7 +77,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
 
   protected static final String SOLR_BATCH_SIZE_PROPERTY = "solr.batchSize";
 
-  // protected static final String SOLR_SOLRJSERVER_IMPL = "solr.solrjserver";
+  protected static final String SOLR_SOLRJSERVER_IMPL = "solr.solrjserver";
 
   protected static final String SOLR_COMMIT_WITHIN_PROPERTY = "solr.commitWithin";
 
@@ -86,7 +91,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
 
   private SolrMapping mapping;
 
-  private String solrServerUrl, solrConfig, solrSchema;
+  private String solrServerUrl, solrConfig, solrSchema, solrJServerImpl;
 
   private SolrServer server, adminServer;
 
@@ -134,9 +139,48 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
         SOLR_CONFIG_PROPERTY, null);
     solrSchema = DataStoreFactory.findProperty(properties, this,
         SOLR_SCHEMA_PROPERTY, null);
+    solrJServerImpl = DataStoreFactory.findProperty(properties, this, 
+        SOLR_SOLRJSERVER_IMPL, "http");
     LOG.info("Using Solr server at " + solrServerUrl);
-    adminServer = new HttpSolrServer(solrServerUrl);
-    server = new HttpSolrServer(solrServerUrl + "/" + mapping.getCoreName());
+    String solrJServerType = ((solrJServerImpl == null || solrJServerImpl.equals(""))?"http":solrJServerImpl);
+    // HttpSolrServer - denoted by "http" in properties
+    if (solrJServerType.toString().toLowerCase().equals("http")) {
+      LOG.info("Using HttpSolrServer Solrj implementation.");
+      this.adminServer = new HttpSolrServer(solrServerUrl);
+      this.server = new HttpSolrServer( solrServerUrl + "/" + mapping.getCoreName() );
+      // CloudSolrServer - denoted by "cloud" in properties
+    } else if (solrJServerType.toString().toLowerCase().equals("cloud")) {
+      LOG.info("Using CloudSolrServer Solrj implementation.");
+      try {
+        this.adminServer = new CloudSolrServer(solrServerUrl);
+      } catch (MalformedURLException e) {
+        e.printStackTrace();
+      }
+      try {
+        this.server = new CloudSolrServer( solrServerUrl + "/" + mapping.getCoreName() );
+      } catch (MalformedURLException e) {
+        e.printStackTrace();
+      }
+      // ConcurrentUpdateSolrServer - denoted by "concurrent" in properties
+    } else if (solrJServerType.toString().toLowerCase().equals("concurrent")) {
+      LOG.info("Using ConcurrentUpdateSolrServer Solrj implementation.");
+      this.adminServer = new ConcurrentUpdateSolrServer(solrServerUrl, 1000, 10);
+      this.server = new ConcurrentUpdateSolrServer( solrServerUrl + "/" + mapping.getCoreName(), 1000, 10);
+      // LBHttpSolrServer - denoted by "loadbalance" in properties
+    } else if (solrJServerType.toString().toLowerCase().equals("loadbalance")) {
+      LOG.info("Using LBHttpSolrServer Solrj implementation.");
+      String[] solrUrlElements = StringUtils.split(solrServerUrl);
+      try {
+        this.adminServer = new LBHttpSolrServer(solrUrlElements);
+      } catch (MalformedURLException e) {
+        e.printStackTrace();
+      }
+      try {
+        this.server = new LBHttpSolrServer( solrUrlElements + "/" + mapping.getCoreName() );
+      } catch (MalformedURLException e) {
+        e.printStackTrace();
+      }
+    }
     if (autoCreateSchema) {
       createSchema();
     }
@@ -473,7 +517,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       doc.addField(sf, v);
 
     }
-    LOG.info("DOCUMENT: " + doc);
+    LOG.info("Putting DOCUMENT: " + doc);
     batch.add(doc);
     if (batch.size() >= batchSize) {
       try {
