@@ -67,26 +67,59 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
 
   private static final Logger LOG = LoggerFactory.getLogger(SolrStore.class);
 
+  /** The default file name value to be used for obtaining the Solr object field mapping's */
   protected static final String DEFAULT_MAPPING_FILE = "gora-solr-mapping.xml";
 
+  /** The URL of the Solr server - defined in <code>gora.properties</code> */
   protected static final String SOLR_URL_PROPERTY = "solr.url";
 
+  /** The <code>solrconfig.xml</code> file to be used - defined in <code>gora.properties</code>*/
   protected static final String SOLR_CONFIG_PROPERTY = "solr.config";
 
+  /** The <code>schema.xml</code> file to be used - defined in <code>gora.properties</code>*/
   protected static final String SOLR_SCHEMA_PROPERTY = "solr.schema";
 
+  /** A batch size unit (ArrayList) of SolrDocument's to be used for writing to Solr.
+   * Should be defined in <code>gora.properties</code>. 
+   * A default value of 100 is used if this value is absent. This value must be of type <b>Integer</b>.
+   */
   protected static final String SOLR_BATCH_SIZE_PROPERTY = "solr.batchSize";
 
+  /** The solrj implementation to use. This has a default value of <i>http</i> for HttpSolrServer.
+   * Available options include <b>http</b>, <b>cloud</b>, <b>concurrent</b> and <b>loadbalance</b>. 
+   * Defined in <code>gora.properties</code>
+   * This value must be of type <b>String</b>.
+   */
   protected static final String SOLR_SOLRJSERVER_IMPL = "solr.solrjserver";
 
+  /** A batch commit unit for SolrDocument's used when making (commit) calls to Solr.
+   * Should be defined in <code>gora.properties</code>. 
+   * A default value of 1000 is used if this value is absent. This value must be of type <b>Integer</b>.
+   */
   protected static final String SOLR_COMMIT_WITHIN_PROPERTY = "solr.commitWithin";
 
+  /** The maximum number of result to return when we make a call to 
+   * {@link org.apache.gora.solr.store.SolrStore#execute(Query)}. This should be 
+   * defined in <code>gora.properties</code>. This value must be of type <b>Integer</b>.
+   */
   protected static final String SOLR_RESULTS_SIZE_PROPERTY = "solr.resultsSize";
 
+  /** The default batch size (ArrayList) of SolrDocuments to be used in the event of an absent 
+   * value for <code>solr.batchSize</code>. 
+   * Set to 100 by default.
+   */
   protected static final int DEFAULT_BATCH_SIZE = 100;
 
+  /** The default commit size of SolrDocuments to be used in the event of an absent 
+   * value for <code>solr.commitSize</code>. 
+   * Set to 1000 by default.
+   */
   protected static final int DEFAULT_COMMIT_WITHIN = 1000;
 
+  /** The default results size of SolrDocuments to be used in the event of an absent 
+   * value for <code>solr.resultsSize</code>. 
+   * Set to 100 by default.
+   */
   protected static final int DEFAULT_RESULTS_SIZE = 100;
 
   private SolrMapping mapping;
