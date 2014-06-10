@@ -73,6 +73,7 @@ public class MongoFilterUtil<K, T extends PersistentBase> {
         for (String filterClass : factory.getSupportedFilters()) {
           factories.put(filterClass, factory);
         }
+        factory.setFilterUtil(this);
       } catch (Exception e) {
         throw new GoraException(e);
       }

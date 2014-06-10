@@ -4,6 +4,10 @@
 
 Current Development 0.5-SNAPSHOT
 
+* GORA-336 MongoFilterUtil: missing ref link when creating new instance of factory (drazzib via lewismc)
+
+* GORA-260 Make Solrj solr server impl configurable from within gora.properties (lewismc)
+
 * GORA-199 MongoDB support for Gora ( Damien Raude-Morvan)
 
 * GORA-333 Move README to markdown for better rendering on Github (lewismc)
