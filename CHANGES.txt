@@ -4,6 +4,8 @@
 
 Current Development 0.5-SNAPSHOT
 
+* GORA-332 fix record.vm template to generate deepCopyToReadOnlyBuffer method (drazzib aka Damien Raude-Morvan via hsaputra)
+
 * GORA-331 Gora 0.4 compiler crash with "enum" type (drazzib aka Damien Raude-Morvan via hsaputra)
 
 * GORA-336 MongoFilterUtil: missing ref link when creating new instance of factory (drazzib via lewismc)
