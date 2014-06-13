@@ -15,7 +15,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 -->
-<gora-orm>
+<gora-otd>
 
     <class document="frontier" keyClass="java.lang.String" name="org.apache.gora.examples.generated.WebPage">
         <field name="baseUrl" docfield="baseUrl" type="string"/>
@@ -48,4 +48,4 @@
         <field name="inlinks" docfield="links.in" type="document"/>
     </class>
 
-</gora-orm>
+</gora-otd>

@@ -17,7 +17,7 @@
    limitations under the License.
 -->
 
-<gora-orm>
+<gora-otd>
 
   <table name="Employee"> <!-- optional descriptors for tables -->
     <family name="info"/> <!-- This can also have params like compression, bloom filters -->
@@ -53,4 +53,4 @@
     <field name="count" family="common" qualifier="count"/>
   </class>
 
-</gora-orm>
+</gora-otd>

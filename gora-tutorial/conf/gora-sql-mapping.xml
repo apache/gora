@@ -19,7 +19,7 @@
 <!-- 
   Gora Mapping file for SQL Backend
 -->
-<gora-orm>
+<gora-otd>
   <class name="org.apache.gora.tutorial.log.generated.Pageview" keyClass="java.lang.Long" table="AccessLog">
     <primarykey column="line"/>
     <field name="url" column="url" length="512" primarykey="true"/>
@@ -39,5 +39,5 @@
     <field name="metric" column="metric"/>
   </class>
 
-</gora-orm>
+</gora-otd>
 

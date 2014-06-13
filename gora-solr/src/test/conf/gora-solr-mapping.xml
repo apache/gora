@@ -16,7 +16,7 @@
    limitations under the License.
 -->
 
-<gora-orm>
+<gora-otd>
   <class name="org.apache.gora.examples.generated.Employee" keyClass="java.lang.String" table="Employee">
     <primarykey column="ssn"/>
     <field name="name" column="name"/>
@@ -34,5 +34,5 @@
     <field name="headers" column="headers"/>     
     <field name="metadata" column="metadata"/>
   </class>
-</gora-orm>
+</gora-otd>
 
