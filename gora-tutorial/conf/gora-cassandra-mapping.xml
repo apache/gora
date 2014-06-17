@@ -19,7 +19,7 @@
 <!--
   Gora Mapping file for Cassandra Backend
 -->
-<gora-orm>
+<gora-otd>
 
   <keyspace name="Pageview" cluster="Test Cluster" host="localhost">
     <family name="common"/>
@@ -48,4 +48,4 @@
     <field name="metric" family="common" qualifier="metric"/>
   </class>
 
-</gora-orm>
+</gora-otd>

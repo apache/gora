@@ -172,7 +172,7 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
     return new #if ($schema.getNamespace())$schema.getNamespace().#end${this.mangle($schema.getName())}.Builder(other);
   }
   
-  private static java.nio.ByteBuffer deepCopyToWriteOnlyBuffer(
+  private static java.nio.ByteBuffer deepCopyToReadOnlyBuffer(
       java.nio.ByteBuffer input) {
     java.nio.ByteBuffer copy = java.nio.ByteBuffer.allocate(input.capacity());
     int position = input.position();
@@ -347,3 +347,4 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
   }
   
 }
+

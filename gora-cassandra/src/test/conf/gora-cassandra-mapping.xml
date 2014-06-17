@@ -17,7 +17,7 @@
    limitations under the License.
 -->
 
-<gora-orm>
+<gora-otd>
   <keyspace name="Employee" host="localhost" cluster="Gora Cassandra Test Cluster">
     <family name="p" gc_grace_seconds="5"/>
      <family name="sc" type="super" />
@@ -55,4 +55,4 @@
     <field name="count"  family="p" qualifier="common:count" ttl="10"/>
   </class>
 
-</gora-orm>
+</gora-otd>

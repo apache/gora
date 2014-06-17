@@ -19,7 +19,7 @@
 <!--
   Gora Mapping file for HBase Backend
 -->
-<gora-orm>
+<gora-otd>
   <table name="Pageview"> <!-- optional descriptors for tables -->
     <family name="common"/> <!-- This can also have params like compression, bloom filters -->
     <family name="http"/>
@@ -43,4 +43,4 @@
     <field name="metric" family="common" qualifier="metric"/>
   </class>
 
-</gora-orm>
+</gora-otd>
