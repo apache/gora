@@ -26,11 +26,34 @@
    http://wiki.apache.org/solr/CoreAdmin
 -->
 
-<solr persistent="false">
+<!--
+ All (relative) paths are relative to the Solr Home Directory
 
-  <cores adminPath="/admin/cores" host="${host:}" hostPort="${jetty.port:8983}" hostContext="${hostContext:solr}">
+  persistent: Save changes made via the API to this file
+  sharedLib: path to a lib directory that will be shared across all cores
+-->
+<solr persistent="false">
+  <!-- by default, this is 50 @ WARN
+  <logging enabled="true">
+        <watcher size="100" threshold="DEBUG" />
+  </logging>
+   -->
+
+  <!--
+  adminPath: RequestHandler path to manage cores.
+    If 'null' (or absent), cores will not be manageable via request handler
+  defaultCoreName: (optional) core to use when no core name is specified in an access url
+
+  All of the attributes in cores after defaultCoreName only apply when running in SolrCloud mode.
+  You can read more about SolrCloud mode at http://wiki.apache.org/solr/SolrCloud
+  -->
+  <cores adminPath="/admin/cores" host="${host:}" hostPort="${jetty.port:9876}" 
+      hostContext="${hostContext:solr}" zkClientTimeout="${zkClientTimeout:15000}">
+    <core name="collection1" instanceDir="collection1" />
     <core name="Employee" instanceDir="Employee" />
     <core name="WebPage" instanceDir="WebPage" />
+    <!--  shardHandlerFactory name="shardHandlerFactory" class="HttpShardHandlerFactory">
+      <str name="urlScheme">${urlScheme:}</str>
+    </shardHandlerFactory-->
   </cores>
-
 </solr>

@@ -184,17 +184,8 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       // CloudSolrServer - denoted by "cloud" in properties
     } else if (solrJServerType.toString().toLowerCase().equals("cloud")) {
       LOG.info("Using CloudSolrServer Solrj implementation.");
-      try {
-        this.adminServer = new CloudSolrServer(solrServerUrl);
-      } catch (MalformedURLException e) {
-        e.printStackTrace();
-      }
-      try {
-        this.server = new CloudSolrServer( solrServerUrl + "/" + mapping.getCoreName() );
-      } catch (MalformedURLException e) {
-        e.printStackTrace();
-      }
-      // ConcurrentUpdateSolrServer - denoted by "concurrent" in properties
+      this.adminServer = new CloudSolrServer(solrServerUrl);
+      this.server = new CloudSolrServer( solrServerUrl + "/" + mapping.getCoreName() );
     } else if (solrJServerType.toString().toLowerCase().equals("concurrent")) {
       LOG.info("Using ConcurrentUpdateSolrServer Solrj implementation.");
       this.adminServer = new ConcurrentUpdateSolrServer(solrServerUrl, 1000, 10);
