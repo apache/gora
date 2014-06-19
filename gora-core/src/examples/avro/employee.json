@@ -10,9 +10,9 @@
       {"name": "boss", "type":["null","Employee","string"],"default":null},
       {"name": "webpage","default":null, "type":["null",
         {
-      	  "type": "record",
-      	  "name": "WebPage",
-      	  "namespace": "org.apache.gora.examples.generated",
+          "type": "record",
+          "name": "WebPage",
+          "namespace": "org.apache.gora.examples.generated",
           "fields" : [
            {"name": "url", "type": ["null","string"], "default":null},
            {"name": "content", "type": ["null","bytes"],"default":null},
@@ -29,7 +29,7 @@
             ]
           }}
           ]
-      	}
+        }
       ]}
     ]
   }
