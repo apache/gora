@@ -116,8 +116,13 @@ public class CassandraClient<K, T extends PersistentBase> {
         cfDef.setComparatorType(ComparatorType.BYTESTYPE);
       }
 
-      keyspaceDefinition = HFactory.createKeyspaceDefinition(this.cassandraMapping.getKeyspaceName(), 
-          "org.apache.cassandra.locator.SimpleStrategy", 1, columnFamilyDefinitions);      
+      keyspaceDefinition = HFactory.createKeyspaceDefinition(
+    	this.cassandraMapping.getKeyspaceName(), 
+        this.cassandraMapping.getKeyspaceReplicationStrategy(),
+        this.cassandraMapping.getKeyspaceReplicationFactor(),
+        columnFamilyDefinitions
+      );
+      
       this.cluster.addKeyspace(keyspaceDefinition, true);
       // LOG.info("Keyspace '" + this.cassandraMapping.getKeyspaceName() + "' in cluster '" + this.cassandraMapping.getClusterName() + "' was created on host '" + this.cassandraMapping.getHostName() + "'");
       
@@ -174,20 +179,30 @@ public class CassandraClient<K, T extends PersistentBase> {
    */
   public void addColumn(K key, String fieldName, Object value) {
     if (value == null) {
+    	LOG.debug( "field:"+fieldName+", its value is null.");
       return;
     }
 
     ByteBuffer byteBuffer = toByteBuffer(value);
     String columnFamily = this.cassandraMapping.getFamily(fieldName);
     String columnName = this.cassandraMapping.getColumn(fieldName);
-    String ttlAttr = this.cassandraMapping.getColumnsAttribs().get(fieldName);
-    if (ttlAttr == null)
-      ttlAttr = CassandraMapping.DEFAULT_COLUMNS_TTL;
-
+    
     if (columnName == null) {
-      LOG.warn("Column name is null for field=" + fieldName + " with value=" + value.toString());
-      return;
+    	LOG.warn("Column name is null for field=" + fieldName );
+        return;
     }
+      
+    if( LOG.isDebugEnabled() ) LOG.debug( "fieldName:"+fieldName +" columnName:" + columnName );
+    
+    String ttlAttr = this.cassandraMapping.getColumnsAttribs().get(columnName);
+    
+    if ( null == ttlAttr ){
+    	ttlAttr = CassandraMapping.DEFAULT_COLUMNS_TTL;
+    	if( LOG.isDebugEnabled() ) LOG.debug( "ttl was not set for field:" + fieldName + " .Using " + ttlAttr );
+    } else {
+    	if( LOG.isDebugEnabled() ) LOG.debug( "ttl for field:" + fieldName + " is " + ttlAttr );
+    }
+
     synchronized(mutator) {
       HectorUtils.insertColumn(mutator, key, columnFamily, columnName, byteBuffer, ttlAttr);
     }
@@ -230,9 +245,14 @@ public class CassandraClient<K, T extends PersistentBase> {
     
     String columnFamily = this.cassandraMapping.getFamily(fieldName);
     String superColumnName = this.cassandraMapping.getColumn(fieldName);
-    String ttlAttr = this.cassandraMapping.getColumnsAttribs().get(fieldName);
-    if (ttlAttr == null)
+    String ttlAttr = this.cassandraMapping.getColumnsAttribs().get(superColumnName);
+    if ( null == ttlAttr ) {
       ttlAttr = CassandraMapping.DEFAULT_COLUMNS_TTL;
+      if( LOG.isDebugEnabled() ) LOG.debug( "ttl was not set for field:" + fieldName + " .Using " + ttlAttr );
+    } else {
+      if( LOG.isDebugEnabled() ) LOG.debug( "ttl for field:" + fieldName + " is " + ttlAttr );
+    }
+
     synchronized(mutator) {
       HectorUtils.insertSubColumn(mutator, key, columnFamily, superColumnName, columnName, byteBuffer, ttlAttr);
     }

@@ -48,15 +48,36 @@ public class HectorUtils<K,T extends Persistent> {
 
 
   public static<K> HColumn<ByteBuffer,ByteBuffer> createColumn(ByteBuffer name, ByteBuffer value, String ttlAttr) {
-    return HFactory.createColumn(name, value, ByteBufferSerializer.get(), ByteBufferSerializer.get()).setTtl(Integer.parseInt(ttlAttr));
+	int ttl = Integer.parseInt(ttlAttr);
+	HColumn<ByteBuffer,ByteBuffer> col = HFactory.createColumn(name, value, ByteBufferSerializer.get(), ByteBufferSerializer.get());
+	
+	if( 0 < ttl ) {
+		col.setTtl( ttl ); 
+	}
+	
+	return col;
   }
 
   public static<K> HColumn<String,ByteBuffer> createColumn(String name, ByteBuffer value, String ttlAttr) {
-    return HFactory.createColumn(name, value, StringSerializer.get(), ByteBufferSerializer.get()).setTtl(Integer.parseInt(ttlAttr));
+	int ttl = Integer.parseInt(ttlAttr);
+	HColumn<String,ByteBuffer> col = HFactory.createColumn(name, value, StringSerializer.get(), ByteBufferSerializer.get());
+	
+	if( 0 < ttl ) {
+		col.setTtl( ttl );
+	}
+	
+	return col;
   }
 
   public static<K> HColumn<Integer,ByteBuffer> createColumn(Integer name, ByteBuffer value, String ttlAttr) {
-    return HFactory.createColumn(name, value, IntegerSerializer.get(), ByteBufferSerializer.get()).setTtl(Integer.parseInt(ttlAttr));
+    int ttl = Integer.parseInt(ttlAttr);
+    HColumn<Integer,ByteBuffer> col = HFactory.createColumn(name, value, IntegerSerializer.get(), ByteBufferSerializer.get());
+    
+    if( 0 < ttl ) {
+    	col.setTtl( ttl );
+    }
+    
+	return col;
   }
 
 

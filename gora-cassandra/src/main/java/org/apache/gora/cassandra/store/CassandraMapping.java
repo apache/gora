@@ -46,12 +46,19 @@ public class CassandraMapping {
 
   private static final String GCGRACE_SECONDS_ATTRIBUTE = "gc_grace_seconds";
   private static final String COLUMNS_TTL_ATTRIBUTE = "ttl";
-  public static final String DEFAULT_COLUMNS_TTL = "60";
-  public static final int DEFAULT_GCGRACE_SECONDS = 30;
+  private static final String REPLICATION_FACTOR_ATTRIBUTE = "replication_factor"; 	
+  private static final String REPLICATION_STRATEGY_ATTRIBUTE = "placement_strategy";
+  
+  public static final String DEFAULT_REPLICATION_FACTOR = "1";		 
+  public static final String DEFAULT_REPLICATION_STRATEGY = "org.apache.cassandra.locator.SimpleStrategy";
+  public static final String DEFAULT_COLUMNS_TTL = "0";
+  public static final String DEFAULT_GCGRACE_SECONDS = "0";
 
   private String hostName;
   private String clusterName;
   private String keyspaceName;
+  private String keyspaceStrategy;
+  private int 	 keyspaceRF;
   
   
   /**
@@ -106,6 +113,22 @@ public class CassandraMapping {
   public String getKeyspaceName() {
     return this.keyspaceName;
   }
+  
+  /**
+   * gets the replication strategy
+   * @return string class name to be used for strategy
+   */
+  public String getKeyspaceReplicationStrategy() {
+	return this.keyspaceStrategy;
+  }
+  
+  /**
+   * gets the replication factor
+   * @return int replication factor
+   */
+  public int getKeyspaceReplicationFactor() {
+	return this.keyspaceRF;
+  }
 
   /**
    * Primary class for loading Cassandra configuration from the 'MAPPING_FILE'.
@@ -149,6 +172,26 @@ public class CassandraMapping {
       }  
     }
     
+    // setting replication strategy
+    this.keyspaceStrategy = keyspace.getAttributeValue( REPLICATION_STRATEGY_ATTRIBUTE );
+    if( null == this.keyspaceStrategy ) {
+    	this.keyspaceStrategy = DEFAULT_REPLICATION_STRATEGY;
+    }
+	if( LOG.isDebugEnabled() ) {
+		LOG.debug( "setting Keyspace replication strategy to " + this.keyspaceStrategy );
+	}
+
+	// setting replication factor
+	String tmp = keyspace.getAttributeValue( REPLICATION_FACTOR_ATTRIBUTE );	
+	if( null == tmp ) {
+		tmp = DEFAULT_REPLICATION_FACTOR;
+	}
+	this.keyspaceRF = Integer.parseInt( tmp );
+	if( LOG.isDebugEnabled() ) {
+		LOG.debug( "setting Keyspace replication factor to " + this.keyspaceRF );
+	}
+
+    
     // load column family definitions
     List<Element> elements = keyspace.getChildren();
     for (Element element: elements) {
@@ -166,7 +209,9 @@ public class CassandraMapping {
       String gcgrace_scs = element.getAttributeValue(GCGRACE_SECONDS_ATTRIBUTE);
       if (gcgrace_scs == null) {
         LOG.warn("Error locating gc_grace_seconds attribute for '" + familyName + "' column family");
-        LOG.warn("Using default set to: " + DEFAULT_GCGRACE_SECONDS);
+        LOG.warn("Using gc_grace_seconds default value which is: " + DEFAULT_GCGRACE_SECONDS 
+        		+ " and is viable ONLY FOR A SINGLE NODE CLUSTER");
+        LOG.warn("please update the gora-cassandra-mapping.xml file to avoid seeing this warning");
       } else {
         if (LOG.isDebugEnabled()) {
         LOG.debug("Located gc_grace_seconds: '" + gcgrace_scs + "'" );
@@ -191,7 +236,7 @@ public class CassandraMapping {
       cfDef.setComparatorType(ComparatorType.BYTESTYPE);
       cfDef.setDefaultValidationClass(ComparatorType.BYTESTYPE.getClassName());
 
-      cfDef.setGcGraceSeconds(gcgrace_scs!=null?Integer.parseInt(gcgrace_scs):DEFAULT_GCGRACE_SECONDS);
+      cfDef.setGcGraceSeconds(Integer.parseInt( gcgrace_scs!=null?gcgrace_scs:DEFAULT_GCGRACE_SECONDS));
       this.columnFamilyDefinitions.put(familyName, cfDef);
 
     }
