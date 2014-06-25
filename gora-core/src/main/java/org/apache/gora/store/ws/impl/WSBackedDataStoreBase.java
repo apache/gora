@@ -83,7 +83,7 @@ public abstract class WSBackedDataStoreBase<K, T extends Persistent>
    */
   public void deleteSchema() {
     throw new OperationNotSupportedException("delete schema is not supported for " +
-    		"file backed data stores");
+      "file backed data stores");
   }
 
   @Override

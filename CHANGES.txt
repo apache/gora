@@ -4,6 +4,18 @@
 
 Current Development 0.5-SNAPSHOT
 
+* GORA-241 Properly document WebServiceBackedDataStore Interface (Tyler Palsulich)
+
+* GORA-347 Column attributes should be obtained using the column name and not the field name. (kaveh minooie, rmarroquin)
+
+* GORA-348 - Using query for Avro Unions in Cassandra doesn't fully work (rmarroquin)
+
+* GORA-XX Attemtpt to resolve javax.servlet classloading issue within gora-solr (lewismc)
+
+* GORA-339 Upgrade solr dependencies to 4.8.1 (lewismc)
+
+* GORA-341 - Switch gora-orm references to gora-otd in tutorial (MJJoyce via lewismc)
+
 * GORA-332 fix record.vm template to generate deepCopyToReadOnlyBuffer method (drazzib aka Damien Raude-Morvan via hsaputra)
 
 * GORA-331 Gora 0.4 compiler crash with "enum" type (drazzib aka Damien Raude-Morvan via hsaputra)

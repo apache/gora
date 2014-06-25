@@ -18,7 +18,6 @@
 
 package org.apache.gora.store.ws.impl;
 
-import java.io.IOException;
 import java.util.Properties;
 
 import org.apache.gora.persistency.Persistent;

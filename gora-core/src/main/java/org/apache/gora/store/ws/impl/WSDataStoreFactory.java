@@ -30,7 +30,7 @@ import org.apache.gora.util.GoraException;
 import org.apache.gora.util.ReflectionUtils;
 
 /**
- * A Factory for {@link DataStore}s. DataStoreFactory instances are thread-safe.
+ * A Factory for Web-based {@link DataStore}s. DataStoreFactory instances are thread-safe.
  */
 public class WSDataStoreFactory{
 
@@ -106,7 +106,7 @@ public class WSDataStoreFactory{
    * @param dataStoreClass The datastore implementation class.
    * @param keyClass The key class.
    * @param persistent The value class.
-   * @param conf {@link Configuration} to be used be the store.
+   * @param auth an authentication {@link Object} to be used for communication.
    * @return A new store instance.
    * @throws GoraException
    */
@@ -122,7 +122,7 @@ public class WSDataStoreFactory{
    * @param dataStoreClass The datastore implementation class.
    * @param keyClass The key class.
    * @param persistent The value class.
-   * @param conf {@link Configuration} to be used be the store.
+   * @param auth an authentication {@link Object} to be used for communication.
    * @param schemaName A default schemaname that will be put on the properties.
    * @return A new store instance.
    * @throws GoraException
@@ -139,7 +139,7 @@ public class WSDataStoreFactory{
    * @param dataStoreClass The datastore implementation class.
    * @param keyClass The key class.
    * @param persistent The value class.
-   * @param conf {@link Configuration} to be used be the store.
+   * @param auth an authentication {@link Object} to be used for communication.
    * @param properties The properties to be used be the store.
    * @param schemaName A default schemaname that will be put on the properties.
    * @return A new store instance.
@@ -173,7 +173,7 @@ public class WSDataStoreFactory{
    * @param dataStoreClass The datastore implementation class.
    * @param keyClass The key class.
    * @param persistent The value class.
-   * @param conf {@link Configuration} to be used be the store.
+   * @param auth an authentication {@link Object} to be used for communication.
    * @param properties The properties to be used be the store.
    * @return A new store instance.
    * @throws GoraException
@@ -191,7 +191,7 @@ public class WSDataStoreFactory{
    * @param dataStoreClass The datastore implementation class.
    * @param keyClass The key class.
    * @param persistentClass The value class.
-   * @param conf {@link Configuration} to be used be the store.
+   * @param auth an authentication {@link Object} to be used for communication.
    * @return A new store instance.
    * @throws GoraException
    */
@@ -208,7 +208,7 @@ public class WSDataStoreFactory{
    * @param dataStoreClass The datastore implementation class <i>as string</i>.
    * @param keyClass The key class.
    * @param persistentClass The value class.
-   * @param conf {@link Configuration} to be used be the store.
+   * @param auth an authentication {@link Object} to be used for communication.
    * @return A new store instance.
    * @throws GoraException
    */
@@ -233,7 +233,7 @@ public class WSDataStoreFactory{
    * @param dataStoreClass The datastore implementation class <i>as string</i>.
    * @param keyClass The key class <i>as string</i>.
    * @param persistentClass The value class <i>as string</i>.
-   * @param conf {@link Configuration} to be used be the store.
+   * @param auth an authentication {@link Object} to be used for communication.
    * @return A new store instance.
    * @throws GoraException
    */
@@ -260,7 +260,7 @@ public class WSDataStoreFactory{
    * 
    * @param keyClass The key class.
    * @param persistent The value class.
-   * @param conf {@link Configuration} to be used be the store.
+   * @param auth an authentication {@link Object} to be used for communication.
    * @return A new store instance.
    * @throws GoraException
    */
@@ -283,6 +283,10 @@ public class WSDataStoreFactory{
    * If not found, the property keys for all superclasses is recursively
    * tested. Lastly, the property key constructed as
    * "gora.datastore.&lt;baseKey&gt;" is searched.
+   * @param properties The properties to be used be the store.
+   * @param store the datastore class we wish to search for the property within.
+   * @param baseKey the key associated with the property we are trying to find. 
+   * @param defaultValue a default (fallback) value for the property we wish to assert.
    * @return the first found value, or defaultValue
    */
   public static String findProperty(Properties properties
@@ -325,6 +329,9 @@ public class WSDataStoreFactory{
    * If not found, the property keys for all superclasses is recursively
    * tested. Lastly, the property key constructed as
    * "gora.datastore.&lt;baseKey&gt;" is searched.
+   * @param properties The properties to be used be the store.
+   * @param store the datastore class we wish to search for the property within.
+   * @param baseKey the key associated with the property we are trying to find. 
    * @return the first found value, or throws IOException
    */
   public static String findPropertyOrDie(Properties properties
@@ -337,11 +344,33 @@ public class WSDataStoreFactory{
     return val;
   }
 
+  /**
+   * Asserts whether or not we can find a particular property based on the property 
+   * with the given baseKey. First the property
+   * key constructed as "gora.&lt;classname&gt;.&lt;baseKey&gt;" is searched.
+   * If not found, the property keys for all superclasses is recursively
+   * tested. Lastly, the property key constructed as
+   * "gora.datastore.&lt;baseKey&gt;" is searched. We parse the boolean output
+   * and assert whether such a property exists or not.
+   * @param properties The properties to be used be the store.
+   * @param store the datastore class we wish to search for the property within.
+   * @param baseKey the key associated with the property we are trying to find. 
+   * @param defaultValue a default (fallback) value for the property we wish to assert.
+   * @return the first found value, or throws IOException
+   */
   public static boolean findBooleanProperty(Properties properties
       , DataStore<?, ?> store, String baseKey, String defaultValue) {
     return Boolean.parseBoolean(findProperty(properties, store, baseKey, defaultValue));
   }
 
+  /**
+   * Asserts whether schema/datamodel autocreation is supported within datastore
+   * initialization. Assentially we scan the datastore class for a static AUTO_CREATE_SCHEMA
+   * constant. Additionally, we expect this to be true for each datastore.
+   * @param properties The properties to be used be the store.
+   * @param store the datastore class we wish to search for the property within.
+   * @return the first found value, or throws IOException
+   */
   public static boolean getAutoCreateSchema(Properties properties
       , DataStore<?,?> store) {
     return findBooleanProperty(properties, store, AUTO_CREATE_SCHEMA, "true");
@@ -361,6 +390,15 @@ public class WSDataStoreFactory{
     return findProperty(properties, store, OUTPUT_PATH, null);
   }
 
+  /**
+   * Returns a particular instance of an XML mapping file for some particular 
+   * properties and datastore. We can specify numerous mapping files per 
+   * mapping configuration with this option and obtain them at runtime.
+   * @param properties The properties to be used be the store.
+   * @param store The datastore class we wish to search for the property within.
+   * @param defaultValue The name of the XML mapping file we wish to use.
+   * @return
+   */
   public static String getMappingFile(Properties properties, DataStore<?,?> store
       , String defaultValue) {
     return findProperty(properties, store, MAPPING_FILE, defaultValue);
