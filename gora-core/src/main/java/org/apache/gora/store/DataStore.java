@@ -49,7 +49,6 @@ public interface DataStore<K, T extends Persistent> {
    * @param keyClass the class of the keys
    * @param persistentClass the class of the persistent objects
    * @param properties extra metadata
-   * @throws IOException
    */
   void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties);
 
@@ -88,7 +87,6 @@ public interface DataStore<K, T extends Persistent> {
    * to hold the objects. If the schema is already created previously,
    * or the underlying data model does not support
    * or need this operation, the operation is ignored.
-   * @throws IOException
    */
   void createSchema();
 
@@ -96,21 +94,18 @@ public interface DataStore<K, T extends Persistent> {
    * Deletes the underlying schema or table (or similar) in the datastore
    * that holds the objects. This also deletes all the data associated with
    * the schema.
-   * @throws IOException
    */
   void deleteSchema();
 
   /**
    * Deletes all the data associated with the schema, but keeps the
    * schema (table or similar) intact.
-   * @throws IOException
    */
   void truncateSchema();
 
   /**
    * Returns whether the schema that holds the data exists in the datastore.
    * @return whether schema exists
-   * @throws IOException
    */
   boolean schemaExists();
 
@@ -120,14 +115,12 @@ public interface DataStore<K, T extends Persistent> {
    * constructor) it throws an exception. Only use this function if you can 
    * make sure that the key class has a no-arg constructor.   
    * @return a new instance of the key object.
-   * @throws IOException
    */
   K newKey();
 
   /**
    * Returns a new instance of the managed persistent object.
    * @return a new instance of the managed persistent object.
-   * @throws IOException
    */
   T newPersistent();
 
@@ -135,7 +128,6 @@ public interface DataStore<K, T extends Persistent> {
    * Returns the object corresponding to the given key fetching all the fields.
    * @param key the key of the object
    * @return the Object corresponding to the key or null if it cannot be found
-   * @throws IOException
    */
   T get(K key);
 
@@ -144,7 +136,6 @@ public interface DataStore<K, T extends Persistent> {
    * @param key the key of the object
    * @param fields the fields required in the object. Pass null, to retrieve all fields
    * @return the Object corresponding to the key or null if it cannot be found
-   * @throws IOException
    */
   T get(K key, String[] fields);
 
@@ -153,7 +144,6 @@ public interface DataStore<K, T extends Persistent> {
    * object with the same key already exists it will silently
    * be replaced. See also the note on 
    * <a href="#visibility">visibility</a>.
-   * @throws IOException
    */
   void put(K key, T obj);
 
@@ -161,7 +151,6 @@ public interface DataStore<K, T extends Persistent> {
    * Deletes the object with the given key
    * @param key the key of the object
    * @return whether the object was successfully deleted
-   * @throws IOException
    */
   boolean delete(K key);
 
@@ -170,7 +159,6 @@ public interface DataStore<K, T extends Persistent> {
    * See also the note on <a href="#visibility">visibility</a>.
    * @param query matching records to this query will be deleted
    * @return number of deleted records
-   * @throws IOException
    */
   long deleteByQuery(Query<K, T> query);
 
@@ -178,7 +166,6 @@ public interface DataStore<K, T extends Persistent> {
    * Executes the given query and returns the results.
    * @param query the query to execute.
    * @return the results as a {@link Result} object.
-   * @throws IOException
    */
   Result<K, T> execute(Query<K, T> query);
 
@@ -204,7 +191,6 @@ public interface DataStore<K, T extends Persistent> {
    * optimize their writing by deferring the actual put / delete operations
    * until this moment.
    * See also the note on <a href="#visibility">visibility</a>.
-   * @throws IOException
    */
   void flush();
 
@@ -225,7 +211,6 @@ public interface DataStore<K, T extends Persistent> {
    * implementation, so that the instance is ready for GC.
    * All other DataStore methods cannot be used after this
    * method was called. Subsequent calls of this method are ignored.
-   * @throws IOException
    */
   void close();
 

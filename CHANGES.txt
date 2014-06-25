@@ -4,6 +4,10 @@
 
 Current Development 0.5-SNAPSHOT
 
+* GORA-234 Javadoc and java annotations in gora-core base (abstract) classes needs to be corrected (tpalsulich via lewismc)
+
+* GORA-349 Update Datastore specific mapping documentation with new default root element (MJJoyce) via lewismc
+
 * GORA-241 Properly document WebServiceBackedDataStore Interface (Tyler Palsulich)
 
 * GORA-347 Column attributes should be obtained using the column name and not the field name. (kaveh minooie, rmarroquin)

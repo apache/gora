@@ -121,7 +121,7 @@ implements DataStore<K, T>{
   
   /**
    * Reads fields from an object
-   * @param obj
+   * @param obj Object to read from.
    * @throws Exception
    */
   public void readFields(Object obj) throws Exception {
@@ -129,7 +129,7 @@ implements DataStore<K, T>{
 
   /**
    * Writes an object
-   * @param obj
+   * @param obj Object to write.
    * @throws Exception
    */
   public void write(Object obj) throws Exception {
@@ -175,8 +175,8 @@ implements DataStore<K, T>{
   }
 
   /**
-   * Gets web service provider name
-   * @return
+   * Get the service provider name.
+   * @return the service provider name.
    */
   public String getWSProvider() {
     return wsProvider;
@@ -184,7 +184,7 @@ implements DataStore<K, T>{
 
   /**
    * Sets web service provider name
-   * @param wsProvider
+   * @param wsProvider Name to set the service provider to.
    */
   public void setWsProvider(String wsProvider) {
     this.wsProvider = wsProvider;
