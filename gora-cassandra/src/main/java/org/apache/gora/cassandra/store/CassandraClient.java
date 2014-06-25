@@ -46,12 +46,15 @@ import me.prettyprint.hector.api.query.RangeSuperSlicesQuery;
 import me.prettyprint.hector.api.HConsistencyLevel;
 import me.prettyprint.hector.api.Serializer;
 
+import org.apache.avro.Schema;
+import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericArray;
 import org.apache.gora.cassandra.query.CassandraQuery;
 import org.apache.gora.cassandra.serializers.GoraSerializerTypeInferer;
 import org.apache.gora.mapreduce.GoraRecordReader;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
+import org.apache.gora.store.DataStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -444,6 +447,7 @@ public class CassandraClient<K, T extends PersistentBase> {
    */
   public Map<String, List<String>> getFamilyMap(Query<K, T> query) {
     Map<String, List<String>> map = new HashMap<String, List<String>>();
+    Schema persistentSchema = query.getDataStore().newPersistent().getSchema();
     for (String field: query.getFields()) {
       String family = this.getMappingFamily(field);
       String column = this.getMappingColumn(field);
@@ -454,6 +458,8 @@ public class CassandraClient<K, T extends PersistentBase> {
         list = new ArrayList<String>();
         map.put(family, list);
       }
+      if (persistentSchema.getField(field).schema().getType() == Type.UNION)
+        list.add(column + CassandraStore.UNION_COL_SUFIX);
       if (column != null) {
         list.add(column);
       }
@@ -480,10 +486,12 @@ public class CassandraClient<K, T extends PersistentBase> {
    */
   public Map<String, String> getReverseMap(Query<K, T> query) {
     Map<String, String> map = new HashMap<String, String>();
+    Schema persistentSchema = query.getDataStore().newPersistent().getSchema();
     for (String field: query.getFields()) {
       String family = this.getMappingFamily(field);
       String column = this.getMappingColumn(field);
-      
+      if (persistentSchema.getField(field).schema().getType() == Type.UNION)
+        map.put(family + ":" + column + CassandraStore.UNION_COL_SUFIX, field + CassandraStore.UNION_COL_SUFIX);
       map.put(family + ":" + column, field);
     }
     

@@ -119,7 +119,9 @@ public class GoraRecordReader<K, T extends PersistentBase> extends RecordReader<
 	    return this.result.next();
 	  }
 	  catch(Exception e){
-		return false;
+	    LOG.error("Error reading Gora records");
+	    e.printStackTrace();
+	    return false;
 	  }
   }
 
