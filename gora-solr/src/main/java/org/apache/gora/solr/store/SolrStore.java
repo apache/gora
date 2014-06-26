@@ -273,6 +273,10 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
           }
           break;
         }
+        LOG.warn("Check that 'keyClass' and 'name' parameters in gora-solr-mapping.xml "
+            + "match with intended values. A mapping mismatch has been found therefore "
+            + "no mapping has been initialized for class mapping at position " 
+            + classes.indexOf(classElement) + " in mapping file.");
       }
     } catch (Exception ex) {
       throw new IOException(ex);

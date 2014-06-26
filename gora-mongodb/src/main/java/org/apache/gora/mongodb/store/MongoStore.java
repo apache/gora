@@ -635,6 +635,7 @@ public class MongoStore<K, T extends PersistentBase> extends
     return result;
   }
 
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   private Object fromMongoRecord(final Schema fieldSchema, final String docf,
       final DBObject rec) {
     Object result;
@@ -680,7 +681,7 @@ public class MongoStore<K, T extends PersistentBase> extends
           "item", new BSONDecorator(new BasicDBObject("item", item)));
       rlist.add(o);
     }
-    return new DirtyListWrapper(rlist);
+    return new DirtyListWrapper<Object>(rlist);
   }
 
   private Object fromMongoMap(final String docf, final Schema fieldSchema,
@@ -699,7 +700,7 @@ public class MongoStore<K, T extends PersistentBase> extends
           new BSONDecorator(map));
       rmap.put(new Utf8(decodedMapKey), o);
     }
-    return new DirtyMapWrapper(rmap);
+    return new DirtyMapWrapper<Utf8, Object>(rmap);
   }
 
   private Object fromMongoString(final DocumentFieldType storeType,
@@ -790,6 +791,7 @@ public class MongoStore<K, T extends PersistentBase> extends
     return result;
   }
 
+  @SuppressWarnings("unchecked")
   private Object toDBObject(final String docf, final Schema fieldSchema,
       final Type fieldType, final DocumentFieldType storeType,
       final Object value) {

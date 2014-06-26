@@ -54,7 +54,6 @@ import org.apache.gora.cassandra.serializers.GoraSerializerTypeInferer;
 import org.apache.gora.mapreduce.GoraRecordReader;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
-import org.apache.gora.store.DataStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
