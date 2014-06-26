@@ -4,6 +4,8 @@
 
 Current Development 0.5-SNAPSHOT
 
+* GORA-351 Multiple Slf4j logging implementations in parent pom.xml (lewismc)
+
 * GORA-234 Javadoc and java annotations in gora-core base (abstract) classes needs to be corrected (tpalsulich via lewismc)
 
 * GORA-349 Update Datastore specific mapping documentation with new default root element (MJJoyce) via lewismc
