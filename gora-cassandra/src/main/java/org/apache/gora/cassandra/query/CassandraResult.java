@@ -107,8 +107,6 @@ public class CassandraResult<K, T extends PersistentBase> extends ResultBase<K, 
           int pos = this.persistent.getSchema().getField(fieldName).pos();
           Field field = fields.get(pos);
           Type fieldType = field.schema().getType();
-          // LOG.info(StringSerializer.get().fromByteBuffer(cassandraColumn.getName())
-          // + fieldName + " " + fieldType.name());
           if (fieldType.equals(Type.UNION)) {
             //getting UNION stored type
             CassandraColumn cc = getUnionTypeColumn(fieldName

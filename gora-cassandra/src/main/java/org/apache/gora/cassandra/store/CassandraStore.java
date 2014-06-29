@@ -47,7 +47,6 @@ import org.apache.avro.io.BinaryEncoder;
 import org.apache.avro.specific.SpecificData;
 import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.avro.util.Utf8;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.gora.cassandra.query.CassandraQuery;
 import org.apache.gora.cassandra.query.CassandraResult;
 import org.apache.gora.cassandra.query.CassandraResultSet;
@@ -314,20 +313,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
     if (fields == null){
       fields = this.getFields();
     }
-    // Generating UnionFields
-    ArrayList<String> unionFields = new ArrayList<String>();
-    for (String field: fields){
-      Field schemaField =this.fieldMap.get(field);
-      Type type = schemaField.schema().getType();
-      if (type.getName().equals("UNION".toLowerCase())){
-        unionFields.add(field+UNION_COL_SUFIX);
-      }
-    }
-    
-    String[] arr = unionFields.toArray(new String[unionFields.size()]);
-    String[] both = (String[]) ArrayUtils.addAll(fields, arr);
-    
-    query.setFields(both);
+    query.setFields(fields);
 
     query.setLimit(1);
     Result<K,T> result = execute(query);

@@ -478,7 +478,7 @@ public class CassandraClient<K, T extends PersistentBase> {
         map.put(family, list);
       }
       if (persistentSchema.getField(field).schema().getType() == Type.UNION)
-        list.add(column + CassandraStore.UNION_COL_SUFIX);
+        list.add(field + CassandraStore.UNION_COL_SUFIX);
       if (column != null) {
         list.add(column);
       }
@@ -510,7 +510,7 @@ public class CassandraClient<K, T extends PersistentBase> {
       String family = this.getMappingFamily(field);
       String column = this.getMappingColumn(field);
       if (persistentSchema.getField(field).schema().getType() == Type.UNION)
-        map.put(family + ":" + column + CassandraStore.UNION_COL_SUFIX, field + CassandraStore.UNION_COL_SUFIX);
+        map.put(family + ":" + field + CassandraStore.UNION_COL_SUFIX, field + CassandraStore.UNION_COL_SUFIX);
       map.put(family + ":" + column, field);
     }
     
