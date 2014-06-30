@@ -27,6 +27,8 @@ import java.io.DataOutputStream;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
+
+import org.apache.gora.util.WritableUtils;
 import org.junit.Test;
 
 /**

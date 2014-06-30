@@ -37,7 +37,9 @@ import org.apache.hadoop.io.DataOutputBuffer;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.junit.Test;
+
 import static org.junit.Assert.assertEquals;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -117,10 +119,20 @@ public class TestIOUtils {
       
       for(T before : objects) {
         T after = IOUtils.deserialize(conf, dis, null, (Class<T>)before.getClass());
-        
-        log.info("Before: " + before);
-        log.info("After : " + after);
-        
+        if (before instanceof BoolArrayWrapper) {
+          if (after instanceof BoolArrayWrapper) {
+            log.info("Before : " + java.util.Arrays.toString(((BoolArrayWrapper) before).arr));
+            log.info("After : " + java.util.Arrays.toString(((BoolArrayWrapper) after).arr));
+          }
+        } else if (before instanceof StringArrayWrapper){
+          if (after instanceof StringArrayWrapper) {
+            log.info("Before : " + java.util.Arrays.toString(((StringArrayWrapper) before).arr));
+            log.info("After : " + java.util.Arrays.toString(((StringArrayWrapper) after).arr));
+          }
+        } else {
+          log.info("Before : " + before);
+          log.info("After : " + before);
+        }
         assertEquals(before, after);
       }
       
@@ -138,7 +150,7 @@ public class TestIOUtils {
       org.apache.hadoop.io.IOUtils.closeStream(is);
     }
   }
-  
+
   @Test
   public void testWritableSerde() throws Exception {
     Text text = new Text("foo goes to a bar to get some buzz");
