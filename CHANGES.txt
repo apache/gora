@@ -4,6 +4,8 @@
 
 Current Development 0.5-SNAPSHOT
 
+* GORA-361 AvroUtils.deepClonePersistent needs to flush BinaryEncoder (Gerhard Gossen via hsaputra)
+
 * GORA-351 Multiple Slf4j logging implementations in parent pom.xml (lewismc)
 
 * GORA-234 Javadoc and java annotations in gora-core base (abstract) classes needs to be corrected (tpalsulich via lewismc)

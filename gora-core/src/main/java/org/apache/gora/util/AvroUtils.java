@@ -107,6 +107,7 @@ public class AvroUtils {
         persistent.getSchema());
     try {
       writer.write(persistent, enc);
+      enc.flush();
     } catch (IOException e) {
       throw new RuntimeException(
           "Unable to serialize avro object to byte buffer - "
