@@ -173,7 +173,7 @@ public abstract class PersistentBase extends SpecificRecordBase implements
   }
 
   private ByteBuffer getDirtyBytes() {
-    return (ByteBuffer) get(0);
+    return ByteBuffer.wrap(get(0).toString().getBytes());
   }
 
   @Override
