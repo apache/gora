@@ -139,6 +139,9 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
   @Override
   public T get(K key, String[] fields) {
     T obj = map.get(key);
+    if (obj == null) {
+      return null;
+    }
     return getPersistent(obj, getFieldsToQuery(fields));
   }
 
