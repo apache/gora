@@ -6,8 +6,6 @@ Current Development 0.5-SNAPSHOT
 
 * GORA-364 MemStore.get fails with NPE when key is not set (Gerhard Gossen via lewismc)
 
-* GORA-189 Embrace all text-like parameters in generated Persistent subclasses by Compiler CharSequence (lewismc)
-
 * GORA-361 AvroUtils.deepClonePersistent needs to flush BinaryEncoder (Gerhard Gossen via hsaputra)
 
 * GORA-351 Multiple Slf4j logging implementations in parent pom.xml (lewismc)
