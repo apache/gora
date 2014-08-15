@@ -60,6 +60,7 @@ import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.query.impl.PartitionQueryImpl;
+import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.cassandra.serializers.AvroSerializerUtil;
 import org.slf4j.Logger;
@@ -76,7 +77,21 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
   /** Logging implementation */
   public static final Logger LOG = LoggerFactory.getLogger(CassandraStore.class);
 
-  private CassandraClient<K, T>  cassandraClient = new CassandraClient<K, T>();
+  /** Consistency property level for Cassandra column families */
+  private static final String COL_FAM_CL = "cf.consistency.level";
+   
+  /** Consistency property level for Cassandra read operations. */
+  private static final String READ_OP_CL = "read.consistency.level";
+  
+  /** Consistency property level for Cassandra write operations. */
+  private static final String WRITE_OP_CL = "write.consistency.level";
+  
+  /** Variables to hold different consistency levels defined by the properties. */
+  public static String colFamConsLvl;
+  public static String readOpConsLvl;
+  public static String writeOpConsLvl;
+  
+  private CassandraClient<K, T> cassandraClient = new CassandraClient<K, T>();
 
   /**
    * Fixed string with value "UnionIndex" used to generate an extra column based on 
@@ -126,6 +141,14 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
   public void initialize(Class<K> keyClass, Class<T> persistent, Properties properties) {
     try {
       super.initialize(keyClass, persistent, properties);
+      if (autoCreateSchema) {
+        // If this is not set, then each Cassandra client should set its default
+        // column family
+        colFamConsLvl = DataStoreFactory.findProperty(properties, this, COL_FAM_CL, null);
+        // operations
+        readOpConsLvl = DataStoreFactory.findProperty(properties, this, READ_OP_CL, null);
+        writeOpConsLvl = DataStoreFactory.findProperty(properties, this, WRITE_OP_CL, null);
+      }
       this.cassandraClient.initialize(keyClass, persistent);
     } catch (Exception e) {
       LOG.error(e.getMessage());
