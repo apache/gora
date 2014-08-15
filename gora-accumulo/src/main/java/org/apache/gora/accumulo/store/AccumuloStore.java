@@ -68,6 +68,7 @@ import org.apache.accumulo.core.iterators.SortedKeyIterator;
 import org.apache.accumulo.core.iterators.user.TimestampFilter;
 import org.apache.accumulo.core.master.state.tables.TableState;
 import org.apache.accumulo.core.security.ColumnVisibility;
+import org.apache.accumulo.core.security.CredentialHelper;
 import org.apache.accumulo.core.security.thrift.TCredentials;
 import org.apache.accumulo.core.util.Pair;
 import org.apache.accumulo.core.util.TextUtil;
@@ -106,7 +107,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 /**
- * 
+ * Directs CRUD operations into Accumulo.
  */
 public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T> {
 
@@ -250,7 +251,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         e.printStackTrace();
         return toBytes(o);
       }
-    } else {     
+    } else {
       return toBytes(o);
     }
   }
@@ -357,20 +358,15 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       }
 
       try {
-        AuthenticationToken token =  new PasswordToken(password);
+        AuthenticationToken token = new PasswordToken(password);
         if (mock == null || !mock.equals("true")) {
           String instance = DataStoreFactory.findProperty(properties, this, INSTANCE_NAME_PROPERTY, null);
           String zookeepers = DataStoreFactory.findProperty(properties, this, ZOOKEEPERS_NAME_PROPERTY, null);
-          credentials = new TCredentials(user, 
-              "org.apache.accumulo.core.client.security.tokens.PasswordToken", 
-              ByteBuffer.wrap(password.getBytes()), instance);
           conn = new ZooKeeperInstance(instance, zookeepers).getConnector(user, token);
         } else {
-          conn = new MockInstance().getConnector(user, new PasswordToken(password));
-          credentials = new TCredentials(user, 
-              "org.apache.accumulo.core.client.security.tokens.PasswordToken", 
-              ByteBuffer.wrap(password.getBytes()), conn.getInstance().getInstanceID());
+          conn = new MockInstance().getConnector(user, token);
         }
+        credentials = CredentialHelper.create(user, token, conn.getInstance().getInstanceID());
 
         if (autoCreateSchema)
           createSchema();
@@ -379,7 +375,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       } catch (AccumuloSecurityException e) {
         throw new IOException(e);
       }
-    }catch(IOException e){
+    } catch(IOException e){
       LOG.error(e.getMessage(), e);
     }
   }
@@ -483,7 +479,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       LOG.error(e.getMessage(), e);
     } catch (TableNotFoundException e) {
       LOG.error(e.getMessage(), e);
-    } 
+    }
   }
 
   @Override
@@ -515,7 +511,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
 
       if (currentMap != null) {
         if (currentFam.equals(entry.getKey().getColumnFamily())) {
-          currentMap.put(new Utf8(entry.getKey().getColumnQualifierData().toArray()), 
+          currentMap.put(new Utf8(entry.getKey().getColumnQualifierData().toArray()),
               fromBytes(currentSchema, entry.getValue().get()));
           continue;
         } else {
@@ -539,7 +535,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         currentFam = entry.getKey().getColumnFamily();
         currentSchema = field.schema().getValueType();
 
-        currentMap.put(new Utf8(entry.getKey().getColumnQualifierData().toArray()), 
+        currentMap.put(new Utf8(entry.getKey().getColumnQualifierData().toArray()),
             fromBytes(currentSchema, entry.getValue().get()));
         break;
       case ARRAY:
@@ -572,7 +568,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
           currentFam = entry.getKey().getColumnFamily();
           currentSchema = effectiveSchema.getValueType();
 
-          currentMap.put(new Utf8(entry.getKey().getColumnQualifierData().toArray()), 
+          currentMap.put(new Utf8(entry.getKey().getColumnQualifierData().toArray()),
               fromBytes(currentSchema, entry.getValue().get()));
           break;
         }
@@ -603,7 +599,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
    * @return String The field name
    */
   private String getFieldName(Entry<Key, Value> entry) {
-    String fieldName = mapping.columnMap.get(new Pair<Text,Text>(entry.getKey().getColumnFamily(), 
+    String fieldName = mapping.columnMap.get(new Pair<Text,Text>(entry.getKey().getColumnFamily(),
         entry.getKey().getColumnQualifier()));
     if (fieldName == null) {
       fieldName = mapping.columnMap.get(new Pair<Text,Text>(entry.getKey().getColumnFamily(), null));
@@ -667,7 +663,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         }
         Field field = fields.get(i);
 
-        Object o = val.get(field.pos());       
+        Object o = val.get(field.pos());
 
         Pair<Text,Text> col = mapping.fieldMap.get(field.name());
 
@@ -735,11 +731,11 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
     if (o == null){
       return 0;
     }
-    
+
     Set<?> es = ((Map<?, ?>)o).entrySet();
     for (Object entry : es) {
       Object mapKey = ((Entry<?, ?>) entry).getKey();
-      Object mapVal = ((Entry<?, ?>) entry).getValue();                  
+      Object mapVal = ((Entry<?, ?>) entry).getValue();
       if ((o instanceof DirtyMapWrapper && ((DirtyMapWrapper<?, ?>)o).isDirty())
           || !(o instanceof DirtyMapWrapper)) { //mapVal instanceof Dirtyable && ((Dirtyable)mapVal).isDirty()) {
         m.put(col.getFirst(), new Text(toBytes(mapKey)), new Value(toBytes(valueType, mapVal)));
@@ -763,7 +759,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
     if (o == null){
       return 0;
     }
-    
+
     List<?> array = (List<?>) o;  // both GenericArray and DirtyListWrapper
     int j = 0;
     for (Object item : array) {
@@ -862,7 +858,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       // TODO return empty result?
       LOG.error(e.getMessage(), e);
       return null;
-    } 
+    }
   }
 
   @Override
@@ -1027,7 +1023,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       }
     } catch (MutationsRejectedException e) {
       LOG.error(e.getMessage(), e);
-    } 
+    }
   }
 
   @Override
@@ -1039,6 +1035,6 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       }
     } catch (MutationsRejectedException e) {
       LOG.error(e.getMessage(), e);
-    } 
+    }
   }
 }
