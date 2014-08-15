@@ -4,6 +4,8 @@
 
 Current Development 0.5-SNAPSHOT
 
+* GORA-167 forward port of Make Cassandra keyspace consistency configurable within gora.properties (rmarroquin via lewismc)
+
 * GORA-364 MemStore.get fails with NPE when key is not set (Gerhard Gossen via lewismc)
 
 * GORA-361 AvroUtils.deepClonePersistent needs to flush BinaryEncoder (Gerhard Gossen via hsaputra)
