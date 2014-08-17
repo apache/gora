@@ -83,7 +83,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
    * Should be defined in <code>gora.properties</code>. 
    * A default value of 100 is used if this value is absent. This value must be of type <b>Integer</b>.
    */
-  protected static final String SOLR_BATCH_SIZE_PROPERTY = "solr.batchSize";
+  protected static final String SOLR_BATCH_SIZE_PROPERTY = "solr.batch_size";
 
   /** The solrj implementation to use. This has a default value of <i>http</i> for HttpSolrServer.
    * Available options include <b>http</b>, <b>cloud</b>, <b>concurrent</b> and <b>loadbalance</b>. 
@@ -96,13 +96,13 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
    * Should be defined in <code>gora.properties</code>. 
    * A default value of 1000 is used if this value is absent. This value must be of type <b>Integer</b>.
    */
-  protected static final String SOLR_COMMIT_WITHIN_PROPERTY = "solr.commitWithin";
+  protected static final String SOLR_COMMIT_WITHIN_PROPERTY = "solr.commit_within";
 
   /** The maximum number of result to return when we make a call to 
    * {@link org.apache.gora.solr.store.SolrStore#execute(Query)}. This should be 
    * defined in <code>gora.properties</code>. This value must be of type <b>Integer</b>.
    */
-  protected static final String SOLR_RESULTS_SIZE_PROPERTY = "solr.resultsSize";
+  protected static final String SOLR_RESULTS_SIZE_PROPERTY = "solr.results_size";
 
   /** The default batch size (ArrayList) of SolrDocuments to be used in the event of an absent 
    * value for <code>solr.batchSize</code>. 
