@@ -657,7 +657,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       List<Field> fields = schema.getFields();
       int count = 0;
 
-      for (int i = 1; i < fields.size(); i++) {
+      for (int i = 0; i < fields.size(); i++) {
         if (!val.isDirty(i)) {
           continue;
         }

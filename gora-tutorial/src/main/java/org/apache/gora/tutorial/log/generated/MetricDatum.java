@@ -6,9 +6,64 @@
 package org.apache.gora.tutorial.log.generated;  
 @SuppressWarnings("all")
 public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"MetricDatum\",\"namespace\":\"org.apache.gora.tutorial.log.generated\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty.\",\"default\":\"AA==\"},{\"name\":\"metricDimension\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"timestamp\",\"type\":\"long\",\"default\":0},{\"name\":\"metric\",\"type\":\"long\",\"default\":0}]}");
-  /** Bytes used to represent weather or not a field is dirty. */
-  private java.nio.ByteBuffer __g__dirty = java.nio.ByteBuffer.wrap(new byte[1]);
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"MetricDatum\",\"namespace\":\"org.apache.gora.tutorial.log.generated\",\"fields\":[{\"name\":\"metricDimension\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"timestamp\",\"type\":\"long\",\"default\":0},{\"name\":\"metric\",\"type\":\"long\",\"default\":0}],\"default\":null}");
+
+  /** Enum containing all data bean's fields. */
+  public static enum Field {
+    METRIC_DIMENSION(0, "metricDimension"),
+    TIMESTAMP(1, "timestamp"),
+    METRIC(2, "metric"),
+    ;
+    /**
+     * Field's index.
+     */
+    private int index;
+
+    /**
+     * Field's name.
+     */
+    private String name;
+
+    /**
+     * Field's constructor
+     * @param index field's index.
+     * @param name field's name.
+     */
+    Field(int index, String name) {this.index=index;this.name=name;}
+
+    /**
+     * Gets field's index.
+     * @return int field's index.
+     */
+    public int getIndex() {return index;}
+
+    /**
+     * Gets field's name.
+     * @return String field's name.
+     */
+    public String getName() {return name;}
+
+    /**
+     * Gets field's attributes to string.
+     * @return String field's attributes to string.
+     */
+    public String toString() {return name;}
+  };
+
+  public static final String[] _ALL_FIELDS = {
+  "metricDimension",
+  "timestamp",
+  "metric",
+  };
+
+  /**
+   * Gets the total field count.
+   * @return int field count
+   */
+  public int getFieldsCount() {
+    return MetricDatum._ALL_FIELDS.length;
+  }
+
   private java.lang.CharSequence metricDimension;
   private long timestamp;
   private long metric;
@@ -16,10 +71,9 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
   // Used by DatumWriter.  Applications should not call. 
   public java.lang.Object get(int field$) {
     switch (field$) {
-    case 0: return __g__dirty;
-    case 1: return metricDimension;
-    case 2: return timestamp;
-    case 3: return metric;
+    case 0: return metricDimension;
+    case 1: return timestamp;
+    case 2: return metric;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -28,10 +82,9 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: __g__dirty = (java.nio.ByteBuffer)(value); break;
-    case 1: metricDimension = (java.lang.CharSequence)(value); break;
-    case 2: timestamp = (java.lang.Long)(value); break;
-    case 3: metric = (java.lang.Long)(value); break;
+    case 0: metricDimension = (java.lang.CharSequence)(value); break;
+    case 1: timestamp = (java.lang.Long)(value); break;
+    case 2: metric = (java.lang.Long)(value); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -49,7 +102,7 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
    */
   public void setMetricDimension(java.lang.CharSequence value) {
     this.metricDimension = value;
-    setDirty(1);
+    setDirty(0);
   }
   
   /**
@@ -57,7 +110,7 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
    * @param value the value to set.
    */
   public boolean isMetricDimensionDirty(java.lang.CharSequence value) {
-    return isDirty(1);
+    return isDirty(0);
   }
 
   /**
@@ -73,7 +126,7 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
    */
   public void setTimestamp(java.lang.Long value) {
     this.timestamp = value;
-    setDirty(2);
+    setDirty(1);
   }
   
   /**
@@ -81,7 +134,7 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
    * @param value the value to set.
    */
   public boolean isTimestampDirty(java.lang.Long value) {
-    return isDirty(2);
+    return isDirty(1);
   }
 
   /**
@@ -97,7 +150,7 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
    */
   public void setMetric(java.lang.Long value) {
     this.metric = value;
-    setDirty(3);
+    setDirty(2);
   }
   
   /**
@@ -105,7 +158,7 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
    * @param value the value to set.
    */
   public boolean isMetricDirty(java.lang.Long value) {
-    return isDirty(3);
+    return isDirty(2);
   }
 
   /** Creates a new MetricDatum RecordBuilder */
@@ -123,7 +176,7 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
     return new org.apache.gora.tutorial.log.generated.MetricDatum.Builder(other);
   }
   
-  private static java.nio.ByteBuffer deepCopyToWriteOnlyBuffer(
+  private static java.nio.ByteBuffer deepCopyToReadOnlyBuffer(
       java.nio.ByteBuffer input) {
     java.nio.ByteBuffer copy = java.nio.ByteBuffer.allocate(input.capacity());
     int position = input.position();
@@ -152,7 +205,6 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
   public static class Builder extends org.apache.avro.specific.SpecificRecordBuilderBase<MetricDatum>
     implements org.apache.avro.data.RecordBuilder<MetricDatum> {
 
-    private java.nio.ByteBuffer __g__dirty;
     private java.lang.CharSequence metricDimension;
     private long timestamp;
     private long metric;
@@ -170,21 +222,17 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
     /** Creates a Builder by copying an existing MetricDatum instance */
     private Builder(org.apache.gora.tutorial.log.generated.MetricDatum other) {
             super(org.apache.gora.tutorial.log.generated.MetricDatum.SCHEMA$);
-      if (isValidValue(fields()[0], other.__g__dirty)) {
-        this.__g__dirty = (java.nio.ByteBuffer) data().deepCopy(fields()[0].schema(), other.__g__dirty);
+      if (isValidValue(fields()[0], other.metricDimension)) {
+        this.metricDimension = (java.lang.CharSequence) data().deepCopy(fields()[0].schema(), other.metricDimension);
         fieldSetFlags()[0] = true;
       }
-      if (isValidValue(fields()[1], other.metricDimension)) {
-        this.metricDimension = (java.lang.CharSequence) data().deepCopy(fields()[1].schema(), other.metricDimension);
+      if (isValidValue(fields()[1], other.timestamp)) {
+        this.timestamp = (java.lang.Long) data().deepCopy(fields()[1].schema(), other.timestamp);
         fieldSetFlags()[1] = true;
       }
-      if (isValidValue(fields()[2], other.timestamp)) {
-        this.timestamp = (java.lang.Long) data().deepCopy(fields()[2].schema(), other.timestamp);
+      if (isValidValue(fields()[2], other.metric)) {
+        this.metric = (java.lang.Long) data().deepCopy(fields()[2].schema(), other.metric);
         fieldSetFlags()[2] = true;
-      }
-      if (isValidValue(fields()[3], other.metric)) {
-        this.metric = (java.lang.Long) data().deepCopy(fields()[3].schema(), other.metric);
-        fieldSetFlags()[3] = true;
       }
     }
 
@@ -195,21 +243,21 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
     
     /** Sets the value of the 'metricDimension' field */
     public org.apache.gora.tutorial.log.generated.MetricDatum.Builder setMetricDimension(java.lang.CharSequence value) {
-      validate(fields()[1], value);
+      validate(fields()[0], value);
       this.metricDimension = value;
-      fieldSetFlags()[1] = true;
+      fieldSetFlags()[0] = true;
       return this; 
     }
     
     /** Checks whether the 'metricDimension' field has been set */
     public boolean hasMetricDimension() {
-      return fieldSetFlags()[1];
+      return fieldSetFlags()[0];
     }
     
     /** Clears the value of the 'metricDimension' field */
     public org.apache.gora.tutorial.log.generated.MetricDatum.Builder clearMetricDimension() {
       metricDimension = null;
-      fieldSetFlags()[1] = false;
+      fieldSetFlags()[0] = false;
       return this;
     }
     
@@ -220,20 +268,20 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
     
     /** Sets the value of the 'timestamp' field */
     public org.apache.gora.tutorial.log.generated.MetricDatum.Builder setTimestamp(long value) {
-      validate(fields()[2], value);
+      validate(fields()[1], value);
       this.timestamp = value;
-      fieldSetFlags()[2] = true;
+      fieldSetFlags()[1] = true;
       return this; 
     }
     
     /** Checks whether the 'timestamp' field has been set */
     public boolean hasTimestamp() {
-      return fieldSetFlags()[2];
+      return fieldSetFlags()[1];
     }
     
     /** Clears the value of the 'timestamp' field */
     public org.apache.gora.tutorial.log.generated.MetricDatum.Builder clearTimestamp() {
-      fieldSetFlags()[2] = false;
+      fieldSetFlags()[1] = false;
       return this;
     }
     
@@ -244,20 +292,20 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
     
     /** Sets the value of the 'metric' field */
     public org.apache.gora.tutorial.log.generated.MetricDatum.Builder setMetric(long value) {
-      validate(fields()[3], value);
+      validate(fields()[2], value);
       this.metric = value;
-      fieldSetFlags()[3] = true;
+      fieldSetFlags()[2] = true;
       return this; 
     }
     
     /** Checks whether the 'metric' field has been set */
     public boolean hasMetric() {
-      return fieldSetFlags()[3];
+      return fieldSetFlags()[2];
     }
     
     /** Clears the value of the 'metric' field */
     public org.apache.gora.tutorial.log.generated.MetricDatum.Builder clearMetric() {
-      fieldSetFlags()[3] = false;
+      fieldSetFlags()[2] = false;
       return this;
     }
     
@@ -265,10 +313,9 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
     public MetricDatum build() {
       try {
         MetricDatum record = new MetricDatum();
-        record.__g__dirty = fieldSetFlags()[0] ? this.__g__dirty : (java.nio.ByteBuffer) java.nio.ByteBuffer.wrap(new byte[1]);
-        record.metricDimension = fieldSetFlags()[1] ? this.metricDimension : (java.lang.CharSequence) defaultValue(fields()[1]);
-        record.timestamp = fieldSetFlags()[2] ? this.timestamp : (java.lang.Long) defaultValue(fields()[2]);
-        record.metric = fieldSetFlags()[3] ? this.metric : (java.lang.Long) defaultValue(fields()[3]);
+        record.metricDimension = fieldSetFlags()[0] ? this.metricDimension : (java.lang.CharSequence) defaultValue(fields()[0]);
+        record.timestamp = fieldSetFlags()[1] ? this.timestamp : (java.lang.Long) defaultValue(fields()[1]);
+        record.metric = fieldSetFlags()[2] ? this.metric : (java.lang.Long) defaultValue(fields()[2]);
         return record;
       } catch (Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);
@@ -290,7 +337,7 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
   
       private Tombstone() { }
   
-	  				  /**
+	  		  /**
 	   * Gets the value of the 'metricDimension' field.
 		   */
 	  public java.lang.CharSequence getMetricDimension() {
@@ -363,3 +410,4 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
   }
   
 }
+

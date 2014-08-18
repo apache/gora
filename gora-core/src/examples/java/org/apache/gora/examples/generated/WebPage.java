@@ -6,17 +6,16 @@
 package org.apache.gora.examples.generated;  
 @SuppressWarnings("all")
 public class WebPage extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"WebPage\",\"namespace\":\"org.apache.gora.examples.generated\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty.\",\"default\":\"AA==\"},{\"name\":\"url\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"content\",\"type\":[\"null\",\"bytes\"],\"default\":null},{\"name\":\"parsedContent\",\"type\":{\"type\":\"array\",\"items\":\"string\"},\"default\":{}},{\"name\":\"outlinks\",\"type\":{\"type\":\"map\",\"values\":[\"null\",\"string\"]},\"default\":{}},{\"name\":\"headers\",\"type\":[\"null\",{\"type\":\"map\",\"values\":[\"null\",\"string\"]}],\"default\":null},{\"name\":\"metadata\",\"type\":{\"type\":\"record\",\"name\":\"Metadata\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty.\",\"default\":\"AA==\"},{\"name\":\"version\",\"type\":\"int\",\"default\":0},{\"name\":\"data\",\"type\":{\"type\":\"map\",\"values\":\"string\"},\"default\":{}}]},\"default\":null}]}");
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"WebPage\",\"namespace\":\"org.apache.gora.examples.generated\",\"fields\":[{\"name\":\"url\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"content\",\"type\":[\"null\",\"bytes\"],\"default\":null},{\"name\":\"parsedContent\",\"type\":{\"type\":\"array\",\"items\":\"string\"},\"default\":null},{\"name\":\"outlinks\",\"type\":{\"type\":\"map\",\"values\":\"string\"},\"default\":{}},{\"name\":\"headers\",\"type\":[\"null\",{\"type\":\"map\",\"values\":[\"null\",\"string\"]}],\"default\":null},{\"name\":\"metadata\",\"type\":{\"type\":\"record\",\"name\":\"Metadata\",\"fields\":[{\"name\":\"version\",\"type\":\"int\",\"default\":0},{\"name\":\"data\",\"type\":{\"type\":\"map\",\"values\":\"string\"},\"default\":null}]},\"default\":null}],\"default\":null}");
 
   /** Enum containing all data bean's fields. */
   public static enum Field {
-    __G__DIRTY(0, "__g__dirty"),
-    URL(1, "url"),
-    CONTENT(2, "content"),
-    PARSED_CONTENT(3, "parsedContent"),
-    OUTLINKS(4, "outlinks"),
-    HEADERS(5, "headers"),
-    METADATA(6, "metadata"),
+    URL(0, "url"),
+    CONTENT(1, "content"),
+    PARSED_CONTENT(2, "parsedContent"),
+    OUTLINKS(3, "outlinks"),
+    HEADERS(4, "headers"),
+    METADATA(5, "metadata"),
     ;
     /**
      * Field's index.
@@ -55,7 +54,6 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
   };
 
   public static final String[] _ALL_FIELDS = {
-  "__g__dirty",
   "url",
   "content",
   "parsedContent",
@@ -64,8 +62,14 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
   "metadata",
   };
 
-  /** Bytes used to represent weather or not a field is dirty. */
-  private java.nio.ByteBuffer __g__dirty = java.nio.ByteBuffer.wrap(new byte[1]);
+  /**
+   * Gets the total field count.
+   * @return int field count
+   */
+  public int getFieldsCount() {
+    return WebPage._ALL_FIELDS.length;
+  }
+
   private java.lang.CharSequence url;
   private java.nio.ByteBuffer content;
   private java.util.List<java.lang.CharSequence> parsedContent;
@@ -76,13 +80,12 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
   // Used by DatumWriter.  Applications should not call. 
   public java.lang.Object get(int field$) {
     switch (field$) {
-    case 0: return __g__dirty;
-    case 1: return url;
-    case 2: return content;
-    case 3: return parsedContent;
-    case 4: return outlinks;
-    case 5: return headers;
-    case 6: return metadata;
+    case 0: return url;
+    case 1: return content;
+    case 2: return parsedContent;
+    case 3: return outlinks;
+    case 4: return headers;
+    case 5: return metadata;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -91,13 +94,12 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: __g__dirty = (java.nio.ByteBuffer)(value); break;
-    case 1: url = (java.lang.CharSequence)(value); break;
-    case 2: content = (java.nio.ByteBuffer)(value); break;
-    case 3: parsedContent = (java.util.List<java.lang.CharSequence>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyListWrapper((java.util.List)value)); break;
-    case 4: outlinks = (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)value)); break;
-    case 5: headers = (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>)(value); break;
-    case 6: metadata = (org.apache.gora.examples.generated.Metadata)(value); break;
+    case 0: url = (java.lang.CharSequence)(value); break;
+    case 1: content = (java.nio.ByteBuffer)(value); break;
+    case 2: parsedContent = (java.util.List<java.lang.CharSequence>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyListWrapper((java.util.List)value)); break;
+    case 3: outlinks = (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)value)); break;
+    case 4: headers = (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>)(value); break;
+    case 5: metadata = (org.apache.gora.examples.generated.Metadata)(value); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -115,7 +117,7 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
    */
   public void setUrl(java.lang.CharSequence value) {
     this.url = value;
-    setDirty(1);
+    setDirty(0);
   }
   
   /**
@@ -123,7 +125,7 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
    * @param value the value to set.
    */
   public boolean isUrlDirty(java.lang.CharSequence value) {
-    return isDirty(1);
+    return isDirty(0);
   }
 
   /**
@@ -139,7 +141,7 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
    */
   public void setContent(java.nio.ByteBuffer value) {
     this.content = value;
-    setDirty(2);
+    setDirty(1);
   }
   
   /**
@@ -147,7 +149,7 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
    * @param value the value to set.
    */
   public boolean isContentDirty(java.nio.ByteBuffer value) {
-    return isDirty(2);
+    return isDirty(1);
   }
 
   /**
@@ -163,7 +165,7 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
    */
   public void setParsedContent(java.util.List<java.lang.CharSequence> value) {
     this.parsedContent = (value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyListWrapper(value);
-    setDirty(3);
+    setDirty(2);
   }
   
   /**
@@ -171,7 +173,7 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
    * @param value the value to set.
    */
   public boolean isParsedContentDirty(java.util.List<java.lang.CharSequence> value) {
-    return isDirty(3);
+    return isDirty(2);
   }
 
   /**
@@ -187,7 +189,7 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
    */
   public void setOutlinks(java.util.Map<java.lang.CharSequence,java.lang.CharSequence> value) {
     this.outlinks = (value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyMapWrapper(value);
-    setDirty(4);
+    setDirty(3);
   }
   
   /**
@@ -195,7 +197,7 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
    * @param value the value to set.
    */
   public boolean isOutlinksDirty(java.util.Map<java.lang.CharSequence,java.lang.CharSequence> value) {
-    return isDirty(4);
+    return isDirty(3);
   }
 
   /**
@@ -211,7 +213,7 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
    */
   public void setHeaders(java.util.Map<java.lang.CharSequence,java.lang.CharSequence> value) {
     this.headers = value;
-    setDirty(5);
+    setDirty(4);
   }
   
   /**
@@ -219,7 +221,7 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
    * @param value the value to set.
    */
   public boolean isHeadersDirty(java.util.Map<java.lang.CharSequence,java.lang.CharSequence> value) {
-    return isDirty(5);
+    return isDirty(4);
   }
 
   /**
@@ -235,7 +237,7 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
    */
   public void setMetadata(org.apache.gora.examples.generated.Metadata value) {
     this.metadata = value;
-    setDirty(6);
+    setDirty(5);
   }
   
   /**
@@ -243,7 +245,7 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
    * @param value the value to set.
    */
   public boolean isMetadataDirty(org.apache.gora.examples.generated.Metadata value) {
-    return isDirty(6);
+    return isDirty(5);
   }
 
   /** Creates a new WebPage RecordBuilder */
@@ -261,7 +263,7 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
     return new org.apache.gora.examples.generated.WebPage.Builder(other);
   }
   
-  private static java.nio.ByteBuffer deepCopyToWriteOnlyBuffer(
+  private static java.nio.ByteBuffer deepCopyToReadOnlyBuffer(
       java.nio.ByteBuffer input) {
     java.nio.ByteBuffer copy = java.nio.ByteBuffer.allocate(input.capacity());
     int position = input.position();
@@ -290,7 +292,6 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
   public static class Builder extends org.apache.avro.specific.SpecificRecordBuilderBase<WebPage>
     implements org.apache.avro.data.RecordBuilder<WebPage> {
 
-    private java.nio.ByteBuffer __g__dirty;
     private java.lang.CharSequence url;
     private java.nio.ByteBuffer content;
     private java.util.List<java.lang.CharSequence> parsedContent;
@@ -311,33 +312,29 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
     /** Creates a Builder by copying an existing WebPage instance */
     private Builder(org.apache.gora.examples.generated.WebPage other) {
             super(org.apache.gora.examples.generated.WebPage.SCHEMA$);
-      if (isValidValue(fields()[0], other.__g__dirty)) {
-        this.__g__dirty = (java.nio.ByteBuffer) data().deepCopy(fields()[0].schema(), other.__g__dirty);
+      if (isValidValue(fields()[0], other.url)) {
+        this.url = (java.lang.CharSequence) data().deepCopy(fields()[0].schema(), other.url);
         fieldSetFlags()[0] = true;
       }
-      if (isValidValue(fields()[1], other.url)) {
-        this.url = (java.lang.CharSequence) data().deepCopy(fields()[1].schema(), other.url);
+      if (isValidValue(fields()[1], other.content)) {
+        this.content = (java.nio.ByteBuffer) data().deepCopy(fields()[1].schema(), other.content);
         fieldSetFlags()[1] = true;
       }
-      if (isValidValue(fields()[2], other.content)) {
-        this.content = (java.nio.ByteBuffer) data().deepCopy(fields()[2].schema(), other.content);
+      if (isValidValue(fields()[2], other.parsedContent)) {
+        this.parsedContent = (java.util.List<java.lang.CharSequence>) data().deepCopy(fields()[2].schema(), other.parsedContent);
         fieldSetFlags()[2] = true;
       }
-      if (isValidValue(fields()[3], other.parsedContent)) {
-        this.parsedContent = (java.util.List<java.lang.CharSequence>) data().deepCopy(fields()[3].schema(), other.parsedContent);
+      if (isValidValue(fields()[3], other.outlinks)) {
+        this.outlinks = (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>) data().deepCopy(fields()[3].schema(), other.outlinks);
         fieldSetFlags()[3] = true;
       }
-      if (isValidValue(fields()[4], other.outlinks)) {
-        this.outlinks = (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>) data().deepCopy(fields()[4].schema(), other.outlinks);
+      if (isValidValue(fields()[4], other.headers)) {
+        this.headers = (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>) data().deepCopy(fields()[4].schema(), other.headers);
         fieldSetFlags()[4] = true;
       }
-      if (isValidValue(fields()[5], other.headers)) {
-        this.headers = (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>) data().deepCopy(fields()[5].schema(), other.headers);
+      if (isValidValue(fields()[5], other.metadata)) {
+        this.metadata = (org.apache.gora.examples.generated.Metadata) data().deepCopy(fields()[5].schema(), other.metadata);
         fieldSetFlags()[5] = true;
-      }
-      if (isValidValue(fields()[6], other.metadata)) {
-        this.metadata = (org.apache.gora.examples.generated.Metadata) data().deepCopy(fields()[6].schema(), other.metadata);
-        fieldSetFlags()[6] = true;
       }
     }
 
@@ -348,21 +345,21 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
     
     /** Sets the value of the 'url' field */
     public org.apache.gora.examples.generated.WebPage.Builder setUrl(java.lang.CharSequence value) {
-      validate(fields()[1], value);
+      validate(fields()[0], value);
       this.url = value;
-      fieldSetFlags()[1] = true;
+      fieldSetFlags()[0] = true;
       return this; 
     }
     
     /** Checks whether the 'url' field has been set */
     public boolean hasUrl() {
-      return fieldSetFlags()[1];
+      return fieldSetFlags()[0];
     }
     
     /** Clears the value of the 'url' field */
     public org.apache.gora.examples.generated.WebPage.Builder clearUrl() {
       url = null;
-      fieldSetFlags()[1] = false;
+      fieldSetFlags()[0] = false;
       return this;
     }
     
@@ -373,21 +370,21 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
     
     /** Sets the value of the 'content' field */
     public org.apache.gora.examples.generated.WebPage.Builder setContent(java.nio.ByteBuffer value) {
-      validate(fields()[2], value);
+      validate(fields()[1], value);
       this.content = value;
-      fieldSetFlags()[2] = true;
+      fieldSetFlags()[1] = true;
       return this; 
     }
     
     /** Checks whether the 'content' field has been set */
     public boolean hasContent() {
-      return fieldSetFlags()[2];
+      return fieldSetFlags()[1];
     }
     
     /** Clears the value of the 'content' field */
     public org.apache.gora.examples.generated.WebPage.Builder clearContent() {
       content = null;
-      fieldSetFlags()[2] = false;
+      fieldSetFlags()[1] = false;
       return this;
     }
     
@@ -398,21 +395,21 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
     
     /** Sets the value of the 'parsedContent' field */
     public org.apache.gora.examples.generated.WebPage.Builder setParsedContent(java.util.List<java.lang.CharSequence> value) {
-      validate(fields()[3], value);
+      validate(fields()[2], value);
       this.parsedContent = value;
-      fieldSetFlags()[3] = true;
+      fieldSetFlags()[2] = true;
       return this; 
     }
     
     /** Checks whether the 'parsedContent' field has been set */
     public boolean hasParsedContent() {
-      return fieldSetFlags()[3];
+      return fieldSetFlags()[2];
     }
     
     /** Clears the value of the 'parsedContent' field */
     public org.apache.gora.examples.generated.WebPage.Builder clearParsedContent() {
       parsedContent = null;
-      fieldSetFlags()[3] = false;
+      fieldSetFlags()[2] = false;
       return this;
     }
     
@@ -423,21 +420,21 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
     
     /** Sets the value of the 'outlinks' field */
     public org.apache.gora.examples.generated.WebPage.Builder setOutlinks(java.util.Map<java.lang.CharSequence,java.lang.CharSequence> value) {
-      validate(fields()[4], value);
+      validate(fields()[3], value);
       this.outlinks = value;
-      fieldSetFlags()[4] = true;
+      fieldSetFlags()[3] = true;
       return this; 
     }
     
     /** Checks whether the 'outlinks' field has been set */
     public boolean hasOutlinks() {
-      return fieldSetFlags()[4];
+      return fieldSetFlags()[3];
     }
     
     /** Clears the value of the 'outlinks' field */
     public org.apache.gora.examples.generated.WebPage.Builder clearOutlinks() {
       outlinks = null;
-      fieldSetFlags()[4] = false;
+      fieldSetFlags()[3] = false;
       return this;
     }
     
@@ -448,21 +445,21 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
     
     /** Sets the value of the 'headers' field */
     public org.apache.gora.examples.generated.WebPage.Builder setHeaders(java.util.Map<java.lang.CharSequence,java.lang.CharSequence> value) {
-      validate(fields()[5], value);
+      validate(fields()[4], value);
       this.headers = value;
-      fieldSetFlags()[5] = true;
+      fieldSetFlags()[4] = true;
       return this; 
     }
     
     /** Checks whether the 'headers' field has been set */
     public boolean hasHeaders() {
-      return fieldSetFlags()[5];
+      return fieldSetFlags()[4];
     }
     
     /** Clears the value of the 'headers' field */
     public org.apache.gora.examples.generated.WebPage.Builder clearHeaders() {
       headers = null;
-      fieldSetFlags()[5] = false;
+      fieldSetFlags()[4] = false;
       return this;
     }
     
@@ -473,21 +470,21 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
     
     /** Sets the value of the 'metadata' field */
     public org.apache.gora.examples.generated.WebPage.Builder setMetadata(org.apache.gora.examples.generated.Metadata value) {
-      validate(fields()[6], value);
+      validate(fields()[5], value);
       this.metadata = value;
-      fieldSetFlags()[6] = true;
+      fieldSetFlags()[5] = true;
       return this; 
     }
     
     /** Checks whether the 'metadata' field has been set */
     public boolean hasMetadata() {
-      return fieldSetFlags()[6];
+      return fieldSetFlags()[5];
     }
     
     /** Clears the value of the 'metadata' field */
     public org.apache.gora.examples.generated.WebPage.Builder clearMetadata() {
       metadata = null;
-      fieldSetFlags()[6] = false;
+      fieldSetFlags()[5] = false;
       return this;
     }
     
@@ -495,13 +492,12 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
     public WebPage build() {
       try {
         WebPage record = new WebPage();
-        record.__g__dirty = fieldSetFlags()[0] ? this.__g__dirty : (java.nio.ByteBuffer) java.nio.ByteBuffer.wrap(new byte[1]);
-        record.url = fieldSetFlags()[1] ? this.url : (java.lang.CharSequence) defaultValue(fields()[1]);
-        record.content = fieldSetFlags()[2] ? this.content : (java.nio.ByteBuffer) defaultValue(fields()[2]);
-        record.parsedContent = fieldSetFlags()[3] ? this.parsedContent : (java.util.List<java.lang.CharSequence>) new org.apache.gora.persistency.impl.DirtyListWrapper((java.util.List)defaultValue(fields()[3]));
-        record.outlinks = fieldSetFlags()[4] ? this.outlinks : (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>) new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)defaultValue(fields()[4]));
-        record.headers = fieldSetFlags()[5] ? this.headers : (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>) defaultValue(fields()[5]);
-        record.metadata = fieldSetFlags()[6] ? this.metadata : (org.apache.gora.examples.generated.Metadata) Metadata.newBuilder().build();
+        record.url = fieldSetFlags()[0] ? this.url : (java.lang.CharSequence) defaultValue(fields()[0]);
+        record.content = fieldSetFlags()[1] ? this.content : (java.nio.ByteBuffer) defaultValue(fields()[1]);
+        record.parsedContent = fieldSetFlags()[2] ? this.parsedContent : (java.util.List<java.lang.CharSequence>) new org.apache.gora.persistency.impl.DirtyListWrapper((java.util.List)defaultValue(fields()[2]));
+        record.outlinks = fieldSetFlags()[3] ? this.outlinks : (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>) new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)defaultValue(fields()[3]));
+        record.headers = fieldSetFlags()[4] ? this.headers : (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>) defaultValue(fields()[4]);
+        record.metadata = fieldSetFlags()[5] ? this.metadata : (org.apache.gora.examples.generated.Metadata) Metadata.newBuilder().build();
         return record;
       } catch (Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);
@@ -523,7 +519,7 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
   
       private Tombstone() { }
   
-	  				  /**
+	  		  /**
 	   * Gets the value of the 'url' field.
 		   */
 	  public java.lang.CharSequence getUrl() {
@@ -665,3 +661,4 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
   }
   
 }
+

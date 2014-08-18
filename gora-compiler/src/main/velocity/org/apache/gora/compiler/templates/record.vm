@@ -75,6 +75,14 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
 #end
   };
 
+  /**
+   * Gets the total field count.
+   * @return int field count
+   */
+  public int getFieldsCount() {
+    return ${this.mangle($schema.getName())}._ALL_FIELDS.length;
+  }
+
 #foreach ($field in $schema.getFields())
 #if ($field.doc())
   /** $field.doc() */

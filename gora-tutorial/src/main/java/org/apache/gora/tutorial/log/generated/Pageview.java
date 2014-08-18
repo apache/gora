@@ -6,9 +6,74 @@
 package org.apache.gora.tutorial.log.generated;  
 @SuppressWarnings("all")
 public class Pageview extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Pageview\",\"namespace\":\"org.apache.gora.tutorial.log.generated\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty.\",\"default\":\"AAA=\"},{\"name\":\"url\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"timestamp\",\"type\":\"long\",\"default\":0},{\"name\":\"ip\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"httpMethod\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"httpStatusCode\",\"type\":\"int\",\"default\":0},{\"name\":\"responseSize\",\"type\":\"int\",\"default\":0},{\"name\":\"referrer\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"userAgent\",\"type\":[\"null\",\"string\"],\"default\":null}]}");
-  /** Bytes used to represent weather or not a field is dirty. */
-  private java.nio.ByteBuffer __g__dirty = java.nio.ByteBuffer.wrap(new byte[2]);
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Pageview\",\"namespace\":\"org.apache.gora.tutorial.log.generated\",\"fields\":[{\"name\":\"url\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"timestamp\",\"type\":\"long\",\"default\":0},{\"name\":\"ip\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"httpMethod\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"httpStatusCode\",\"type\":\"int\",\"default\":0},{\"name\":\"responseSize\",\"type\":\"int\",\"default\":0},{\"name\":\"referrer\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"userAgent\",\"type\":[\"null\",\"string\"],\"default\":null}],\"default\":null}");
+
+  /** Enum containing all data bean's fields. */
+  public static enum Field {
+    URL(0, "url"),
+    TIMESTAMP(1, "timestamp"),
+    IP(2, "ip"),
+    HTTP_METHOD(3, "httpMethod"),
+    HTTP_STATUS_CODE(4, "httpStatusCode"),
+    RESPONSE_SIZE(5, "responseSize"),
+    REFERRER(6, "referrer"),
+    USER_AGENT(7, "userAgent"),
+    ;
+    /**
+     * Field's index.
+     */
+    private int index;
+
+    /**
+     * Field's name.
+     */
+    private String name;
+
+    /**
+     * Field's constructor
+     * @param index field's index.
+     * @param name field's name.
+     */
+    Field(int index, String name) {this.index=index;this.name=name;}
+
+    /**
+     * Gets field's index.
+     * @return int field's index.
+     */
+    public int getIndex() {return index;}
+
+    /**
+     * Gets field's name.
+     * @return String field's name.
+     */
+    public String getName() {return name;}
+
+    /**
+     * Gets field's attributes to string.
+     * @return String field's attributes to string.
+     */
+    public String toString() {return name;}
+  };
+
+  public static final String[] _ALL_FIELDS = {
+  "url",
+  "timestamp",
+  "ip",
+  "httpMethod",
+  "httpStatusCode",
+  "responseSize",
+  "referrer",
+  "userAgent",
+  };
+
+  /**
+   * Gets the total field count.
+   * @return int field count
+   */
+  public int getFieldsCount() {
+    return Pageview._ALL_FIELDS.length;
+  }
+
   private java.lang.CharSequence url;
   private long timestamp;
   private java.lang.CharSequence ip;
@@ -21,15 +86,14 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
   // Used by DatumWriter.  Applications should not call. 
   public java.lang.Object get(int field$) {
     switch (field$) {
-    case 0: return __g__dirty;
-    case 1: return url;
-    case 2: return timestamp;
-    case 3: return ip;
-    case 4: return httpMethod;
-    case 5: return httpStatusCode;
-    case 6: return responseSize;
-    case 7: return referrer;
-    case 8: return userAgent;
+    case 0: return url;
+    case 1: return timestamp;
+    case 2: return ip;
+    case 3: return httpMethod;
+    case 4: return httpStatusCode;
+    case 5: return responseSize;
+    case 6: return referrer;
+    case 7: return userAgent;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -38,15 +102,14 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: __g__dirty = (java.nio.ByteBuffer)(value); break;
-    case 1: url = (java.lang.CharSequence)(value); break;
-    case 2: timestamp = (java.lang.Long)(value); break;
-    case 3: ip = (java.lang.CharSequence)(value); break;
-    case 4: httpMethod = (java.lang.CharSequence)(value); break;
-    case 5: httpStatusCode = (java.lang.Integer)(value); break;
-    case 6: responseSize = (java.lang.Integer)(value); break;
-    case 7: referrer = (java.lang.CharSequence)(value); break;
-    case 8: userAgent = (java.lang.CharSequence)(value); break;
+    case 0: url = (java.lang.CharSequence)(value); break;
+    case 1: timestamp = (java.lang.Long)(value); break;
+    case 2: ip = (java.lang.CharSequence)(value); break;
+    case 3: httpMethod = (java.lang.CharSequence)(value); break;
+    case 4: httpStatusCode = (java.lang.Integer)(value); break;
+    case 5: responseSize = (java.lang.Integer)(value); break;
+    case 6: referrer = (java.lang.CharSequence)(value); break;
+    case 7: userAgent = (java.lang.CharSequence)(value); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -64,7 +127,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    */
   public void setUrl(java.lang.CharSequence value) {
     this.url = value;
-    setDirty(1);
+    setDirty(0);
   }
   
   /**
@@ -72,7 +135,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    * @param value the value to set.
    */
   public boolean isUrlDirty(java.lang.CharSequence value) {
-    return isDirty(1);
+    return isDirty(0);
   }
 
   /**
@@ -88,7 +151,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    */
   public void setTimestamp(java.lang.Long value) {
     this.timestamp = value;
-    setDirty(2);
+    setDirty(1);
   }
   
   /**
@@ -96,7 +159,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    * @param value the value to set.
    */
   public boolean isTimestampDirty(java.lang.Long value) {
-    return isDirty(2);
+    return isDirty(1);
   }
 
   /**
@@ -112,7 +175,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    */
   public void setIp(java.lang.CharSequence value) {
     this.ip = value;
-    setDirty(3);
+    setDirty(2);
   }
   
   /**
@@ -120,7 +183,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    * @param value the value to set.
    */
   public boolean isIpDirty(java.lang.CharSequence value) {
-    return isDirty(3);
+    return isDirty(2);
   }
 
   /**
@@ -136,7 +199,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    */
   public void setHttpMethod(java.lang.CharSequence value) {
     this.httpMethod = value;
-    setDirty(4);
+    setDirty(3);
   }
   
   /**
@@ -144,7 +207,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    * @param value the value to set.
    */
   public boolean isHttpMethodDirty(java.lang.CharSequence value) {
-    return isDirty(4);
+    return isDirty(3);
   }
 
   /**
@@ -160,7 +223,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    */
   public void setHttpStatusCode(java.lang.Integer value) {
     this.httpStatusCode = value;
-    setDirty(5);
+    setDirty(4);
   }
   
   /**
@@ -168,7 +231,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    * @param value the value to set.
    */
   public boolean isHttpStatusCodeDirty(java.lang.Integer value) {
-    return isDirty(5);
+    return isDirty(4);
   }
 
   /**
@@ -184,7 +247,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    */
   public void setResponseSize(java.lang.Integer value) {
     this.responseSize = value;
-    setDirty(6);
+    setDirty(5);
   }
   
   /**
@@ -192,7 +255,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    * @param value the value to set.
    */
   public boolean isResponseSizeDirty(java.lang.Integer value) {
-    return isDirty(6);
+    return isDirty(5);
   }
 
   /**
@@ -208,7 +271,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    */
   public void setReferrer(java.lang.CharSequence value) {
     this.referrer = value;
-    setDirty(7);
+    setDirty(6);
   }
   
   /**
@@ -216,7 +279,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    * @param value the value to set.
    */
   public boolean isReferrerDirty(java.lang.CharSequence value) {
-    return isDirty(7);
+    return isDirty(6);
   }
 
   /**
@@ -232,7 +295,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    */
   public void setUserAgent(java.lang.CharSequence value) {
     this.userAgent = value;
-    setDirty(8);
+    setDirty(7);
   }
   
   /**
@@ -240,7 +303,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    * @param value the value to set.
    */
   public boolean isUserAgentDirty(java.lang.CharSequence value) {
-    return isDirty(8);
+    return isDirty(7);
   }
 
   /** Creates a new Pageview RecordBuilder */
@@ -258,7 +321,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
     return new org.apache.gora.tutorial.log.generated.Pageview.Builder(other);
   }
   
-  private static java.nio.ByteBuffer deepCopyToWriteOnlyBuffer(
+  private static java.nio.ByteBuffer deepCopyToReadOnlyBuffer(
       java.nio.ByteBuffer input) {
     java.nio.ByteBuffer copy = java.nio.ByteBuffer.allocate(input.capacity());
     int position = input.position();
@@ -287,7 +350,6 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
   public static class Builder extends org.apache.avro.specific.SpecificRecordBuilderBase<Pageview>
     implements org.apache.avro.data.RecordBuilder<Pageview> {
 
-    private java.nio.ByteBuffer __g__dirty;
     private java.lang.CharSequence url;
     private long timestamp;
     private java.lang.CharSequence ip;
@@ -310,41 +372,37 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
     /** Creates a Builder by copying an existing Pageview instance */
     private Builder(org.apache.gora.tutorial.log.generated.Pageview other) {
             super(org.apache.gora.tutorial.log.generated.Pageview.SCHEMA$);
-      if (isValidValue(fields()[0], other.__g__dirty)) {
-        this.__g__dirty = (java.nio.ByteBuffer) data().deepCopy(fields()[0].schema(), other.__g__dirty);
+      if (isValidValue(fields()[0], other.url)) {
+        this.url = (java.lang.CharSequence) data().deepCopy(fields()[0].schema(), other.url);
         fieldSetFlags()[0] = true;
       }
-      if (isValidValue(fields()[1], other.url)) {
-        this.url = (java.lang.CharSequence) data().deepCopy(fields()[1].schema(), other.url);
+      if (isValidValue(fields()[1], other.timestamp)) {
+        this.timestamp = (java.lang.Long) data().deepCopy(fields()[1].schema(), other.timestamp);
         fieldSetFlags()[1] = true;
       }
-      if (isValidValue(fields()[2], other.timestamp)) {
-        this.timestamp = (java.lang.Long) data().deepCopy(fields()[2].schema(), other.timestamp);
+      if (isValidValue(fields()[2], other.ip)) {
+        this.ip = (java.lang.CharSequence) data().deepCopy(fields()[2].schema(), other.ip);
         fieldSetFlags()[2] = true;
       }
-      if (isValidValue(fields()[3], other.ip)) {
-        this.ip = (java.lang.CharSequence) data().deepCopy(fields()[3].schema(), other.ip);
+      if (isValidValue(fields()[3], other.httpMethod)) {
+        this.httpMethod = (java.lang.CharSequence) data().deepCopy(fields()[3].schema(), other.httpMethod);
         fieldSetFlags()[3] = true;
       }
-      if (isValidValue(fields()[4], other.httpMethod)) {
-        this.httpMethod = (java.lang.CharSequence) data().deepCopy(fields()[4].schema(), other.httpMethod);
+      if (isValidValue(fields()[4], other.httpStatusCode)) {
+        this.httpStatusCode = (java.lang.Integer) data().deepCopy(fields()[4].schema(), other.httpStatusCode);
         fieldSetFlags()[4] = true;
       }
-      if (isValidValue(fields()[5], other.httpStatusCode)) {
-        this.httpStatusCode = (java.lang.Integer) data().deepCopy(fields()[5].schema(), other.httpStatusCode);
+      if (isValidValue(fields()[5], other.responseSize)) {
+        this.responseSize = (java.lang.Integer) data().deepCopy(fields()[5].schema(), other.responseSize);
         fieldSetFlags()[5] = true;
       }
-      if (isValidValue(fields()[6], other.responseSize)) {
-        this.responseSize = (java.lang.Integer) data().deepCopy(fields()[6].schema(), other.responseSize);
+      if (isValidValue(fields()[6], other.referrer)) {
+        this.referrer = (java.lang.CharSequence) data().deepCopy(fields()[6].schema(), other.referrer);
         fieldSetFlags()[6] = true;
       }
-      if (isValidValue(fields()[7], other.referrer)) {
-        this.referrer = (java.lang.CharSequence) data().deepCopy(fields()[7].schema(), other.referrer);
+      if (isValidValue(fields()[7], other.userAgent)) {
+        this.userAgent = (java.lang.CharSequence) data().deepCopy(fields()[7].schema(), other.userAgent);
         fieldSetFlags()[7] = true;
-      }
-      if (isValidValue(fields()[8], other.userAgent)) {
-        this.userAgent = (java.lang.CharSequence) data().deepCopy(fields()[8].schema(), other.userAgent);
-        fieldSetFlags()[8] = true;
       }
     }
 
@@ -355,21 +413,21 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
     
     /** Sets the value of the 'url' field */
     public org.apache.gora.tutorial.log.generated.Pageview.Builder setUrl(java.lang.CharSequence value) {
-      validate(fields()[1], value);
+      validate(fields()[0], value);
       this.url = value;
-      fieldSetFlags()[1] = true;
+      fieldSetFlags()[0] = true;
       return this; 
     }
     
     /** Checks whether the 'url' field has been set */
     public boolean hasUrl() {
-      return fieldSetFlags()[1];
+      return fieldSetFlags()[0];
     }
     
     /** Clears the value of the 'url' field */
     public org.apache.gora.tutorial.log.generated.Pageview.Builder clearUrl() {
       url = null;
-      fieldSetFlags()[1] = false;
+      fieldSetFlags()[0] = false;
       return this;
     }
     
@@ -380,20 +438,20 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
     
     /** Sets the value of the 'timestamp' field */
     public org.apache.gora.tutorial.log.generated.Pageview.Builder setTimestamp(long value) {
-      validate(fields()[2], value);
+      validate(fields()[1], value);
       this.timestamp = value;
-      fieldSetFlags()[2] = true;
+      fieldSetFlags()[1] = true;
       return this; 
     }
     
     /** Checks whether the 'timestamp' field has been set */
     public boolean hasTimestamp() {
-      return fieldSetFlags()[2];
+      return fieldSetFlags()[1];
     }
     
     /** Clears the value of the 'timestamp' field */
     public org.apache.gora.tutorial.log.generated.Pageview.Builder clearTimestamp() {
-      fieldSetFlags()[2] = false;
+      fieldSetFlags()[1] = false;
       return this;
     }
     
@@ -404,21 +462,21 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
     
     /** Sets the value of the 'ip' field */
     public org.apache.gora.tutorial.log.generated.Pageview.Builder setIp(java.lang.CharSequence value) {
-      validate(fields()[3], value);
+      validate(fields()[2], value);
       this.ip = value;
-      fieldSetFlags()[3] = true;
+      fieldSetFlags()[2] = true;
       return this; 
     }
     
     /** Checks whether the 'ip' field has been set */
     public boolean hasIp() {
-      return fieldSetFlags()[3];
+      return fieldSetFlags()[2];
     }
     
     /** Clears the value of the 'ip' field */
     public org.apache.gora.tutorial.log.generated.Pageview.Builder clearIp() {
       ip = null;
-      fieldSetFlags()[3] = false;
+      fieldSetFlags()[2] = false;
       return this;
     }
     
@@ -429,21 +487,21 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
     
     /** Sets the value of the 'httpMethod' field */
     public org.apache.gora.tutorial.log.generated.Pageview.Builder setHttpMethod(java.lang.CharSequence value) {
-      validate(fields()[4], value);
+      validate(fields()[3], value);
       this.httpMethod = value;
-      fieldSetFlags()[4] = true;
+      fieldSetFlags()[3] = true;
       return this; 
     }
     
     /** Checks whether the 'httpMethod' field has been set */
     public boolean hasHttpMethod() {
-      return fieldSetFlags()[4];
+      return fieldSetFlags()[3];
     }
     
     /** Clears the value of the 'httpMethod' field */
     public org.apache.gora.tutorial.log.generated.Pageview.Builder clearHttpMethod() {
       httpMethod = null;
-      fieldSetFlags()[4] = false;
+      fieldSetFlags()[3] = false;
       return this;
     }
     
@@ -454,20 +512,20 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
     
     /** Sets the value of the 'httpStatusCode' field */
     public org.apache.gora.tutorial.log.generated.Pageview.Builder setHttpStatusCode(int value) {
-      validate(fields()[5], value);
+      validate(fields()[4], value);
       this.httpStatusCode = value;
-      fieldSetFlags()[5] = true;
+      fieldSetFlags()[4] = true;
       return this; 
     }
     
     /** Checks whether the 'httpStatusCode' field has been set */
     public boolean hasHttpStatusCode() {
-      return fieldSetFlags()[5];
+      return fieldSetFlags()[4];
     }
     
     /** Clears the value of the 'httpStatusCode' field */
     public org.apache.gora.tutorial.log.generated.Pageview.Builder clearHttpStatusCode() {
-      fieldSetFlags()[5] = false;
+      fieldSetFlags()[4] = false;
       return this;
     }
     
@@ -478,20 +536,20 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
     
     /** Sets the value of the 'responseSize' field */
     public org.apache.gora.tutorial.log.generated.Pageview.Builder setResponseSize(int value) {
-      validate(fields()[6], value);
+      validate(fields()[5], value);
       this.responseSize = value;
-      fieldSetFlags()[6] = true;
+      fieldSetFlags()[5] = true;
       return this; 
     }
     
     /** Checks whether the 'responseSize' field has been set */
     public boolean hasResponseSize() {
-      return fieldSetFlags()[6];
+      return fieldSetFlags()[5];
     }
     
     /** Clears the value of the 'responseSize' field */
     public org.apache.gora.tutorial.log.generated.Pageview.Builder clearResponseSize() {
-      fieldSetFlags()[6] = false;
+      fieldSetFlags()[5] = false;
       return this;
     }
     
@@ -502,21 +560,21 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
     
     /** Sets the value of the 'referrer' field */
     public org.apache.gora.tutorial.log.generated.Pageview.Builder setReferrer(java.lang.CharSequence value) {
-      validate(fields()[7], value);
+      validate(fields()[6], value);
       this.referrer = value;
-      fieldSetFlags()[7] = true;
+      fieldSetFlags()[6] = true;
       return this; 
     }
     
     /** Checks whether the 'referrer' field has been set */
     public boolean hasReferrer() {
-      return fieldSetFlags()[7];
+      return fieldSetFlags()[6];
     }
     
     /** Clears the value of the 'referrer' field */
     public org.apache.gora.tutorial.log.generated.Pageview.Builder clearReferrer() {
       referrer = null;
-      fieldSetFlags()[7] = false;
+      fieldSetFlags()[6] = false;
       return this;
     }
     
@@ -527,21 +585,21 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
     
     /** Sets the value of the 'userAgent' field */
     public org.apache.gora.tutorial.log.generated.Pageview.Builder setUserAgent(java.lang.CharSequence value) {
-      validate(fields()[8], value);
+      validate(fields()[7], value);
       this.userAgent = value;
-      fieldSetFlags()[8] = true;
+      fieldSetFlags()[7] = true;
       return this; 
     }
     
     /** Checks whether the 'userAgent' field has been set */
     public boolean hasUserAgent() {
-      return fieldSetFlags()[8];
+      return fieldSetFlags()[7];
     }
     
     /** Clears the value of the 'userAgent' field */
     public org.apache.gora.tutorial.log.generated.Pageview.Builder clearUserAgent() {
       userAgent = null;
-      fieldSetFlags()[8] = false;
+      fieldSetFlags()[7] = false;
       return this;
     }
     
@@ -549,15 +607,14 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
     public Pageview build() {
       try {
         Pageview record = new Pageview();
-        record.__g__dirty = fieldSetFlags()[0] ? this.__g__dirty : (java.nio.ByteBuffer) java.nio.ByteBuffer.wrap(new byte[2]);
-        record.url = fieldSetFlags()[1] ? this.url : (java.lang.CharSequence) defaultValue(fields()[1]);
-        record.timestamp = fieldSetFlags()[2] ? this.timestamp : (java.lang.Long) defaultValue(fields()[2]);
-        record.ip = fieldSetFlags()[3] ? this.ip : (java.lang.CharSequence) defaultValue(fields()[3]);
-        record.httpMethod = fieldSetFlags()[4] ? this.httpMethod : (java.lang.CharSequence) defaultValue(fields()[4]);
-        record.httpStatusCode = fieldSetFlags()[5] ? this.httpStatusCode : (java.lang.Integer) defaultValue(fields()[5]);
-        record.responseSize = fieldSetFlags()[6] ? this.responseSize : (java.lang.Integer) defaultValue(fields()[6]);
-        record.referrer = fieldSetFlags()[7] ? this.referrer : (java.lang.CharSequence) defaultValue(fields()[7]);
-        record.userAgent = fieldSetFlags()[8] ? this.userAgent : (java.lang.CharSequence) defaultValue(fields()[8]);
+        record.url = fieldSetFlags()[0] ? this.url : (java.lang.CharSequence) defaultValue(fields()[0]);
+        record.timestamp = fieldSetFlags()[1] ? this.timestamp : (java.lang.Long) defaultValue(fields()[1]);
+        record.ip = fieldSetFlags()[2] ? this.ip : (java.lang.CharSequence) defaultValue(fields()[2]);
+        record.httpMethod = fieldSetFlags()[3] ? this.httpMethod : (java.lang.CharSequence) defaultValue(fields()[3]);
+        record.httpStatusCode = fieldSetFlags()[4] ? this.httpStatusCode : (java.lang.Integer) defaultValue(fields()[4]);
+        record.responseSize = fieldSetFlags()[5] ? this.responseSize : (java.lang.Integer) defaultValue(fields()[5]);
+        record.referrer = fieldSetFlags()[6] ? this.referrer : (java.lang.CharSequence) defaultValue(fields()[6]);
+        record.userAgent = fieldSetFlags()[7] ? this.userAgent : (java.lang.CharSequence) defaultValue(fields()[7]);
         return record;
       } catch (Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);
@@ -566,7 +623,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
   }
   
   public Pageview.Tombstone getTombstone(){
-  	return TOMBSTONE;
+    return TOMBSTONE;
   }
 
   public Pageview newInstance(){
@@ -579,191 +636,192 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
   
       private Tombstone() { }
   
-	  				  /**
-	   * Gets the value of the 'url' field.
-		   */
-	  public java.lang.CharSequence getUrl() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'url' field.
-		   * @param value the value to set.
-	   */
-	  public void setUrl(java.lang.CharSequence value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'url' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
-	   */
-	  public boolean isUrlDirty(java.lang.CharSequence value) {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-				  /**
-	   * Gets the value of the 'timestamp' field.
-		   */
-	  public java.lang.Long getTimestamp() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'timestamp' field.
-		   * @param value the value to set.
-	   */
-	  public void setTimestamp(java.lang.Long value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'timestamp' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
-	   */
-	  public boolean isTimestampDirty(java.lang.Long value) {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-				  /**
-	   * Gets the value of the 'ip' field.
-		   */
-	  public java.lang.CharSequence getIp() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'ip' field.
-		   * @param value the value to set.
-	   */
-	  public void setIp(java.lang.CharSequence value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'ip' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
-	   */
-	  public boolean isIpDirty(java.lang.CharSequence value) {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-				  /**
-	   * Gets the value of the 'httpMethod' field.
-		   */
-	  public java.lang.CharSequence getHttpMethod() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'httpMethod' field.
-		   * @param value the value to set.
-	   */
-	  public void setHttpMethod(java.lang.CharSequence value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'httpMethod' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
-	   */
-	  public boolean isHttpMethodDirty(java.lang.CharSequence value) {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-				  /**
-	   * Gets the value of the 'httpStatusCode' field.
-		   */
-	  public java.lang.Integer getHttpStatusCode() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'httpStatusCode' field.
-		   * @param value the value to set.
-	   */
-	  public void setHttpStatusCode(java.lang.Integer value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'httpStatusCode' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
-	   */
-	  public boolean isHttpStatusCodeDirty(java.lang.Integer value) {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-				  /**
-	   * Gets the value of the 'responseSize' field.
-		   */
-	  public java.lang.Integer getResponseSize() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'responseSize' field.
-		   * @param value the value to set.
-	   */
-	  public void setResponseSize(java.lang.Integer value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'responseSize' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
-	   */
-	  public boolean isResponseSizeDirty(java.lang.Integer value) {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-				  /**
-	   * Gets the value of the 'referrer' field.
-		   */
-	  public java.lang.CharSequence getReferrer() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'referrer' field.
-		   * @param value the value to set.
-	   */
-	  public void setReferrer(java.lang.CharSequence value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'referrer' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
-	   */
-	  public boolean isReferrerDirty(java.lang.CharSequence value) {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-				  /**
-	   * Gets the value of the 'userAgent' field.
-		   */
-	  public java.lang.CharSequence getUserAgent() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'userAgent' field.
-		   * @param value the value to set.
-	   */
-	  public void setUserAgent(java.lang.CharSequence value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'userAgent' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
-	   */
-	  public boolean isUserAgentDirty(java.lang.CharSequence value) {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-		  
+          /**
+     * Gets the value of the 'url' field.
+       */
+    public java.lang.CharSequence getUrl() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+  
+    /**
+     * Sets the value of the 'url' field.
+       * @param value the value to set.
+     */
+    public void setUrl(java.lang.CharSequence value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+    
+    /**
+     * Checks the dirty status of the 'url' field. A field is dirty if it represents a change that has not yet been written to the database.
+       * @param value the value to set.
+     */
+    public boolean isUrlDirty(java.lang.CharSequence value) {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+  
+          /**
+     * Gets the value of the 'timestamp' field.
+       */
+    public java.lang.Long getTimestamp() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+  
+    /**
+     * Sets the value of the 'timestamp' field.
+       * @param value the value to set.
+     */
+    public void setTimestamp(java.lang.Long value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+    
+    /**
+     * Checks the dirty status of the 'timestamp' field. A field is dirty if it represents a change that has not yet been written to the database.
+       * @param value the value to set.
+     */
+    public boolean isTimestampDirty(java.lang.Long value) {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+  
+          /**
+     * Gets the value of the 'ip' field.
+       */
+    public java.lang.CharSequence getIp() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+  
+    /**
+     * Sets the value of the 'ip' field.
+       * @param value the value to set.
+     */
+    public void setIp(java.lang.CharSequence value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+    
+    /**
+     * Checks the dirty status of the 'ip' field. A field is dirty if it represents a change that has not yet been written to the database.
+       * @param value the value to set.
+     */
+    public boolean isIpDirty(java.lang.CharSequence value) {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+  
+          /**
+     * Gets the value of the 'httpMethod' field.
+       */
+    public java.lang.CharSequence getHttpMethod() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+  
+    /**
+     * Sets the value of the 'httpMethod' field.
+       * @param value the value to set.
+     */
+    public void setHttpMethod(java.lang.CharSequence value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+    
+    /**
+     * Checks the dirty status of the 'httpMethod' field. A field is dirty if it represents a change that has not yet been written to the database.
+       * @param value the value to set.
+     */
+    public boolean isHttpMethodDirty(java.lang.CharSequence value) {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+  
+          /**
+     * Gets the value of the 'httpStatusCode' field.
+       */
+    public java.lang.Integer getHttpStatusCode() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+  
+    /**
+     * Sets the value of the 'httpStatusCode' field.
+       * @param value the value to set.
+     */
+    public void setHttpStatusCode(java.lang.Integer value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+    
+    /**
+     * Checks the dirty status of the 'httpStatusCode' field. A field is dirty if it represents a change that has not yet been written to the database.
+       * @param value the value to set.
+     */
+    public boolean isHttpStatusCodeDirty(java.lang.Integer value) {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+  
+          /**
+     * Gets the value of the 'responseSize' field.
+       */
+    public java.lang.Integer getResponseSize() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+  
+    /**
+     * Sets the value of the 'responseSize' field.
+       * @param value the value to set.
+     */
+    public void setResponseSize(java.lang.Integer value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+    
+    /**
+     * Checks the dirty status of the 'responseSize' field. A field is dirty if it represents a change that has not yet been written to the database.
+       * @param value the value to set.
+     */
+    public boolean isResponseSizeDirty(java.lang.Integer value) {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+  
+          /**
+     * Gets the value of the 'referrer' field.
+       */
+    public java.lang.CharSequence getReferrer() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+  
+    /**
+     * Sets the value of the 'referrer' field.
+       * @param value the value to set.
+     */
+    public void setReferrer(java.lang.CharSequence value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+    
+    /**
+     * Checks the dirty status of the 'referrer' field. A field is dirty if it represents a change that has not yet been written to the database.
+       * @param value the value to set.
+     */
+    public boolean isReferrerDirty(java.lang.CharSequence value) {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+  
+          /**
+     * Gets the value of the 'userAgent' field.
+       */
+    public java.lang.CharSequence getUserAgent() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+  
+    /**
+     * Sets the value of the 'userAgent' field.
+       * @param value the value to set.
+     */
+    public void setUserAgent(java.lang.CharSequence value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+    
+    /**
+     * Checks the dirty status of the 'userAgent' field. A field is dirty if it represents a change that has not yet been written to the database.
+       * @param value the value to set.
+     */
+    public boolean isUserAgentDirty(java.lang.CharSequence value) {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+  
+      
   }
   
 }
+

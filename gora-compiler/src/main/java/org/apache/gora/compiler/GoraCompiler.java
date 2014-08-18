@@ -59,7 +59,8 @@ public class GoraCompiler extends SpecificCompiler {
       System.out.println("Compiling: " + src.getAbsolutePath());
       Schema originalSchema = parser.parse(src);
       Map<Schema,Schema> queue = new HashMap<Schema,Schema>();
-      Schema newSchema = getSchemaWithDirtySupport(originalSchema, queue);
+      //Schema newSchema = getSchemaWithDirtySupport(originalSchema, queue);
+      Schema newSchema = originalSchema;
       GoraCompiler compiler = new GoraCompiler(newSchema);
       compiler.setTemplateDir("/org/apache/gora/compiler/templates/");
       compiler.compileToDestination(src, dest);

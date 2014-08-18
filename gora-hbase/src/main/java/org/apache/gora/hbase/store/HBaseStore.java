@@ -239,7 +239,7 @@ implements Configurable {
       Put put = new Put(keyRaw);
       Delete delete = new Delete(keyRaw);
       List<Field> fields = schema.getFields();
-      for (int i = 1; i < fields.size(); i++) {
+      for (int i = 0; i < fields.size(); i++) {
         if (!persistent.isDirty(i)) {
           continue;
         }

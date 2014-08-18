@@ -6,12 +6,11 @@
 package org.apache.gora.examples.generated;  
 @SuppressWarnings("all")
 public class TokenDatum extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"TokenDatum\",\"namespace\":\"org.apache.gora.examples.generated\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty.\",\"default\":\"AA==\"},{\"name\":\"count\",\"type\":\"int\",\"default\":0}]}");
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"TokenDatum\",\"namespace\":\"org.apache.gora.examples.generated\",\"fields\":[{\"name\":\"count\",\"type\":\"int\",\"default\":0}]}");
 
   /** Enum containing all data bean's fields. */
   public static enum Field {
-    __G__DIRTY(0, "__g__dirty"),
-    COUNT(1, "count"),
+    COUNT(0, "count"),
     ;
     /**
      * Field's index.
@@ -50,19 +49,23 @@ public class TokenDatum extends org.apache.gora.persistency.impl.PersistentBase 
   };
 
   public static final String[] _ALL_FIELDS = {
-  "__g__dirty",
   "count",
   };
 
-  /** Bytes used to represent weather or not a field is dirty. */
-  private java.nio.ByteBuffer __g__dirty = java.nio.ByteBuffer.wrap(new byte[1]);
+  /**
+   * Gets the total field count.
+   * @return int field count
+   */
+  public int getFieldsCount() {
+    return TokenDatum._ALL_FIELDS.length;
+  }
+
   private int count;
   public org.apache.avro.Schema getSchema() { return SCHEMA$; }
   // Used by DatumWriter.  Applications should not call. 
   public java.lang.Object get(int field$) {
     switch (field$) {
-    case 0: return __g__dirty;
-    case 1: return count;
+    case 0: return count;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -71,8 +74,7 @@ public class TokenDatum extends org.apache.gora.persistency.impl.PersistentBase 
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: __g__dirty = (java.nio.ByteBuffer)(value); break;
-    case 1: count = (java.lang.Integer)(value); break;
+    case 0: count = (java.lang.Integer)(value); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -90,7 +92,7 @@ public class TokenDatum extends org.apache.gora.persistency.impl.PersistentBase 
    */
   public void setCount(java.lang.Integer value) {
     this.count = value;
-    setDirty(1);
+    setDirty(0);
   }
   
   /**
@@ -98,7 +100,7 @@ public class TokenDatum extends org.apache.gora.persistency.impl.PersistentBase 
    * @param value the value to set.
    */
   public boolean isCountDirty(java.lang.Integer value) {
-    return isDirty(1);
+    return isDirty(0);
   }
 
   /** Creates a new TokenDatum RecordBuilder */
@@ -116,7 +118,7 @@ public class TokenDatum extends org.apache.gora.persistency.impl.PersistentBase 
     return new org.apache.gora.examples.generated.TokenDatum.Builder(other);
   }
   
-  private static java.nio.ByteBuffer deepCopyToWriteOnlyBuffer(
+  private static java.nio.ByteBuffer deepCopyToReadOnlyBuffer(
       java.nio.ByteBuffer input) {
     java.nio.ByteBuffer copy = java.nio.ByteBuffer.allocate(input.capacity());
     int position = input.position();
@@ -145,7 +147,6 @@ public class TokenDatum extends org.apache.gora.persistency.impl.PersistentBase 
   public static class Builder extends org.apache.avro.specific.SpecificRecordBuilderBase<TokenDatum>
     implements org.apache.avro.data.RecordBuilder<TokenDatum> {
 
-    private java.nio.ByteBuffer __g__dirty;
     private int count;
 
     /** Creates a new Builder */
@@ -161,13 +162,9 @@ public class TokenDatum extends org.apache.gora.persistency.impl.PersistentBase 
     /** Creates a Builder by copying an existing TokenDatum instance */
     private Builder(org.apache.gora.examples.generated.TokenDatum other) {
             super(org.apache.gora.examples.generated.TokenDatum.SCHEMA$);
-      if (isValidValue(fields()[0], other.__g__dirty)) {
-        this.__g__dirty = (java.nio.ByteBuffer) data().deepCopy(fields()[0].schema(), other.__g__dirty);
+      if (isValidValue(fields()[0], other.count)) {
+        this.count = (java.lang.Integer) data().deepCopy(fields()[0].schema(), other.count);
         fieldSetFlags()[0] = true;
-      }
-      if (isValidValue(fields()[1], other.count)) {
-        this.count = (java.lang.Integer) data().deepCopy(fields()[1].schema(), other.count);
-        fieldSetFlags()[1] = true;
       }
     }
 
@@ -178,20 +175,20 @@ public class TokenDatum extends org.apache.gora.persistency.impl.PersistentBase 
     
     /** Sets the value of the 'count' field */
     public org.apache.gora.examples.generated.TokenDatum.Builder setCount(int value) {
-      validate(fields()[1], value);
+      validate(fields()[0], value);
       this.count = value;
-      fieldSetFlags()[1] = true;
+      fieldSetFlags()[0] = true;
       return this; 
     }
     
     /** Checks whether the 'count' field has been set */
     public boolean hasCount() {
-      return fieldSetFlags()[1];
+      return fieldSetFlags()[0];
     }
     
     /** Clears the value of the 'count' field */
     public org.apache.gora.examples.generated.TokenDatum.Builder clearCount() {
-      fieldSetFlags()[1] = false;
+      fieldSetFlags()[0] = false;
       return this;
     }
     
@@ -199,8 +196,7 @@ public class TokenDatum extends org.apache.gora.persistency.impl.PersistentBase 
     public TokenDatum build() {
       try {
         TokenDatum record = new TokenDatum();
-        record.__g__dirty = fieldSetFlags()[0] ? this.__g__dirty : (java.nio.ByteBuffer) java.nio.ByteBuffer.wrap(new byte[1]);
-        record.count = fieldSetFlags()[1] ? this.count : (java.lang.Integer) defaultValue(fields()[1]);
+        record.count = fieldSetFlags()[0] ? this.count : (java.lang.Integer) defaultValue(fields()[0]);
         return record;
       } catch (Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);
@@ -222,7 +218,7 @@ public class TokenDatum extends org.apache.gora.persistency.impl.PersistentBase 
   
       private Tombstone() { }
   
-	  				  /**
+	  		  /**
 	   * Gets the value of the 'count' field.
 		   */
 	  public java.lang.Integer getCount() {
@@ -249,3 +245,4 @@ public class TokenDatum extends org.apache.gora.persistency.impl.PersistentBase 
   }
   
 }
+

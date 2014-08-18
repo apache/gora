@@ -7,13 +7,12 @@ package org.apache.gora.examples.generated;
 @SuppressWarnings("all")
 /** Record with only immutable or dirtyable fields, used for testing */
 public class ImmutableFields extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"ImmutableFields\",\"namespace\":\"org.apache.gora.examples.generated\",\"doc\":\"Record with only immutable or dirtyable fields, used for testing\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty.\",\"default\":\"AA==\"},{\"name\":\"v1\",\"type\":\"int\",\"default\":0},{\"name\":\"v2\",\"type\":[{\"type\":\"record\",\"name\":\"V2\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty.\",\"default\":\"AA==\"},{\"name\":\"v3\",\"type\":\"int\",\"default\":0}]},\"null\"],\"default\":null}]}");
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"ImmutableFields\",\"namespace\":\"org.apache.gora.examples.generated\",\"doc\":\"Record with only immutable or dirtyable fields, used for testing\",\"fields\":[{\"name\":\"v1\",\"type\":\"int\",\"default\":0},{\"name\":\"v2\",\"type\":[{\"type\":\"record\",\"name\":\"V2\",\"fields\":[{\"name\":\"v3\",\"type\":\"int\",\"default\":0}]},\"null\"],\"default\":null}]}");
 
   /** Enum containing all data bean's fields. */
   public static enum Field {
-    __G__DIRTY(0, "__g__dirty"),
-    V1(1, "v1"),
-    V2(2, "v2"),
+    V1(0, "v1"),
+    V2(1, "v2"),
     ;
     /**
      * Field's index.
@@ -52,22 +51,26 @@ public class ImmutableFields extends org.apache.gora.persistency.impl.Persistent
   };
 
   public static final String[] _ALL_FIELDS = {
-  "__g__dirty",
   "v1",
   "v2",
   };
 
-  /** Bytes used to represent weather or not a field is dirty. */
-  private java.nio.ByteBuffer __g__dirty = java.nio.ByteBuffer.wrap(new byte[1]);
+  /**
+   * Gets the total field count.
+   * @return int field count
+   */
+  public int getFieldsCount() {
+    return ImmutableFields._ALL_FIELDS.length;
+  }
+
   private int v1;
   private org.apache.gora.examples.generated.V2 v2;
   public org.apache.avro.Schema getSchema() { return SCHEMA$; }
   // Used by DatumWriter.  Applications should not call. 
   public java.lang.Object get(int field$) {
     switch (field$) {
-    case 0: return __g__dirty;
-    case 1: return v1;
-    case 2: return v2;
+    case 0: return v1;
+    case 1: return v2;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -76,9 +79,8 @@ public class ImmutableFields extends org.apache.gora.persistency.impl.Persistent
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: __g__dirty = (java.nio.ByteBuffer)(value); break;
-    case 1: v1 = (java.lang.Integer)(value); break;
-    case 2: v2 = (org.apache.gora.examples.generated.V2)(value); break;
+    case 0: v1 = (java.lang.Integer)(value); break;
+    case 1: v2 = (org.apache.gora.examples.generated.V2)(value); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -96,7 +98,7 @@ public class ImmutableFields extends org.apache.gora.persistency.impl.Persistent
    */
   public void setV1(java.lang.Integer value) {
     this.v1 = value;
-    setDirty(1);
+    setDirty(0);
   }
   
   /**
@@ -104,7 +106,7 @@ public class ImmutableFields extends org.apache.gora.persistency.impl.Persistent
    * @param value the value to set.
    */
   public boolean isV1Dirty(java.lang.Integer value) {
-    return isDirty(1);
+    return isDirty(0);
   }
 
   /**
@@ -120,7 +122,7 @@ public class ImmutableFields extends org.apache.gora.persistency.impl.Persistent
    */
   public void setV2(org.apache.gora.examples.generated.V2 value) {
     this.v2 = value;
-    setDirty(2);
+    setDirty(1);
   }
   
   /**
@@ -128,7 +130,7 @@ public class ImmutableFields extends org.apache.gora.persistency.impl.Persistent
    * @param value the value to set.
    */
   public boolean isV2Dirty(org.apache.gora.examples.generated.V2 value) {
-    return isDirty(2);
+    return isDirty(1);
   }
 
   /** Creates a new ImmutableFields RecordBuilder */
@@ -146,7 +148,7 @@ public class ImmutableFields extends org.apache.gora.persistency.impl.Persistent
     return new org.apache.gora.examples.generated.ImmutableFields.Builder(other);
   }
   
-  private static java.nio.ByteBuffer deepCopyToWriteOnlyBuffer(
+  private static java.nio.ByteBuffer deepCopyToReadOnlyBuffer(
       java.nio.ByteBuffer input) {
     java.nio.ByteBuffer copy = java.nio.ByteBuffer.allocate(input.capacity());
     int position = input.position();
@@ -175,7 +177,6 @@ public class ImmutableFields extends org.apache.gora.persistency.impl.Persistent
   public static class Builder extends org.apache.avro.specific.SpecificRecordBuilderBase<ImmutableFields>
     implements org.apache.avro.data.RecordBuilder<ImmutableFields> {
 
-    private java.nio.ByteBuffer __g__dirty;
     private int v1;
     private org.apache.gora.examples.generated.V2 v2;
 
@@ -192,17 +193,13 @@ public class ImmutableFields extends org.apache.gora.persistency.impl.Persistent
     /** Creates a Builder by copying an existing ImmutableFields instance */
     private Builder(org.apache.gora.examples.generated.ImmutableFields other) {
             super(org.apache.gora.examples.generated.ImmutableFields.SCHEMA$);
-      if (isValidValue(fields()[0], other.__g__dirty)) {
-        this.__g__dirty = (java.nio.ByteBuffer) data().deepCopy(fields()[0].schema(), other.__g__dirty);
+      if (isValidValue(fields()[0], other.v1)) {
+        this.v1 = (java.lang.Integer) data().deepCopy(fields()[0].schema(), other.v1);
         fieldSetFlags()[0] = true;
       }
-      if (isValidValue(fields()[1], other.v1)) {
-        this.v1 = (java.lang.Integer) data().deepCopy(fields()[1].schema(), other.v1);
+      if (isValidValue(fields()[1], other.v2)) {
+        this.v2 = (org.apache.gora.examples.generated.V2) data().deepCopy(fields()[1].schema(), other.v2);
         fieldSetFlags()[1] = true;
-      }
-      if (isValidValue(fields()[2], other.v2)) {
-        this.v2 = (org.apache.gora.examples.generated.V2) data().deepCopy(fields()[2].schema(), other.v2);
-        fieldSetFlags()[2] = true;
       }
     }
 
@@ -213,20 +210,20 @@ public class ImmutableFields extends org.apache.gora.persistency.impl.Persistent
     
     /** Sets the value of the 'v1' field */
     public org.apache.gora.examples.generated.ImmutableFields.Builder setV1(int value) {
-      validate(fields()[1], value);
+      validate(fields()[0], value);
       this.v1 = value;
-      fieldSetFlags()[1] = true;
+      fieldSetFlags()[0] = true;
       return this; 
     }
     
     /** Checks whether the 'v1' field has been set */
     public boolean hasV1() {
-      return fieldSetFlags()[1];
+      return fieldSetFlags()[0];
     }
     
     /** Clears the value of the 'v1' field */
     public org.apache.gora.examples.generated.ImmutableFields.Builder clearV1() {
-      fieldSetFlags()[1] = false;
+      fieldSetFlags()[0] = false;
       return this;
     }
     
@@ -237,21 +234,21 @@ public class ImmutableFields extends org.apache.gora.persistency.impl.Persistent
     
     /** Sets the value of the 'v2' field */
     public org.apache.gora.examples.generated.ImmutableFields.Builder setV2(org.apache.gora.examples.generated.V2 value) {
-      validate(fields()[2], value);
+      validate(fields()[1], value);
       this.v2 = value;
-      fieldSetFlags()[2] = true;
+      fieldSetFlags()[1] = true;
       return this; 
     }
     
     /** Checks whether the 'v2' field has been set */
     public boolean hasV2() {
-      return fieldSetFlags()[2];
+      return fieldSetFlags()[1];
     }
     
     /** Clears the value of the 'v2' field */
     public org.apache.gora.examples.generated.ImmutableFields.Builder clearV2() {
       v2 = null;
-      fieldSetFlags()[2] = false;
+      fieldSetFlags()[1] = false;
       return this;
     }
     
@@ -259,9 +256,8 @@ public class ImmutableFields extends org.apache.gora.persistency.impl.Persistent
     public ImmutableFields build() {
       try {
         ImmutableFields record = new ImmutableFields();
-        record.__g__dirty = fieldSetFlags()[0] ? this.__g__dirty : (java.nio.ByteBuffer) java.nio.ByteBuffer.wrap(new byte[1]);
-        record.v1 = fieldSetFlags()[1] ? this.v1 : (java.lang.Integer) defaultValue(fields()[1]);
-        record.v2 = fieldSetFlags()[2] ? this.v2 : (org.apache.gora.examples.generated.V2) defaultValue(fields()[2]);
+        record.v1 = fieldSetFlags()[0] ? this.v1 : (java.lang.Integer) defaultValue(fields()[0]);
+        record.v2 = fieldSetFlags()[1] ? this.v2 : (org.apache.gora.examples.generated.V2) defaultValue(fields()[1]);
         return record;
       } catch (Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);
@@ -283,7 +279,7 @@ public class ImmutableFields extends org.apache.gora.persistency.impl.Persistent
   
       private Tombstone() { }
   
-	  				  /**
+	  		  /**
 	   * Gets the value of the 'v1' field.
 		   */
 	  public java.lang.Integer getV1() {
@@ -333,3 +329,4 @@ public class ImmutableFields extends org.apache.gora.persistency.impl.Persistent
   }
   
 }
+

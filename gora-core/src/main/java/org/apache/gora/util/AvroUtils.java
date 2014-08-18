@@ -93,9 +93,9 @@ public class AvroUtils {
    */
   public static String[] getSchemaFieldNames(Schema schema) {
     List<Field> fields = schema.getFields();
-    String[] fieldNames = new String[fields.size() - 1];
+    String[] fieldNames = new String[fields.size()];
     for (int i = 0; i < fieldNames.length; i++) {
-      fieldNames[i] = fields.get(i + 1).name();
+      fieldNames[i] = fields.get(i).name();
     }
     return fieldNames;
   }

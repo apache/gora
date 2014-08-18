@@ -34,6 +34,15 @@ import org.apache.gora.persistency.Persistent;
 public abstract class PersistentBase extends SpecificRecordBase implements
     Persistent {
 
+  /** Bytes used to represent weather or not a field is dirty. */
+  private java.nio.ByteBuffer __g__dirty;
+
+  public PersistentBase() {
+    __g__dirty = java.nio.ByteBuffer.wrap(new byte[getFieldsCount()]);
+  }
+
+  public abstract int getFieldsCount();
+
   public static class PersistentData extends SpecificData {
     private static final PersistentData INSTANCE = new PersistentData();
 
@@ -173,7 +182,7 @@ public abstract class PersistentBase extends SpecificRecordBase implements
   }
 
   private ByteBuffer getDirtyBytes() {
-    return (ByteBuffer) get(0);
+    return __g__dirty;
   }
 
   @Override
@@ -200,7 +209,8 @@ public abstract class PersistentBase extends SpecificRecordBase implements
   
   public List<Field> getUnmanagedFields(){
     List<Field> fields = getSchema().getFields();
-    return fields.subList(1, fields.size());
+    //return fields.subList(1, fields.size());
+    return fields;
   }
   
 }

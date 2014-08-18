@@ -6,12 +6,11 @@
 package org.apache.gora.examples.generated;  
 @SuppressWarnings("all")
 public class V2 extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"V2\",\"namespace\":\"org.apache.gora.examples.generated\",\"fields\":[{\"name\":\"__g__dirty\",\"type\":\"bytes\",\"doc\":\"Bytes used to represent weather or not a field is dirty.\",\"default\":\"AA==\"},{\"name\":\"v3\",\"type\":\"int\",\"default\":0}]}");
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"V2\",\"namespace\":\"org.apache.gora.examples.generated\",\"fields\":[{\"name\":\"v3\",\"type\":\"int\",\"default\":0}]}");
 
   /** Enum containing all data bean's fields. */
   public static enum Field {
-    __G__DIRTY(0, "__g__dirty"),
-    V3(1, "v3"),
+    V3(0, "v3"),
     ;
     /**
      * Field's index.
@@ -50,19 +49,23 @@ public class V2 extends org.apache.gora.persistency.impl.PersistentBase implemen
   };
 
   public static final String[] _ALL_FIELDS = {
-  "__g__dirty",
   "v3",
   };
 
-  /** Bytes used to represent weather or not a field is dirty. */
-  private java.nio.ByteBuffer __g__dirty = java.nio.ByteBuffer.wrap(new byte[1]);
+  /**
+   * Gets the total field count.
+   * @return int field count
+   */
+  public int getFieldsCount() {
+    return V2._ALL_FIELDS.length;
+  }
+
   private int v3;
   public org.apache.avro.Schema getSchema() { return SCHEMA$; }
   // Used by DatumWriter.  Applications should not call. 
   public java.lang.Object get(int field$) {
     switch (field$) {
-    case 0: return __g__dirty;
-    case 1: return v3;
+    case 0: return v3;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -71,8 +74,7 @@ public class V2 extends org.apache.gora.persistency.impl.PersistentBase implemen
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: __g__dirty = (java.nio.ByteBuffer)(value); break;
-    case 1: v3 = (java.lang.Integer)(value); break;
+    case 0: v3 = (java.lang.Integer)(value); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -90,7 +92,7 @@ public class V2 extends org.apache.gora.persistency.impl.PersistentBase implemen
    */
   public void setV3(java.lang.Integer value) {
     this.v3 = value;
-    setDirty(1);
+    setDirty(0);
   }
   
   /**
@@ -98,7 +100,7 @@ public class V2 extends org.apache.gora.persistency.impl.PersistentBase implemen
    * @param value the value to set.
    */
   public boolean isV3Dirty(java.lang.Integer value) {
-    return isDirty(1);
+    return isDirty(0);
   }
 
   /** Creates a new V2 RecordBuilder */
@@ -116,7 +118,7 @@ public class V2 extends org.apache.gora.persistency.impl.PersistentBase implemen
     return new org.apache.gora.examples.generated.V2.Builder(other);
   }
   
-  private static java.nio.ByteBuffer deepCopyToWriteOnlyBuffer(
+  private static java.nio.ByteBuffer deepCopyToReadOnlyBuffer(
       java.nio.ByteBuffer input) {
     java.nio.ByteBuffer copy = java.nio.ByteBuffer.allocate(input.capacity());
     int position = input.position();
@@ -145,7 +147,6 @@ public class V2 extends org.apache.gora.persistency.impl.PersistentBase implemen
   public static class Builder extends org.apache.avro.specific.SpecificRecordBuilderBase<V2>
     implements org.apache.avro.data.RecordBuilder<V2> {
 
-    private java.nio.ByteBuffer __g__dirty;
     private int v3;
 
     /** Creates a new Builder */
@@ -161,13 +162,9 @@ public class V2 extends org.apache.gora.persistency.impl.PersistentBase implemen
     /** Creates a Builder by copying an existing V2 instance */
     private Builder(org.apache.gora.examples.generated.V2 other) {
             super(org.apache.gora.examples.generated.V2.SCHEMA$);
-      if (isValidValue(fields()[0], other.__g__dirty)) {
-        this.__g__dirty = (java.nio.ByteBuffer) data().deepCopy(fields()[0].schema(), other.__g__dirty);
+      if (isValidValue(fields()[0], other.v3)) {
+        this.v3 = (java.lang.Integer) data().deepCopy(fields()[0].schema(), other.v3);
         fieldSetFlags()[0] = true;
-      }
-      if (isValidValue(fields()[1], other.v3)) {
-        this.v3 = (java.lang.Integer) data().deepCopy(fields()[1].schema(), other.v3);
-        fieldSetFlags()[1] = true;
       }
     }
 
@@ -178,20 +175,20 @@ public class V2 extends org.apache.gora.persistency.impl.PersistentBase implemen
     
     /** Sets the value of the 'v3' field */
     public org.apache.gora.examples.generated.V2.Builder setV3(int value) {
-      validate(fields()[1], value);
+      validate(fields()[0], value);
       this.v3 = value;
-      fieldSetFlags()[1] = true;
+      fieldSetFlags()[0] = true;
       return this; 
     }
     
     /** Checks whether the 'v3' field has been set */
     public boolean hasV3() {
-      return fieldSetFlags()[1];
+      return fieldSetFlags()[0];
     }
     
     /** Clears the value of the 'v3' field */
     public org.apache.gora.examples.generated.V2.Builder clearV3() {
-      fieldSetFlags()[1] = false;
+      fieldSetFlags()[0] = false;
       return this;
     }
     
@@ -199,8 +196,7 @@ public class V2 extends org.apache.gora.persistency.impl.PersistentBase implemen
     public V2 build() {
       try {
         V2 record = new V2();
-        record.__g__dirty = fieldSetFlags()[0] ? this.__g__dirty : (java.nio.ByteBuffer) java.nio.ByteBuffer.wrap(new byte[1]);
-        record.v3 = fieldSetFlags()[1] ? this.v3 : (java.lang.Integer) defaultValue(fields()[1]);
+        record.v3 = fieldSetFlags()[0] ? this.v3 : (java.lang.Integer) defaultValue(fields()[0]);
         return record;
       } catch (Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);
@@ -222,7 +218,7 @@ public class V2 extends org.apache.gora.persistency.impl.PersistentBase implemen
   
       private Tombstone() { }
   
-	  				  /**
+	  		  /**
 	   * Gets the value of the 'v3' field.
 		   */
 	  public java.lang.Integer getV3() {
@@ -249,3 +245,4 @@ public class V2 extends org.apache.gora.persistency.impl.PersistentBase implemen
   }
   
 }
+

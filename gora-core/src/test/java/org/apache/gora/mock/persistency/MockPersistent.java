@@ -29,7 +29,14 @@ public class MockPersistent extends PersistentBase {
   public static final String BAZ = "baz";
   
   public static final String[] _ALL_FIELDS = {FOO, BAZ};
-  
+
+  /**
+   * Gets the total field count.
+   */
+  public int getFieldsCount() {
+    return MockPersistent._ALL_FIELDS.length;
+  }
+
   private int foo;
   private int baz;
   
