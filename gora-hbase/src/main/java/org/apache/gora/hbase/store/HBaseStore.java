@@ -22,6 +22,8 @@ import static org.apache.gora.hbase.util.HBaseByteInterface.toBytes;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -788,6 +790,14 @@ implements Configurable {
           LOG.error("KeyClass in gora-hbase-mapping is not the same as the one in the databean.");
         }
       }
+    } catch (MalformedURLException ex) {
+      LOG.error("Error while trying to read the mapping file {}. "
+              + "Expected to be in the classpath "
+              + "(ClassLoader#getResource(java.lang.String)).",
+              filename) ;
+      LOG.error("Actual classpath = {}", Arrays.asList(
+          ((URLClassLoader) getClass().getClassLoader()).getURLs()));
+      throw ex ;
     } catch(IOException ex) {
       LOG.error(ex.getMessage());
       LOG.error(ex.getStackTrace().toString());
