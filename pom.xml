@@ -212,6 +212,15 @@
         <role>PMC Member</role>
       </roles>
     </developer>
+    <developer>
+      <id>drazzib</id>
+      <name>Damien Raude-Morvan</name>
+      <email>drazzib [at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
   </developers>
 
   <mailingLists>
