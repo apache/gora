@@ -422,7 +422,7 @@
 					</systemPropertyVariables>
 					<argLine>-Xmx512m</argLine>
 					<forkMode>always</forkMode>
-					<testFailureIgnore>true</testFailureIgnore>
+					<testFailureIgnore>false</testFailureIgnore>
 				</configuration>
 			</plugin>
 			<plugin>
