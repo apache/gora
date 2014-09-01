@@ -14,14 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.gora.examples.generated;  
+package org.apache.gora.goraci.generated;  
 @SuppressWarnings("all")
-public class V2 extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"V2\",\"namespace\":\"org.apache.gora.examples.generated\",\"fields\":[{\"name\":\"v3\",\"type\":\"int\",\"default\":0}]}");
+public class Flushed extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Flushed\",\"namespace\":\"org.apache.gora.goraci.generated\",\"fields\":[{\"name\":\"count\",\"type\":\"long\"}]}");
 
   /** Enum containing all data bean's fields. */
   public static enum Field {
-    V3(0, "v3"),
+    COUNT(0, "count"),
     ;
     /**
      * Field's index.
@@ -60,7 +60,7 @@ public class V2 extends org.apache.gora.persistency.impl.PersistentBase implemen
   };
 
   public static final String[] _ALL_FIELDS = {
-  "v3",
+  "count",
   };
 
   /**
@@ -68,15 +68,15 @@ public class V2 extends org.apache.gora.persistency.impl.PersistentBase implemen
    * @return int field count
    */
   public int getFieldsCount() {
-    return V2._ALL_FIELDS.length;
+    return Flushed._ALL_FIELDS.length;
   }
 
-  private int v3;
+  private long count;
   public org.apache.avro.Schema getSchema() { return SCHEMA$; }
   // Used by DatumWriter.  Applications should not call. 
   public java.lang.Object get(int field$) {
     switch (field$) {
-    case 0: return v3;
+    case 0: return count;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -85,48 +85,48 @@ public class V2 extends org.apache.gora.persistency.impl.PersistentBase implemen
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: v3 = (java.lang.Integer)(value); break;
+    case 0: count = (java.lang.Long)(value); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
 
   /**
-   * Gets the value of the 'v3' field.
+   * Gets the value of the 'count' field.
    */
-  public java.lang.Integer getV3() {
-    return v3;
+  public java.lang.Long getCount() {
+    return count;
   }
 
   /**
-   * Sets the value of the 'v3' field.
+   * Sets the value of the 'count' field.
    * @param value the value to set.
    */
-  public void setV3(java.lang.Integer value) {
-    this.v3 = value;
+  public void setCount(java.lang.Long value) {
+    this.count = value;
     setDirty(0);
   }
   
   /**
-   * Checks the dirty status of the 'v3' field. A field is dirty if it represents a change that has not yet been written to the database.
+   * Checks the dirty status of the 'count' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
    */
-  public boolean isV3Dirty(java.lang.Integer value) {
+  public boolean isCountDirty(java.lang.Long value) {
     return isDirty(0);
   }
 
-  /** Creates a new V2 RecordBuilder */
-  public static org.apache.gora.examples.generated.V2.Builder newBuilder() {
-    return new org.apache.gora.examples.generated.V2.Builder();
+  /** Creates a new Flushed RecordBuilder */
+  public static org.apache.gora.goraci.generated.Flushed.Builder newBuilder() {
+    return new org.apache.gora.goraci.generated.Flushed.Builder();
   }
   
-  /** Creates a new V2 RecordBuilder by copying an existing Builder */
-  public static org.apache.gora.examples.generated.V2.Builder newBuilder(org.apache.gora.examples.generated.V2.Builder other) {
-    return new org.apache.gora.examples.generated.V2.Builder(other);
+  /** Creates a new Flushed RecordBuilder by copying an existing Builder */
+  public static org.apache.gora.goraci.generated.Flushed.Builder newBuilder(org.apache.gora.goraci.generated.Flushed.Builder other) {
+    return new org.apache.gora.goraci.generated.Flushed.Builder(other);
   }
   
-  /** Creates a new V2 RecordBuilder by copying an existing V2 instance */
-  public static org.apache.gora.examples.generated.V2.Builder newBuilder(org.apache.gora.examples.generated.V2 other) {
-    return new org.apache.gora.examples.generated.V2.Builder(other);
+  /** Creates a new Flushed RecordBuilder by copying an existing Flushed instance */
+  public static org.apache.gora.goraci.generated.Flushed.Builder newBuilder(org.apache.gora.goraci.generated.Flushed other) {
+    return new org.apache.gora.goraci.generated.Flushed.Builder(other);
   }
   
   private static java.nio.ByteBuffer deepCopyToReadOnlyBuffer(
@@ -153,61 +153,61 @@ public class V2 extends org.apache.gora.persistency.impl.PersistentBase implemen
   }
   
   /**
-   * RecordBuilder for V2 instances.
+   * RecordBuilder for Flushed instances.
    */
-  public static class Builder extends org.apache.avro.specific.SpecificRecordBuilderBase<V2>
-    implements org.apache.avro.data.RecordBuilder<V2> {
+  public static class Builder extends org.apache.avro.specific.SpecificRecordBuilderBase<Flushed>
+    implements org.apache.avro.data.RecordBuilder<Flushed> {
 
-    private int v3;
+    private long count;
 
     /** Creates a new Builder */
     private Builder() {
-      super(org.apache.gora.examples.generated.V2.SCHEMA$);
+      super(org.apache.gora.goraci.generated.Flushed.SCHEMA$);
     }
     
     /** Creates a Builder by copying an existing Builder */
-    private Builder(org.apache.gora.examples.generated.V2.Builder other) {
+    private Builder(org.apache.gora.goraci.generated.Flushed.Builder other) {
       super(other);
     }
     
-    /** Creates a Builder by copying an existing V2 instance */
-    private Builder(org.apache.gora.examples.generated.V2 other) {
-            super(org.apache.gora.examples.generated.V2.SCHEMA$);
-      if (isValidValue(fields()[0], other.v3)) {
-        this.v3 = (java.lang.Integer) data().deepCopy(fields()[0].schema(), other.v3);
+    /** Creates a Builder by copying an existing Flushed instance */
+    private Builder(org.apache.gora.goraci.generated.Flushed other) {
+            super(org.apache.gora.goraci.generated.Flushed.SCHEMA$);
+      if (isValidValue(fields()[0], other.count)) {
+        this.count = (java.lang.Long) data().deepCopy(fields()[0].schema(), other.count);
         fieldSetFlags()[0] = true;
       }
     }
 
-    /** Gets the value of the 'v3' field */
-    public java.lang.Integer getV3() {
-      return v3;
+    /** Gets the value of the 'count' field */
+    public java.lang.Long getCount() {
+      return count;
     }
     
-    /** Sets the value of the 'v3' field */
-    public org.apache.gora.examples.generated.V2.Builder setV3(int value) {
+    /** Sets the value of the 'count' field */
+    public org.apache.gora.goraci.generated.Flushed.Builder setCount(long value) {
       validate(fields()[0], value);
-      this.v3 = value;
+      this.count = value;
       fieldSetFlags()[0] = true;
       return this; 
     }
     
-    /** Checks whether the 'v3' field has been set */
-    public boolean hasV3() {
+    /** Checks whether the 'count' field has been set */
+    public boolean hasCount() {
       return fieldSetFlags()[0];
     }
     
-    /** Clears the value of the 'v3' field */
-    public org.apache.gora.examples.generated.V2.Builder clearV3() {
+    /** Clears the value of the 'count' field */
+    public org.apache.gora.goraci.generated.Flushed.Builder clearCount() {
       fieldSetFlags()[0] = false;
       return this;
     }
     
     @Override
-    public V2 build() {
+    public Flushed build() {
       try {
-        V2 record = new V2();
-        record.v3 = fieldSetFlags()[0] ? this.v3 : (java.lang.Integer) defaultValue(fields()[0]);
+        Flushed record = new Flushed();
+        record.count = fieldSetFlags()[0] ? this.count : (java.lang.Long) defaultValue(fields()[0]);
         return record;
       } catch (Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);
@@ -215,40 +215,40 @@ public class V2 extends org.apache.gora.persistency.impl.PersistentBase implemen
     }
   }
   
-  public V2.Tombstone getTombstone(){
+  public Flushed.Tombstone getTombstone(){
   	return TOMBSTONE;
   }
 
-  public V2 newInstance(){
+  public Flushed newInstance(){
     return newBuilder().build();
   }
 
   private static final Tombstone TOMBSTONE = new Tombstone();
   
-  public static final class Tombstone extends V2 implements org.apache.gora.persistency.Tombstone {
+  public static final class Tombstone extends Flushed implements org.apache.gora.persistency.Tombstone {
   
       private Tombstone() { }
   
 	  		  /**
-	   * Gets the value of the 'v3' field.
+	   * Gets the value of the 'count' field.
 		   */
-	  public java.lang.Integer getV3() {
+	  public java.lang.Long getCount() {
 	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
 	  }
 	
 	  /**
-	   * Sets the value of the 'v3' field.
+	   * Sets the value of the 'count' field.
 		   * @param value the value to set.
 	   */
-	  public void setV3(java.lang.Integer value) {
+	  public void setCount(java.lang.Long value) {
 	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
 	  }
 	  
 	  /**
-	   * Checks the dirty status of the 'v3' field. A field is dirty if it represents a change that has not yet been written to the database.
+	   * Checks the dirty status of the 'count' field. A field is dirty if it represents a change that has not yet been written to the database.
 		   * @param value the value to set.
 	   */
-	  public boolean isV3Dirty(java.lang.Integer value) {
+	  public boolean isCountDirty(java.lang.Long value) {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
 	  }
 	

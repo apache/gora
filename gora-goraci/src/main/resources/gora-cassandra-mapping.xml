@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gora-orm>
+  <keyspace name="CINode" host="localhost" cluster="GoraCI Test Cluster">
+    <family name="p"/>
+    <family name="f"/>
+     <family name="sc" type="super" />
+  </keyspace>
+
+  <keyspace name="Flushed" host="localhost" cluster="GoraCI Test Cluster">
+    <family name="p"/>
+    <family name="f"/>
+    <family name="sc" type="super"/>
+  </keyspace>
+  
+  <class name="org.apache.gora.goraci.generated.CINode" keyClass="java.lang.Long" keyspace="CINode">
+    <field name="prev" family="p" qualifier="prev"/>
+    <field name="client" family="p" qualifier="client"/>
+    <field name="count" family="p" qualifier="count"/>
+  </class>
+  <class name="org.apache.gora.goraci.generated.Flushed" keyClass="org.apache.avro.util.Utf8" keyspace="Flushed">
+    <field name="count" family="f" qualifier="count" />
+  </class>
+</gora-orm>
+<!-- Incorrect Mapping -->
+
