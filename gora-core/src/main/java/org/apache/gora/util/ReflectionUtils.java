@@ -20,8 +20,6 @@ package org.apache.gora.util;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
 import org.apache.avro.specific.SpecificRecordBuilderBase;
 import org.apache.gora.persistency.Persistent;
 
@@ -105,6 +103,7 @@ public class ReflectionUtils {
     return clazz.getField(fieldName).get(null);
   }
   
+  @SuppressWarnings("unchecked")
   public static <T extends Persistent> SpecificRecordBuilderBase<T> classBuilder(Class<T> clazz) throws SecurityException
     , NoSuchMethodException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
     return (SpecificRecordBuilderBase<T>) clazz.getMethod("newBuilder").invoke(null);

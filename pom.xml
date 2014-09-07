@@ -573,12 +573,17 @@
 		<module>gora-core</module>
 		<module>gora-accumulo</module>
 		<module>gora-cassandra</module>
-                <module>gora-goraci</module>
+		<module>gora-goraci</module>
+
 		<module>gora-hbase</module>
 		<!-- module>gora-lucene</module -->
 		<!--module>gora-dynamodb</module -->
 		<!--module>gora-sql</module -->
 		<module>gora-mongodb</module>
+		<module>gora-shims-hadoop</module>
+		<module>gora-shims-hadoop1</module>
+		<module>gora-shims-hadoop2</module>
+		<module>gora-shims-distribution</module>
 		<module>gora-solr</module>
 		<module>gora-tutorial</module>
 		<module>sources-dist</module>
@@ -591,7 +596,8 @@
 		<avro.version>1.7.6</avro.version>
 		<jackson.version>1.6.9</jackson.version>
 		<!-- Hadoop Dependencies -->
-		<hadoop.version>1.0.1</hadoop.version>
+		<hadoop-1.version>1.0.1</hadoop-1.version>
+		<hadoop-2.version>2.4.0</hadoop-2.version>
 		<hadoop.test.version>1.0.1</hadoop.test.version>
 		<hbase.version>0.94.14</hbase.version>
 		<cxf-rt-frontend-jaxrs.version>2.5.2</cxf-rt-frontend-jaxrs.version>
@@ -766,7 +772,7 @@
 			<dependency>
 				<groupId>org.apache.hadoop</groupId>
 				<artifactId>hadoop-core</artifactId>
-				<version>${hadoop.version}</version>
+				<version>${hadoop-1.version}</version>
 				<exclusions>
 					<!-- jackson is conflicting with the Avro dep -->
 					<exclusion>
@@ -794,6 +800,23 @@
 						<artifactId>core</artifactId>
 					</exclusion>
 				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.hadoop</groupId>
+				<artifactId>hadoop-common</artifactId>
+				<version>${hadoop-2.version}</version>
+				<classifier>tests</classifier>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.hadoop</groupId>
+				<artifactId>hadoop-mapreduce-client-jobclient</artifactId>
+				<version>${hadoop-2.version}</version>
+				<classifier>tests</classifier>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.hadoop</groupId>
+				<artifactId>hadoop-mapreduce-client-core</artifactId>
+				<version>${hadoop-2.version}</version>
 			</dependency>
 
 			<dependency>

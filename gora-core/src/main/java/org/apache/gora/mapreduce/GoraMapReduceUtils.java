@@ -21,6 +21,8 @@ package org.apache.gora.mapreduce;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.gora.shims.hadoop.HadoopShim;
+import org.apache.gora.shims.hadoop.HadoopShimFactory;
 import org.apache.gora.util.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -35,6 +37,8 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
  * MapReduce related utilities for Gora
  */
 public class GoraMapReduceUtils {
+
+  private static HadoopShim hadoopShim = HadoopShimFactory.INSTANCE().getHadoopShim();
 
   public static class HelperInputFormat<K,V> extends FileInputFormat<K, V> {
     @Override
@@ -75,11 +79,11 @@ public class GoraMapReduceUtils {
     throws IOException {
     
     if(inputPath != null) {
-      Job job = new Job(conf);
+      Job job = hadoopShim.createJob(conf);
       FileInputFormat.addInputPath(job, new Path(inputPath));
-      return new JobContext(job.getConfiguration(), null);
+      return hadoopShim.createJobContext(job.getConfiguration());
     } 
     
-    return new JobContext(conf, null);
+    return hadoopShim.createJobContext(conf);
   }
 }

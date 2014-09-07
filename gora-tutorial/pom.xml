@@ -117,9 +117,10 @@
         </dependency-->
 
 	<!-- Hadoop Dependencies -->
-	<dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-core</artifactId>
+        <dependency>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-common</artifactId>
+          <version>${hadoop-2.version}</version>
         </dependency>
         
         <dependency>
