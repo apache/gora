@@ -4,6 +4,8 @@
 
 Current Development 0.5-SNAPSHOT
 
+* GOTA-346 Create shim layer to support multiple hadoop versions (Moritz Hoffmann, rmarroquin, hsaputra, Mikhail Bernadsky via lewismc)
+
 * GORA-353 Accumulo authentication token serialized incorrectly (Chin Huang via lewismc)
 
 * GORA-167 forward port of Make Cassandra keyspace consistency configurable within gora.properties (rmarroquin via lewismc)
