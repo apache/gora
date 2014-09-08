@@ -646,7 +646,7 @@
     <build-helper-maven-plugin.version>1.7</build-helper-maven-plugin.version>
     <maven-surfire-plugin.version>2.12</maven-surfire-plugin.version>
     <maven-release-plugin.version>2.2.2</maven-release-plugin.version>
-    <maven-bundle-plugin.version>2.3.7</maven-bundle-plugin.version>
+    <maven-bundle-plugin.version>2.5.3</maven-bundle-plugin.version>
     <maven-source-plugin.version>2.1.2</maven-source-plugin.version>
     <maven-javadoc-plugin.version>2.8.1</maven-javadoc-plugin.version>
     <maven-gpg-plugin.version>1.4</maven-gpg-plugin.version>

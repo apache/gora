@@ -20,26 +20,38 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <packaging>bundle</packaging>
   <parent>
     <groupId>org.apache.gora</groupId>
     <artifactId>gora</artifactId>
     <version>0.5-SNAPSHOT</version>
+    <relativePath>../</relativePath>
   </parent>
   <artifactId>gora-shims-distribution</artifactId>
+  <packaging>bundle</packaging>
 
   <name>Apache Gora :: Shims Distribution</name>
-  <licenses>
-    <license>
-      <name>The Apache Software License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-    </license>
-  </licenses>
-
+  <description>The Apache Gora open source framework provides an in-memory data model and 
+    persistence for big data. Gora supports persisting to column stores, key value stores, 
+    document stores and RDBMSs, and analyzing the data with extensive Apache Hadoop MapReduce 
+    support.</description>
+  <inceptionYear>2010</inceptionYear>
   <organization>
     <name>The Apache Software Foundation</name>
     <url>http://www.apache.org/</url>
   </organization>
+  <issueManagement>
+    <system>JIRA</system>
+    <url>https://issues.apache.org/jira/browse/GORA</url>
+  </issueManagement>
+  <ciManagement>
+    <system>Jenkins</system>
+    <url>https://builds.apache.org/job/Gora-trunk/</url>
+  </ciManagement>
+
+  <properties>
+    <osgi.import>*</osgi.import>
+    <osgi.export>org.apache.gora.shims.distribution*;version="${project.version}";-noimport:=true</osgi.export>
+  </properties>
 
   <build>
     <plugins>
