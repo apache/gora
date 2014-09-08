@@ -38,7 +38,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
  */
 public class GoraMapReduceUtils {
 
-  private static HadoopShim hadoopShim = HadoopShimFactory.INSTANCE().getHadoopShim();
+  private static final HadoopShim hadoopShim = HadoopShimFactory.INSTANCE().getHadoopShim();
 
   public static class HelperInputFormat<K,V> extends FileInputFormat<K, V> {
     @Override
