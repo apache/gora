@@ -4,7 +4,11 @@
 
 Current Development 0.5-SNAPSHOT
 
-* GOTA-346 Create shim layer to support multiple hadoop versions (Moritz Hoffmann, rmarroquin, hsaputra, Mikhail Bernadsky via lewismc)
+* GORA-369 Obtain consistent formatting of all pom.xml's (lewismc)
+
+* GORA-346 Create shim layer to support multiple hadoop versions (Moritz Hoffmann, rmarroquin, hsaputra, Mikhail Bernadsky via lewismc)
+
+* GORA-73 Merge goraci testing suite with master branch (kturner, enis via lewismc)
 
 * GORA-353 Accumulo authentication token serialized incorrectly (Chin Huang via lewismc)
 
