@@ -184,9 +184,7 @@
 
         <dependency>
           <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-common</artifactId>
-          <version>${hadoop-2.version}</version>
-          <classifier>tests</classifier>
+          <artifactId>hadoop-test</artifactId>
         </dependency>
         
     </dependencies>
