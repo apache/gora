@@ -28,7 +28,7 @@
   <groupId>org.apache.gora</groupId>
   <artifactId>gora</artifactId>
   <packaging>pom</packaging>
-  <version>0.6-SNAPSHOT</version>
+  <version>0.5</version>
   <name>Apache Gora</name>
   <description>The Apache Gora open source framework provides an in-memory data model and 
     persistence for big data. Gora supports persisting to column stores, key value stores, 
@@ -655,7 +655,7 @@
     <maven-dependency-plugin.version>2.4</maven-dependency-plugin.version>
     <build-helper-maven-plugin.version>1.7</build-helper-maven-plugin.version>
     <maven-surfire-plugin.version>2.12</maven-surfire-plugin.version>
-    <maven-release-plugin.version>2.2.2</maven-release-plugin.version>
+    <maven-release-plugin.version>2.5</maven-release-plugin.version>
     <maven-bundle-plugin.version>2.5.3</maven-bundle-plugin.version>
     <maven-source-plugin.version>2.1.2</maven-source-plugin.version>
     <maven-javadoc-plugin.version>2.8.1</maven-javadoc-plugin.version>
