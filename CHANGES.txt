@@ -2,7 +2,8 @@
  ==CHANGES.txt
  =======================================================================
 
-Current Development 0.5-SNAPSHOT
+Apache Gora 0.5 Release - 15/09/14
+Release Report - http://s.apache.org/0.5report
 
 * GORA-369 Obtain consistent formatting of all pom.xml's (lewismc)
 
