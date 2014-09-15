@@ -17,8 +17,7 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.apache</groupId>
@@ -29,7 +28,7 @@
   <groupId>org.apache.gora</groupId>
   <artifactId>gora</artifactId>
   <packaging>pom</packaging>
-  <version>0.5-SNAPSHOT</version>
+  <version>0.6-SNAPSHOT</version>
   <name>Apache Gora</name>
   <description>The Apache Gora open source framework provides an in-memory data model and 
     persistence for big data. Gora supports persisting to column stores, key value stores, 
@@ -328,6 +327,9 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-deploy-plugin</artifactId>
           <version>${maven-deploy-plugin.version}</version>
+          <configuration>
+            <updateReleaseInfo>true</updateReleaseInfo>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -351,11 +353,20 @@
           <artifactId>maven-release-plugin</artifactId>
           <version>${maven-release-plugin.version}</version>
           <configuration>
+            <preparationGoals>install</preparationGoals>
             <mavenExecutorId>forked-path</mavenExecutorId>
             <useReleaseProfile>false</useReleaseProfile>
+            <tagNameFormat>apache-gora-@{project.version}</tagNameFormat>
             <arguments>-Papache-release,release</arguments>
             <autoVersionSubmodules>true</autoVersionSubmodules>
           </configuration>
+          <dependencies>
+            <dependency>
+              <groupId>org.apache.maven.scm</groupId>
+              <artifactId>maven-scm-provider-gitexe</artifactId>
+              <version>1.9</version>
+            </dependency>
+          </dependencies>
         </plugin>
         <!--This plugin's configuration is used to store Eclipse m2e settings 
           only. It has no influence on the Maven build itself. -->
