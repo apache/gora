@@ -265,7 +265,7 @@
     <url>https://builds.apache.org/job/Gora-trunk/</url>
   </ciManagement>
 
-  <distributionManagement>
+  <!--distributionManagement>
     <repository>
       <id>apache.releases.https</id>
       <name>Apache Release Distribution Repository</name>
@@ -290,7 +290,7 @@
         <enabled>false</enabled>
       </releases>
     </repository>
-  </repositories>
+  </repositories-->
 
   <build>
     <defaultGoal>install</defaultGoal>
