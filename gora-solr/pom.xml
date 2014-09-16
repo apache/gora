@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache.gora</groupId>
     <artifactId>gora</artifactId>
-    <version>0.5-SNAPSHOT</version>
+    <version>0.5</version>
     <relativePath>../</relativePath>
   </parent>
   <artifactId>gora-solr</artifactId>
