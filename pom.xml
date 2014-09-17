@@ -635,7 +635,7 @@
     <restlet.version>2.2.1</restlet.version>
 
     <!-- Misc Dependencies -->
-    <guava.version>13.0</guava.version>
+    <guava.version>17.0</guava.version>
     <commons-lang.version>2.6</commons-lang.version>
     <jdom.version>1.1.2</jdom.version>
     <hsqldb.version>2.2.8</hsqldb.version>

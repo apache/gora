@@ -46,6 +46,7 @@ if [ $# = 0 ]; then
   echo "  goracompiler               Run Compiler"
   echo "  specificcompiler           Run Avro Specific Compiler"
   echo "  dynamocompiler             Run Gora DynamoDB Compiler"
+  echo "  goracisetup                Run the GoraCI Rackspace orchestration setup"
   echo "  logmanager                 Run the tutorial log manager"
   echo "  loganalytics               Run the tutorial log analytics"
   echo "  junit         	     Run the given JUnit test"
@@ -121,6 +122,10 @@ elif [ "$COMMAND" = "dynamocompiler" ] ; then
   MODULE=gora-dynamodb
   CLASSPATH=$CLASSPATH:$GORA_HOME/$MODULE/target/classes/
   CLASS=org.apache.gora.dynamodb.compiler.GoraDynamoDBCompiler
+elif [ "$COMMAND" = "goracisetup" ] ; then
+  MODULE=gora-goraci
+  CLASSPATH=$CLASSPATH:$GORA_HOME/$MODULE/target/classes/
+  CLASS=org.apache.gora.goraci.rackspace.RackspaceOrchestration
 elif [ "$COMMAND" = "logmanager" ] ; then
   MODULE=gora-tutorial
   CLASSPATH=$CLASSPATH:$GORA_HOME/$MODULE/target/classes/

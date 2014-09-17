@@ -17,7 +17,8 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
   <parent>
@@ -31,9 +32,9 @@
   <name>Apache Gora :: GoraCI</name>
   <url>http://gora.apache.org</url>
   <description>The GoraCI test runs many ingest clients that continually create 
-	linked lists containing 25 million nodes. At some point the clients are stopped 
-	and a map reduce job is run to ensure no linked list has a hole. A hole indicates 
-	data was lost.</description>
+  linked lists containing 25 million nodes. At some point the clients are stopped 
+  and a map reduce job is run to ensure no linked list has a hole. A hole indicates 
+  data was lost.</description>
   <organization>
     <name>The Apache Software Foundation</name>
     <url>http://www.apache.org/</url>
@@ -48,7 +49,7 @@
   </ciManagement>
 
   <properties>
-    <jclouds.version>1.7.3</jclouds.version>
+    <jclouds.version>1.8.0</jclouds.version>
   </properties>
 
   <build>
@@ -262,6 +263,13 @@
       <groupId>org.apache.gora</groupId>
       <artifactId>gora-core</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.apache.gora</groupId>
+      <artifactId>gora-core-tests</artifactId>
+      <version>0.5-SNAPSHOT</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/libext/gora-core-tests-0.5-SNAPSHOT.jar</systemPath>
+    </dependency>
 
     <dependency>
       <groupId>org.apache.hadoop</groupId>
@@ -276,6 +284,12 @@
       <groupId>commons-cli</groupId>
       <artifactId>commons-cli</artifactId>
     </dependency>
+
+    <!--  dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <scope>runtime</scope>
+    </dependency-->
 
     <!-- jclouds dependencies -->
     <dependency>
