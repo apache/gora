@@ -2,6 +2,8 @@
  ==CHANGES.txt
  =======================================================================
 
+* GORA-372: Fixed runtime error with the slf4j-api version conflict. (Viacheslav Dobromyslov (dobromyslov) via hsaputra)
+
 Apache Gora 0.5 Release - 15/09/14
 Release Report - http://s.apache.org/0.5report
 
