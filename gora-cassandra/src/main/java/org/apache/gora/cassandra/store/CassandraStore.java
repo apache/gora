@@ -149,7 +149,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
         readOpConsLvl = DataStoreFactory.findProperty(properties, this, READ_OP_CL, null);
         writeOpConsLvl = DataStoreFactory.findProperty(properties, this, WRITE_OP_CL, null);
       }
-      this.cassandraClient.initialize(keyClass, persistent);
+      this.cassandraClient.initialize(keyClass, persistent, properties);
     } catch (Exception e) {
       LOG.error(e.getMessage());
       LOG.error(e.getStackTrace().toString());
