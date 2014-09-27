@@ -272,19 +272,19 @@ public class CassandraClient<K, T extends PersistentBase> {
     String columnName = this.cassandraMapping.getColumn(fieldName);
     
     if (columnName == null) {
-    	LOG.warn("Column name is null for field=" + fieldName );
+    	LOG.warn("Column name is null for field: " + fieldName );
         return;
     }
       
-    if( LOG.isDebugEnabled() ) LOG.debug( "fieldName:"+fieldName +" columnName:" + columnName );
+    if( LOG.isDebugEnabled() ) LOG.debug( "fieldName: "+fieldName +" columnName: " + columnName );
     
     String ttlAttr = this.cassandraMapping.getColumnsAttribs().get(columnName);
     
     if ( null == ttlAttr ){
     	ttlAttr = CassandraMapping.DEFAULT_COLUMNS_TTL;
-    	if( LOG.isDebugEnabled() ) LOG.debug( "ttl was not set for field:" + fieldName + " .Using " + ttlAttr );
+    	if( LOG.isDebugEnabled() ) LOG.debug( "ttl was not set for field: " + fieldName + ". Using " + ttlAttr );
     } else {
-    	if( LOG.isDebugEnabled() ) LOG.debug( "ttl for field:" + fieldName + " is " + ttlAttr );
+    	if( LOG.isDebugEnabled() ) LOG.debug( "ttl for field: " + fieldName + " is " + ttlAttr );
     }
 
     synchronized(mutator) {

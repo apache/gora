@@ -2,6 +2,12 @@
  ==CHANGES.txt
  =======================================================================
 
+Current Development 0.6-SNAPSHOT
+ 
+* GORA-378 Log error trace as well as error message in GoraRecordWriter (lewismc)
+
+* GORA-376 Gora Cassandra doesn't accept user credentials for connection (Viju Kothuvatiparambil via lewismc) 
+
 * GORA-372: Fixed runtime error with the slf4j-api version conflict. (Viacheslav Dobromyslov (dobromyslov) via hsaputra)
 
 Apache Gora 0.5 Release - 15/09/14

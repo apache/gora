@@ -56,6 +56,8 @@ public class GoraRecordWriter<K, T> extends RecordWriter<K, T> {
       store.close();
     }catch(Exception e){
       LOG.warn("Exception at GoraRecordWriter.class while closing datastore." + e.getMessage());
+      LOG.warn("Trace: " + e.getStackTrace());
+      e.printStackTrace();
     }
   }
 
@@ -70,6 +72,8 @@ public class GoraRecordWriter<K, T> extends RecordWriter<K, T> {
       }
     }catch(Exception e){
       LOG.warn("Exception at GoraRecordWriter.class while writing to datastore. " + e.getMessage());
+      LOG.warn("Trace: " + e.getStackTrace());
+      e.printStackTrace();
     }
   }
 }
