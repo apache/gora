@@ -4,6 +4,8 @@
 
 Current Development 0.6-SNAPSHOT
  
+* GORA-381 Fix Guava dependency mismatch post GoraCI (lewismc)
+
 * GORA-374 Implement Rackspace Cloud Orchestration in GoraCI (lewismc)
 
 * GORA-371 Exception setXIncludeAware UnsupportedOperationException (Viacheslav Dobromyslov (dobromyslov) via lewismc)
