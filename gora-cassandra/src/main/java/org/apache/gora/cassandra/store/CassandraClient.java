@@ -122,20 +122,20 @@ public class CassandraClient<K, T extends PersistentBase> {
     // get cassandra mapping with persistent class
     this.persistentClass = persistentClass;
     this.cassandraMapping = CassandraMappingManager.getManager().get(persistentClass);
-	Map<String, String> accessMap = null;
-	if (properties != null) {
-		String username = properties
-				.getProperty("gora.cassandrastore.username");
-		if (username != null) {
-			accessMap = new HashMap<String, String>();
-			accessMap.put("username", username);
-			String password = properties
-					.getProperty("gora.cassandrastore.password");
-			if (password != null) {
-				accessMap.put("password", password);
-			}
-		}
-	}
+    Map<String, String> accessMap = null;
+    if (properties != null) {
+      String username = properties
+          .getProperty("gora.cassandrastore.username");
+      if (username != null) {
+        accessMap = new HashMap<String, String>();
+        accessMap.put("username", username);
+        String password = properties
+            .getProperty("gora.cassandrastore.password");
+        if (password != null) {
+          accessMap.put("password", password);
+        }
+      }
+    }
 
     this.cluster = HFactory.getOrCreateCluster(this.cassandraMapping.getClusterName(), 
         new CassandraHostConfigurator(this.cassandraMapping.getHostName()), accessMap);

@@ -50,19 +50,19 @@
 -->
 
 <gora-otd>
-  <keyspace name="Employee" host="localhost" placement_strategy="org.apache.cassandra.locator.SimpleStrategy"
+  <keyspace name="Employee" host="localhost:9160" placement_strategy="org.apache.cassandra.locator.SimpleStrategy"
       replication_factor="1" cluster="Gora Cassandra Test Cluster">
     <family name="p" gc_grace_seconds="5"/>
      <family name="sc" type="super" />
   </keyspace>
 
-  <keyspace name="WebPage" host="localhost" placement_strategy="org.apache.cassandra.locator.SimpleStrategy"
+  <keyspace name="WebPage" host="localhost:9160" placement_strategy="org.apache.cassandra.locator.SimpleStrategy"
       replication_factor="1" cluster="Gora Cassandra Test Cluster">
     <family name="p" gc_grace_seconds="5"/>
     <family name="sc" type="super"/>
   </keyspace>
 
-  <keyspace name="TokenDatum" host="localhost" placement_strategy="org.apache.cassandra.locator.SimpleStrategy"
+  <keyspace name="TokenDatum" host="localhost:9160" placement_strategy="org.apache.cassandra.locator.SimpleStrategy"
       replication_factor="1" cluster="Gora Cassandra Test Cluster">
     <family name="p" gc_grace_seconds="5"/>
     <family name="sc" type="super"/>

@@ -285,11 +285,12 @@
       <artifactId>commons-cli</artifactId>
     </dependency>
 
-    <!--  dependency>
+    <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <scope>runtime</scope>
-    </dependency-->
+      <version>17.0</version>
+      <scope>compile</scope>
+    </dependency>
 
     <!-- jclouds dependencies -->
     <dependency>
