@@ -637,7 +637,7 @@
     <!-- Misc Dependencies -->
     <guava.version>17.0</guava.version>
     <commons-lang.version>2.6</commons-lang.version>
-    <jdom.version>1.1.2</jdom.version>
+    <jdom.version>1.1.3</jdom.version>
     <hsqldb.version>2.2.8</hsqldb.version>
     <mysql.version>5.1.18</mysql.version>
     <xerces.version>2.9.1</xerces.version>
@@ -1292,11 +1292,11 @@
         <artifactId>mysql-connector-java</artifactId> <version>${mysql.version}</version> 
         </dependency -->
 
-      <dependency>
+      <!--dependency>
         <groupId>xerces</groupId>
         <artifactId>xercesImpl</artifactId>
         <version>${xerces.version}</version>
-      </dependency>
+      </dependency -->
 
       <!-- Logging Dependencies -->
       <dependency>

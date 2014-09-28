@@ -94,6 +94,14 @@ public class CassandraClient<K, T extends PersistentBase> {
   private Serializer<K> keySerializer;
   
   /**
+   * Method to maintain backward compatibility with earlier versions. 
+  */
+  public void initialize(Class<K> keyClass, Class<T> persistentClass)
+    throws Exception {
+	initialize(keyClass, persistentClass, null);
+  }
+  
+  /**
    * Given our key, persistentClass from 
    * {@link org.apache.gora.cassandra.store.CassandraStore#initialize(Class, Class, Properties)}
    * we make best efforts to dictate our data model. 
@@ -105,17 +113,32 @@ public class CassandraClient<K, T extends PersistentBase> {
    * defining a mutator from and by which we can mutate this object.
    * @param keyClass the Key by which we wish o assign a record object
    * @param persistentClass the generated {@link org.apache.org.gora.persistency.Peristent} bean representing the data.
+   * @param properties key value pairs from gora.properties
    * @throws Exception
    */
-  public void initialize(Class<K> keyClass, Class<T> persistentClass) throws Exception {
+  public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) throws Exception {
     this.keyClass = keyClass;
 
     // get cassandra mapping with persistent class
     this.persistentClass = persistentClass;
     this.cassandraMapping = CassandraMappingManager.getManager().get(persistentClass);
+	Map<String, String> accessMap = null;
+	if (properties != null) {
+		String username = properties
+				.getProperty("gora.cassandrastore.username");
+		if (username != null) {
+			accessMap = new HashMap<String, String>();
+			accessMap.put("username", username);
+			String password = properties
+					.getProperty("gora.cassandrastore.password");
+			if (password != null) {
+				accessMap.put("password", password);
+			}
+		}
+	}
 
     this.cluster = HFactory.getOrCreateCluster(this.cassandraMapping.getClusterName(), 
-        new CassandraHostConfigurator(this.cassandraMapping.getHostName()));
+        new CassandraHostConfigurator(this.cassandraMapping.getHostName()), accessMap);
     
     // add keyspace to cluster
     checkKeyspace();
@@ -249,19 +272,19 @@ public class CassandraClient<K, T extends PersistentBase> {
     String columnName = this.cassandraMapping.getColumn(fieldName);
     
     if (columnName == null) {
-    	LOG.warn("Column name is null for field=" + fieldName );
+    	LOG.warn("Column name is null for field: " + fieldName );
         return;
     }
       
-    if( LOG.isDebugEnabled() ) LOG.debug( "fieldName:"+fieldName +" columnName:" + columnName );
+    if( LOG.isDebugEnabled() ) LOG.debug( "fieldName: "+fieldName +" columnName: " + columnName );
     
     String ttlAttr = this.cassandraMapping.getColumnsAttribs().get(columnName);
     
     if ( null == ttlAttr ){
     	ttlAttr = CassandraMapping.DEFAULT_COLUMNS_TTL;
-    	if( LOG.isDebugEnabled() ) LOG.debug( "ttl was not set for field:" + fieldName + " .Using " + ttlAttr );
+    	if( LOG.isDebugEnabled() ) LOG.debug( "ttl was not set for field: " + fieldName + ". Using " + ttlAttr );
     } else {
-    	if( LOG.isDebugEnabled() ) LOG.debug( "ttl for field:" + fieldName + " is " + ttlAttr );
+    	if( LOG.isDebugEnabled() ) LOG.debug( "ttl for field: " + fieldName + " is " + ttlAttr );
     }
 
     synchronized(mutator) {
