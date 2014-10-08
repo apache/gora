@@ -369,13 +369,8 @@ public class MongoStore<K, T extends PersistentBase> extends
     }
     // Execute the query
     DBObject res = mongoClientColl.findOne(q, proj);
-    // Build the corresponding persistent and clears its states
-    T persistent = newInstance(res, dbFields);
-    if (persistent != null) {
-      persistent.clearDirty();
-    }
-    // Done
-    return persistent;
+    // Build the corresponding persistent
+    return newInstance(res, dbFields);
   }
 
   /**

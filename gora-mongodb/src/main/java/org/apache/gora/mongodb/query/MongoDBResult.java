@@ -74,10 +74,6 @@ public class MongoDBResult<K, T extends PersistentBase> extends
     key = (K) obj.get("_id");
     persistent = ((MongoStore<K, T>) getDataStore()).newInstance(obj,
         getQuery().getFields());
-    if (persistent != null) {
-      persistent.clearDirty();
-    }
-
     return persistent != null;
   }
 
