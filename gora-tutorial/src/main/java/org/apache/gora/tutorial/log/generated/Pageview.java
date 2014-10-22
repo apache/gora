@@ -134,7 +134,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    * Checks the dirty status of the 'url' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
    */
-  public boolean isUrlDirty(java.lang.CharSequence value) {
+  public boolean isUrlDirty() {
     return isDirty(0);
   }
 
@@ -158,7 +158,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    * Checks the dirty status of the 'timestamp' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
    */
-  public boolean isTimestampDirty(java.lang.Long value) {
+  public boolean isTimestampDirty() {
     return isDirty(1);
   }
 
@@ -182,7 +182,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    * Checks the dirty status of the 'ip' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
    */
-  public boolean isIpDirty(java.lang.CharSequence value) {
+  public boolean isIpDirty() {
     return isDirty(2);
   }
 
@@ -206,7 +206,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    * Checks the dirty status of the 'httpMethod' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
    */
-  public boolean isHttpMethodDirty(java.lang.CharSequence value) {
+  public boolean isHttpMethodDirty() {
     return isDirty(3);
   }
 
@@ -230,7 +230,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    * Checks the dirty status of the 'httpStatusCode' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
    */
-  public boolean isHttpStatusCodeDirty(java.lang.Integer value) {
+  public boolean isHttpStatusCodeDirty() {
     return isDirty(4);
   }
 
@@ -254,7 +254,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    * Checks the dirty status of the 'responseSize' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
    */
-  public boolean isResponseSizeDirty(java.lang.Integer value) {
+  public boolean isResponseSizeDirty() {
     return isDirty(5);
   }
 
@@ -278,7 +278,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    * Checks the dirty status of the 'referrer' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
    */
-  public boolean isReferrerDirty(java.lang.CharSequence value) {
+  public boolean isReferrerDirty() {
     return isDirty(6);
   }
 
@@ -302,7 +302,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
    * Checks the dirty status of the 'userAgent' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
    */
-  public boolean isUserAgentDirty(java.lang.CharSequence value) {
+  public boolean isUserAgentDirty() {
     return isDirty(7);
   }
 
@@ -623,7 +623,7 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
   }
   
   public Pageview.Tombstone getTombstone(){
-    return TOMBSTONE;
+  	return TOMBSTONE;
   }
 
   public Pageview newInstance(){
@@ -636,191 +636,191 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
   
       private Tombstone() { }
   
-          /**
-     * Gets the value of the 'url' field.
-       */
-    public java.lang.CharSequence getUrl() {
-      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-    }
-  
-    /**
-     * Sets the value of the 'url' field.
-       * @param value the value to set.
-     */
-    public void setUrl(java.lang.CharSequence value) {
-      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-    }
-    
-    /**
-     * Checks the dirty status of the 'url' field. A field is dirty if it represents a change that has not yet been written to the database.
-       * @param value the value to set.
-     */
-    public boolean isUrlDirty(java.lang.CharSequence value) {
-      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-    }
-  
-          /**
-     * Gets the value of the 'timestamp' field.
-       */
-    public java.lang.Long getTimestamp() {
-      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-    }
-  
-    /**
-     * Sets the value of the 'timestamp' field.
-       * @param value the value to set.
-     */
-    public void setTimestamp(java.lang.Long value) {
-      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-    }
-    
-    /**
-     * Checks the dirty status of the 'timestamp' field. A field is dirty if it represents a change that has not yet been written to the database.
-       * @param value the value to set.
-     */
-    public boolean isTimestampDirty(java.lang.Long value) {
-      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-    }
-  
-          /**
-     * Gets the value of the 'ip' field.
-       */
-    public java.lang.CharSequence getIp() {
-      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-    }
-  
-    /**
-     * Sets the value of the 'ip' field.
-       * @param value the value to set.
-     */
-    public void setIp(java.lang.CharSequence value) {
-      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-    }
-    
-    /**
-     * Checks the dirty status of the 'ip' field. A field is dirty if it represents a change that has not yet been written to the database.
-       * @param value the value to set.
-     */
-    public boolean isIpDirty(java.lang.CharSequence value) {
-      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-    }
-  
-          /**
-     * Gets the value of the 'httpMethod' field.
-       */
-    public java.lang.CharSequence getHttpMethod() {
-      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-    }
-  
-    /**
-     * Sets the value of the 'httpMethod' field.
-       * @param value the value to set.
-     */
-    public void setHttpMethod(java.lang.CharSequence value) {
-      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-    }
-    
-    /**
-     * Checks the dirty status of the 'httpMethod' field. A field is dirty if it represents a change that has not yet been written to the database.
-       * @param value the value to set.
-     */
-    public boolean isHttpMethodDirty(java.lang.CharSequence value) {
-      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-    }
-  
-          /**
-     * Gets the value of the 'httpStatusCode' field.
-       */
-    public java.lang.Integer getHttpStatusCode() {
-      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-    }
-  
-    /**
-     * Sets the value of the 'httpStatusCode' field.
-       * @param value the value to set.
-     */
-    public void setHttpStatusCode(java.lang.Integer value) {
-      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-    }
-    
-    /**
-     * Checks the dirty status of the 'httpStatusCode' field. A field is dirty if it represents a change that has not yet been written to the database.
-       * @param value the value to set.
-     */
-    public boolean isHttpStatusCodeDirty(java.lang.Integer value) {
-      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-    }
-  
-          /**
-     * Gets the value of the 'responseSize' field.
-       */
-    public java.lang.Integer getResponseSize() {
-      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-    }
-  
-    /**
-     * Sets the value of the 'responseSize' field.
-       * @param value the value to set.
-     */
-    public void setResponseSize(java.lang.Integer value) {
-      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-    }
-    
-    /**
-     * Checks the dirty status of the 'responseSize' field. A field is dirty if it represents a change that has not yet been written to the database.
-       * @param value the value to set.
-     */
-    public boolean isResponseSizeDirty(java.lang.Integer value) {
-      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-    }
-  
-          /**
-     * Gets the value of the 'referrer' field.
-       */
-    public java.lang.CharSequence getReferrer() {
-      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-    }
-  
-    /**
-     * Sets the value of the 'referrer' field.
-       * @param value the value to set.
-     */
-    public void setReferrer(java.lang.CharSequence value) {
-      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-    }
-    
-    /**
-     * Checks the dirty status of the 'referrer' field. A field is dirty if it represents a change that has not yet been written to the database.
-       * @param value the value to set.
-     */
-    public boolean isReferrerDirty(java.lang.CharSequence value) {
-      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-    }
-  
-          /**
-     * Gets the value of the 'userAgent' field.
-       */
-    public java.lang.CharSequence getUserAgent() {
-      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-    }
-  
-    /**
-     * Sets the value of the 'userAgent' field.
-       * @param value the value to set.
-     */
-    public void setUserAgent(java.lang.CharSequence value) {
-      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-    }
-    
-    /**
-     * Checks the dirty status of the 'userAgent' field. A field is dirty if it represents a change that has not yet been written to the database.
-       * @param value the value to set.
-     */
-    public boolean isUserAgentDirty(java.lang.CharSequence value) {
-      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-    }
-  
-      
+	  		  /**
+	   * Gets the value of the 'url' field.
+		   */
+	  public java.lang.CharSequence getUrl() {
+	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+	  }
+	
+	  /**
+	   * Sets the value of the 'url' field.
+		   * @param value the value to set.
+	   */
+	  public void setUrl(java.lang.CharSequence value) {
+	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+	  }
+	  
+	  /**
+	   * Checks the dirty status of the 'url' field. A field is dirty if it represents a change that has not yet been written to the database.
+		   * @param value the value to set.
+	   */
+	  public boolean isUrlDirty() {
+	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+	  }
+	
+				  /**
+	   * Gets the value of the 'timestamp' field.
+		   */
+	  public java.lang.Long getTimestamp() {
+	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+	  }
+	
+	  /**
+	   * Sets the value of the 'timestamp' field.
+		   * @param value the value to set.
+	   */
+	  public void setTimestamp(java.lang.Long value) {
+	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+	  }
+	  
+	  /**
+	   * Checks the dirty status of the 'timestamp' field. A field is dirty if it represents a change that has not yet been written to the database.
+		   * @param value the value to set.
+	   */
+	  public boolean isTimestampDirty() {
+	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+	  }
+	
+				  /**
+	   * Gets the value of the 'ip' field.
+		   */
+	  public java.lang.CharSequence getIp() {
+	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+	  }
+	
+	  /**
+	   * Sets the value of the 'ip' field.
+		   * @param value the value to set.
+	   */
+	  public void setIp(java.lang.CharSequence value) {
+	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+	  }
+	  
+	  /**
+	   * Checks the dirty status of the 'ip' field. A field is dirty if it represents a change that has not yet been written to the database.
+		   * @param value the value to set.
+	   */
+	  public boolean isIpDirty() {
+	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+	  }
+	
+				  /**
+	   * Gets the value of the 'httpMethod' field.
+		   */
+	  public java.lang.CharSequence getHttpMethod() {
+	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+	  }
+	
+	  /**
+	   * Sets the value of the 'httpMethod' field.
+		   * @param value the value to set.
+	   */
+	  public void setHttpMethod(java.lang.CharSequence value) {
+	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+	  }
+	  
+	  /**
+	   * Checks the dirty status of the 'httpMethod' field. A field is dirty if it represents a change that has not yet been written to the database.
+		   * @param value the value to set.
+	   */
+	  public boolean isHttpMethodDirty() {
+	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+	  }
+	
+				  /**
+	   * Gets the value of the 'httpStatusCode' field.
+		   */
+	  public java.lang.Integer getHttpStatusCode() {
+	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+	  }
+	
+	  /**
+	   * Sets the value of the 'httpStatusCode' field.
+		   * @param value the value to set.
+	   */
+	  public void setHttpStatusCode(java.lang.Integer value) {
+	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+	  }
+	  
+	  /**
+	   * Checks the dirty status of the 'httpStatusCode' field. A field is dirty if it represents a change that has not yet been written to the database.
+		   * @param value the value to set.
+	   */
+	  public boolean isHttpStatusCodeDirty() {
+	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+	  }
+	
+				  /**
+	   * Gets the value of the 'responseSize' field.
+		   */
+	  public java.lang.Integer getResponseSize() {
+	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+	  }
+	
+	  /**
+	   * Sets the value of the 'responseSize' field.
+		   * @param value the value to set.
+	   */
+	  public void setResponseSize(java.lang.Integer value) {
+	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+	  }
+	  
+	  /**
+	   * Checks the dirty status of the 'responseSize' field. A field is dirty if it represents a change that has not yet been written to the database.
+		   * @param value the value to set.
+	   */
+	  public boolean isResponseSizeDirty() {
+	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+	  }
+	
+				  /**
+	   * Gets the value of the 'referrer' field.
+		   */
+	  public java.lang.CharSequence getReferrer() {
+	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+	  }
+	
+	  /**
+	   * Sets the value of the 'referrer' field.
+		   * @param value the value to set.
+	   */
+	  public void setReferrer(java.lang.CharSequence value) {
+	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+	  }
+	  
+	  /**
+	   * Checks the dirty status of the 'referrer' field. A field is dirty if it represents a change that has not yet been written to the database.
+		   * @param value the value to set.
+	   */
+	  public boolean isReferrerDirty() {
+	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+	  }
+	
+				  /**
+	   * Gets the value of the 'userAgent' field.
+		   */
+	  public java.lang.CharSequence getUserAgent() {
+	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+	  }
+	
+	  /**
+	   * Sets the value of the 'userAgent' field.
+		   * @param value the value to set.
+	   */
+	  public void setUserAgent(java.lang.CharSequence value) {
+	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+	  }
+	  
+	  /**
+	   * Checks the dirty status of the 'userAgent' field. A field is dirty if it represents a change that has not yet been written to the database.
+		   * @param value the value to set.
+	   */
+	  public boolean isUserAgentDirty() {
+	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+	  }
+	
+		  
   }
   
 }

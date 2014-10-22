@@ -109,7 +109,7 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
    * Checks the dirty status of the 'metricDimension' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
    */
-  public boolean isMetricDimensionDirty(java.lang.CharSequence value) {
+  public boolean isMetricDimensionDirty() {
     return isDirty(0);
   }
 
@@ -133,7 +133,7 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
    * Checks the dirty status of the 'timestamp' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
    */
-  public boolean isTimestampDirty(java.lang.Long value) {
+  public boolean isTimestampDirty() {
     return isDirty(1);
   }
 
@@ -157,7 +157,7 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
    * Checks the dirty status of the 'metric' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
    */
-  public boolean isMetricDirty(java.lang.Long value) {
+  public boolean isMetricDirty() {
     return isDirty(2);
   }
 
@@ -356,7 +356,7 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
 	   * Checks the dirty status of the 'metricDimension' field. A field is dirty if it represents a change that has not yet been written to the database.
 		   * @param value the value to set.
 	   */
-	  public boolean isMetricDimensionDirty(java.lang.CharSequence value) {
+	  public boolean isMetricDimensionDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
 	  }
 	
@@ -379,7 +379,7 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
 	   * Checks the dirty status of the 'timestamp' field. A field is dirty if it represents a change that has not yet been written to the database.
 		   * @param value the value to set.
 	   */
-	  public boolean isTimestampDirty(java.lang.Long value) {
+	  public boolean isTimestampDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
 	  }
 	
@@ -402,7 +402,7 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
 	   * Checks the dirty status of the 'metric' field. A field is dirty if it represents a change that has not yet been written to the database.
 		   * @param value the value to set.
 	   */
-	  public boolean isMetricDirty(java.lang.Long value) {
+	  public boolean isMetricDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
 	  }
 	

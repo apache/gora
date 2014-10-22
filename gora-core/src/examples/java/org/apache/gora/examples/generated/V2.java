@@ -5,7 +5,7 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
+ * 
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -110,7 +110,7 @@ public class V2 extends org.apache.gora.persistency.impl.PersistentBase implemen
    * Checks the dirty status of the 'v3' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
    */
-  public boolean isV3Dirty(java.lang.Integer value) {
+  public boolean isV3Dirty() {
     return isDirty(0);
   }
 
@@ -248,7 +248,7 @@ public class V2 extends org.apache.gora.persistency.impl.PersistentBase implemen
 	   * Checks the dirty status of the 'v3' field. A field is dirty if it represents a change that has not yet been written to the database.
 		   * @param value the value to set.
 	   */
-	  public boolean isV3Dirty(java.lang.Integer value) {
+	  public boolean isV3Dirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
 	  }
 	

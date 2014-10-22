@@ -5,7 +5,7 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
+ * 
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -135,7 +135,7 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
    * Checks the dirty status of the 'name' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
    */
-  public boolean isNameDirty(java.lang.CharSequence value) {
+  public boolean isNameDirty() {
     return isDirty(0);
   }
 
@@ -159,7 +159,7 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
    * Checks the dirty status of the 'dateOfBirth' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
    */
-  public boolean isDateOfBirthDirty(java.lang.Long value) {
+  public boolean isDateOfBirthDirty() {
     return isDirty(1);
   }
 
@@ -183,7 +183,7 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
    * Checks the dirty status of the 'ssn' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
    */
-  public boolean isSsnDirty(java.lang.CharSequence value) {
+  public boolean isSsnDirty() {
     return isDirty(2);
   }
 
@@ -207,7 +207,7 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
    * Checks the dirty status of the 'salary' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
    */
-  public boolean isSalaryDirty(java.lang.Integer value) {
+  public boolean isSalaryDirty() {
     return isDirty(3);
   }
 
@@ -231,7 +231,7 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
    * Checks the dirty status of the 'boss' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
    */
-  public boolean isBossDirty(java.lang.Object value) {
+  public boolean isBossDirty() {
     return isDirty(4);
   }
 
@@ -255,7 +255,7 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
    * Checks the dirty status of the 'webpage' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
    */
-  public boolean isWebpageDirty(org.apache.gora.examples.generated.WebPage value) {
+  public boolean isWebpageDirty() {
     return isDirty(5);
   }
 
@@ -547,7 +547,7 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
 	   * Checks the dirty status of the 'name' field. A field is dirty if it represents a change that has not yet been written to the database.
 		   * @param value the value to set.
 	   */
-	  public boolean isNameDirty(java.lang.CharSequence value) {
+	  public boolean isNameDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
 	  }
 	
@@ -570,7 +570,7 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
 	   * Checks the dirty status of the 'dateOfBirth' field. A field is dirty if it represents a change that has not yet been written to the database.
 		   * @param value the value to set.
 	   */
-	  public boolean isDateOfBirthDirty(java.lang.Long value) {
+	  public boolean isDateOfBirthDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
 	  }
 	
@@ -593,7 +593,7 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
 	   * Checks the dirty status of the 'ssn' field. A field is dirty if it represents a change that has not yet been written to the database.
 		   * @param value the value to set.
 	   */
-	  public boolean isSsnDirty(java.lang.CharSequence value) {
+	  public boolean isSsnDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
 	  }
 	
@@ -616,7 +616,7 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
 	   * Checks the dirty status of the 'salary' field. A field is dirty if it represents a change that has not yet been written to the database.
 		   * @param value the value to set.
 	   */
-	  public boolean isSalaryDirty(java.lang.Integer value) {
+	  public boolean isSalaryDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
 	  }
 	
@@ -639,7 +639,7 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
 	   * Checks the dirty status of the 'boss' field. A field is dirty if it represents a change that has not yet been written to the database.
 		   * @param value the value to set.
 	   */
-	  public boolean isBossDirty(java.lang.Object value) {
+	  public boolean isBossDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
 	  }
 	
@@ -662,7 +662,7 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
 	   * Checks the dirty status of the 'webpage' field. A field is dirty if it represents a change that has not yet been written to the database.
 		   * @param value the value to set.
 	   */
-	  public boolean isWebpageDirty(org.apache.gora.examples.generated.WebPage value) {
+	  public boolean isWebpageDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
 	  }
 	

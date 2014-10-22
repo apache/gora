@@ -5,7 +5,7 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
+ * 
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -120,7 +120,7 @@ public class CINode extends org.apache.gora.persistency.impl.PersistentBase impl
    * Checks the dirty status of the 'prev' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
    */
-  public boolean isPrevDirty(java.lang.Long value) {
+  public boolean isPrevDirty() {
     return isDirty(0);
   }
 
@@ -144,7 +144,7 @@ public class CINode extends org.apache.gora.persistency.impl.PersistentBase impl
    * Checks the dirty status of the 'client' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
    */
-  public boolean isClientDirty(java.lang.CharSequence value) {
+  public boolean isClientDirty() {
     return isDirty(1);
   }
 
@@ -168,7 +168,7 @@ public class CINode extends org.apache.gora.persistency.impl.PersistentBase impl
    * Checks the dirty status of the 'count' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
    */
-  public boolean isCountDirty(java.lang.Long value) {
+  public boolean isCountDirty() {
     return isDirty(2);
   }
 
@@ -367,7 +367,7 @@ public class CINode extends org.apache.gora.persistency.impl.PersistentBase impl
 	   * Checks the dirty status of the 'prev' field. A field is dirty if it represents a change that has not yet been written to the database.
 		   * @param value the value to set.
 	   */
-	  public boolean isPrevDirty(java.lang.Long value) {
+	  public boolean isPrevDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
 	  }
 	
@@ -390,7 +390,7 @@ public class CINode extends org.apache.gora.persistency.impl.PersistentBase impl
 	   * Checks the dirty status of the 'client' field. A field is dirty if it represents a change that has not yet been written to the database.
 		   * @param value the value to set.
 	   */
-	  public boolean isClientDirty(java.lang.CharSequence value) {
+	  public boolean isClientDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
 	  }
 	
@@ -413,7 +413,7 @@ public class CINode extends org.apache.gora.persistency.impl.PersistentBase impl
 	   * Checks the dirty status of the 'count' field. A field is dirty if it represents a change that has not yet been written to the database.
 		   * @param value the value to set.
 	   */
-	  public boolean isCountDirty(java.lang.Long value) {
+	  public boolean isCountDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
 	  }
 	

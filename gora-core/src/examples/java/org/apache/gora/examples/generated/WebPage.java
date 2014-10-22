@@ -5,7 +5,7 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
+ * 
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -17,7 +17,7 @@
 package org.apache.gora.examples.generated;  
 @SuppressWarnings("all")
 public class WebPage extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"WebPage\",\"namespace\":\"org.apache.gora.examples.generated\",\"fields\":[{\"name\":\"url\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"content\",\"type\":[\"null\",\"bytes\"],\"default\":null},{\"name\":\"parsedContent\",\"type\":{\"type\":\"array\",\"items\":\"string\"},\"default\":null},{\"name\":\"outlinks\",\"type\":{\"type\":\"map\",\"values\":\"string\"},\"default\":{}},{\"name\":\"headers\",\"type\":[\"null\",{\"type\":\"map\",\"values\":[\"null\",\"string\"]}],\"default\":null},{\"name\":\"metadata\",\"type\":{\"type\":\"record\",\"name\":\"Metadata\",\"fields\":[{\"name\":\"version\",\"type\":\"int\",\"default\":0},{\"name\":\"data\",\"type\":{\"type\":\"map\",\"values\":\"string\"},\"default\":null}]},\"default\":null}],\"default\":null}");
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"WebPage\",\"namespace\":\"org.apache.gora.examples.generated\",\"fields\":[{\"name\":\"url\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"content\",\"type\":[\"null\",\"bytes\"],\"default\":null},{\"name\":\"parsedContent\",\"type\":{\"type\":\"array\",\"items\":\"string\"},\"default\":{}},{\"name\":\"outlinks\",\"type\":{\"type\":\"map\",\"values\":[\"null\",\"string\"]},\"default\":{}},{\"name\":\"headers\",\"type\":[\"null\",{\"type\":\"map\",\"values\":[\"null\",\"string\"]}],\"default\":null},{\"name\":\"metadata\",\"type\":{\"type\":\"record\",\"name\":\"Metadata\",\"fields\":[{\"name\":\"version\",\"type\":\"int\",\"default\":0},{\"name\":\"data\",\"type\":{\"type\":\"map\",\"values\":\"string\"},\"default\":{}}]},\"default\":null}]}");
 
   /** Enum containing all data bean's fields. */
   public static enum Field {
@@ -135,7 +135,7 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
    * Checks the dirty status of the 'url' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
    */
-  public boolean isUrlDirty(java.lang.CharSequence value) {
+  public boolean isUrlDirty() {
     return isDirty(0);
   }
 
@@ -159,7 +159,7 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
    * Checks the dirty status of the 'content' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
    */
-  public boolean isContentDirty(java.nio.ByteBuffer value) {
+  public boolean isContentDirty() {
     return isDirty(1);
   }
 
@@ -183,7 +183,7 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
    * Checks the dirty status of the 'parsedContent' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
    */
-  public boolean isParsedContentDirty(java.util.List<java.lang.CharSequence> value) {
+  public boolean isParsedContentDirty() {
     return isDirty(2);
   }
 
@@ -207,7 +207,7 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
    * Checks the dirty status of the 'outlinks' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
    */
-  public boolean isOutlinksDirty(java.util.Map<java.lang.CharSequence,java.lang.CharSequence> value) {
+  public boolean isOutlinksDirty() {
     return isDirty(3);
   }
 
@@ -231,7 +231,7 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
    * Checks the dirty status of the 'headers' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
    */
-  public boolean isHeadersDirty(java.util.Map<java.lang.CharSequence,java.lang.CharSequence> value) {
+  public boolean isHeadersDirty() {
     return isDirty(4);
   }
 
@@ -255,7 +255,7 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
    * Checks the dirty status of the 'metadata' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
    */
-  public boolean isMetadataDirty(org.apache.gora.examples.generated.Metadata value) {
+  public boolean isMetadataDirty() {
     return isDirty(5);
   }
 
@@ -549,7 +549,7 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
 	   * Checks the dirty status of the 'url' field. A field is dirty if it represents a change that has not yet been written to the database.
 		   * @param value the value to set.
 	   */
-	  public boolean isUrlDirty(java.lang.CharSequence value) {
+	  public boolean isUrlDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
 	  }
 	
@@ -572,7 +572,7 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
 	   * Checks the dirty status of the 'content' field. A field is dirty if it represents a change that has not yet been written to the database.
 		   * @param value the value to set.
 	   */
-	  public boolean isContentDirty(java.nio.ByteBuffer value) {
+	  public boolean isContentDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
 	  }
 	
@@ -595,7 +595,7 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
 	   * Checks the dirty status of the 'parsedContent' field. A field is dirty if it represents a change that has not yet been written to the database.
 		   * @param value the value to set.
 	   */
-	  public boolean isParsedContentDirty(java.util.List<java.lang.CharSequence> value) {
+	  public boolean isParsedContentDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
 	  }
 	
@@ -618,7 +618,7 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
 	   * Checks the dirty status of the 'outlinks' field. A field is dirty if it represents a change that has not yet been written to the database.
 		   * @param value the value to set.
 	   */
-	  public boolean isOutlinksDirty(java.util.Map<java.lang.CharSequence,java.lang.CharSequence> value) {
+	  public boolean isOutlinksDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
 	  }
 	
@@ -641,7 +641,7 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
 	   * Checks the dirty status of the 'headers' field. A field is dirty if it represents a change that has not yet been written to the database.
 		   * @param value the value to set.
 	   */
-	  public boolean isHeadersDirty(java.util.Map<java.lang.CharSequence,java.lang.CharSequence> value) {
+	  public boolean isHeadersDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
 	  }
 	
@@ -664,7 +664,7 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
 	   * Checks the dirty status of the 'metadata' field. A field is dirty if it represents a change that has not yet been written to the database.
 		   * @param value the value to set.
 	   */
-	  public boolean isMetadataDirty(org.apache.gora.examples.generated.Metadata value) {
+	  public boolean isMetadataDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
 	  }
 	

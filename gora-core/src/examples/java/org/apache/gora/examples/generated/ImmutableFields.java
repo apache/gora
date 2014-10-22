@@ -5,7 +5,7 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
+ * 
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -116,7 +116,7 @@ public class ImmutableFields extends org.apache.gora.persistency.impl.Persistent
    * Checks the dirty status of the 'v1' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
    */
-  public boolean isV1Dirty(java.lang.Integer value) {
+  public boolean isV1Dirty() {
     return isDirty(0);
   }
 
@@ -140,7 +140,7 @@ public class ImmutableFields extends org.apache.gora.persistency.impl.Persistent
    * Checks the dirty status of the 'v2' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
    */
-  public boolean isV2Dirty(org.apache.gora.examples.generated.V2 value) {
+  public boolean isV2Dirty() {
     return isDirty(1);
   }
 
@@ -309,7 +309,7 @@ public class ImmutableFields extends org.apache.gora.persistency.impl.Persistent
 	   * Checks the dirty status of the 'v1' field. A field is dirty if it represents a change that has not yet been written to the database.
 		   * @param value the value to set.
 	   */
-	  public boolean isV1Dirty(java.lang.Integer value) {
+	  public boolean isV1Dirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
 	  }
 	
@@ -332,7 +332,7 @@ public class ImmutableFields extends org.apache.gora.persistency.impl.Persistent
 	   * Checks the dirty status of the 'v2' field. A field is dirty if it represents a change that has not yet been written to the database.
 		   * @param value the value to set.
 	   */
-	  public boolean isV2Dirty(org.apache.gora.examples.generated.V2 value) {
+	  public boolean isV2Dirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
 	  }
 	
