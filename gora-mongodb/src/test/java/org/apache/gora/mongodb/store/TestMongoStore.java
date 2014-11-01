@@ -17,15 +17,22 @@
  */
 package org.apache.gora.mongodb.store;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.io.IOException;
 
 import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.mongodb.GoraMongodbTestDriver;
+import org.apache.gora.mongodb.utils.BSONDecorator;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreTestBase;
 import org.junit.Before;
 import org.junit.Ignore;
+import org.junit.Test;
+
+import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
 
 public class TestMongoStore extends DataStoreTestBase {
 
@@ -74,4 +81,43 @@ public class TestMongoStore extends DataStoreTestBase {
     // MongoStore doesn't support 3 types union field yet
   }
 
+  @Test
+  public void testFromMongoList_null() throws Exception {
+    MongoStore store = new MongoStore();
+    BasicDBObject noField = new BasicDBObject();
+    String field = "myField";
+    Object item = store.fromMongoList(field, null, new BSONDecorator(noField),
+        null);
+    assertNotNull(item);
+  }
+
+  @Test
+  public void testFromMongoList_empty() throws Exception {
+    MongoStore store = new MongoStore();
+    String field = "myField";
+    BasicDBObject emptyField = new BasicDBObject(field, new BasicDBList());
+    Object item = store.fromMongoList(field, null,
+        new BSONDecorator(emptyField), null);
+    assertNotNull(item);
+  }
+
+  @Test
+  public void testFromMongoMap_null() throws Exception {
+    MongoStore store = new MongoStore();
+    BasicDBObject noField = new BasicDBObject();
+    String field = "myField";
+    Object item = store.fromMongoMap(field, null, new BSONDecorator(noField),
+        null);
+    assertNotNull(item);
+  }
+
+  @Test
+  public void testFromMongoMap_empty() throws Exception {
+    MongoStore store = new MongoStore();
+    String field = "myField";
+    BasicDBObject emptyField = new BasicDBObject(field, new BasicDBObject());
+    Object item = store.fromMongoMap(field, null,
+        new BSONDecorator(emptyField), null);
+    assertNotNull(item);
+  }
 }

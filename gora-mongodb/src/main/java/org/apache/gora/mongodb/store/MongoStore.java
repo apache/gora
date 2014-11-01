@@ -369,13 +369,8 @@ public class MongoStore<K, T extends PersistentBase> extends
     }
     // Execute the query
     DBObject res = mongoClientColl.findOne(q, proj);
-    // Build the corresponding persistent and clears its states
-    T persistent = newInstance(res, dbFields);
-    if (persistent != null) {
-      persistent.clearDirty();
-    }
-    // Done
-    return persistent;
+    // Build the corresponding persistent
+    return newInstance(res, dbFields);
   }
 
   /**
@@ -666,14 +661,14 @@ public class MongoStore<K, T extends PersistentBase> extends
     return result;
   }
 
-  private Object fromMongoList(final String docf, final Schema fieldSchema,
-      final BSONDecorator easybson, final Field f) {
+  /* pp */ Object fromMongoList(final String docf, final Schema fieldSchema,
+                       final BSONDecorator easybson, final Field f) {
     List<Object> list = easybson.getDBList(docf);
+    List<Object> rlist = new ArrayList<Object>();
     if (list == null) {
-      return null;
+      return new DirtyListWrapper(rlist);
     }
 
-    List<Object> rlist = new ArrayList<Object>();
 
     for (Object item : list) {
       DocumentFieldType storeType = mapping.getDocumentFieldType(docf);
@@ -684,13 +679,13 @@ public class MongoStore<K, T extends PersistentBase> extends
     return new DirtyListWrapper<Object>(rlist);
   }
 
-  private Object fromMongoMap(final String docf, final Schema fieldSchema,
-      final BSONDecorator easybson, final Field f) {
+  /* pp */ Object fromMongoMap(final String docf, final Schema fieldSchema,
+                      final BSONDecorator easybson, final Field f) {
     BasicDBObject map = easybson.getDBObject(docf);
-    if (map == null) {
-      return null;
-    }
     Map<Utf8, Object> rmap = new HashMap<Utf8, Object>();
+    if (map == null) {
+        return new DirtyMapWrapper(rmap);
+    }
     for (Entry<String, Object> e : map.entrySet()) {
       String mapKey = e.getKey();
       String decodedMapKey = decodeFieldKey(mapKey);
@@ -960,12 +955,12 @@ public class MongoStore<K, T extends PersistentBase> extends
   private BasicDBObject mapToMongo(final String docf,
       final Map<CharSequence, ?> value, final Schema fieldSchema,
       final Type fieldType) {
+    BasicDBObject map = new BasicDBObject();
     // Handle null case
     if (value == null)
-      return null;
+      return map;
 
     // Handle regular cases
-    BasicDBObject map = new BasicDBObject();
     for (Entry<CharSequence, ?> e : value.entrySet()) {
       String mapKey = e.getKey().toString();
       String encodedMapKey = encodeFieldKey(mapKey);
@@ -993,12 +988,12 @@ public class MongoStore<K, T extends PersistentBase> extends
    */
   private BasicDBList listToMongo(final String docf, final Collection<?> array,
       final Schema fieldSchema, final Type fieldType) {
+    BasicDBList list = new BasicDBList();
     // Handle null case
     if (array == null)
-      return null;
+      return list;
 
     // Handle regular cases
-    BasicDBList list = new BasicDBList();
     for (Object item : array) {
       DocumentFieldType storeType = mapping.getDocumentFieldType(docf);
       Object result = toDBObject(docf, fieldSchema, fieldType, storeType, item);
