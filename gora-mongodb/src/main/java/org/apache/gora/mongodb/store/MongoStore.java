@@ -661,8 +661,8 @@ public class MongoStore<K, T extends PersistentBase> extends
     return result;
   }
 
-  private Object fromMongoList(final String docf, final Schema fieldSchema,
-      final BSONDecorator easybson, final Field f) {
+  /* pp */ Object fromMongoList(final String docf, final Schema fieldSchema,
+                       final BSONDecorator easybson, final Field f) {
     List<Object> list = easybson.getDBList(docf);
     List<Object> rlist = new ArrayList<Object>();
     if (list == null) {
@@ -679,8 +679,8 @@ public class MongoStore<K, T extends PersistentBase> extends
     return new DirtyListWrapper<Object>(rlist);
   }
 
-  private Object fromMongoMap(final String docf, final Schema fieldSchema,
-      final BSONDecorator easybson, final Field f) {
+  /* pp */ Object fromMongoMap(final String docf, final Schema fieldSchema,
+                      final BSONDecorator easybson, final Field f) {
     BasicDBObject map = easybson.getDBObject(docf);
     Map<Utf8, Object> rmap = new HashMap<Utf8, Object>();
     if (map == null) {
