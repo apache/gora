@@ -148,6 +148,8 @@ public class CassandraClient<K, T extends PersistentBase> {
     this.keyspace = HFactory.createKeyspace(this.cassandraMapping.getKeyspaceName(), this.cluster);
     
     this.keySerializer = GoraSerializerTypeInferer.getSerializer(keyClass);
+    if (this.keySerializer == null)
+      LOG.error("Serializer for " + keyClass + " not found.");
     this.mutator = HFactory.createMutator(this.keyspace, this.keySerializer);
   }
 

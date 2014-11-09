@@ -55,6 +55,8 @@ public class GoraSerializerTypeInferer {
     Serializer serializer = null;
     if (value == null) {
       serializer = ByteBufferSerializer.get();
+    } else if (value instanceof CharSequence) {
+      serializer = CharSequenceSerializer.get();
     } else if (value instanceof Utf8) {
       serializer = CharSequenceSerializer.get();
     } else if (value instanceof Boolean) {
@@ -103,7 +105,7 @@ public class GoraSerializerTypeInferer {
   @SuppressWarnings({ "rawtypes", "unchecked" })
   public static <T> Serializer<T> getSerializer(Class<?> valueClass) {
     Serializer serializer = null;
-    if (valueClass.equals(Utf8.class)) {
+    if (valueClass.equals(Utf8.class) || valueClass.equals(CharSequence.class)) {
       serializer = CharSequenceSerializer.get();
     } else if (valueClass.equals(Boolean.class) || valueClass.equals(boolean.class)) {
       serializer = BooleanSerializer.get();
