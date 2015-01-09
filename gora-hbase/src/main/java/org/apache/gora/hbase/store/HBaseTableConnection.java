@@ -18,6 +18,7 @@
 package org.apache.gora.hbase.store;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -26,8 +27,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HRegionLocation;
 import org.apache.hadoop.hbase.HTableDescriptor;
+import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Append;
 import org.apache.hadoop.hbase.client.Delete;
+import org.apache.hadoop.hbase.client.Durability;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.HTableInterface;
@@ -35,15 +38,20 @@ import org.apache.hadoop.hbase.client.Increment;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.RetriesExhaustedWithDetailsException;
 import org.apache.hadoop.hbase.client.Row;
-import org.apache.hadoop.hbase.client.RowLock;
 import org.apache.hadoop.hbase.client.RowMutations;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.coprocessor.Batch.Call;
 import org.apache.hadoop.hbase.client.coprocessor.Batch.Callback;
-import org.apache.hadoop.hbase.ipc.CoprocessorProtocol;
-import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
+import org.apache.hadoop.hbase.ipc.CoprocessorRpcChannel;
 import org.apache.hadoop.hbase.util.Pair;
+
+import com.google.protobuf.Descriptors.MethodDescriptor;
+import com.google.protobuf.Message;
+import com.google.protobuf.Service;
+import com.google.protobuf.ServiceException;
 
 /**
  * Thread safe implementation to connect to a HBase table.
@@ -62,8 +70,8 @@ public class HBaseTableConnection implements HTableInterface {
   private final Configuration conf;
   private final ThreadLocal<HTable> tables;
   private final BlockingQueue<HTable> pool = new LinkedBlockingQueue<HTable>();
-  private final boolean autoflush;
-  private final String tableName;
+  private final boolean autoFlush;
+  private final TableName tableName;
   
   /**
    * Instantiate new connection.
@@ -77,8 +85,8 @@ public class HBaseTableConnection implements HTableInterface {
       throws IOException {
     this.conf = conf;
     this.tables = new ThreadLocal<HTable>();
-    this.tableName = tableName;
-    this.autoflush = autoflush;
+    this.tableName = TableName.valueOf(tableName);
+    this.autoFlush = autoflush;
   }
   
   private HTable getTable() throws IOException {
@@ -86,11 +94,11 @@ public class HBaseTableConnection implements HTableInterface {
     if (table == null) {
       table = new HTable(conf, tableName) {
         @Override
-        public synchronized void flushCommits() throws IOException {
+        public synchronized void flushCommits() throws RetriesExhaustedWithDetailsException, InterruptedIOException {
           super.flushCommits();
         }
       };
-      table.setAutoFlush(autoflush);
+      table.setAutoFlushTo(autoFlush);
       pool.add(table); //keep track
       tables.set(table);
     }
@@ -111,7 +119,7 @@ public class HBaseTableConnection implements HTableInterface {
 
   @Override
   public byte[] getTableName() {
-    return Bytes.toBytes(tableName);
+    return tableName.getName();
   }
 
   @Override
@@ -121,7 +129,7 @@ public class HBaseTableConnection implements HTableInterface {
 
   @Override
   public boolean isAutoFlush() {
-    return autoflush;
+    return autoFlush;
   }
 
   /**
@@ -225,6 +233,7 @@ public class HBaseTableConnection implements HTableInterface {
     return getTable().incrementColumnValue(row, family, qualifier, amount);
   }
 
+  @Deprecated
   @Override
   public long incrementColumnValue(byte[] row, byte[] family, byte[] qualifier,
       long amount, boolean writeToWAL) throws IOException {
@@ -240,63 +249,20 @@ public class HBaseTableConnection implements HTableInterface {
   }
 
   @Override
-  public RowLock lockRow(byte[] row) throws IOException {
-    return getTable().lockRow(row);
-  }
-
-  @Override
-  public void unlockRow(RowLock rl) throws IOException {
-    getTable().unlockRow(rl);
-  }
-
-  @Override
   public void batch(List<? extends Row> actions, Object[] results)
       throws IOException, InterruptedException {
-    // TODO Auto-generated method stub
     getTable().batch(actions, results);
     
   }
 
   @Override
-  public Object[] batch(List<? extends Row> actions) throws IOException,
-      InterruptedException {
-    // TODO Auto-generated method stub
-    return getTable().batch(actions);
-  }
-
-  @Override
   public void mutateRow(RowMutations rm) throws IOException {
-    // TODO Auto-generated method stub
-    
+    getTable().mutateRow(rm);    
   }
 
   @Override
   public Result append(Append append) throws IOException {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public <T extends CoprocessorProtocol> T coprocessorProxy(Class<T> protocol,
-      byte[] row) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public <T extends CoprocessorProtocol, R> Map<byte[], R> coprocessorExec(
-      Class<T> protocol, byte[] startKey, byte[] endKey, Call<T, R> callable)
-      throws IOException, Throwable {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public <T extends CoprocessorProtocol, R> void coprocessorExec(
-      Class<T> protocol, byte[] startKey, byte[] endKey, Call<T, R> callable,
-      Callback<R> callback) throws IOException, Throwable {
-    // TODO Auto-generated method stub
-    
+    return getTable().append(append);
   }
 
   @Override
@@ -306,9 +272,8 @@ public class HBaseTableConnection implements HTableInterface {
   }
 
   @Override
-  public void setAutoFlush(boolean autoFlush, boolean clearBufferOnFail) {
+  public void setAutoFlush(boolean autoFlush, boolean clearBufferOnFail){
     // TODO Auto-generated method stub
-    
   }
 
   @Override
@@ -320,6 +285,87 @@ public class HBaseTableConnection implements HTableInterface {
   @Override
   public void setWriteBufferSize(long writeBufferSize) throws IOException {
     // TODO Auto-generated method stub
+  }
+
+  @Override
+  public TableName getName() {
+    return tableName;
+  }
+
+  @Override
+  public Boolean[] exists(List<Get> gets) throws IOException {
+    return getTable().exists(gets);
+  }
+
+  @Override
+  public <R> void
+      batchCallback(List<? extends Row> actions, Object[] results, Callback<R> callback)
+          throws IOException, InterruptedException {
+    getTable().batchCallback(actions, results, callback);
     
+  }
+
+  @Deprecated
+  @Override
+  public <R> Object[] batchCallback(List<? extends Row> actions, Callback<R> callback)
+      throws IOException, InterruptedException {
+    return getTable().batchCallback(actions, callback);
+  }
+
+  @Override
+  public long incrementColumnValue(byte[] row, byte[] family, byte[] qualifier, long amount,
+      Durability durability) throws IOException {
+    return getTable().incrementColumnValue(row, family, qualifier, amount,durability);
+  }
+
+  @Override
+  public CoprocessorRpcChannel coprocessorService(byte[] row) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public <T extends Service, R> Map<byte[], R> coprocessorService(Class<T> service,
+      byte[] startKey, byte[] endKey, Call<T, R> callable) throws ServiceException, Throwable {
+    return getTable().coprocessorService(service, startKey, endKey, callable);
+  }
+
+  @Override
+  public <T extends Service, R> void coprocessorService(Class<T> service, byte[] startKey,
+      byte[] endKey, Call<T, R> callable, Callback<R> callback) throws ServiceException, Throwable {
+    getTable().coprocessorService(service, startKey, endKey, callable, callback);;
+  }
+
+  @Override
+  public void setAutoFlushTo(boolean autoFlush) {
+    // TODO Auto-generated method stub    
+  }
+
+  @Override
+  public <R extends Message> Map<byte[], R> batchCoprocessorService(
+      MethodDescriptor methodDescriptor, Message request, byte[] startKey, byte[] endKey,
+      R responsePrototype) throws ServiceException, Throwable {
+    return getTable().batchCoprocessorService(methodDescriptor, request, startKey, endKey, responsePrototype);
+  }
+
+  @Override
+  public <R extends Message> void batchCoprocessorService(MethodDescriptor methodDescriptor,
+      Message request, byte[] startKey, byte[] endKey, R responsePrototype, Callback<R> callback)
+      throws ServiceException, Throwable {
+    getTable().batchCoprocessorService(methodDescriptor, request, startKey, endKey, responsePrototype, callback);
+    
+  }
+
+  @Deprecated
+  @Override
+  public Object[] batch(List<? extends Row> actions) throws IOException, InterruptedException {
+    return getTable().batch(actions);
+  }
+
+  @Override
+  public boolean checkAndMutate(byte[] arg0, byte[] arg1, byte[] arg2, CompareOp arg3, byte[] arg4,
+      RowMutations arg5) throws IOException {
+    // TODO Auto-generated method stub
+    return false;
   }
 }

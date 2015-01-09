@@ -68,7 +68,7 @@
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-test</artifactId>
-      <version>${hadoop-1.version}</version>
+      <version>${hadoop-1.test.version}</version>
       <optional>true</optional>
     </dependency>
     <dependency>

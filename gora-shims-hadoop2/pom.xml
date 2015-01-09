@@ -64,6 +64,12 @@
       <optional>true</optional>
     </dependency>
     <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-minicluster</artifactId>
+      <version>${hadoop-2.test.version}</version>
+      <optional>true</optional>
+    </dependency>    
+    <dependency>
       <groupId>org.apache.gora</groupId>
       <artifactId>gora-shims-hadoop</artifactId>
       <version>${project.version}</version>

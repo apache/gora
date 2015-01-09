@@ -412,7 +412,7 @@ implements Configurable {
     }
     List<PartitionQuery<K,T>> partitions = new ArrayList<PartitionQuery<K,T>>(keys.getFirst().length);
     for (int i = 0; i < keys.getFirst().length; i++) {
-      String regionLocation = table.getRegionLocation(keys.getFirst()[i]).getServerAddress().getHostname();
+      String regionLocation = table.getRegionLocation(keys.getFirst()[i]).getHostname();
       byte[] startRow = query.getStartKey() != null ? toBytes(query.getStartKey())
           : HConstants.EMPTY_START_ROW;
       byte[] stopRow = query.getEndKey() != null ? toBytes(query.getEndKey())

@@ -23,8 +23,9 @@ import java.util.Map;
 
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.io.hfile.Compression.Algorithm;
-import org.apache.hadoop.hbase.regionserver.StoreFile.BloomType;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.io.compress.Compression.Algorithm;
+import org.apache.hadoop.hbase.regionserver.BloomType;
 import org.apache.hadoop.hbase.util.Bytes;
 
 /**
@@ -69,14 +70,14 @@ public class HBaseMapping {
     private Map<String, HBaseColumn> columnMap = 
       new HashMap<String, HBaseColumn>();
     
-    private String tableName;
+    private TableName tableName;
     
     public String getTableName() {
-      return tableName;
+      return tableName.getNameAsString();
     }
     
     public void setTableName(String tableName) {
-      this.tableName = tableName;
+      this.tableName = TableName.valueOf(tableName);
     }
     
     public void addFamilyProps(String tableName, String familyName,
@@ -165,7 +166,7 @@ public class HBaseMapping {
     public HBaseMapping build() {
       if (tableName == null) throw new IllegalStateException("tableName is not specified");
       
-      Map<String, HColumnDescriptor> families = tableToFamilies.get(tableName);
+      Map<String, HColumnDescriptor> families = tableToFamilies.get(tableName.getNameAsString());
       if (families == null) throw new IllegalStateException("no families for table " + tableName);
       
       HTableDescriptor tableDescriptors = new HTableDescriptor(tableName);
