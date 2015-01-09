@@ -4,6 +4,8 @@
 
 Current Development 0.6-SNAPSHOT
 
+* GORA-375 Upgrade HBase to 0.98 (Talat UYARER via lewismc)
+
 * GORA-390 Rework generated isXXXDirty methods. (drazzib)
  
 * GORA-381 Fix Guava dependency mismatch post GoraCI (lewismc)
