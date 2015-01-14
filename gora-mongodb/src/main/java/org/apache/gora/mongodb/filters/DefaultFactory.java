@@ -151,6 +151,12 @@ public class DefaultFactory<K, T extends PersistentBase> extends
     return builder;
   }
 
+  /**
+   * Transform all Utf8 into String before preparing MongoDB query.
+   * <p>Otherwise, you'll get <tt>RuntimeException: json can't serialize type : Utf8</tt></p>
+   *
+   * @see <a href="https://issues.apache.org/jira/browse/GORA-388">GORA-388</a>
+   */
   private List<String> convertOperandsToString(List<Object> rawOperands) {
     List<String> operands = new ArrayList<String>(rawOperands.size());
     for (Object rawOperand : rawOperands) {

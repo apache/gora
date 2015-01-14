@@ -121,6 +121,23 @@ public class DefaultFactoryTest {
         dbObject.toString());
   }
 
+  /**
+   * Check that <a href="https://issues.apache.org/jira/browse/GORA-388">GORA-388</a> is fixed.
+   * @see <a href="https://issues.apache.org/jira/browse/GORA-388">GORA-388</a>
+   */
+  @Test
+  public void testCreateFilter_handlingUtf8() throws Exception {
+    SingleFieldValueFilter<String, WebPage> filter = new SingleFieldValueFilter<String, WebPage>();
+    filter.setFieldName(WebPage.Field.URL.toString());
+    filter.setFilterOp(FilterOp.EQUALS);
+    filter.getOperands().add(new Utf8("http://www.example.com"));
+    filter.setFilterIfMissing(true);
+
+    DBObject dbObject = filterFactory.createFilter(filter, store);
+    assertEquals("{ \"url\" : \"http://www.example.com\"}",
+            dbObject.toString());
+  }
+
   private MapFieldValueFilter<String, WebPage> createHeadersFilter() {
     MapFieldValueFilter<String, WebPage> filter = new MapFieldValueFilter<String, WebPage>();
     filter.setFieldName(WebPage.Field.HEADERS.toString());
