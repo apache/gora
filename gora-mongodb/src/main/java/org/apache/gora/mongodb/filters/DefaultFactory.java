@@ -115,7 +115,8 @@ public class DefaultFactory<K, T extends PersistentBase> extends
   }
 
   protected QueryBuilder appendToBuilder(final QueryBuilder builder,
-      final FilterOp filterOp, final List<Object> operands) {
+      final FilterOp filterOp, final List<Object> rawOperands) {
+    List<String> operands = convertOperandsToString(rawOperands);
     switch (filterOp) {
     case EQUALS:
       if (operands.size() == 1) {
@@ -148,6 +149,16 @@ public class DefaultFactory<K, T extends PersistentBase> extends
           + " no MongoDB equivalent yet");
     }
     return builder;
+  }
+
+  private List<String> convertOperandsToString(List<Object> rawOperands) {
+    List<String> operands = new ArrayList<String>(rawOperands.size());
+    for (Object rawOperand : rawOperands) {
+      if (rawOperand != null) {
+        operands.add(rawOperand.toString());
+      }
+    }
+    return operands;
   }
 
 }
