@@ -115,7 +115,8 @@ public class DefaultFactory<K, T extends PersistentBase> extends
   }
 
   protected QueryBuilder appendToBuilder(final QueryBuilder builder,
-      final FilterOp filterOp, final List<Object> operands) {
+      final FilterOp filterOp, final List<Object> rawOperands) {
+    List<String> operands = convertOperandsToString(rawOperands);
     switch (filterOp) {
     case EQUALS:
       if (operands.size() == 1) {
@@ -148,6 +149,22 @@ public class DefaultFactory<K, T extends PersistentBase> extends
           + " no MongoDB equivalent yet");
     }
     return builder;
+  }
+
+  /**
+   * Transform all Utf8 into String before preparing MongoDB query.
+   * <p>Otherwise, you'll get <tt>RuntimeException: json can't serialize type : Utf8</tt></p>
+   *
+   * @see <a href="https://issues.apache.org/jira/browse/GORA-388">GORA-388</a>
+   */
+  private List<String> convertOperandsToString(List<Object> rawOperands) {
+    List<String> operands = new ArrayList<String>(rawOperands.size());
+    for (Object rawOperand : rawOperands) {
+      if (rawOperand != null) {
+        operands.add(rawOperand.toString());
+      }
+    }
+    return operands;
   }
 
 }

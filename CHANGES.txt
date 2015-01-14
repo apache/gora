@@ -4,6 +4,8 @@
 
 Current Development 0.6-SNAPSHOT
 
+* GORA-388 MongoStore: Fix handling of Utf8 in filters (drazzib)
+
 * GORA-375 Upgrade HBase to 0.98 (Talat UYARER via lewismc)
 
 * GORA-389 MongoStore: Document or List mapping change cause NPE in clearDirty() (drazzib)
