@@ -1,0 +1,24 @@
+// Declare buildscript dependencies
+buildscript {
+    repositories {
+        mavenLocal()
+        jcenter()
+    }
+    dependencies {
+        classpath 'org.apache.gora.gradle:gora-gradle-plugin:0.7-SNAPSHOT'
+        classpath "org.apache.gora:gora-core:${goraVersion}"
+    }
+}
+// Enable plugins
+apply plugin: 'java'
+apply plugin: 'org.apache.gora'
+
+// Project dependencies
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    compile "org.apache.gora:gora-core:${goraVersion}"
+}
