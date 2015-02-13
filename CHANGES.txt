@@ -2,7 +2,8 @@
  ==CHANGES.txt
  =======================================================================
 
-Current Development 0.6-SNAPSHOT
+Apache Gora 0.6 Release - 12/02/2015 (dd/mm/yyyy)
+Release Report - http://s.apache.org/gora-0.6
 
 * GORA-406 Upgrade Solr dependencies to 4.10.3 (lewismc)
 
