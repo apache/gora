@@ -4,6 +4,8 @@
 
 Current Development 0.6-SNAPSHOT
 
+* GORA-406 Upgrade Solr dependencies to 4.10.3 (lewismc)
+
 * GORA-407 Upgrade restlet dependencies to 2.3.1 for gora-solr (lewismc)
 
 * GORA-388 MongoStore: Fix handling of Utf8 in filters (drazzib)
