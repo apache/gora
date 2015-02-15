@@ -1,0 +1,13 @@
+{"name": "Test1",
+ "type": "record",
+ "namespace": "org.apache.gora.mongodb.beans.tests",
+ "fields": [
+        {"name": "mapOfBytes", "type": {"type": "map", "values": "bytes"}},
+        {"name": "mapOfStrings", "type": {"type": "map", "values": "string"}},
+        {"name": "mapOfInt", "type": {"type": "map", "values": "int"}},
+        {"name": "listOfInt", "type": {"type": "array", "items": "int"}},
+        {"name": "scalarString", "type": "string"},
+        {"name": "scalarDate", "type": "string"},
+        {"name": "scalarInt", "type": "int"}
+   ]
+}
