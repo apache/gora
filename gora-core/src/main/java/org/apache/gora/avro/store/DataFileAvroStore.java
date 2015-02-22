@@ -59,8 +59,7 @@ public class DataFileAvroStore<K, T extends PersistentBase> extends AvroStore<K,
     try{
       getWriter().append(obj);
     } catch(IOException ex){
-      LOG.error(ex.getMessage());
-      LOG.error(ex.getStackTrace().toString());
+      LOG.error(ex.getMessage(), ex);
     }
   };
   
@@ -78,8 +77,7 @@ public class DataFileAvroStore<K, T extends PersistentBase> extends AvroStore<K,
       return new DataFileAvroResult<K, T>(this, query
           , createReader(createFsInput()));
     } catch(IOException ex){
-      LOG.error(ex.getMessage());
-      LOG.error(ex.getStackTrace().toString());
+      LOG.error(ex.getMessage(), ex);
       return null;
     }
   }
@@ -92,8 +90,7 @@ public class DataFileAvroStore<K, T extends PersistentBase> extends AvroStore<K,
       return new DataFileAvroResult<K, T>(this, query, reader, fsInput
           , query.getStart(), query.getLength());
     } catch(IOException ex){
-      LOG.error(ex.getMessage());
-      LOG.error(ex.getStackTrace().toString());
+      LOG.error(ex.getMessage(), ex);
       return null;
     }
   }
@@ -115,8 +112,7 @@ public class DataFileAvroStore<K, T extends PersistentBase> extends AvroStore<K,
         writer.flush();
       }
     } catch(IOException ex){
-      LOG.error(ex.getMessage());
-      LOG.error(ex.getStackTrace().toString());
+      LOG.error(ex.getMessage(), ex);
     }
   }
   
@@ -129,8 +125,7 @@ public class DataFileAvroStore<K, T extends PersistentBase> extends AvroStore<K,
       writer = null;
       super.close();
     } catch(IOException ex){
-      LOG.error(ex.getMessage());
-      LOG.error(ex.getStackTrace().toString());
+      LOG.error(ex.getMessage(), ex);
     }
   }
 }

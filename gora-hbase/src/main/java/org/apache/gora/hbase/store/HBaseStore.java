@@ -121,8 +121,7 @@ implements Configurable {
         LOG.warn(DEPRECATED_MAPPING_FILE + " is deprecated, please rename the file to "
             + DEFAULT_MAPPING_FILE);
       } catch (FileNotFoundException ex1) {
-          LOG.error(ex1.getMessage());
-          LOG.error(ex1.getStackTrace().toString());
+          LOG.error(ex1.getMessage(), ex1);
           //throw (ex1); //throw the original exception
       } catch (Exception ex1) {
         LOG.warn(DEPRECATED_MAPPING_FILE + " is deprecated, please rename the file to "
@@ -151,8 +150,7 @@ implements Configurable {
       boolean autoflush = this.conf.getBoolean("hbase.client.autoflush.default", false);
       table = new HBaseTableConnection(getConf(), getSchemaName(), autoflush);
     } catch(IOException ex2){
-      LOG.error(ex2.getMessage());
-      LOG.error(ex2.getStackTrace().toString());
+      LOG.error(ex2.getMessage(), ex2);
     }
   }
 
@@ -176,8 +174,7 @@ implements Configurable {
   
       admin.createTable(tableDesc);
     } catch(IOException ex2){
-      LOG.error(ex2.getMessage());
-      LOG.error(ex2.getStackTrace().toString());
+      LOG.error(ex2.getMessage(), ex2);
     }
   }
 
@@ -190,8 +187,7 @@ implements Configurable {
       admin.disableTable(getSchemaName());
       admin.deleteTable(getSchemaName());
     } catch(IOException ex2){
-      LOG.error(ex2.getMessage());
-      LOG.error(ex2.getStackTrace().toString());
+      LOG.error(ex2.getMessage(), ex2);
     }
   }
 
@@ -200,8 +196,7 @@ implements Configurable {
     try{
       return admin.tableExists(mapping.getTableName());
     } catch(IOException ex2){
-      LOG.error(ex2.getMessage());
-      LOG.error(ex2.getStackTrace().toString());
+      LOG.error(ex2.getMessage(), ex2);
       return false;
     }
   }
@@ -215,8 +210,7 @@ implements Configurable {
       Result result = table.get(get);
       return newInstance(result, fields);      
     } catch(IOException ex2){
-      LOG.error(ex2.getMessage());
-      LOG.error(ex2.getStackTrace().toString());
+      LOG.error(ex2.getMessage(), ex2);
       return null;
     }
   }
@@ -265,8 +259,7 @@ implements Configurable {
         table.delete(delete); // HBase sometimes does not delete arbitrarily
       }
     } catch (IOException ex2) {
-      LOG.error(ex2.getMessage());
-      LOG.error(ex2.getStackTrace().toString());
+      LOG.error(ex2.getMessage(), ex2);
     }
   }
 
@@ -349,8 +342,7 @@ implements Configurable {
       //success is a bit costly
       return true;
     } catch(IOException ex2){
-      LOG.error(ex2.getMessage());
-      LOG.error(ex2.getStackTrace().toString());
+      LOG.error(ex2.getMessage(), ex2);
       return false;
     }
   }
@@ -376,8 +368,7 @@ implements Configurable {
       table.delete(deletes);
       return deletes.size();
     } catch (Exception ex) {
-      LOG.error(ex.getMessage());
-      LOG.error(ex.getStackTrace().toString());
+      LOG.error(ex.getMessage(), ex);
       return -1;
     }
   }
@@ -387,8 +378,7 @@ implements Configurable {
     try{
       table.flushCommits();
     }catch(IOException ex){
-      LOG.error(ex.getMessage());
-      LOG.error(ex.getStackTrace().toString());
+      LOG.error(ex.getMessage(), ex);
     }
   }
 
@@ -469,8 +459,7 @@ implements Configurable {
         return result;
       }
     }catch(IOException ex){
-      LOG.error(ex.getMessage());
-      LOG.error(ex.getStackTrace().toString());
+      LOG.error(ex.getMessage(), ex);
       return null;
     }
   }
@@ -799,12 +788,10 @@ implements Configurable {
           ((URLClassLoader) getClass().getClassLoader()).getURLs()));
       throw ex ;
     } catch(IOException ex) {
-      LOG.error(ex.getMessage());
-      LOG.error(ex.getStackTrace().toString());
+      LOG.error(ex.getMessage(), ex);
       throw ex;
     } catch(Exception ex) {
-      LOG.error(ex.getMessage());
-      LOG.error(ex.getStackTrace().toString());
+      LOG.error(ex.getMessage(), ex);
       throw new IOException(ex);
     }
 
@@ -816,8 +803,7 @@ implements Configurable {
     try{
       table.close();
     }catch(IOException ex){
-      LOG.error(ex.getMessage());
-      LOG.error(ex.getStackTrace().toString());
+      LOG.error(ex.getMessage(), ex);
     }
   }
 

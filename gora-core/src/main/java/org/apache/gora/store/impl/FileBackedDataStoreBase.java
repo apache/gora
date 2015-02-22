@@ -134,8 +134,7 @@ public InputStream getInputStream() {
       FileSystem fs = path.getFileSystem(getConf());
       conf = fs.create(path);
     }catch(IOException ex){
-      LOG.error(ex.getMessage());
-      LOG.error(ex.getStackTrace().toString());
+      LOG.error(ex.getMessage(), ex);
     }
     return conf;
   }
@@ -170,8 +169,7 @@ public InputStream getInputStream() {
         queries.add(new FileSplitPartitionQuery<K, T>(query, (FileSplit) split));
       }
     }catch(IOException ex){
-      LOG.error(ex.getMessage());
-      LOG.error(ex.getStackTrace().toString());
+      LOG.error(ex.getMessage(), ex);
     }
     return queries;
   }
@@ -186,8 +184,7 @@ public InputStream getInputStream() {
         results = executeQuery(query);
       }
     }catch(IOException ex){
-      LOG.error(ex.getMessage());
-      LOG.error(ex.getStackTrace().toString());
+      LOG.error(ex.getMessage(), ex);
     }
     return results;
   }
@@ -211,8 +208,7 @@ public InputStream getInputStream() {
       if(outputStream != null)
         outputStream.flush();
     }catch(IOException ex){
-      LOG.error(ex.getMessage());
-      LOG.error(ex.getStackTrace().toString());
+      LOG.error(ex.getMessage(), ex);
     }
   }
 
@@ -241,8 +237,7 @@ public InputStream getInputStream() {
       if(outputPath != null)
         Text.writeString(out, outputPath);
     }catch(IOException ex){
-      LOG.error(ex.getMessage());
-      LOG.error(ex.getStackTrace().toString());
+      LOG.error(ex.getMessage(), ex);
     }
   }
 
@@ -256,8 +251,7 @@ public InputStream getInputStream() {
       if(!nullFields[1])
         outputPath = Text.readString(in);
     }catch(IOException ex){
-      LOG.error(ex.getMessage());
-      LOG.error(ex.getStackTrace().toString());
+      LOG.error(ex.getMessage(), ex);
     }
   }
 

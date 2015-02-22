@@ -150,8 +150,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
       }
       this.cassandraClient.initialize(keyClass, persistent, properties);
     } catch (Exception e) {
-      LOG.error(e.getMessage());
-      LOG.error(e.getStackTrace().toString());
+      LOG.error(e.getMessage(), e);
     }
   }
 

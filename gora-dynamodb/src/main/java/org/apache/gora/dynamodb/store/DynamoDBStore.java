@@ -170,8 +170,7 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
     }
     catch (Exception e) {
       LOG.error("Error while initializing DynamoDB store");
-      LOG.error(e.getMessage());
-      LOG.error(e.getStackTrace().toString());
+      LOG.error(e.getMessage(), e);
     }
   }
   
@@ -357,8 +356,7 @@ public class DynamoDBStore<K, T extends Persistent> extends WSDataStoreBase<K, T
     } catch (InvocationTargetException e) {
       e.printStackTrace();
     } catch (GoraException ge){
-      LOG.error(ge.getMessage());
-      LOG.error(ge.getStackTrace().toString());
+      LOG.error(ge.getMessage(), ge);
     }
     return object;
   }

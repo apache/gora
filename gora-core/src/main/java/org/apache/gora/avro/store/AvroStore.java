@@ -121,8 +121,7 @@ public class AvroStore<K, T extends PersistentBase>
       encoder = null;
       decoder = null;
     }catch(IOException ex){
-      LOG.error(ex.getMessage());
-      LOG.error(ex.getStackTrace().toString());
+      LOG.error(ex.getMessage(), ex);
     }
   }
 
@@ -162,8 +161,7 @@ public class AvroStore<K, T extends PersistentBase>
       if(encoder != null)
         encoder.flush();
     }catch(IOException ex){
-      LOG.error(ex.getMessage());
-      LOG.error(ex.getStackTrace().toString());
+      LOG.error(ex.getMessage(), ex);
     }
   }
 
@@ -182,8 +180,7 @@ public class AvroStore<K, T extends PersistentBase>
     try{
       getDatumWriter().write(obj, getEncoder());
     }catch(IOException ex){
-      LOG.error(ex.getMessage());
-      LOG.error(ex.getStackTrace().toString());
+      LOG.error(ex.getMessage(), ex);
     }
   }
 

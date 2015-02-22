@@ -4,6 +4,8 @@
 
 Apache Gora 0.7 Release 
 
+* GORA-410 Change logging behavior to pass exception object to LOG methods (Gerhard Gossen via lewismc)
+
 * GORA-330 Import Gora Gradle plugin (drazzib)
 
 

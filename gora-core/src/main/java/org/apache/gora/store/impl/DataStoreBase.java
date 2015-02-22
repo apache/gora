@@ -126,8 +126,7 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
     try {
       return beanFactory.newKey();
     } catch (Exception ex) {
-      LOG.error(ex.getMessage());
-      LOG.error(ex.getStackTrace().toString());
+      LOG.error(ex.getMessage(), ex);
       return null;
     }
   }
@@ -137,8 +136,7 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
     try {
       return beanFactory.newPersistent();
     } catch (Exception ex) {
-      LOG.error(ex.getMessage());
-      LOG.error(ex.getStackTrace().toString());
+      LOG.error(ex.getMessage(), ex);
       return null;
     }
   }
@@ -214,11 +212,9 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
       Properties props = WritableUtils.readProperties(in);
       initialize(keyClass, persistentClass, props);
     } catch (ClassNotFoundException ex) {
-      LOG.error(ex.getMessage());
-      LOG.error(ex.getStackTrace().toString());
+      LOG.error(ex.getMessage(), ex);
     } catch (IOException e) {
-      LOG.error(e.getMessage());
-      LOG.error(e.getStackTrace().toString());
+      LOG.error(e.getMessage(), e);
     }
   }
 
@@ -228,8 +224,7 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
       Text.writeString(out, getPersistentClass().getCanonicalName());
       WritableUtils.writeProperties(out, properties);
     } catch (IOException e) {
-      LOG.error(e.getMessage());
-      LOG.error(e.getStackTrace().toString());
+      LOG.error(e.getMessage(), e);
     }
   }
 
