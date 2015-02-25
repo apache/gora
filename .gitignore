@@ -34,3 +34,4 @@ ivy/ivy*.jar
 **/conf/*-site.xml
 **/dependency-reduced-pom.xml
 **/gora-solr/src/test/conf/solr/collection1/data/
+**/_rest_managed.json
