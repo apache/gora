@@ -125,6 +125,13 @@
     </dependency>
 
     <!-- Misc Dependencies -->
+     <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-client</artifactId>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
+
     <dependency>
       <groupId>org.jdom</groupId>
       <artifactId>jdom</artifactId>

@@ -61,7 +61,7 @@ public class HBaseMapping {
   
   /**
    * A builder for creating the mapper. This will allow building a thread safe
-   * {@link HBaseMapping} using simple immutabilty.
+   * {@link HBaseMapping} using simple immutability.
    *
    */
   public static class HBaseMappingBuilder { 

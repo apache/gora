@@ -602,7 +602,6 @@
     <module>gora-accumulo</module>
     <module>gora-cassandra</module>
     <module>gora-goraci</module>
-
     <module>gora-hbase</module>
     <!-- module>gora-lucene</module -->
     <!--module>gora-dynamodb</module -->
