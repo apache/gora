@@ -2,7 +2,9 @@
  ==CHANGES.txt
  =======================================================================
 
-Apache Gora 0.7 Release 
+Apache Gora 0.6.1 Release 
+
+* GORA-415 hadoop-client dependency should be optional in gora-core (hsaputra via lewismc)
 
 * GORA-410 Change logging behavior to pass exception object to LOG methods (Gerhard Gossen via lewismc)
 
