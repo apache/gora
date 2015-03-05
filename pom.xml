@@ -896,6 +896,38 @@
         </exclusions>
       </dependency>
 
+      <!-- HBase Dependencies -->
+      <dependency>
+        <groupId>org.apache.hbase</groupId>
+        <artifactId>hbase-common</artifactId>
+        <version>${hbase.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>avro</artifactId>
+          </exclusion>
+			<exclusion>
+				<artifactId>slf4j-log4j12</artifactId>
+				<groupId>org.slf4j</groupId>
+			</exclusion>
+			<exclusion>
+				<artifactId>hadoop-common</artifactId>
+				<groupId>org.apache.hadoop</groupId>
+			</exclusion>
+			<exclusion>
+				<artifactId>hadoop-yarn-common</artifactId>
+				<groupId>org.apache.hadoop</groupId>
+			</exclusion>
+			<exclusion>
+				<artifactId>hadoop-mapreduce-client-core</artifactId>
+				<groupId>org.apache.hadoop</groupId>
+			</exclusion>
+			<exclusion>
+				<artifactId>hadoop-auth</artifactId>
+				<groupId>org.apache.hadoop</groupId>
+			</exclusion>
+        </exclusions>
+      </dependency>
       <dependency>
         <groupId>org.apache.hbase</groupId>
         <artifactId>hbase-client</artifactId>
