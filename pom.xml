@@ -906,26 +906,26 @@
             <groupId>org.apache.hadoop</groupId>
             <artifactId>avro</artifactId>
           </exclusion>
-			<exclusion>
-				<artifactId>slf4j-log4j12</artifactId>
-				<groupId>org.slf4j</groupId>
-			</exclusion>
-			<exclusion>
-				<artifactId>hadoop-common</artifactId>
-				<groupId>org.apache.hadoop</groupId>
-			</exclusion>
-			<exclusion>
-				<artifactId>hadoop-yarn-common</artifactId>
-				<groupId>org.apache.hadoop</groupId>
-			</exclusion>
-			<exclusion>
-				<artifactId>hadoop-mapreduce-client-core</artifactId>
-				<groupId>org.apache.hadoop</groupId>
-			</exclusion>
-			<exclusion>
-				<artifactId>hadoop-auth</artifactId>
-				<groupId>org.apache.hadoop</groupId>
-			</exclusion>
+		  <exclusion>
+			<artifactId>slf4j-log4j12</artifactId>
+			<groupId>org.slf4j</groupId>
+		  </exclusion>
+		  <exclusion>
+			<artifactId>hadoop-common</artifactId>
+			<groupId>org.apache.hadoop</groupId>
+		  </exclusion>
+		  <exclusion>
+			<artifactId>hadoop-yarn-common</artifactId>
+			<groupId>org.apache.hadoop</groupId>
+		  </exclusion>
+		  <exclusion>
+			<artifactId>hadoop-mapreduce-client-core</artifactId>
+			<groupId>org.apache.hadoop</groupId>
+		  </exclusion>
+		  <exclusion>
+			<artifactId>hadoop-auth</artifactId>
+			<groupId>org.apache.hadoop</groupId>
+		  </exclusion>
         </exclusions>
       </dependency>
       <dependency>
@@ -937,26 +937,26 @@
             <groupId>org.apache.hadoop</groupId>
             <artifactId>avro</artifactId>
           </exclusion>
-			<exclusion>
-				<artifactId>slf4j-log4j12</artifactId>
-				<groupId>org.slf4j</groupId>
-			</exclusion>
-			<exclusion>
-				<artifactId>hadoop-common</artifactId>
-				<groupId>org.apache.hadoop</groupId>
-			</exclusion>
-			<exclusion>
-				<artifactId>hadoop-yarn-common</artifactId>
-				<groupId>org.apache.hadoop</groupId>
-			</exclusion>
-			<exclusion>
-				<artifactId>hadoop-mapreduce-client-core</artifactId>
-				<groupId>org.apache.hadoop</groupId>
-			</exclusion>
-			<exclusion>
-				<artifactId>hadoop-auth</artifactId>
-				<groupId>org.apache.hadoop</groupId>
-			</exclusion>
+		  <exclusion>
+			<artifactId>slf4j-log4j12</artifactId>
+			<groupId>org.slf4j</groupId>
+		  </exclusion>
+		  <exclusion>
+			<artifactId>hadoop-common</artifactId>
+			<groupId>org.apache.hadoop</groupId>
+		  </exclusion>
+		  <exclusion>
+			<artifactId>hadoop-yarn-common</artifactId>
+			<groupId>org.apache.hadoop</groupId>
+		  </exclusion>
+		  <exclusion>
+			<artifactId>hadoop-mapreduce-client-core</artifactId>
+			<groupId>org.apache.hadoop</groupId>
+		  </exclusion>
+		  <exclusion>
+			<artifactId>hadoop-auth</artifactId>
+			<groupId>org.apache.hadoop</groupId>
+		  </exclusion>
         </exclusions>
       </dependency>
       <dependency>
@@ -969,26 +969,26 @@
             <groupId>org.apache.hadoop</groupId>
             <artifactId>avro</artifactId>
           </exclusion>
-			<exclusion>
-				<artifactId>slf4j-log4j12</artifactId>
-				<groupId>org.slf4j</groupId>
-			</exclusion>
-			<exclusion>
-				<artifactId>hadoop-common</artifactId>
-				<groupId>org.apache.hadoop</groupId>
-			</exclusion>
-			<exclusion>
-				<artifactId>hadoop-yarn-common</artifactId>
-				<groupId>org.apache.hadoop</groupId>
-			</exclusion>
-			<exclusion>
-				<artifactId>hadoop-mapreduce-client-core</artifactId>
-				<groupId>org.apache.hadoop</groupId>
-			</exclusion>
-			<exclusion>
-				<artifactId>hadoop-auth</artifactId>
-				<groupId>org.apache.hadoop</groupId>
-			</exclusion>
+		  <exclusion>
+			<artifactId>slf4j-log4j12</artifactId>
+			<groupId>org.slf4j</groupId>
+		  </exclusion>
+		  <exclusion>
+			<artifactId>hadoop-common</artifactId>
+			<groupId>org.apache.hadoop</groupId>
+		  </exclusion>
+		  <exclusion>
+			<artifactId>hadoop-yarn-common</artifactId>
+			<groupId>org.apache.hadoop</groupId>
+		  </exclusion>
+		  <exclusion>
+			<artifactId>hadoop-mapreduce-client-core</artifactId>
+			<groupId>org.apache.hadoop</groupId>
+		  </exclusion>
+		  <exclusion>
+		    <artifactId>hadoop-auth</artifactId>
+			<groupId>org.apache.hadoop</groupId>
+		  </exclusion>
         </exclusions>
       </dependency>
 
