@@ -506,10 +506,15 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
       case RECORD:
         if (value != null) {
           if (value instanceof PersistentBase) {
-            PersistentBase persistentBase = (PersistentBase) value;            
+            PersistentBase persistentBase = (PersistentBase) value;  
+            String familyName = this.cassandraClient.getCassandraMapping().getFamily(field.name());
             try {
               byte[] byteValue = AvroSerializerUtil.serializer(persistentBase, schema);
-              this.cassandraClient.addColumn(key, field.name(), byteValue);
+              if (this.cassandraClient.isSuper( familyName )){
+                this.cassandraClient.addSubColumn(key, field.name(), field.name(), byteValue);
+              }else{
+                this.cassandraClient.addColumn(key, field.name(), byteValue);
+              }
             } catch (IOException e) {
               LOG.warn(field.name() + " named record could not be serialized.");
             }
@@ -579,7 +584,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
         }
         break;
       case UNION:
-     // adding union schema index
+        // adding union schema index
         String columnName = field.name() + UNION_COL_SUFIX;
         String familyName = this.cassandraClient.getCassandraMapping().getFamily(field.name());
         if(value != null) {
@@ -592,11 +597,9 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
             this.cassandraClient.addColumn(key, columnName, schemaPos);
             
           }
-          //this.cassandraClient.getCassandraMapping().addColumn(familyName, columnName, columnName);
           // adding union value
           Schema unionSchema = schema.getTypes().get(schemaPos);
           addOrUpdateField(key, field, unionSchema, value);
-          //this.cassandraClient.addColumn(key, field.name(), value);
         } else {
           LOG.warn("Setting content of: " + field.name() + " to null.");
           if (this.cassandraClient.isSuper( familyName )){
