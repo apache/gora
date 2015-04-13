@@ -368,7 +368,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         }
         credentials = CredentialHelper.create(user, token, conn.getInstance().getInstanceID());
 
-        if (autoCreateSchema)
+        if (autoCreateSchema && !schemaExists())
           createSchema();
       } catch (AccumuloException e) {
         throw new IOException(e);
