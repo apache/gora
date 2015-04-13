@@ -673,21 +673,21 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
 
         switch (field.schema().getType()) {
         case MAP:
-          count = putMap(m, count, field.schema().getValueType(), o, col);
+          count = putMap(m, count, field.schema().getValueType(), o, col, field.name());
           break;
         case ARRAY:
-          count = putArray(m, count, o, col);
+          count = putArray(m, count, o, col, field.name());
           break;
         case UNION: // default value of null acts like union with null
           Schema effectiveSchema = field.schema().getTypes()
           .get(firstNotNullSchemaTypeIndex(field.schema()));
           // map and array need to compute qualifier
           if (effectiveSchema.getType() == Type.ARRAY) {
-            count = putArray(m, count, o, col);
+            count = putArray(m, count, o, col, field.name());
             break;
           }
           else if (effectiveSchema.getType() == Type.MAP) {
-            count = putMap(m, count, effectiveSchema.getValueType(), o, col);
+            count = putMap(m, count, effectiveSchema.getValueType(), o, col, field.name());
             break;
           }
           // continue like a regular top-level union
@@ -718,12 +718,12 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
     }
   }
 
-  private int putMap(Mutation m, int count, Schema valueType, Object o, Pair<Text, Text> col) throws GoraException {
+  private int putMap(Mutation m, int count, Schema valueType, Object o, Pair<Text, Text> col, String fieldName) throws GoraException {
 
     // First of all we delete map field on accumulo store
     Text rowKey = new Text(m.getRow());
     Query<K, T> query = newQuery();
-    query.setFields(col.getFirst().toString());
+    query.setFields(fieldName);
     query.setStartKey((K)rowKey.toString());
     query.setEndKey((K)rowKey.toString());
     deleteByQuery(query);
@@ -746,12 +746,12 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
     return count;
   }
 
-  private int putArray(Mutation m, int count, Object o, Pair<Text, Text> col) {
+  private int putArray(Mutation m, int count, Object o, Pair<Text, Text> col, String fieldName) {
 
     // First of all we delete array field on accumulo store
     Text rowKey = new Text(m.getRow());
     Query<K, T> query = newQuery();
-    query.setFields(col.getFirst().toString());
+    query.setFields(fieldName);
     query.setStartKey((K)rowKey.toString());
     query.setEndKey((K)rowKey.toString());
     deleteByQuery(query);
