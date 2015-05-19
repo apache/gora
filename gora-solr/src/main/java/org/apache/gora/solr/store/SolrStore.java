@@ -43,12 +43,10 @@ import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.AvroUtils;
 import org.apache.gora.util.IOUtils;
 import org.apache.hadoop.util.StringUtils;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.CloudSolrServer;
-import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrServer;
-import org.apache.solr.client.solrj.impl.HttpSolrServer;
-import org.apache.solr.client.solrj.impl.LBHttpSolrServer;
+import org.apache.solr.client.solrj.impl.*;
 import org.apache.solr.client.solrj.request.CoreAdminRequest;
 import org.apache.solr.client.solrj.response.CoreAdminResponse;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -92,6 +90,27 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
    */
   protected static final String SOLR_SOLRJSERVER_IMPL = "solr.solrjserver";
 
+  /** Whether to use secured Solr client or not.
+   * Available options include <b>true</b>, and <b>false</b>.
+   * Defined in <code>gora.properties</code>
+   * This value must be of type <b>boolean</b>.
+   */
+  protected static final String SOLR_SERVER_USER_AUTH = "solr.solrjserver.user_auth";
+
+  /** Solr client username.
+   * Solr client user authentication should be enabled for this property.
+   * Defined in <code>gora.properties</code>
+   * This value must be of type <b>String</b>.
+   */
+  protected static final String SOLR_SERVER_USERNAME = "solr.solrjserver.username";
+
+  /** Solr client password.
+   * Solr client user authentication should be enabled for this property.
+   * Defined in <code>gora.properties</code>
+   * This value must be of type <b>String</b>.
+   */
+  protected static final String SOLR_SERVER_PASSWORD = "solr.solrjserver.password";
+
   /** A batch commit unit for SolrDocument's used when making (commit) calls to Solr.
    * Should be defined in <code>gora.properties</code>. 
    * A default value of 1000 is used if this value is absent. This value must be of type <b>Integer</b>.
@@ -127,6 +146,12 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
   private String solrServerUrl, solrConfig, solrSchema, solrJServerImpl;
 
   private SolrServer server, adminServer;
+
+  private boolean serverUserAuth;
+
+  private String serverUsername;
+
+  private String serverPassword;
 
   private ArrayList<SolrInputDocument> batch;
 
@@ -173,6 +198,14 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
         SOLR_SCHEMA_PROPERTY, null);
     solrJServerImpl = DataStoreFactory.findProperty(properties, this, 
         SOLR_SOLRJSERVER_IMPL, "http");
+    serverUserAuth = DataStoreFactory.findBooleanProperty(properties, this,
+        SOLR_SERVER_USER_AUTH, "false");
+    if (serverUserAuth) {
+      serverUsername = DataStoreFactory.findProperty(properties, this,
+          SOLR_SERVER_USERNAME, null);
+      serverPassword = DataStoreFactory.findProperty(properties, this,
+          SOLR_SERVER_PASSWORD, null);
+    }
     LOG.info("Using Solr server at " + solrServerUrl);
     String solrJServerType = ((solrJServerImpl == null || solrJServerImpl.equals(""))?"http":solrJServerImpl);
     // HttpSolrServer - denoted by "http" in properties
@@ -180,11 +213,27 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       LOG.info("Using HttpSolrServer Solrj implementation.");
       this.adminServer = new HttpSolrServer(solrServerUrl);
       this.server = new HttpSolrServer( solrServerUrl + "/" + mapping.getCoreName() );
+      if (serverUserAuth) {
+        HttpClientUtil.setBasicAuth(
+            (DefaultHttpClient) ((HttpSolrServer) adminServer).getHttpClient(),
+            serverUsername, serverPassword);
+        HttpClientUtil.setBasicAuth(
+            (DefaultHttpClient) ((HttpSolrServer) server).getHttpClient(),
+            serverUsername, serverPassword);
+      }
       // CloudSolrServer - denoted by "cloud" in properties
     } else if (solrJServerType.toString().toLowerCase().equals("cloud")) {
       LOG.info("Using CloudSolrServer Solrj implementation.");
       this.adminServer = new CloudSolrServer(solrServerUrl);
       this.server = new CloudSolrServer( solrServerUrl + "/" + mapping.getCoreName() );
+      if (serverUserAuth) {
+        HttpClientUtil.setBasicAuth(
+            (DefaultHttpClient) ((CloudSolrServer) adminServer).getLbServer().getHttpClient(),
+            serverUsername, serverPassword);
+        HttpClientUtil.setBasicAuth(
+            (DefaultHttpClient) ((CloudSolrServer) server).getLbServer().getHttpClient(),
+            serverUsername, serverPassword);
+      }
     } else if (solrJServerType.toString().toLowerCase().equals("concurrent")) {
       LOG.info("Using ConcurrentUpdateSolrServer Solrj implementation.");
       this.adminServer = new ConcurrentUpdateSolrServer(solrServerUrl, 1000, 10);
@@ -202,6 +251,14 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
         this.server = new LBHttpSolrServer( solrUrlElements + "/" + mapping.getCoreName() );
       } catch (MalformedURLException e) {
         e.printStackTrace();
+      }
+      if (serverUserAuth) {
+        HttpClientUtil.setBasicAuth(
+            (DefaultHttpClient) ((LBHttpSolrServer) adminServer).getHttpClient(),
+            serverUsername, serverPassword);
+        HttpClientUtil.setBasicAuth(
+            (DefaultHttpClient) ((LBHttpSolrServer) server).getHttpClient(),
+            serverUsername, serverPassword);
       }
     }
     if (autoCreateSchema) {

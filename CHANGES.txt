@@ -5,6 +5,8 @@
 Apache Gora 0.6.1 Release - 02/03/2015 (dd/mm/yyyy)
 Release Report - http://s.apache.org/l69 
 
+* GORA-262 Add support for HTTPClient authentication in gora-solr (Furkan KAMACI via lewismc)
+
 * GORA-384 Provide documentation on Gora Shims layer (lewismc)
 
 * GORA-415 hadoop-client dependency should be optional in gora-core (hsaputra via lewismc)
