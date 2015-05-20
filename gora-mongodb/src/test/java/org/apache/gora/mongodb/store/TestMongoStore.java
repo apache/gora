@@ -34,11 +34,8 @@ import org.junit.Test;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 
-public class TestMongoStore extends DataStoreTestBase {
 
-  static {
-    setTestDriver(new GoraMongodbTestDriver());
-  }
+public abstract class TestMongoStore extends DataStoreTestBase {
 
   @Deprecated
   @Override

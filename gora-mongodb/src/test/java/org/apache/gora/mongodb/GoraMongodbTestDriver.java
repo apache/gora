@@ -15,12 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/**
- * Driver to set up an embedded MongoDB database instance for use in our
- * unit tests. We use embedded mongodb which is available from 
- * https://github.com/flapdoodle-oss/embedmongo.flapdoodle.de
- */
 package org.apache.gora.mongodb;
 
 import org.apache.gora.GoraTestDriver;
@@ -40,6 +34,11 @@ import de.flapdoodle.embed.mongo.config.Net;
 import de.flapdoodle.embed.mongo.distribution.Version;
 import de.flapdoodle.embed.process.runtime.Network;
 
+/**
+ * Driver to set up an embedded MongoDB database instance for use in our
+ * unit tests. We use embedded mongodb which is available from
+ * https://github.com/flapdoodle-oss/embedmongo.flapdoodle.de
+ */
 public class GoraMongodbTestDriver extends GoraTestDriver {
 
   private static Logger log = LoggerFactory
@@ -48,12 +47,18 @@ public class GoraMongodbTestDriver extends GoraTestDriver {
   private MongodExecutable _mongodExe;
   private MongodProcess _mongod;
   private MongoClient _mongo;
+  private final Version.Main version;
 
   /**
    * Constructor for this class.
    */
   public GoraMongodbTestDriver() {
+    this(Version.Main.PRODUCTION);
+  }
+
+  public GoraMongodbTestDriver(Version.Main version) {
     super(MongoStore.class);
+    this.version = version;
   }
 
   /**
@@ -66,8 +71,8 @@ public class GoraMongodbTestDriver extends GoraTestDriver {
 
     int port = Network.getFreeServerPort();
     IMongodConfig mongodConfig = new MongodConfigBuilder()
-        .version(Version.Main.PRODUCTION)
-        .net(new Net(port, Network.localhostIsIPv6())).build();
+            .version(version)
+            .net(new Net(port, Network.localhostIsIPv6())).build();
 
     // Store Mongo server "host:port" in Hadoop configuration
     // so that MongoStore will be able to get it latter
