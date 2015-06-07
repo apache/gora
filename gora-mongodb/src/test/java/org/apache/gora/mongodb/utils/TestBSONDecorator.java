@@ -92,4 +92,18 @@ public class TestBSONDecorator {
     assertArrayEquals("test2".getBytes(), dboc.getBytes("root3").array());
   }
 
+  @Test
+  public void testNullStringField() {
+    // Init the object used for testing
+    DBObject dbo1 = BasicDBObjectBuilder
+        .start()
+        .add("key1", null)
+        .get();
+    BSONDecorator dboc = new BSONDecorator(dbo1);
+
+    assertTrue(dboc.containsField("key1"));
+    assertNull(dboc.getUtf8String("key1"));
+
+    assertFalse(dboc.containsField("key2"));
+  }
 }
