@@ -31,7 +31,7 @@ import com.mongodb.DBObject;
 /**
  * MongoDB specific implementation of the {@link org.apache.gora.query.Result}
  * interface.
- * 
+ *
  * @author Fabien Poulard <fpoulard@dictanova.com>
  * @author Damien Raude-Morvan <draudemorvan@dictanova.com>
  */
@@ -42,6 +42,7 @@ public class MongoDBResult<K, T extends PersistentBase> extends
    * Reference to the cursor pointing to the results
    */
   private DBCursor cursor;
+  private int size;
 
   public MongoDBResult(DataStore<K, T> dataStore, Query<K, T> query) {
     super(dataStore, query);
@@ -49,12 +50,13 @@ public class MongoDBResult<K, T extends PersistentBase> extends
 
   @Override
   public float getProgress() throws IOException {
-    if (cursor == null)
+    if (cursor == null) {
       return 0;
-    else if (cursor.size() == 0)
+    } else if (size == 0) {
       return 1;
-    else
-      return offset / cursor.size();
+    } else {
+      return offset / size;
+    }
   }
 
   @Override
@@ -79,13 +81,13 @@ public class MongoDBResult<K, T extends PersistentBase> extends
 
   /**
    * Save the reference to the cursor that holds the actual results.
-   * 
+   *
    * @param cursor
    *          {@link DBCursor} obtained from a query execution and that holds
    *          the actual results
    */
   public void setCursor(DBCursor cursor) {
     this.cursor = cursor;
+    this.size = cursor.size();
   }
-
 }
