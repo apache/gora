@@ -17,7 +17,7 @@
  */
 package org.apache.gora.mongodb.store;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 
@@ -33,27 +33,36 @@ import org.junit.Test;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
+import java.util.Collections;
 
+import org.apache.avro.util.Utf8;
+import org.apache.gora.query.Query;
+import org.apache.gora.query.Result;
+import static org.junit.Assert.assertNotNull;
 
 public abstract class TestMongoStore extends DataStoreTestBase {
+
+  private int keySequence;
 
   @Deprecated
   @Override
   protected DataStore<String, Employee> createEmployeeDataStore()
-      throws IOException {
+          throws IOException {
     throw new UnsupportedOperationException();
   }
 
   @Deprecated
   @Override
   protected DataStore<String, WebPage> createWebPageDataStore()
-      throws IOException {
+          throws IOException {
     throw new UnsupportedOperationException();
   }
 
   @Before
+  @Override
   public void setUp() throws Exception {
     super.setUp();
+    keySequence = 1;
   }
 
   public GoraMongodbTestDriver getTestDriver() {
@@ -84,7 +93,7 @@ public abstract class TestMongoStore extends DataStoreTestBase {
     BasicDBObject noField = new BasicDBObject();
     String field = "myField";
     Object item = store.fromMongoList(field, null, new BSONDecorator(noField),
-        null);
+            null);
     assertNotNull(item);
   }
 
@@ -94,7 +103,7 @@ public abstract class TestMongoStore extends DataStoreTestBase {
     String field = "myField";
     BasicDBObject emptyField = new BasicDBObject(field, new BasicDBList());
     Object item = store.fromMongoList(field, null,
-        new BSONDecorator(emptyField), null);
+            new BSONDecorator(emptyField), null);
     assertNotNull(item);
   }
 
@@ -104,7 +113,7 @@ public abstract class TestMongoStore extends DataStoreTestBase {
     BasicDBObject noField = new BasicDBObject();
     String field = "myField";
     Object item = store.fromMongoMap(field, null, new BSONDecorator(noField),
-        null);
+            null);
     assertNotNull(item);
   }
 
@@ -114,7 +123,62 @@ public abstract class TestMongoStore extends DataStoreTestBase {
     String field = "myField";
     BasicDBObject emptyField = new BasicDBObject(field, new BasicDBObject());
     Object item = store.fromMongoMap(field, null,
-        new BSONDecorator(emptyField), null);
+            new BSONDecorator(emptyField), null);
     assertNotNull(item);
+  }
+
+  @Test
+  public void testResultProgress() throws Exception {
+    Query<String, WebPage> q;
+
+    // empty
+    q = webPageStore.newQuery();
+    assertProgress(q, 1);
+
+    addWebPage();
+
+    // one
+    q = webPageStore.newQuery();
+    assertProgress(q, 0, 1);
+
+    addWebPage();
+
+    // two
+    q = webPageStore.newQuery();
+    assertProgress(q, 0, 0.5f, 1);
+
+    addWebPage();
+
+    // three
+    q = webPageStore.newQuery();
+    assertProgress(q, 0, 0.33f, 0.66f, 1);
+  }
+
+  @Test
+  public void testResultProgressWithLimit() throws Exception {
+    for (int i = 0; i < 5; i++) {
+      addWebPage();
+    }
+    Query<String, WebPage> q = webPageStore.newQuery();
+    q.setLimit(2);
+
+    assertProgress(q, 0, 0.5f, 1);
+  }
+
+  private void assertProgress(Query<String, WebPage> q, float... progress) throws Exception {
+    Result<String, WebPage> r = webPageStore.execute(q);
+    int i = 0;
+    do {
+      assertEquals(progress[i++], r.getProgress(), 0.01f);
+    } while (r.next());
+    r.close();
+  }
+
+  private void addWebPage() {
+    String key = String.valueOf(keySequence++);
+    WebPage p1 = webPageStore.newPersistent();
+    p1.setUrl(new Utf8(key));
+    p1.setHeaders(Collections.singletonMap((CharSequence) "header", (CharSequence) "value"));
+    webPageStore.put(key, p1);
   }
 }
