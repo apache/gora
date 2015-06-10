@@ -36,7 +36,7 @@ import com.mongodb.DBObject;
  * @author Damien Raude-Morvan <draudemorvan@dictanova.com>
  */
 public class MongoDBResult<K, T extends PersistentBase> extends
-    ResultBase<K, T> {
+        ResultBase<K, T> {
 
   /**
    * Reference to the cursor pointing to the results
@@ -55,7 +55,7 @@ public class MongoDBResult<K, T extends PersistentBase> extends
     } else if (size == 0) {
       return 1;
     } else {
-      return offset / size;
+      return offset / (float) size;
     }
   }
 
@@ -75,7 +75,7 @@ public class MongoDBResult<K, T extends PersistentBase> extends
     DBObject obj = cursor.next();
     key = (K) obj.get("_id");
     persistent = ((MongoStore<K, T>) getDataStore()).newInstance(obj,
-        getQuery().getFields());
+            getQuery().getFields());
     return persistent != null;
   }
 
