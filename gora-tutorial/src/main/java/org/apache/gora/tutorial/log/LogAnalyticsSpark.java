@@ -40,12 +40,14 @@ public class LogAnalyticsSpark {
   private static final long DAY_MILIS = 1000 * 60 * 60 * 24;
 
   //todo _fk consider using Kyro serialization
-  private static Function<Pageview, Tuple2<String, Long>> s = new Function<Pageview, Tuple2<String, Long>>() {
+  private static Function<Pageview, Tuple2<Tuple2<String, Long>, Long>> s = new Function<Pageview, Tuple2<Tuple2<String, Long>, Long>> () {
     @Override
-    public Tuple2<String, Long> call(Pageview pageview) throws Exception {
-      String key = pageview.getUrl().toString();
-      Long value = getDay(pageview.getTimestamp());
-      return new Tuple2<>(key, value);
+    public Tuple2<Tuple2<String, Long>, Long> call(Pageview pageview) throws Exception {
+      String url = pageview.getUrl().toString();
+      Long day = getDay(pageview.getTimestamp());
+      Tuple2<String, Long> keyTuple =new Tuple2<>(url, day);
+
+      return new Tuple2<>(keyTuple, 1L);
     }
   };
 
@@ -100,7 +102,7 @@ public class LogAnalyticsSpark {
     String firstOneURL = goraRDD.first()._2().getUrl().toString();
     System.out.println(firstOneURL);
 
-    JavaRDD<Tuple2<String, Long>> mappedGoraRdd = goraRDD.values().map(s);
+    JavaRDD<Tuple2<Tuple2<String, Long>, Long>> mappedGoraRdd = goraRDD.values().map(s);
 
     return 1;
   }
