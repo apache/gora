@@ -21,44 +21,44 @@ import org.apache.gora.spark.GoraSpark;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.tutorial.log.generated.Pageview;
-import org.apache.hadoop.conf.Configured;
-import org.apache.hadoop.util.Tool;
-import org.apache.hadoop.util.ToolRunner;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 
-public class LogAnalyticsSpark extends Configured implements Tool {
+public class LogAnalyticsSpark {
 
   private static final String USAGE = "LogAnalyticsSpark <input_data_store> <output_data_store>";
-  private static LogAnalyticsSpark logAnalyticsSpark = new LogAnalyticsSpark();
 
   public static void main(String[] args) throws Exception {
-      if (args.length < 2) {
-        System.err.println(USAGE);
-        System.exit(1);
+    if (args.length < 2) {
+      System.err.println(USAGE);
+      System.exit(1);
     }
-      // run as any other MR job
-      int ret = ToolRunner.run(logAnalyticsSpark, args);
-      System.exit(ret);
+
+    String inStoreClass = args[0];
+    String outStoreClass = args[1];
+
+    LogAnalyticsSpark logAnalyticsSpark = new LogAnalyticsSpark();
+    int ret = logAnalyticsSpark.run(inStoreClass, outStoreClass);
+
+    System.exit(ret);
   }
 
-  @Override
-  public int run(String[] args) throws Exception {
-    GoraSpark<Long, Pageview> goraSpark = new GoraSpark<Long, Pageview>(
-      Long.class, Pageview.class);
+  public int run(String inStoreClass, String outStoreClass) throws Exception {
+    GoraSpark<Long, Pageview> goraSpark = new GoraSpark<>(Long.class,
+        Pageview.class);
 
-    SparkConf conf = new SparkConf().setAppName(
+    SparkConf sparkConf = new SparkConf().setAppName(
         "Gora Integration Application").setMaster("local");
-    JavaSparkContext sc = new JavaSparkContext(conf);
+    JavaSparkContext sc = new JavaSparkContext(sparkConf);
 
-    String dataStoreClass = args[0];
+    Configuration hadoopConf = new Configuration();
+
     DataStore<Long, Pageview> dataStore = DataStoreFactory.getDataStore(
-        dataStoreClass, Long.class, Pageview.class,
-    logAnalyticsSpark.getConf());
+        inStoreClass, Long.class, Pageview.class, hadoopConf);
 
-    JavaPairRDD<Long, org.apache.gora.tutorial.log.generated.Pageview> goraRDD = goraSpark
-        .initialize(sc, logAnalyticsSpark.getConf(), dataStore);
+    JavaPairRDD<Long, Pageview> goraRDD = goraSpark.initializeInput(sc, dataStore);
     // JavaPairRDD<Long, org.apache.gora.tutorial.log.generated.Pageview>
     // cachedGoraRdd = goraRDD.cache();
 
