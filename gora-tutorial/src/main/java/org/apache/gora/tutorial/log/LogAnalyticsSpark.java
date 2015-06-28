@@ -51,6 +51,12 @@ public class LogAnalyticsSpark {
 
     SparkConf sparkConf = new SparkConf().setAppName(
         "Gora Integration Application").setMaster("local");
+      
+    //todo _fk change architectural desigm
+    Class[] c = new Class[1];
+    c[0] = Pageview.class;
+    sparkConf.registerKryoClasses(c);
+    //
     JavaSparkContext sc = new JavaSparkContext(sparkConf);
 
     Configuration hadoopConf = new Configuration();
@@ -64,6 +70,10 @@ public class LogAnalyticsSpark {
 
     long count = goraRDD.count();
     System.out.println("Total Count: " + count);
+
+    String firstOneURL = goraRDD.first()._2().getUrl().toString();
+    System.out.println(firstOneURL);
+
     return 1;
   }
 }
