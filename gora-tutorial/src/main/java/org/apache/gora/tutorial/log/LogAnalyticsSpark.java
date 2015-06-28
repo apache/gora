@@ -24,11 +24,30 @@ import org.apache.gora.tutorial.log.generated.Pageview;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.Function;
+
+import scala.Tuple2;
+
+import java.util.concurrent.TimeUnit;
 
 public class LogAnalyticsSpark {
 
   private static final String USAGE = "LogAnalyticsSpark <input_data_store> <output_data_store>";
+
+  /** The number of milliseconds in a day */
+  private static final long DAY_MILIS = 1000 * 60 * 60 * 24;
+
+  //todo _fk consider using Kyro serialization
+  private static Function<Pageview, Tuple2<String, Long>> s = new Function<Pageview, Tuple2<String, Long>>() {
+    @Override
+    public Tuple2<String, Long> call(Pageview pageview) throws Exception {
+      String key = pageview.getUrl().toString();
+      Long value = getDay(pageview.getTimestamp());
+      return new Tuple2<>(key, value);
+    }
+  };
 
   public static void main(String[] args) throws Exception {
     if (args.length < 2) {
@@ -45,14 +64,22 @@ public class LogAnalyticsSpark {
     System.exit(ret);
   }
 
+  /**
+   * Rolls up the given timestamp to the day cardinality, so that data can be
+   * aggregated daily
+   */
+  private static long getDay(long timeStamp) {
+    return (timeStamp / DAY_MILIS) * DAY_MILIS;
+  }
+
   public int run(String inStoreClass, String outStoreClass) throws Exception {
     GoraSpark<Long, Pageview> goraSpark = new GoraSpark<>(Long.class,
         Pageview.class);
 
     SparkConf sparkConf = new SparkConf().setAppName(
         "Gora Integration Application").setMaster("local");
-      
-    //todo _fk change architectural desigm
+
+    // todo _fk consider alternative architectural design
     Class[] c = new Class[1];
     c[0] = Pageview.class;
     sparkConf.registerKryoClasses(c);
@@ -64,15 +91,16 @@ public class LogAnalyticsSpark {
     DataStore<Long, Pageview> dataStore = DataStoreFactory.getDataStore(
         inStoreClass, Long.class, Pageview.class, hadoopConf);
 
-    JavaPairRDD<Long, Pageview> goraRDD = goraSpark.initializeInput(sc, dataStore);
-    // JavaPairRDD<Long, org.apache.gora.tutorial.log.generated.Pageview>
-    // cachedGoraRdd = goraRDD.cache();
+    JavaPairRDD<Long, Pageview> goraRDD = goraSpark.initializeInput(sc,
+        dataStore);
 
     long count = goraRDD.count();
     System.out.println("Total Count: " + count);
 
     String firstOneURL = goraRDD.first()._2().getUrl().toString();
     System.out.println(firstOneURL);
+
+    JavaRDD<Tuple2<String, Long>> mappedGoraRdd = goraRDD.values().map(s);
 
     return 1;
   }
