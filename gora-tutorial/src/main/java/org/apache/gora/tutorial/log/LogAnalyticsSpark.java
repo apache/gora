@@ -20,6 +20,7 @@ package org.apache.gora.tutorial.log;
 import org.apache.gora.spark.GoraSpark;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
+import org.apache.gora.tutorial.log.generated.MetricDatum;
 import org.apache.gora.tutorial.log.generated.Pageview;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.spark.SparkConf;
@@ -27,10 +28,10 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
+import org.apache.spark.api.java.function.Function2;
+import org.apache.spark.api.java.function.PairFunction;
 
 import scala.Tuple2;
-
-import java.util.concurrent.TimeUnit;
 
 public class LogAnalyticsSpark {
 
@@ -39,15 +40,41 @@ public class LogAnalyticsSpark {
   /** The number of milliseconds in a day */
   private static final long DAY_MILIS = 1000 * 60 * 60 * 24;
 
-  //todo _fk consider using Kyro serialization
-  private static Function<Pageview, Tuple2<Tuple2<String, Long>, Long>> s = new Function<Pageview, Tuple2<Tuple2<String, Long>, Long>> () {
+  // todo _fk consider using Kyro serialization
+  private static Function<Pageview, Tuple2<Tuple2<String, Long>, Long>> mapFunc = new Function<Pageview, Tuple2<Tuple2<String, Long>, Long>>() {
     @Override
-    public Tuple2<Tuple2<String, Long>, Long> call(Pageview pageview) throws Exception {
+    public Tuple2<Tuple2<String, Long>, Long> call(Pageview pageview)
+        throws Exception {
       String url = pageview.getUrl().toString();
       Long day = getDay(pageview.getTimestamp());
-      Tuple2<String, Long> keyTuple =new Tuple2<>(url, day);
+      Tuple2<String, Long> keyTuple = new Tuple2<>(url, day);
 
       return new Tuple2<>(keyTuple, 1L);
+    }
+  };
+
+  private static Function2<Long, Long, Long> redFunc = new Function2<Long, Long, Long>() {
+    @Override
+    public Long call(Long aLong, Long aLong2) throws Exception {
+      return aLong + aLong2;
+    }
+  };
+
+  private static PairFunction<Tuple2<Tuple2<String, Long>, Long>, String, MetricDatum> metricFunc = new PairFunction<Tuple2<Tuple2<String, Long>, Long>, String, MetricDatum>() {
+    @Override
+    public Tuple2<String, MetricDatum> call(
+        Tuple2<Tuple2<String, Long>, Long> tuple2LongTuple2) throws Exception {
+      String dimension = tuple2LongTuple2._1()._1();
+      long timestamp = tuple2LongTuple2._1()._2();
+
+      MetricDatum metricDatum = new MetricDatum();
+      metricDatum.setMetricDimension(dimension);
+      metricDatum.setTimestamp(timestamp);
+
+      String key = metricDatum.getMetricDimension().toString();
+      key += "_" + Long.toString(timestamp);
+      metricDatum.setMetric(tuple2LongTuple2._2());
+      return new Tuple2<>(key, metricDatum);
     }
   };
 
@@ -93,7 +120,7 @@ public class LogAnalyticsSpark {
     DataStore<Long, Pageview> dataStore = DataStoreFactory.getDataStore(
         inStoreClass, Long.class, Pageview.class, hadoopConf);
 
-    JavaPairRDD<Long, Pageview> goraRDD = goraSpark.initializeInput(sc,
+    JavaPairRDD<Long, Pageview> goraRDD = goraSpark.initialize(sc,
         dataStore);
 
     long count = goraRDD.count();
@@ -102,7 +129,13 @@ public class LogAnalyticsSpark {
     String firstOneURL = goraRDD.first()._2().getUrl().toString();
     System.out.println(firstOneURL);
 
-    JavaRDD<Tuple2<Tuple2<String, Long>, Long>> mappedGoraRdd = goraRDD.values().map(s);
+    JavaRDD<Tuple2<Tuple2<String, Long>, Long>> mappedGoraRdd = goraRDD
+        .values().map(mapFunc);
+
+    JavaPairRDD<String, MetricDatum> reducedGoraRdd = JavaPairRDD
+        .fromJavaRDD(mappedGoraRdd).reduceByKey(redFunc).mapToPair(metricFunc);
+
+    System.out.println("MetricDatum count:" + reducedGoraRdd.count());
 
     return 1;
   }

@@ -41,7 +41,7 @@ public class GoraSpark<K, V extends Persistent> {
     this.clazzV = clazzV;
   }
 
-  public JavaPairRDD<K, V> initializeInput(JavaSparkContext sparkContext,
+  public JavaPairRDD<K, V> initialize(JavaSparkContext sparkContext,
       Configuration conf, DataStore<K, V> dataStore) {
     GoraMapReduceUtils.setIOSerializations(conf, true);
 
@@ -56,7 +56,7 @@ public class GoraSpark<K, V extends Persistent> {
         clazzV);
   }
 
-  public JavaPairRDD<K, V> initializeInput(JavaSparkContext sparkContext,
+  public JavaPairRDD<K, V> initialize(JavaSparkContext sparkContext,
       DataStore<K, V> dataStore) {
     Configuration hadoopConf;
 
