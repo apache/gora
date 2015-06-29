@@ -17,7 +17,9 @@
  */
 package org.apache.gora.tutorial.log;
 
-import org.apache.gora.spark.GoraSpark;
+import java.util.Map;
+
+import org.apache.gora.spark.GoraSparkEngine;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.tutorial.log.generated.MetricDatum;
@@ -33,6 +35,21 @@ import org.apache.spark.api.java.function.PairFunction;
 
 import scala.Tuple2;
 
+/**
+ * LogAnalyticsSpark is the tutorial class to illustrate Gora Spark API. The
+ * Spark job reads the web access data stored earlier by the {@link LogManager},
+ * and calculates the aggregate daily pageviews. The output of the job is stored
+ * in a Gora compatible data store.
+ *
+ * This class illustrates the same functionality with {@link LogAnalytics} via
+ * Spark.
+ *
+ * <p>
+ * See the tutorial.html file in docs or go to the <a
+ * href="http://incubator.apache.org/gora/docs/current/tutorial.html"> web
+ * site</a>for more information.
+ * </p>
+ */
 public class LogAnalyticsSpark {
 
   private static final String USAGE = "LogAnalyticsSpark <input_data_store> <output_data_store>";
@@ -41,6 +58,9 @@ public class LogAnalyticsSpark {
   private static final long DAY_MILIS = 1000 * 60 * 60 * 24;
 
   // todo _fk consider using Kyro serialization
+  /**
+   * map function used in calculation
+   */
   private static Function<Pageview, Tuple2<Tuple2<String, Long>, Long>> mapFunc = new Function<Pageview, Tuple2<Tuple2<String, Long>, Long>>() {
     @Override
     public Tuple2<Tuple2<String, Long>, Long> call(Pageview pageview)
@@ -53,6 +73,9 @@ public class LogAnalyticsSpark {
     }
   };
 
+    /**
+     * reduce function used in calculation
+     */
   private static Function2<Long, Long, Long> redFunc = new Function2<Long, Long, Long>() {
     @Override
     public Long call(Long aLong, Long aLong2) throws Exception {
@@ -60,6 +83,9 @@ public class LogAnalyticsSpark {
     }
   };
 
+    /**
+     * metric function used after map phase
+     */
   private static PairFunction<Tuple2<Tuple2<String, Long>, Long>, String, MetricDatum> metricFunc = new PairFunction<Tuple2<Tuple2<String, Long>, Long>, String, MetricDatum>() {
     @Override
     public Tuple2<String, MetricDatum> call(
@@ -102,7 +128,7 @@ public class LogAnalyticsSpark {
   }
 
   public int run(String inStoreClass, String outStoreClass) throws Exception {
-    GoraSpark<Long, Pageview> goraSpark = new GoraSpark<>(Long.class,
+    GoraSparkEngine<Long, Pageview> goraSparkEngine = new GoraSparkEngine<>(Long.class,
         Pageview.class);
 
     SparkConf sparkConf = new SparkConf().setAppName(
@@ -120,11 +146,10 @@ public class LogAnalyticsSpark {
     DataStore<Long, Pageview> dataStore = DataStoreFactory.getDataStore(
         inStoreClass, Long.class, Pageview.class, hadoopConf);
 
-    JavaPairRDD<Long, Pageview> goraRDD = goraSpark.initialize(sc,
-        dataStore);
+    JavaPairRDD<Long, Pageview> goraRDD = goraSparkEngine.initialize(sc, dataStore);
 
     long count = goraRDD.count();
-    System.out.println("Total Count: " + count);
+    System.out.println("Total Log Count: " + count);
 
     String firstOneURL = goraRDD.first()._2().getUrl().toString();
     System.out.println(firstOneURL);
@@ -136,6 +161,11 @@ public class LogAnalyticsSpark {
         .fromJavaRDD(mappedGoraRdd).reduceByKey(redFunc).mapToPair(metricFunc);
 
     System.out.println("MetricDatum count:" + reducedGoraRdd.count());
+
+    Map<String, MetricDatum> metricDatumMap = reducedGoraRdd.collectAsMap();
+    for (String key : metricDatumMap.keySet()) {
+      System.out.println(key);
+    }
 
     return 1;
   }

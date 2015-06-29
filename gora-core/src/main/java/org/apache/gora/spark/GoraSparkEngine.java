@@ -30,17 +30,29 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 
 /**
- * Base class for Spark integration
+ * Base class for Gora - Spark integration.
  */
-public class GoraSpark<K, V extends Persistent> {
+public class GoraSparkEngine<K, V extends Persistent> {
   Class<K> clazzK;
   Class<V> clazzV;
 
-  public GoraSpark(Class<K> clazzK, Class<V> clazzV) {
+  public GoraSparkEngine(Class<K> clazzK, Class<V> clazzV) {
     this.clazzK = clazzK;
     this.clazzV = clazzV;
   }
 
+  /**
+   * Initializes a {@link JavaPairRDD} from given Spark context, Hadoop
+   * configuration and data store.
+   * 
+   * @param sparkContext
+   *          Spark context
+   * @param conf
+   *          Hadoop configuration
+   * @param dataStore
+   *          Data store
+   * @return initialized rdd
+   */
   public JavaPairRDD<K, V> initialize(JavaSparkContext sparkContext,
       Configuration conf, DataStore<K, V> dataStore) {
     GoraMapReduceUtils.setIOSerializations(conf, true);
@@ -56,26 +68,29 @@ public class GoraSpark<K, V extends Persistent> {
         clazzV);
   }
 
+  /**
+   * Initializes a {@link JavaPairRDD} from given Spark context and data store.
+   * If given data store is {@link Configurable} and has not a configuration
+   * than a Hadoop configuration is created otherwise existed configuration is
+   * used.
+   * 
+   * @param sparkContext
+   *          Spark context
+   * @param dataStore
+   *          Data store
+   * @return initialized rdd
+   */
   public JavaPairRDD<K, V> initialize(JavaSparkContext sparkContext,
       DataStore<K, V> dataStore) {
     Configuration hadoopConf;
 
-      if ((dataStore instanceof Configurable) && ((Configurable) dataStore).getConf() != null) {
-          hadoopConf = ((Configurable) dataStore).getConf();
-      } else {
-          hadoopConf = new Configuration();
-      }
-
-      GoraMapReduceUtils.setIOSerializations(hadoopConf, true);
-
-    try {
-      IOUtils.storeToConf(dataStore.newQuery(), hadoopConf,
-              GoraInputFormat.QUERY_KEY);
-    } catch (IOException ioex) {
-      throw new RuntimeException(ioex.getMessage());
+    if ((dataStore instanceof Configurable)
+        && ((Configurable) dataStore).getConf() != null) {
+      hadoopConf = ((Configurable) dataStore).getConf();
+    } else {
+      hadoopConf = new Configuration();
     }
 
-    return sparkContext.newAPIHadoopRDD(hadoopConf, GoraInputFormat.class,
-        clazzK, clazzV);
+    return initialize(sparkContext, hadoopConf, dataStore);
   }
 }
