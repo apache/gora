@@ -19,12 +19,16 @@ package org.apache.gora.tutorial.log;
 
 import java.util.Map;
 
+import org.apache.gora.mapreduce.GoraMapReduceUtils;
+import org.apache.gora.mapreduce.GoraOutputFormat;
+import org.apache.gora.persistency.Persistent;
 import org.apache.gora.spark.GoraSparkEngine;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.tutorial.log.generated.MetricDatum;
 import org.apache.gora.tutorial.log.generated.Pageview;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.Job;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -135,6 +139,8 @@ public class LogAnalyticsSpark {
         "Gora Integration Application").setMaster("local");
 
     // todo _fk consider alternative architectural design
+    // todo design inStore and outStore initialization parts as like LogAnalytics.java
+    // todo consider creating job and manipulating it at input part as like LogAnalytics.java
     Class[] c = new Class[1];
     c[0] = Pageview.class;
     sparkConf.registerKryoClasses(c);
@@ -143,10 +149,10 @@ public class LogAnalyticsSpark {
 
     Configuration hadoopConf = new Configuration();
 
-    DataStore<Long, Pageview> dataStore = DataStoreFactory.getDataStore(
+    DataStore<Long, Pageview> inStore = DataStoreFactory.getDataStore(
         inStoreClass, Long.class, Pageview.class, hadoopConf);
 
-    JavaPairRDD<Long, Pageview> goraRDD = goraSparkEngine.initialize(sc, dataStore);
+    JavaPairRDD<Long, Pageview> goraRDD = goraSparkEngine.initialize(sc, inStore);
 
     long count = goraRDD.count();
     System.out.println("Total Log Count: " + count);
@@ -162,10 +168,35 @@ public class LogAnalyticsSpark {
 
     System.out.println("MetricDatum count:" + reducedGoraRdd.count());
 
+    //print screen output
     Map<String, MetricDatum> metricDatumMap = reducedGoraRdd.collectAsMap();
     for (String key : metricDatumMap.keySet()) {
       System.out.println(key);
     }
+    //
+
+    //write output to datastore
+    DataStore<String, MetricDatum> outStore = DataStoreFactory.getDataStore(
+            outStoreClass, String.class, MetricDatum.class, hadoopConf);
+
+    GoraMapReduceUtils.setIOSerializations(hadoopConf, true);
+
+    Job job = Job.getInstance(hadoopConf);
+    job.setOutputFormatClass(GoraOutputFormat.class);
+    job.setOutputKeyClass(outStore.getKeyClass());
+    job.setOutputValueClass(outStore.getPersistentClass());
+
+    job.getConfiguration().setClass(GoraOutputFormat.DATA_STORE_CLASS, outStore.getClass(),
+              DataStore.class);
+    job.getConfiguration().setClass(GoraOutputFormat.OUTPUT_KEY_CLASS, outStore.getKeyClass(), Object.class);
+    job.getConfiguration().setClass(GoraOutputFormat.OUTPUT_VALUE_CLASS,
+            outStore.getPersistentClass(), Persistent.class);
+
+    reducedGoraRdd.saveAsNewAPIHadoopDataset(job.getConfiguration());
+    //
+
+    inStore.close();
+    outStore.close();
 
     return 1;
   }
