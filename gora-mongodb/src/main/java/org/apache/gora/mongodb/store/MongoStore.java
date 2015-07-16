@@ -72,56 +72,10 @@ public class MongoStore<K, T extends PersistentBase> extends
 
   public static final Logger LOG = LoggerFactory.getLogger(MongoStore.class);
 
-  // Configuration properties
-
-  /**
-   * Property indicating if the hadoop configuration has priority or not
-   */
-  public static final String PROP_OVERRIDING = "gora.mongodb.override_hadoop_configuration";
-
-  /**
-   * Property pointing to the file for the mapping
-   */
-  public static final String PROP_MAPPING_FILE = "gora.mongodb.mapping.file";
-
-  /**
-   * Property pointing to the host where the server is running
-   */
-  public static final String PROP_MONGO_SERVERS = "gora.mongodb.servers";
-
-  /**
-   * Property pointing to the username to connect to the server
-   */
-  public static final String PROP_MONGO_LOGIN = "gora.mongodb.login";
-
-  /**
-   * Property pointing to the secret to connect to the server
-   */
-  public static final String PROP_MONGO_SECRET = "gora.mongodb.secret";
-
-  /**
-   * Property pointing to MongoDB Read Preference value.
-   * @see <a href="http://docs.mongodb.org/manual/core/read-preference/">Read Preference in MongoDB Documentation</a>
-   * @see <a href="http://api.mongodb.org/java/current/com/mongodb/ReadPreference.html">ReadPreference in MongoDB Java Driver</a>
-   */
-  public static final String PROP_MONGO_READPREFERENCE = "gora.mongodb.readpreference";
-
-  /**
-   * Property pointing to MongoDB Write Concern value.
-   * @see <a href="http://docs.mongodb.org/manual/core/write-concern/">Write Concern in MongoDB Documentation</a>
-   * @see <a href="http://api.mongodb.org/java/current/com/mongodb/WriteConcern.html">WriteConcern in MongoDB Java Driver</a>
-   */
-  public static final String PROP_MONGO_WRITECONCERN = "gora.mongodb.writeconcern";
-
   /**
    * Default value for mapping file
    */
   public static final String DEFAULT_MAPPING_FILE = "/gora-mongodb-mapping.xml";
-
-  /**
-   * Property to select the database
-   */
-  public static String PROP_MONGO_DB = "gora.mongodb.db";
 
   /**
    * MongoDB client
@@ -152,26 +106,7 @@ public class MongoStore<K, T extends PersistentBase> extends
       final Class<T> pPersistentClass, final Properties properties) {
     try {
       LOG.debug("Initializing MongoDB store");
-
-      // Prepare the configuration
-      String vPropMappingFile = properties.getProperty(PROP_MAPPING_FILE, DEFAULT_MAPPING_FILE);
-      String vPropMongoServers = properties.getProperty(PROP_MONGO_SERVERS);
-      String vPropMongoLogin = properties.getProperty(PROP_MONGO_LOGIN);
-      String vPropMongoSecret = properties.getProperty(PROP_MONGO_SECRET);
-      String vPropMongoDb = properties.getProperty(PROP_MONGO_DB);
-      String vPropMongoRead = properties.getProperty(PROP_MONGO_READPREFERENCE);
-      String vPropMongoWrite = properties.getProperty(PROP_MONGO_WRITECONCERN);
-      String overrideHadoop = properties.getProperty(PROP_OVERRIDING);
-      if (!Boolean.parseBoolean(overrideHadoop)) {
-        LOG.debug("Hadoop configuration has priority.");
-        vPropMappingFile = getConf().get(PROP_MAPPING_FILE, vPropMappingFile);
-        vPropMongoServers = getConf().get(PROP_MONGO_SERVERS, vPropMongoServers);
-        vPropMongoLogin = getConf().get(PROP_MONGO_LOGIN, vPropMongoLogin);
-        vPropMongoSecret = getConf().get(PROP_MONGO_SECRET, vPropMongoSecret);
-        vPropMongoDb = getConf().get(PROP_MONGO_DB, vPropMongoDb);
-        vPropMongoRead = getConf().get(PROP_MONGO_READPREFERENCE, vPropMongoRead);
-        vPropMongoWrite = getConf().get(PROP_MONGO_WRITECONCERN, vPropMongoWrite);
-      }
+      MongoStoreParameters parameters = MongoStoreParameters.load(properties, getConf());
       super.initialize(keyClass, pPersistentClass, properties);
 
       filterUtil = new MongoFilterUtil<K, T>(getConf());
@@ -179,18 +114,17 @@ public class MongoStore<K, T extends PersistentBase> extends
       // Load the mapping
       MongoMappingBuilder<K, T> builder = new MongoMappingBuilder<K, T>(this);
       LOG.debug("Initializing Mongo store with mapping {}.",
-          new Object[] { vPropMappingFile });
-      builder.fromFile(vPropMappingFile);
+          new Object[] { parameters.getMappingFile() });
+      builder.fromFile(parameters.getMappingFile());
       mapping = builder.build();
 
       // Prepare MongoDB connection
-      mongoClientDB = getDB(
-              new Parameters(vPropMongoServers, vPropMongoDb, vPropMongoLogin, vPropMongoSecret, vPropMongoRead, vPropMongoWrite));
+      mongoClientDB = getDB(parameters);
       mongoClientColl = mongoClientDB
           .getCollection(mapping.getCollectionName());
 
       LOG.info("Initialized Mongo store for database {} of {}.", new Object[] {
-          vPropMongoDb, vPropMongoServers });
+              parameters.getDbname(), parameters.getServers() });
     } catch (IOException e) {
       LOG.error("Error while initializing MongoDB store: {}",
           new Object[] { e.getMessage() });
@@ -208,7 +142,7 @@ public class MongoStore<K, T extends PersistentBase> extends
    * @return a {@link Mongo} instance connected to the server
    * @throws UnknownHostException
    */
-  private MongoClient getClient(Parameters params)
+  private MongoClient getClient(MongoStoreParameters params)
       throws UnknownHostException {
     // Configure options
     MongoClientOptions.Builder optBuilder = new MongoClientOptions.Builder()
@@ -252,7 +186,7 @@ public class MongoStore<K, T extends PersistentBase> extends
   /**
    * Get reference to Mongo DB, using credentials if not null.
    */
-  private DB getDB(Parameters parameters) throws UnknownHostException {
+  private DB getDB(MongoStoreParameters parameters) throws UnknownHostException {
 
     // Get reference to Mongo DB
     if (!mapsOfClients.containsKey(parameters.getServers()))
@@ -1037,56 +971,4 @@ public class MongoStore<K, T extends PersistentBase> extends
     return key.replace("\u00B7", ".");
   }
 
-  private static class Parameters {
-    private final String servers;
-    private final String dbname;
-    private final String login;
-    private final String secret;
-    private final String readPreference;
-    private final String writeConcern;
-
-    /**
-     * @param servers
-     * @param dbname
-   *          Name of database to connect to.
-     * @param login
- *          Optionnal login for remote database.
-     * @param secret
-*          Optional secret for remote database.
-     * @param readPreference
-     * @param writeConcern @return a {@link DB} instance from <tt>mongoClient</tt> or null if
-     */
-    private Parameters(String servers, String dbname, String login, String secret, String readPreference, String writeConcern) {
-      this.servers = servers;
-      this.dbname = dbname;
-      this.login = login;
-      this.secret = secret;
-      this.readPreference = readPreference;
-      this.writeConcern = writeConcern;
-    }
-
-    public String getServers() {
-      return servers;
-    }
-
-    public String getDbname() {
-      return dbname;
-    }
-
-    public String getLogin() {
-      return login;
-    }
-
-    public String getSecret() {
-      return secret;
-    }
-
-    public String getReadPreference() {
-      return readPreference;
-    }
-
-    public String getWriteConcern() {
-      return writeConcern;
-    }
-  }
 }
