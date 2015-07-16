@@ -17,8 +17,6 @@
  */
 package org.apache.gora.tutorial.log;
 
-import java.util.Map;
-
 import org.apache.gora.mapreduce.GoraMapReduceUtils;
 import org.apache.gora.mapreduce.GoraOutputFormat;
 import org.apache.gora.persistency.Persistent;
@@ -158,7 +156,7 @@ public class LogAnalyticsSpark {
     System.out.println("Total Log Count: " + count);
 
     String firstOneURL = goraRDD.first()._2().getUrl().toString();
-    System.out.println(firstOneURL);
+    System.out.println("First entry's first URL:" + firstOneURL);
 
     JavaRDD<Tuple2<Tuple2<String, Long>, Long>> mappedGoraRdd = goraRDD
         .values().map(mapFunc);
@@ -169,10 +167,12 @@ public class LogAnalyticsSpark {
     System.out.println("MetricDatum count:" + reducedGoraRdd.count());
 
     //print screen output
+    /*
     Map<String, MetricDatum> metricDatumMap = reducedGoraRdd.collectAsMap();
     for (String key : metricDatumMap.keySet()) {
       System.out.println(key);
     }
+    */
     //
 
     //write output to datastore
