@@ -469,6 +469,7 @@ public class MongoStore<K, T extends PersistentBase> extends
     if (query.getLimit() > 0)
       cursor = cursor.limit((int) query.getLimit());
     cursor.batchSize(100);
+    cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
 
     // Build the result
     MongoDBResult<K, T> mongoResult = new MongoDBResult<K, T>(this, query);

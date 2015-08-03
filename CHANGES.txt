@@ -5,6 +5,8 @@
 Apache Gora 0.6.1 Release - 02/03/2015 (dd/mm/yyyy)
 Release Report - http://s.apache.org/l69 
 
+* GORA-426 MongoDB cursor timeout on long running parse job (Alexander Yastrebov via drazzib)
+
 * GORA-424 Cache cursor size to improve performance (Alexander Yastrebov via drazzib)
 
 * GORA-423 BSONDecorator returns empty string for null field value (Alexander Yastrebov via drazzib)
