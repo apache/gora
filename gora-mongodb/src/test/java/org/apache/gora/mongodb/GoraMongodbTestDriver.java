@@ -19,6 +19,7 @@ package org.apache.gora.mongodb;
 
 import org.apache.gora.GoraTestDriver;
 import org.apache.gora.mongodb.store.MongoStore;
+import org.apache.gora.mongodb.store.MongoStoreParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,7 +77,7 @@ public class GoraMongodbTestDriver extends GoraTestDriver {
 
     // Store Mongo server "host:port" in Hadoop configuration
     // so that MongoStore will be able to get it latter
-    conf.set(MongoStore.PROP_MONGO_SERVERS, "127.0.0.1:" + port);
+    conf.set(MongoStoreParameters.PROP_MONGO_SERVERS, "127.0.0.1:" + port);
 
     log.info("Starting embedded Mongodb server on {} port.", port);
     try {

@@ -72,42 +72,10 @@ public class MongoStore<K, T extends PersistentBase> extends
 
   public static final Logger LOG = LoggerFactory.getLogger(MongoStore.class);
 
-  // Configuration properties
-
-  /**
-   * Property indicating if the hadoop configuration has priority or not
-   */
-  public static final String PROP_OVERRIDING = "gora.mongodb.override_hadoop_configuration";
-
-  /**
-   * Property pointing to the file for the mapping
-   */
-  public static final String PROP_MAPPING_FILE = "gora.mongodb.mapping.file";
-
-  /**
-   * Property pointing to the host where the server is running
-   */
-  public static final String PROP_MONGO_SERVERS = "gora.mongodb.servers";
-
-  /**
-   * Property pointing to the username to connect to the server
-   */
-  public static final String PROP_MONGO_LOGIN = "gora.mongodb.login";
-
-  /**
-   * Property pointing to the secret to connect to the server
-   */
-  public static final String PROP_MONGO_SECRET = "gora.mongodb.secret";
-
   /**
    * Default value for mapping file
    */
   public static final String DEFAULT_MAPPING_FILE = "/gora-mongodb-mapping.xml";
-
-  /**
-   * Property to select the database
-   */
-  public static String PROP_MONGO_DB = "gora.mongodb.db";
 
   /**
    * MongoDB client
@@ -138,24 +106,7 @@ public class MongoStore<K, T extends PersistentBase> extends
       final Class<T> pPersistentClass, final Properties properties) {
     try {
       LOG.debug("Initializing MongoDB store");
-
-      // Prepare the configuration
-      String vPropMappingFile = properties.getProperty(PROP_MAPPING_FILE,
-          DEFAULT_MAPPING_FILE);
-      String vPropMongoServers = properties.getProperty(PROP_MONGO_SERVERS);
-      String vPropMongoLogin = properties.getProperty(PROP_MONGO_LOGIN);
-      String vPropMongoSecret = properties.getProperty(PROP_MONGO_SECRET);
-      String vPropMongoDb = properties.getProperty(PROP_MONGO_DB);
-      String overrideHadoop = properties.getProperty(PROP_OVERRIDING);
-      if (!Boolean.parseBoolean(overrideHadoop)) {
-        LOG.debug("Hadoop configuration has priority.");
-        vPropMappingFile = getConf().get(PROP_MAPPING_FILE, vPropMappingFile);
-        vPropMongoServers = getConf()
-            .get(PROP_MONGO_SERVERS, vPropMongoServers);
-        vPropMongoLogin = getConf().get(PROP_MONGO_LOGIN, vPropMongoLogin);
-        vPropMongoSecret = getConf().get(PROP_MONGO_SECRET, vPropMongoSecret);
-        vPropMongoDb = getConf().get(PROP_MONGO_DB, vPropMongoDb);
-      }
+      MongoStoreParameters parameters = MongoStoreParameters.load(properties, getConf());
       super.initialize(keyClass, pPersistentClass, properties);
 
       filterUtil = new MongoFilterUtil<K, T>(getConf());
@@ -163,18 +114,17 @@ public class MongoStore<K, T extends PersistentBase> extends
       // Load the mapping
       MongoMappingBuilder<K, T> builder = new MongoMappingBuilder<K, T>(this);
       LOG.debug("Initializing Mongo store with mapping {}.",
-          new Object[] { vPropMappingFile });
-      builder.fromFile(vPropMappingFile);
+          new Object[] { parameters.getMappingFile() });
+      builder.fromFile(parameters.getMappingFile());
       mapping = builder.build();
 
       // Prepare MongoDB connection
-      mongoClientDB = getDB(vPropMongoServers, vPropMongoDb, vPropMongoLogin,
-          vPropMongoSecret);
+      mongoClientDB = getDB(parameters);
       mongoClientColl = mongoClientDB
           .getCollection(mapping.getCollectionName());
 
       LOG.info("Initialized Mongo store for database {} of {}.", new Object[] {
-          vPropMongoDb, vPropMongoServers });
+              parameters.getDbname(), parameters.getServers() });
     } catch (IOException e) {
       LOG.error("Error while initializing MongoDB store: {}",
           new Object[] { e.getMessage() });
@@ -184,7 +134,7 @@ public class MongoStore<K, T extends PersistentBase> extends
 
   /**
    * Retrieve a client connected to the MongoDB server to be used.
-   * 
+   *
    * @param servers
    *          This value should specify the host:port (at least one) for
    *          connecting to remote MongoDB. Multiple values must be separated by
@@ -192,19 +142,29 @@ public class MongoStore<K, T extends PersistentBase> extends
    * @return a {@link Mongo} instance connected to the server
    * @throws UnknownHostException
    */
-  private MongoClient getClient(final String servers)
+  private MongoClient getClient(MongoStoreParameters params)
       throws UnknownHostException {
     // Configure options
-    MongoClientOptions opts = new MongoClientOptions.Builder()
-        .dbEncoderFactory(GoraDBEncoder.FACTORY) // Utf8 serialization!
-        .build();
+    MongoClientOptions.Builder optBuilder = new MongoClientOptions.Builder()
+            .dbEncoderFactory(GoraDBEncoder.FACTORY); // Utf8 serialization!
+    if (params.getReadPreference() != null) {
+      optBuilder.readPreference(ReadPreference.valueOf(params.getReadPreference()));
+    }
+    if (params.getWriteConcern() != null) {
+      optBuilder.writeConcern(WriteConcern.valueOf(params.getWriteConcern()));
+    }
+    // If configuration contains a login + secret, try to authenticated with DB
+    List<MongoCredential> credentials = null;
+    if (params.getLogin() != null && params.getSecret() != null) {
+      credentials = new ArrayList<MongoCredential>();
+      credentials.add(MongoCredential.createCredential(params.getLogin(), params.getDbname(), params.getSecret().toCharArray()));
+    }
     // Build server address
     List<ServerAddress> addrs = new ArrayList<ServerAddress>();
-    Iterable<String> serversArray = Splitter.on(",").split(servers);
+    Iterable<String> serversArray = Splitter.on(",").split(params.getServers());
     if (serversArray != null) {
       for (String server : serversArray) {
-        Iterable<String> params = Splitter.on(":").trimResults().split(server);
-        Iterator<String> paramsIterator = params.iterator();
+        Iterator<String> paramsIterator = Splitter.on(":").trimResults().split(server).iterator();
         if (!paramsIterator.hasNext()) {
           // No server, use default
           addrs.add(new ServerAddress());
@@ -220,41 +180,19 @@ public class MongoStore<K, T extends PersistentBase> extends
       }
     }
     // Connect to the Mongo server
-    return new MongoClient(addrs, opts);
+    return new MongoClient(addrs, credentials, optBuilder.build());
   }
 
   /**
    * Get reference to Mongo DB, using credentials if not null.
-   * 
-   * @param servers
-   * @param dbname
-   *          Name of database to connect to.
-   * @param login
-   *          Optionnal login for remote database.
-   * @param secret
-   *          Optional secret for remote database.
-   * @return a {@link DB} instance from <tt>mongoClient</tt> or null if
-   *         authentication request failed.
    */
-  private DB getDB(final String servers, final String dbname,
-      final String login, final String secret) throws UnknownHostException {
+  private DB getDB(MongoStoreParameters parameters) throws UnknownHostException {
 
     // Get reference to Mongo DB
-    if (!mapsOfClients.containsKey(servers))
-      mapsOfClients.put(servers, getClient(servers));
-    DB db = mapsOfClients.get(servers).getDB(dbname);
-    // By default, we are authenticated
-    boolean auth = true;
-    // If configuration contains a login + secret, try to authenticated with DB
-    if (login != null && secret != null) {
-      auth = db.authenticate(login, secret.toCharArray());
-    }
-
-    if (auth) {
-      return db;
-    } else {
-      return null;
-    }
+    if (!mapsOfClients.containsKey(parameters.getServers()))
+      mapsOfClients.put(parameters.getServers(), getClient(parameters));
+    DB db = mapsOfClients.get(parameters.getServers()).getDB(parameters.getDbname());
+    return db;
   }
 
   public MongoMapping getMapping() {
@@ -1033,4 +971,5 @@ public class MongoStore<K, T extends PersistentBase> extends
     }
     return key.replace("\u00B7", ".");
   }
+
 }
