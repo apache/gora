@@ -59,7 +59,7 @@ import com.mongodb.*;
 
 /**
  * Implementation of a MongoDB data store to be used by gora.
- * 
+ *
  * @param <K>
  *          class to be used for the key
  * @param <T>
@@ -184,7 +184,7 @@ public class MongoStore<K, T extends PersistentBase> extends
 
   /**
    * Retrieve a client connected to the MongoDB server to be used.
-   * 
+   *
    * @param servers
    *          This value should specify the host:port (at least one) for
    *          connecting to remote MongoDB. Multiple values must be separated by
@@ -225,7 +225,7 @@ public class MongoStore<K, T extends PersistentBase> extends
 
   /**
    * Get reference to Mongo DB, using credentials if not null.
-   * 
+   *
    * @param servers
    * @param dbname
    *          Name of database to connect to.
@@ -348,7 +348,7 @@ public class MongoStore<K, T extends PersistentBase> extends
 
   /**
    * Retrieve an entry from the store with only selected fields.
-   * 
+   *
    * @param key
    *          identifier of the document in the database
    * @param fields
@@ -375,7 +375,7 @@ public class MongoStore<K, T extends PersistentBase> extends
 
   /**
    * Persist an object into the store.
-   * 
+   *
    * @param key
    *          identifier of the object in the store
    * @param obj
@@ -395,7 +395,7 @@ public class MongoStore<K, T extends PersistentBase> extends
   /**
    * Update a object that already exists in the store. The object must exist
    * already or the update may fail.
-   * 
+   *
    * @param key
    *          identifier of the object in the store
    * @param obj
@@ -510,7 +510,7 @@ public class MongoStore<K, T extends PersistentBase> extends
   /**
    * Build a new instance of the persisted class from the {@link DBObject}
    * retrieved from the database.
-   * 
+   *
    * @param obj
    *          the {@link DBObject} that results from the query to the database
    * @param fields
@@ -730,7 +730,7 @@ public class MongoStore<K, T extends PersistentBase> extends
    * instance in parameter. Limit the {@link DBObject} to the fields that are
    * dirty and not null, that is the fields that will need to be updated in the
    * store.
-   * 
+   *
    * @param persistent
    *          a persistence class instance which content is to be serialized as
    *          a {@link DBObject} for use as parameter of a $set operator
@@ -761,7 +761,7 @@ public class MongoStore<K, T extends PersistentBase> extends
    * instance in parameter. Limit the {@link DBObject} to the fields that are
    * dirty and null, that is the fields that will need to be updated in the
    * store by being removed.
-   * 
+   *
    * @param persistent
    *          a persistence class instance which content is to be serialized as
    *          a {@link DBObject} for use as parameter of a $set operator
@@ -945,7 +945,7 @@ public class MongoStore<K, T extends PersistentBase> extends
   /**
    * Convert a Java Map as used in Gora generated classes to a Map that can
    * safely be serialized into MongoDB.
-   * 
+   *
    * @param value
    *          the Java Map that must be serialized into a MongoDB object
    * @param fieldType
@@ -979,7 +979,7 @@ public class MongoStore<K, T extends PersistentBase> extends
   /**
    * Convert a Java {@link GenericArray} as used in Gora generated classes to a
    * List that can safely be serialized into MongoDB.
-   * 
+   *
    * @param array
    *          the {@link GenericArray} to be serialized
    * @param fieldType
@@ -1008,7 +1008,7 @@ public class MongoStore<K, T extends PersistentBase> extends
 
   /**
    * Ensure Key encoding -> dots replaced with middle dots
-   * 
+   *
    * @param key
    *          char with only dots.
    * @return encoded string with "\u00B7" chars..
@@ -1022,7 +1022,7 @@ public class MongoStore<K, T extends PersistentBase> extends
 
   /**
    * Ensure Key decoding -> middle dots replaced with dots
-   * 
+   *
    * @param key
    *          encoded string with "\u00B7" chars.
    * @return Cleanup up char with only dots.
