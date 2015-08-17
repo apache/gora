@@ -63,7 +63,6 @@ public class LogAnalyticsSpark {
   /** The number of milliseconds in a day */
   private static final long DAY_MILIS = 1000 * 60 * 60 * 24;
 
-  // todo _fk consider using Kyro serialization
   /**
    * map function used in calculation
    */
@@ -173,9 +172,6 @@ public class LogAnalyticsSpark {
     long count = goraRDD.count();
     System.out.println("Total Log Count: " + count);
 
-    String firstOneURL = goraRDD.first()._2().getUrl().toString();
-    System.out.println("First entry's first URL:" + firstOneURL);
-
     JavaRDD<Tuple2<Tuple2<String, Long>, Long>> mappedGoraRdd = goraRDD
         .values().map(mapFunc);
 
@@ -184,7 +180,7 @@ public class LogAnalyticsSpark {
 
     System.out.println("MetricDatum count:" + reducedGoraRdd.count());
 
-    //print screen output
+    //Print output for debug purpose
     /*
     Map<String, MetricDatum> metricDatumMap = reducedGoraRdd.collectAsMap();
     for (String key : metricDatumMap.keySet()) {
@@ -195,19 +191,10 @@ public class LogAnalyticsSpark {
 
     //write output to datastore
     GoraMapReduceUtils.setIOSerializations(hadoopConf, true);
-
     Job job = Job.getInstance(hadoopConf);
-    job.setOutputFormatClass(GoraOutputFormat.class);
-    job.setOutputKeyClass(outStore.getKeyClass());
-    job.setOutputValueClass(outStore.getPersistentClass());
 
-    job.getConfiguration().setClass(GoraOutputFormat.DATA_STORE_CLASS, outStore.getClass(),
-              DataStore.class);
-    job.getConfiguration().setClass(GoraOutputFormat.OUTPUT_KEY_CLASS, outStore.getKeyClass(), Object.class);
-    job.getConfiguration().setClass(GoraOutputFormat.OUTPUT_VALUE_CLASS,
-            outStore.getPersistentClass(), Persistent.class);
-
-    reducedGoraRdd.saveAsNewAPIHadoopDataset(job.getConfiguration());
+    Configuration sparkHadoopConf = goraSparkEngine.setOutput(job, outStore, true);
+    reducedGoraRdd.saveAsNewAPIHadoopDataset(sparkHadoopConf);
     //
 
     inStore.close();

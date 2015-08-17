@@ -21,11 +21,13 @@ import java.io.IOException;
 
 import org.apache.gora.mapreduce.GoraInputFormat;
 import org.apache.gora.mapreduce.GoraMapReduceUtils;
+import org.apache.gora.mapreduce.GoraOutputFormat;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.util.IOUtils;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.Job;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 
@@ -93,4 +95,43 @@ public class GoraSparkEngine<K, V extends Persistent> {
 
     return initialize(sparkContext, hadoopConf, dataStore);
   }
+
+    /**
+     * Sets the output parameters for the job
+     * @param job the job to set the properties for
+     * @param dataStore the datastore as the output
+     * @param reuseObjects whether to reuse objects in serialization
+     */
+    public <K, V extends Persistent> Configuration setOutput(Job job,
+        DataStore<K, V> dataStore, boolean reuseObjects) {
+      return setOutput(job, dataStore.getClass(), dataStore.getKeyClass(),
+           dataStore.getPersistentClass(), reuseObjects);
+    }
+
+    /**
+     * Sets the output parameters for the job
+     *
+     * @param job             the job to set the properties for
+     * @param dataStoreClass  the datastore class
+     * @param keyClass        output key class
+     * @param persistentClass output value class
+     * @param reuseObjects    whether to reuse objects in serialization
+     */
+    @SuppressWarnings("rawtypes")
+    public <K, V extends Persistent> Configuration setOutput(Job job,
+        Class<? extends DataStore> dataStoreClass,
+        Class<K> keyClass, Class<V> persistentClass,
+        boolean reuseObjects) {
+
+      job.setOutputFormatClass(GoraOutputFormat.class);
+      job.setOutputKeyClass(keyClass);
+      job.setOutputValueClass(persistentClass);
+
+      job.getConfiguration().setClass(GoraOutputFormat.DATA_STORE_CLASS, dataStoreClass,
+              DataStore.class);
+      job.getConfiguration().setClass(GoraOutputFormat.OUTPUT_KEY_CLASS, keyClass, Object.class);
+      job.getConfiguration().setClass(GoraOutputFormat.OUTPUT_VALUE_CLASS,
+              persistentClass, Persistent.class);
+      return job.getConfiguration();
+    }
 }
