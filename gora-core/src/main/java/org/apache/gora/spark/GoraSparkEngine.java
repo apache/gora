@@ -99,17 +99,16 @@ public class GoraSparkEngine<K, V extends Persistent> {
     /**
      * Creates a job and sets the output parameters for the conf that Spark will use
      * @param dataStore the datastore as the output
-     * @param reuseObjects whether to reuse objects in serialization
      */
-    public <K, V extends Persistent> Configuration generateOutputConf(DataStore<K, V> dataStore,
-        boolean reuseObjects) throws IOException {
+    public <K, V extends Persistent> Configuration generateOutputConf(DataStore<K, V> dataStore)
+       throws IOException {
 
       Configuration hadoopConf = new Configuration();
       GoraMapReduceUtils.setIOSerializations(hadoopConf, true);
       Job job = Job.getInstance(hadoopConf);
 
       return generateOutputConf(job, dataStore.getClass(), dataStore.getKeyClass(),
-           dataStore.getPersistentClass(), reuseObjects);
+           dataStore.getPersistentClass());
     }
 
     /**
@@ -121,7 +120,7 @@ public class GoraSparkEngine<K, V extends Persistent> {
     public <K, V extends Persistent> Configuration generateOutputConf(Job job,
         DataStore<K, V> dataStore, boolean reuseObjects) {
       return generateOutputConf(job, dataStore.getClass(), dataStore.getKeyClass(),
-              dataStore.getPersistentClass(), reuseObjects);
+              dataStore.getPersistentClass());
     }
 
     /**
@@ -131,13 +130,11 @@ public class GoraSparkEngine<K, V extends Persistent> {
      * @param dataStoreClass  the datastore class
      * @param keyClass        output key class
      * @param persistentClass output value class
-     * @param reuseObjects    whether to reuse objects in serialization
      */
     @SuppressWarnings("rawtypes")
     public <K, V extends Persistent> Configuration generateOutputConf(Job job,
         Class<? extends DataStore> dataStoreClass,
-        Class<K> keyClass, Class<V> persistentClass,
-        boolean reuseObjects) {
+        Class<K> keyClass, Class<V> persistentClass) {
 
       job.setOutputFormatClass(GoraOutputFormat.class);
       job.setOutputKeyClass(keyClass);
