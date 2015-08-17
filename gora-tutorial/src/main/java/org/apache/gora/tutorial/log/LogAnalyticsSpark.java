@@ -190,10 +190,7 @@ public class LogAnalyticsSpark {
     //
 
     //write output to datastore
-    GoraMapReduceUtils.setIOSerializations(hadoopConf, true);
-    Job job = Job.getInstance(hadoopConf);
-
-    Configuration sparkHadoopConf = goraSparkEngine.setOutput(job, outStore, true);
+    Configuration sparkHadoopConf = goraSparkEngine.generateOutputConf(outStore, true);
     reducedGoraRdd.saveAsNewAPIHadoopDataset(sparkHadoopConf);
     //
 

@@ -97,19 +97,35 @@ public class GoraSparkEngine<K, V extends Persistent> {
   }
 
     /**
-     * Sets the output parameters for the job
-     * @param job the job to set the properties for
+     * Creates a job and sets the output parameters for the conf that Spark will use
      * @param dataStore the datastore as the output
      * @param reuseObjects whether to reuse objects in serialization
      */
-    public <K, V extends Persistent> Configuration setOutput(Job job,
-        DataStore<K, V> dataStore, boolean reuseObjects) {
-      return setOutput(job, dataStore.getClass(), dataStore.getKeyClass(),
+    public <K, V extends Persistent> Configuration generateOutputConf(DataStore<K, V> dataStore,
+        boolean reuseObjects) throws IOException {
+
+      Configuration hadoopConf = new Configuration();
+      GoraMapReduceUtils.setIOSerializations(hadoopConf, true);
+      Job job = Job.getInstance(hadoopConf);
+
+      return generateOutputConf(job, dataStore.getClass(), dataStore.getKeyClass(),
            dataStore.getPersistentClass(), reuseObjects);
     }
 
     /**
-     * Sets the output parameters for the job
+     * Sets the output parameters for the conf that Spark will use
+     * @param job the job to set the properties for
+     * @param dataStore the datastore as the output
+     * @param reuseObjects whether to reuse objects in serialization
+     */
+    public <K, V extends Persistent> Configuration generateOutputConf(Job job,
+        DataStore<K, V> dataStore, boolean reuseObjects) {
+      return generateOutputConf(job, dataStore.getClass(), dataStore.getKeyClass(),
+              dataStore.getPersistentClass(), reuseObjects);
+    }
+
+    /**
+     * Sets the output parameters for the conf that Spark will use
      *
      * @param job             the job to set the properties for
      * @param dataStoreClass  the datastore class
@@ -118,7 +134,7 @@ public class GoraSparkEngine<K, V extends Persistent> {
      * @param reuseObjects    whether to reuse objects in serialization
      */
     @SuppressWarnings("rawtypes")
-    public <K, V extends Persistent> Configuration setOutput(Job job,
+    public <K, V extends Persistent> Configuration generateOutputConf(Job job,
         Class<? extends DataStore> dataStoreClass,
         Class<K> keyClass, Class<V> persistentClass,
         boolean reuseObjects) {
