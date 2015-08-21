@@ -17,16 +17,12 @@
  */
 package org.apache.gora.tutorial.log;
 
-import org.apache.gora.mapreduce.GoraMapReduceUtils;
-import org.apache.gora.mapreduce.GoraOutputFormat;
-import org.apache.gora.persistency.Persistent;
 import org.apache.gora.spark.GoraSparkEngine;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.tutorial.log.generated.MetricDatum;
 import org.apache.gora.tutorial.log.generated.Pageview;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.mapreduce.Job;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
