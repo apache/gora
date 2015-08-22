@@ -86,7 +86,7 @@ public class SparkWordCount {
     JavaPairRDD<String, WebPage> goraRDD = goraSparkEngine.initialize(sc, inStore);
 
     long count = goraRDD.count();
-    System.out.println("Total Log Count: " + count);
+    System.out.println("Total Web page count: " + count);
 
     JavaRDD<Tuple2<String, Long>> mappedGoraRdd = goraRDD.values().map(mapFunc);
 
