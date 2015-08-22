@@ -155,10 +155,10 @@ public class LogAnalyticsSpark {
         Pageview.class);
 
     SparkConf sparkConf = new SparkConf().setAppName(
-        "Gora Integration Application").setMaster("local");
+        "Gora Spark Integration Application").setMaster("local");
 
     Class[] c = new Class[1];
-    c[0] = Pageview.class;
+    c[0] = inStore.getPersistentClass();
     sparkConf.registerKryoClasses(c);
     //
     JavaSparkContext sc = new JavaSparkContext(sparkConf);
