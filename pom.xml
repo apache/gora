@@ -894,10 +894,6 @@
             <groupId>ant</groupId>
             <artifactId>ant</artifactId>
           </exclusion>
-          <exclusion>
-            <groupId>org.mortbay.jetty</groupId>
-            <artifactId>servlet-api</artifactId>
-          </exclusion>
         </exclusions>
       </dependency>
 
