@@ -2,8 +2,9 @@
  ==CHANGES.txt
  =======================================================================
 
-Apache Gora 0.6.1 Release - 02/03/2015 (dd/mm/yyyy)
-Release Report - http://s.apache.org/l69 
+Current Development
+
+* GORA-420: AccumuloStore.createSchema fails when table already exists (gerhardgossen via lewismc)
 
 * GORA-427 Configure MongoDB ReadPreference and WriteConcern (drazzib)
 
