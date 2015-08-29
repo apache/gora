@@ -367,7 +367,7 @@
             <mavenExecutorId>forked-path</mavenExecutorId>
             <useReleaseProfile>false</useReleaseProfile>
             <tagNameFormat>apache-gora-@{project.version}</tagNameFormat>
-            <arguments>-Papache-release,release</arguments>
+            <arguments>-Papache-release,release,hadoop2</arguments>
             <autoVersionSubmodules>true</autoVersionSubmodules>
           </configuration>
           <dependencies>
@@ -593,6 +593,54 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <id>hadoop1</id>
+      <properties>
+        <hadoop.classifier>hadoop1</hadoop.classifier>
+      </properties>
+      <dependencyManagement>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-core</artifactId>
+            <version>${hadoop-1.version}</version>
+          </dependency>
+        </dependencies>
+      </dependencyManagement>
+    </profile>
+    <profile>
+      <id>hadoop2</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <hadoop.classifier>hadoop2</hadoop.classifier>
+      </properties>
+      <dependencyManagement>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-common</artifactId>
+            <version>${hadoop-2.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-auth</artifactId>
+            <version>${hadoop-2.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-mapreduce-client-core</artifactId>
+            <version>${hadoop-2.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-yarn-common</artifactId>
+            <version>${hadoop-2.version}</version>
+          </dependency>
+        </dependencies>
+      </dependencyManagement>
+    </profile>
   </profiles>
 
   <modules>
@@ -799,60 +847,9 @@
 
       <dependency>
         <groupId>org.apache.hadoop</groupId>
-		<artifactId>hadoop-client</artifactId>
-		<version>${hadoop-2.version}</version>
+		    <artifactId>hadoop-client</artifactId>
+		    <version>${hadoop-2.version}</version>
       </dependency>
-
-      <!-- Hadoop Dependencies -->
-<!--       <dependency> -->
-<!--         <groupId>org.apache.hadoop</groupId> -->
-<!--         <artifactId>hadoop-core</artifactId> -->
-<!--         <version>${hadoop-1.version}</version> -->
-<!--         <exclusions> -->
-<!--           jackson is conflicting with the Avro dep -->
-<!--           <exclusion> -->
-<!--             <groupId>org.codehaus.jackson</groupId> -->
-<!--             <artifactId>jackson-core-asl</artifactId> -->
-<!--           </exclusion> -->
-<!--           <exclusion> -->
-<!--             <groupId>org.codehaus.jackson</groupId> -->
-<!--             <artifactId>jackson-mapper-asl</artifactId> -->
-<!--           </exclusion> -->
-<!--           <exclusion> -->
-<!--             <groupId>hsqldb</groupId> -->
-<!--             <artifactId>hsqldb</artifactId> -->
-<!--           </exclusion> -->
-<!--           <exclusion> -->
-<!--             <groupId>net.sf.kosmos</groupId> -->
-<!--             <artifactId>kfs</artifactId> -->
-<!--           </exclusion> -->
-<!--           <exclusion> -->
-<!--             <groupId>net.java.dev.jets3t</groupId> -->
-<!--             <artifactId>jets3t</artifactId> -->
-<!--           </exclusion> -->
-<!--           <exclusion> -->
-<!--             <groupId>org.eclipse.jdt</groupId> -->
-<!--             <artifactId>core</artifactId> -->
-<!--           </exclusion> -->
-<!--         </exclusions> -->
-<!--       </dependency> -->
-<!--       <dependency> -->
-<!--         <groupId>org.apache.hadoop</groupId> -->
-<!--         <artifactId>hadoop-common</artifactId> -->
-<!--         <version>${hadoop-2.version}</version> -->
-<!--         <classifier>tests</classifier> -->
-<!--       </dependency> -->
-<!--       <dependency> -->
-<!--         <groupId>org.apache.hadoop</groupId> -->
-<!--         <artifactId>hadoop-mapreduce-client-jobclient</artifactId> -->
-<!--         <version>${hadoop-2.version}</version> -->
-<!--         <classifier>tests</classifier> -->
-<!--       </dependency> -->
-<!--       <dependency> -->
-<!--         <groupId>org.apache.hadoop</groupId> -->
-<!--         <artifactId>hadoop-mapreduce-client-core</artifactId> -->
-<!--         <version>${hadoop-2.version}</version> -->
-<!--       </dependency> -->
 
       <dependency>
         <groupId>org.apache.cxf</groupId>
@@ -905,26 +902,26 @@
             <groupId>org.apache.hadoop</groupId>
             <artifactId>avro</artifactId>
           </exclusion>
-			<exclusion>
-				<artifactId>slf4j-log4j12</artifactId>
-				<groupId>org.slf4j</groupId>
-			</exclusion>
-			<exclusion>
-				<artifactId>hadoop-common</artifactId>
-				<groupId>org.apache.hadoop</groupId>
-			</exclusion>
-			<exclusion>
-				<artifactId>hadoop-yarn-common</artifactId>
-				<groupId>org.apache.hadoop</groupId>
-			</exclusion>
-			<exclusion>
-				<artifactId>hadoop-mapreduce-client-core</artifactId>
-				<groupId>org.apache.hadoop</groupId>
-			</exclusion>
-			<exclusion>
-				<artifactId>hadoop-auth</artifactId>
-				<groupId>org.apache.hadoop</groupId>
-			</exclusion>
+			    <exclusion>
+				    <artifactId>slf4j-log4j12</artifactId>
+				    <groupId>org.slf4j</groupId>
+			    </exclusion>
+			    <exclusion>
+				    <artifactId>hadoop-common</artifactId>
+				    <groupId>org.apache.hadoop</groupId>
+			    </exclusion>
+			    <exclusion>
+				    <artifactId>hadoop-yarn-common</artifactId>
+				    <groupId>org.apache.hadoop</groupId>
+			    </exclusion>
+			    <exclusion>
+				    <artifactId>hadoop-mapreduce-client-core</artifactId>
+				    <groupId>org.apache.hadoop</groupId>
+			    </exclusion>
+			    <exclusion>
+				    <artifactId>hadoop-auth</artifactId>
+				    <groupId>org.apache.hadoop</groupId>
+			    </exclusion>
         </exclusions>
       </dependency>
       <dependency>
@@ -937,26 +934,26 @@
             <groupId>org.apache.hadoop</groupId>
             <artifactId>avro</artifactId>
           </exclusion>
-			<exclusion>
-				<artifactId>slf4j-log4j12</artifactId>
-				<groupId>org.slf4j</groupId>
-			</exclusion>
-			<exclusion>
-				<artifactId>hadoop-common</artifactId>
-				<groupId>org.apache.hadoop</groupId>
-			</exclusion>
-			<exclusion>
-				<artifactId>hadoop-yarn-common</artifactId>
-				<groupId>org.apache.hadoop</groupId>
-			</exclusion>
-			<exclusion>
-				<artifactId>hadoop-mapreduce-client-core</artifactId>
-				<groupId>org.apache.hadoop</groupId>
-			</exclusion>
-			<exclusion>
-				<artifactId>hadoop-auth</artifactId>
-				<groupId>org.apache.hadoop</groupId>
-			</exclusion>
+			    <exclusion>
+				    <artifactId>slf4j-log4j12</artifactId>
+				    <groupId>org.slf4j</groupId>
+			    </exclusion>
+			    <exclusion>
+				    <artifactId>hadoop-common</artifactId>
+				    <groupId>org.apache.hadoop</groupId>
+			    </exclusion>
+			    <exclusion>
+				    <artifactId>hadoop-yarn-common</artifactId>
+				    <groupId>org.apache.hadoop</groupId>
+			    </exclusion>
+			    <exclusion>
+				    <artifactId>hadoop-mapreduce-client-core</artifactId>
+				    <groupId>org.apache.hadoop</groupId>
+			    </exclusion>
+			    <exclusion>
+				    <artifactId>hadoop-auth</artifactId>
+				    <groupId>org.apache.hadoop</groupId>
+			    </exclusion>
         </exclusions>
       </dependency>
 
