@@ -24,8 +24,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NavigableMap;
-import java.util.concurrent.ConcurrentNavigableMap;
-import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.TreeMap;
 
 
 import org.apache.avro.Schema.Field;
@@ -89,9 +88,7 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
     }
   }
 
-  // This map behaves like DB, has to be static and concurrent collection
-  @SuppressWarnings("rawtypes")
-  public static ConcurrentSkipListMap map = new ConcurrentSkipListMap();
+  private TreeMap<K, T> map = new TreeMap<K, T>();
 
   @Override
   public String getSchemaName() {
@@ -113,36 +110,35 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
         if(delete(result.getKey()))
           deletedRows++;
       }
-      return deletedRows;
-    } catch (Exception e) {
+      return 0;
+    }
+    catch(Exception e){
       return 0;
     }
   }
-  
-  @SuppressWarnings("unchecked")
+
   @Override
   public Result<K, T> execute(Query<K, T> query) {
     K startKey = query.getStartKey();
     K endKey = query.getEndKey();
     if(startKey == null) {
-      startKey = (K) map.firstKey();
+      startKey = map.firstKey();
     }
     if(endKey == null) {
-      endKey = (K) map.lastKey();
+      endKey = map.lastKey();
     }
 
     //check if query.fields is null
     query.setFields(getFieldsToQuery(query.getFields()));
 
-    ConcurrentNavigableMap<K,T> submap = map.subMap(startKey, true, endKey, true);
+    NavigableMap<K, T> submap = map.subMap(startKey, true, endKey, true);
 
     return new MemResult<K,T>(this, query, submap);
   }
-  
-  @SuppressWarnings("unchecked")
+
   @Override
   public T get(K key, String[] fields) {
-    T obj = (T) map.get(key);
+    T obj = map.get(key);
     if (obj == null) {
       return null;
     }
@@ -173,8 +169,7 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
   public Query<K, T> newQuery() {
     return new MemQuery<K, T>(this);
   }
-  
-  @SuppressWarnings("unchecked")
+
   @Override
   public void put(K key, T obj) {
     map.put(key, obj);
@@ -194,6 +189,7 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
   @Override
   public void close() {
+    map.clear();
   }
 
   @Override
@@ -210,7 +206,5 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
   }
 
   @Override
-  public void flush() {
-    map.clear();
-  }
+  public void flush() { }
 }
