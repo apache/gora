@@ -16,6 +16,7 @@
  */
 package org.apache.gora.accumulo.util;
 
+import java.nio.charset.Charset;
 import org.apache.gora.accumulo.encoders.HexEncoder;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
@@ -29,8 +30,8 @@ public class HexEncoderTest {
   public void testByte() {
     HexEncoder encoder = new HexEncoder();
     
-    assertEquals("12", new String(encoder.encodeByte((byte) 0x12)));
-    assertEquals("f2", new String(encoder.encodeByte((byte) 0xf2)));
+    assertEquals("12", new String(encoder.encodeByte((byte) 0x12), Charset.defaultCharset()));
+    assertEquals("f2", new String(encoder.encodeByte((byte) 0xf2), Charset.defaultCharset()));
     
     byte b = Byte.MIN_VALUE;
     while (b != Byte.MAX_VALUE) {
@@ -43,8 +44,8 @@ public class HexEncoderTest {
   public void testShort() {
     HexEncoder encoder = new HexEncoder();
     
-    assertEquals("1234", new String(encoder.encodeShort((short) 0x1234)));
-    assertEquals("f234", new String(encoder.encodeShort((short) 0xf234)));
+    assertEquals("1234", new String(encoder.encodeShort((short) 0x1234), Charset.defaultCharset()));
+    assertEquals("f234", new String(encoder.encodeShort((short) 0xf234), Charset.defaultCharset()));
     
     short s = Short.MIN_VALUE;
     while (s != Short.MAX_VALUE) {

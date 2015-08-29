@@ -19,6 +19,7 @@
 package org.apache.gora.store;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import org.junit.BeforeClass;
 import org.junit.Before;
@@ -188,7 +189,7 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
   @Test
   public void testPutBytes() throws IOException, Exception {
     log.info("test method: testPutBytes");
-    byte[] contentBytes = "example content in example.com".getBytes();
+    byte[] contentBytes = "example content in example.com".getBytes(Charset.defaultCharset());
 
     assertPutBytes(contentBytes);
   }

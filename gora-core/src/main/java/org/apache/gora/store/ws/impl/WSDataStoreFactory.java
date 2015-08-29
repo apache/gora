@@ -19,6 +19,7 @@ package org.apache.gora.store.ws.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Locale;
 import java.util.Properties;
 
 import org.slf4j.Logger;
@@ -301,7 +302,7 @@ public class WSDataStoreFactory{
         return value;
       }
       //try once with lowercase
-      value = getProperty(properties, fullKey.toLowerCase());
+      value = getProperty(properties, fullKey.toLowerCase(Locale.getDefault()));
       if(value != null) {
         return value;
       }

@@ -20,6 +20,7 @@ package org.apache.gora.mongodb.store;
 import static org.apache.gora.mongodb.store.MongoMapping.DocumentFieldType.*;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
@@ -165,7 +166,7 @@ public class MongoMapping {
       String docFieldName, String fieldType) {
     try {
       // Register a new field for the mongo document
-      newDocumentField(docFieldName, valueOf(fieldType.toUpperCase()));
+      newDocumentField(docFieldName, valueOf(fieldType.toUpperCase(Locale.getDefault())));
     } catch (final IllegalArgumentException e) {
       throw new IllegalStateException("Declared '" + fieldType
           + "' for class field '" + classFieldName

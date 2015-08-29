@@ -51,8 +51,7 @@ public abstract class WSBackedDataStoreBase<K, T extends Persistent>
     try {
       return executeQuery(query);
     } catch (IOException e) {
-      e.printStackTrace();
-      return null;
+      throw new RuntimeException(e);
     }
   }
 

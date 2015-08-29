@@ -36,6 +36,7 @@ import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.ModifiableSolrParams;
 
 public class SolrResult<K, T extends PersistentBase> extends ResultBase<K, T> {
+
   SolrDocumentList list = null;
   SolrStore<K, T> store;
   String[] fields;
@@ -70,7 +71,6 @@ public class SolrResult<K, T extends PersistentBase> extends ResultBase<K, T> {
       QueryResponse rsp = server.query(params);
       list = rsp.getResults();
     } catch (SolrServerException e) {
-      e.printStackTrace();
       throw new IOException(e);
     }
   }

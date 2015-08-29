@@ -35,10 +35,15 @@ import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * A stand alone program that follows a linked list created by {@link Generator} and prints timing info.
  */
 public class Walker extends Configured implements Tool {
+
+  private static final Logger LOG = LoggerFactory.getLogger(Walker.class);
   
   private static final String[] PREV_FIELD = new String[] {"prev"};
 
@@ -54,8 +59,7 @@ public class Walker extends Configured implements Tool {
         throw new ParseException("Command takes no arguments");
       }
     } catch (ParseException e) {
-      System.err.println("Failed to parse command line " + e.getMessage());
-      System.err.println();
+      LOG.error("Failed to parse command line {}", e.getMessage());
       HelpFormatter formatter = new HelpFormatter();
       formatter.printHelp(getClass().getSimpleName(), options);
       System.exit(-1);
@@ -81,13 +85,13 @@ public class Walker extends Configured implements Tool {
         long t1 = System.currentTimeMillis();
         node = store.get(prev, PREV_FIELD);
         long t2 = System.currentTimeMillis();
-        System.out.printf("CQ %d %016x \n", t2 - t1, prev);
+        LOG.info("CQ %d %016x \n {}", new Object [] {t2 - t1, prev});
         numQueries++;
         
         t1 = System.currentTimeMillis();
         node = store.get(prev, PREV_FIELD);
         t2 = System.currentTimeMillis();
-        System.out.printf("HQ %d %016x \n", t2 - t1, prev);
+        LOG.info("HQ %d %016x \n {}", new Object [] {t2 - t1, prev});
         numQueries++;
 
       }
@@ -109,14 +113,14 @@ public class Walker extends Configured implements Tool {
     
     try {
       if (rs.next()) {
-        System.out.printf("FSR %d %016x\n", t2 - t1, rs.getKey());
+        LOG.info("FSR %d %016x\n {}", new Object[] {t2 - t1, rs.getKey()});
         return rs.get();
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new RuntimeException(e);
     }
     
-    System.out.println("FSR " + (t2 - t1));
+    LOG.info("FSR {}", new Object [] {(t2 - t1)});
     
     return null;
   }

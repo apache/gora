@@ -141,8 +141,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         } else {
           data = decoder.readBytes(null).array();
         }
-      } catch (IOException e) {
-        e.printStackTrace();
+      } catch (IOException e) {;
         throw new GoraException("Error decoding union type: ", e);
       }
     } else {
@@ -248,7 +247,6 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         avroEncoder.flush();
         return baos.toByteArray();
       } catch (IOException e) {
-        e.printStackTrace();
         return toBytes(o);
       }
     } else {

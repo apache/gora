@@ -19,6 +19,7 @@
 package org.apache.gora.examples.mapreduce;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.StringTokenizer;
 
 import org.apache.gora.examples.generated.TokenDatum;
@@ -67,7 +68,7 @@ public class WordCount extends Configured implements Tool {
       
       if (page.getContent() != null) {
         // Get the content from a WebPage as obtained from the DataStore
-        String content = new String(page.getContent().array());
+        String content = new String(page.getContent().array(), Charset.defaultCharset());
 
         StringTokenizer itr = new StringTokenizer(content);
         while (itr.hasMoreTokens()) {

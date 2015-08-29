@@ -101,9 +101,8 @@ public class TestHBaseByteInterface {
             // everything ok, return 0
             return 0;
           } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
             // this will fail the test
-            return 1;
           }
         }
       });

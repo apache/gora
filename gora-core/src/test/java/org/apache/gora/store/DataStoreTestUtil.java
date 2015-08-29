@@ -28,6 +28,7 @@ import static org.apache.gora.examples.WebPageDataCreator.createWebPageData;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -57,6 +58,9 @@ import org.apache.gora.util.AvroUtils;
 import org.apache.gora.util.ByteUtils;
 import org.apache.gora.util.StringUtils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Test utilities for DataStores. This utility class provides everything
  * necessary for convenience tests in {@link DataStoreTestBase} to execute cleanly.
@@ -69,6 +73,8 @@ import org.apache.gora.util.StringUtils;
  * classes that are used for tests under <gora-core>/src/examples/
  */
 public class DataStoreTestUtil {
+
+  private static final Logger LOG = LoggerFactory.getLogger(DataStoreTestUtil.class);
 
   public static final long YEAR_IN_MS = 365L * 24L * 60L * 60L * 1000L;
   private static final int NUM_KEYS = 4;
@@ -100,7 +106,7 @@ public class DataStoreTestUtil {
   private static <K> WebPage createWebPage(DataStore<K, Employee> dataStore) {
     WebPage webpage = WebPage.newBuilder().build();
     webpage.setUrl(new Utf8("url.."));
-    webpage.setContent(ByteBuffer.wrap("test content".getBytes()));
+    webpage.setContent(ByteBuffer.wrap("test content".getBytes(Charset.defaultCharset())));
     webpage.setParsedContent(new ArrayList<CharSequence>());
     Metadata metadata = Metadata.newBuilder().build();
     webpage.setMetadata(metadata);
@@ -212,7 +218,7 @@ public class DataStoreTestUtil {
     WebPage webpage = new BeanFactoryImpl<String,WebPage>(String.class,WebPage.class).newPersistent() ;
     
     webpage.setUrl(new Utf8("url..")) ;
-    webpage.setContent(ByteBuffer.wrap("test content".getBytes())) ;
+    webpage.setContent(ByteBuffer.wrap("test content".getBytes(Charset.defaultCharset()))) ;
     webpage.setParsedContent(new ArrayList<CharSequence>());
     Metadata metadata = new BeanFactoryImpl<String,Metadata>(String.class,Metadata.class).newPersistent();
     webpage.setMetadata(metadata) ;
@@ -708,10 +714,10 @@ public class DataStoreTestUtil {
     assertEquals(URLS[i], page.getUrl().toString());
     // 'content' is optional
     if (page.getContent() != null) {
-      assertTrue("content error:" + new String( toByteArray(page.getContent()) ) +
+      assertTrue("content error:" + new String( toByteArray(page.getContent()), Charset.defaultCharset() ) +
         " actual=" + CONTENTS[i] + " i=" + i
         , Arrays.equals( toByteArray(page.getContent() )
-        , CONTENTS[i].getBytes()));
+        , CONTENTS[i].getBytes(Charset.defaultCharset())));
     
       List<CharSequence> parsedContent = page.getParsedContent();
       assertNotNull(parsedContent);
@@ -1053,8 +1059,8 @@ public class DataStoreTestUtil {
           + "not only removes the data but also the data structure.", 0, page.getOutlinks().size());
       assertEquals(0, page.getParsedContent().size());
       if(page.getContent() != null) {
-        System.out.println("url:" + page.getUrl().toString());
-        System.out.println( "limit:" + page.getContent().limit());
+        LOG.info("url:" + page.getUrl().toString());
+        LOG.info( "limit:" + page.getContent().limit());
       } else {
         assertNull(page.getContent());
       }
@@ -1146,7 +1152,7 @@ public class DataStoreTestUtil {
     store.createSchema();
     WebPage page = WebPage.newBuilder().build();
     page.setUrl(new Utf8("http://example.com"));
-    byte[] contentBytes = "example content in example.com".getBytes();
+    byte[] contentBytes = "example content in example.com".getBytes(Charset.defaultCharset());
     ByteBuffer buff = ByteBuffer.wrap(contentBytes);
     page.setContent(buff);
 

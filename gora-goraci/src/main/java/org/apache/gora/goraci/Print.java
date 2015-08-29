@@ -34,10 +34,15 @@ import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * A stand alone program that prints out portions of a list created by {@link Generator}
  */
 public class Print extends Configured implements Tool {
+
+  private static final Logger LOG = LoggerFactory.getLogger(Print.class);
   
   public int run(String[] args) throws Exception {
     Options options = new Options();
@@ -53,8 +58,7 @@ public class Print extends Configured implements Tool {
         throw new ParseException("Command takes no arguments");
       }
     } catch (ParseException e) {
-      System.err.println("Failed to parse command line " + e.getMessage());
-      System.err.println();
+      LOG.error("Failed to parse command line " + e.getMessage());
       HelpFormatter formatter = new HelpFormatter();
       formatter.printHelp(getClass().getSimpleName(), options);
       System.exit(-1);
@@ -79,7 +83,8 @@ public class Print extends Configured implements Tool {
 
     while (rs.next()) {
       CINode node = rs.get();
-      System.out.printf("%016x:%016x:%012d:%s\n", rs.getKey(), node.getPrev(), node.getCount(), node.getClient());
+      LOG.info("%016x:%016x:%012d:%s\n {} {} {} {}", new Object[] {rs.getKey(), 
+        node.getPrev(), node.getCount(), node.getClient()});
 
     }
     

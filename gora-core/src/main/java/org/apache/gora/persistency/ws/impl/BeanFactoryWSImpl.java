@@ -109,7 +109,6 @@ public class BeanFactoryWSImpl<K, T extends Persistent> implements BeanFactory<K
     } catch (InstantiationException e) {
       throw new RuntimeException(e);
     } catch (IllegalAccessException e) {
-      e.printStackTrace();
       throw new RuntimeException(e);
     }
   }

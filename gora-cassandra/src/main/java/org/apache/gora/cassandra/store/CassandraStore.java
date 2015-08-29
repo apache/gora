@@ -342,7 +342,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
     try {
       hasResult = result.next();
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new RuntimeException(e);
     }
     return hasResult ? result.get() : null;
   }

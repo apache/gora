@@ -230,13 +230,13 @@ public class LicenseHeaders {
           relatedLicenses.put(licenseValue,var);
         }
     } catch (SecurityException e) {
-      e.printStackTrace();
+      throw new RuntimeException(e);
     } catch (NoSuchFieldException e) {
-      e.printStackTrace();
+      throw new RuntimeException(e);
     } catch (IllegalArgumentException e) {
-      e.printStackTrace();
+      throw new RuntimeException(e);
     } catch (IllegalAccessException e) {
-      e.printStackTrace();
+      throw new RuntimeException(e);
     }
   }
 
