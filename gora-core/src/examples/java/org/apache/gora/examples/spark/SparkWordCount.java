@@ -17,6 +17,8 @@
  */
 package org.apache.gora.examples.spark;
 
+import java.nio.charset.Charset;
+
 import org.apache.gora.examples.generated.TokenDatum;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.spark.GoraSparkEngine;
@@ -52,7 +54,7 @@ public class SparkWordCount {
         @Override
         public Tuple2<String, Long> call(WebPage webPage)
                 throws Exception {
-          String content = new String(webPage.getContent().array());
+          String content = new String(webPage.getContent().array(), Charset.defaultCharset());
           return new Tuple2<>(content, 1L);
         }
   };
@@ -86,20 +88,20 @@ public class SparkWordCount {
     JavaPairRDD<String, WebPage> goraRDD = goraSparkEngine.initialize(sc, inStore);
 
     long count = goraRDD.count();
-    System.out.println("Total Web page count: " + count);
+    log.info("Total Web page count: {}", count);
 
     JavaRDD<Tuple2<String, Long>> mappedGoraRdd = goraRDD.values().map(mapFunc);
 
     JavaPairRDD<String, Long> reducedGoraRdd = JavaPairRDD.fromJavaRDD(mappedGoraRdd).reduceByKey(redFunc);
 
     //Print output for debug purpose
-    System.out.println("SparkWordCount debug purpose TokenDatum print starts:");
+    log.info("SparkWordCount debug purpose TokenDatum print starts:");
     Map<String, Long> tokenDatumMap = reducedGoraRdd.collectAsMap();
     for (String key : tokenDatumMap.keySet()) {
-      System.out.println(key);
-      System.out.println(tokenDatumMap.get(key));
+      log.info(key);
+      log.info(tokenDatumMap.get(key).toString());
     }
-    System.out.println("SparkWordCount debug purpose TokenDatum print ends:");
+    log.info("SparkWordCount debug purpose TokenDatum print ends:");
     //
 
     //write output to datastore
@@ -134,7 +136,7 @@ public class SparkWordCount {
   public static void main(String[] args) throws Exception {
 
     if (args.length < 2) {
-      System.err.println(USAGE);
+      log.info(USAGE);
       System.exit(1);
     }
 
