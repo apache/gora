@@ -246,11 +246,13 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       try {
         this.adminServer = new LBHttpSolrServer(solrUrlElements);
       } catch (MalformedURLException e) {
+        LOG.error(e.getMessage());
         throw new RuntimeException(e);
       }
       try {
         this.server = new LBHttpSolrServer( solrUrlElements + "/" + mapping.getCoreName() );
       } catch (MalformedURLException e) {
+        LOG.error(e.getMessage());
         throw new RuntimeException(e);
       }
       if (serverUserAuth) {

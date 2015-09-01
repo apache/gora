@@ -117,6 +117,7 @@ public class Walker extends Configured implements Tool {
         return rs.get();
       }
     } catch (Exception e) {
+      LOG.error(e.getMessage());
       throw new RuntimeException(e);
     }
     

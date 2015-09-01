@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
  * An adapter for Result to Hadoop RecordReader.
  */
 public class GoraRecordReader<K, T extends PersistentBase> extends RecordReader<K,T> {
+
   public static final Logger LOG = LoggerFactory.getLogger(GoraRecordReader.class);
 
   public static final String BUFFER_LIMIT_READ_NAME = "gora.buffer.read.limit";
@@ -119,7 +120,7 @@ public class GoraRecordReader<K, T extends PersistentBase> extends RecordReader<
 	    return this.result.next();
 	  }
 	  catch(Exception e){
-	    LOG.error("Error reading Gora records");
+	    LOG.error("Error reading Gora records: {}", e.getMessage());
 	    throw new RuntimeException(e);
 	  }
   }

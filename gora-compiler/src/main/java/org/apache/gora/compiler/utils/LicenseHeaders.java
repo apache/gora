@@ -19,12 +19,17 @@ package org.apache.gora.compiler.utils;
 
 import java.util.HashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /** 
  * Utility class which specifies a collection of license headers which can be 
  * used within the GoraCompiler for generating alternative license headers for
  * Java interfaces and classes generated from protocols and schemas. 
  */
 public class LicenseHeaders {
+
+  private static final Logger LOG = LoggerFactory.getLogger(LicenseHeaders.class);
 
   /**
    * Chosen license to be included within the generated classes
@@ -230,12 +235,16 @@ public class LicenseHeaders {
           relatedLicenses.put(licenseValue,var);
         }
     } catch (SecurityException e) {
+      LOG.error(e.getMessage());
       throw new RuntimeException(e);
     } catch (NoSuchFieldException e) {
+      LOG.error(e.getMessage());
       throw new RuntimeException(e);
     } catch (IllegalArgumentException e) {
+      LOG.error(e.getMessage());
       throw new RuntimeException(e);
     } catch (IllegalAccessException e) {
+      LOG.error(e.getMessage());
       throw new RuntimeException(e);
     }
   }

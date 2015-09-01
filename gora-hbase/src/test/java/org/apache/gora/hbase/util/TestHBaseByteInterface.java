@@ -37,7 +37,12 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class TestHBaseByteInterface {
+
+  private static final Logger LOG = LoggerFactory.getLogger(TestHBaseByteInterface.class);
 
   private static final Random RANDOM = new Random(0);
 
@@ -101,6 +106,7 @@ public class TestHBaseByteInterface {
             // everything ok, return 0
             return 0;
           } catch (Exception e) {
+            LOG.error(e.getMessage());
             throw new RuntimeException(e);
             // this will fail the test
           }

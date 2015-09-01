@@ -141,7 +141,8 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         } else {
           data = decoder.readBytes(null).array();
         }
-      } catch (IOException e) {;
+      } catch (IOException e) {
+        LOG.error(e.getMessage());
         throw new GoraException("Error decoding union type: ", e);
       }
     } else {
@@ -216,6 +217,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
 
       throw new IllegalArgumentException("Unknown type " + clazz.getName());
     } catch (IOException ioe) {
+      LOG.error(ioe.getMessage());
       throw new RuntimeException(ioe);
     }
   }
@@ -247,6 +249,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         avroEncoder.flush();
         return baos.toByteArray();
       } catch (IOException e) {
+        LOG.error(e.getMessage());
         return toBytes(o);
       }
     } else {

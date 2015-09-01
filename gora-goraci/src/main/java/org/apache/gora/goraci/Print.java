@@ -58,7 +58,7 @@ public class Print extends Configured implements Tool {
         throw new ParseException("Command takes no arguments");
       }
     } catch (ParseException e) {
-      LOG.error("Failed to parse command line " + e.getMessage());
+      LOG.error("Failed to parse command line {}", e.getMessage());
       HelpFormatter formatter = new HelpFormatter();
       formatter.printHelp(getClass().getSimpleName(), options);
       System.exit(-1);

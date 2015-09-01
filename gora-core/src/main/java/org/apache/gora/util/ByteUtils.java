@@ -31,12 +31,17 @@ import org.apache.avro.specific.SpecificRecord;
 import org.apache.avro.util.Utf8;
 import org.apache.hadoop.io.WritableUtils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 //  This code is copied almost directly from HBase project's Bytes class.
 /**
  * Utility class that handles byte arrays, conversions to/from other types.
  *
  */
 public class ByteUtils {
+
+  private static final Logger LOG = LoggerFactory.getLogger(ByteUtils.class);
 
   /**
    * Size of boolean in bytes
@@ -151,6 +156,7 @@ public class ByteUtils {
     try {
       result = new String(b, off, len, "UTF-8");
     } catch (UnsupportedEncodingException e) {
+      LOG.error(e.getMessage());
       throw new RuntimeException(e);
     }
     return result;
@@ -168,6 +174,7 @@ public class ByteUtils {
     try {
       result = s.getBytes("UTF-8");
     } catch (UnsupportedEncodingException e) {
+      LOG.error(e.getMessage());
       throw new RuntimeException(e);
     }
     return result;

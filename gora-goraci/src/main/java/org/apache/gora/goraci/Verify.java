@@ -170,7 +170,7 @@ public class Verify extends Configured implements Tool {
         throw new ParseException("Did not see expected # of arguments, saw " + cmd.getArgs().length);
       }
     } catch (ParseException e) {
-      LOG.error("Failed to parse command line " + e.getMessage());
+      LOG.error("Failed to parse command line {}", e.getMessage());
       HelpFormatter formatter = new HelpFormatter();
       formatter.printHelp(getClass().getSimpleName() + " <output dir> <num reducers>", options);
       System.exit(-1);
