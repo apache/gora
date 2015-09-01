@@ -4,6 +4,8 @@
 
 Current Development
 
+* GORA-429 Implement Maven forbidden-apis plugin in Gora (lewismc, rmarroquin)
+
 * GORA-228 java.util.ConcurrentModificationException when using MemStore for concurrent tests (Yasin Kılınç, cihad güzel, lewismc)
 
 * GORA-419: AccumuloStore.put deletes entire row when updating map/array field (gerhardgossen via lewismc)
