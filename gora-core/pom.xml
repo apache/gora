@@ -141,6 +141,19 @@
       <artifactId>guava</artifactId>
     </dependency>
 
+    <!-- Spark dependency -->
+    <dependency> <!-- Spark dependency -->
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-core_2.10</artifactId>
+      <version>${spark.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.eclipse.jetty.orbit</groupId>
+          <artifactId>javax.servlet</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
     <!-- Logging Dependencies -->
     <dependency>
       <groupId>org.slf4j</groupId>

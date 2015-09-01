@@ -49,6 +49,7 @@ if [ $# = 0 ]; then
   echo "  goracisetup                Run the GoraCI Rackspace orchestration setup"
   echo "  logmanager                 Run the tutorial log manager"
   echo "  loganalytics               Run the tutorial log analytics"
+  echo "  loganalyticsspark          Run the tutorial log analytics spark"
   echo "  junit         	     Run the given JUnit test"
   echo "  version         	     Print Gora version to terminal"
   echo " or"
@@ -133,6 +134,10 @@ elif [ "$COMMAND" = "logmanager" ] ; then
 elif [ "$COMMAND" = "loganalytics" ] ; then
   MODULE=gora-tutorial
   CLASS=org.apache.gora.tutorial.log.LogAnalytics
+  CLASSPATH=$CLASSPATH:$GORA_HOME/$MODULE/target/classes/
+elif [ "$COMMAND" = "loganalyticsspark" ] ; then
+  MODULE=gora-tutorial
+  CLASS=org.apache.gora.tutorial.log.LogAnalyticsSpark
   CLASSPATH=$CLASSPATH:$GORA_HOME/$MODULE/target/classes/
 elif [ "$COMMAND" = "junit" ] ; then
   MODULE=*
