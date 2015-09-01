@@ -108,6 +108,11 @@
       <artifactId>gora-cassandra</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>org.apache.gora</groupId>
+      <artifactId>gora-solr</artifactId>
+    </dependency>
+
     <!--dependency> <groupId>org.apache.gora</groupId> <artifactId>gora-sql</artifactId> 
       </dependency> <dependency> <groupId>org.apache.gora</groupId> <artifactId>gora-solr</artifactId> 
       </dependency -->

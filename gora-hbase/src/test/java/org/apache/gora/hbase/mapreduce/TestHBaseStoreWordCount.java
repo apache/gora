@@ -27,6 +27,7 @@ import org.apache.gora.store.DataStoreFactory;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -56,6 +57,13 @@ public class TestHBaseStoreWordCount {
   @Test
   public void testWordCount() throws Exception {
     MapReduceTestUtils.testWordCount(cluster.getConf(), webPageStore, tokenStore);
+  }
+
+  //todo fix config
+  @Ignore
+  @Test
+  public void testSparkWordCount() throws Exception {
+    MapReduceTestUtils.testSparkWordCount(cluster.getConf(), webPageStore, tokenStore);
   }
 
 }

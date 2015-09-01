@@ -28,6 +28,7 @@ import org.apache.gora.examples.generated.TokenDatum;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.examples.mapreduce.QueryCounter;
 import org.apache.gora.examples.mapreduce.WordCount;
+import org.apache.gora.examples.spark.SparkWordCount;
 import org.apache.gora.query.Query;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.impl.DataStoreBase;
@@ -101,6 +102,36 @@ public class MapReduceTestUtils {
     }
     for(Map.Entry<String, Integer> entry:actualCounts.entrySet()) {
       assertTokenCount(outStore, entry.getKey(), entry.getValue()); 
+    }
+  }
+
+  public static void testSparkWordCount(Configuration conf, DataStore<String,WebPage> inStore, DataStore<String,
+      TokenDatum> outStore) throws Exception {
+    //Datastore now has to be a Hadoop based datastore
+    ((DataStoreBase<String,WebPage>)inStore).setConf(conf);
+    ((DataStoreBase<String,TokenDatum>)outStore).setConf(conf);
+
+    //create input
+    WebPageDataCreator.createWebPageData(inStore);
+
+    //run Spark
+    SparkWordCount wordCount = new SparkWordCount();
+    wordCount.wordCount(inStore, outStore);
+
+    //assert results
+    HashMap<String, Integer> actualCounts = new HashMap<String, Integer>();
+    for(String content : WebPageDataCreator.CONTENTS) {
+      if (content != null) {
+        for(String token:content.split(" ")) {
+          Integer count = actualCounts.get(token);
+          if(count == null)
+            count = 0;
+          actualCounts.put(token, ++count);
+        }
+      }
+    }
+    for(Map.Entry<String, Integer> entry:actualCounts.entrySet()) {
+      assertTokenCount(outStore, entry.getKey(), entry.getValue());
     }
   }
   
