@@ -33,8 +33,6 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -53,12 +51,15 @@ import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * A Map only job that generates random linked list and stores them using Gora.
  */
 public class Generator extends Configured implements Tool {
   
-  private static final Log LOG = LogFactory.getLog(Generator.class);
+  private static final Logger LOG = LoggerFactory.getLogger(Generator.class);
   
   static final int WIDTH = 1000000;
   static final int WRAP = WIDTH * 25;
@@ -189,7 +190,7 @@ public class Generator extends Configured implements Tool {
     @Override
     protected void map(LongWritable key, NullWritable value, Context output) throws IOException {
       long num = key.get();
-      System.out.println("num" + num);
+      LOG.info("num {}", num);
       
       Utf8 id = new Utf8(UUID.randomUUID().toString());
       
@@ -304,8 +305,7 @@ public class Generator extends Configured implements Tool {
         throw new ParseException("Did not see expected # of arguments, saw " + cmd.getArgs().length);
       }
     } catch (ParseException e) {
-      System.err.println("Failed to parse command line " + e.getMessage());
-      System.err.println();
+      LOG.error("Failed to parse command line {}", e.getMessage());
       HelpFormatter formatter = new HelpFormatter();
       formatter.printHelp(getClass().getSimpleName() + " <num mappers> <num nodes per map>", options);
       System.exit(-1);
@@ -317,7 +317,7 @@ public class Generator extends Configured implements Tool {
   }
 
   public int run(int numMappers, long numNodes, boolean concurrent) throws Exception {
-    LOG.info("Running Generator with numMappers=" + numMappers +", numNodes=" + numNodes);
+    LOG.info("Running Generator with numMappers={}, numNodes={}", numMappers, numNodes);
     
     Job job = new Job(getConf());
     

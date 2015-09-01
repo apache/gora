@@ -35,6 +35,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
@@ -140,12 +141,12 @@ public class TestHBaseStore extends DataStoreTestBase {
     // Test writing+reading an empty bytes field. FIELD in HBASE MUST 
     // become EMPTY (byte[0])
     page = webPageStore.get("com.example/http") ;
-    page.setContent(ByteBuffer.wrap("".getBytes())) ;
+    page.setContent(ByteBuffer.wrap("".getBytes(Charset.defaultCharset()))) ;
     webPageStore.put("com.example/http", page) ;
     webPageStore.close() ;
     webPageStore = testDriver.createDataStore(String.class, WebPage.class);
     page = webPageStore.get("com.example/http") ;
-    assertTrue(Arrays.equals("".getBytes(),page.getContent().array())) ;
+    assertTrue(Arrays.equals("".getBytes(Charset.defaultCharset()),page.getContent().array())) ;
     // Check directly with HBase
     table = new HTable(conf,"WebPage");
     get = new Get(Bytes.toBytes("com.example/http"));
@@ -167,7 +168,7 @@ public class TestHBaseStore extends DataStoreTestBase {
     
     // Write webpage data
     page.setUrl((CharSequence) new Utf8("http://example.com"));
-    byte[] contentBytes = "example content in example.com".getBytes();
+    byte[] contentBytes = "example content in example.com".getBytes(Charset.defaultCharset());
     ByteBuffer buff = ByteBuffer.wrap(contentBytes);
     page.setContent(buff);
     webPageStore.put("com.example/http", page);

@@ -20,6 +20,7 @@ package org.apache.gora.persistency.impl;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.List;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.util.Utf8;
@@ -115,7 +116,7 @@ public class TestPersistentBase {
     page.setUrl(new Utf8("http://foo.com"));
     page.getParsedContent().add(new Utf8("foo"));
     page.getOutlinks().put(new Utf8("foo"), new Utf8("bar"));
-    page.setContent(ByteBuffer.wrap("foo baz bar".getBytes()));
+    page.setContent(ByteBuffer.wrap("foo baz bar".getBytes(Charset.defaultCharset())));
     
     page.clear();
     
@@ -128,7 +129,7 @@ public class TestPersistentBase {
     page.setUrl(new Utf8("http://bar.com"));
     page.getParsedContent().add(new Utf8("bar"));
     page.getOutlinks().put(new Utf8("bar"), new Utf8("baz"));
-    page.setContent(ByteBuffer.wrap("foo baz bar barbaz".getBytes()));
+    page.setContent(ByteBuffer.wrap("foo baz bar barbaz".getBytes(Charset.defaultCharset())));
     
     //test clear new object
     page = WebPage.newBuilder().build();

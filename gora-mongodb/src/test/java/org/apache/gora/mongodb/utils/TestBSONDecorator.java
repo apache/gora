@@ -20,6 +20,7 @@ package org.apache.gora.mongodb.utils;
 import static org.junit.Assert.*;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 import org.junit.Test;
 
@@ -69,27 +70,27 @@ public class TestBSONDecorator {
     DBObject dbo1 = BasicDBObjectBuilder
         .start()
         .add("root0", "value")
-        .add("root1", new BasicDBObject("leaf1", "abcdefgh".getBytes()))
+        .add("root1", new BasicDBObject("leaf1", "abcdefgh".getBytes(Charset.defaultCharset())))
         .add(
             "root2",
             new BasicDBObject("parent1", new BasicDBObject("leaf2", "test"
-                .getBytes())))
-        .add("root3", ByteBuffer.wrap("test2".getBytes())).get();
+                .getBytes(Charset.defaultCharset()))))
+        .add("root3", ByteBuffer.wrap("test2".getBytes(Charset.defaultCharset()))).get();
     BSONDecorator dboc = new BSONDecorator(dbo1);
 
     // Access first bytes field
     assertTrue(dboc.containsField("root1.leaf1"));
-    assertArrayEquals("abcdefgh".getBytes(), dboc.getBytes("root1.leaf1")
+    assertArrayEquals("abcdefgh".getBytes(Charset.defaultCharset()), dboc.getBytes("root1.leaf1")
         .array());
 
     // Access second bytes field
     assertTrue(dboc.containsField("root2.parent1.leaf2"));
-    assertArrayEquals("test".getBytes(), dboc.getBytes("root2.parent1.leaf2")
+    assertArrayEquals("test".getBytes(Charset.defaultCharset()), dboc.getBytes("root2.parent1.leaf2")
         .array());
 
     // Access third bytes field
     assertTrue(dboc.containsField("root3"));
-    assertArrayEquals("test2".getBytes(), dboc.getBytes("root3").array());
+    assertArrayEquals("test2".getBytes(Charset.defaultCharset()), dboc.getBytes("root3").array());
   }
 
   @Test

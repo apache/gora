@@ -17,6 +17,7 @@
  */
 package org.apache.gora.mongodb.store;
 
+import java.util.Locale;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.gora.mongodb.store.MongoMapping.DocumentFieldType;
@@ -32,58 +33,58 @@ public class TestMongoMapping {
     MongoMapping mapping = new MongoMapping();
     // Add fields of type binary
     mapping.addClassField("test", "classBin1", "topLevel1",
-        DocumentFieldType.BINARY.toString().toLowerCase());
+        DocumentFieldType.BINARY.toString().toLowerCase(Locale.getDefault()));
     mapping.addClassField("test", "classBin2", "topLevel2",
-        DocumentFieldType.BINARY.toString().toUpperCase());
+        DocumentFieldType.BINARY.toString().toUpperCase(Locale.getDefault()));
     assertEquals("topLevel1", mapping.getDocumentField("classBin1"));
     assertEquals("topLevel2", mapping.getDocumentField("classBin2"));
     // Add fields of type int32
     mapping.addClassField("test", "classInt321", "topLevel3",
-        DocumentFieldType.INT32.toString().toLowerCase());
+        DocumentFieldType.INT32.toString().toLowerCase(Locale.getDefault()));
     mapping.addClassField("test", "classInt322", "topLevel4",
-        DocumentFieldType.INT32.toString().toUpperCase());
+        DocumentFieldType.INT32.toString().toUpperCase(Locale.getDefault()));
     assertEquals("topLevel3", mapping.getDocumentField("classInt321"));
     assertEquals("topLevel4", mapping.getDocumentField("classInt322"));
     // Add fields of type int64
     mapping.addClassField("test", "classInt641", "topLevel5",
-        DocumentFieldType.INT64.toString().toLowerCase());
+        DocumentFieldType.INT64.toString().toLowerCase(Locale.getDefault()));
     mapping.addClassField("test", "classInt642", "topLevel6",
-        DocumentFieldType.INT64.toString().toUpperCase());
+        DocumentFieldType.INT64.toString().toUpperCase(Locale.getDefault()));
     assertEquals("topLevel5", mapping.getDocumentField("classInt641"));
     assertEquals("topLevel6", mapping.getDocumentField("classInt642"));
     // Add fields of type double
     mapping.addClassField("test", "classDouble1", "topLevel7",
-        DocumentFieldType.DOUBLE.toString().toLowerCase());
+        DocumentFieldType.DOUBLE.toString().toLowerCase(Locale.getDefault()));
     mapping.addClassField("test", "classDouble2", "topLevel8",
-        DocumentFieldType.DOUBLE.toString().toUpperCase());
+        DocumentFieldType.DOUBLE.toString().toUpperCase(Locale.getDefault()));
     assertEquals("topLevel7", mapping.getDocumentField("classDouble1"));
     assertEquals("topLevel8", mapping.getDocumentField("classDouble2"));
     // Add fields of type string
     mapping.addClassField("test", "classString1", "topLevel9",
-        DocumentFieldType.STRING.toString().toLowerCase());
+        DocumentFieldType.STRING.toString().toLowerCase(Locale.getDefault()));
     mapping.addClassField("test", "classString2", "topLevel10",
-        DocumentFieldType.STRING.toString().toUpperCase());
+        DocumentFieldType.STRING.toString().toUpperCase(Locale.getDefault()));
     assertEquals("topLevel9", mapping.getDocumentField("classString1"));
     assertEquals("topLevel10", mapping.getDocumentField("classString2"));
     // Add fields of type date
     mapping.addClassField("test", "classDate1", "topLevel11",
-        DocumentFieldType.DATE.toString().toLowerCase());
+        DocumentFieldType.DATE.toString().toLowerCase(Locale.getDefault()));
     mapping.addClassField("test", "classDate2", "topLevel12",
-        DocumentFieldType.DATE.toString().toUpperCase());
+        DocumentFieldType.DATE.toString().toUpperCase(Locale.getDefault()));
     assertEquals("topLevel11", mapping.getDocumentField("classDate1"));
     assertEquals("topLevel12", mapping.getDocumentField("classDate2"));
     // Add fields of type list
     mapping.addClassField("test", "classList1", "topLevel13",
-        DocumentFieldType.LIST.toString().toLowerCase());
+        DocumentFieldType.LIST.toString().toLowerCase(Locale.getDefault()));
     mapping.addClassField("test", "classList2", "topLevel14",
-        DocumentFieldType.LIST.toString().toUpperCase());
+        DocumentFieldType.LIST.toString().toUpperCase(Locale.getDefault()));
     assertEquals("topLevel13", mapping.getDocumentField("classList1"));
     assertEquals("topLevel14", mapping.getDocumentField("classList2"));
     // Add fields of type document
     mapping.addClassField("test", "classDocument1", "topLevel15",
-        DocumentFieldType.DOCUMENT.toString().toLowerCase());
+        DocumentFieldType.DOCUMENT.toString().toLowerCase(Locale.getDefault()));
     mapping.addClassField("test", "classDocument2", "topLevel16",
-        DocumentFieldType.DOCUMENT.toString().toUpperCase());
+        DocumentFieldType.DOCUMENT.toString().toUpperCase(Locale.getDefault()));
     assertEquals("topLevel15", mapping.getDocumentField("classDocument1"));
     assertEquals("topLevel16", mapping.getDocumentField("classDocument2"));
   }

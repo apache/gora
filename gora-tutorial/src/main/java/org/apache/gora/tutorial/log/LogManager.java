@@ -17,11 +17,16 @@
  */
 package org.apache.gora.tutorial.log;
 
+import java.nio.charset.Charset;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.InputStreamReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 import java.util.StringTokenizer;
 
 import org.apache.avro.util.Utf8;
@@ -55,7 +60,7 @@ public class LogManager {
   private DataStore<Long, Pageview> dataStore; 
   
   private static final SimpleDateFormat dateFormat 
-    = new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss Z");
+    = new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss Z", Locale.getDefault());
   
   public LogManager() {
     try {
@@ -78,8 +83,9 @@ public class LogManager {
    * @param input the input file location
    */
   private void parse(String input) throws IOException, ParseException, Exception {
-    log.info("Parsing file:" + input);
-    BufferedReader reader = new BufferedReader(new FileReader(input));
+    log.info("Parsing file: {}", input);
+    BufferedReader reader = new BufferedReader(new InputStreamReader(
+      new FileInputStream(input), Charset.defaultCharset()));
     long lineCount = 0;
     try {
       String line = reader.readLine();
@@ -97,7 +103,7 @@ public class LogManager {
     } finally {
       reader.close();  
     }
-    log.info("finished parsing file. Total number of log lines:" + lineCount);
+    log.info("finished parsing file. Total number of log lines: {}", lineCount);
   }
   
   /** Parses a single log line in combined log format using StringTokenizers */
@@ -177,7 +183,7 @@ public class LogManager {
     dataStore.delete(lineNum);
     dataStore.flush(); //write changes may need to be flushed before
                        //they are committed 
-    log.info("pageview with key:" + lineNum + " deleted");
+    log.info("pageview with key: {} deleted", lineNum);
   }
   
   /** This method illustrates delete by query call */
@@ -189,7 +195,7 @@ public class LogManager {
     query.setEndKey(endKey);
     
     dataStore.deleteByQuery(query);
-    log.info("pageviews with keys between " + startKey + " and " + endKey + " are deleted");
+    log.info("pageviews with keys between {} and {} are deleted.", startKey, endKey);
   }
   
   private void printResult(Result<Long, Pageview> result) throws IOException, Exception {
@@ -198,20 +204,19 @@ public class LogManager {
       long resultKey = result.getKey(); //obtain current key
       Pageview resultPageview = result.get(); //obtain current value object
       
-      //print the results
-      System.out.println(resultKey + ":");
+      log.info("{} :", resultKey);
       printPageview(resultPageview);
     }
     
-    System.out.println("Number of pageviews from the query:" + result.getOffset());
+    log.info("Number of pageviews from the query: {}", result.getOffset());
   }
   
   /** Pretty prints the pageview object to stdout */
   private void printPageview(Pageview pageview) {
     if(pageview == null) {
-      System.out.println("No result to show"); 
+      log.info("No result to show"); 
     } else {
-      System.out.println(pageview.toString());
+      log.info(pageview.toString());
     }
   }
   
@@ -231,7 +236,7 @@ public class LogManager {
   
   public static void main(String[] args) throws Exception {
     if(args.length < 2) {
-      System.err.println(USAGE);
+      log.error(USAGE);
       System.exit(1);
     }
     
@@ -251,7 +256,7 @@ public class LogManager {
     } else if("-deleteByQuery".equalsIgnoreCase(args[0])) {
       manager.deleteByQuery(Long.parseLong(args[1]), Long.parseLong(args[2]));
     } else {
-      System.err.println(USAGE);
+      log.info(USAGE);
       System.exit(1);
     }
     

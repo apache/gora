@@ -23,8 +23,13 @@ import java.io.PrintStream;
 
 import org.apache.gora.compiler.GoraCompiler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public class GoraCompilerCLI {
+
+  private static final Logger LOG = LoggerFactory.getLogger(GoraCompilerCLI.class);
 
   public static void main(String[] args) {
     if(args.length == 1 && (args[0].equals("--help") || args[0].equals("-h"))){
@@ -32,13 +37,13 @@ public class GoraCompilerCLI {
       System.exit(0);
     }
     if(args.length < 2){
-      System.err.println("Must supply at least one source file and an output directory.");
+      LOG.error("Must supply at least one source file and an output directory.");
       printHelp();
       System.exit(1);
     }
     File outputDir = new File(args[args.length-1]);
     if(!outputDir.isDirectory()){
-      System.err.println("Must supply a directory for output");
+      LOG.error("Must supply a directory for output");
       printHelp();
       System.exit(1);
     }
@@ -46,7 +51,7 @@ public class GoraCompilerCLI {
     for(int i  = 0; i<inputs.length; i++){
       File inputFile = new File(args[i]);
       if(!inputFile.isFile()){
-        System.err.println("Input must be a file.");
+        LOG.error("Input must be a file.");
         printHelp();
         System.exit(1);
       }
@@ -54,16 +59,15 @@ public class GoraCompilerCLI {
     }
     try {
       GoraCompiler.compileSchema(inputs, outputDir);
-      System.out.println("Compiler executed SUCCESSFULL.");
+      LOG.info("Compiler executed SUCCESSFULL.");
     } catch (IOException e) {
-      System.err.println("Error while compiling schema files. Check that the schemas are properly formatted.");
+      LOG.error("Error while compiling schema files. Check that the schemas are properly formatted.");
       printHelp();
-      e.printStackTrace(System.err);
+      throw new RuntimeException(e);
     }
   }
 
   private static void printHelp() {
-    PrintStream out = System.out;
-    out.println("Usage: gora-compiler ( -h | --help ) | (<input> [<input>...] <output>)");
+    LOG.info("Usage: gora-compiler ( -h | --help ) | (<input> [<input>...] <output>)");
   }
 }

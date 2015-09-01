@@ -27,11 +27,16 @@ import org.apache.gora.query.Result;
 import org.apache.gora.store.WebServiceBackedDataStore;
 import org.apache.gora.util.OperationNotSupportedException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Base implementations for {@link WebServiceBackedDataStore} methods.
  */
 public abstract class WSBackedDataStoreBase<K, T extends Persistent>
   extends WSDataStoreBase<K, T> implements WebServiceBackedDataStore<K, T> {
+
+  private static final Logger LOG = LoggerFactory.getLogger(WSBackedDataStoreBase.class);
 
   @Override
   /**
@@ -51,8 +56,8 @@ public abstract class WSBackedDataStoreBase<K, T extends Persistent>
     try {
       return executeQuery(query);
     } catch (IOException e) {
-      e.printStackTrace();
-      return null;
+      LOG.error(e.getMessage());
+      throw new RuntimeException(e);
     }
   }
 
