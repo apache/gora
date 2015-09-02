@@ -65,11 +65,7 @@ public class HBaseColumn {
     if (getClass() != obj.getClass())
       return false;
     HBaseColumn other = (HBaseColumn) obj;
-    if (!Arrays.equals(family, other.family))
-      return false;
-    if (!Arrays.equals(qualifier, other.qualifier))
-      return false;
-    return true;
+    return Arrays.equals(family, other.family) && Arrays.equals(qualifier, other.qualifier);
   }
 
   @Override
