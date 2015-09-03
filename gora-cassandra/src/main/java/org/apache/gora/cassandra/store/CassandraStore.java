@@ -96,12 +96,12 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
    * Fixed string with value "UnionIndex" used to generate an extra column based on 
    * the original field's name
    */
-  public static String UNION_COL_SUFIX = "_UnionIndex";
+  public static final String UNION_COL_SUFIX = "_UnionIndex";
 
   /**
    * Default schema index with value "0" used when AVRO Union data types are stored
    */
-  public static int DEFAULT_UNION_SCHEMA = 0;
+  public static final int DEFAULT_UNION_SCHEMA = 0;
 
   /**
    * The values are Avro fields pending to be stored.
