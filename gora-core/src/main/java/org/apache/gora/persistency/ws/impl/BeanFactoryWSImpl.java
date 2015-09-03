@@ -24,12 +24,17 @@ import org.apache.gora.persistency.BeanFactory;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.util.ReflectionUtils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * A default implementation of the {@link BeanFactory} interface. Constructs 
  * the keys using by reflection, {@link Persistent} objects by calling 
  * {@link Persistent#newInstance(org.apache.gora.persistency.StateManager)}. 
  */
 public class BeanFactoryWSImpl<K, T extends Persistent> implements BeanFactory<K, T> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(BeanFactoryWSImpl.class);
 
   /**
    * Class of the key to be used
@@ -107,9 +112,10 @@ public class BeanFactoryWSImpl<K, T extends Persistent> implements BeanFactory<K
     try {
       return (T) persistentClass.newInstance();
     } catch (InstantiationException e) {
+      LOG.error(e.getMessage());
       throw new RuntimeException(e);
     } catch (IllegalAccessException e) {
-      e.printStackTrace();
+      LOG.error(e.getMessage());
       throw new RuntimeException(e);
     }
   }

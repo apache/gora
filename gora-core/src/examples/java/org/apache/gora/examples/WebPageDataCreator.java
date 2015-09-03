@@ -20,6 +20,7 @@ package org.apache.gora.examples;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -121,7 +122,7 @@ public class WebPageDataCreator {
         page.setUrl(new Utf8(URLS[i]));
         page.setParsedContent(new ArrayList<CharSequence>());
         if (CONTENTS[i]!=null){
-          page.setContent(ByteBuffer.wrap(CONTENTS[i].getBytes()));
+          page.setContent(ByteBuffer.wrap(CONTENTS[i].getBytes(Charset.defaultCharset())));
           for(String token : CONTENTS[i].split(" ")) {
             page.getParsedContent().add(new Utf8(token));  
           }

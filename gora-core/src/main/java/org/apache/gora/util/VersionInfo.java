@@ -20,11 +20,16 @@ package org.apache.gora.util;
 
 import org.apache.gora.GoraVersionAnnotation;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * This class finds the package info for Gora and the GoraVersionAnnotation
  * information.
  */
 public class VersionInfo {
+
+  private static final Logger LOG = LoggerFactory.getLogger(VersionInfo.class);
   private static Package myPackage;
   private static GoraVersionAnnotation version;
   
@@ -100,10 +105,10 @@ public class VersionInfo {
   }
   
   public static void main(String[] args) {
-    System.out.println("Gora " + getVersion());
-    System.out.println("Subversion " + getUrl() + " -r " + getRevision());
-    System.out.println("Compiled by " + getUser() + " on " + getDate());
-    System.out.println("From source with checksum " + getSrcChecksum());
+    LOG.info("Gora " + getVersion());
+    LOG.info("Subversion " + getUrl() + " -r " + getRevision());
+    LOG.info("Compiled by " + getUser() + " on " + getDate());
+    LOG.info("From source with checksum " + getSrcChecksum());
 
   }
 }

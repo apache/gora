@@ -649,7 +649,7 @@ public class MongoStore<K, T extends PersistentBase> extends
     } else if (storeType == DocumentFieldType.DATE) {
       Object bin = easybson.get(docf);
       if (bin instanceof Date) {
-        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"), Locale.getDefault());
         calendar.setTime((Date) bin);
         result = new Utf8(DatatypeConverter.printDateTime(calendar));
       } else {

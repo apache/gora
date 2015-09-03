@@ -20,6 +20,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -209,7 +210,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
     LOG.info("Using Solr server at " + solrServerUrl);
     String solrJServerType = ((solrJServerImpl == null || solrJServerImpl.equals(""))?"http":solrJServerImpl);
     // HttpSolrServer - denoted by "http" in properties
-    if (solrJServerType.toString().toLowerCase().equals("http")) {
+    if (solrJServerType.toString().toLowerCase(Locale.getDefault()).equals("http")) {
       LOG.info("Using HttpSolrServer Solrj implementation.");
       this.adminServer = new HttpSolrServer(solrServerUrl);
       this.server = new HttpSolrServer( solrServerUrl + "/" + mapping.getCoreName() );
@@ -222,7 +223,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
             serverUsername, serverPassword);
       }
       // CloudSolrServer - denoted by "cloud" in properties
-    } else if (solrJServerType.toString().toLowerCase().equals("cloud")) {
+    } else if (solrJServerType.toString().toLowerCase(Locale.getDefault()).equals("cloud")) {
       LOG.info("Using CloudSolrServer Solrj implementation.");
       this.adminServer = new CloudSolrServer(solrServerUrl);
       this.server = new CloudSolrServer( solrServerUrl + "/" + mapping.getCoreName() );
@@ -234,23 +235,25 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
             (DefaultHttpClient) ((CloudSolrServer) server).getLbServer().getHttpClient(),
             serverUsername, serverPassword);
       }
-    } else if (solrJServerType.toString().toLowerCase().equals("concurrent")) {
+    } else if (solrJServerType.toString().toLowerCase(Locale.getDefault()).equals("concurrent")) {
       LOG.info("Using ConcurrentUpdateSolrServer Solrj implementation.");
       this.adminServer = new ConcurrentUpdateSolrServer(solrServerUrl, 1000, 10);
       this.server = new ConcurrentUpdateSolrServer( solrServerUrl + "/" + mapping.getCoreName(), 1000, 10);
       // LBHttpSolrServer - denoted by "loadbalance" in properties
-    } else if (solrJServerType.toString().toLowerCase().equals("loadbalance")) {
+    } else if (solrJServerType.toString().toLowerCase(Locale.getDefault()).equals("loadbalance")) {
       LOG.info("Using LBHttpSolrServer Solrj implementation.");
       String[] solrUrlElements = StringUtils.split(solrServerUrl);
       try {
         this.adminServer = new LBHttpSolrServer(solrUrlElements);
       } catch (MalformedURLException e) {
-        e.printStackTrace();
+        LOG.error(e.getMessage());
+        throw new RuntimeException(e);
       }
       try {
         this.server = new LBHttpSolrServer( solrUrlElements + "/" + mapping.getCoreName() );
       } catch (MalformedURLException e) {
-        e.printStackTrace();
+        LOG.error(e.getMessage());
+        throw new RuntimeException(e);
       }
       if (serverUserAuth) {
         HttpClientUtil.setBasicAuth(
@@ -270,8 +273,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       try {
         batchSize = Integer.parseInt(batchSizeString);
       } catch (NumberFormatException nfe) {
-        LOG.warn("Invalid batch size '" + batchSizeString + "', using default "
-            + DEFAULT_BATCH_SIZE);
+        LOG.warn("Invalid batch size '{}', using default {}", batchSizeString, DEFAULT_BATCH_SIZE);
       }
     }
     batch = new ArrayList<SolrInputDocument>(batchSize);
@@ -281,8 +283,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       try {
         commitWithin = Integer.parseInt(commitWithinString);
       } catch (NumberFormatException nfe) {
-        LOG.warn("Invalid commit within '" + commitWithinString
-            + "', using default " + DEFAULT_COMMIT_WITHIN);
+        LOG.warn("Invalid commit within '{}' , using default {}", commitWithinString, DEFAULT_COMMIT_WITHIN);
       }
     }
     String resultsSizeString = DataStoreFactory.findProperty(properties, this,
@@ -291,8 +292,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       try {
         resultsSize = Integer.parseInt(resultsSizeString);
       } catch (NumberFormatException nfe) {
-        LOG.warn("Invalid results size '" + resultsSizeString
-            + "', using default " + DEFAULT_RESULTS_SIZE);
+        LOG.warn("Invalid results size '{}' , using default {}", resultsSizeString, DEFAULT_RESULTS_SIZE);
       }
     }
   }
@@ -332,7 +332,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
         LOG.warn("Check that 'keyClass' and 'name' parameters in gora-solr-mapping.xml "
             + "match with intended values. A mapping mismatch has been found therefore "
             + "no mapping has been initialized for class mapping at position " 
-            + classes.indexOf(classElement) + " in mapping file.");
+            + " {} in mapping file.", classes.indexOf(classElement));
       }
     } catch (Exception ex) {
       throw new IOException(ex);

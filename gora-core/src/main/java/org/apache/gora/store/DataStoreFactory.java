@@ -20,6 +20,7 @@ package org.apache.gora.store;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.gora.persistency.Persistent;
@@ -291,7 +292,7 @@ public class DataStoreFactory{
     //recursively try the class names until the base class
     Class<?> clazz = store.getClass();
     while(true) {
-      String fullKey = GORA + "." + org.apache.gora.util.StringUtils.getClassname(clazz).toLowerCase() + "." + baseKey;
+      String fullKey = GORA + "." + org.apache.gora.util.StringUtils.getClassname(clazz).toLowerCase(Locale.getDefault()) + "." + baseKey;
       String value = getProperty(properties, fullKey);
       if(value != null) {
         return value;
@@ -395,7 +396,7 @@ public class DataStoreFactory{
     if (!key.matches(regex)) {
       log.warn("Keys should be LOWERCASE. Please change that!");
       log.warn("Using lowecase for key " + key);
-      key = key.toLowerCase();
+      key = key.toLowerCase(Locale.getDefault());
     }
     String result = properties.getProperty(key);
     if (result == null) {

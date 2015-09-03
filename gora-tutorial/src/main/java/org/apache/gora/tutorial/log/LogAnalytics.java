@@ -139,7 +139,7 @@ public class LogAnalytics extends Configured implements Tool {
       DataStore<String, MetricDatum> outStore, int numReducer) throws IOException {
     Job job = new Job(getConf());
     job.setJobName("Log Analytics");
-    log.info("Creating Hadoop Job: " + job.getJobName());
+    log.info("Creating Hadoop Job: {}", job.getJobName());
     job.setNumReduceTasks(numReducer);
     job.setJarByClass(getClass());
 
@@ -183,7 +183,7 @@ public class LogAnalytics extends Configured implements Tool {
     inStore.close();
     outStore.close();
     
-    log.info("Log completed with " + (success ? "success" : "failure"));
+    log.info("Log completed with {}", (success ? "success" : "failure"));
     
     return success ? 0 : 1;
   }
@@ -192,7 +192,7 @@ public class LogAnalytics extends Configured implements Tool {
   
   public static void main(String[] args) throws Exception {
     if(args.length < 2) {
-      System.err.println(USAGE);
+      log.info(USAGE);
       System.exit(1);
     }
     //run as any other MR job

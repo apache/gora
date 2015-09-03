@@ -34,7 +34,12 @@ import org.apache.avro.compiler.specific.SpecificCompiler;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class GoraCompiler extends SpecificCompiler {
+
+  private static final Logger LOG = LoggerFactory.getLogger(GoraCompiler.class);
 
   public static String DIRTY_BYTES_FIELD_NAME = "__g__dirty";
   public static final int FIRST_UNMANAGED_FIELD_INDEX = 1;
@@ -56,7 +61,7 @@ public class GoraCompiler extends SpecificCompiler {
     Schema.Parser parser = new Schema.Parser();
 
     for (File src : srcFiles) {
-      System.out.println("Compiling: " + src.getAbsolutePath());
+      LOG.info("Compiling: {}", src.getAbsolutePath());
       Schema originalSchema = parser.parse(src);
       Map<Schema,Schema> queue = new HashMap<Schema,Schema>();
       //Schema newSchema = getSchemaWithDirtySupport(originalSchema, queue);
@@ -64,7 +69,7 @@ public class GoraCompiler extends SpecificCompiler {
       GoraCompiler compiler = new GoraCompiler(newSchema);
       compiler.setTemplateDir("/org/apache/gora/compiler/templates/");
       compiler.compileToDestination(src, dest);
-      System.out.println("Compiled into: " + dest.getAbsolutePath());
+      LOG.info("Compiled into: {}", dest.getAbsolutePath());
     }
   }
 

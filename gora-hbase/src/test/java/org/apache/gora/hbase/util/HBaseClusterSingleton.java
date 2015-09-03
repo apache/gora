@@ -20,6 +20,7 @@ package org.apache.gora.hbase.util;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseTestingUtility;
@@ -64,7 +65,7 @@ public final class HBaseClusterSingleton {
     // 0777 & ~umask, and use that to set the config value.
     try {
       Process process = Runtime.getRuntime().exec("/bin/sh -c umask");
-      BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
+      BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream(), Charset.defaultCharset()));
       int rc = process.waitFor();
       if(rc == 0) {
         String umask = br.readLine();
@@ -73,14 +74,14 @@ public final class HBaseClusterSingleton {
         int permBits = 0777 & ~umaskBits;
         String perms = Integer.toString(permBits, 8);
 
-        LOG.info("Setting dfs.datanode.data.dir.perm to " + perms);
+        LOG.info("Setting dfs.datanode.data.dir.perm to {}",  perms);
         htu.getConfiguration().set("dfs.datanode.data.dir.perm", perms);
       } else {
         LOG.warn("Failed running umask command in a shell, nonzero return value");
       }
     } catch (Exception e) {
       // ignore errors, we might not be running on POSIX, or "sh" might not be on the path
-      LOG.warn("Couldn't get umask", e);
+      LOG.warn("Couldn't get umask {}", e);
     }
 
     htu.getConfiguration().setBoolean("dfs.support.append", true);

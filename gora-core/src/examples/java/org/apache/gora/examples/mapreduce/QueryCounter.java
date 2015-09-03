@@ -34,10 +34,15 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.gora.util.ClassLoadingUtils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Example Hadoop job to count the row of a gora {@link Query}.
  */
 public class QueryCounter<K, T extends Persistent> extends Configured implements Tool {
+
+  private static final Logger LOG = LoggerFactory.getLogger(QueryCounter.class);
 
   public static final String COUNTER_GROUP = "QueryCounter";
   public static final String ROWS = "ROWS";
@@ -118,7 +123,7 @@ public class QueryCounter<K, T extends Persistent> extends Configured implements
   public int run(String[] args) throws Exception {
 
     if(args.length < 2) {
-      System.err.println("Usage QueryCounter <keyClass> <persistentClass> [dataStoreClass]");
+      LOG.info("Usage QueryCounter <keyClass> <persistentClass> [dataStoreClass]");
       return 1;
     }
 
@@ -139,7 +144,7 @@ public class QueryCounter<K, T extends Persistent> extends Configured implements
 
     long results = countQuery(dataStore);
 
-    System.out.println("Number of result to the query:" + results);
+    LOG.info("Number of result to the query:" + results);
 
     return 0;
   }

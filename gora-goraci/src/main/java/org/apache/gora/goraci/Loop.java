@@ -20,18 +20,20 @@ package org.apache.gora.goraci;
 
 import java.util.Arrays;
 import java.util.UUID;
+import java.util.Locale;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** 
  * Executes Generate and Verify in a loop. Data is not cleaned between runs, so each iteration
@@ -39,7 +41,7 @@ import org.apache.hadoop.util.ToolRunner;
  */
 public class Loop extends Configured implements Tool {
 
-  private static final Log LOG = LogFactory.getLog(Loop.class); 
+  private static final Logger LOG = LoggerFactory.getLogger(Loop.class); 
   
   protected void runGenerator(int numMappers, long numNodes, boolean concurrent) throws Exception {
     Generator generator = new Generator();
@@ -67,7 +69,7 @@ public class Loop extends Configured implements Tool {
       throw new RuntimeException("Verify.verify failed");
     }
     
-    LOG.info("Verify finished with succees. Total nodes=" + expectedNumNodes);
+    LOG.info("Verify finished with succees. Total nodes={}", expectedNumNodes);
   }
 
   protected Verify startVerify(String outputDir, int numReducers, boolean concurrent) throws Exception {
@@ -95,8 +97,7 @@ public class Loop extends Configured implements Tool {
         throw new ParseException("Did not see expected # of arguments, saw " + cmd.getArgs().length);
       }
     } catch (ParseException e) {
-      System.err.println("Failed to parse command line " + e.getMessage());
-      System.err.println();
+      LOG.error("Failed to parse command line {}", e.getMessage());
       HelpFormatter formatter = new HelpFormatter();
       formatter.printHelp(getClass().getSimpleName() + " <num iterations> <num mappers> <num nodes per mapper> <output dir> <num reducers>", options);
       System.exit(-1);
@@ -112,7 +113,7 @@ public class Loop extends Configured implements Tool {
     int numReducers = Integer.parseInt(cmd.getArgs()[4]);
     
     if (numNodes % Generator.WRAP != 0) {
-      throw new RuntimeException("Number of node per mapper is not a multiple of " + String.format("%,d", Generator.WRAP));
+      throw new RuntimeException("Number of node per mapper is not a multiple of " + String.format(Locale.getDefault(), "%,d", Generator.WRAP));
     }
 
     long expectedNumNodes = 0;
@@ -125,7 +126,7 @@ public class Loop extends Configured implements Tool {
     long verifyNodes = 0;
 
     for (int i=0; i < numIterations; i++) {
-      LOG.info("Starting iteration = " + i);
+      LOG.info("Starting iteration = {}", i);
       runGenerator(numMappers, numNodes, concurrent);
       expectedNumNodes += numMappers * numNodes;
       

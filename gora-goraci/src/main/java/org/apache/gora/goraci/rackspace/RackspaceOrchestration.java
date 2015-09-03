@@ -77,7 +77,7 @@ public class RackspaceOrchestration<K> {
    * @throws InstantiationException 
    * @throws NoSuchElementException 
    */
-  public static void main(String[] args) throws NoSuchElementException, InstantiationException, IllegalAccessException {
+  public static void main(String[] args) throws NoSuchElementException, InstantiationException, IllegalAccessException, IOException {
     Properties properties = DataStoreFactory.createProps();
     String rsContinent = DataStoreFactory.findProperty(properties, MockDataStore.class.newInstance(), 
         RS_CONTINENT, "rackspace-cloudservers-us");
@@ -122,12 +122,12 @@ public class RackspaceOrchestration<K> {
         try {
           Files.write(keyPair.getPrivateKey(), keyPairFile, Charsets.UTF_8);
         } catch (IOException e) {
-          e.printStackTrace();
+          throw new IOException(e);
         }
         try {
           publicKey = Files.toString(keyPairFile, Charsets.UTF_8);
         } catch (IOException e) {
-          e.printStackTrace();
+          throw new IOException(e);
         }
         keyPairApi.createWithPublicKey("goraci-keypair", publicKey);
       }

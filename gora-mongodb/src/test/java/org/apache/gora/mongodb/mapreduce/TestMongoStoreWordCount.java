@@ -24,6 +24,7 @@ import org.apache.gora.mongodb.store.MongoStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -52,6 +53,14 @@ public class TestMongoStoreWordCount extends GoraMongoMapredTest {
   @Test
   public void testWordCount() throws Exception {
     MapReduceTestUtils.testWordCount(testDriver.getConfiguration(),
+        webPageStore, tokenStore);
+  }
+
+  //todo fix config
+  @Ignore
+  @Test
+  public void testSparkWordCount() throws Exception {
+    MapReduceTestUtils.testSparkWordCount(testDriver.getConfiguration(),
         webPageStore, tokenStore);
   }
 

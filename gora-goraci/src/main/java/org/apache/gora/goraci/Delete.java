@@ -27,14 +27,19 @@ import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * A stand alone program that deletes a single node.
  */
 public class Delete extends Configured implements Tool {
+
+  private static final Logger LOG = LoggerFactory.getLogger(Delete.class);
   
   public int run(String[] args) throws Exception {
     if (args.length != 1) {
-      System.out.println("Usage : " + Delete.class.getSimpleName() + " <node to delete>");
+      LOG.info("Usage : {} <node to delete>", Delete.class.getSimpleName());
       return 0;
     }
     
@@ -43,7 +48,7 @@ public class Delete extends Configured implements Tool {
     boolean ret = store.delete(new BigInteger(args[0], 16).longValue());
     store.flush();
     
-    System.out.println("Delete returned " + ret);
+    LOG.info("Delete returned {}", ret);
     
     store.close();
 
