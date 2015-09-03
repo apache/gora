@@ -32,7 +32,6 @@ import me.prettyprint.hector.api.beans.HSuperColumn;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
-import org.apache.avro.util.Utf8;
 import org.apache.gora.cassandra.serializers.CharSequenceSerializer;
 import org.apache.gora.cassandra.store.CassandraStore;
 import org.apache.gora.persistency.impl.PersistentBase;
