@@ -158,7 +158,7 @@ public class HBaseByteInterface {
     if (clazz.equals(Byte.TYPE) || clazz.equals(Byte.class)) {
       return (K) Byte.valueOf(val[0]);
     } else if (clazz.equals(Boolean.TYPE) || clazz.equals(Boolean.class)) {
-      return (K) Boolean.valueOf(val[0] == 0 ? false : true);
+      return (K) Boolean.valueOf(val[0] != 0);
     } else if (clazz.equals(Short.TYPE) || clazz.equals(Short.class)) {
       return (K) Short.valueOf(Bytes.toShort(val));
     } else if (clazz.equals(Integer.TYPE) || clazz.equals(Integer.class)) {

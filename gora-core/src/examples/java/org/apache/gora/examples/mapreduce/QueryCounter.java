@@ -99,7 +99,7 @@ public class QueryCounter<K, T extends Persistent> extends Configured implements
   public long countQuery(DataStore<K,T> dataStore, Query<K,T> query) throws Exception {
     Job job = createJob(dataStore, query);
     job.waitForCompletion(true);
-    assert(job.isComplete() == true);
+    assert(job.isComplete());
 
     return job.getCounters().findCounter(COUNTER_GROUP, ROWS).getValue();
   }
@@ -113,7 +113,7 @@ public class QueryCounter<K, T extends Persistent> extends Configured implements
 
     Job job = createJob(dataStore, query);
     job.waitForCompletion(true);
-    assert(job.isComplete() == true);
+    assert(job.isComplete());
 
     return job.getCounters().findCounter(COUNTER_GROUP, ROWS).getValue();
   }
