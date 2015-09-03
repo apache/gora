@@ -107,7 +107,7 @@ public class LogAnalyticsSpark {
 
   public static void main(String[] args) throws Exception {
     if (args.length < 2) {
-      System.err.println(USAGE);
+      log.error(USAGE);
       System.exit(1);
     }
 
@@ -166,7 +166,7 @@ public class LogAnalyticsSpark {
     JavaPairRDD<Long, Pageview> goraRDD = goraSparkEngine.initialize(sc, inStore);
 
     long count = goraRDD.count();
-    System.out.println("Total Log Count: " + count);
+    log.info("Total Log Count: {}", count);
 
     JavaRDD<Tuple2<Tuple2<String, Long>, Long>> mappedGoraRdd = goraRDD
         .values().map(mapFunc);
@@ -174,7 +174,7 @@ public class LogAnalyticsSpark {
     JavaPairRDD<String, MetricDatum> reducedGoraRdd = JavaPairRDD
         .fromJavaRDD(mappedGoraRdd).reduceByKey(redFunc).mapToPair(metricFunc);
 
-    System.out.println("MetricDatum count:" + reducedGoraRdd.count());
+    log.info("MetricDatum count: {}", reducedGoraRdd.count());
 
     //Print output for debug purpose
     /*
