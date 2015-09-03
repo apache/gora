@@ -4,6 +4,8 @@
 
 Current Development
 
+* GORA-417 Deploy Hadoop-1 compatible binaries for Apache Gora (lewismc)
+
 * GORA-432 Simplify if Statements (Furkan KAMACI via lewismc)
 
 * GORA-386 Gora Spark Backend Support (Furkan KAMACI, talat, lewismc)
