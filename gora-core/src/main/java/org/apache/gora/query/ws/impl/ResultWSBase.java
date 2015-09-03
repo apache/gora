@@ -120,10 +120,7 @@ public abstract class ResultWSBase<K, T extends Persistent>
    * Returns whether the limit for the query is reached. 
    */
   protected boolean isLimitReached() {
-    if(limit > 0 && offset >= limit) {
-      return true;
-    }
-    return false;
+    return limit > 0 && offset >= limit;
   }
   
   /**

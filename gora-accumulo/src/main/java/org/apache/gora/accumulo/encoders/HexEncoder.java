@@ -147,10 +147,7 @@ public class HexEncoder implements Encoder {
   
   @Override
   public boolean decodeBoolean(byte[] val) {
-    if (decodeByte(val) == 1) {
-      return true;
-    }
-    return false;
+      return decodeByte(val) == 1;
   }
   
   @Override

@@ -4,6 +4,8 @@
 
 Current Development
 
+* GORA-432 Simplify if Statements (Furkan KAMACI via lewismc)
+
 * GORA-386 Gora Spark Backend Support (Furkan KAMACI, talat, lewismc)
 
 * GORA-429 Implement Maven forbidden-apis plugin in Gora (lewismc, rmarroquin)
