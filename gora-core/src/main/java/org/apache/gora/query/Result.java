@@ -46,7 +46,7 @@ public interface Result<K, T extends Persistent> {
    * Advances to the next element and returns false if at end.
    * @return true if end is not reached yet
    */
-  boolean next() throws Exception, IOException;
+  boolean next() throws Exception;
   
   /**
    * Returns the current key.

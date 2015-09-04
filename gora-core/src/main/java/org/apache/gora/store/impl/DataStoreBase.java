@@ -154,7 +154,7 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
   @Override
   public T get(K key) {
     return get(key, getFieldsToQuery(null));
-  };
+  }
 
   /**
    * Checks whether the fields argument is null, and if so

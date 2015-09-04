@@ -97,7 +97,7 @@ public class WSDataStoreFactory{
 
   private static <K, T extends Persistent> void initializeDataStore(
       DataStore<K, T> dataStore, Class<K> keyClass, Class<T> persistent,
-      Properties properties) throws IOException, Exception {
+      Properties properties) throws Exception {
     dataStore.initialize(keyClass, persistent, properties);
   }
 

@@ -77,13 +77,13 @@ public abstract class TestMongoStore extends DataStoreTestBase {
 
   @Ignore("Skip until GORA-66 is fixed: need better semantic for end/start keys")
   @Override
-  public void testQueryKeyRange() throws IOException, Exception {
+  public void testQueryKeyRange() throws Exception {
     // Skip until GORA-66 is fixed: need better semantic for end/start keys
   }
 
   @Ignore("MongoStore doesn't support 3 types union field yet")
   @Override
-  public void testGet3UnionField() throws IOException, Exception {
+  public void testGet3UnionField() throws Exception {
     // MongoStore doesn't support 3 types union field yet
   }
 

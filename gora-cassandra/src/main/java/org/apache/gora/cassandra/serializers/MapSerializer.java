@@ -130,7 +130,7 @@ public class MapSerializer<T> extends AbstractSerializer<Map<CharSequence, T>> {
   }
 
   private ByteBuffer toByteBufferWithFixedLengthElements(Map<CharSequence, T> map) {
-    int n = (int) map.size();
+    int n = map.size();
     List<byte[]> list = new ArrayList<byte[]>(n);
     n *= 4;
     for (CharSequence key : map.keySet()) {
@@ -156,7 +156,7 @@ public class MapSerializer<T> extends AbstractSerializer<Map<CharSequence, T>> {
   }
 
   private ByteBuffer toByteBufferWithVariableLengthElements(Map<CharSequence, T> map) {
-    int n = (int) map.size();
+    int n = map.size();
     List<byte[]> list = new ArrayList<byte[]>(n);
     n *= 8;
     for (CharSequence key : map.keySet()) {

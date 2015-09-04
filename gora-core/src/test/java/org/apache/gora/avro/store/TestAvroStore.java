@@ -94,27 +94,27 @@ public class TestAvroStore {
   }
 
   @Test
-  public void testNewInstance() throws IOException, Exception {
+  public void testNewInstance() throws Exception {
     DataStoreTestUtil.testNewPersistent(employeeStore);
   }
 
   @Test
-  public void testCreateSchema() throws IOException, Exception {
+  public void testCreateSchema() throws Exception {
     DataStoreTestUtil.testCreateEmployeeSchema(employeeStore);
   }
 
   @Test
-  public void testAutoCreateSchema() throws IOException, Exception {
+  public void testAutoCreateSchema() throws Exception {
     DataStoreTestUtil.testAutoCreateSchema(employeeStore);
   }
 
   @Test
-  public void testPut() throws IOException, Exception {
+  public void testPut() throws Exception {
     DataStoreTestUtil.testPutEmployee(employeeStore);
   }
 
   @Test
-  public void testQuery() throws IOException, Exception {
+  public void testQuery() throws Exception {
     createWebPageData(webPageStore);
     webPageStore.close();
 
@@ -123,7 +123,7 @@ public class TestAvroStore {
   }
 
   @Test
-  public void testQueryBinaryEncoder() throws IOException, Exception {
+  public void testQueryBinaryEncoder() throws Exception {
     webPageStore.setCodecType(CodecType.BINARY);
     webPageStore.setInputPath(webPageStore.getOutputPath());
 
@@ -135,7 +135,7 @@ public class TestAvroStore {
   //AvroStore should be closed so that Hadoop file is completely flushed,
   //so below test is copied and modified to close the store after pushing data
   public static void testQueryWebPages(DataStore<String, WebPage> store)
-  throws IOException, Exception {
+  throws Exception {
 
     Query<String, WebPage> query = store.newQuery();
     Result<String, WebPage> result = query.execute();

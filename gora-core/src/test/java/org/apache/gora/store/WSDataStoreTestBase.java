@@ -113,7 +113,7 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
   }
   
   @Test
-  public void testNewInstance() throws IOException, Exception {
+  public void testNewInstance() throws Exception {
     log.info("test method: testNewInstance");
     DataStoreTestUtil.testNewPersistent(dataStore);
   }
@@ -145,7 +145,7 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
   }
 
   @Test
-  public void testDeleteSchema() throws IOException, Exception {
+  public void testDeleteSchema() throws Exception {
     log.info("test method: testDeleteSchema");
     assertDeleteSchema();
   }
@@ -161,7 +161,7 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
   }
 
   @Test
-  public void testPut() throws IOException, Exception {
+  public void testPut() throws Exception {
     log.info("test method: testPut");
     assertPut();
   }
@@ -171,13 +171,13 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
   }
 
   @Test
-  public void testPutNested() throws IOException, Exception {
+  public void testPutNested() throws Exception {
     log.info("test method: testPutNested");
 
   }
 
   @Test
-  public void testPutArray() throws IOException, Exception {
+  public void testPutArray() throws Exception {
     log.info("test method: testPutArray");
     assertPutArray();
   }
@@ -187,7 +187,7 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
   }
 
   @Test
-  public void testPutBytes() throws IOException, Exception {
+  public void testPutBytes() throws Exception {
     log.info("test method: testPutBytes");
     byte[] contentBytes = "example content in example.com".getBytes(Charset.defaultCharset());
 
@@ -199,7 +199,7 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
   }
 
   @Test
-  public void testPutMap() throws IOException, Exception {
+  public void testPutMap() throws Exception {
     log.info("test method: testPutMap");
     assertPutMap();
   }
@@ -209,7 +209,7 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
   }
 
   @Test
-  public void testUpdate() throws IOException, Exception {
+  public void testUpdate() throws Exception {
     log.info("test method: testUpdate");
     assertTestUpdateDataStore();
   }
@@ -220,11 +220,11 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
 
   @Ignore
   @Test
-  public void testEmptyUpdate() throws IOException, Exception {
+  public void testEmptyUpdate() throws Exception {
   }
 
   @Test
-  public void testGet() throws IOException, Exception {
+  public void testGet() throws Exception {
     log.info("test method: testGet");
     assertTestGetDataStore();
   }
@@ -234,12 +234,12 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
   }
   
   @Test
-  public void testGetWithFields() throws IOException, Exception {
+  public void testGetWithFields() throws Exception {
     log.info("test method: testGetWithFields");
   }
 
  @Test
-  public void testQuery() throws IOException, Exception {
+  public void testQuery() throws Exception {
     log.info("test method: testQuery");
     assertTestQueryDataStore();
   }
@@ -249,17 +249,17 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
   }
 
   @Test
-  public void testQueryStartKey() throws IOException, Exception {
+  public void testQueryStartKey() throws Exception {
     log.info("test method: testQueryStartKey");
   }
 
   @Test
-  public void testQueryEndKey() throws IOException, Exception {
+  public void testQueryEndKey() throws Exception {
     log.info("test method: testQueryEndKey");
   }
 
   @Test
-  public void testQueryKeyRange() throws IOException, Exception {
+  public void testQueryKeyRange() throws Exception {
     log.info("test method: testQueryKetRange");
     assertTestQueryKeyRange();
   }
@@ -268,7 +268,7 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
   public void assertTestQueryKeyRange(){}
   
   @Test
-  public void testDelete() throws IOException, Exception {
+  public void testDelete() throws Exception {
     log.info("test method: testDelete");
     assertTestDeleteDataStore();
   }
@@ -277,7 +277,7 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
   public void assertTestDeleteDataStore(){}
   
   @Test
-  public void testDeleteByQuery() throws IOException, Exception {
+  public void testDeleteByQuery() throws Exception {
     log.info("test method: testDeleteByQuery");
     assertTestDeleteByQueryDataStore();
   }
@@ -287,7 +287,7 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
   }
   
   @Test
-  public void testDeleteByQueryFields() throws IOException, Exception {
+  public void testDeleteByQueryFields() throws Exception {
     log.info("test method: testQueryByQueryFields");
   }
 

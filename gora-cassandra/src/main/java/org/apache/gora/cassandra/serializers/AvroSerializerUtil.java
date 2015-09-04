@@ -43,7 +43,7 @@ public class AvroSerializerUtil {
   
   @SuppressWarnings({ "unchecked", "rawtypes" })
   public static <T> byte[] serializer(T value, Schema schema) throws IOException{
-    SpecificDatumWriter writer = (SpecificDatumWriter<?>) writerMap.get(schema.getFullName());
+    SpecificDatumWriter writer = writerMap.get(schema.getFullName());
     if (writer == null) {
       writer = new SpecificDatumWriter(schema);// ignore dirty bits
       writerMap.put(schema.getFullName(),writer);
@@ -70,7 +70,7 @@ public class AvroSerializerUtil {
   public static Object deserializer(Object value, Schema schema) throws IOException{
     String schemaId = schema.getFullName();      
     
-    SpecificDatumReader<?> reader = (SpecificDatumReader<?>)readerMap.get(schemaId);
+    SpecificDatumReader<?> reader = readerMap.get(schemaId);
     if (reader == null) {
       reader = new SpecificDatumReader(schema);// ignore dirty bits
       SpecificDatumReader localReader=null;

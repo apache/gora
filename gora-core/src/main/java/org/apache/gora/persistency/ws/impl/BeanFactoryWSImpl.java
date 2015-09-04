@@ -110,7 +110,7 @@ public class BeanFactoryWSImpl<K, T extends Persistent> implements BeanFactory<K
    */
   public T newPersistent() {
     try {
-      return (T) persistentClass.newInstance();
+      return persistentClass.newInstance();
     } catch (InstantiationException e) {
       LOG.error(e.getMessage());
       throw new RuntimeException(e);

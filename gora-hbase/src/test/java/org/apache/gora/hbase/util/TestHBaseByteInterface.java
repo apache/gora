@@ -51,10 +51,10 @@ public class TestHBaseByteInterface {
     for (int i=0; i < 1000; i++) {
     
       //employer
-      CharSequence name = (CharSequence) new Utf8("john");
+      CharSequence name = new Utf8("john");
       long dateOfBirth = System.currentTimeMillis();
       int salary = 1337;
-      CharSequence ssn = (CharSequence) new Utf8(String.valueOf(RANDOM.nextLong()));
+      CharSequence ssn = new Utf8(String.valueOf(RANDOM.nextLong()));
       
       Employee e = Employee.newBuilder().build();
       e.setName(name);
@@ -73,8 +73,8 @@ public class TestHBaseByteInterface {
       
       
       //metadata
-      CharSequence key = (CharSequence) new Utf8("theKey");
-      CharSequence value = (CharSequence) new Utf8("theValue " + RANDOM.nextLong());
+      CharSequence key = new Utf8("theKey");
+      CharSequence value = new Utf8("theValue " + RANDOM.nextLong());
       HashMap<CharSequence, CharSequence> data = new HashMap<CharSequence, CharSequence>();
       data.put(key, value);
       Metadata m = Metadata.newBuilder().build();

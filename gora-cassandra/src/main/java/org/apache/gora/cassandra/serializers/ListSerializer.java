@@ -130,7 +130,7 @@ public class ListSerializer<T> extends AbstractSerializer<List<T>> {
   }
 
   private ByteBuffer toByteBufferWithFixedLengthElements(List<T> array) {
-    ByteBuffer byteBuffer = ByteBuffer.allocate((int) array.size() * size);
+    ByteBuffer byteBuffer = ByteBuffer.allocate(array.size() * size);
     for (T element : array) {
       byteBuffer.put(elementSerializer.toByteBuffer(element));
     }
@@ -139,7 +139,7 @@ public class ListSerializer<T> extends AbstractSerializer<List<T>> {
   }
 
   private ByteBuffer toByteBufferWithVariableLengthElements(List<T> array) {
-    int n = (int) array.size();
+    int n = array.size();
     List<byte[]> list = new ArrayList<byte[]>(n);
     n *= 4;
     for (T element : array) {

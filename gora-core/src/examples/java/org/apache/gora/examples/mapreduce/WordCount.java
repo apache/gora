@@ -76,7 +76,7 @@ public class WordCount extends Configured implements Tool {
           context.write(word, one);
         }
       }
-    };
+    }
   }
   
   public static class WordCountReducer extends GoraReducer<Text, IntWritable, 
@@ -93,8 +93,8 @@ public class WordCount extends Configured implements Tool {
       }
       result.setCount(sum);
       context.write(key.toString(), result);
-    };
-    
+    }
+
   }
   
   /**

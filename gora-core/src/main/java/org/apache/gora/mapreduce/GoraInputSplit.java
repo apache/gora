@@ -73,7 +73,7 @@ public class GoraInputSplit extends InputSplit
   @Override
   public void readFields(DataInput in) throws IOException {
     try {
-      query = (PartitionQuery<?, ?>) IOUtils.deserialize(conf, in, null);
+      query = IOUtils.deserialize(conf, in, null);
     } catch (ClassNotFoundException ex) {
       throw new IOException(ex);
     }

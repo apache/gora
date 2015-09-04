@@ -42,7 +42,7 @@ public class HadoopShimFactory {
   // package private
   static class Singleton {
     public static final HadoopShimFactory INSTANCE = new HadoopShimFactory();
-  };
+  }
 
   /**
    * Access the {@link HadoopShimFactory} singleton.

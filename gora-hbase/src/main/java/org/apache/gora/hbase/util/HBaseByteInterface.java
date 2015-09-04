@@ -125,7 +125,7 @@ public class HBaseByteInterface {
       // (key name in map will be "UNION-type-type-...")
       String schemaId = schema.getType().equals(Schema.Type.UNION) ? String.valueOf(schema.hashCode()) : schema.getFullName();      
       
-      SpecificDatumReader<?> reader = (SpecificDatumReader<?>)readerMap.get(schemaId);
+      SpecificDatumReader<?> reader = readerMap.get(schemaId);
       if (reader == null) {
         reader = new SpecificDatumReader(schema);// ignore dirty bits
         SpecificDatumReader localReader=null;
@@ -232,7 +232,7 @@ public class HBaseByteInterface {
     case ENUM:    return new byte[] { (byte)((Enum<?>) o).ordinal() };
     case UNION:
     case RECORD:
-      SpecificDatumWriter writer = (SpecificDatumWriter<?>) writerMap.get(schema.getFullName());
+      SpecificDatumWriter writer = writerMap.get(schema.getFullName());
       if (writer == null) {
         writer = new SpecificDatumWriter(schema);// ignore dirty bits
         writerMap.put(schema.getFullName(),writer);

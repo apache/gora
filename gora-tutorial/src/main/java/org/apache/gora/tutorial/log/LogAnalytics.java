@@ -71,8 +71,8 @@ public class LogAnalytics extends Configured implements Tool {
       tuple = new TextLong();
       tuple.setKey(new Text());
       tuple.setValue(new LongWritable());
-    };
-    
+    }
+
     @Override
     protected void map(Long key, Pageview pageview, Context context)
         throws IOException ,InterruptedException {
@@ -84,9 +84,9 @@ public class LogAnalytics extends Configured implements Tool {
       tuple.getValue().set(day);
       
       context.write(tuple, one);
-    };
-    
-    /** Rolls up the given timestamp to the day cardinality, so that 
+    }
+
+    /** Rolls up the given timestamp to the day cardinality, so that
      * data can be aggregated daily */
     private long getDay(long timeStamp) {
       return (timeStamp / DAY_MILIS) * DAY_MILIS; 
@@ -124,7 +124,7 @@ public class LogAnalytics extends Configured implements Tool {
       metricDatum.setMetric(sum);
       
       context.write(key, metricDatum);
-    };
+    }
   }
   
   /**

@@ -52,8 +52,8 @@ public class DataFileAvroStore<K, T extends PersistentBase> extends AvroStore<K,
   public T get(K key, String[] fields) {
     throw new OperationNotSupportedException(
         "Avro DataFile's does not support indexed retrieval");
-  };
-  
+  }
+
   @Override
   public void put(K key, T obj) {
     try{
@@ -61,8 +61,8 @@ public class DataFileAvroStore<K, T extends PersistentBase> extends AvroStore<K,
     } catch(IOException ex){
       LOG.error(ex.getMessage(), ex);
     }
-  };
-  
+  }
+
   private DataFileWriter<T> getWriter() throws IOException {
     if(writer == null) {
       writer = new DataFileWriter<T>(getDatumWriter());

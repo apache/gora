@@ -492,7 +492,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
   private void addOrUpdateField(K key, Field field, Schema schema, Object value) {
     Type type = schema.getType();
     // checking if the value to be updated is used for saving union schema
-    if (field.name().indexOf(CassandraStore.UNION_COL_SUFIX) < 0){
+    if (!field.name().contains(CassandraStore.UNION_COL_SUFIX)){
       switch (type) {
       case STRING:
       case BOOLEAN:

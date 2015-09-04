@@ -99,7 +99,7 @@ public abstract class ResultBase<K, T extends Persistent>
   }
   
   @Override
-  public final boolean next() throws Exception, IOException {
+  public final boolean next() throws Exception {
     if(isLimitReached()) {
       return false;
     }
@@ -144,7 +144,7 @@ public abstract class ResultBase<K, T extends Persistent>
    */
   protected abstract boolean nextInner() throws IOException; 
   
-  protected T getOrCreatePersistent(T persistent) throws Exception, IOException {
+  protected T getOrCreatePersistent(T persistent) throws Exception {
 	  if(persistent != null) {
 			return persistent;
 		}

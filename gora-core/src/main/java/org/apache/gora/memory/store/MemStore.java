@@ -161,8 +161,8 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
     if(Arrays.equals(fields, otherFieldStrings)) { 
       return obj;
     }
-    T newObj = (T) AvroUtils.deepClonePersistent(obj); 
-      for(int i = 0; i<otherFields.size(); i++) {
+    T newObj = AvroUtils.deepClonePersistent(obj);
+    for(int i = 0; i<otherFields.size(); i++) {
       int index = otherFields.get(i).pos(); 
       newObj.put(index, obj.get(index));
     }

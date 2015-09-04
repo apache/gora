@@ -47,7 +47,7 @@ public class GoraCompiler extends SpecificCompiler {
   private static final Set<String> GORA_RESERVED_NAMES = new HashSet<String>();
   
   static {
-    GORA_RESERVED_NAMES.addAll(Arrays.asList(new String[] { DIRTY_BYTES_FIELD_NAME }));
+    GORA_RESERVED_NAMES.addAll(Arrays.asList(DIRTY_BYTES_FIELD_NAME));
   }
 
   private static final Set<String> GORA_HIDDEN_FIELD_NAMES = new HashSet<String>();

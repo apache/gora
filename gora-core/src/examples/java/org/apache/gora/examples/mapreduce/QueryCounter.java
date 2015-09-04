@@ -59,7 +59,7 @@ public class QueryCounter<K, T extends Persistent> extends Configured implements
         Context context) throws IOException ,InterruptedException {
 
       context.getCounter(COUNTER_GROUP, ROWS).increment(1L);
-    };
+    }
   }
 
   /** Returns the Query to count the results of. Subclasses can

@@ -210,7 +210,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
     LOG.info("Using Solr server at " + solrServerUrl);
     String solrJServerType = ((solrJServerImpl == null || solrJServerImpl.equals(""))?"http":solrJServerImpl);
     // HttpSolrServer - denoted by "http" in properties
-    if (solrJServerType.toString().toLowerCase(Locale.getDefault()).equals("http")) {
+    if (solrJServerType.toLowerCase(Locale.getDefault()).equals("http")) {
       LOG.info("Using HttpSolrServer Solrj implementation.");
       this.adminServer = new HttpSolrServer(solrServerUrl);
       this.server = new HttpSolrServer( solrServerUrl + "/" + mapping.getCoreName() );
@@ -223,7 +223,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
             serverUsername, serverPassword);
       }
       // CloudSolrServer - denoted by "cloud" in properties
-    } else if (solrJServerType.toString().toLowerCase(Locale.getDefault()).equals("cloud")) {
+    } else if (solrJServerType.toLowerCase(Locale.getDefault()).equals("cloud")) {
       LOG.info("Using CloudSolrServer Solrj implementation.");
       this.adminServer = new CloudSolrServer(solrServerUrl);
       this.server = new CloudSolrServer( solrServerUrl + "/" + mapping.getCoreName() );
@@ -235,12 +235,12 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
             (DefaultHttpClient) ((CloudSolrServer) server).getLbServer().getHttpClient(),
             serverUsername, serverPassword);
       }
-    } else if (solrJServerType.toString().toLowerCase(Locale.getDefault()).equals("concurrent")) {
+    } else if (solrJServerType.toLowerCase(Locale.getDefault()).equals("concurrent")) {
       LOG.info("Using ConcurrentUpdateSolrServer Solrj implementation.");
       this.adminServer = new ConcurrentUpdateSolrServer(solrServerUrl, 1000, 10);
       this.server = new ConcurrentUpdateSolrServer( solrServerUrl + "/" + mapping.getCoreName(), 1000, 10);
       // LBHttpSolrServer - denoted by "loadbalance" in properties
-    } else if (solrJServerType.toString().toLowerCase(Locale.getDefault()).equals("loadbalance")) {
+    } else if (solrJServerType.toLowerCase(Locale.getDefault()).equals("loadbalance")) {
       LOG.info("Using LBHttpSolrServer Solrj implementation.");
       String[] solrUrlElements = StringUtils.split(solrServerUrl);
       try {
@@ -430,7 +430,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       switch (c) {
       case ':':
       case '*':
-        sb.append("\\" + c);
+        sb.append("\\").append(c);
         break;
       default:
         sb.append(c);
@@ -489,8 +489,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
 
   @SuppressWarnings("rawtypes")
   private SpecificDatumReader getDatumReader(String schemaId, Schema fieldSchema) {
-    SpecificDatumReader<?> reader = (SpecificDatumReader<?>) readerMap
-        .get(schemaId);
+    SpecificDatumReader<?> reader = readerMap.get(schemaId);
     if (reader == null) {
       reader = new SpecificDatumReader(fieldSchema);// ignore dirty bits
       SpecificDatumReader localReader = null;
@@ -503,8 +502,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
 
   @SuppressWarnings("rawtypes")
   private SpecificDatumWriter getDatumWriter(String schemaId, Schema fieldSchema) {
-    SpecificDatumWriter writer = (SpecificDatumWriter<?>) writerMap
-        .get(schemaId);
+    SpecificDatumWriter writer = writerMap.get(schemaId);
     if (writer == null) {
       writer = new SpecificDatumWriter(fieldSchema);// ignore dirty bits
       writerMap.put(schemaId, writer);

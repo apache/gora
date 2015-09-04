@@ -941,7 +941,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
             endKey = fromBytes(getKeyClass(), TextUtil.getBytes(endRow));
           }
 
-          PartitionQueryImpl<K, T> pqi = new PartitionQueryImpl<K,T>(query, startKey, endKey, new String[] {location});
+          PartitionQueryImpl<K, T> pqi = new PartitionQueryImpl<K,T>(query, startKey, endKey, location);
           pqi.setConf(getConf());
           ret.add(pqi);
         }

@@ -194,7 +194,7 @@ public class Verify extends Configured implements Tool {
     return success ? 0 : 1;
   }
   
-  public void start(Path outputDir, int numReducers, boolean concurrent) throws GoraException, IOException, Exception {
+  public void start(Path outputDir, int numReducers, boolean concurrent) throws Exception {
     LOG.info("Running Verify with outputDir=" + outputDir +", numReducers=" + numReducers);
     
     DataStore<Long,CINode> store = DataStoreFactory.getDataStore(Long.class, CINode.class, new Configuration());

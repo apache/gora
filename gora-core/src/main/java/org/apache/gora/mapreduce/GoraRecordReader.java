@@ -65,7 +65,7 @@ public class GoraRecordReader<K, T extends PersistentBase> extends RecordReader<
     this.query.setLimit(recordsMax);
   }
 
-  public void executeQuery() throws IOException, Exception {
+  public void executeQuery() throws Exception {
     this.result = query.execute();
   }
   

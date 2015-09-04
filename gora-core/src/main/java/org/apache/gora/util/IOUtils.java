@@ -266,7 +266,7 @@ public class IOUtils {
       SpecificDatumReader<T> datumReader, Schema schema, T object)
       throws IOException {
     decoder = DecoderFactory.get().binaryDecoder(is, decoder);
-    return (T)datumReader.read(object, decoder);
+    return datumReader.read(object, decoder);
   }
 
   /**
@@ -276,7 +276,7 @@ public class IOUtils {
       SpecificDatumReader<T> datumReader, Schema schema, T object)
       throws IOException {
     decoder = DecoderFactory.get().binaryDecoder(bytes, decoder);
-    return (T)datumReader.read(object, decoder);
+    return datumReader.read(object, decoder);
   }
 
   /**
@@ -286,7 +286,7 @@ public class IOUtils {
       SpecificDatumReader<T> datumReader, Schema schema, T object)
       throws IOException {
     decoder = DecoderFactory.get().binaryDecoder(bytes, decoder);
-    return (T)datumReader.read(object, decoder);
+    return datumReader.read(object, decoder);
   }
   
   /**

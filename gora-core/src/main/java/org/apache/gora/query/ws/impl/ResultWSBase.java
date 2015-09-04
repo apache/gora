@@ -174,7 +174,7 @@ public abstract class ResultWSBase<K, T extends Persistent>
    * @throws Exception
    * @throws IOException
    */
-  protected T getOrCreatePersistent(T persistent) throws Exception, IOException {
+  protected T getOrCreatePersistent(T persistent) throws Exception {
 	  if(persistent != null) {
 			return persistent;
 		}

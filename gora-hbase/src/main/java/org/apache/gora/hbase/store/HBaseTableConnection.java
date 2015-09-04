@@ -326,14 +326,14 @@ public class HBaseTableConnection implements HTableInterface {
 
   @Override
   public <T extends Service, R> Map<byte[], R> coprocessorService(Class<T> service,
-      byte[] startKey, byte[] endKey, Call<T, R> callable) throws ServiceException, Throwable {
+      byte[] startKey, byte[] endKey, Call<T, R> callable) throws Throwable {
     return getTable().coprocessorService(service, startKey, endKey, callable);
   }
 
   @Override
   public <T extends Service, R> void coprocessorService(Class<T> service, byte[] startKey,
-      byte[] endKey, Call<T, R> callable, Callback<R> callback) throws ServiceException, Throwable {
-    getTable().coprocessorService(service, startKey, endKey, callable, callback);;
+      byte[] endKey, Call<T, R> callable, Callback<R> callback) throws Throwable {
+    getTable().coprocessorService(service, startKey, endKey, callable, callback);
   }
 
   @Override
@@ -344,14 +344,14 @@ public class HBaseTableConnection implements HTableInterface {
   @Override
   public <R extends Message> Map<byte[], R> batchCoprocessorService(
       MethodDescriptor methodDescriptor, Message request, byte[] startKey, byte[] endKey,
-      R responsePrototype) throws ServiceException, Throwable {
+      R responsePrototype) throws Throwable {
     return getTable().batchCoprocessorService(methodDescriptor, request, startKey, endKey, responsePrototype);
   }
 
   @Override
   public <R extends Message> void batchCoprocessorService(MethodDescriptor methodDescriptor,
       Message request, byte[] startKey, byte[] endKey, R responsePrototype, Callback<R> callback)
-      throws ServiceException, Throwable {
+      throws Throwable {
     getTable().batchCoprocessorService(methodDescriptor, request, startKey, endKey, responsePrototype, callback);
     
   }
