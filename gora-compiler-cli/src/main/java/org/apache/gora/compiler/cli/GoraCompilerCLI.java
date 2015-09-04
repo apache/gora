@@ -19,7 +19,6 @@ package org.apache.gora.compiler.cli;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 
 import org.apache.gora.compiler.GoraCompiler;
 

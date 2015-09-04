@@ -25,7 +25,6 @@ import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.util.GoraException;
 import org.apache.gora.util.ReflectionUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Scan;
 
 import java.util.LinkedHashMap;

@@ -38,7 +38,6 @@ import java.util.Collections;
 import org.apache.avro.util.Utf8;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
-import static org.junit.Assert.assertNotNull;
 
 public abstract class TestMongoStore extends DataStoreTestBase {
 

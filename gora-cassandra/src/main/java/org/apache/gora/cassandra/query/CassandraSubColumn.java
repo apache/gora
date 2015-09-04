@@ -20,7 +20,6 @@ package org.apache.gora.cassandra.query;
 
 import java.nio.ByteBuffer;
 import java.util.List;
-import java.util.Map;
 
 import me.prettyprint.hector.api.beans.HColumn;
 
@@ -28,7 +27,6 @@ import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
 import org.apache.gora.cassandra.serializers.ListSerializer;
-import org.apache.gora.cassandra.serializers.MapSerializer;
 import org.apache.gora.cassandra.store.CassandraStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

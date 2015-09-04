@@ -18,11 +18,8 @@
 
 package org.apache.gora.avro.query;
 
-import java.io.IOException;
-
 import org.apache.gora.avro.store.AvroStore;
 import org.apache.gora.persistency.impl.PersistentBase;
-import org.apache.gora.query.Result;
 import org.apache.gora.query.impl.QueryBase;
 
 /**

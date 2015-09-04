@@ -17,9 +17,7 @@
  */
 package org.apache.gora.tutorial.log;
 
-import java.nio.charset.Charset;
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.io.FileInputStream;
 import java.io.IOException;

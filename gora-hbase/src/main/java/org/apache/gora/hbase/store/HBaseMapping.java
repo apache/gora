@@ -98,7 +98,7 @@ public class HBaseMapping {
       // For example nest columns in families. Of course this would break compatibility.
       
       
-      Map<String, HColumnDescriptor> families = getOrCreateFamilies(tableName);;
+      Map<String, HColumnDescriptor> families = getOrCreateFamilies(tableName);
       
       
       HColumnDescriptor columnDescriptor = getOrCreateFamily(familyName, families);

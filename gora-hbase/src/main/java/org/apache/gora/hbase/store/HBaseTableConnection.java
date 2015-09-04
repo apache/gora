@@ -51,7 +51,6 @@ import org.apache.hadoop.hbase.util.Pair;
 import com.google.protobuf.Descriptors.MethodDescriptor;
 import com.google.protobuf.Message;
 import com.google.protobuf.Service;
-import com.google.protobuf.ServiceException;
 
 /**
  * Thread safe implementation to connect to a HBase table.
