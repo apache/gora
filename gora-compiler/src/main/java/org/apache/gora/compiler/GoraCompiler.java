@@ -111,7 +111,7 @@ public class GoraCompiler extends SpecificCompiler {
   }
 
   public static String generateAppropriateWrapper(Schema schema, Field field) {
-    if (field.name() == "__g__dirty") {
+    if (DIRTY_BYTES_FIELD_NAME.equals(field.name())) {
       return "java.nio.ByteBuffer.wrap(new byte["
         + getNumberOfBytesNeededForDirtyBits(schema) + "])";
     } else {
@@ -176,7 +176,7 @@ public class GoraCompiler extends SpecificCompiler {
   }
 
   public static String generateDefaultValueString(Schema schema, String fieldName) {
-    if (fieldName == "__g__dirty") {
+    if (DIRTY_BYTES_FIELD_NAME.equals(fieldName)) {
       return "java.nio.ByteBuffer.wrap(new byte["
         + getNumberOfBytesNeededForDirtyBits(schema) + "])";
     } else {

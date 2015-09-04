@@ -312,7 +312,7 @@ public class CassandraClient<K, T extends PersistentBase> {
    */
   public void deleteByKey(K key) {
     Map<String, String> familyMap = this.cassandraMapping.getFamilyMap();
-    deleteColumn(key, familyMap.values().iterator().next().toString(), null);
+    deleteColumn(key, familyMap.values().iterator().next(), null);
   }
 
   /**
