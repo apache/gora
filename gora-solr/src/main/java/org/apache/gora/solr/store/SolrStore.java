@@ -166,7 +166,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
    * Default schema index with value "0" used when AVRO Union data types are
    * stored
    */
-  public static int DEFAULT_UNION_SCHEMA = 0;
+  public static final int DEFAULT_UNION_SCHEMA = 0;
 
   /*
    * Create a threadlocal map for the datum readers and writers, because they
@@ -781,9 +781,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
 
   @Override
   public void close() {
-    // In testing, the index gets closed before the commit in flush() can happen
-    // so an exception gets thrown
-    // flush();
+    flush();
   }
 
   private void add(ArrayList<SolrInputDocument> batch, int commitWithin)

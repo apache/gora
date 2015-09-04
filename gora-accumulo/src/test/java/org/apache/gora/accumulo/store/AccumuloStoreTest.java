@@ -18,32 +18,50 @@ package org.apache.gora.accumulo.store;
 
 import java.io.IOException;
 
+import org.apache.gora.accumulo.GoraAccumuloTestDriver;
 import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.DataStoreTestBase;
 import org.apache.hadoop.conf.Configuration;
+import org.junit.Before;
 import org.junit.Ignore;
 
 /**
- * 
+ * Tests extending {@link org.apache.gora.store.DataStoreTestBase}
+ * which run the base JUnit test suite for Gora.
  */
 public class AccumuloStoreTest extends DataStoreTestBase {
-  
-  // TODO implement test driver
+
+  static {
+    try {
+    setTestDriver(new GoraAccumuloTestDriver());
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Before
+  public void setUp() throws Exception {
+    super.setUp();
+  }
+
+  public GoraAccumuloTestDriver getTestDriver() {
+    return (GoraAccumuloTestDriver) testDriver;
+  }
 
   @Override
   protected DataStore<String,Employee> createEmployeeDataStore() throws IOException {
     return DataStoreFactory.getDataStore(String.class, Employee.class, new Configuration());
   }
-  
+
   @Override
   protected DataStore<String,WebPage> createWebPageDataStore() throws IOException {
     return DataStoreFactory.getDataStore(String.class, WebPage.class, new Configuration());
   }
 
-  
+
   //Until GORA-66 is resolved this test will always fail, so 
   //do not run it
   @Ignore("skipped until GORA-66 is resolved")

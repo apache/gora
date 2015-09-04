@@ -41,7 +41,8 @@ public class GoraCompiler extends SpecificCompiler {
 
   private static final Logger LOG = LoggerFactory.getLogger(GoraCompiler.class);
 
-  public static String DIRTY_BYTES_FIELD_NAME = "__g__dirty";
+  public static final String DIRTY_BYTES_FIELD_NAME = "__g__dirty";
+
   public static final int FIRST_UNMANAGED_FIELD_INDEX = 1;
 
   private static final Set<String> GORA_RESERVED_NAMES = new HashSet<String>();
