@@ -19,6 +19,7 @@
 package org.apache.gora.util;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -34,8 +35,8 @@ public class StringUtils {
    */
   public static String[] joinStringArrays(String[] arr1, String... arr2) {
     HashSet<String> set = new HashSet<String>();
-    for(String str : arr1) set.add(str);
-    for(String str : arr2) set.add(str);
+    Collections.addAll(set, arr1);
+    Collections.addAll(set, arr2);
 
     return set.toArray(new String[set.size()]);
   }

@@ -105,9 +105,7 @@ public class WebPageDataCreator {
 
   public static final String[] SORTED_URLS = new String[URLS.length];
   static {
-    for (int i = 0; i < URLS.length; i++) {
-      SORTED_URLS[i] = URLS[i];
-    }
+    System.arraycopy(URLS, 0, SORTED_URLS, 0, URLS.length);
     Arrays.sort(SORTED_URLS);
   }
   
