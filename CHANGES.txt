@@ -4,6 +4,8 @@
 
 Current Development
 
+* GORA-314 Implement TestDriver for AccumuloStoreTest e.g. TODO in class (lewismc)
+
 * GORA-417 Deploy Hadoop-1 compatible binaries for Apache Gora (lewismc)
 
 * GORA-432 Simplify if Statements (Furkan KAMACI via lewismc)
