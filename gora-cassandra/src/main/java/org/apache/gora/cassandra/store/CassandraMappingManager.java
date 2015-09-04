@@ -106,6 +106,7 @@ public class CassandraMappingManager {
     Document document = saxBuilder.build(inputStream);
     if (document == null) {
       LOG.warn("Mapping file '" + MAPPING_FILE + "' could not be found!");
+      throw new IOException("Mapping file '" + MAPPING_FILE + "' could not be found!");
     }
     Element root = document.getRootElement();
     // find cassandra keyspace element

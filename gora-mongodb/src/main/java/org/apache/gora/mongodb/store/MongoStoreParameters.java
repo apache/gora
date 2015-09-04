@@ -73,7 +73,7 @@ public class MongoStoreParameters {
   /**
    * Property to select the database
    */
-  public static String PROP_MONGO_DB = "gora.mongodb.db";
+  public static final String PROP_MONGO_DB = "gora.mongodb.db";
 
   private final String mappingFile;
   private final String servers;

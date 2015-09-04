@@ -114,12 +114,13 @@ public class CassandraSuperColumn extends CassandraColumn {
 
           for (HColumn<ByteBuffer, ByteBuffer> hColumn : this.hSuperColumn.getColumns()) {
             String memberName = StringSerializer.get().fromByteBuffer(hColumn.getName());
-            if (memberName.indexOf(CassandraStore.UNION_COL_SUFIX) < 0) {
-              
+
             if (memberName == null || memberName.length() == 0) {
               LOG.warn("member name is null or empty.");
               continue;
             }
+
+            if (!memberName.contains(CassandraStore.UNION_COL_SUFIX)) {
             Field memberField = fieldSchema.getField(memberName);
             Schema memberSchema = memberField.schema();
             Type memberType = memberSchema.getType();
