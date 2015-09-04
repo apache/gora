@@ -4,6 +4,8 @@
 
 Current Development
 
+* GORA-433 Non-Final Public Static Fields Should Be Final (Furkan KAMACI via lewismc)
+
 * GORA-314 Implement TestDriver for AccumuloStoreTest e.g. TODO in class (lewismc)
 
 * GORA-417 Deploy Hadoop-1 compatible binaries for Apache Gora (lewismc)

@@ -166,7 +166,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
    * Default schema index with value "0" used when AVRO Union data types are
    * stored
    */
-  public static int DEFAULT_UNION_SCHEMA = 0;
+  public static final int DEFAULT_UNION_SCHEMA = 0;
 
   /*
    * Create a threadlocal map for the datum readers and writers, because they
