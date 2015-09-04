@@ -783,9 +783,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
 
   @Override
   public void close() {
-    // In testing, the index gets closed before the commit in flush() can happen
-    // so an exception gets thrown
-    // flush();
+    flush();
   }
 
   private void add(ArrayList<SolrInputDocument> batch, int commitWithin)
