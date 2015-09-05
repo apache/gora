@@ -43,9 +43,9 @@ public class HexEncoder implements Encoder {
   
   private long decode(byte[] a) {
     long b = 0;
-    for (int i = 0; i < a.length; i++) {
+    for (byte anA : a) {
       b = b << 4;
-      b |= fromChar(a[i]);
+      b |= fromChar(anA);
     }
     
     return b;
@@ -183,9 +183,9 @@ public class HexEncoder implements Encoder {
     byte[] hex = new byte[bin.length * 2];
     
     int j = 0;
-    for (int i = 0; i < bin.length; i++) {
-      hex[j++] = chars[0x0f & (bin[i] >>> 4)];
-      hex[j++] = chars[0x0f & bin[i]];
+    for (byte aBin : bin) {
+      hex[j++] = chars[0x0f & (aBin >>> 4)];
+      hex[j++] = chars[0x0f & aBin];
     }
     
     return hex;

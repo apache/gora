@@ -66,9 +66,9 @@ public class HBaseMapping {
    */
   public static class HBaseMappingBuilder { 
     private Map<String, Map<String, HColumnDescriptor>> tableToFamilies = 
-      new HashMap<String, Map<String, HColumnDescriptor>>();
+      new HashMap<>();
     private Map<String, HBaseColumn> columnMap = 
-      new HashMap<String, HBaseColumn>();
+      new HashMap<>();
     
     private TableName tableName;
     
@@ -148,7 +148,7 @@ public class HBaseMapping {
       Map<String, HColumnDescriptor> families;
       families = tableToFamilies.get(tableName);
       if (families == null) {
-        families = new HashMap<String, HColumnDescriptor>();
+        families = new HashMap<>();
         tableToFamilies.put(tableName, families);
       }
       return families;

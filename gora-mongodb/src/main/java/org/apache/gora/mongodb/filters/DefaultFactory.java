@@ -37,7 +37,7 @@ public class DefaultFactory<K, T extends PersistentBase> extends
 
   @Override
   public List<String> getSupportedFilters() {
-    List<String> filters = new ArrayList<String>();
+    List<String> filters = new ArrayList<>();
     filters.add(SingleFieldValueFilter.class.getCanonicalName());
     filters.add(MapFieldValueFilter.class.getCanonicalName());
     filters.add(FilterList.class.getCanonicalName());
@@ -158,7 +158,7 @@ public class DefaultFactory<K, T extends PersistentBase> extends
    * @see <a href="https://issues.apache.org/jira/browse/GORA-388">GORA-388</a>
    */
   private List<String> convertOperandsToString(List<Object> rawOperands) {
-    List<String> operands = new ArrayList<String>(rawOperands.size());
+    List<String> operands = new ArrayList<>(rawOperands.size());
     for (Object rawOperand : rawOperands) {
       if (rawOperand != null) {
         operands.add(rawOperand.toString());

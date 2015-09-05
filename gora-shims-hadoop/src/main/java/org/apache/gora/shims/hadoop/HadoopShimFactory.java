@@ -30,7 +30,7 @@ public class HadoopShimFactory {
   /**
    * Hadoop shim version mapping.
    */
-  private static final Map<String, String> HADOOP_VERSION_TO_IMPL_MAP = new HashMap<String, String>();
+  private static final Map<String, String> HADOOP_VERSION_TO_IMPL_MAP = new HashMap<>();
 
   static {
     HADOOP_VERSION_TO_IMPL_MAP.put("1",

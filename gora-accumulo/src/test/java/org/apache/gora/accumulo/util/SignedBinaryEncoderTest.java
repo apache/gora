@@ -104,7 +104,7 @@ public class SignedBinaryEncoderTest {
   @Test
   public void testDouble() {
     
-    ArrayList<Double> testData = new ArrayList<Double>();
+    ArrayList<Double> testData = new ArrayList<>();
     testData.add(Double.NEGATIVE_INFINITY);
     testData.add(Double.MIN_VALUE);
     testData.add(Math.nextUp(Double.NEGATIVE_INFINITY));
@@ -135,7 +135,7 @@ public class SignedBinaryEncoderTest {
   @Test
   public void testFloat() {
     
-    ArrayList<Float> testData = new ArrayList<Float>();
+    ArrayList<Float> testData = new ArrayList<>();
     testData.add(Float.NEGATIVE_INFINITY);
     testData.add(Float.MIN_VALUE);
     testData.add(Math.nextUp(Float.NEGATIVE_INFINITY));

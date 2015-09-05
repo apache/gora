@@ -141,7 +141,7 @@ public class Generator extends Configured implements Tool {
     public List<InputSplit> getSplits(JobContext job) throws IOException, InterruptedException {
       int numMappers = job.getConfiguration().getInt("org.apache.gora.goraci.generator.mappers", 1);
       
-      ArrayList<InputSplit> splits = new ArrayList<InputSplit>(numMappers);
+      ArrayList<InputSplit> splits = new ArrayList<>(numMappers);
       
       for (int i = 0; i < numMappers; i++) {
         splits.add(new GeneratorInputSplit());

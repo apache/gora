@@ -25,7 +25,7 @@ public class SolrMapping {
   String primaryKey;
   
   public SolrMapping() {
-    mapping = new HashMap<String,String>();
+    mapping = new HashMap<>();
   }
   
   public void addField(String goraField, String solrField) {

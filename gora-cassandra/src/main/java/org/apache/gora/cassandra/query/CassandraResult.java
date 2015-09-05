@@ -69,9 +69,9 @@ public class CassandraResult<K, T extends PersistentBase> extends ResultBase<K, 
    * @return
    */
   private CassandraColumn getUnionTypeColumn(String pFieldName, Object[] pCassandraRow){
-    
-    for (int iCnt = 0; iCnt < pCassandraRow.length; iCnt++){
-      CassandraColumn cColumn = (CassandraColumn)pCassandraRow[iCnt];
+
+    for (Object currentPCassandraRow : pCassandraRow) {
+      CassandraColumn cColumn = (CassandraColumn) currentPCassandraRow;
       String columnName = StringSerializer.get().fromByteBuffer(cColumn.getName().duplicate());
       if (pFieldName.equals(columnName))
         return cColumn;
@@ -102,7 +102,7 @@ public class CassandraResult<K, T extends PersistentBase> extends ResultBase<K, 
       
       if (fieldName != null) {
         // get field
-        if (fieldName.indexOf(CassandraStore.UNION_COL_SUFIX) < 0) {
+        if (!fieldName.contains(CassandraStore.UNION_COL_SUFIX)) {
 
           int pos = this.persistent.getSchema().getField(fieldName).pos();
           Field field = fields.get(pos);

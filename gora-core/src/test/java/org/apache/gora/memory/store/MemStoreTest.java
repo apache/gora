@@ -12,7 +12,7 @@ public class MemStoreTest {
 
   @Test
   public void testGetMissingValue() {
-    DataStore<String, WebPage> store = new MemStore<String, WebPage>();
+    DataStore<String, WebPage> store = new MemStore<>();
     WebPage nullWebPage = store.get("missing", new String[0]);
     assertNull(nullWebPage);
     store.close();
@@ -21,7 +21,7 @@ public class MemStoreTest {
   @Test
   public void testPutGet() throws Exception {
     String key = "org.apache.gora:http:/";
-    DataStore<String, WebPage> store = new MemStore<String, WebPage>();
+    DataStore<String, WebPage> store = new MemStore<>();
     assumeTrue(store.get(key, new String[0]) == null);
     store.put(key, WebPage.newBuilder().build());
     assertNotNull(store.get(key, new String[0]));

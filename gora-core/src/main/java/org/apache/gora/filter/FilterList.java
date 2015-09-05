@@ -38,7 +38,7 @@ public class FilterList<K, T extends PersistentBase> implements Filter<K, T> {
   }
   
   private Operator operator = Operator.MUST_PASS_ALL;
-  private List<Filter<K, T>> filters = new ArrayList<Filter<K, T>>();
+  private List<Filter<K, T>> filters = new ArrayList<>();
   
   public FilterList() {
   }
@@ -74,7 +74,7 @@ public class FilterList<K, T extends PersistentBase> implements Filter<K, T> {
     operator = Operator.values()[opByte];
     int size = in.readInt();
     if (size > 0) {
-      filters = new ArrayList<Filter<K, T>>(size);
+      filters = new ArrayList<>(size);
       try {
         for (int i = 0; i < size; i++) {
           @SuppressWarnings("unchecked")

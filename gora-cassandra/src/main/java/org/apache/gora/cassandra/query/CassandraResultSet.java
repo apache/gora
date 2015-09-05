@@ -34,7 +34,7 @@ public class CassandraResultSet<K> extends ArrayList<CassandraRow<K>> {
   /**
    * Maps keys to indices in the list.
    */
-  private HashMap<K, Integer> indexMap = new HashMap<K, Integer>();
+  private HashMap<K, Integer> indexMap = new HashMap<>();
 
   public CassandraRow<K> getRow(K key) {
     Integer integer = this.indexMap.get(key);

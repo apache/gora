@@ -77,7 +77,7 @@ public class Verify extends Configured implements Tool {
       String[] entries = context.getConfiguration().getStrings("org.apache.gora.goraci.verify.flushed");
       
       if (entries != null && entries.length > 0) {
-        flushed = new HashMap<Utf8,Long>();
+        flushed = new HashMap<>();
         for (String entry : entries) {
           String[] kv = entry.split(":");
           flushed.put(new Utf8(kv[0]), Long.parseLong(kv[1]));
@@ -111,7 +111,7 @@ public class Verify extends Configured implements Tool {
   }
   
   public static class VerifyReducer extends Reducer<LongWritable,VLongWritable,Text,Text> {
-    private ArrayList<Long> refs = new ArrayList<Long>();
+    private ArrayList<Long> refs = new ArrayList<>();
     
     public void reduce(LongWritable key, Iterable<VLongWritable> values, Context context) throws IOException, InterruptedException {
       
@@ -245,7 +245,7 @@ public class Verify extends Configured implements Tool {
     Query<Utf8,Flushed> query = flushedTable.newQuery();
     Result<Utf8,Flushed> result = flushedTable.execute(query);
     
-    ArrayList<String> flushedEntries = new ArrayList<String>();
+    ArrayList<String> flushedEntries = new ArrayList<>();
     while (result.next()) {
       flushedEntries.add(result.getKey() + ":" + result.get().getCount());
     }

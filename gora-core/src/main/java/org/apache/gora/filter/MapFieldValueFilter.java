@@ -42,7 +42,7 @@ public class MapFieldValueFilter<K, T extends PersistentBase> implements Filter<
   protected String fieldName;
   protected Utf8 mapKey;
   protected FilterOp filterOp;
-  protected List<Object> operands = new ArrayList<Object>();
+  protected List<Object> operands = new ArrayList<>();
   protected boolean filterIfMissing = false;
 
   private Configuration conf = new Configuration(); // just create empty conf,
@@ -54,8 +54,7 @@ public class MapFieldValueFilter<K, T extends PersistentBase> implements Filter<
     Text.writeString(out, mapKey.toString());
     WritableUtils.writeEnum(out, filterOp);
     WritableUtils.writeVInt(out, operands.size());
-    for (int i = 0; i < operands.size(); i++) {
-      Object operand = operands.get(i);
+    for (Object operand : operands) {
       if (operand instanceof String) {
         throw new IllegalStateException("Use Utf8 instead of String for operands");
       }

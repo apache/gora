@@ -164,7 +164,7 @@ public class DirtyMapWrapper<K, V> implements Map<K, V>, Dirtyable {
 
   @Override
   public Collection<V> values() {
-    return new DirtyCollectionWrapper<V>(delegate.values(), dirtyFlag);
+    return new DirtyCollectionWrapper<>(delegate.values(), dirtyFlag);
   }
 
   @Override
@@ -175,7 +175,7 @@ public class DirtyMapWrapper<K, V> implements Map<K, V>, Dirtyable {
         new Function<Entry<K, V>, DirtyEntryWrapper<K, V>>() {
           @Override
           public DirtyEntryWrapper<K, V> apply(java.util.Map.Entry<K, V> input) {
-            return new DirtyEntryWrapper<K, V>(input, dirtyFlag);
+            return new DirtyEntryWrapper<>(input, dirtyFlag);
           }
         });
     return new DirtySetWrapper(dirtyEntrySet, dirtyFlag);

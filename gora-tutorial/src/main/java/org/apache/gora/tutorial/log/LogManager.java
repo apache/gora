@@ -82,25 +82,22 @@ public class LogManager {
    */
   private void parse(String input) throws Exception {
     log.info("Parsing file: {}", input);
-    BufferedReader reader = new BufferedReader(new InputStreamReader(
-      new FileInputStream(input), Charset.defaultCharset()));
-    long lineCount = 0;
-    try {
-      String line = reader.readLine();
-      do {
-        Pageview pageview = parseLine(line);
-        
-        if(pageview != null) {
-          //store the pageview 
-          storePageview(lineCount++, pageview);
-        }
-        
-        line = reader.readLine();
-      } while(line != null);
-      
-    } finally {
-      reader.close();  
-    }
+      long lineCount = 0;
+      try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+            new FileInputStream(input), Charset.defaultCharset()))) {
+        String line = reader.readLine();
+        do {
+          Pageview pageview = parseLine(line);
+
+          if (pageview != null) {
+            //store the pageview
+            storePageview(lineCount++, pageview);
+          }
+
+          line = reader.readLine();
+        } while (line != null);
+
+      }
     log.info("finished parsing file. Total number of log lines: {}", lineCount);
   }
   

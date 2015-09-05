@@ -159,7 +159,7 @@ public class TestIOUtils {
   
   @Test
   public void testJavaSerializableSerde() throws Exception {
-    Integer integer = Integer.valueOf(42);
+    Integer integer = 42;
     testSerializeDeserialize(integer);
   }
   
@@ -194,7 +194,7 @@ public class TestIOUtils {
   public void testReadWriteNullFieldsInfo() throws IOException {
 
     Integer n = null; //null
-    Integer nn = new Integer(42); //not null
+    Integer nn = 42; //not null
 
     testNullFieldsWith(nn);
     testNullFieldsWith(n);

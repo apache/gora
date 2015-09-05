@@ -349,11 +349,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       } else {
         try {
           encoder = (Encoder) getClass().getClassLoader().loadClass(mapping.encoder).newInstance();
-        } catch (InstantiationException e) {
-          throw new IOException(e);
-        } catch (IllegalAccessException e) {
-          throw new IOException(e);
-        } catch (ClassNotFoundException e) {
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
           throw new IOException(e);
         }
       }
@@ -371,9 +367,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
 
         if (autoCreateSchema && !schemaExists())
           createSchema();
-      } catch (AccumuloException e) {
-        throw new IOException(e);
-      } catch (AccumuloSecurityException e) {
+      } catch (AccumuloException | AccumuloSecurityException e) {
         throw new IOException(e);
       }
     } catch(IOException e){
@@ -411,7 +405,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
             if (qualifier.equals(""))
               qualifier = null;
 
-            Pair<Text,Text> col = new Pair<Text,Text>(new Text(family), qualifier == null ? null : new Text(qualifier));
+            Pair<Text,Text> col = new Pair<>(new Text(family), qualifier == null ? null : new Text(qualifier));
             mapping.fieldMap.put(name, col);
             mapping.columnMap.put(col, name);
           }
@@ -458,11 +452,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         conn.tableOperations().setProperty(mapping.tableName, entry.getKey(), entry.getValue());
       }
 
-    } catch (AccumuloException e) {
-      LOG.error(e.getMessage(), e);
-    } catch (AccumuloSecurityException e) {
-      LOG.error(e.getMessage(), e);
-    } catch (TableExistsException e) {
+    } catch (AccumuloException | AccumuloSecurityException | TableExistsException e) {
       LOG.error(e.getMessage(), e);
     }
   }
@@ -474,11 +464,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         batchWriter.close();
       batchWriter = null;
       conn.tableOperations().delete(mapping.tableName);
-    } catch (AccumuloException e) {
-      LOG.error(e.getMessage(), e);
-    } catch (AccumuloSecurityException e) {
-      LOG.error(e.getMessage(), e);
-    } catch (TableNotFoundException e) {
+    } catch (AccumuloException | AccumuloSecurityException | TableNotFoundException e) {
       LOG.error(e.getMessage(), e);
     }
   }
@@ -531,7 +517,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
 
       switch (field.schema().getType()) {
       case MAP:  // first entry only. Next are handled above on the next loop
-        currentMap = new DirtyMapWrapper<Utf8, Object>(new HashMap<Utf8, Object>());
+        currentMap = new DirtyMapWrapper<>(new HashMap<Utf8, Object>());
         currentPos = field.pos();
         currentFam = entry.getKey().getColumnFamily();
         currentSchema = field.schema().getValueType();
@@ -540,7 +526,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
             fromBytes(currentSchema, entry.getValue().get()));
         break;
       case ARRAY:
-        currentArray = new DirtyListWrapper<Object>(new ArrayList<Object>());
+        currentArray = new DirtyListWrapper<>(new ArrayList<>());
         currentPos = field.pos();
         currentFam = entry.getKey().getColumnFamily();
         currentSchema = field.schema().getElementType();
@@ -554,7 +540,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         .get(firstNotNullSchemaTypeIndex(field.schema()));
         // map and array were coded without union index so need to be read the same way
         if (effectiveSchema.getType() == Type.ARRAY) {
-          currentArray = new DirtyListWrapper<Object>(new ArrayList<Object>());
+          currentArray = new DirtyListWrapper<>(new ArrayList<>());
           currentPos = field.pos();
           currentFam = entry.getKey().getColumnFamily();
           currentSchema = field.schema().getElementType();
@@ -564,7 +550,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
           break;
         }
         else if (effectiveSchema.getType() == Type.MAP) {
-          currentMap = new DirtyMapWrapper<Utf8, Object>(new HashMap<Utf8, Object>());
+          currentMap = new DirtyMapWrapper<>(new HashMap<Utf8, Object>());
           currentPos = field.pos();
           currentFam = entry.getKey().getColumnFamily();
           currentSchema = effectiveSchema.getValueType();
@@ -600,7 +586,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
    * @return String The field name
    */
   private String getFieldName(Entry<Key, Value> entry) {
-    String fieldName = mapping.columnMap.get(new Pair<Text,Text>(entry.getKey().getColumnFamily(),
+    String fieldName = mapping.columnMap.get(new Pair<>(entry.getKey().getColumnFamily(),
         entry.getKey().getColumnQualifier()));
     if (fieldName == null) {
       fieldName = mapping.columnMap.get(new Pair<Text,Text>(entry.getKey().getColumnFamily(), null));
@@ -693,7 +679,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
           }
           // continue like a regular top-level union
         case RECORD:
-          SpecificDatumWriter<Object> writer = new SpecificDatumWriter<Object>(field.schema());
+          SpecificDatumWriter<Object> writer = new SpecificDatumWriter<>(field.schema());
           ByteArrayOutputStream os = new ByteArrayOutputStream();
           org.apache.avro.io.BinaryEncoder encoder = EncoderFactory.get().binaryEncoder(os, null);
           writer.write(o, encoder);
@@ -854,7 +840,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
   public Result<K,T> execute(Query<K,T> query) {
     try {
       Scanner scanner = createScanner(query);
-      return new AccumuloResult<K,T>(this, query, scanner);
+      return new AccumuloResult<>(this, query, scanner);
     } catch (TableNotFoundException e) {
       // TODO return empty result?
       LOG.error(e.getMessage(), e);
@@ -864,7 +850,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
 
   @Override
   public Query<K,T> newQuery() {
-    return new AccumuloQuery<K,T>(this);
+    return new AccumuloQuery<>(this);
   }
 
   Text pad(Text key, int bytes) {
@@ -887,7 +873,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       else
         tl = TabletLocator.getInstance(conn.getInstance(), new Text(Tables.getTableId(conn.getInstance(), mapping.tableName)));
 
-      Map<String,Map<KeyExtent,List<Range>>> binnedRanges = new HashMap<String,Map<KeyExtent,List<Range>>>();
+      Map<String,Map<KeyExtent,List<Range>>> binnedRanges = new HashMap<>();
 
       tl.invalidateCache();
       while (tl.binRanges(Collections.singletonList(createRange(query)), binnedRanges, credentials).size() > 0) {
@@ -900,7 +886,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         tl.invalidateCache();
       }
 
-      List<PartitionQuery<K,T>> ret = new ArrayList<PartitionQuery<K,T>>();
+      List<PartitionQuery<K,T>> ret = new ArrayList<>();
 
       Text startRow = null;
       Text endRow = null;
@@ -910,7 +896,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         endRow = new Text(toBytes(query.getEndKey()));
 
       //hadoop expects hostnames, accumulo keeps track of IPs... so need to convert
-      HashMap<String,String> hostNameCache = new HashMap<String,String>();
+      HashMap<String,String> hostNameCache = new HashMap<>();
 
       for (Entry<String,Map<KeyExtent,List<Range>>> entry : binnedRanges.entrySet()) {
         String ip = entry.getKey().split(":", 2)[0];
@@ -941,18 +927,14 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
             endKey = fromBytes(getKeyClass(), TextUtil.getBytes(endRow));
           }
 
-          PartitionQueryImpl<K, T> pqi = new PartitionQueryImpl<K,T>(query, startKey, endKey, location);
+          PartitionQueryImpl<K, T> pqi = new PartitionQueryImpl<>(query, startKey, endKey, location);
           pqi.setConf(getConf());
           ret.add(pqi);
         }
       }
 
       return ret;
-    } catch (TableNotFoundException e) {
-      throw new IOException(e);
-    } catch (AccumuloException e) {
-      throw new IOException(e);
-    } catch (AccumuloSecurityException e) {
+    } catch (TableNotFoundException | AccumuloException | AccumuloSecurityException e) {
       throw new IOException(e);
     }
 

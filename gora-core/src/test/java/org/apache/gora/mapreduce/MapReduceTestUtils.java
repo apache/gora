@@ -55,7 +55,7 @@ public class MapReduceTestUtils {
     //create input
     WebPageDataCreator.createWebPageData(dataStore);
 
-    QueryCounter<String,WebPage> counter = new QueryCounter<String,WebPage>(conf);
+    QueryCounter<String,WebPage> counter = new QueryCounter<>(conf);
     Query<String,WebPage> query = dataStore.newQuery();
     List<Field> fields = WebPage.SCHEMA$.getFields();
     String[] fieldNames = new String[fields.size() - 1];
@@ -89,7 +89,7 @@ public class MapReduceTestUtils {
     wordCount.wordCount(inStore, outStore);
     
     //assert results
-    HashMap<String, Integer> actualCounts = new HashMap<String, Integer>();
+    HashMap<String, Integer> actualCounts = new HashMap<>();
     for(String content : WebPageDataCreator.CONTENTS) {
       if (content != null) {
         for(String token:content.split(" ")) {
@@ -119,7 +119,7 @@ public class MapReduceTestUtils {
     wordCount.wordCount(inStore, outStore);
 
     //assert results
-    HashMap<String, Integer> actualCounts = new HashMap<String, Integer>();
+    HashMap<String, Integer> actualCounts = new HashMap<>();
     for(String content : WebPageDataCreator.CONTENTS) {
       if (content != null) {
         for(String token:content.split(" ")) {

@@ -84,7 +84,7 @@ public class GoraInputFormat<K, T extends PersistentBase>
       ((GoraInputSplit)split).getQuery();
 
     setInputPath(partitionQuery, context);
-    return new GoraRecordReader<K, T>(partitionQuery, context);
+    return new GoraRecordReader<>(partitionQuery, context);
   }
 
   @Override
@@ -92,7 +92,7 @@ public class GoraInputFormat<K, T extends PersistentBase>
       InterruptedException {
 
     List<PartitionQuery<K, T>> queries = dataStore.getPartitions(query);
-    List<InputSplit> splits = new ArrayList<InputSplit>(queries.size());
+    List<InputSplit> splits = new ArrayList<>(queries.size());
 
     for(PartitionQuery<K,T> query : queries) {
       splits.add(new GoraInputSplit(context.getConfiguration(), query));

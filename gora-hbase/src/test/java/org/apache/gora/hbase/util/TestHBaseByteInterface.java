@@ -75,7 +75,7 @@ public class TestHBaseByteInterface {
       //metadata
       CharSequence key = new Utf8("theKey");
       CharSequence value = new Utf8("theValue " + RANDOM.nextLong());
-      HashMap<CharSequence, CharSequence> data = new HashMap<CharSequence, CharSequence>();
+      HashMap<CharSequence, CharSequence> data = new HashMap<>();
       data.put(key, value);
       Metadata m = Metadata.newBuilder().build();
       m.setData(data);
@@ -95,7 +95,7 @@ public class TestHBaseByteInterface {
     ExecutorService pool = Executors.newFixedThreadPool(numThreads);
 
     // define a list of tasks
-    Collection<Callable<Integer>> tasks = new ArrayList<Callable<Integer>>();
+    Collection<Callable<Integer>> tasks = new ArrayList<>();
     for (int i = 0; i < numThreads; i++) {
       tasks.add(new Callable<Integer>() {
         @Override

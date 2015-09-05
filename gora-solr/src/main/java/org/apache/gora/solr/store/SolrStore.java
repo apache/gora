@@ -175,9 +175,9 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
    * pair for every schema, instead of one for every thread.
    */
 
-  public static final ConcurrentHashMap<String, SpecificDatumReader<?>> readerMap = new ConcurrentHashMap<String, SpecificDatumReader<?>>();
+  public static final ConcurrentHashMap<String, SpecificDatumReader<?>> readerMap = new ConcurrentHashMap<>();
 
-  public static final ConcurrentHashMap<String, SpecificDatumWriter<?>> writerMap = new ConcurrentHashMap<String, SpecificDatumWriter<?>>();
+  public static final ConcurrentHashMap<String, SpecificDatumWriter<?>> writerMap = new ConcurrentHashMap<>();
 
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
@@ -276,7 +276,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
         LOG.warn("Invalid batch size '{}', using default {}", batchSizeString, DEFAULT_BATCH_SIZE);
       }
     }
-    batch = new ArrayList<SolrInputDocument>(batchSize);
+    batch = new ArrayList<>(batchSize);
     String commitWithinString = DataStoreFactory.findProperty(properties, this,
         SOLR_COMMIT_WITHIN_PROPERTY, null);
     if (commitWithinString != null) {
@@ -681,9 +681,8 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
    */
   private int getUnionSchema(Object pValue, Schema pUnionSchema) {
     int unionSchemaPos = 0;
-    Iterator<Schema> it = pUnionSchema.getTypes().iterator();
-    while (it.hasNext()) {
-      Type schemaType = it.next().getType();
+    for (Schema currentSchema : pUnionSchema.getTypes()) {
+      Type schemaType = currentSchema.getType();
       if (pValue instanceof Utf8 && schemaType.equals(Type.STRING))
         return unionSchemaPos;
       else if (pValue instanceof ByteBuffer && schemaType.equals(Type.BYTES))
@@ -742,7 +741,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
   @Override
   public Result<K, T> execute(Query<K, T> query) {
     try {
-      return new SolrResult<K, T>(this, query, server, resultsSize);
+      return new SolrResult<>(this, query, server, resultsSize);
     } catch (IOException e) {
       LOG.error(e.getMessage(), e);
     }
@@ -751,7 +750,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
 
   @Override
   public Query<K, T> newQuery() {
-    return new SolrQuery<K, T>(this);
+    return new SolrQuery<>(this);
   }
 
   @Override
@@ -759,8 +758,8 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       throws IOException {
     // TODO: implement this using Hadoop DB support
 
-    ArrayList<PartitionQuery<K, T>> partitions = new ArrayList<PartitionQuery<K, T>>();
-    PartitionQueryImpl<K, T> pqi = new PartitionQueryImpl<K, T>(query);
+    ArrayList<PartitionQuery<K, T>> partitions = new ArrayList<>();
+    PartitionQueryImpl<K, T> pqi = new PartitionQueryImpl<>(query);
     pqi.setConf(getConf());
     partitions.add(pqi);
 

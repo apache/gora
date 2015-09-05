@@ -68,7 +68,7 @@ public class HBaseTableConnection implements HTableInterface {
   
   private final Configuration conf;
   private final ThreadLocal<HTable> tables;
-  private final BlockingQueue<HTable> pool = new LinkedBlockingQueue<HTable>();
+  private final BlockingQueue<HTable> pool = new LinkedBlockingQueue<>();
   private final boolean autoFlush;
   private final TableName tableName;
   
@@ -83,7 +83,7 @@ public class HBaseTableConnection implements HTableInterface {
   public HBaseTableConnection(Configuration conf, String tableName, boolean autoflush)
       throws IOException {
     this.conf = conf;
-    this.tables = new ThreadLocal<HTable>();
+    this.tables = new ThreadLocal<>();
     this.tableName = TableName.valueOf(tableName);
     this.autoFlush = autoflush;
   }

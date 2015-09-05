@@ -23,9 +23,9 @@ import org.apache.accumulo.core.util.Pair;
 import org.apache.hadoop.io.Text;
 
 public class AccumuloMapping {
-  Map<String,Pair<Text,Text>> fieldMap = new HashMap<String,Pair<Text,Text>>();
-  Map<Pair<Text,Text>,String> columnMap = new HashMap<Pair<Text,Text>,String>();
-  Map<String,String> tableConfig = new HashMap<String,String>();
+  Map<String,Pair<Text,Text>> fieldMap = new HashMap<>();
+  Map<Pair<Text,Text>,String> columnMap = new HashMap<>();
+  Map<String,String> tableConfig = new HashMap<>();
   String tableName;
   String encoder;
 

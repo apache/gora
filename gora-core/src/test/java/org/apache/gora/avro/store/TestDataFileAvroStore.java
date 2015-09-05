@@ -30,12 +30,12 @@ public class TestDataFileAvroStore extends TestAvroStore {
 
   @Override
   protected AvroStore<String, Employee> createEmployeeDataStore() {
-    return new DataFileAvroStore<String, Employee>();
+    return new DataFileAvroStore<>();
   }
   
   @Override
   protected AvroStore<String, WebPage> createWebPageDataStore() {
-    return new DataFileAvroStore<String, WebPage>();
+    return new DataFileAvroStore<>();
   }
   
   //import all tests from super class

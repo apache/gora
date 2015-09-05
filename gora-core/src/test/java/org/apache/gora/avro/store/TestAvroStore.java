@@ -61,7 +61,7 @@ public class TestAvroStore {
     employeeStore.setOutputPath(EMPLOYEE_OUTPUT);
     employeeStore.setInputPath(EMPLOYEE_OUTPUT);
 
-    webPageStore = new AvroStore<String, WebPage>();
+    webPageStore = new AvroStore<>();
     webPageStore.initialize(String.class, WebPage.class, DataStoreFactory.createProps());
     webPageStore.setOutputPath(WEBPAGE_OUTPUT);
     webPageStore.setInputPath(WEBPAGE_OUTPUT);
@@ -74,7 +74,7 @@ public class TestAvroStore {
   }
 
   protected AvroStore<String, WebPage> createWebPageDataStore() {
-    return new AvroStore<String, WebPage>();
+    return new AvroStore<>();
   }
 
   @After

@@ -48,7 +48,7 @@ public class GoraTestDriver {
   @SuppressWarnings({ "rawtypes", "unchecked" })
   protected GoraTestDriver(Class<? extends DataStore> dataStoreClass) {
     this.dataStoreClass = (Class<? extends DataStore<?, ?>>) dataStoreClass;
-    this.dataStores = new HashSet<DataStore>();
+    this.dataStores = new HashSet<>();
   }
 
   /** Should be called once before the tests are started, probably in the

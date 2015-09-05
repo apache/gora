@@ -46,12 +46,12 @@ public class HBaseByteInterface {
    * Threadlocals maintaining reusable binary decoders and encoders.
    */
   private static ThreadLocal<ByteArrayOutputStream> outputStream =
-      new ThreadLocal<ByteArrayOutputStream>();
+      new ThreadLocal<>();
   
   public static final ThreadLocal<BinaryDecoder> decoders =
-      new ThreadLocal<BinaryDecoder>();
+      new ThreadLocal<>();
   public static final ThreadLocal<BinaryEncoder> encoders =
-      new ThreadLocal<BinaryEncoder>();
+      new ThreadLocal<>();
   /*
    * Create a threadlocal map for the datum readers and writers, because
    * they are not thread safe, at least not before Avro 1.4.0 (See AVRO-650).
@@ -60,10 +60,10 @@ public class HBaseByteInterface {
    */
   
   public static final ConcurrentHashMap<String, SpecificDatumReader<?>> readerMap = 
-      new ConcurrentHashMap<String, SpecificDatumReader<?>>();
+      new ConcurrentHashMap<>();
      
   public static final ConcurrentHashMap<String, SpecificDatumWriter<?>> writerMap = 
-      new ConcurrentHashMap<String, SpecificDatumWriter<?>>();
+      new ConcurrentHashMap<>();
 
   /**
    * Deserializes an array of bytes matching the given schema to the proper basic 

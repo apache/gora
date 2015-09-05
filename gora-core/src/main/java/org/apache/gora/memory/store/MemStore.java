@@ -136,7 +136,7 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
     ConcurrentNavigableMap<K,T> submap = map.subMap(startKey, true, endKey, true);
 
-    return new MemResult<K,T>(this, query, submap);
+    return new MemResult<>(this, query, submap);
   }
   
   @SuppressWarnings("unchecked")
@@ -162,8 +162,8 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
       return obj;
     }
     T newObj = AvroUtils.deepClonePersistent(obj);
-    for(int i = 0; i<otherFields.size(); i++) {
-      int index = otherFields.get(i).pos(); 
+    for (Field otherField : otherFields) {
+      int index = otherField.pos();
       newObj.put(index, obj.get(index));
     }
     return newObj;
@@ -171,7 +171,7 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
   @Override
   public Query<K, T> newQuery() {
-    return new MemQuery<K, T>(this);
+    return new MemQuery<>(this);
   }
   
   @SuppressWarnings("unchecked")
@@ -185,8 +185,8 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
    * Returns a single partition containing the original query
    */
   public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query){
-    List<PartitionQuery<K, T>> list = new ArrayList<PartitionQuery<K,T>>();
-    PartitionQueryImpl<K, T> pqi = new PartitionQueryImpl<K, T>(query);
+    List<PartitionQuery<K, T>> list = new ArrayList<>();
+    PartitionQueryImpl<K, T> pqi = new PartitionQueryImpl<>(query);
     pqi.setConf(getConf());
     list.add(pqi);
     return list;

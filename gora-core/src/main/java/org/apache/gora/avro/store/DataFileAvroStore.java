@@ -65,7 +65,7 @@ public class DataFileAvroStore<K, T extends PersistentBase> extends AvroStore<K,
 
   private DataFileWriter<T> getWriter() throws IOException {
     if(writer == null) {
-      writer = new DataFileWriter<T>(getDatumWriter());
+      writer = new DataFileWriter<>(getDatumWriter());
       writer.create(schema, getOrCreateOutputStream());
     }
     return writer;
@@ -74,7 +74,7 @@ public class DataFileAvroStore<K, T extends PersistentBase> extends AvroStore<K,
   @Override
   protected Result<K, T> executeQuery(Query<K, T> query) {
     try{
-      return new DataFileAvroResult<K, T>(this, query
+      return new DataFileAvroResult<>(this, query
           , createReader(createFsInput()));
     } catch(IOException ex){
       LOG.error(ex.getMessage(), ex);
@@ -87,7 +87,7 @@ public class DataFileAvroStore<K, T extends PersistentBase> extends AvroStore<K,
     try{
       FsInput fsInput = createFsInput();
       DataFileReader<T> reader = createReader(fsInput);
-      return new DataFileAvroResult<K, T>(this, query, reader, fsInput
+      return new DataFileAvroResult<>(this, query, reader, fsInput
           , query.getStart(), query.getLength());
     } catch(IOException ex){
       LOG.error(ex.getMessage(), ex);
@@ -96,7 +96,7 @@ public class DataFileAvroStore<K, T extends PersistentBase> extends AvroStore<K,
   }
   
   private DataFileReader<T> createReader(FsInput fsInput) throws IOException {
-    return new DataFileReader<T>(fsInput, getDatumReader());
+    return new DataFileReader<>(fsInput, getDatumReader());
   }
   
   private FsInput createFsInput() throws IOException {

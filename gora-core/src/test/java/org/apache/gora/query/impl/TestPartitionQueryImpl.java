@@ -40,7 +40,7 @@ public class TestPartitionQueryImpl {
     baseQuery.setLimit(42);
     
     PartitionQueryImpl<String, MockPersistent> 
-      query = new PartitionQueryImpl<String, MockPersistent>(baseQuery);
+      query = new PartitionQueryImpl<>(baseQuery);
     
     TestWritable.testWritable(query);
   }

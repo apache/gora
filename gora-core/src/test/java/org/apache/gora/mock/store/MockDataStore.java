@@ -111,10 +111,10 @@ public class MockDataStore extends DataStoreBase<String, MockPersistent> {
       Query<String, MockPersistent> query) throws IOException {
 
     ArrayList<PartitionQuery<String, MockPersistent>> list =
-      new ArrayList<PartitionQuery<String,MockPersistent>>();
+      new ArrayList<>();
 
     for(int i=0; i<NUM_PARTITIONS; i++) {
-      list.add(new PartitionQueryImpl<String, MockPersistent>(query, LOCATIONS[i]));
+      list.add(new PartitionQueryImpl<>(query, LOCATIONS[i]));
     }
 
     return list;

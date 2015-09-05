@@ -88,7 +88,7 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
     setKeyClass(keyClass);
     setPersistentClass(persistentClass);
     if (this.beanFactory == null) {
-      this.beanFactory = new BeanFactoryImpl<K, T>(keyClass, persistentClass);
+      this.beanFactory = new BeanFactoryImpl<>(keyClass, persistentClass);
     }
     schema = this.beanFactory.getCachedPersistent().getSchema();
     fieldMap = AvroUtils.getFieldMap(schema);
@@ -96,8 +96,8 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
     autoCreateSchema = DataStoreFactory.getAutoCreateSchema(properties, this);
     this.properties = properties;
 
-    datumReader = new SpecificDatumReader<T>(schema);
-    datumWriter = new SpecificDatumWriter<T>(schema);
+    datumReader = new SpecificDatumReader<>(schema);
+    datumWriter = new SpecificDatumWriter<>(schema);
   }
 
   @Override
@@ -171,7 +171,7 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
   protected String[] getFields() {
     List<Field> schemaFields = beanFactory.getCachedPersistent().getSchema().getFields();
     
-    List<Field> list = new ArrayList<Field>();
+    List<Field> list = new ArrayList<>();
     for (Field field : schemaFields) {
       if (!Persistent.DIRTY_BYTES_FIELD_NAME.equalsIgnoreCase(field.name())) {
         list.add(field);
@@ -211,10 +211,8 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
       Class<T> persistentClass = (Class<T>)ClassLoadingUtils.loadClass(Text.readString(in));
       Properties props = WritableUtils.readProperties(in);
       initialize(keyClass, persistentClass, props);
-    } catch (ClassNotFoundException ex) {
+    } catch (ClassNotFoundException | IOException ex) {
       LOG.error(ex.getMessage(), ex);
-    } catch (IOException e) {
-      LOG.error(e.getMessage(), e);
     }
   }
 

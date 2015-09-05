@@ -56,15 +56,12 @@ public class CassandraMappingManager {
   private Map<String, Element>  mappingMap = null;
 
   private CassandraMappingManager() {
-    keyspaceMap = new HashMap<String, Element>();
-    mappingMap  = new HashMap<String, Element>();
+    keyspaceMap = new HashMap<>();
+    mappingMap  = new HashMap<>();
     try {
       loadConfiguration();
     }
-    catch (JDOMException e) {
-      LOG.error(e.toString());
-    }
-    catch (IOException e) {
+    catch (JDOMException | IOException e) {
       LOG.error(e.toString());
     }
   }

@@ -36,7 +36,7 @@ public class TestSolrStore extends DataStoreTestBase {
   @Override
   protected DataStore<String, Employee> createEmployeeDataStore()
       throws IOException {
-    SolrStore<String, Employee> store = new SolrStore<String, Employee>();
+    SolrStore<String, Employee> store = new SolrStore<>();
     store.initialize(String.class, Employee.class, DataStoreFactory.createProps());
     return store;
   }
@@ -44,7 +44,7 @@ public class TestSolrStore extends DataStoreTestBase {
   @Override
   protected DataStore<String, WebPage> createWebPageDataStore()
       throws IOException {
-    SolrStore<String, WebPage> store = new SolrStore<String, WebPage>();
+    SolrStore<String, WebPage> store = new SolrStore<>();
     store.initialize(String.class, WebPage.class, DataStoreFactory.createProps());
     return store;
   }

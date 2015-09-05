@@ -228,22 +228,13 @@ public class LicenseHeaders {
    * Initializes relations between supported licenses and license text
    */
   public void initializeRelations(){
-    relatedLicenses = new HashMap<String, String>();
+    relatedLicenses = new HashMap<>();
     try {
         for (String licenseValue : supportedLicenses) {
           String var = (String) this.getClass().getDeclaredField(licenseValue).get(licenseValue);
           relatedLicenses.put(licenseValue,var);
         }
-    } catch (SecurityException e) {
-      LOG.error(e.getMessage());
-      throw new RuntimeException(e);
-    } catch (NoSuchFieldException e) {
-      LOG.error(e.getMessage());
-      throw new RuntimeException(e);
-    } catch (IllegalArgumentException e) {
-      LOG.error(e.getMessage());
-      throw new RuntimeException(e);
-    } catch (IllegalAccessException e) {
+    } catch (SecurityException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
       LOG.error(e.getMessage());
       throw new RuntimeException(e);
     }

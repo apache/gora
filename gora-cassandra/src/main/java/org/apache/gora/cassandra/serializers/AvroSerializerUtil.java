@@ -18,13 +18,13 @@ public class AvroSerializerUtil {
    * Threadlocals maintaining reusable binary decoders and encoders.
    */
   private static ThreadLocal<ByteArrayOutputStream> outputStream =
-      new ThreadLocal<ByteArrayOutputStream>();
+      new ThreadLocal<>();
   
   public static final ThreadLocal<BinaryEncoder> encoders =
-      new ThreadLocal<BinaryEncoder>();
+      new ThreadLocal<>();
 
   public static final ThreadLocal<BinaryDecoder> decoders =
-      new ThreadLocal<BinaryDecoder>();
+      new ThreadLocal<>();
   
   /**
    * Create a {@link java.util.concurrent.ConcurrentHashMap} for the 
@@ -36,10 +36,10 @@ public class AvroSerializerUtil {
    * @see <a href="https://issues.apache.org/jira/browse/AVRO-650">AVRO-650</a>
    */
   public static final ConcurrentHashMap<String, SpecificDatumWriter<?>> writerMap = 
-      new ConcurrentHashMap<String, SpecificDatumWriter<?>>();  
+      new ConcurrentHashMap<>();
   
   public static final ConcurrentHashMap<String, SpecificDatumReader<?>> readerMap = 
-      new ConcurrentHashMap<String, SpecificDatumReader<?>>();
+      new ConcurrentHashMap<>();
   
   @SuppressWarnings({ "unchecked", "rawtypes" })
   public static <T> byte[] serializer(T value, Schema schema) throws IOException{

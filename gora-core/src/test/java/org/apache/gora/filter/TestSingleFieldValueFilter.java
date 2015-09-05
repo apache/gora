@@ -32,14 +32,14 @@ public class TestSingleFieldValueFilter {
 
   @Test
   public void testSerialization() throws IOException {
-    SingleFieldValueFilter<String, WebPage> filter = new SingleFieldValueFilter<String, WebPage>();
+    SingleFieldValueFilter<String, WebPage> filter = new SingleFieldValueFilter<>();
     //set filter field to url
     filter.setFieldName(WebPage.Field.URL.toString());
     filter.setFilterOp(FilterOp.EQUALS);
     filter.setFilterIfMissing(true);
     filter.getOperands().add(new Utf8("http://example.org"));
     byte[] byteArray = WritableUtils.toByteArray(filter);
-    SingleFieldValueFilter<String, WebPage> filter2 = new SingleFieldValueFilter<String, WebPage>();
+    SingleFieldValueFilter<String, WebPage> filter2 = new SingleFieldValueFilter<>();
     filter2.readFields(new DataInputStream(new ByteArrayInputStream(byteArray)));
     assertEquals(filter.getFieldName(), filter2.getFieldName());
     assertEquals(filter.getFilterOp(), filter2.getFilterOp());
@@ -49,7 +49,7 @@ public class TestSingleFieldValueFilter {
   
   @Test
   public void testFilterBasics() {
-    SingleFieldValueFilter<String, WebPage> filter = new SingleFieldValueFilter<String, WebPage>();
+    SingleFieldValueFilter<String, WebPage> filter = new SingleFieldValueFilter<>();
     //set filter field to url
     filter.setFieldName(WebPage.Field.URL.toString());
     filter.setFilterOp(FilterOp.EQUALS);
@@ -71,7 +71,7 @@ public class TestSingleFieldValueFilter {
   
   @Test
   public void testFilterInequals() {
-    SingleFieldValueFilter<String, WebPage> filter = new SingleFieldValueFilter<String, WebPage>();
+    SingleFieldValueFilter<String, WebPage> filter = new SingleFieldValueFilter<>();
     //set filter field to url
     filter.setFieldName(WebPage.Field.URL.toString());
     filter.setFilterOp(FilterOp.NOT_EQUALS);

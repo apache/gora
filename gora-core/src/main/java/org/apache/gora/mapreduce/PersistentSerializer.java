@@ -36,7 +36,7 @@ public class PersistentSerializer implements Serializer<Persistent> {
   private BinaryEncoder encoder;
   
   public PersistentSerializer() {
-    this.datumWriter = new SpecificDatumWriter<Persistent>();
+    this.datumWriter = new SpecificDatumWriter<>();
   }
   
   @Override

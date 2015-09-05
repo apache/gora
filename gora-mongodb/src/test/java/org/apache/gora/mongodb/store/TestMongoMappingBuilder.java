@@ -29,10 +29,10 @@ public class TestMongoMappingBuilder {
 
   @Test
   public void testMultiMapping_Webpage() throws IOException {
-    MongoStore<String, WebPage> store = new MongoStore<String, WebPage>();
+    MongoStore<String, WebPage> store = new MongoStore<>();
     store.setKeyClass(String.class);
     store.setPersistentClass(WebPage.class);
-    MongoMappingBuilder<String, WebPage> builder = new MongoMappingBuilder<String, WebPage>(
+    MongoMappingBuilder<String, WebPage> builder = new MongoMappingBuilder<>(
         store);
     builder.fromFile("/multimapping.xml");
     MongoMapping mapping = builder.build();

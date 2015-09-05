@@ -31,7 +31,7 @@ public class TestMapFieldValueFilter {
 
   @Test
   public void testSerialization() throws IOException {
-    MapFieldValueFilter<String, WebPage> filter = new MapFieldValueFilter<String, WebPage>();
+    MapFieldValueFilter<String, WebPage> filter = new MapFieldValueFilter<>();
     //set filter field name as metadata
     filter.setFieldName(WebPage.Field.METADATA.toString());
     filter.setMapKey(new Utf8("fetchTime"));
@@ -39,7 +39,7 @@ public class TestMapFieldValueFilter {
     filter.setFilterIfMissing(true);
     filter.getOperands().add(new Utf8("http://example.org"));
     byte[] byteArray = WritableUtils.toByteArray(filter);
-    MapFieldValueFilter<String, WebPage> filter2 = new MapFieldValueFilter<String, WebPage>();
+    MapFieldValueFilter<String, WebPage> filter2 = new MapFieldValueFilter<>();
     filter2.readFields(new DataInputStream(new ByteArrayInputStream(byteArray)));
     assertEquals(filter.getFieldName(), filter2.getFieldName());
     assertEquals(filter.getMapKey(), filter2.getMapKey());
@@ -50,7 +50,7 @@ public class TestMapFieldValueFilter {
   
   @Test
   public void testFilterBasics() {
-    MapFieldValueFilter<String, WebPage> filter = new MapFieldValueFilter<String, WebPage>();
+    MapFieldValueFilter<String, WebPage> filter = new MapFieldValueFilter<>();
     //set filter field name as outlinks
     filter.setFieldName(WebPage.Field.OUTLINKS.toString());
     filter.setMapKey(new Utf8("example"));
@@ -72,7 +72,7 @@ public class TestMapFieldValueFilter {
   
   @Test
   public void testFilterEntryInMap() {
-    MapFieldValueFilter<String, WebPage> filter = new MapFieldValueFilter<String, WebPage>();
+    MapFieldValueFilter<String, WebPage> filter = new MapFieldValueFilter<>();
     //set filter field name as outlinks
     filter.setFieldName(WebPage.Field.OUTLINKS.toString());
     filter.setMapKey(new Utf8("foobar.whatever"));

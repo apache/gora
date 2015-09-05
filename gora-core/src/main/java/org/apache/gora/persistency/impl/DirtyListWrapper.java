@@ -73,19 +73,19 @@ public class DirtyListWrapper<T> extends DirtyCollectionWrapper<T> implements
 
   @Override
   public ListIterator<T> listIterator() {
-    return new DirtyListIterator<T>(getDelegate().listIterator(),
+    return new DirtyListIterator<>(getDelegate().listIterator(),
         getDirtyFlag());
   }
 
   @Override
   public ListIterator<T> listIterator(int index) {
-    return new DirtyListIterator<T>(getDelegate().listIterator(index),
+    return new DirtyListIterator<>(getDelegate().listIterator(index),
         getDirtyFlag());
   }
 
   @Override
   public List<T> subList(int fromIndex, int toIndex) {
-    return new DirtyListWrapper<T>(getDelegate().subList(fromIndex, toIndex),
+    return new DirtyListWrapper<>(getDelegate().subList(fromIndex, toIndex),
         getDirtyFlag());
   }
 

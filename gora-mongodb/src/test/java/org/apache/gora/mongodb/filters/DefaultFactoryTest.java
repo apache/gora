@@ -39,12 +39,12 @@ public class DefaultFactoryTest {
 
   @Before
   public void setUp() throws Exception {
-    filterFactory = new DefaultFactory<String, WebPage>();
+    filterFactory = new DefaultFactory<>();
     filterFactory.setFilterUtil(new MongoFilterUtil<String, WebPage>(
         new Configuration()));
 
     // Create dummy mapping for unit testing
-    store = new MongoStore<String, WebPage>();
+    store = new MongoStore<>();
     store.getMapping().addClassField(null, "headers", "h", "document");
     store.getMapping().addClassField(null, "url", "url", "string");
   }
@@ -97,7 +97,7 @@ public class DefaultFactoryTest {
 
   @Test
   public void testCreateFilter_list_empty() throws Exception {
-    FilterList<String, WebPage> filter = new FilterList<String, WebPage>();
+    FilterList<String, WebPage> filter = new FilterList<>();
 
     DBObject dbObject = filterFactory.createFilter(filter, store);
     assertEquals("{ }", dbObject.toString());
@@ -105,7 +105,7 @@ public class DefaultFactoryTest {
 
   @Test
   public void testCreateFilter_list_2() throws Exception {
-    FilterList<String, WebPage> filter = new FilterList<String, WebPage>();
+    FilterList<String, WebPage> filter = new FilterList<>();
     MapFieldValueFilter<String, WebPage> hFilter = createHeadersFilter();
     hFilter.setFilterIfMissing(true);
     hFilter.setFilterOp(FilterOp.EQUALS);
@@ -127,7 +127,7 @@ public class DefaultFactoryTest {
    */
   @Test
   public void testCreateFilter_handlingUtf8() throws Exception {
-    SingleFieldValueFilter<String, WebPage> filter = new SingleFieldValueFilter<String, WebPage>();
+    SingleFieldValueFilter<String, WebPage> filter = new SingleFieldValueFilter<>();
     filter.setFieldName(WebPage.Field.URL.toString());
     filter.setFilterOp(FilterOp.EQUALS);
     filter.getOperands().add(new Utf8("http://www.example.com"));
@@ -139,7 +139,7 @@ public class DefaultFactoryTest {
   }
 
   private MapFieldValueFilter<String, WebPage> createHeadersFilter() {
-    MapFieldValueFilter<String, WebPage> filter = new MapFieldValueFilter<String, WebPage>();
+    MapFieldValueFilter<String, WebPage> filter = new MapFieldValueFilter<>();
     filter.setFieldName(WebPage.Field.HEADERS.toString());
     filter.setMapKey(new Utf8("C.T"));
     filter.getOperands().add("text/html");
@@ -147,7 +147,7 @@ public class DefaultFactoryTest {
   }
 
   private SingleFieldValueFilter<String, WebPage> createUrlFilter() {
-    SingleFieldValueFilter<String, WebPage> filter = new SingleFieldValueFilter<String, WebPage>();
+    SingleFieldValueFilter<String, WebPage> filter = new SingleFieldValueFilter<>();
     filter.setFieldName(WebPage.Field.URL.toString());
     filter.getOperands().add("http://www.example.com");
     return filter;

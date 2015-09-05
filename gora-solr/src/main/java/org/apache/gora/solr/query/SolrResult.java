@@ -56,7 +56,7 @@ public class SolrResult<K, T extends PersistentBase> extends ResultBase<K, T> {
     if (fields == null) {
       params.set(CommonParams.FL, "*");
     } else {
-      HashSet<String> uniqFields = new HashSet<String>(Arrays.asList(fields));
+      HashSet<String> uniqFields = new HashSet<>(Arrays.asList(fields));
       String keyFld = ((SolrStore<K, T>)dataStore).getMapping().getPrimaryKey();
       uniqFields.add(keyFld); // return also primary key
       StringBuilder sb = new StringBuilder();

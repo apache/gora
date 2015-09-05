@@ -52,17 +52,17 @@ public class MongoMapping {
   /**
    * Mapping between the class fields and the Mongo document fields
    */
-  private HashMap<String, String> classToDocument = new HashMap<String, String>();
+  private HashMap<String, String> classToDocument = new HashMap<>();
 
   /**
    * Mapping between the Mongo document fields and the class fields
    */
-  private HashMap<String, String> documentToClass = new HashMap<String, String>();
+  private HashMap<String, String> documentToClass = new HashMap<>();
 
   /**
    * Mongo document description
    */
-  private HashMap<String, DocumentFieldType> documentFields = new HashMap<String, DocumentFieldType>();
+  private HashMap<String, DocumentFieldType> documentFields = new HashMap<>();
 
   /**
    * Change the name of the collection.

@@ -55,7 +55,7 @@ public class WebPageDataCreator {
     //"http://example.com",
   };
   
-  public static HashMap<String, Integer> URL_INDEXES = new HashMap<String, Integer>();
+  public static HashMap<String, Integer> URL_INDEXES = new HashMap<>();
   
   static {
     for(int i=0; i<URLS.length; i++) {

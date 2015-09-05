@@ -114,7 +114,7 @@ implements Configurable {
       this.conf = HBaseConfiguration.create(getConf());
       admin = new HBaseAdmin(this.conf);
       mapping = readMapping(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE));
-      filterUtil = new HBaseFilterUtil<K, T>(this.conf);
+      filterUtil = new HBaseFilterUtil<>(this.conf);
     } catch (FileNotFoundException ex) {
       try {
         mapping = readMapping(getConf().get(PARSE_MAPPING_FILE_KEY, DEPRECATED_MAPPING_FILE));
@@ -357,7 +357,7 @@ implements Configurable {
   
       org.apache.gora.query.Result<K, T> result = null;
       result = query.execute();
-      ArrayList<Delete> deletes = new ArrayList<Delete>();
+      ArrayList<Delete> deletes = new ArrayList<>();
       while(result.next()) {
         Delete delete = new Delete(toBytes(result.getKey()));
         deletes.add(delete);
@@ -384,7 +384,7 @@ implements Configurable {
 
   @Override
   public Query<K, T> newQuery() {
-    return new HBaseQuery<K, T>(this);
+    return new HBaseQuery<>(this);
   }
 
   @Override
@@ -400,7 +400,7 @@ implements Configurable {
     if (table == null) {
       throw new IOException("No table was provided.");
     }
-    List<PartitionQuery<K,T>> partitions = new ArrayList<PartitionQuery<K,T>>(keys.getFirst().length);
+    List<PartitionQuery<K,T>> partitions = new ArrayList<>(keys.getFirst().length);
     for (int i = 0; i < keys.getFirst().length; i++) {
       String regionLocation = table.getRegionLocation(keys.getFirst()[i]).getHostname();
       byte[] startRow = query.getStartKey() != null ? toBytes(query.getStartKey())
@@ -427,7 +427,7 @@ implements Configurable {
         K endKey = Arrays.equals(HConstants.EMPTY_END_ROW, splitStop) ?
             null : HBaseByteInterface.fromBytes(keyClass, splitStop);
 
-        PartitionQueryImpl<K, T> partition = new PartitionQueryImpl<K, T>(
+        PartitionQueryImpl<K, T> partition = new PartitionQueryImpl<>(
             query, startKey, endKey, regionLocation);
         partition.setConf(getConf());
 
@@ -449,12 +449,12 @@ implements Configurable {
         addFields(get, query.getFields());
         addTimeRange(get, query);
         Result result = table.get(get);
-        return new HBaseGetResult<K,T>(this, query, result);
+        return new HBaseGetResult<>(this, query, result);
       } else {
         ResultScanner scanner = createScanner(query);
   
         org.apache.gora.query.Result<K,T> result
-            = new HBaseScannerResult<K,T>(this, query, scanner);
+            = new HBaseScannerResult<>(this, query, scanner);
   
         return result;
       }
@@ -642,7 +642,7 @@ implements Configurable {
         return;
       }
       Schema valueSchema = fieldSchema.getValueType();
-      Map<Utf8, Object> map = new HashMap<Utf8, Object>();
+      Map<Utf8, Object> map = new HashMap<>();
       for (Entry<byte[], byte[]> e : qualMap.entrySet()) {
         map.put(new Utf8(Bytes.toString(e.getKey())),
             fromBytes(valueSchema, e.getValue()));
@@ -655,8 +655,8 @@ implements Configurable {
         return;
       }
       valueSchema = fieldSchema.getElementType();
-      ArrayList<Object> arrayList = new ArrayList<Object>();
-      DirtyListWrapper<Object> dirtyListWrapper = new DirtyListWrapper<Object>(arrayList);
+      ArrayList<Object> arrayList = new ArrayList<>();
+      DirtyListWrapper<Object> dirtyListWrapper = new DirtyListWrapper<>(arrayList);
       for (Entry<byte[], byte[]> e : qualMap.entrySet()) {
         dirtyListWrapper.add(fromBytes(valueSchema, e.getValue()));
       }

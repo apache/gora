@@ -215,12 +215,12 @@ public class DataStoreTestUtil {
     throws Exception {
 
     Employee employee = DataStoreTestUtil.createEmployee(dataStore);
-    WebPage webpage = new BeanFactoryImpl<String,WebPage>(String.class,WebPage.class).newPersistent() ;
+    WebPage webpage = new BeanFactoryImpl<>(String.class,WebPage.class).newPersistent() ;
     
     webpage.setUrl(new Utf8("url..")) ;
     webpage.setContent(ByteBuffer.wrap("test content".getBytes(Charset.defaultCharset()))) ;
     webpage.setParsedContent(new ArrayList<CharSequence>());
-    Metadata metadata = new BeanFactoryImpl<String,Metadata>(String.class,Metadata.class).newPersistent();
+    Metadata metadata = new BeanFactoryImpl<>(String.class,Metadata.class).newPersistent();
     webpage.setMetadata(metadata) ;
     employee.setWebpage(webpage) ;
     
@@ -541,9 +541,9 @@ public class DataStoreTestUtil {
     String anchor = "anchor";
 
     // putting evens
-    for (int i = 0; i < urls.length; i++) {
+    for (String url : urls) {
       WebPage webPage = WebPage.newBuilder().build();
-      webPage.setUrl(new Utf8(urls[i]));
+      webPage.setUrl(new Utf8(url));
       for (int j = 0; j < urls.length; j += 2) {
         webPage.getOutlinks().put(new Utf8(anchor + j), new Utf8(urls[j]));
       }
@@ -552,8 +552,8 @@ public class DataStoreTestUtil {
     dataStore.flush();
 
     // putting odds
-    for (int i = 0; i < urls.length; i++) {
-      WebPage webPage = dataStore.get(urls[i]);
+    for (String url : urls) {
+      WebPage webPage = dataStore.get(url);
       webPage.getOutlinks().clear();
       for (int j = 1; j < urls.length; j += 2) {
         webPage.getOutlinks().put(new Utf8(anchor + j), new Utf8(urls[j]));
@@ -566,8 +566,8 @@ public class DataStoreTestUtil {
     }
     dataStore.flush();
 
-    for (int i = 0; i < urls.length; i++) {
-      WebPage webPage = dataStore.get(urls[i]);
+    for (String url : urls) {
+      WebPage webPage = dataStore.get(url);
       int count = 0;
       for (int j = 1; j < urls.length; j += 2) {
         CharSequence link = webPage.getOutlinks().get(new Utf8(anchor + j));
@@ -589,10 +589,10 @@ public class DataStoreTestUtil {
     String[] headers = { "firstHeader", "secondHeader", "thirdHeader",
         "fourthHeader", "fifthHeader", "sixthHeader" };
 
-    for (int i = 0; i < urls.length; i++) {
+    for (String url : urls) {
       WebPage webPage = WebPage.newBuilder().build();
-      webPage.setUrl(new Utf8(urls[i]));
-      //test put for nullable map field 
+      webPage.setUrl(new Utf8(url));
+      //test put for nullable map field
       // we put data to the 'headers' field which is a Map with default value of 'null'
       webPage.setHeaders(new HashMap<CharSequence, CharSequence>());
       for (int j = 0; j < headers.length; j += 2) {
@@ -603,8 +603,8 @@ public class DataStoreTestUtil {
 
     dataStore.flush();
 
-    for (int i = 0; i < urls.length; i++) {
-      WebPage webPage = dataStore.get(urls[i]);
+    for (String url : urls) {
+      WebPage webPage = dataStore.get(url);
       //webPage.getHeaders().clear(); //TODO clear method does not work
       webPage.setHeaders(new HashMap<CharSequence, CharSequence>());
       for (int j = 1; j < headers.length; j += 2) {
@@ -615,8 +615,8 @@ public class DataStoreTestUtil {
 
     dataStore.flush();
 
-    for (int i = 0; i < urls.length; i++) {
-      WebPage webPage = dataStore.get(urls[i]);
+    for (String url : urls) {
+      WebPage webPage = dataStore.get(url);
       int count = 0;
       for (int j = 1; j < headers.length; j += 2) {
         CharSequence headerSample = webPage.getHeaders().get(new Utf8(header + j));
@@ -636,9 +636,9 @@ public class DataStoreTestUtil {
         "http://d.com/d", "http://e.com/e", "http://f.com/f", "http://g.com/g" };
     String anchor = "anchor";
 
-    for (int i = 0; i < urls.length; i++) {
+    for (String url : urls) {
       WebPage webPage = WebPage.newBuilder().build();
-      webPage.setUrl(new Utf8(urls[i]));
+      webPage.setUrl(new Utf8(url));
       for (int j = 0; j < urls.length; j++) {
         webPage.getOutlinks().put(new Utf8(anchor + j), new Utf8(urls[j]));
       }
@@ -648,8 +648,8 @@ public class DataStoreTestUtil {
     dataStore.flush();
 
     // map entry removal test
-    for (int i = 0; i < urls.length; i++) {
-      WebPage webPage = dataStore.get(urls[i]);
+    for (String url : urls) {
+      WebPage webPage = dataStore.get(url);
       for (int j = 1; j < urls.length; j += 2) {
         webPage.getOutlinks().remove(new Utf8(anchor + j));
       }
@@ -658,9 +658,9 @@ public class DataStoreTestUtil {
 
     dataStore.flush();
 
-    for (int i = 0; i < urls.length; i++) {
+    for (String url : urls) {
       int count = 0;
-      WebPage webPage = dataStore.get(urls[i]);
+      WebPage webPage = dataStore.get(url);
       for (int j = 1; j < urls.length; j += 2) {
         CharSequence link = webPage.getOutlinks().get(new Utf8(anchor + j));
         assertNull(link);
@@ -681,9 +681,9 @@ public class DataStoreTestUtil {
     String[] headers = { "firstHeader", "secondHeader", "thirdHeader",
         "fourthHeader", "fifthHeader", "sixthHeader" };
 
-    for (int i = 0; i < urls.length; i++) {
+    for (String url : urls) {
       WebPage webPage = WebPage.newBuilder().build();
-      webPage.setUrl(new Utf8(urls[i]));
+      webPage.setUrl(new Utf8(url));
       webPage.setHeaders(new HashMap<CharSequence, CharSequence>());
       for (int j = 0; j < headers.length; j++) {
         webPage.getHeaders().put(new Utf8(header + j), new Utf8(headers[j]));
@@ -694,16 +694,16 @@ public class DataStoreTestUtil {
     dataStore.flush();
 
     // nullable map field removal test
-    for (int i = 0; i < urls.length; i++) {
-      WebPage webPage = dataStore.get(urls[i]);
+    for (String url : urls) {
+      WebPage webPage = dataStore.get(url);
       webPage.setHeaders(null);
       dataStore.put(webPage.getUrl().toString(), webPage);
     }
 
     dataStore.flush();
 
-    for (int i = 0; i < urls.length; i++) {
-      WebPage webPage = dataStore.get(urls[i]);
+    for (String url : urls) {
+      WebPage webPage = dataStore.get(url);
       assertNull(webPage.getHeaders());
     }
   }
@@ -800,10 +800,8 @@ public class DataStoreTestUtil {
     createWebPageData(store);
 
     //create sorted set of urls
-    List<String> sortedUrls = new ArrayList<String>();
-    for(String url: URLS) {
-      sortedUrls.add(url);
-    }
+    List<String> sortedUrls = new ArrayList<>();
+    Collections.addAll(sortedUrls, URLS);
     Collections.sort(sortedUrls);
 
     //try all ranges
@@ -911,8 +909,8 @@ public class DataStoreTestUtil {
   throws Exception {
 
     int count = 0, partitionsCount = 0;
-    Map<String, Integer> results = new HashMap<String, Integer>();
-    Map<String, Integer> partitionResults = new HashMap<String, Integer>();
+    Map<String, Integer> results = new HashMap<>();
+    Map<String, Integer> partitionResults = new HashMap<>();
 
     //execute query and count results
     Result<String, WebPage> result = store.execute(query);
@@ -1049,18 +1047,18 @@ public class DataStoreTestUtil {
     assertNumResults(store.newQuery(), URLS.length);
 
     //assert that data is deleted
-    for (int i = 0; i < SORTED_URLS.length; i++) {
-      WebPage page = store.get(SORTED_URLS[i]);
+    for (String SORTED_URL : SORTED_URLS) {
+      WebPage page = store.get(SORTED_URL);
       assertNotNull(page);
 
       assertNotNull(page.getUrl());
-      assertEquals(page.getUrl().toString(), SORTED_URLS[i]);
+      assertEquals(page.getUrl().toString(), SORTED_URL);
       assertEquals("Map of Outlinks should have a size of '0' as the deleteByQuery "
           + "not only removes the data but also the data structure.", 0, page.getOutlinks().size());
       assertEquals(0, page.getParsedContent().size());
-      if(page.getContent() != null) {
+      if (page.getContent() != null) {
         LOG.info("url:" + page.getUrl().toString());
-        LOG.info( "limit:" + page.getContent().limit());
+        LOG.info("limit:" + page.getContent().limit());
       } else {
         assertNull(page.getContent());
       }
@@ -1189,7 +1187,7 @@ public class DataStoreTestUtil {
   
   public static String[] getFields(List<Field> schemaFields) {
     
-    List<Field> list = new ArrayList<Field>();
+    List<Field> list = new ArrayList<>();
     for (Field field : schemaFields) {
       if (!Persistent.DIRTY_BYTES_FIELD_NAME.equalsIgnoreCase(field.name())) {
         list.add(field);

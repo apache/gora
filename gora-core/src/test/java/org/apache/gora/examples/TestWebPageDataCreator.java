@@ -13,7 +13,7 @@ public class TestWebPageDataCreator {
 
   @Test 
   public void testCreatesData() throws IOException{
-    MemStore<String, WebPage> dataStore = new MemStore<String, WebPage>();
+    MemStore<String, WebPage> dataStore = new MemStore<>();
     WebPageDataCreator.createWebPageData(dataStore);
   }
   

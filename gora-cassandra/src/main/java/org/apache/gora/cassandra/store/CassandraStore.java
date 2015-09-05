@@ -90,7 +90,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
   public static String readOpConsLvl;
   public static String writeOpConsLvl;
   
-  private CassandraClient<K, T> cassandraClient = new CassandraClient<K, T>();
+  private CassandraClient<K, T> cassandraClient = new CassandraClient<>();
 
   /**
    * Fixed string with value "UnionIndex" used to generate an extra column based on 
@@ -113,7 +113,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
   private Map<K, T> buffer = Collections.synchronizedMap(new LinkedHashMap<K, T>());
 
   public static final ThreadLocal<BinaryEncoder> encoders =
-      new ThreadLocal<BinaryEncoder>();
+      new ThreadLocal<>();
   
   /**
    * Create a {@link java.util.concurrent.ConcurrentHashMap} for the 
@@ -125,7 +125,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
    * @see <a href="https://issues.apache.org/jira/browse/AVRO-650">AVRO-650</a>
    */
   public static final ConcurrentHashMap<String, SpecificDatumWriter<?>> writerMap = 
-      new ConcurrentHashMap<String, SpecificDatumWriter<?>>();
+      new ConcurrentHashMap<>();
   
   /** The default constructor for CassandraStore */
   public CassandraStore() throws Exception {
@@ -196,14 +196,14 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
     Map<String, List<String>> familyMap = this.cassandraClient.getFamilyMap(query);
     Map<String, String> reverseMap = this.cassandraClient.getReverseMap(query);
 
-    CassandraQuery<K, T> cassandraQuery = new CassandraQuery<K, T>();
+    CassandraQuery<K, T> cassandraQuery = new CassandraQuery<>();
     cassandraQuery.setQuery(query);
     cassandraQuery.setFamilyMap(familyMap);
 
-    CassandraResult<K, T> cassandraResult = new CassandraResult<K, T>(this, query);
+    CassandraResult<K, T> cassandraResult = new CassandraResult<>(this, query);
     cassandraResult.setReverseMap(reverseMap);
 
-    CassandraResultSet<K> cassandraResultSet = new CassandraResultSet<K>();
+    CassandraResultSet<K> cassandraResultSet = new CassandraResultSet<>();
 
     // We query Cassandra keyspace by families.
     for (String family : familyMap.keySet()) {
@@ -239,7 +239,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
       // find associated row in the resultset
       CassandraRow<K> cassandraRow = cassandraResultSet.getRow(key);
       if (cassandraRow == null) {
-        cassandraRow = new CassandraRow<K>();
+        cassandraRow = new CassandraRow<>();
         cassandraResultSet.putRow(key, cassandraRow);
         cassandraRow.setKey(key);
       }
@@ -269,7 +269,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
       K key = superRow.getKey();
       CassandraRow<K> cassandraRow = cassandraResultSet.getRow(key);
       if (cassandraRow == null) {
-        cassandraRow = new CassandraRow<K>();
+        cassandraRow = new CassandraRow<>();
         cassandraResultSet.putRow(key, cassandraRow);
         cassandraRow.setKey(key);
       }
@@ -327,7 +327,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
 
   @Override
   public T get(K key, String[] fields) {
-    CassandraQuery<K,T> query = new CassandraQuery<K,T>();
+    CassandraQuery<K,T> query = new CassandraQuery<>();
     query.setDataStore(this);
     query.setKeyRange(key, key);
     
@@ -352,8 +352,8 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
   public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query)
       throws IOException {
     // TODO GORA-298 Implement CassandraStore#getPartitions
-    List<PartitionQuery<K,T>> partitions = new ArrayList<PartitionQuery<K,T>>();
-    PartitionQueryImpl<K, T> pqi = new PartitionQueryImpl<K, T>(query);
+    List<PartitionQuery<K,T>> partitions = new ArrayList<>();
+    PartitionQueryImpl<K, T> pqi = new PartitionQueryImpl<>(query);
     pqi.setConf(getConf());
     partitions.add(pqi);
     return partitions;
@@ -370,7 +370,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
 
   @Override
   public Query<K, T> newQuery() {
-    Query<K,T> query = new CassandraQuery<K, T>(this);
+    Query<K,T> query = new CassandraQuery<>(this);
     query.setFields(getFieldsToQuery(null));
     return query;
   }
@@ -530,7 +530,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
             Schema valueSchema = schema.getValueType();
             Type valueType = valueSchema.getType();
             if (Type.UNION.equals(valueType)){
-              Map<CharSequence,Object> valueMap = new HashMap<CharSequence, Object>();
+              Map<CharSequence,Object> valueMap = new HashMap<>();
               for (CharSequence mapKey: map.keySet()) {
                 Object mapValue = map.get(mapKey);
                 int valueUnionIndex = getUnionSchema(mapValue, valueSchema);
@@ -625,9 +625,8 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
   private int getUnionSchema(Object pValue, Schema pUnionSchema){
     int unionSchemaPos = 0;
 //    String valueType = pValue.getClass().getSimpleName();
-    Iterator<Schema> it = pUnionSchema.getTypes().iterator();
-    while ( it.hasNext() ){
-      Type schemaType = it.next().getType();
+    for (Schema currentSchema : pUnionSchema.getTypes()) {
+      Type schemaType = currentSchema.getType();
       if (pValue instanceof CharSequence && schemaType.equals(Type.STRING))
         return unionSchemaPos;
       else if (pValue instanceof ByteBuffer && schemaType.equals(Type.BYTES))
@@ -648,7 +647,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
         return unionSchemaPos;
       else if (pValue instanceof Persistent && schemaType.equals(Type.RECORD))
         return unionSchemaPos;
-      unionSchemaPos ++;
+      unionSchemaPos++;
     }
     // if we weren't able to determine which data type it is, then we return the default
     return DEFAULT_UNION_SCHEMA;

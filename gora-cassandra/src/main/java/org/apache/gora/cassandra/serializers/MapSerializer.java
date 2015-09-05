@@ -43,8 +43,8 @@ public class MapSerializer<T> extends AbstractSerializer<Map<CharSequence, T>> {
 
   public static final Logger LOG = LoggerFactory.getLogger(MapSerializer.class);
 
-  private static Map<Type, MapSerializer> valueTypeToSerializerMap = new HashMap<Type, MapSerializer>();
-  private static Map<Class, MapSerializer> fixedClassToSerializerMap = new HashMap<Class, MapSerializer>();
+  private static Map<Type, MapSerializer> valueTypeToSerializerMap = new HashMap<>();
+  private static Map<Class, MapSerializer> fixedClassToSerializerMap = new HashMap<>();
 
   public static MapSerializer get(Type valueType) {
     MapSerializer serializer = valueTypeToSerializerMap.get(valueType);
@@ -131,7 +131,7 @@ public class MapSerializer<T> extends AbstractSerializer<Map<CharSequence, T>> {
 
   private ByteBuffer toByteBufferWithFixedLengthElements(Map<CharSequence, T> map) {
     int n = map.size();
-    List<byte[]> list = new ArrayList<byte[]>(n);
+    List<byte[]> list = new ArrayList<>(n);
     n *= 4;
     for (CharSequence key : map.keySet()) {
       T value = map.get(key);
@@ -157,7 +157,7 @@ public class MapSerializer<T> extends AbstractSerializer<Map<CharSequence, T>> {
 
   private ByteBuffer toByteBufferWithVariableLengthElements(Map<CharSequence, T> map) {
     int n = map.size();
-    List<byte[]> list = new ArrayList<byte[]>(n);
+    List<byte[]> list = new ArrayList<>(n);
     n *= 8;
     for (CharSequence key : map.keySet()) {
       T value = map.get(key);
@@ -182,7 +182,7 @@ public class MapSerializer<T> extends AbstractSerializer<Map<CharSequence, T>> {
     if (byteBuffer == null) {
       return null;
     }
-    Map<CharSequence, T> map = new HashMap<CharSequence, T>();
+    Map<CharSequence, T> map = new HashMap<>();
     while (true) {
       CharSequence key = null;
       T value = null;

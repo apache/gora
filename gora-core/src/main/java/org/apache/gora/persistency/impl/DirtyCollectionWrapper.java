@@ -65,7 +65,7 @@ public class DirtyCollectionWrapper<T> implements Dirtyable,
 
   @Override
   public Iterator<T> iterator() {
-    return new DirtyIteratorWrapper<T>(delegate.iterator(), dirtyFlag);
+    return new DirtyIteratorWrapper<>(delegate.iterator(), dirtyFlag);
   }
 
   @Override

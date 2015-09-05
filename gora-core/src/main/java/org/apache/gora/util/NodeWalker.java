@@ -46,7 +46,7 @@ public class NodeWalker {
    */
   public NodeWalker(Node rootNode) {
 
-    nodes = new Stack<Node>();
+    nodes = new Stack<>();
     nodes.add(rootNode);
   }
   

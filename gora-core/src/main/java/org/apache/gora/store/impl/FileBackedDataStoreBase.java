@@ -163,10 +163,10 @@ public InputStream getInputStream() {
     List<PartitionQuery<K, T>> queries = null;
     try{
       splits = GoraMapReduceUtils.getSplits(getConf(), inputPath);
-      queries = new ArrayList<PartitionQuery<K,T>>(splits.size());
+      queries = new ArrayList<>(splits.size());
   
       for(InputSplit split : splits) {
-        queries.add(new FileSplitPartitionQuery<K, T>(query, (FileSplit) split));
+        queries.add(new FileSplitPartitionQuery<>(query, (FileSplit) split));
       }
     }catch(IOException ex){
       LOG.error(ex.getMessage(), ex);

@@ -60,7 +60,7 @@ public class MongoFilterUtil<K, T extends PersistentBase> {
    */
   private static final Log LOG = LogFactory.getLog(MongoFilterUtil.class);
 
-  private Map<String, FilterFactory<K, T>> factories = new LinkedHashMap<String, FilterFactory<K, T>>();
+  private Map<String, FilterFactory<K, T>> factories = new LinkedHashMap<>();
 
   public MongoFilterUtil(final Configuration conf) throws GoraException {
     String[] factoryClassNames = conf.getStrings(

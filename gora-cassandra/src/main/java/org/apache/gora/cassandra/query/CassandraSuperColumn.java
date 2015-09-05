@@ -52,7 +52,7 @@ public class CassandraSuperColumn extends CassandraColumn {
     
     switch (type) {
       case ARRAY:
-        List<Object> array = new ArrayList<Object>();
+        List<Object> array = new ArrayList<>();
         
         for (HColumn<ByteBuffer, ByteBuffer> hColumn : this.hSuperColumn.getColumns()) {
           Object memberValue = fromByteBuffer(fieldSchema.getElementType(), hColumn.getValue());
@@ -63,11 +63,11 @@ public class CassandraSuperColumn extends CassandraColumn {
         
         break;
       case MAP:
-        Map<CharSequence, Object> map = new HashMap<CharSequence, Object>();
+        Map<CharSequence, Object> map = new HashMap<>();
 
         for (HColumn<ByteBuffer, ByteBuffer> hColumn : this.hSuperColumn.getColumns()) {
           CharSequence mapKey = CharSequenceSerializer.get().fromByteBuffer(hColumn.getName());
-          if (mapKey.toString().indexOf(CassandraStore.UNION_COL_SUFIX) < 0) {
+          if (!mapKey.toString().contains(CassandraStore.UNION_COL_SUFIX)) {
             Object memberValue = null;
             // We need detect real type for UNION Fields
             if (fieldSchema.getValueType().getType().equals(Type.UNION)){
@@ -170,9 +170,9 @@ public class CassandraSuperColumn extends CassandraColumn {
 }
 
   private HColumn<ByteBuffer, ByteBuffer> getUnionTypeColumn(String fieldName, Object[] hColumns) {
-    for (int iCnt = 0; iCnt < hColumns.length; iCnt++){
+    for (Object currentHColumn : hColumns) {
       @SuppressWarnings("unchecked")
-      HColumn<ByteBuffer, ByteBuffer> hColumn = (HColumn<ByteBuffer, ByteBuffer>)hColumns[iCnt];
+      HColumn<ByteBuffer, ByteBuffer> hColumn = (HColumn<ByteBuffer, ByteBuffer>) currentHColumn;
       String columnName = StringSerializer.get().fromByteBuffer(hColumn.getNameBytes().duplicate());
       if (fieldName.equals(columnName))
         return hColumn;

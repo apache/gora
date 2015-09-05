@@ -94,7 +94,7 @@ public class TestDataStoreFactory {
   public void testFindProperty() {
     Properties properties = DataStoreFactory.createProps();
 
-    DataStore<String, MockPersistent> store = new DataFileAvroStore<String, MockPersistent>();
+    DataStore<String, MockPersistent> store = new DataFileAvroStore<>();
 
     String fooValue = DataStoreFactory.findProperty(properties, store,
         "foo_property", "foo_default");

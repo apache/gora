@@ -64,28 +64,28 @@ public class CassandraMapping {
   /**
    * List of the super column families.
    */
-  private List<String> superFamilies = new ArrayList<String>();
+  private List<String> superFamilies = new ArrayList<>();
 
   /**
    * Look up the column family associated to the Avro field.
    */
-  private Map<String, String> familyMap = new HashMap<String, String>();
+  private Map<String, String> familyMap = new HashMap<>();
   
   /**
    * Look up the column associated to the Avro field.
    */
-  private Map<String, String> columnMap = new HashMap<String, String>();
+  private Map<String, String> columnMap = new HashMap<>();
 
   /**
    * Helps storing attributes defined for each field.
    */
-  private Map<String, String> columnAttrMap = new HashMap<String, String>();
+  private Map<String, String> columnAttrMap = new HashMap<>();
   
   /**
    * Look up the column family from its name.
    */
   private Map<String, BasicColumnFamilyDefinition> columnFamilyDefinitions = 
-		  new HashMap<String, BasicColumnFamilyDefinition>();
+		  new HashMap<>();
 
   
   /**
@@ -313,7 +313,7 @@ public class CassandraMapping {
   }
 
   public List<ColumnFamilyDefinition> getColumnFamilyDefinitions() {
-    List<ColumnFamilyDefinition> list = new ArrayList<ColumnFamilyDefinition>();
+    List<ColumnFamilyDefinition> list = new ArrayList<>();
     for (String key: this.columnFamilyDefinitions.keySet()) {
       ColumnFamilyDefinition columnFamilyDefinition = this.columnFamilyDefinitions.get(key);
       ThriftCfDef thriftCfDef = new ThriftCfDef(columnFamilyDefinition);

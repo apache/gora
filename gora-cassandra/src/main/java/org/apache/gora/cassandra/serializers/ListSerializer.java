@@ -43,8 +43,8 @@ public class ListSerializer<T> extends AbstractSerializer<List<T>> {
 
   public static final Logger LOG = LoggerFactory.getLogger(ListSerializer.class);
 
-  private static Map<Type, ListSerializer> elementTypeToSerializerMap = new HashMap<Type, ListSerializer>();
-  private static Map<Class, ListSerializer> fixedClassToSerializerMap = new HashMap<Class, ListSerializer>();
+  private static Map<Type, ListSerializer> elementTypeToSerializerMap = new HashMap<>();
+  private static Map<Class, ListSerializer> fixedClassToSerializerMap = new HashMap<>();
 
   public static ListSerializer get(Type elementType) {
     ListSerializer serializer = elementTypeToSerializerMap.get(elementType);
@@ -140,7 +140,7 @@ public class ListSerializer<T> extends AbstractSerializer<List<T>> {
 
   private ByteBuffer toByteBufferWithVariableLengthElements(List<T> array) {
     int n = array.size();
-    List<byte[]> list = new ArrayList<byte[]>(n);
+    List<byte[]> list = new ArrayList<>(n);
     n *= 4;
     for (T element : array) {
       byte[] bytes = BytesArraySerializer.get().fromByteBuffer(elementSerializer.toByteBuffer(element));
@@ -161,7 +161,7 @@ public class ListSerializer<T> extends AbstractSerializer<List<T>> {
     if (byteBuffer == null) {
       return null;
     }
-    ArrayList<T> array = new ArrayList<T>();
+    ArrayList<T> array = new ArrayList<>();
     while (true) {
       T element = null;
       try {

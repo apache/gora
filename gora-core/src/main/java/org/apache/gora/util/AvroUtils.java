@@ -45,7 +45,7 @@ public class AvroUtils {
    */
   public static Map<String, Field> getFieldMap(Schema schema) {
     List<Field> fields = schema.getFields();
-    HashMap<String, Field> fieldMap = new HashMap<String, Field>(fields.size());
+    HashMap<String, Field> fieldMap = new HashMap<>(fields.size());
     for (Field field : fields) {
       fieldMap.put(field.name(), field);
     }
@@ -103,7 +103,7 @@ public class AvroUtils {
   public static <T extends Persistent> T deepClonePersistent(T persistent) {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     BinaryEncoder enc = EncoderFactory.get().binaryEncoder(bos, null);
-    SpecificDatumWriter<Persistent> writer = new SpecificDatumWriter<Persistent>(
+    SpecificDatumWriter<Persistent> writer = new SpecificDatumWriter<>(
         persistent.getSchema());
     try {
       writer.write(persistent, enc);
@@ -117,7 +117,7 @@ public class AvroUtils {
     byte[] value = bos.toByteArray();
     Decoder dec = DecoderFactory.get().binaryDecoder(value, null);
     @SuppressWarnings("unchecked")
-    SpecificDatumReader<T> reader = new SpecificDatumReader<T>(
+    SpecificDatumReader<T> reader = new SpecificDatumReader<>(
         (Class<T>) persistent.getClass());
     try {
       return reader.read(null, dec);

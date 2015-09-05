@@ -141,7 +141,7 @@ public class AvroStore<K, T extends PersistentBase>
    */
   @Override
   protected Result<K,T> executeQuery(Query<K,T> query) throws IOException {
-    return new AvroResult<K,T>(this, (AvroQuery<K,T>)query,
+    return new AvroResult<>(this, (AvroQuery<K,T>)query,
         getDatumReader(), getDecoder());
   }
 
@@ -172,7 +172,7 @@ public class AvroStore<K, T extends PersistentBase>
 
   @Override
   public AvroQuery<K,T> newQuery() {
-    return new AvroQuery<K,T>(this);
+    return new AvroQuery<>(this);
   }
 
   @Override
@@ -233,11 +233,11 @@ public class AvroStore<K, T extends PersistentBase>
   }
 
   protected DatumWriter<T> createDatumWriter() {
-    return new SpecificDatumWriter<T>(schema);
+    return new SpecificDatumWriter<>(schema);
   }
 
   protected DatumReader<T> createDatumReader() {
-    return new SpecificDatumReader<T>(schema);
+    return new SpecificDatumReader<>(schema);
   }
 
   @Override

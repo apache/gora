@@ -127,7 +127,7 @@ public class CassandraClient<K, T extends PersistentBase> {
       String username = properties
           .getProperty("gora.cassandrastore.username");
       if (username != null) {
-        accessMap = new HashMap<String, String>();
+        accessMap = new HashMap<>();
         accessMap.put("username", username);
         String password = properties
             .getProperty("gora.cassandrastore.password");
@@ -240,7 +240,7 @@ public class CassandraClient<K, T extends PersistentBase> {
    * @return Map<String, HConsistencyLevel> with the mapping between colFams and consistency level.
    */
   private Map<String, HConsistencyLevel> getConsisLevelForColFams(List<ColumnFamilyDefinition> pColFams) {
-    Map<String, HConsistencyLevel> clMap = new HashMap<String, HConsistencyLevel>();
+    Map<String, HConsistencyLevel> clMap = new HashMap<>();
     // Get columnFamily consistency level.
     String colFamConsisLvl = (colFamConsLvl != null && !colFamConsLvl.isEmpty())?colFamConsLvl:DEFAULT_HECTOR_CONSIS_LEVEL;
     LOG.debug("ColumnFamily consistency level configured to '" + colFamConsisLvl + "'.");
@@ -554,7 +554,7 @@ public class CassandraClient<K, T extends PersistentBase> {
    * corresponding column names required to get all the query fields.
    */
   public Map<String, List<String>> getFamilyMap(Query<K, T> query) {
-    Map<String, List<String>> map = new HashMap<String, List<String>>();
+    Map<String, List<String>> map = new HashMap<>();
     Schema persistentSchema = query.getDataStore().newPersistent().getSchema();
     for (String field: query.getFields()) {
       String family = this.getMappingFamily(field);
@@ -563,7 +563,7 @@ public class CassandraClient<K, T extends PersistentBase> {
       // check if the family value was already initialized 
       List<String> list = map.get(family);
       if (list == null) {
-        list = new ArrayList<String>();
+        list = new ArrayList<>();
         map.put(family, list);
       }
       if (persistentSchema.getField(field).schema().getType() == Type.UNION)
@@ -593,7 +593,7 @@ public class CassandraClient<K, T extends PersistentBase> {
    * names and values the query fields
    */
   public Map<String, String> getReverseMap(Query<K, T> query) {
-    Map<String, String> map = new HashMap<String, String>();
+    Map<String, String> map = new HashMap<>();
     Schema persistentSchema = query.getDataStore().newPersistent().getSchema();
     for (String field: query.getFields()) {
       String family = this.getMappingFamily(field);

@@ -54,7 +54,7 @@ public class TestGoraInputFormat {
     GoraInputFormat.setInput(job, query, false);
 
     GoraInputFormat<String, MockPersistent> inputFormat
-      = new GoraInputFormat<String, MockPersistent>();
+      = new GoraInputFormat<>();
 
     inputFormat.setConf(job.getConfiguration());
 

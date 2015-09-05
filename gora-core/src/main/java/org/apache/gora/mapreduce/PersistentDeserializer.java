@@ -45,7 +45,7 @@ public class PersistentDeserializer
     this.reuseObjects = reuseObjects;
     try {
       Schema schema = AvroUtils.getSchema(persistentClass);
-      datumReader = new SpecificDatumReader<Persistent>(schema);
+      datumReader = new SpecificDatumReader<>(schema);
 
     } catch (Exception ex) {
       throw new RuntimeException(ex);

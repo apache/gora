@@ -80,7 +80,7 @@ public class MongoStore<K, T extends PersistentBase> extends
   /**
    * MongoDB client
    */
-  private static ConcurrentHashMap<String, MongoClient> mapsOfClients = new ConcurrentHashMap<String, MongoClient>();
+  private static ConcurrentHashMap<String, MongoClient> mapsOfClients = new ConcurrentHashMap<>();
 
   private DB mongoClientDB;
 
@@ -109,10 +109,10 @@ public class MongoStore<K, T extends PersistentBase> extends
       MongoStoreParameters parameters = MongoStoreParameters.load(properties, getConf());
       super.initialize(keyClass, pPersistentClass, properties);
 
-      filterUtil = new MongoFilterUtil<K, T>(getConf());
+      filterUtil = new MongoFilterUtil<>(getConf());
 
       // Load the mapping
-      MongoMappingBuilder<K, T> builder = new MongoMappingBuilder<K, T>(this);
+      MongoMappingBuilder<K, T> builder = new MongoMappingBuilder<>(this);
       LOG.debug("Initializing Mongo store with mapping {}.",
           new Object[] { parameters.getMappingFile() });
       builder.fromFile(parameters.getMappingFile());
@@ -156,11 +156,11 @@ public class MongoStore<K, T extends PersistentBase> extends
     // If configuration contains a login + secret, try to authenticated with DB
     List<MongoCredential> credentials = null;
     if (params.getLogin() != null && params.getSecret() != null) {
-      credentials = new ArrayList<MongoCredential>();
+      credentials = new ArrayList<>();
       credentials.add(MongoCredential.createCredential(params.getLogin(), params.getDbname(), params.getSecret().toCharArray()));
     }
     // Build server address
-    List<ServerAddress> addrs = new ArrayList<ServerAddress>();
+    List<ServerAddress> addrs = new ArrayList<>();
     Iterable<String> serversArray = Splitter.on(",").split(params.getServers());
     if (serversArray != null) {
       for (String server : serversArray) {
@@ -410,7 +410,7 @@ public class MongoStore<K, T extends PersistentBase> extends
     cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
 
     // Build the result
-    MongoDBResult<K, T> mongoResult = new MongoDBResult<K, T>(this, query);
+    MongoDBResult<K, T> mongoResult = new MongoDBResult<>(this, query);
     mongoResult.setCursor(cursor);
 
     return mongoResult;
@@ -421,7 +421,7 @@ public class MongoStore<K, T extends PersistentBase> extends
    */
   @Override
   public Query<K, T> newQuery() {
-    MongoDBQuery<K, T> query = new MongoDBQuery<K, T>(this);
+    MongoDBQuery<K, T> query = new MongoDBQuery<>(this);
     query.setFields(getFieldsToQuery(null));
     return query;
   }
@@ -435,8 +435,8 @@ public class MongoStore<K, T extends PersistentBase> extends
       throws IOException {
     // FIXME: for now, there is only one partition as we do not handle
     // MongoDB sharding configuration
-    List<PartitionQuery<K, T>> partitions = new ArrayList<PartitionQuery<K, T>>();
-    PartitionQueryImpl<K, T> partitionQuery = new PartitionQueryImpl<K, T>(
+    List<PartitionQuery<K, T>> partitions = new ArrayList<>();
+    PartitionQueryImpl<K, T> partitionQuery = new PartitionQueryImpl<>(
         query);
     partitionQuery.setConf(getConf());
     partitions.add(partitionQuery);
@@ -603,7 +603,7 @@ public class MongoStore<K, T extends PersistentBase> extends
   /* pp */ Object fromMongoList(final String docf, final Schema fieldSchema,
                        final BSONDecorator easybson, final Field f) {
     List<Object> list = easybson.getDBList(docf);
-    List<Object> rlist = new ArrayList<Object>();
+    List<Object> rlist = new ArrayList<>();
     if (list == null) {
       return new DirtyListWrapper(rlist);
     }
@@ -615,13 +615,13 @@ public class MongoStore<K, T extends PersistentBase> extends
           "item", new BSONDecorator(new BasicDBObject("item", item)));
       rlist.add(o);
     }
-    return new DirtyListWrapper<Object>(rlist);
+    return new DirtyListWrapper<>(rlist);
   }
 
   /* pp */ Object fromMongoMap(final String docf, final Schema fieldSchema,
                       final BSONDecorator easybson, final Field f) {
     BasicDBObject map = easybson.getDBObject(docf);
-    Map<Utf8, Object> rmap = new HashMap<Utf8, Object>();
+    Map<Utf8, Object> rmap = new HashMap<>();
     if (map == null) {
         return new DirtyMapWrapper(rmap);
     }
@@ -634,7 +634,7 @@ public class MongoStore<K, T extends PersistentBase> extends
           new BSONDecorator(map));
       rmap.put(new Utf8(decodedMapKey), o);
     }
-    return new DirtyMapWrapper<Utf8, Object>(rmap);
+    return new DirtyMapWrapper<>(rmap);
   }
 
   private Object fromMongoString(final DocumentFieldType storeType,

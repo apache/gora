@@ -106,8 +106,7 @@ public class IOUtils {
     SerializationFactory serializationFactory = new SerializationFactory(getOrCreateConf(conf));
     Serializer<T> serializer = serializationFactory.getSerializer(objClass);
 
-    ByteBufferOutputStream os = new ByteBufferOutputStream();
-    try {
+    try (ByteBufferOutputStream os = new ByteBufferOutputStream()) {
       serializer.open(os);
       serializer.serialize(obj);
 
@@ -126,8 +125,6 @@ public class IOUtils {
     }finally {
       if(serializer != null)
         serializer.close();
-      if(os != null)
-        os.close();
     }
   }
 
@@ -219,11 +216,10 @@ public class IOUtils {
     int length = WritableUtils.readVInt(in);
     byte[] arr = new byte[length];
     in.readFully(arr);
-    List<ByteBuffer> list = new ArrayList<ByteBuffer>();
+    List<ByteBuffer> list = new ArrayList<>();
     list.add(ByteBuffer.wrap(arr));
-    ByteBufferInputStream is = new ByteBufferInputStream(list);
 
-    try {
+    try (ByteBufferInputStream is = new ByteBufferInputStream(list)) {
       deserializer.open(is);
       T newObj = deserializer.deserialize(obj);
       return newObj;
@@ -231,8 +227,6 @@ public class IOUtils {
     }finally {
       if(deserializer != null)
         deserializer.close();
-      if(is != null)
-        is.close();
     }
   }
 
@@ -519,7 +513,7 @@ public class IOUtils {
    * Reads until the end of the input stream, and returns the contents as a byte[]
    */
   public static byte[] readFully(InputStream in) throws IOException {
-    List<ByteBuffer> buffers = new ArrayList<ByteBuffer>(4);
+    List<ByteBuffer> buffers = new ArrayList<>(4);
     while(true) {
       ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
       int count = in.read(buffer.array(), 0, BUFFER_SIZE);

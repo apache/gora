@@ -34,7 +34,7 @@ public class StringUtils {
    * Joins the two given arrays, removing dup elements.
    */
   public static String[] joinStringArrays(String[] arr1, String... arr2) {
-    HashSet<String> set = new HashSet<String>();
+    HashSet<String> set = new HashSet<>();
     Collections.addAll(set, arr1);
     Collections.addAll(set, arr2);
 
@@ -83,7 +83,7 @@ public class StringUtils {
   public static LinkedHashSet<Set<String>> powerset(String[] set) {
 
     //create the empty power set
-    LinkedHashSet<Set<String>> power = new LinkedHashSet<Set<String>>();
+    LinkedHashSet<Set<String>> power = new LinkedHashSet<>();
 
     //get the number of elements in the set
     int elements = set.length;
@@ -98,7 +98,7 @@ public class StringUtils {
       String binary = intToBinary(i, elements);
 
       //create a new set
-      LinkedHashSet<String> innerSet = new LinkedHashSet<String>();
+      LinkedHashSet<String> innerSet = new LinkedHashSet<>();
 
       //convert each digit in the current binary number to the corresponding element
       //in the given set

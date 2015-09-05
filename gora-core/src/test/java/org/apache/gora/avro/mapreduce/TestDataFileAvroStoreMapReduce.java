@@ -40,7 +40,7 @@ public class TestDataFileAvroStoreMapReduce extends DataStoreMapReduceTestBase {
   @Override
   protected DataStore<String, WebPage> createWebPageDataStore() 
     throws IOException {
-    DataFileAvroStore<String,WebPage> webPageStore = new DataFileAvroStore<String, WebPage>();
+    DataFileAvroStore<String,WebPage> webPageStore = new DataFileAvroStore<>();
     webPageStore.initialize(String.class, WebPage.class, DataStoreFactory.createProps());
     webPageStore.setOutputPath(WEBPAGE_OUTPUT);
     webPageStore.setInputPath(WEBPAGE_OUTPUT);

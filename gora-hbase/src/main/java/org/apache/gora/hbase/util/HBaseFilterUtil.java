@@ -33,7 +33,7 @@ import java.util.Map;
 public class HBaseFilterUtil<K, T extends PersistentBase> {
   private static final Log LOG = LogFactory.getLog(HBaseFilterUtil.class);
 
-  private Map<String, FilterFactory<K, T>> factories = new LinkedHashMap<String, FilterFactory<K, T>>();
+  private Map<String, FilterFactory<K, T>> factories = new LinkedHashMap<>();
 
   public HBaseFilterUtil(Configuration conf) throws GoraException {
     String[] factoryClassNames = conf.getStrings("gora.hbase.filter.factories", "org.apache.gora.hbase.util.DefaultFactory");

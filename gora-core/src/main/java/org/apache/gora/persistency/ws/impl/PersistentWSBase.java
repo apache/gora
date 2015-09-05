@@ -34,13 +34,13 @@ public abstract class PersistentWSBase implements Persistent  {
    * Maps keys to their own classes
    */
   protected static Map<Class<?>, Map<String, Integer>> FIELD_MAP =
-    new HashMap<Class<?>, Map<String,Integer>>();
+    new HashMap<>();
 
   /**
    * Maps fields to their own classes
    */
   protected static Map<Class<?>, String[]> FIELDS =
-    new HashMap<Class<?>, String[]>();
+    new HashMap<>();
     
 
   /** Subclasses should call this function for all the persistable fields
@@ -51,7 +51,7 @@ public abstract class PersistentWSBase implements Persistent  {
   protected static void registerFields(Class<?> clazz, String... fields) {
     FIELDS.put(clazz, fields);
     int fieldsLength = fields == null ? 0 :fields.length;
-    HashMap<String, Integer> map = new HashMap<String, Integer>(fieldsLength);
+    HashMap<String, Integer> map = new HashMap<>(fieldsLength);
 
     for(int i=0; i < fieldsLength; i++) {
       map.put(fields[i], i);

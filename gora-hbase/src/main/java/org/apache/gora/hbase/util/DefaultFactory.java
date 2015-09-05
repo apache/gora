@@ -40,7 +40,7 @@ public class DefaultFactory <K, T extends PersistentBase> extends BaseFactory<K,
   
   @Override
   public List<String> getSupportedFilters() {
-    List<String> filters = new ArrayList<String>();
+    List<String> filters = new ArrayList<>();
     filters.add(SingleFieldValueFilter.class.getCanonicalName());
     filters.add(MapFieldValueFilter.class.getCanonicalName());
     filters.add(FilterList.class.getCanonicalName());

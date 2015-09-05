@@ -45,13 +45,13 @@ public class GoraCompiler extends SpecificCompiler {
 
   public static final int FIRST_UNMANAGED_FIELD_INDEX = 1;
 
-  private static final Set<String> GORA_RESERVED_NAMES = new HashSet<String>();
+  private static final Set<String> GORA_RESERVED_NAMES = new HashSet<>();
   
   static {
     GORA_RESERVED_NAMES.addAll(Arrays.asList(DIRTY_BYTES_FIELD_NAME));
   }
 
-  private static final Set<String> GORA_HIDDEN_FIELD_NAMES = new HashSet<String>();
+  private static final Set<String> GORA_HIDDEN_FIELD_NAMES = new HashSet<>();
   
   static {
     GORA_HIDDEN_FIELD_NAMES.add(DIRTY_BYTES_FIELD_NAME);
@@ -64,7 +64,7 @@ public class GoraCompiler extends SpecificCompiler {
     for (File src : srcFiles) {
       LOG.info("Compiling: {}", src.getAbsolutePath());
       Schema originalSchema = parser.parse(src);
-      Map<Schema,Schema> queue = new HashMap<Schema,Schema>();
+      //Map<Schema,Schema> queue = new HashMap<>();
       //Schema newSchema = getSchemaWithDirtySupport(originalSchema, queue);
       Schema newSchema = originalSchema;
       GoraCompiler compiler = new GoraCompiler(newSchema);
@@ -222,10 +222,9 @@ public class GoraCompiler extends SpecificCompiler {
 
   private static Schema getUnionSchemaWithDirtySupport(Schema originalSchema, Map<Schema,Schema> queue) throws IOException {
     List<Schema> schemaTypes = originalSchema.getTypes();
-    List<Schema> newTypeSchemas = new ArrayList<Schema>();
-    for (int i = 0; i < schemaTypes.size(); i++) {
-      Schema currentTypeSchema = schemaTypes.get(i);
-      newTypeSchemas.add(getSchemaWithDirtySupport(currentTypeSchema,queue));
+    List<Schema> newTypeSchemas = new ArrayList<>();
+    for (Schema currentTypeSchema : schemaTypes) {
+      newTypeSchemas.add(getSchemaWithDirtySupport(currentTypeSchema, queue));
     }
     return Schema.createUnion(newTypeSchemas);
   }
@@ -248,7 +247,7 @@ public class GoraCompiler extends SpecificCompiler {
     
     queue.put(originalSchema, newSchema);
     
-    List<Field> newFields = new ArrayList<Schema.Field>();
+    List<Field> newFields = new ArrayList<>();
     byte[] defaultDirtyBytesValue = new byte[getNumberOfBytesNeededForDirtyBits(originalSchema)];
     Arrays.fill(defaultDirtyBytesValue, (byte) 0);
     JsonNode defaultDirtyJsonValue = JsonNodeFactory.instance
