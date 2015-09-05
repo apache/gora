@@ -4,6 +4,8 @@
 
 Current Development
 
+* GORA-435 Clean Up Code and Fix Potential Bugs (Furkan KAMACI via lewismc)
+
 * GORA-433 Non-Final Public Static Fields Should Be Final (Furkan KAMACI via lewismc)
 
 * GORA-314 Implement TestDriver for AccumuloStoreTest e.g. TODO in class (lewismc)
