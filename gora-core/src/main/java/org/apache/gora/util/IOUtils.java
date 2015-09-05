@@ -79,7 +79,7 @@ public class IOUtils {
         return obj;
       }
     }
-    throw new IOException("cannot write to DataOutput of instance:"
+    throw new IOException("cannot read from DataInput of instance:"
         + in.getClass());
   }
 
