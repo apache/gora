@@ -92,8 +92,7 @@ public class DataStoreTestUtil {
     assertFalse( obj1 == obj2 );
   }
 
-  public static <K> Employee createEmployee(
-      DataStore<K, Employee> dataStore) throws Exception {
+  public static <K> Employee createEmployee() throws Exception {
 
     Employee employee = Employee.newBuilder().build();
     employee.setName(new Utf8("Random Joe"));
@@ -103,7 +102,7 @@ public class DataStoreTestUtil {
     return employee;
   }
 
-  private static <K> WebPage createWebPage(DataStore<K, Employee> dataStore) {
+  private static <K> WebPage createWebPage() {
     WebPage webpage = WebPage.newBuilder().build();
     webpage.setUrl(new Utf8("url.."));
     webpage.setContent(ByteBuffer.wrap("test content".getBytes(Charset.defaultCharset())));
@@ -113,7 +112,7 @@ public class DataStoreTestUtil {
     return webpage;
   }
 
-  public static <K> Employee createBoss(DataStore<K, Employee> dataStore)
+  public static <K> Employee createBoss()
       throws Exception {
 
     Employee employee = Employee.newBuilder().build();
@@ -127,7 +126,7 @@ public class DataStoreTestUtil {
   public static void testAutoCreateSchema(DataStore<String,Employee> dataStore)
   throws Exception {
     //should not throw exception
-    dataStore.put("foo", createEmployee(dataStore));
+    dataStore.put("foo", createEmployee());
   }
 
   public static void testCreateEmployeeSchema(DataStore<String, Employee> dataStore)
@@ -170,7 +169,7 @@ public class DataStoreTestUtil {
   public static void testGetEmployee(DataStore<String, Employee> dataStore)
     throws Exception {
     dataStore.createSchema();
-    Employee employee = DataStoreTestUtil.createEmployee(dataStore);
+    Employee employee = DataStoreTestUtil.createEmployee();
     String ssn = employee.getSsn().toString();
     dataStore.put(ssn, employee);
     dataStore.flush();
@@ -183,8 +182,8 @@ public class DataStoreTestUtil {
   public static void testGetEmployeeRecursive(DataStore<String, Employee> dataStore)
     throws Exception {
 
-    Employee employee = DataStoreTestUtil.createEmployee(dataStore);
-    Employee boss = DataStoreTestUtil.createBoss(dataStore);
+    Employee employee = DataStoreTestUtil.createEmployee();
+    Employee boss = DataStoreTestUtil.createBoss();
     employee.setBoss(boss);
     
     String ssn = employee.getSsn().toString();
@@ -197,9 +196,9 @@ public class DataStoreTestUtil {
   public static void testGetEmployeeDoubleRecursive(DataStore<String, Employee> dataStore)
       throws Exception {
 
-      Employee employee = DataStoreTestUtil.createEmployee(dataStore);
-      Employee boss = DataStoreTestUtil.createBoss(dataStore);
-      Employee uberBoss = DataStoreTestUtil.createBoss(dataStore);
+      Employee employee = DataStoreTestUtil.createEmployee();
+      Employee boss = DataStoreTestUtil.createBoss();
+      Employee uberBoss = DataStoreTestUtil.createBoss();
       uberBoss.setName(new Utf8("Überboss")) ;
       boss.setBoss(uberBoss) ;
       employee.setBoss(boss) ;
@@ -214,7 +213,7 @@ public class DataStoreTestUtil {
   public static void testGetEmployeeNested(DataStore<String, Employee> dataStore)
     throws Exception {
 
-    Employee employee = DataStoreTestUtil.createEmployee(dataStore);
+    Employee employee = DataStoreTestUtil.createEmployee();
     WebPage webpage = new BeanFactoryImpl<>(String.class,WebPage.class).newPersistent() ;
     
     webpage.setUrl(new Utf8("url..")) ;
@@ -236,7 +235,7 @@ public class DataStoreTestUtil {
   public static void testGetEmployee3UnionField(DataStore<String, Employee> dataStore)
     throws Exception {
 
-    Employee employee = DataStoreTestUtil.createEmployee(dataStore);
+    Employee employee = DataStoreTestUtil.createEmployee();
     employee.setBoss(new Utf8("Real boss")) ;
 
     String ssn = employee.getSsn().toString();
@@ -255,10 +254,10 @@ public class DataStoreTestUtil {
 
   public static void testGetEmployeeWithFields(DataStore<String, Employee> dataStore)
     throws Exception {
-    Employee employee = DataStoreTestUtil.createEmployee(dataStore);
-    WebPage webpage = createWebPage(dataStore);
+    Employee employee = DataStoreTestUtil.createEmployee();
+    WebPage webpage = createWebPage();
     employee.setWebpage(webpage);
-    Employee boss = createBoss(dataStore);
+    Employee boss = createBoss();
     employee.setBoss(boss);
     String ssn = employee.getSsn().toString();
     dataStore.put(ssn, employee);
@@ -392,7 +391,7 @@ public class DataStoreTestUtil {
   public static Employee testPutEmployee(DataStore<String, Employee> dataStore)
   throws Exception {
     dataStore.createSchema();
-    Employee employee = DataStoreTestUtil.createEmployee(dataStore);
+    Employee employee = DataStoreTestUtil.createEmployee();
     return employee;
   }
 

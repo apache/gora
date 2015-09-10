@@ -167,7 +167,7 @@ public class MongoMappingBuilder<K, T extends PersistentBase> {
     List<Element> fields = classElement.getChildren(TAG_FIELD);
     for (Element field : fields) {
       mapping
-          .addClassField(docNameFromMapping, field.getAttributeValue(ATT_NAME),
+          .addClassField(field.getAttributeValue(ATT_NAME),
               field.getAttributeValue(ATT_FIELD),
               field.getAttributeValue(ATT_TYPE));
     }

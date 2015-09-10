@@ -99,12 +99,11 @@ public class WordCount extends Configured implements Tool {
   
   /**
    * Creates and returns the {@link Job} for submitting to Hadoop mapreduce.
-   * @param inStore
    * @param query
    * @return
    * @throws IOException
    */
-  public Job createJob(DataStore<String,WebPage> inStore, Query<String,WebPage> query
+  public Job createJob(Query<String,WebPage> query
       , DataStore<String,TokenDatum> outStore) throws IOException {
     Job job = new Job(getConf());
    
@@ -118,7 +117,7 @@ public class WordCount extends Configured implements Tool {
      * obtained via Gora, any other mapper can be used, such as 
      * Hadoop-MapReduce's WordCount.TokenizerMapper.
      */
-    GoraMapper.initMapperJob(job, query, inStore, Text.class
+    GoraMapper.initMapperJob(job, query, Text.class
         , IntWritable.class, TokenizerMapper.class, true);
     
     /* Reducers are initialized with GoraReducer#initReducer().
@@ -136,7 +135,7 @@ public class WordCount extends Configured implements Tool {
       DataStore<String, TokenDatum> outStore) throws IOException, InterruptedException, ClassNotFoundException {
     Query<String,WebPage> query = inStore.newQuery();
     
-    Job job = createJob(inStore, query, outStore);
+    Job job = createJob(query, outStore);
     return job.waitForCompletion(true) ? 0 : 1;
   }
   

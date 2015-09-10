@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -522,7 +521,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       @SuppressWarnings("rawtypes")
       SpecificDatumReader reader = getDatumReader(fieldSchema.getFullName(),
           fieldSchema);
-      fieldValue = IOUtils.deserialize((byte[]) solrValue, reader, fieldSchema,
+      fieldValue = IOUtils.deserialize((byte[]) solrValue, reader,
           persistent.get(field.pos()));
       break;
     case ENUM:
@@ -560,7 +559,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
         SpecificDatumReader unionReader = getDatumReader(
             String.valueOf(fieldSchema.hashCode()), fieldSchema);
         fieldValue = IOUtils.deserialize((byte[]) solrValue, unionReader,
-            fieldSchema, persistent.get(field.pos()));
+            persistent.get(field.pos()));
         break;
       }
       break;
@@ -621,7 +620,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
         @SuppressWarnings("rawtypes")
         SpecificDatumWriter writer = getDatumWriter(fieldSchema.getFullName(),
             fieldSchema);
-        data = IOUtils.serialize(writer, fieldSchema, fieldValue);
+        data = IOUtils.serialize(writer, fieldValue);
       } catch (IOException e) {
         LOG.error(e.getMessage(), e);
       }
@@ -647,7 +646,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
           @SuppressWarnings("rawtypes")
           SpecificDatumWriter writer = getDatumWriter(
               String.valueOf(fieldSchema.hashCode()), fieldSchema);
-          serilazeData = IOUtils.serialize(writer, fieldSchema, fieldValue);
+          serilazeData = IOUtils.serialize(writer, fieldValue);
         } catch (IOException e) {
           LOG.error(e.getMessage(), e);
         }

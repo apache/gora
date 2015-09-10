@@ -102,7 +102,6 @@ public class GoraMapper<K1, V1 extends Persistent, K2, V2> extends Mapper<K1, V1
    * Initializes the Mapper, and sets input parameters for the job
    * @param job the job to set the properties for
    * @param query the query to get the inputs from
-   * @param dataStore the datastore as the input
    * @param outKeyClass Map output key class
    * @param outValueClass Map output value class
    * @param mapperClass the mapper class extending GoraMapper
@@ -113,14 +112,13 @@ public class GoraMapper<K1, V1 extends Persistent, K2, V2> extends Mapper<K1, V1
   public static <K1, V1 extends Persistent, K2, V2> void initMapperJob(
       Job job, 
       Query<K1,V1> query,
-      DataStore<K1,V1> dataStore,
-      Class<K2> outKeyClass, 
+      Class<K2> outKeyClass,
       Class<V2> outValueClass,
       Class<? extends GoraMapper> mapperClass,
       Class<? extends Partitioner> partitionerClass, 
       boolean reuseObjects) throws IOException {
     //set the input via GoraInputFormat
-    GoraInputFormat.setInput(job, query, dataStore, reuseObjects);
+    GoraInputFormat.setInput(job, query, reuseObjects);
 
     job.setMapperClass(mapperClass);
     job.setMapOutputKeyClass(outKeyClass);
@@ -148,7 +146,7 @@ public class GoraMapper<K1, V1 extends Persistent, K2, V2> extends Mapper<K1, V1
       Class<V2> outValueClass,
       Class<? extends GoraMapper> mapperClass, 
       boolean reuseObjects) throws IOException {
-    initMapperJob(job, dataStore.newQuery(), dataStore, 
+    initMapperJob(job, dataStore.newQuery(),
         outKeyClass, outValueClass, mapperClass, reuseObjects);
   }
   
@@ -156,7 +154,6 @@ public class GoraMapper<K1, V1 extends Persistent, K2, V2> extends Mapper<K1, V1
    * Initializes the Mapper, and sets input parameters for the job
    * @param job the job to set the properties for
    * @param query the query to get the inputs from
-   * @param dataStore the datastore as the input
    * @param outKeyClass Map output key class
    * @param outValueClass Map output value class
    * @param mapperClass the mapper class extending GoraMapper
@@ -166,12 +163,11 @@ public class GoraMapper<K1, V1 extends Persistent, K2, V2> extends Mapper<K1, V1
   public static <K1, V1 extends Persistent, K2, V2> void initMapperJob(
       Job job, 
       Query<K1,V1> query, 
-      DataStore<K1,V1> dataStore,
-      Class<K2> outKeyClass, 
+      Class<K2> outKeyClass,
       Class<V2> outValueClass,
       Class<? extends GoraMapper> mapperClass, 
       boolean reuseObjects) throws IOException {
-    initMapperJob(job, query, dataStore, outKeyClass, outValueClass,
+    initMapperJob(job, query, outKeyClass, outValueClass,
         mapperClass, null, reuseObjects);
   }
 }

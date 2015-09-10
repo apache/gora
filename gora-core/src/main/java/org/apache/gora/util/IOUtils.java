@@ -151,7 +151,7 @@ public class IOUtils {
    * Serializes the field object using the datumWriter.
    */
   public static<T extends SpecificRecord> void serialize(OutputStream os,
-      SpecificDatumWriter<T> datumWriter, Schema schema, T object)
+      SpecificDatumWriter<T> datumWriter, T object)
       throws IOException {
 
     BinaryEncoder encoder = EncoderFactory.get().binaryEncoder(os, null);
@@ -163,7 +163,7 @@ public class IOUtils {
    * Serializes the field object using the datumWriter.
    */
   public static<T> void serialize(OutputStream os,
-      SpecificDatumWriter<T> datumWriter, Schema schema, T object)
+      SpecificDatumWriter<T> datumWriter, T object)
       throws IOException {
 
     BinaryEncoder encoder = EncoderFactory.get().binaryEncoder(os, null);
@@ -175,9 +175,9 @@ public class IOUtils {
    * Serializes the field object using the datumWriter.
    */
   public static<T extends SpecificRecord> byte[] serialize(SpecificDatumWriter<T> datumWriter
-      , Schema schema, T object) throws IOException {
+      , T object) throws IOException {
     ByteArrayOutputStream os = new ByteArrayOutputStream();
-    serialize(os, datumWriter, schema, object);
+    serialize(os, datumWriter, object);
     return os.toByteArray();
   }
 
@@ -185,9 +185,9 @@ public class IOUtils {
    * Serializes the field object using the datumWriter.
    */
   public static<T> byte[] serialize(SpecificDatumWriter<T> datumWriter
-      , Schema schema, T object) throws IOException {
+      , T object) throws IOException {
     ByteArrayOutputStream os = new ByteArrayOutputStream();
-    serialize(os, datumWriter, schema, object);
+    serialize(os, datumWriter, object);
     return os.toByteArray();
   }
   
@@ -257,7 +257,7 @@ public class IOUtils {
    * Deserializes the field object using the datumReader.
    */
   public static<K, T extends SpecificRecord> T deserialize(InputStream is,
-      SpecificDatumReader<T> datumReader, Schema schema, T object)
+      SpecificDatumReader<T> datumReader, T object)
       throws IOException {
     decoder = DecoderFactory.get().binaryDecoder(is, decoder);
     return datumReader.read(object, decoder);
@@ -267,7 +267,7 @@ public class IOUtils {
    * Deserializes the field object using the datumReader.
    */
   public static<K, T extends SpecificRecord> T deserialize(byte[] bytes,
-      SpecificDatumReader<T> datumReader, Schema schema, T object)
+      SpecificDatumReader<T> datumReader, T object)
       throws IOException {
     decoder = DecoderFactory.get().binaryDecoder(bytes, decoder);
     return datumReader.read(object, decoder);
@@ -277,7 +277,7 @@ public class IOUtils {
    * Deserializes the field object using the datumReader.
    */
   public static<K, T> T deserialize(byte[] bytes,
-      SpecificDatumReader<T> datumReader, Schema schema, T object)
+      SpecificDatumReader<T> datumReader, T object)
       throws IOException {
     decoder = DecoderFactory.get().binaryDecoder(bytes, decoder);
     return datumReader.read(object, decoder);

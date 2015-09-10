@@ -74,7 +74,7 @@ public class CassandraSuperColumn extends CassandraColumn {
               
               HColumn<ByteBuffer, ByteBuffer> cc = getUnionTypeColumn(mapKey
                   + CassandraStore.UNION_COL_SUFIX, this.hSuperColumn.getColumns());
-              Integer unionIndex = getUnionIndex(mapKey.toString(), cc);
+              Integer unionIndex = getUnionIndex(cc);
               Schema realSchema = fieldSchema.getValueType().getTypes().get(unionIndex);
               memberValue = fromByteBuffer(realSchema, hColumn.getValue());
               
@@ -132,7 +132,7 @@ public class CassandraSuperColumn extends CassandraColumn {
             if (memberType.equals(Type.UNION)){
               HColumn<ByteBuffer, ByteBuffer> hc = getUnionTypeColumn(memberField.name()
                   + CassandraStore.UNION_COL_SUFIX, this.hSuperColumn.getColumns().toArray());
-              Integer unionIndex = getUnionIndex(memberField.name(),hc);
+              Integer unionIndex = getUnionIndex(hc);
               cassandraColumn.setUnionType(unionIndex);
             }
             
@@ -159,7 +159,7 @@ public class CassandraSuperColumn extends CassandraColumn {
     return value;
   }
 
- private Integer getUnionIndex(String fieldName, HColumn<ByteBuffer, ByteBuffer> uc){
+ private Integer getUnionIndex(HColumn<ByteBuffer, ByteBuffer> uc){
    Integer val = IntegerSerializer.get().fromByteBuffer(uc.getValue());
    return Integer.parseInt(val.toString());
  }

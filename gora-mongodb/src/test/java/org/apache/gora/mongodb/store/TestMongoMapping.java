@@ -32,58 +32,58 @@ public class TestMongoMapping {
   public void addSeveralTopLevelDocumentFields() {
     MongoMapping mapping = new MongoMapping();
     // Add fields of type binary
-    mapping.addClassField("test", "classBin1", "topLevel1",
+    mapping.addClassField("classBin1", "topLevel1",
         DocumentFieldType.BINARY.toString().toLowerCase(Locale.getDefault()));
-    mapping.addClassField("test", "classBin2", "topLevel2",
+    mapping.addClassField("classBin2", "topLevel2",
         DocumentFieldType.BINARY.toString().toUpperCase(Locale.getDefault()));
     assertEquals("topLevel1", mapping.getDocumentField("classBin1"));
     assertEquals("topLevel2", mapping.getDocumentField("classBin2"));
     // Add fields of type int32
-    mapping.addClassField("test", "classInt321", "topLevel3",
+    mapping.addClassField("classInt321", "topLevel3",
         DocumentFieldType.INT32.toString().toLowerCase(Locale.getDefault()));
-    mapping.addClassField("test", "classInt322", "topLevel4",
+    mapping.addClassField("classInt322", "topLevel4",
         DocumentFieldType.INT32.toString().toUpperCase(Locale.getDefault()));
     assertEquals("topLevel3", mapping.getDocumentField("classInt321"));
     assertEquals("topLevel4", mapping.getDocumentField("classInt322"));
     // Add fields of type int64
-    mapping.addClassField("test", "classInt641", "topLevel5",
+    mapping.addClassField("classInt641", "topLevel5",
         DocumentFieldType.INT64.toString().toLowerCase(Locale.getDefault()));
-    mapping.addClassField("test", "classInt642", "topLevel6",
+    mapping.addClassField("classInt642", "topLevel6",
         DocumentFieldType.INT64.toString().toUpperCase(Locale.getDefault()));
     assertEquals("topLevel5", mapping.getDocumentField("classInt641"));
     assertEquals("topLevel6", mapping.getDocumentField("classInt642"));
     // Add fields of type double
-    mapping.addClassField("test", "classDouble1", "topLevel7",
+    mapping.addClassField("classDouble1", "topLevel7",
         DocumentFieldType.DOUBLE.toString().toLowerCase(Locale.getDefault()));
-    mapping.addClassField("test", "classDouble2", "topLevel8",
+    mapping.addClassField("classDouble2", "topLevel8",
         DocumentFieldType.DOUBLE.toString().toUpperCase(Locale.getDefault()));
     assertEquals("topLevel7", mapping.getDocumentField("classDouble1"));
     assertEquals("topLevel8", mapping.getDocumentField("classDouble2"));
     // Add fields of type string
-    mapping.addClassField("test", "classString1", "topLevel9",
+    mapping.addClassField("classString1", "topLevel9",
         DocumentFieldType.STRING.toString().toLowerCase(Locale.getDefault()));
-    mapping.addClassField("test", "classString2", "topLevel10",
+    mapping.addClassField("classString2", "topLevel10",
         DocumentFieldType.STRING.toString().toUpperCase(Locale.getDefault()));
     assertEquals("topLevel9", mapping.getDocumentField("classString1"));
     assertEquals("topLevel10", mapping.getDocumentField("classString2"));
     // Add fields of type date
-    mapping.addClassField("test", "classDate1", "topLevel11",
+    mapping.addClassField("classDate1", "topLevel11",
         DocumentFieldType.DATE.toString().toLowerCase(Locale.getDefault()));
-    mapping.addClassField("test", "classDate2", "topLevel12",
+    mapping.addClassField("classDate2", "topLevel12",
         DocumentFieldType.DATE.toString().toUpperCase(Locale.getDefault()));
     assertEquals("topLevel11", mapping.getDocumentField("classDate1"));
     assertEquals("topLevel12", mapping.getDocumentField("classDate2"));
     // Add fields of type list
-    mapping.addClassField("test", "classList1", "topLevel13",
+    mapping.addClassField("classList1", "topLevel13",
         DocumentFieldType.LIST.toString().toLowerCase(Locale.getDefault()));
-    mapping.addClassField("test", "classList2", "topLevel14",
+    mapping.addClassField("classList2", "topLevel14",
         DocumentFieldType.LIST.toString().toUpperCase(Locale.getDefault()));
     assertEquals("topLevel13", mapping.getDocumentField("classList1"));
     assertEquals("topLevel14", mapping.getDocumentField("classList2"));
     // Add fields of type document
-    mapping.addClassField("test", "classDocument1", "topLevel15",
+    mapping.addClassField("classDocument1", "topLevel15",
         DocumentFieldType.DOCUMENT.toString().toLowerCase(Locale.getDefault()));
-    mapping.addClassField("test", "classDocument2", "topLevel16",
+    mapping.addClassField("classDocument2", "topLevel16",
         DocumentFieldType.DOCUMENT.toString().toUpperCase(Locale.getDefault()));
     assertEquals("topLevel15", mapping.getDocumentField("classDocument1"));
     assertEquals("topLevel16", mapping.getDocumentField("classDocument2"));
@@ -99,12 +99,12 @@ public class TestMongoMapping {
 
     // Add fields with already registered parent fields
     mapping = new MongoMapping();
-    mapping.addClassField("test", "classField1", "top1", "document");
-    mapping.addClassField("test", "classField2", "top1.level2-1", "string");
-    mapping.addClassField("test", "classField3", "top1.level2-2", "int32");
-    mapping.addClassField("test", "classField4", "top1.level2-3", "document");
-    mapping.addClassField("test", "classField5", "top1.level2-4", "date");
-    mapping.addClassField("test", "classField6", "top1.level2-3.leaf", "int64");
+    mapping.addClassField("classField1", "top1", "document");
+    mapping.addClassField("classField2", "top1.level2-1", "string");
+    mapping.addClassField("classField3", "top1.level2-2", "int32");
+    mapping.addClassField("classField4", "top1.level2-3", "document");
+    mapping.addClassField("classField5", "top1.level2-4", "date");
+    mapping.addClassField("classField6", "top1.level2-3.leaf", "int64");
     assertEquals("top1", mapping.getDocumentField("classField1"));
     assertEquals(DocumentFieldType.DOCUMENT,
         mapping.getDocumentFieldType("top1"));
@@ -126,10 +126,10 @@ public class TestMongoMapping {
 
     // Add fields with not already registered parent fields
     mapping = new MongoMapping();
-    mapping.addClassField("test", "classField1", "top1.l2.l3.l4", "double");
-    mapping.addClassField("test", "classField2", "top2.l2", "document");
-    mapping.addClassField("test", "classField3", "top2.l2.l3.l5.l6", "list");
-    mapping.addClassField("test", "classField4", "top1.l2.date", "date");
+    mapping.addClassField("classField1", "top1.l2.l3.l4", "double");
+    mapping.addClassField("classField2", "top2.l2", "document");
+    mapping.addClassField("classField3", "top2.l2.l3.l5.l6", "list");
+    mapping.addClassField("classField4", "top1.l2.date", "date");
     assertEquals("top1.l2.l3.l4", mapping.getDocumentField("classField1"));
     assertEquals(DocumentFieldType.DOCUMENT,
         mapping.getDocumentFieldType("top1"));
@@ -168,25 +168,25 @@ public class TestMongoMapping {
   @Test(expected = IllegalStateException.class)
   public void addConflictingFields1() {
     MongoMapping mapping = new MongoMapping();
-    mapping.addClassField("test", "classFieldName", "top1", "int32");
-    mapping.addClassField("test", "classFieldName", "top1.l2", "double"); // conflict
+    mapping.addClassField("classFieldName", "top1", "int32");
+    mapping.addClassField("classFieldName", "top1.l2", "double"); // conflict
   }
 
   /** Add conflicting fields */
   @Test(expected = IllegalStateException.class)
   public void addConflictingFields2() {
     MongoMapping mapping = new MongoMapping();
-    mapping.addClassField("test", "classFieldName", "top1", "int64");
-    mapping.addClassField("test", "classFieldName", "top1", "string"); // conflict
+    mapping.addClassField("classFieldName", "top1", "int64");
+    mapping.addClassField("classFieldName", "top1", "string"); // conflict
   }
 
   /** Add conflicting fields */
   @Test(expected = IllegalStateException.class)
   public void addConflictingFields3() {
     MongoMapping mapping = new MongoMapping();
-    mapping.addClassField("test", "classFieldName", "top1", "document");
-    mapping.addClassField("test", "classFieldName", "top1.l2", "string");
-    mapping.addClassField("test", "classFieldName", "top1.l2.l3", "double"); // conflict
+    mapping.addClassField("classFieldName", "top1", "document");
+    mapping.addClassField("classFieldName", "top1.l2", "string");
+    mapping.addClassField("classFieldName", "top1.l2.l3", "double"); // conflict
   }
 
 }
