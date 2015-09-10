@@ -2,7 +2,11 @@
  ==CHANGES.txt
  =======================================================================
 
-Apache Gora 0.6 Release - 05/09/2015 (dd/mm/yyyy)
+Current Development
+
+* GORA-438 Erroneous Exception Message at IOUtils.java (Furkan KAMACI via lewismc)
+
+Apache Gora 0.6.1 Release - 05/09/2015 (dd/mm/yyyy)
 Release Report - http://s.apache.org/l69
 
 * GORA-436 Improve Source Code as Java 7 Compatible (Furkan KAMACI via lewismc)
