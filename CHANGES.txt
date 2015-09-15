@@ -4,6 +4,8 @@
 
 Current Development
 
+* GORA-441 Update build.gradle within gora-gradle-plugin to reference canonical Apache links (lewismc)
+
 * GORA-438 Erroneous Exception Message at IOUtils.java (Furkan KAMACI via lewismc)
 
 Apache Gora 0.6.1 Release - 05/09/2015 (dd/mm/yyyy)
