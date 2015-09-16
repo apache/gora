@@ -141,6 +141,15 @@
       </roles>
     </developer>
     <developer>
+      <id>kamaci</id>
+      <name>Furkan KAMACI</name>
+      <email>kamaci [at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
       <id>kturner</id>
       <name>Keith Turner</name>
       <email>kturner [at] apache [dot] org</email>
