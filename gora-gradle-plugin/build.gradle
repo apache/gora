@@ -68,8 +68,8 @@ publishing {
 }
 
 bintray {
-    user = project.hasProperty('bintrayUser') ? project.getProperty('bintrayUser') : null
-    key = project.hasProperty('bintrayKey') ? project.getProperty('bintrayKey') : null
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_KEY')
 
     publications = ['mavenJava']
     publish = true
@@ -79,9 +79,9 @@ bintray {
         name = 'gradle-gora-plugin'
         licenses = ['Apache-2.0']
         desc = 'Gradle plugin for generating Gora beans for Avro schemas'
-        websiteUrl = 'https://github.com/Dictanova/gora-gradle-plugin'
-        issueTrackerUrl = 'https://github.com/Dictanova/gora-gradle-plugin/issues'
-        vcsUrl = 'https://github.com/Dictanova/gora-gradle-plugin.git'
+        websiteUrl = 'http://gora.apache.org'
+        issueTrackerUrl = 'https://issues.apache.org/jira/browse/GORA'
+        vcsUrl = 'http://git.apache.org/gora.git'
         labels = ['gradle', 'gora', 'avro']
         publicDownloadNumbers = true
         attributes = ['gradle-plugin': 'org.apache.gora:org.apache.gora.gradle:gora-gradle-plugin']
