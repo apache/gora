@@ -27,9 +27,7 @@ import java.util.NavigableMap;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
-
 import org.apache.avro.Schema.Field;
-
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
@@ -41,11 +39,15 @@ import org.apache.gora.query.impl.ResultBase;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.AvroUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Memory based {@link DataStore} implementation for tests.
  */
 public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
+  
+  private static final Logger LOG = LoggerFactory.getLogger(MemStore.class); 
 
   public static class MemQuery<K, T extends PersistentBase> extends QueryBase<K, T> {
     public MemQuery() {
@@ -67,7 +69,7 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
     }
     //@Override
     public void close() { }
-    
+
     @Override
     public float getProgress() throws IOException {
       return 0;
@@ -95,7 +97,7 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
   @Override
   public String getSchemaName() {
-    return "default";
+    return "MemStore";
   }
 
   @Override
@@ -105,8 +107,8 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
   @Override
   public long deleteByQuery(Query<K, T> query) {
-  try{
-    long deletedRows = 0;
+    try{
+      long deletedRows = 0;
       Result<K,T> result = query.execute();
 
       while(result.next()) {
@@ -118,27 +120,43 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
       return 0;
     }
   }
-  
+
+  /**
+   * An important feature of {@link MemStore#execute(Query)} is
+   * that when specifying the {@link MemQuery} one should be aware 
+   * that when fromKey and toKey are equal, the returned map is empty 
+   * unless fromInclusive and toInclusive are both true. On the other hand
+   * if either or both of fromKey and toKey are null we return no results.
+   */
   @SuppressWarnings("unchecked")
   @Override
   public Result<K, T> execute(Query<K, T> query) {
     K startKey = query.getStartKey();
     K endKey = query.getEndKey();
     if(startKey == null) {
-      startKey = (K) map.firstKey();
+      if (!map.isEmpty()) {
+        startKey = (K) map.firstKey();
+      }
     }
     if(endKey == null) {
-      endKey = (K) map.lastKey();
+      if (!map.isEmpty()) {
+        endKey = (K) map.lastKey();
+      }
     }
 
     //check if query.fields is null
     query.setFields(getFieldsToQuery(query.getFields()));
-
-    ConcurrentNavigableMap<K,T> submap = map.subMap(startKey, true, endKey, true);
-
+    ConcurrentNavigableMap<K,T> submap = null;
+    try {
+      submap =  map.subMap(startKey, true, endKey, true);
+    } catch (NullPointerException npe){
+      LOG.info("Either startKey || endKey || startKey and endKey value(s) is null. "
+          + "No results will be returned for query to MemStore.");
+      return new MemResult<>(this, query, new ConcurrentSkipListMap<K, T>());
+    }
     return new MemResult<>(this, query, submap);
   }
-  
+
   @SuppressWarnings("unchecked")
   @Override
   public T get(K key, String[] fields) {
@@ -173,7 +191,7 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
   public Query<K, T> newQuery() {
     return new MemQuery<>(this);
   }
-  
+
   @SuppressWarnings("unchecked")
   @Override
   public void put(K key, T obj) {
@@ -196,12 +214,19 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
   public void close() {
   }
 
+  /**
+   * As MemStore is basically an implementation of
+   * {@link java.util.concurrent.ConcurrentSkipListMap}
+   * it has no concept of a schema.
+   */
   @Override
   public void createSchema() { }
 
   @Override
   public void deleteSchema() {
-    map.clear();
+    if (!map.isEmpty()) {
+      map.clear();
+    }
   }
 
   @Override
