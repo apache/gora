@@ -4,6 +4,12 @@
 
 Current Development
 
+* GORA-240 Tests for MemStore (lewismc)
+  
+* GORA-446 java.util.NoSuchElementException thrown by accessing java.util.concurrent.ConcurrentSkipListMap.firstKey in MemStore (lewismc)
+ 
+* GORA-125 Clean up logging libraries (lewismc)
+
 * GORA-441 Update build.gradle within gora-gradle-plugin to reference canonical Apache links (lewismc)
 
 * GORA-438 Erroneous Exception Message at IOUtils.java (Furkan KAMACI via lewismc)
