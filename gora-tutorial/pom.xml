@@ -137,14 +137,8 @@
     <!-- Logging Dependencies -->
     <dependency>
       <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
+      <artifactId>slf4j-log4j12</artifactId>
     </dependency>
-
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-    </dependency>
-
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
@@ -156,9 +150,6 @@
       </exclusions>
     </dependency>
 
-    <!--dependency> <groupId>org.hsqldb</groupId> <artifactId>hsqldb</artifactId> 
-      </dependency> <dependency> <groupId>mysql</groupId> <artifactId>mysql-connector-java</artifactId> 
-      </dependency -->
   </dependencies>
 
 </project>
