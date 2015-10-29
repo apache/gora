@@ -684,7 +684,7 @@ public class ByteUtils {
     case BOOLEAN: return (T)Boolean.valueOf(val[0] != 0);
     case RECORD:  //fall
     case MAP:
-    case ARRAY:   return (T)IOUtils.deserialize(val, (SpecificDatumReader<SpecificRecord>)datumReader, schema, (SpecificRecord)object);
+    case ARRAY:   return (T)IOUtils.deserialize(val, (SpecificDatumReader<SpecificRecord>)datumReader, (SpecificRecord)object);
     default: throw new RuntimeException("Unknown type: "+type);
     }
   }
@@ -705,7 +705,7 @@ public class ByteUtils {
     case ENUM:    return new byte[] { (byte)((Enum<?>) o).ordinal() };
     case RECORD:  //fall
     case MAP:
-    case ARRAY:   return IOUtils.serialize((SpecificDatumWriter<SpecificRecord>)datumWriter, schema, (SpecificRecord)o);
+    case ARRAY:   return IOUtils.serialize((SpecificDatumWriter<SpecificRecord>)datumWriter, (SpecificRecord)o);
     default: throw new RuntimeException("Unknown type: "+type);
     }
   }

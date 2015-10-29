@@ -73,19 +73,18 @@ public class QueryCounter<K, T extends Persistent> extends Configured implements
 
   /**
    * Creates and returns the {@link Job} for submitting to Hadoop mapreduce.
-   * @param dataStore
    * @param query
    * @return
    * @throws IOException
    */
-  public Job createJob(DataStore<K,T> dataStore, Query<K,T> query) throws IOException {
+  public Job createJob(Query<K,T> query) throws IOException {
     Job job = new Job(getConf());
 
     job.setJobName("QueryCounter");
     job.setNumReduceTasks(0);
     job.setJarByClass(getClass());
     /* Mappers are initialized with GoraMapper.initMapper()*/
-    GoraMapper.initMapperJob(job, query, dataStore, NullWritable.class
+    GoraMapper.initMapperJob(job, query, NullWritable.class
         , NullWritable.class, QueryCounterMapper.class, true);
 
     job.setOutputFormatClass(NullOutputFormat.class);
@@ -96,8 +95,8 @@ public class QueryCounter<K, T extends Persistent> extends Configured implements
   /**
    * Returns the number of results to the Query
    */
-  public long countQuery(DataStore<K,T> dataStore, Query<K,T> query) throws Exception {
-    Job job = createJob(dataStore, query);
+  public long countQuery(Query<K,T> query) throws Exception {
+    Job job = createJob(query);
     job.waitForCompletion(true);
     assert(job.isComplete());
 
@@ -111,7 +110,7 @@ public class QueryCounter<K, T extends Persistent> extends Configured implements
   public long countQuery(DataStore<K,T> dataStore) throws Exception {
     Query<K,T> query = getQuery(dataStore);
 
-    Job job = createJob(dataStore, query);
+    Job job = createJob(query);
     job.waitForCompletion(true);
     assert(job.isComplete());
 

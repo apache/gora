@@ -214,7 +214,7 @@ public class Verify extends Configured implements Tool {
       readFlushed(job.getConfiguration());
     }
 
-    GoraMapper.initMapperJob(job, query, store, LongWritable.class, VLongWritable.class, VerifyMapper.class, true);
+    GoraMapper.initMapperJob(job, query, LongWritable.class, VLongWritable.class, VerifyMapper.class, true);
 
     job.getConfiguration().setBoolean("mapred.map.tasks.speculative.execution", false);
     

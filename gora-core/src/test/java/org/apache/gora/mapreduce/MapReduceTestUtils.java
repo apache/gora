@@ -68,7 +68,7 @@ public class MapReduceTestUtils {
 
     //run the job
     log.info("running count query job");
-    long result = counter.countQuery(dataStore, query);
+    long result = counter.countQuery(query);
     log.info("finished count query job");
     
     //assert results

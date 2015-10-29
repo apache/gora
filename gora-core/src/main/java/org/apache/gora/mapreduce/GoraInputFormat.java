@@ -65,8 +65,7 @@ public class GoraInputFormat<K, T extends PersistentBase>
   private Query<K, T> query;
 
   @SuppressWarnings({ "rawtypes" })
-  private void setInputPath(PartitionQuery<K,T> partitionQuery
-      , TaskAttemptContext context) throws IOException {
+  private void setInputPath(PartitionQuery<K, T> partitionQuery) throws IOException {
     //if the data store is file based
     if(partitionQuery instanceof FileSplitPartitionQuery) {
       FileSplit split = ((FileSplitPartitionQuery<K,T>)partitionQuery).getSplit();
@@ -83,7 +82,7 @@ public class GoraInputFormat<K, T extends PersistentBase>
     PartitionQuery<K,T> partitionQuery = (PartitionQuery<K, T>)
       ((GoraInputSplit)split).getQuery();
 
-    setInputPath(partitionQuery, context);
+    setInputPath(partitionQuery);
     return new GoraRecordReader<>(partitionQuery, context);
   }
 
@@ -134,20 +133,7 @@ public class GoraInputFormat<K, T extends PersistentBase>
    * @throws IOException
    */
   public static <K1, V1 extends Persistent> void setInput(Job job
-      , Query<K1,V1> query, boolean reuseObjects) throws IOException {
-    setInput(job, query, query.getDataStore(), reuseObjects);
-  }
-
-  /**
-   * Sets the input parameters for the job
-   * @param job the job to set the properties for
-   * @param query the query to get the inputs from
-   * @param dataStore the datastore as the input
-   * @param reuseObjects whether to reuse objects in serialization
-   * @throws IOException
-   */
-  public static <K1, V1 extends Persistent> void setInput(Job job
-      , Query<K1,V1> query, DataStore<K1,V1> dataStore, boolean reuseObjects)
+      , Query<K1,V1> query, boolean reuseObjects)
   throws IOException {
 
     Configuration conf = job.getConfiguration();
@@ -177,6 +163,6 @@ public class GoraInputFormat<K, T extends PersistentBase>
 
     DataStore<K1,V1> store = DataStoreFactory.getDataStore(dataStoreClass
         , inKeyClass, inValueClass, job.getConfiguration());
-    setInput(job, store.newQuery(), store, reuseObjects);
+    setInput(job, store.newQuery(), reuseObjects);
   }
 }

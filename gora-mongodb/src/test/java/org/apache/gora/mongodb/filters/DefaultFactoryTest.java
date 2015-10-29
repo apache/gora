@@ -45,8 +45,8 @@ public class DefaultFactoryTest {
 
     // Create dummy mapping for unit testing
     store = new MongoStore<>();
-    store.getMapping().addClassField(null, "headers", "h", "document");
-    store.getMapping().addClassField(null, "url", "url", "string");
+    store.getMapping().addClassField("headers", "h", "document");
+    store.getMapping().addClassField("url", "url", "string");
   }
 
   @Test

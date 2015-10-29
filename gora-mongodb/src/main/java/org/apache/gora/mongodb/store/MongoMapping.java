@@ -153,8 +153,6 @@ public class MongoMapping {
    * Register a new mapping between a field from the persisted class to a
    * MongoDocument field.
    * 
-   * @param docNameFromMapping
-   *          name of the document as defined in the mapping
    * @param classFieldName
    *          name of the field in the persisted class
    * @param docFieldName
@@ -162,7 +160,7 @@ public class MongoMapping {
    * @param fieldType
    *          type of the field
    */
-  public void addClassField(String docNameFromMapping, String classFieldName,
+  public void addClassField(String classFieldName,
       String docFieldName, String fieldType) {
     try {
       // Register a new field for the mongo document

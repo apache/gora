@@ -115,10 +115,9 @@ public class GoraSparkEngine<K, V extends Persistent> {
      * Sets the output parameters for the conf that Spark will use
      * @param job the job to set the properties for
      * @param dataStore the datastore as the output
-     * @param reuseObjects whether to reuse objects in serialization
      */
     public <K, V extends Persistent> Configuration generateOutputConf(Job job,
-        DataStore<K, V> dataStore, boolean reuseObjects) {
+        DataStore<K, V> dataStore) {
       return generateOutputConf(job, dataStore.getClass(), dataStore.getKeyClass(),
               dataStore.getPersistentClass());
     }
