@@ -4,6 +4,8 @@
 
 Current Development
 
+* GORA-439 Remove Unused Method Parameters (Furkan KAMACI)
+
 * GORA-240 Tests for MemStore (lewismc)
   
 * GORA-446 java.util.NoSuchElementException thrown by accessing java.util.concurrent.ConcurrentSkipListMap.firstKey in MemStore (lewismc)
