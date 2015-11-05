@@ -102,10 +102,15 @@ public class MemStoreTest extends DataStoreTestBase {
     store.close();
   }
 
-  @Ignore("This test assumes that ")
+  @Ignore("GORA-447")
   @Test
   public void testDeleteByQueryFields() {}
 
+  @Ignore("GORA-447")
+  @Test
+  public void testGetWithFields() {}
+
+  @Ignore("GORA-447")
   @Test
   public void testMemStoreDeleteByQueryFields() throws Exception {
 
