@@ -44,22 +44,23 @@ If you want to build this plugin from a Git checkout, please use Gradle Wrapper 
 ./gradlew clean build publishToMavenLocal
 ```
 
-## Publishing to Bintray
+## Publishing to Gradle plugins portal
 
 As per the [Gora Release HOWTO](https://cwiki.apache.org/confluence/display/GORA/Apache+Gora+Release+Procedure+HOW_TO) we release the gora-gradle-plugin post release of the Gora release artifacts including the Maven artifacts.
 
-In order to publish the plugin you must first register with [bintray](https://bintray.com/) and add your username and API key to your local System properties e.g. ~/.bashrc
+In order to publish the plugin you must first register with [Gradle plugins portal](https://plugins.gradle.org/docs/submit) and add your API key and secret to your $USER_HOME/.gradle/gradle.properties :
 ```
-export BINTRAY_USER=abc
-export BINTRAY_KEY=xyz
+gradle.publish.key=abc
+gradle.publish.secret=xyz
+
 ```
 Then run the following :
 
-cd $GORA_HOME/gora-gradle-plugin; ./gradlew clean bintrayUpload
+cd $GORA_HOME/gora-gradle-plugin; ./gradlew clean publishPlugins
 
 This does the following
 
  * Relaunch compile / assemble tasks
  * Deploy artifacts to your local Maven Repository (~/.m2/repository/)
- * Uploads those artifacts to Bintray (for publication on Maven Central repository)
+ * Uploads those artifacts to Gradle plugins portal
 

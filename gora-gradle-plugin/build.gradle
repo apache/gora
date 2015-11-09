@@ -16,20 +16,21 @@
  * limitations under the License.
  */
 buildscript {
-    repositories {
-        jcenter()
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
     }
-
-    dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.5'
-    }
+  }
+  dependencies {
+    classpath "com.gradle.publish:plugin-publish-plugin:0.9.1"
+  }
 }
 
 apply plugin: 'java-gradle-plugin'
 apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
-apply plugin: 'com.jfrog.bintray'
+apply plugin: "com.gradle.plugin-publish"
 
 repositories {
     mavenCentral()
@@ -42,51 +43,16 @@ dependencies {
     compile "org.apache.gora:gora-compiler:${goraVersion}"
 }
 
-task sourcesJar(type: Jar) {
-    classifier 'sources'
-    from sourceSets.main.allSource
-}
+pluginBundle {
+  website = 'http://gora.apache.org'
+  vcsUrl = 'http://git.apache.org/gora.git'
+  description = 'Gradle plugin for generating Gora beans for Avro schemas'
+  tags = ['gradle', 'gora', 'avro']
 
-task javadocJar(type: Jar) {
-    classifier 'javadoc'
-    from javadoc
-}
-
-artifacts {
-    archives sourcesJar
-    archives javadocJar
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-            artifact sourcesJar
-            artifact javadocJar
-        }
+  plugins {
+    goraPlugin {
+      id = 'org.apache.gora'
+      displayName = 'Gradle Gora plugin'
     }
-}
-
-bintray {
-    user = System.getenv('BINTRAY_USER')
-    key = System.getenv('BINTRAY_KEY')
-
-    publications = ['mavenJava']
-    publish = true
-
-    pkg {
-        repo = 'gradle-gora-plugin'
-        name = 'gradle-gora-plugin'
-        licenses = ['Apache-2.0']
-        desc = 'Gradle plugin for generating Gora beans for Avro schemas'
-        websiteUrl = 'http://gora.apache.org'
-        issueTrackerUrl = 'https://issues.apache.org/jira/browse/GORA'
-        vcsUrl = 'http://git.apache.org/gora.git'
-        labels = ['gradle', 'gora', 'avro']
-        publicDownloadNumbers = true
-        attributes = ['gradle-plugin': 'org.apache.gora:org.apache.gora.gradle:gora-gradle-plugin']
-        version = [
-                attributes: ['gradle-plugin': 'org.apache.gora:org.apache.gora.gradle:gora-gradle-plugin']
-        ]
-    }
+  }
 }
