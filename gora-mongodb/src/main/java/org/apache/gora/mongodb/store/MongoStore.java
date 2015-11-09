@@ -276,11 +276,6 @@ public class MongoStore<K, T extends PersistentBase> extends
    */
   @Override
   public void close() {
-    mongoClientDB.cleanCursors(true);
-    // mongoClient.close();
-    // LOG.info("Closed database and connection for Mongo instance {}.",
-    // new Object[]{mongoClient});
-    LOG.debug("Not closed!!!");
   }
 
   /**
