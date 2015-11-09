@@ -154,9 +154,8 @@ public class MongoStore<K, T extends PersistentBase> extends
       optBuilder.writeConcern(WriteConcern.valueOf(params.getWriteConcern()));
     }
     // If configuration contains a login + secret, try to authenticated with DB
-    List<MongoCredential> credentials = null;
+    List<MongoCredential> credentials = new ArrayList<>();
     if (params.getLogin() != null && params.getSecret() != null) {
-      credentials = new ArrayList<>();
       credentials.add(MongoCredential.createCredential(params.getLogin(), params.getDbname(), params.getSecret().toCharArray()));
     }
     // Build server address
