@@ -638,8 +638,12 @@ public class MongoStore<K, T extends PersistentBase> extends
       // Try auto-conversion of BSON data to ObjectId
       // It will work if data is stored as String or as ObjectId
       Object bin = easybson.get(docf);
-      ObjectId id = ObjectId.massageToObjectId(bin);
-      result = new Utf8(id.toString());
+      if (bin instanceof String) {
+        ObjectId id = new ObjectId((String) bin);
+        result = new Utf8(id.toString());
+      } else {
+        result = new Utf8(bin.toString());
+      }
     } else if (storeType == DocumentFieldType.DATE) {
       Object bin = easybson.get(docf);
       if (bin instanceof Date) {
