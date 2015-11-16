@@ -35,7 +35,6 @@ import java.util.concurrent.TimeUnit;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.accumulo.core.Constants;
 import org.apache.accumulo.core.client.AccumuloException;
 import org.apache.accumulo.core.client.AccumuloSecurityException;
 import org.apache.accumulo.core.client.BatchWriter;
@@ -67,11 +66,10 @@ import org.apache.accumulo.core.data.Value;
 import org.apache.accumulo.core.iterators.SortedKeyIterator;
 import org.apache.accumulo.core.iterators.user.TimestampFilter;
 import org.apache.accumulo.core.master.state.tables.TableState;
+import org.apache.accumulo.core.security.Authorizations;
 import org.apache.accumulo.core.security.ColumnVisibility;
-import org.apache.accumulo.core.security.CredentialHelper;
-import org.apache.accumulo.core.security.thrift.TCredentials;
+import org.apache.accumulo.core.security.Credentials;
 import org.apache.accumulo.core.util.Pair;
-import org.apache.accumulo.core.util.TextUtil;
 import org.apache.accumulo.core.util.UtilWaitThread;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
@@ -121,7 +119,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
   private Connector conn;
   private BatchWriter batchWriter;
   private AccumuloMapping mapping;
-  private TCredentials credentials;
+  private Credentials credentials;
   private Encoder encoder;
 
   public static final Logger LOG = LoggerFactory.getLogger(AccumuloStore.class);
@@ -186,6 +184,15 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
     }
     throw new IllegalArgumentException("Unknown type " + schema.getType());
 
+  }
+
+  private static byte[] getBytes(Text text) {
+    byte[] bytes = text.getBytes();
+    if (bytes.length != text.getLength()) {
+      bytes = new byte[text.getLength()];
+      System.arraycopy(text.getBytes(), 0, bytes, 0, bytes.length);
+    }
+    return bytes;
   }
 
   public K fromBytes(Class<K> clazz, byte[] val) {
@@ -363,7 +370,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         } else {
           conn = new MockInstance().getConnector(user, token);
         }
-        credentials = CredentialHelper.create(user, token, conn.getInstance().getInstanceID());
+        credentials = new Credentials(user, token);
 
         if (autoCreateSchema && !schemaExists())
           createSchema();
@@ -452,8 +459,10 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         conn.tableOperations().setProperty(mapping.tableName, entry.getKey(), entry.getValue());
       }
 
-    } catch (AccumuloException | AccumuloSecurityException | TableExistsException e) {
+    } catch (AccumuloException | AccumuloSecurityException e) {
       LOG.error(e.getMessage(), e);
+    } catch (TableExistsException e) {
+      LOG.debug(e.getMessage(), e);
     }
   }
 
@@ -614,7 +623,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
   public T get(K key, String[] fields) {
     try {
       // TODO make isolated scanner optional?
-      Scanner scanner = new IsolatedScanner(conn.createScanner(mapping.tableName, Constants.NO_AUTHS));
+      Scanner scanner = new IsolatedScanner(conn.createScanner(mapping.tableName, Authorizations.EMPTY));
       Range rowRange = new Range(new Text(toBytes(key)));
 
       scanner.setRange(rowRange);
@@ -818,7 +827,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
 
   private Scanner createScanner(Query<K,T> query) throws TableNotFoundException {
     // TODO make isolated scanner optional?
-    Scanner scanner = new IsolatedScanner(conn.createScanner(mapping.tableName, Constants.NO_AUTHS));
+    Scanner scanner = new IsolatedScanner(conn.createScanner(mapping.tableName, Authorizations.EMPTY));
     setFetchColumns(scanner, query.getFields());
 
     scanner.setRange(createRange(query));
@@ -871,12 +880,12 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       if (conn instanceof MockConnector)
         tl = new MockTabletLocator();
       else
-        tl = TabletLocator.getInstance(conn.getInstance(), new Text(Tables.getTableId(conn.getInstance(), mapping.tableName)));
+        tl = TabletLocator.getLocator(conn.getInstance(), new Text(Tables.getTableId(conn.getInstance(), mapping.tableName)));
 
       Map<String,Map<KeyExtent,List<Range>>> binnedRanges = new HashMap<>();
 
       tl.invalidateCache();
-      while (tl.binRanges(Collections.singletonList(createRange(query)), binnedRanges, credentials).size() > 0) {
+      while (tl.binRanges(credentials, Collections.singletonList(createRange(query)), binnedRanges).size() > 0) {
         // TODO log?
         if (!Tables.exists(conn.getInstance(), Tables.getTableId(conn.getInstance(), mapping.tableName)))
           throw new TableDeletedException(Tables.getTableId(conn.getInstance(), mapping.tableName));
@@ -913,18 +922,18 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
           K startKey = null;
           if (startRow == null || !ke.contains(startRow)) {
             if (ke.getPrevEndRow() != null) {
-              startKey = followingKey(encoder, getKeyClass(), TextUtil.getBytes(ke.getPrevEndRow()));
+              startKey = followingKey(encoder, getKeyClass(), getBytes(ke.getPrevEndRow()));
             }
           } else {
-            startKey = fromBytes(getKeyClass(), TextUtil.getBytes(startRow));
+            startKey = fromBytes(getKeyClass(), getBytes(startRow));
           }
 
           K endKey = null;
           if (endRow == null || !ke.contains(endRow)) {
             if (ke.getEndRow() != null)
-              endKey = lastPossibleKey(encoder, getKeyClass(), TextUtil.getBytes(ke.getEndRow()));
+              endKey = lastPossibleKey(encoder, getKeyClass(), getBytes(ke.getEndRow()));
           } else {
-            endKey = fromBytes(getKeyClass(), TextUtil.getBytes(endRow));
+            endKey = fromBytes(getKeyClass(), getBytes(endRow));
           }
 
           PartitionQueryImpl<K, T> pqi = new PartitionQueryImpl<>(query, startKey, endKey, location);

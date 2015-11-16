@@ -18,6 +18,7 @@
 package org.apache.gora.accumulo;
 
 import org.apache.accumulo.minicluster.MiniAccumuloCluster;
+import org.apache.accumulo.minicluster.MiniAccumuloConfig;
 import org.apache.gora.GoraTestDriver;
 import org.apache.gora.accumulo.store.AccumuloStore;
 import org.junit.Rule;
@@ -33,7 +34,7 @@ public class GoraAccumuloTestDriver extends GoraTestDriver {
 
   private static final Logger LOG = LoggerFactory.getLogger(GoraAccumuloTestDriver.class);
   private static MiniAccumuloCluster cluster = null;
-  private static final String PASSWORD = "password";
+  private static final String PASSWORD = "drowssap";
 
   @Rule
   public TemporaryFolder tmpDir = new TemporaryFolder();
@@ -48,7 +49,10 @@ public class GoraAccumuloTestDriver extends GoraTestDriver {
     log.info("Starting Accumulo MiniAccumuloCluster...");
     try {
       tmpDir.create();
-      cluster = new MiniAccumuloCluster(tmpDir.getRoot(), PASSWORD);
+      MiniAccumuloConfig miniCfg = new MiniAccumuloConfig(tmpDir.getRoot(), PASSWORD);
+      miniCfg.setInstanceName("goraTest");
+      miniCfg.setZooKeeperPort(56321);
+      cluster = new MiniAccumuloCluster(miniCfg);
       cluster.start();
     } catch (Exception e) {
       LOG.error("Error starting Accumulo MiniAccumuloCluster: {}", e.getMessage());

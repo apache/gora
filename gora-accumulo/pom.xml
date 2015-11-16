@@ -50,7 +50,7 @@
   </ciManagement>
 
   <properties>
-    <accumulo.version>1.5.1</accumulo.version>
+    <accumulo.version>1.6.4</accumulo.version>
     <osgi.import>*</osgi.import>
     <osgi.export>org.apache.gora.accumulo*;version="${project.version}";-noimport:=true</osgi.export>
   </properties>
@@ -124,6 +124,14 @@
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
+    </dependency>
+
+    <dependency>
+      <!-- Accumulo mini was trying to load the Shell, which failed with the version of jline in the parent pom -->
+      <groupId>jline</groupId>
+      <artifactId>jline</artifactId>
+      <version>2.11</version>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
