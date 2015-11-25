@@ -48,7 +48,7 @@
   </ciManagement>
 
   <properties>
-    <jclouds.version>1.8.0</jclouds.version>
+    <jclouds.version>1.9.0</jclouds.version>
   </properties>
 
   <build>
@@ -137,23 +137,24 @@
   <profiles>
     <profile>
       <!-- this profile contains the runtime deps for accumulo-1.4 -->
-      <id>accumulo-1.4</id>
+      <id>accumulo-1.6.4</id>
       <dependencies>
         <dependency>
           <groupId>org.apache.gora</groupId>
           <artifactId>gora-accumulo</artifactId>
+          <version>${project.version}</version>
           <scope>runtime</scope>
         </dependency>
         <dependency>
           <groupId>org.apache.accumulo</groupId>
           <artifactId>accumulo-core</artifactId>
-          <version>1.4.0</version>
+          <version>1.6.4</version>
           <scope>runtime</scope>
         </dependency>
-        <dependency>
+        <!--  dependency>
           <groupId>org.apache.accumulo</groupId>
           <artifactId>cloudtrace</artifactId>
-          <version>1.4.0</version>
+          <version>1.6.4</version>
           <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -161,11 +162,10 @@
           <artifactId>libthrift</artifactId>
           <version>0.6.1</version>
           <scope>runtime</scope>
-        </dependency>
+        </dependency-->
         <dependency>
           <groupId>org.apache.zookeeper</groupId>
           <artifactId>zookeeper</artifactId>
-          <version>3.3.1</version>
           <scope>runtime</scope>
         </dependency>
       </dependencies>
@@ -194,7 +194,6 @@
         <dependency>
           <groupId>org.apache.zookeeper</groupId>
           <artifactId>zookeeper</artifactId>
-          <version>3.4.3</version>
           <scope>runtime</scope>
         </dependency>
       </dependencies>
@@ -261,13 +260,6 @@
     <dependency>
       <groupId>org.apache.gora</groupId>
       <artifactId>gora-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.gora</groupId>
-      <artifactId>gora-core-tests</artifactId>
-      <version>0.5-SNAPSHOT</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/libext/gora-core-tests-0.5-SNAPSHOT.jar</systemPath>
     </dependency>
 
     <dependency>
@@ -379,6 +371,13 @@
     <dependency>
       <groupId>org.apache.jclouds.provider</groupId>
       <artifactId>rackspace-clouddns-uk</artifactId>
+      <version>${jclouds.version}</version>
+    </dependency>
+    
+    <!-- JClouds Chef Dependencies -->
+    <dependency>
+      <groupId>org.apache.jclouds.api</groupId>
+      <artifactId>chef</artifactId>
       <version>${jclouds.version}</version>
     </dependency>
 

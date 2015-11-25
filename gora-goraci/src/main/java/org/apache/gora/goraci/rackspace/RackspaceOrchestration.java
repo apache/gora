@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 
-import org.apache.gora.mock.store.MockDataStore;
+import org.apache.gora.memory.store.MemStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.jclouds.ContextBuilder;
 import org.jclouds.openstack.nova.v2_0.NovaApi;
@@ -42,8 +42,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is the main class for initiating Rackspace cloud
- * topography for use within the GoraCI job.
+ * <p>This is the main class for initiating Rackspace cloud
+ * topography for use within the GoraCI job. A wealth of settings
+ * are configurable from within <code>gora.properties</code>.</p> 
+ * <p>For
+ * further documentation on the Rackspace Orchestration please see the
+ * <a href="http://gora.apache.org/current/index.html#goraci-integration-testsing-suite">
+ * current documentation</a>.</p>
  * @param <K>
  *
  */
@@ -79,15 +84,15 @@ public class RackspaceOrchestration<K> {
    */
   public static void main(String[] args) throws NoSuchElementException, InstantiationException, IllegalAccessException, IOException {
     Properties properties = DataStoreFactory.createProps();
-    String rsContinent = DataStoreFactory.findProperty(properties, MockDataStore.class.newInstance(), 
+    String rsContinent = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), 
         RS_CONTINENT, "rackspace-cloudservers-us");
-    String rsUser = DataStoreFactory.findProperty(properties, MockDataStore.class.newInstance(), RS_USERNAME, "asf-gora");
-    String rsApiKey = DataStoreFactory.findProperty(properties, MockDataStore.class.newInstance(), RS_APIKEY, null);
-    String rs_region = DataStoreFactory.findProperty(properties, MockDataStore.class.newInstance(), RS_REGION, "DFW");
-    String rs_flavourId = DataStoreFactory.findProperty(properties, MockDataStore.class.newInstance(), RS_FLAVORID, null);
-    String rs_imageId = DataStoreFactory.findProperty(properties, MockDataStore.class.newInstance(), RS_IMAGEID, null);
-    int num_servers = Integer.parseInt(DataStoreFactory.findProperty(properties, MockDataStore.class.newInstance(), RS_NUM_SERVERS, "10"));
-    String serverName = DataStoreFactory.findProperty(properties, MockDataStore.class.newInstance(), RS_SERVERNAME, "goraci_test_server");
+    String rsUser = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), RS_USERNAME, "asf-gora");
+    String rsApiKey = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), RS_APIKEY, null);
+    String rs_region = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), RS_REGION, "DFW");
+    String rs_flavourId = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), RS_FLAVORID, null);
+    String rs_imageId = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), RS_IMAGEID, null);
+    int num_servers = Integer.parseInt(DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), RS_NUM_SERVERS, "10"));
+    String serverName = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), RS_SERVERNAME, "goraci_test_server");
 
     NovaApi novaApi = ContextBuilder.newBuilder(rsContinent).credentials(rsUser, rsApiKey).buildApi(NovaApi.class);
     LOG.info("Defining Rackspace cloudserver continent as: {}, and region: {}.", rsContinent, rs_region);
@@ -106,7 +111,7 @@ public class RackspaceOrchestration<K> {
     File keyPairFile = null;
     String publicKey = null;
     //Use your own .pub key which should be on CP
-    if (DataStoreFactory.findBooleanProperty(properties, MockDataStore.class.newInstance(), RS_PUBKEY, "true")) {
+    if (DataStoreFactory.findBooleanProperty(properties, MemStore.class.newInstance(), RS_PUBKEY, "true")) {
       keyPairFile = new File("~/.ssh/id_rsa.pub");
       LOG.info("Uploading local public key from ~/.ssh/id_rsa.pub to Rackspace...");
     } else {

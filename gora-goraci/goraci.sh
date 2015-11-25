@@ -31,17 +31,17 @@ if [ $# = 0 ]; then
   echo "  Generator                  A map only job that generates data."
   echo "  Verify                     A map reduce job that looks for holes.  
                              Look at the counts after running.  
-  		             REFERENCED and UNREFERENCED are ok, 
-  		             any UNDEFINED counts are bad. Do not 
-  			     run at the same time as the Generator."
-  echo "  Walker                     A standalong program that starts 
-  			     following a linked list and emits 
-  			     timing info."
+                             REFERENCED and UNREFERENCED are ok, 
+                             any UNDEFINED counts are bad. Do not 
+                             run at the same time as the Generator."
+  echo "  Walker                     A standalone program that starts 
+                             following a linked list and emits 
+                             timing info."
   echo "  Print                      A standalone program that prints nodes 
-  			     in the linked list."
-  echo "  Delete         	     A standalone program that deletes a 
-  			     single node."
-  echo "  Loop         	             A program to Loop through Generator and
+                             in the linked list."
+  echo "  Delete                     A standalone program that deletes a 
+                             single node."
+  echo "  Loop                       A program to Loop through Generator and
                              Verify steps"
   echo " or"
   echo "  CLASSNAME                  run the class named CLASSNAME"
@@ -99,6 +99,6 @@ done
 #run it
 export HADOOP_CLASSPATH="$CLASSPATH"
 LIBJARS=`echo $HADOOP_CLASSPATH | tr : ,`
-hadoop jar "$GORACI_HOME/lib/org.apache.gora.goraci-0.0.1-SNAPSHOT.jar" $CLASS -libjars "$LIBJARS" "$@"
+hadoop jar "$GORACI_HOME/lib/gora-goraci-0.7-SNAPSHOT.jar" $CLASS -libjars "$LIBJARS" "$@"
 
 
