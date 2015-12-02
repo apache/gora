@@ -18,12 +18,25 @@ package org.apache.gora.goraci.rackspace;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.gora.memory.store.MemStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.jclouds.ContextBuilder;
+import org.jclouds.chef.ChefContext;
+import org.jclouds.chef.config.ChefProperties;
+import org.jclouds.chef.domain.BootstrapConfig;
+import org.jclouds.chef.domain.CookbookVersion;
+import org.jclouds.chef.predicates.CookbookVersionPredicates;
+import org.jclouds.chef.util.RunListBuilder;
+import org.jclouds.compute.ComputeServiceContext;
+import org.jclouds.compute.RunNodesException;
+import org.jclouds.compute.domain.NodeMetadata;
+import org.jclouds.compute.domain.TemplateBuilder;
+import org.jclouds.domain.JsonBall;
 import org.jclouds.openstack.nova.v2_0.NovaApi;
 import org.jclouds.openstack.nova.v2_0.domain.Flavor;
 import org.jclouds.openstack.nova.v2_0.domain.Image;
@@ -35,15 +48,24 @@ import org.jclouds.openstack.nova.v2_0.features.ImageApi;
 import org.jclouds.openstack.nova.v2_0.features.ServerApi;
 import org.jclouds.openstack.nova.v2_0.options.CreateServerOptions;
 import org.jclouds.openstack.nova.v2_0.predicates.ServerPredicates;
+import org.jclouds.scriptbuilder.domain.Statement;
+import org.jclouds.sshj.config.SshjSshClientModule;
+import static org.jclouds.compute.options.TemplateOptions.Builder.runScript; 
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Files;
+import com.google.inject.Module;
+
+import static com.google.common.collect.Iterables.any;
+import static com.google.common.collect.Iterables.concat;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * <p>This is the main class for initiating Rackspace cloud
- * topography for use within the GoraCI job. A wealth of settings
+ * topography for use within GoraCI jobs. A wealth of settings
  * are configurable from within <code>gora.properties</code>.</p> 
  * <p>For
  * further documentation on the Rackspace Orchestration please see the
@@ -75,8 +97,21 @@ public class RackspaceOrchestration<K> {
   /* we can optionally upload our own keys for security, otherwise 
    * we can have Rackspace autocreate one for us*/
   private static String RS_PUBKEY = "rackspace.uploadpubkey";
+  
+  private static NovaApi novaApi = null;
+  
+  private static String rsContinent = null;
+  
+  private static String rsUser = null;
+  
+  private static String rsApiKey = null;
+  
+  private static String rsRegion = null;
 
   /**
+   * Right now the Rackspace Orchestration and Services Provisioning
+   * requires no arguments. It can be invoked from
+   * <code>$GORA_HOME/bin/gora goracisetup</code>
    * @param args
    * @throws IllegalAccessException 
    * @throws InstantiationException 
@@ -84,29 +119,33 @@ public class RackspaceOrchestration<K> {
    */
   public static void main(String[] args) throws NoSuchElementException, InstantiationException, IllegalAccessException, IOException {
     Properties properties = DataStoreFactory.createProps();
-    String rsContinent = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), 
+    performRackspaceOrchestration(properties);
+  }
+  
+  private static void performRackspaceOrchestration(Properties properties) throws InstantiationException, IllegalAccessException, IOException {
+    rsContinent = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), 
         RS_CONTINENT, "rackspace-cloudservers-us");
-    String rsUser = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), RS_USERNAME, "asf-gora");
-    String rsApiKey = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), RS_APIKEY, null);
-    String rs_region = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), RS_REGION, "DFW");
-    String rs_flavourId = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), RS_FLAVORID, null);
-    String rs_imageId = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), RS_IMAGEID, null);
-    int num_servers = Integer.parseInt(DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), RS_NUM_SERVERS, "10"));
+    rsUser = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), RS_USERNAME, "asf-gora");
+    rsApiKey = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), RS_APIKEY, null);
+    rsRegion = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), RS_REGION, "DFW");
+    String rsFlavourId = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), RS_FLAVORID, null);
+    String rsImageId = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), RS_IMAGEID, null);
+    int numServers = Integer.parseInt(DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), RS_NUM_SERVERS, "10"));
     String serverName = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), RS_SERVERNAME, "goraci_test_server");
 
-    NovaApi novaApi = ContextBuilder.newBuilder(rsContinent).credentials(rsUser, rsApiKey).buildApi(NovaApi.class);
-    LOG.info("Defining Rackspace cloudserver continent as: {}, and region: {}.", rsContinent, rs_region);
+    novaApi = ContextBuilder.newBuilder(rsContinent).credentials(rsUser, rsApiKey).buildApi(NovaApi.class);
+    LOG.info("Defining Rackspace cloudserver continent as: {}, and region: {}.", rsContinent, rsRegion);
 
     //Choose operating system
-    ImageApi imageApi = novaApi.getImageApiForZone(rs_region);
-    Image image = imageApi.get(rs_imageId);
+    ImageApi imageApi = novaApi.getImageApi(rsRegion);
+    Image image = imageApi.get(rsImageId);
     //Choose hardware configuration
-    FlavorApi flavorApi = novaApi.getFlavorApiForZone(rs_region);
-    Flavor flavor = flavorApi.get(rs_flavourId);
-    LOG.info("Defining Rackspace cloudserver flavors as: {}, with image id's {}", rs_flavourId, rs_imageId);
+    FlavorApi flavorApi = novaApi.getFlavorApi(rsRegion);
+    Flavor flavor = flavorApi.get(rsFlavourId);
+    LOG.info("Defining Rackspace cloudserver flavors as: {}, with image id's {}", rsFlavourId, rsImageId);
 
     //Manage keypairs
-    KeyPairApi keyPairApi = novaApi.getKeyPairExtensionForZone(rs_region).get();
+    KeyPairApi keyPairApi = novaApi.getKeyPairApi(rsRegion).get();
 
     File keyPairFile = null;
     String publicKey = null;
@@ -137,20 +176,20 @@ public class RackspaceOrchestration<K> {
         keyPairApi.createWithPublicKey("goraci-keypair", publicKey);
       }
     }
-    
-    ServerApi serverApi = novaApi.getServerApiForZone(rs_region);
+
+    ServerApi serverApi = novaApi.getServerApi(rsRegion);
     CreateServerOptions options = CreateServerOptions.Builder.keyPairName("goraci-keypair");
     ServerCreated serverCreated = null;
-    for (int i = 0; i < num_servers; i++) {
+    for (int i = 0; i < numServers; i++) {
       if (serverName != null) {
-        serverCreated = serverApi.create(serverName + num_servers, rs_imageId, rs_flavourId, options);
+        serverCreated = serverApi.create(serverName + i, rsImageId, rsFlavourId, options);
 
       } else {
-        serverCreated = serverApi.create("goraci_test_server" + num_servers, image.getId(), flavor.getId(), options);
+        serverCreated = serverApi.create("goraci_test_server" + i, image.getId(), flavor.getId(), options);
       }
       ServerPredicates.awaitActive(serverApi).apply(serverCreated.getId());
-      LOG.info("Provisioned node " + i + 1 + " of " + num_servers + " with name: " + serverName + i);
+      LOG.info("Provisioned node {} of {} with name {}", new Object[]{i + 1, numServers, serverName + i});
     }
-  }
 
+  }
 }

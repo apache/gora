@@ -46,7 +46,8 @@ if [ $# = 0 ]; then
   echo "  goracompiler               Run Compiler"
   echo "  specificcompiler           Run Avro Specific Compiler"
   echo "  dynamocompiler             Run Gora DynamoDB Compiler"
-  echo "  goracisetup                Run the GoraCI Rackspace orchestration setup"
+  echo "  goracirackspace            Run the GoraCI Rackspace orchestration setup"
+  echo "  goracichef                 Run the GoraCI Chef software provisioning setup"
   echo "  logmanager                 Run the tutorial log manager"
   echo "  loganalytics               Run the tutorial log analytics"
   echo "  loganalyticsspark          Run the tutorial log analytics spark"
@@ -123,10 +124,14 @@ elif [ "$COMMAND" = "dynamocompiler" ] ; then
   MODULE=gora-dynamodb
   CLASSPATH=$CLASSPATH:$GORA_HOME/$MODULE/target/classes/
   CLASS=org.apache.gora.dynamodb.compiler.GoraDynamoDBCompiler
-elif [ "$COMMAND" = "goracisetup" ] ; then
+elif [ "$COMMAND" = "goracirackspace" ] ; then
   MODULE=gora-goraci
   CLASSPATH=$CLASSPATH:$GORA_HOME/$MODULE/target/classes/
   CLASS=org.apache.gora.goraci.rackspace.RackspaceOrchestration
+elif [ "$COMMAND" = "goracichef" ] ; then
+  MODULE=gora-goraci
+  CLASSPATH=$CLASSPATH:$GORA_HOME/$MODULE/target/classes/
+  CLASS=org.apache.gora.goraci.chef.ChefSoftwareProvisioning
 elif [ "$COMMAND" = "logmanager" ] ; then
   MODULE=gora-tutorial
   CLASSPATH=$CLASSPATH:$GORA_HOME/$MODULE/target/classes/
