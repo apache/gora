@@ -1,15 +1,12 @@
-=================================
-=				=
-= GORACI README			=
-= @author Keith Turner		=
-=================================
+#GORACI README
+@author Keith Turner
 
-BACKGROUND
-------------
+## BACKGROUND
 
-Apache Accumulo [0] has a simple test suite that verifies that data is not lost
-at scale.  This test suite is called continuous ingest [5].  This test runs
-many ingest clients that continually create linked lists containing 25 million
+[Apache Accumulo](http://accumulo.apache.org) has a simple test suite that verifies that data is not lost
+at scale. 
+This test suite is called [continuous ingest](http://svn.apache.org/viewvc/accumulo/tags/1.4.0/test/system/continuous/ScaleTest.odp?view=co).  
+This test runs many ingest clients that continually create linked lists containing 25 million
 nodes. At some point the clients are stopped and a map reduce job is run to
 ensure no linked list has a hole. A hole indicates data was lost.    
 
@@ -17,11 +14,12 @@ The nodes in the linked list are random.  This causes each linked list to
 spread across the table.  Therefore if one part of a table loses data, then it
 will be detected by references in another part of the table.
 
-This project is a version of the test suite written using Apache Gora [1].
+This project is a version of the test suite written using [Apache Gora](http://gora.apache.org).
 Goraci has been tested against Accumulo and HBase.  
 
-THE ANATOMY OF GORACI TESTS
-----------------------------
+More documentation on GoraCI can be found at the [goraci-integration-testsing-suite](http://gora.apache.org/current/index.html#goraci-integration-testsing-suite)
+
+## THE ANATOMY OF GORACI TESTS
 
 Below is rough sketch of how data is written.  For specific details look at the
 Generator code (src/main/java/org.apache.gora.goraci/Generator.java)
@@ -54,46 +52,36 @@ million.  The reason for this is that circular linked list are generated every
 list not having references.  The loss of an unreferenced node can not be
 detected.
 
-BUILDING GORACI
----------------
+## BUILDING GORACI
 
-This code currently depends on an unreleased version of Gora.  To build Gora
-0.2 run the following commands.
-
-  svn export http://svn.apache.org/repos/asf/gora/trunk gora
-  cd gora
-  mvn install -DskipTests
-
-After this you can build org.apache.gora.goraci.
-
-  git clone git://github.com/keith-turner/org.apache.gora.goraci.git
-  cd org.apache.gora.goraci
-  mvn compile
-
-The maven pom file has some profiles that attempt to make it easier to run
-org.apache.gora.goraci against different gora backends by copying the jars you need into lib.
+GoraCI can be built as part of the main source via
+```
+mvn install -DskipTests
+```
+Maven artifacts also exist... see [Maven Central](http://search.maven.org/#search|ga|1|a%3A%22gora-goraci%22)
+The Maven pom file has some profiles that attempt to make it easier to run
+GoraCI against different gora backends by copying the jars you need into lib.
 Before packaging its important to edit gora.properties and set it correctly
 for your datastore.  To run against accumulo do the following.
-
+```
   vim src/main/resources/gora.properties (set Accumulo properties)
-  mvn package -Paccumulo-1.4
-
+  mvn package -Paccumulo-1.6.4
+```
 To run against hbase, do the following.
-
+```
   vim src/main/resources/gora.properties (set HBase properties)
-  mvn package -Phbase-0.92
-
+  mvn package -Phbase-1.1.2
+```
 To run against cassandra, do the following.
-
+```
   vim src/main/resources/gora.properties (set Cassandra properties)
-  mvn package -Pcassandra-1.1.2
-
+  mvn package -Pcassandra-2.0.2
+```
 For other datastores mentioned in gora.properties, you will need to copy the
 appropriate deps into lib.  Feel free to update the pom with other profiles and
-send me pull request.
+send a pull request.
 
-JAVA CLASS DESCRIPTION
------------------
+## JAVA CLASS DESCRIPTION
 
 Below is a description of the Java programs
 
@@ -112,39 +100,37 @@ Below is a description of the Java programs
 org.apache.gora.goraci.sh is a helper script that you can use to run the above programs.  It
 assumes all needed jars are in the lib dir.  It does not need the package name.
 You can just run "./org.apache.gora.goraci.sh Generator", below is an example.
-
+```
   $ ./org.apache.gora.goraci.sh Generator
   Usage : Generator <num mappers> <num nodes>
-
+```
 For Gora to work, it needs a gora.properties file on the classpath and a
 mapping file on the classpath, the contents of both are datastore specific,
-more details can be found here [2]. You can edit the ones in src/main/resources
+more details can be found at [gora-conf](http://gora.apache.org/current/gora-conf.html). You can edit the ones in src/main/resources
 and build the org.apache.gora.goraci-${version}-SNAPSHOT.jar with those. Alternatively remove
 those and put them on the classpath through some other means.
 
-GORA AND HADOOP
------------------
+## GORA AND HADOOP
 
 Gora uses Avro which uses a Json library that Hadoop has an old version of.
 The two libraries  jackson-core and jackson-mapper need to be updated in
 <HADOOP_HOME>/lib and <HADOOP_HOME>/share/hadoop/lib/.  I updated these to
 jackson-core-asl-1.4.2.jar and jackson-mapper-asl-1.4.2.jar.  For details see
-HADOOP-6945 [3]. 
+[HADOOP-6945](https://issues.apache.org/jira/browse/HADOOP-6945). 
 
-GORACI AND HBASE
------------------
+## GORACI AND HBASE
 
 To improve performance running read jobs such as the Verify step, enable
 scanner caching on the command line.  For example:
-
+```
     $ ./gorachi.sh Verify -Dhbase.client.scanner.caching=1000 \
          -Dmapred.map.tasks.speculative.execution=false verify_dir 1000
-
+```
 Dependent on how you have your hadoop and hbase deployed, you may need to
 change the gorachi.sh script around some.  Here is one suggestion that may help
 in the case where your hadoop and hbase configuration are other than under the
 hadoop and hbase home directories.
-
+```
   diff --git a/org.apache.gora.goraci.sh b/org.apache.gora.goraci.sh
   index db1562a..31c3c94 100755
   --- a/org.apache.gora.goraci.sh
@@ -157,16 +143,15 @@ hadoop and hbase home directories.
   -
   -
   +CLASSPATH="${HBASE_CONF_DIR}" hadoop --config "${HADOOP_CONF_DIR} jar "$GORACI_HOME/lib/org.apache.gora.goraci-0.0.1-SNAPSHOT.jar" $CLASS -files "${HBASE_CONF_DIR}/hbase-site.xml" -libjars "$LIBJARS" "$@"
-
+```
 You will need to define HBASE_CONF_DIR and HADOOP_CONF_DIR before you run your
 org.apache.gora.goraci jobs.  For example:
-
+```
   $ export HADOOP_CONF_DIR=/home/you/hadoop-conf
   $ export HBASE_CONF_DIR=/home/you/hbase-conf
   $ PATH=/home/you/hadoop-1.0.2/bin:$PATH ./org.apache.gora.goraci.sh Generator 1000 1000000
-
-CONCURRENCY
-------------
+```
+## CONCURRENCY
 
 Its possible to run verification at the same time as generation.  To do this
 supply the -c option to Generator and Verify.  This will cause Genertor to
@@ -184,8 +169,7 @@ written, when the node is later referenced it will appear to be missing.  The
 -c option basically filters out newer information using data written to the
 secondary table.
 
-CONCLUSIONS
-------------
+## CONCLUSIONS
 
 This test suite does not do everything that the Accumulo test suite does,
 mainly it does not collect statistics and generate reports.  The reports
@@ -194,7 +178,7 @@ are useful for assesing performance.
 Below shows running a test of the test.  Ingest one linked list, deleted a node
 in it, ensure the verifaction map reduce job notices that the node is missing.
 Not all output is shown, just the important parts.
-
+```
   $ ./org.apache.gora.goraci.sh Generator  1 25000000
   $ ./org.apache.gora.goraci.sh Print -s 2000000000000000 -l 1
   2000001f65dbd238:30350f9ae6f6e8f7:000004265852:ef09f9dd-75b1-4c16-9f14-0fa84f3029b6
@@ -209,48 +193,42 @@ Not all output is shown, just the important parts.
   11/12/20 17:12:31 INFO mapred.JobClient:     UNREFERENCED=1
   $ hadoop fs -cat gci_verify_1/part\*
   30350f9ae6f6e8f7	2000001f65dbd238
-
+```
 The map reduce job found the one undefined node and gave the node that
 referenced it.
 
 Below are some timing statistics for running org.apache.gora.goraci on a 10 node cluster. 
-
+```
   Store           | Task                   | Time    | Undef  | Unref | Ref        
   ----------------+------------------------+---------+--------+-------+------------
   accumulo-1.4.0  | Generator 10 100000000 | 40m 16s |    N/A |   N/A |        N/A     
   accumulo-1.4.0  | Verify /tmp/goraci1 40 |  6m  7s |      0 |     0 | 1000000000  
   hbase-0.92.1    | Generator 10 100000000 |  2h 44m |    N/A |   N/A |        N/A     
   hbase-0.92.1    | Verify /tmp/goraci2 40 |  6m 34s |      0 |     0 | 1000000000
-
+```
 Hbase and Accumulo are configured differently out-of-the-box.  We used the Accumulo 
 3G, native configuration examples in the conf/examples directory.
 
 To provide a comparable memory footprint, we increased the HBase jvm to "-Xmx4000m", 
 and turned on compression for the ci table:
-
+```
 create 'ci', {NAME=>'meta', COMPRESSION=>'GZ'}
-
+```
 We also turned down the replication of write-ahead logs to be comparable to Accumulo:
-
+```
   <property>
     <name>hbase.regionserver.hlog.replication</name>
     <value>2</value>
   </property>
-
+```
 For the accumulo run, we set the split threshold to 512M:
-
+```
  shell> config -t ci -s table.split.threshold=512M
-
+```
 This was done so that Accumulo would end up with 64 tablets, which is the
 number of regions hbase had.   The number of tablets/regions determines how
 much parallelism there is in the map phase of the verify step.
 
 Sometimes when this test suite is run against HBase data is lost.  This issue
-is being tracked under HBASE-5754 [4].
+is being tracked under [HBASE-5754](https://issues.apache.org/jira/browse/HBASE-5754).
 
-[0] http://accumulo.apache.org
-[1] http://gora.apache.org
-[2] http://gora.apache.org/docs/current/gora-conf.html
-[3] https://issues.apache.org/jira/browse/HADOOP-6945
-[4] https://issues.apache.org/jira/browse/HBASE-5754
-[5] http://svn.apache.org/viewvc/accumulo/tags/1.4.0/test/system/continuous/ScaleTest.odp?view=co
