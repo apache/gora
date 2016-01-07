@@ -43,8 +43,9 @@ public class SingleFieldValueFilter<K, T extends PersistentBase> implements Filt
   protected List<Object> operands = new ArrayList<>();
   protected boolean filterIfMissing = false;
 
-  private Configuration conf = new Configuration(); //just create empty conf,
-                                                    //needed for ObjectWritable
+  //just create empty conf needed for ObjectWritable
+  private Configuration conf = new Configuration();
+  
   @Override
   public void write(DataOutput out) throws IOException {
     Text.writeString(out, fieldName);
@@ -81,7 +82,7 @@ public class SingleFieldValueFilter<K, T extends PersistentBase> implements Filt
     }
     out.writeBoolean(filterIfMissing);
   }  
-  
+
   @Override
   public void readFields(DataInput in) throws IOException {
     fieldName = Text.readString(in);
@@ -100,7 +101,8 @@ public class SingleFieldValueFilter<K, T extends PersistentBase> implements Filt
 
   @Override
   public boolean filter(K key, T persistent) {
-    int fieldIndex = persistent.getSchema().getField(fieldName).pos(); //.getIndexNamed(fieldName); throws org.apache.avro.AvroRuntimeException: Not a union:
+    //.getIndexNamed(fieldName); throws org.apache.avro.AvroRuntimeException: Not a union:
+    int fieldIndex = persistent.getSchema().getField(fieldName).pos();
     Object fieldValue = persistent.get(fieldIndex);
     Object operand = operands.get(0);
     if (fieldValue == null) {
@@ -112,19 +114,19 @@ public class SingleFieldValueFilter<K, T extends PersistentBase> implements Filt
     } else if (filterOp.equals(FilterOp.NOT_EQUALS)) {
       boolean equals = operand.equals(fieldValue);
       return equals;
-    // TODO implement other FilterOp operators
+      //TODO Currently only EQUALS and NOT_EQUALS are implemented. 
     } else {
-      throw new IllegalStateException(filterOp + " not yet implemented");
+      throw new IllegalStateException(filterOp + " not yet implemented!");
     }
   }
-  
+
   public String getFieldName() {
     return fieldName;
   }
   public void setFieldName(String fieldName) {
     this.fieldName = fieldName;
   }
-  
+
   public FilterOp getFilterOp() {
     return filterOp;
   }
@@ -138,11 +140,11 @@ public class SingleFieldValueFilter<K, T extends PersistentBase> implements Filt
   public void setOperands(List<Object> operands) {
     this.operands = operands;
   }
-  
+
   public void setFilterIfMissing(boolean filterIfMissing) {
     this.filterIfMissing = filterIfMissing;
   }
-  
+
   public boolean isFilterIfMissing() {
     return filterIfMissing;
   }

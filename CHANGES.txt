@@ -4,7 +4,9 @@
 
 Current Development
 
-* GORA-452 Upgrade goraci prior to Chef and the ComputeService implementations 
+* GORA-454 Implement FilterList tests (lewismc)
+
+* GORA-452 Upgrade goraci prior to Chef and the ComputeService implementations (lewismc)
 
 * GORA-439 Remove Unused Method Parameters (Furkan KAMACI)
 

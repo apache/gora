@@ -45,8 +45,8 @@ public class MapFieldValueFilter<K, T extends PersistentBase> implements Filter<
   protected List<Object> operands = new ArrayList<>();
   protected boolean filterIfMissing = false;
 
-  private Configuration conf = new Configuration(); // just create empty conf,
-                                                    // needed for ObjectWritable
+  //just create empty conf needed for ObjectWritable
+  private Configuration conf = new Configuration();
 
   @Override
   public void write(DataOutput out) throws IOException {
@@ -123,7 +123,8 @@ public class MapFieldValueFilter<K, T extends PersistentBase> implements Filter<
       boolean equals = value.equals(operand);
       return equals;
     } else {
-      throw new IllegalStateException(filterOp + " not yet implemented");
+      //TODO Currently only EQUALS and NOT_EQUALS are implemented. 
+      throw new IllegalStateException(filterOp + " not yet implemented!");
     }
   }
 

@@ -19,6 +19,7 @@ package org.apache.gora.filter;
 
 /**
  * Defines a set of common filter compare operations.
+ * TODO N.B. Currently only EQUALS and NOT_EQUALS are implemented.
  */
 public enum FilterOp {
   EQUALS,

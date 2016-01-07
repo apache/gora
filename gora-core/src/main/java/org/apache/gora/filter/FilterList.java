@@ -28,6 +28,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * {@link FilterList} enables us to utilize conditional operands
+ * for advanced filtering within the construction and 
+ * execution of Gora queries.
+ *
+ * @param <K>
+ * @param <T>
+ */
 public class FilterList<K, T extends PersistentBase> implements Filter<K, T> {
   /** set operator */
   public static enum Operator {
@@ -36,21 +44,21 @@ public class FilterList<K, T extends PersistentBase> implements Filter<K, T> {
     /** !OR */
     MUST_PASS_ONE
   }
-  
+
   private Operator operator = Operator.MUST_PASS_ALL;
   private List<Filter<K, T>> filters = new ArrayList<>();
-  
+
   public FilterList() {
   }
-  
+
   public FilterList(final List<Filter<K, T>> rowFilters) {
     this.filters = rowFilters;
   }
-  
+
   public FilterList(final Operator operator) {
     this.operator = operator;
   }
-  
+
   public FilterList(final Operator operator, final List<Filter<K, T>> rowFilters) {
     this.filters = rowFilters;
     this.operator = operator;
@@ -59,15 +67,15 @@ public class FilterList<K, T extends PersistentBase> implements Filter<K, T> {
   public List<Filter<K, T>> getFilters() {
     return filters;
   }
-  
+
   public Operator getOperator() {
     return operator;
   }
-  
+
   public void addFilter(Filter<K, T> filter) {
     this.filters.add(filter);
   }
-  
+
   @Override
   public void readFields(DataInput in) throws IOException {
     byte opByte = in.readByte();
@@ -101,8 +109,25 @@ public class FilterList<K, T extends PersistentBase> implements Filter<K, T> {
 
   @Override
   public boolean filter(K key, T persistent) {
-    // TODO not yet implemented
-    return false;
+    boolean filtered = false;
+    //OR
+    if (operator.equals(Operator.MUST_PASS_ONE)) {
+      for (Filter<K, T> filter: filters) {
+        if (!filter.filter(key, persistent)) {
+          return !filtered;
+        }
+      }
+      //AND
+    } else if (operator.equals(Operator.MUST_PASS_ALL)) {
+      for (Filter<K, T> filter: filters) {
+        if (filter.filter(key, persistent)) {
+          return !filtered;
+        }
+      }
+    } else {
+      throw new IllegalStateException(operator + " not yet implemented!");
+    }
+    return filtered;
   }
 
 }
