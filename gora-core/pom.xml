@@ -51,6 +51,7 @@
 
   <properties>
     <osgi.import>*</osgi.import>
+    <osgi.dynamic.import>*<osgi.dynamic.import>
     <osgi.export>org.apache.gora*;version="${project.version}";-noimport:=true</osgi.export>
   </properties>
 
