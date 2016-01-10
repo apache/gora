@@ -231,7 +231,7 @@ public class MongoStore<K, T extends PersistentBase> extends
     // otherwise creation is deferred
     mongoClientColl.setDBEncoderFactory(GoraDBEncoder.FACTORY);
 
-    LOG.info("Collection {} has been created for Mongo instance {}.",
+    LOG.debug("Collection {} has been created for Mongo instance {}.",
         new Object[] { mapping.getCollectionName(), mongoClientDB.getMongo() });
   }
 
@@ -246,7 +246,7 @@ public class MongoStore<K, T extends PersistentBase> extends
     // If initialized, simply drop the collection
     mongoClientColl.drop();
 
-    LOG.info(
+    LOG.debug(
         "Collection {} has been dropped for Mongo instance {}.",
         new Object[] { mongoClientColl.getFullName(), mongoClientDB.getMongo() });
   }
@@ -266,7 +266,7 @@ public class MongoStore<K, T extends PersistentBase> extends
   public void flush() {
     for (MongoClient client : mapsOfClients.values()) {
       client.fsync(false);
-      LOG.info("Forced synced of database for Mongo instance {}.",
+      LOG.debug("Forced synced of database for Mongo instance {}.",
           new Object[] { client });
     }
   }
