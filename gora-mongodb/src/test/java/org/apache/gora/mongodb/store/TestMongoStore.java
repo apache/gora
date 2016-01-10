@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,27 +17,26 @@
  */
 package org.apache.gora.mongodb.store;
 
-import static org.junit.Assert.*;
-
-import java.io.IOException;
-
+import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
+import org.apache.avro.util.Utf8;
 import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.mongodb.GoraMongodbTestDriver;
 import org.apache.gora.mongodb.utils.BSONDecorator;
+import org.apache.gora.query.Query;
+import org.apache.gora.query.Result;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreTestBase;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
+import java.io.IOException;
 import java.util.Collections;
 
-import org.apache.avro.util.Utf8;
-import org.apache.gora.query.Query;
-import org.apache.gora.query.Result;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public abstract class TestMongoStore extends DataStoreTestBase {
 

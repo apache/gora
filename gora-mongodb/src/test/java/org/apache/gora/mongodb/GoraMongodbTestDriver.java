@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,23 +17,25 @@
  */
 package org.apache.gora.mongodb;
 
-import org.apache.gora.GoraTestDriver;
-import org.apache.gora.mongodb.store.MongoStore;
-import org.apache.gora.mongodb.store.MongoStoreParameters;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
-
+import de.flapdoodle.embed.mongo.Command;
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodProcess;
 import de.flapdoodle.embed.mongo.MongodStarter;
 import de.flapdoodle.embed.mongo.config.IMongodConfig;
 import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
 import de.flapdoodle.embed.mongo.config.Net;
+import de.flapdoodle.embed.mongo.config.RuntimeConfigBuilder;
 import de.flapdoodle.embed.mongo.distribution.Version;
+import de.flapdoodle.embed.process.config.IRuntimeConfig;
+import de.flapdoodle.embed.process.config.io.ProcessOutput;
 import de.flapdoodle.embed.process.runtime.Network;
+import org.apache.gora.GoraTestDriver;
+import org.apache.gora.mongodb.store.MongoStore;
+import org.apache.gora.mongodb.store.MongoStoreParameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Driver to set up an embedded MongoDB database instance for use in our
@@ -43,7 +45,7 @@ import de.flapdoodle.embed.process.runtime.Network;
 public class GoraMongodbTestDriver extends GoraTestDriver {
 
   private static Logger log = LoggerFactory
-      .getLogger(GoraMongodbTestDriver.class);
+          .getLogger(GoraMongodbTestDriver.class);
 
   private MongodExecutable _mongodExe;
   private MongodProcess _mongod;
@@ -68,7 +70,13 @@ public class GoraMongodbTestDriver extends GoraTestDriver {
   @Override
   public void setUpClass() throws Exception {
     super.setUpClass();
-    MongodStarter runtime = MongodStarter.getDefaultInstance();
+
+    IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder()
+            .defaultsWithLogger(Command.MongoD, log)
+            .processOutput(ProcessOutput.getDefaultInstanceSilent())
+            .build();
+
+    MongodStarter runtime = MongodStarter.getInstance(runtimeConfig);
 
     int port = Network.getFreeServerPort();
     IMongodConfig mongodConfig = new MongodConfigBuilder()

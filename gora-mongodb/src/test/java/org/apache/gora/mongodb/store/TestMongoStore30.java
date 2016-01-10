@@ -21,7 +21,7 @@ import de.flapdoodle.embed.mongo.distribution.Version;
 import org.apache.gora.mongodb.GoraMongodbTestDriver;
 
 /**
- * Perform {@link TestMongoStore} tests on MongoDB 3.0.x branch.
+ * Perform {@link TestMongoStore} tests on MongoDB 3.0.x server.
  */
 public class TestMongoStore30 extends TestMongoStore {
 
