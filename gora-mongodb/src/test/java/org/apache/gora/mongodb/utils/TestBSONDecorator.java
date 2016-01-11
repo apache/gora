@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,16 +17,15 @@
  */
 package org.apache.gora.mongodb.utils;
 
-import static org.junit.Assert.*;
+import com.mongodb.BasicDBObject;
+import com.mongodb.BasicDBObjectBuilder;
+import com.mongodb.DBObject;
+import org.junit.Test;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
-import org.junit.Test;
-
-import com.mongodb.BasicDBObject;
-import com.mongodb.BasicDBObjectBuilder;
-import com.mongodb.DBObject;
+import static org.junit.Assert.*;
 
 public class TestBSONDecorator {
 
@@ -34,12 +33,12 @@ public class TestBSONDecorator {
   public void testContainsField() {
     // Init the object used for testing
     DBObject dbo1 = BasicDBObjectBuilder
-        .start()
-        .add("root0", "value")
-        .add("root1", new BasicDBObject("leaf1", 1))
-        .add("root2",
-            new BasicDBObject("parent1", new BasicDBObject("leaf2", "test")))
-        .get();
+            .start()
+            .add("root0", "value")
+            .add("root1", new BasicDBObject("leaf1", 1))
+            .add("root2",
+                    new BasicDBObject("parent1", new BasicDBObject("leaf2", "test")))
+            .get();
     BSONDecorator dboc = new BSONDecorator(dbo1);
 
     // Root level field, does exist
@@ -68,25 +67,25 @@ public class TestBSONDecorator {
   public void testBinaryField() {
     // Init the object used for testing
     DBObject dbo1 = BasicDBObjectBuilder
-        .start()
-        .add("root0", "value")
-        .add("root1", new BasicDBObject("leaf1", "abcdefgh".getBytes(Charset.defaultCharset())))
-        .add(
-            "root2",
-            new BasicDBObject("parent1", new BasicDBObject("leaf2", "test"
-                .getBytes(Charset.defaultCharset()))))
-        .add("root3", ByteBuffer.wrap("test2".getBytes(Charset.defaultCharset()))).get();
+            .start()
+            .add("root0", "value")
+            .add("root1", new BasicDBObject("leaf1", "abcdefgh".getBytes(Charset.defaultCharset())))
+            .add(
+                    "root2",
+                    new BasicDBObject("parent1", new BasicDBObject("leaf2", "test"
+                            .getBytes(Charset.defaultCharset()))))
+            .add("root3", ByteBuffer.wrap("test2".getBytes(Charset.defaultCharset()))).get();
     BSONDecorator dboc = new BSONDecorator(dbo1);
 
     // Access first bytes field
     assertTrue(dboc.containsField("root1.leaf1"));
     assertArrayEquals("abcdefgh".getBytes(Charset.defaultCharset()), dboc.getBytes("root1.leaf1")
-        .array());
+            .array());
 
     // Access second bytes field
     assertTrue(dboc.containsField("root2.parent1.leaf2"));
     assertArrayEquals("test".getBytes(Charset.defaultCharset()), dboc.getBytes("root2.parent1.leaf2")
-        .array());
+            .array());
 
     // Access third bytes field
     assertTrue(dboc.containsField("root3"));
@@ -97,14 +96,30 @@ public class TestBSONDecorator {
   public void testNullStringField() {
     // Init the object used for testing
     DBObject dbo1 = BasicDBObjectBuilder
-        .start()
-        .add("key1", null)
-        .get();
+            .start()
+            .add("key1", null)
+            .get();
     BSONDecorator dboc = new BSONDecorator(dbo1);
 
     assertTrue(dboc.containsField("key1"));
     assertNull(dboc.getUtf8String("key1"));
 
     assertFalse(dboc.containsField("key2"));
+  }
+
+  @Test
+  public void testNullFields() {
+    BSONDecorator dboc = new BSONDecorator(new BasicDBObject());
+
+    assertNull(dboc.getInt("key1"));
+    assertNull(dboc.getLong("key1"));
+    assertNull(dboc.getDouble("key1"));
+    assertNull(dboc.getUtf8String("key1"));
+    assertNull(dboc.getBoolean("key1"));
+    assertNull(dboc.getBytes("key1"));
+    assertNull(dboc.getDate("key1"));
+
+    assertNull(dboc.getDBObject("key1"));
+    assertNull(dboc.getDBList("key1"));
   }
 }

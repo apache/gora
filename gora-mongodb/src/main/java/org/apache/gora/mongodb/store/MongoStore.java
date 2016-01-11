@@ -154,9 +154,8 @@ public class MongoStore<K, T extends PersistentBase> extends
       optBuilder.writeConcern(WriteConcern.valueOf(params.getWriteConcern()));
     }
     // If configuration contains a login + secret, try to authenticated with DB
-    List<MongoCredential> credentials = null;
+    List<MongoCredential> credentials = new ArrayList<>();
     if (params.getLogin() != null && params.getSecret() != null) {
-      credentials = new ArrayList<>();
       credentials.add(MongoCredential.createCredential(params.getLogin(), params.getDbname(), params.getSecret().toCharArray()));
     }
     // Build server address
@@ -232,7 +231,7 @@ public class MongoStore<K, T extends PersistentBase> extends
     // otherwise creation is deferred
     mongoClientColl.setDBEncoderFactory(GoraDBEncoder.FACTORY);
 
-    LOG.info("Collection {} has been created for Mongo instance {}.",
+    LOG.debug("Collection {} has been created for Mongo instance {}.",
         new Object[] { mapping.getCollectionName(), mongoClientDB.getMongo() });
   }
 
@@ -247,7 +246,7 @@ public class MongoStore<K, T extends PersistentBase> extends
     // If initialized, simply drop the collection
     mongoClientColl.drop();
 
-    LOG.info(
+    LOG.debug(
         "Collection {} has been dropped for Mongo instance {}.",
         new Object[] { mongoClientColl.getFullName(), mongoClientDB.getMongo() });
   }
@@ -267,7 +266,7 @@ public class MongoStore<K, T extends PersistentBase> extends
   public void flush() {
     for (MongoClient client : mapsOfClients.values()) {
       client.fsync(false);
-      LOG.info("Forced synced of database for Mongo instance {}.",
+      LOG.debug("Forced synced of database for Mongo instance {}.",
           new Object[] { client });
     }
   }
@@ -277,11 +276,6 @@ public class MongoStore<K, T extends PersistentBase> extends
    */
   @Override
   public void close() {
-    mongoClientDB.cleanCursors(true);
-    // mongoClient.close();
-    // LOG.info("Closed database and connection for Mongo instance {}.",
-    // new Object[]{mongoClient});
-    LOG.debug("Not closed!!!");
   }
 
   /**
@@ -644,8 +638,12 @@ public class MongoStore<K, T extends PersistentBase> extends
       // Try auto-conversion of BSON data to ObjectId
       // It will work if data is stored as String or as ObjectId
       Object bin = easybson.get(docf);
-      ObjectId id = ObjectId.massageToObjectId(bin);
-      result = new Utf8(id.toString());
+      if (bin instanceof String) {
+        ObjectId id = new ObjectId((String) bin);
+        result = new Utf8(id.toString());
+      } else {
+        result = new Utf8(bin.toString());
+      }
     } else if (storeType == DocumentFieldType.DATE) {
       Object bin = easybson.get(docf);
       if (bin instanceof Date) {
