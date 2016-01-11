@@ -110,21 +110,22 @@ public class FilterList<K, T extends PersistentBase> implements Filter<K, T> {
   @Override
   public boolean filter(K key, T persistent) {
     boolean filtered = false;
-    //OR
-    if (operator.equals(Operator.MUST_PASS_ONE)) {
+    switch (operator.toString()) {
+    case "MUST_PASS_ALL":
       for (Filter<K, T> filter: filters) {
         if (!filter.filter(key, persistent)) {
           return !filtered;
         }
       }
-      //AND
-    } else if (operator.equals(Operator.MUST_PASS_ALL)) {
+      break;
+    case "MUST_PASS_ONE":
       for (Filter<K, T> filter: filters) {
         if (filter.filter(key, persistent)) {
           return !filtered;
         }
       }
-    } else {
+      break;
+    default:
       throw new IllegalStateException(operator + " not yet implemented!");
     }
     return filtered;
