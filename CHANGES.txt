@@ -4,21 +4,7 @@
 
 Current Development
 
-* GORA-454 Implement FilterList tests (lewismc)
-
-* GORA-452 Upgrade goraci prior to Chef and the ComputeService implementations (lewismc)
-
-* GORA-439 Remove Unused Method Parameters (Furkan KAMACI)
-
-* GORA-240 Tests for MemStore (lewismc)
-  
-* GORA-446 java.util.NoSuchElementException thrown by accessing java.util.concurrent.ConcurrentSkipListMap.firstKey in MemStore (lewismc)
- 
-* GORA-125 Clean up logging libraries (lewismc)
-
-* GORA-441 Update build.gradle within gora-gradle-plugin to reference canonical Apache links (lewismc)
-
-* GORA-438 Erroneous Exception Message at IOUtils.java (Furkan KAMACI via lewismc)
+Release Report to go here
 
 Apache Gora 0.6.1 Release - 05/09/2015 (dd/mm/yyyy)
 Release Report - http://s.apache.org/l69

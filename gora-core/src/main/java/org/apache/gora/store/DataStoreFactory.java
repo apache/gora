@@ -219,7 +219,7 @@ public class DataStoreFactory{
           throws GoraException {
     try {
       Class<? extends DataStore<K,T>> c
-          = (Class<? extends DataStore<K, T>>) Class.forName(dataStoreClass);
+          = (Class<? extends DataStore<K, T>>) ClassLoadingUtils.loadClass(dataStoreClass);
       return createDataStore(c, keyClass, persistentClass, conf, createProps(), null);
     } catch(GoraException ex) {
       throw ex;
@@ -259,6 +259,9 @@ public class DataStoreFactory{
   /**
    * Instantiate <i>the default</i> {@link DataStore}. Uses default properties. Uses 'null' schema.
    * 
+   * Note:
+   *    consider that default dataStore is always visible
+   *
    * @param keyClass The key class.
    * @param persistent The value class.
    * @param conf {@link Configuration} to be used be the store.
