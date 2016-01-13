@@ -422,6 +422,19 @@
                     <ignore />
                   </action>
                 </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>de.thetaphi</groupId>
+                    <artifactId>forbiddenapis</artifactId>
+                    <versionRange>2.0</versionRange>
+                    <goals>
+                      <goal>testCheck</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
               </pluginExecutions>
             </lifecycleMappingMetadata>
           </configuration>
@@ -446,7 +459,7 @@
       <plugin>
         <groupId>de.thetaphi</groupId>
         <artifactId>forbiddenapis</artifactId>
-        <version>1.8</version>
+        <version>2.0</version>
         <configuration>
           <!-- disallow undocumented classes like sun.misc.Unsafe: -->
           <internalRuntimeForbidden>true</internalRuntimeForbidden>
@@ -691,6 +704,7 @@
     <!-- module>gora-lucene</module -->
     <!--module>gora-dynamodb</module -->
     <!--module>gora-sql</module -->
+    <module>gora-maven-plugin</module>
     <module>gora-mongodb</module>
     <module>gora-shims-hadoop</module>
     <module>gora-shims-hadoop1</module>
