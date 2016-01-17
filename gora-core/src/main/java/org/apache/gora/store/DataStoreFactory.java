@@ -380,6 +380,7 @@ public class DataStoreFactory{
     if (mappingFile == null)
       throw new IOException("Unable to open mapping file: "+mappingFilename);
 
+    mappingFile.close();
     return mappingFilename;
   }
 
