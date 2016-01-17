@@ -27,6 +27,7 @@ import org.apache.hadoop.hbase.HBaseTestingUtility;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.MiniHBaseCluster;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
+import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -152,7 +153,8 @@ public final class HBaseClusterSingleton {
   public void ensureTable(byte[] tableName, byte[][] cfs) throws IOException {
     HBaseAdmin admin = htu.getHBaseAdmin();
     if (!admin.tableExists(tableName)) {
-      htu.createTable(tableName, cfs);
+      HTable hTable = htu.createTable(tableName, cfs);
+      hTable.close();
     }
   }
 
@@ -163,7 +165,8 @@ public final class HBaseClusterSingleton {
   public void truncateAllTables() throws Exception {
     HBaseAdmin admin = htu.getHBaseAdmin();
     for(HTableDescriptor table:admin.listTables()) {
-      htu.truncateTable(table.getName());
+      HTable hTable = htu.truncateTable(table.getName());
+      hTable.close();
     }
   }
   
