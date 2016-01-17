@@ -32,23 +32,38 @@ public class BinaryEncoder implements Encoder {
   }
   
   public byte[] encodeShort(short s, byte ret[]) {
+    DataOutputStream dos = null;
     try {
-      @SuppressWarnings("resource")
-      DataOutputStream dos = new DataOutputStream(new FixedByteArrayOutputStream(ret));
+      dos = new DataOutputStream(new FixedByteArrayOutputStream(ret));
       dos.writeShort(s);
+      dos.close();
       return ret;
     } catch (IOException ioe) {
       throw new RuntimeException(ioe);
+    } finally {
+      try {
+        dos.close();
+      } catch (IOException ioe) {
+        throw new RuntimeException(ioe);
+      }
     }
   }
   
   public short decodeShort(byte[] a) {
+    DataInputStream dis = null;
     try {
-      DataInputStream dis = new DataInputStream(new ByteArrayInputStream(a));
+      dis = new DataInputStream(new ByteArrayInputStream(a));
       short s = dis.readShort();
+      dis.close();
       return s;
     } catch (IOException ioe) {
       throw new RuntimeException(ioe);
+    } finally {
+      try {
+        dis.close();
+      } catch (IOException ioe) {
+        throw new RuntimeException(ioe);
+      }
     }
   }
   
@@ -57,23 +72,38 @@ public class BinaryEncoder implements Encoder {
   }
   
   public byte[] encodeInt(int i, byte ret[]) {
+    DataOutputStream dos = null;
     try {
-      @SuppressWarnings("resource")
-      DataOutputStream dos = new DataOutputStream(new FixedByteArrayOutputStream(ret));
+      dos = new DataOutputStream(new FixedByteArrayOutputStream(ret));
       dos.writeInt(i);
+      dos.close();
       return ret;
     } catch (IOException ioe) {
       throw new RuntimeException(ioe);
+    } finally {
+      try {
+        dos.close();
+      } catch (IOException ioe) {
+        throw new RuntimeException(ioe);
+      }
     }
   }
   
   public int decodeInt(byte[] a) {
+    DataInputStream dis = null;
     try {
-      DataInputStream dis = new DataInputStream(new ByteArrayInputStream(a));
+      dis = new DataInputStream(new ByteArrayInputStream(a));
       int i = dis.readInt();
+      dis.close();
       return i;
     } catch (IOException ioe) {
       throw new RuntimeException(ioe);
+    } finally {
+      try {
+        dis.close();
+      } catch (IOException ioe) {
+        throw new RuntimeException(ioe);
+      }
     }
   }
   
@@ -82,23 +112,38 @@ public class BinaryEncoder implements Encoder {
   }
   
   public byte[] encodeLong(long l, byte ret[]) {
+    DataOutputStream dos = null;
     try {
-      @SuppressWarnings("resource")
-      DataOutputStream dos = new DataOutputStream(new FixedByteArrayOutputStream(ret));
+      dos = new DataOutputStream(new FixedByteArrayOutputStream(ret));
       dos.writeLong(l);
+      dos.close();
       return ret;
     } catch (IOException ioe) {
       throw new RuntimeException(ioe);
+    } finally {
+      try {
+        dos.close();
+      } catch (IOException ioe) {
+        throw new RuntimeException(ioe);
+      }
     }
   }
   
   public long decodeLong(byte[] a) {
+    DataInputStream dis = null;
     try {
-      DataInputStream dis = new DataInputStream(new ByteArrayInputStream(a));
+      dis = new DataInputStream(new ByteArrayInputStream(a));
       long l = dis.readLong();
+      dis.close();
       return l;
     } catch (IOException ioe) {
       throw new RuntimeException(ioe);
+    } finally {
+      try {
+        dis.close();
+      } catch (IOException ioe) {
+        throw new RuntimeException(ioe);
+      }
     }
   }
   
@@ -107,24 +152,39 @@ public class BinaryEncoder implements Encoder {
   }
   
   public byte[] encodeDouble(double d, byte[] ret) {
+    DataOutputStream dos = null;
     try {
       long l = Double.doubleToRawLongBits(d);
-      @SuppressWarnings("resource")
-      DataOutputStream dos = new DataOutputStream(new FixedByteArrayOutputStream(ret));
+      dos = new DataOutputStream(new FixedByteArrayOutputStream(ret));
       dos.writeLong(l);
+      dos.close();
       return ret;
     } catch (IOException ioe) {
       throw new RuntimeException(ioe);
+    } finally {
+      try {
+        dos.close();
+      } catch (IOException ioe) {
+        throw new RuntimeException(ioe);
+      }
     }
   }
   
   public double decodeDouble(byte[] a) {
+    DataInputStream dis = null;
     try {
-      DataInputStream dis = new DataInputStream(new ByteArrayInputStream(a));
+      dis = new DataInputStream(new ByteArrayInputStream(a));
       long l = dis.readLong();
+      dis.close();
       return Double.longBitsToDouble(l);
     } catch (IOException ioe) {
       throw new RuntimeException(ioe);
+    } finally {
+      try {
+        dis.close();
+      } catch (IOException ioe) {
+        throw new RuntimeException(ioe);
+      }
     }
   }
   
@@ -133,24 +193,37 @@ public class BinaryEncoder implements Encoder {
   }
   
   public byte[] encodeFloat(float f, byte[] ret) {
+    DataOutputStream dos = null;
     try {
       int i = Float.floatToRawIntBits(f);
-      @SuppressWarnings("resource")
-      DataOutputStream dos = new DataOutputStream(new FixedByteArrayOutputStream(ret));
+      dos = new DataOutputStream(new FixedByteArrayOutputStream(ret));
       dos.writeInt(i);
       return ret;
     } catch (IOException ioe) {
       throw new RuntimeException(ioe);
+    } finally {
+      try {
+        dos.close();
+      } catch (IOException ioe) {
+        throw new RuntimeException(ioe);
+      }
     }
   }
   
   public float decodeFloat(byte[] a) {
+    DataInputStream dis = null;
     try {
-      DataInputStream dis = new DataInputStream(new ByteArrayInputStream(a));
+      dis = new DataInputStream(new ByteArrayInputStream(a));
       int i = dis.readInt();
       return Float.intBitsToFloat(i);
     } catch (IOException ioe) {
       throw new RuntimeException(ioe);
+    } finally {
+      try {
+        dis.close();
+      } catch (IOException ioe) {
+        throw new RuntimeException(ioe);
+      }
     }
   }
   
@@ -168,11 +241,18 @@ public class BinaryEncoder implements Encoder {
   }
   
   public boolean decodeBoolean(byte[] a) {
+    DataInputStream dis = null;
     try {
-      DataInputStream dis = new DataInputStream(new ByteArrayInputStream(a));
+      dis = new DataInputStream(new ByteArrayInputStream(a));
       return dis.readBoolean();
     } catch (IOException ioe) {
       throw new RuntimeException(ioe);
+    } finally {
+      try {
+        dis.close();
+      } catch (IOException ioe) {
+        throw new RuntimeException(ioe);
+      }
     }
   }
   
@@ -181,13 +261,19 @@ public class BinaryEncoder implements Encoder {
   }
   
   public byte[] encodeBoolean(boolean b, byte[] ret) {
+    DataOutputStream dos = null;
     try {
-      @SuppressWarnings("resource")
-      DataOutputStream dos = new DataOutputStream(new FixedByteArrayOutputStream(ret));
+      dos = new DataOutputStream(new FixedByteArrayOutputStream(ret));
       dos.writeBoolean(b);
       return ret;
     } catch (IOException ioe) {
       throw new RuntimeException(ioe);
+    } finally {
+      try {
+        dos.close();
+      } catch (IOException ioe) {
+        throw new RuntimeException(ioe);
+      }
     }
   }
   
