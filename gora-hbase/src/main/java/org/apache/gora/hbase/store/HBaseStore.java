@@ -391,15 +391,17 @@ implements Configurable {
   public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query)
       throws IOException {
 
+    if (table == null) {
+      throw new IOException("No table was provided.");
+    }
+
     // taken from o.a.h.hbase.mapreduce.TableInputFormatBase
     Pair<byte[][], byte[][]> keys = table.getStartEndKeys();
     if (keys == null || keys.getFirst() == null ||
         keys.getFirst().length == 0) {
       throw new IOException("Expecting at least one region.");
     }
-    if (table == null) {
-      throw new IOException("No table was provided.");
-    }
+
     List<PartitionQuery<K,T>> partitions = new ArrayList<>(keys.getFirst().length);
     for (int i = 0; i < keys.getFirst().length; i++) {
       String regionLocation = table.getRegionLocation(keys.getFirst()[i]).getHostname();
