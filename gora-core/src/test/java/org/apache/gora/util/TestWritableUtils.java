@@ -44,6 +44,7 @@ public class TestWritableUtils {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     DataOutput out = new DataOutputStream(bos);
     WritableUtils.writeProperties(out, props);
+    ((DataOutputStream)out).flush();
     
     DataInput in = new DataInputStream(new ByteArrayInputStream(bos.toByteArray()));
     

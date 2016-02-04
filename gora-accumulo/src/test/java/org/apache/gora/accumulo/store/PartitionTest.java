@@ -39,6 +39,7 @@ public class PartitionTest {
     DataOutputStream dos = new DataOutputStream(baos);
     try {
       dos.writeLong(l);
+      dos.flush();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
