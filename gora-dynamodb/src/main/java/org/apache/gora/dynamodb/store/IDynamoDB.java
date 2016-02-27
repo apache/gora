@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -15,27 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.gora.mapreduce;
+package org.apache.gora.dynamodb.store;
 
-import org.apache.gora.persistency.impl.PersistentBase;
-import org.apache.hadoop.io.serializer.Deserializer;
-import org.apache.hadoop.io.serializer.Serialization;
-import org.apache.hadoop.io.serializer.Serializer;
+import org.apache.gora.persistency.Persistent;
+import org.apache.gora.store.DataStore;
 
-public class PersistentSerialization implements Serialization<PersistentBase> {
+public interface IDynamoDB<K, T extends Persistent> extends DataStore<K, T> {
 
-  @Override
-  public boolean accept(Class<?> c) {
-    return PersistentBase.class.isAssignableFrom(c);
-  }
+  /**
+   * Sets the handler to the main DynamoDB
+   * @param DynamoDBStore handler to main DynamoDB
+   */
+  public abstract void setDynamoDBStoreHandler(DynamoDBStore<K, T> dynamoHandler);
 
-  @Override
-  public Deserializer<PersistentBase> getDeserializer(Class<PersistentBase> c) {
-    return new PersistentDeserializer(c, true);
-  }
-
-  @Override
-  public Serializer<PersistentBase> getSerializer(Class<PersistentBase> c) {
-    return new PersistentSerializer();
-  }
 }

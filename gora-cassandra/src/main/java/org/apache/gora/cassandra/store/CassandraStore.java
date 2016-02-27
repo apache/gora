@@ -442,8 +442,8 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
   private Object getFieldValue(Schema fieldSchema, Type type, Object fieldValue ){
     switch(type) {
     case RECORD:
-      Persistent persistent = (Persistent) fieldValue;
-      Persistent newRecord = (Persistent) SpecificData.get().newRecord(persistent, persistent.getSchema());
+      PersistentBase persistent = (PersistentBase) fieldValue;
+      PersistentBase newRecord = (PersistentBase) SpecificData.get().newRecord(persistent, persistent.getSchema());
       for (Field member: fieldSchema.getFields()) {
         if (member.pos() == 0 || !persistent.isDirty()) {
           continue;

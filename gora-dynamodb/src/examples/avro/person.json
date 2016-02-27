@@ -1,0 +1,13 @@
+{
+  "type": "record",
+  "name": "person",
+  "namespace": "org.apache.gora.examples.dynamodb.generated",
+  "fields" : [
+    {"name": "ssn", "type": "string"},
+    {"name": "date", "type": "string"}, 
+    {"name": "firstname", "type": "string"},
+    {"name": "lastname", "type": "string"},
+    {"name": "lastname", "type": "integer"}, 
+    {"name": "visitedplaces", "type": {"type":"array", "items": "string"}}
+  ]
+}

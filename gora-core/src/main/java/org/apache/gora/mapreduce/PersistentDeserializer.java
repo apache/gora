@@ -24,7 +24,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.io.BinaryDecoder;
 import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.specific.SpecificDatumReader;
-import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.util.AvroUtils;
 import org.apache.hadoop.io.serializer.Deserializer;
 
@@ -33,19 +33,19 @@ import org.apache.hadoop.io.serializer.Deserializer;
 * with {@link BinaryDecoder}.
 */
 public class PersistentDeserializer
-   implements Deserializer<Persistent> {
+   implements Deserializer<PersistentBase> {
 
   private BinaryDecoder decoder;
-  private Class<? extends Persistent> persistentClass;
+  private Class<? extends PersistentBase> persistentClass;
   private boolean reuseObjects;
-  private SpecificDatumReader<Persistent> datumReader;
+  private SpecificDatumReader<PersistentBase> datumReader;
 
-  public PersistentDeserializer(Class<? extends Persistent> c, boolean reuseObjects) {
+  public PersistentDeserializer(Class<? extends PersistentBase> c, boolean reuseObjects) {
     this.persistentClass = c;
     this.reuseObjects = reuseObjects;
     try {
       Schema schema = AvroUtils.getSchema(persistentClass);
-      datumReader = new SpecificDatumReader<>(schema);
+      datumReader = new SpecificDatumReader<PersistentBase>(schema);
 
     } catch (Exception ex) {
       throw new RuntimeException(ex);
@@ -67,7 +67,7 @@ public class PersistentDeserializer
   public void close() throws IOException { }
 
   @Override
-  public Persistent deserialize(Persistent persistent) throws IOException {
+  public PersistentBase deserialize(PersistentBase persistent) throws IOException {
     return datumReader.read(reuseObjects ? persistent : null, decoder);
   }
 }

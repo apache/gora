@@ -22,6 +22,7 @@ import java.util.Properties;
 
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.store.DataStore;
+import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.util.StringUtils;
 
 /**
@@ -54,6 +55,11 @@ implements DataStore<K, T>{
    * Properties object 
    */
   protected Properties properties;
+  
+  /** 
+   * Determines if an schema will be automatically created. 
+   */
+  protected boolean autoCreateSchema;
 
   /**
    * Default constructor
@@ -61,14 +67,16 @@ implements DataStore<K, T>{
   public WSDataStoreBase() {
   }
 
-  @Override
   /**
    * Initializes the web services backed data store
    */
+  @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
       Properties properties) {
     setKeyClass(keyClass);
     setPersistentClass(persistentClass);
+    autoCreateSchema = DataStoreFactory.getAutoCreateSchema(properties, this);
+    this.properties = properties;
   }
 
   @Override
