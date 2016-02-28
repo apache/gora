@@ -99,8 +99,9 @@ public class CassandraSubColumn extends CassandraColumn {
   private Schema getUnionSchema (int pSchemaPos, Schema pSchema){
     Schema unionSchema = pSchema.getTypes().get(pSchemaPos);
     // default union element
-    if ( unionSchema == null )
-      pSchema.getTypes().get(CassandraStore.DEFAULT_UNION_SCHEMA);
+    if ( unionSchema == null ) {
+      unionSchema = pSchema.getTypes().get(CassandraStore.DEFAULT_UNION_SCHEMA);
+    }
     return unionSchema;
   }
 
