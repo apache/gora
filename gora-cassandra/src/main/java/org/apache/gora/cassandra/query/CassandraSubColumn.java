@@ -51,7 +51,7 @@ public class CassandraSubColumn extends CassandraColumn {
         List<?> genericArray = serializer.fromByteBuffer(byteBuffer);
         value = genericArray;
       } else {
-        LOG.warn("Field detected as type Array, however no serializer could be found!")
+        LOG.warn("Field detected as type Array, however no serializer could be found!");
       }
     } else if (type.equals(Type.MAP)) {
 //      MapSerializer<?> serializer = MapSerializer.get(fieldSchema.getValueType());
