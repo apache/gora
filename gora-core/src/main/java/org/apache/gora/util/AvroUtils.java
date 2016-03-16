@@ -33,7 +33,7 @@ import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.reflect.ReflectData;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificDatumWriter;
-import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 
 /**
  * An utility class for Avro related tasks
@@ -65,7 +65,7 @@ public class AvroUtils {
   /**
    * Returns the schema of the class
    */
-  public static Schema getSchema(Class<? extends Persistent> clazz)
+  public static Schema getSchema(Class<? extends PersistentBase> clazz)
       throws SecurityException, NoSuchFieldException, IllegalArgumentException,
       IllegalAccessException {
 
@@ -80,7 +80,7 @@ public class AvroUtils {
    *          the persistent object to get the fields names from
    * @return the field names
    */
-  public static String[] getPersistentFieldNames(Persistent persistent) {
+  public static String[] getPersistentFieldNames(PersistentBase persistent) {
     return getSchemaFieldNames(persistent.getSchema());
   }
 
@@ -100,10 +100,10 @@ public class AvroUtils {
     return fieldNames;
   }
 
-  public static <T extends Persistent> T deepClonePersistent(T persistent) {
+  public static <T extends PersistentBase> T deepClonePersistent(T persistent) {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     BinaryEncoder enc = EncoderFactory.get().binaryEncoder(bos, null);
-    SpecificDatumWriter<Persistent> writer = new SpecificDatumWriter<>(
+    SpecificDatumWriter<PersistentBase> writer = new SpecificDatumWriter<>(
         persistent.getSchema());
     try {
       writer.write(persistent, enc);

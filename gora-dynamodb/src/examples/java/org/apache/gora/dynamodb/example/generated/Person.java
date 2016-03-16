@@ -1,22 +1,28 @@
-package org.apache.gora.examples.generated;
-import java.util.Set;
-import org.apache.gora.persistency.Persistent;
-import org.apache.gora.persistency.StateManager;
-import com.amazonaws.services.dynamodb.datamodeling.DynamoDBAttribute;
-import com.amazonaws.services.dynamodb.datamodeling.DynamoDBHashKey;
-import com.amazonaws.services.dynamodb.datamodeling.DynamoDBRangeKey;
-import com.amazonaws.services.dynamodb.datamodeling.DynamoDBTable;
+package org.apache.gora.dynamodb.example.generated;
 
-@DynamoDBTable(tableName = "person")
-public class person implements Persistent {
-    private String ssn;
-    private String date;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.avro.Schema.Field;
+import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.Tombstone;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
+
+@DynamoDBTable(tableName = "Person")
+public class Person implements Persistent {
+    private double ssn;
 
     @DynamoDBHashKey(attributeName="ssn") 
-    public String getHashKey() {  return ssn; } 
-    public void setHashKey(String pSsn){  this.ssn = pSsn; }
+    public double getHashKey() {  return ssn; } 
+    public void setHashKey(double pSsn){  this.ssn = pSsn; }
+
+    private String date;
+
     @DynamoDBRangeKey(attributeName="date") 
-    public String getRangeKey() {  return date; } 
+    public String getRangeKey() { return date; } 
     public void setRangeKey(String pDate){  this.date = pDate; }
 
     private String lastName;
@@ -43,25 +49,9 @@ public class person implements Persistent {
     public void setNew(boolean pNew){}
     public void setDirty(boolean pDirty){}
     @Override
-    public StateManager getStateManager() { return null; }
-    @Override
-    public Persistent newInstance(StateManager stateManager) { return null; }
-    @Override
-    public String[] getFields() { return null; }
-    @Override
-    public String getField(int index) { return null; }
-    @Override
-    public int getFieldIndex(String field) { return 0; }
-    @Override
     public void clear() { }
     @Override
-    public person clone() { return null; }
-    @Override
-    public boolean isNew() { return false; }
-    @Override
-    public void setNew() { }
-    @Override
-    public void clearNew() { }
+    public Person clone() { return null; }
     @Override
     public boolean isDirty() { return false; }
     @Override
@@ -81,17 +71,9 @@ public class person implements Persistent {
     @Override
     public void clearDirty() { }
     @Override
-    public boolean isReadable(int fieldIndex) { return false; }
+    public Tombstone getTombstone() { return null; }
     @Override
-    public boolean isReadable(String field) { return false; }
+    public List<Field> getUnmanagedFields() { return null; }
     @Override
-    public void setReadable(int fieldIndex) { }
-    @Override
-    public void setReadable(String field) { }
-    @Override
-    public void clearReadable(int fieldIndex) { }
-    @Override
-    public void clearReadable(String field) { }
-    @Override
-    public void clearReadable() { }
+    public Persistent newInstance() { return new Person(); }
 }

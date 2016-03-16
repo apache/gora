@@ -28,7 +28,6 @@ import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import org.apache.avro.Schema.Field;
-import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
@@ -170,7 +169,7 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
   /**
    * Returns a clone with exactly the requested fields shallowly copied
    */
-  private static<T extends Persistent> T getPersistent(T obj, String[] fields) {
+  private static<T extends PersistentBase> T getPersistent(T obj, String[] fields) {
     List<Field> otherFields = obj.getSchema().getFields();
     String[] otherFieldStrings = new String[otherFields.size()];
     for(int i = 0; i<otherFields.size(); i++ ){

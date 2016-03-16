@@ -18,207 +18,241 @@
 
 package org.apache.gora.dynamodb.compiler;
 
+import static org.apache.gora.dynamodb.store.DynamoDBUtils.MAPPING_FILE;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.gora.dynamodb.store.DynamoDBMapping;
 import org.apache.gora.dynamodb.store.DynamoDBMapping.DynamoDBMappingBuilder;
+import org.apache.gora.util.GoraException;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.amazonaws.services.dynamodb.model.KeySchema;
-import com.amazonaws.services.dynamodb.model.KeySchemaElement;
+import com.amazonaws.services.dynamodbv2.model.KeySchemaElement;
+import com.amazonaws.services.dynamodbv2.model.KeyType;
 
-/** Generate specific Java classes for defined schemas. */
+/** 
+ * Generate specific Java classes for defined schemas. 
+ * Different from the {@link org.apache.gora.compiler.GoraCompiler}, 
+ * which uses an .avsc or .json schema definition, this compiler 
+ * expects an XML schema file as input.
+ */
 public class GoraDynamoDBCompiler {
   private File dest;
   private Writer out;
   private static final Logger log = LoggerFactory.getLogger(GoraDynamoDBCompiler.class);
+  private String packageName;
 
+  /**
+   * GoraDynamoDBCompiler
+   * 
+   * @param File
+   *          where the data bean will be written.
+   */
   private GoraDynamoDBCompiler(File dest) {
-    this.dest = dest;                             // root directory for output
+    this.dest = dest;
   }
 
   /** Generates Java classes for a schema. */
   public static void compileSchema(File src, File dest) throws IOException {
-    log.info("Compiling " + src + " to " + dest );
+    log.info("Compiling {} to {}", src, dest);
     GoraDynamoDBCompiler compiler = new GoraDynamoDBCompiler(dest);
     DynamoDBMapping dynamoDBMap = compiler.readMapping(src);
-    if (dynamoDBMap.getTables().isEmpty())  throw new IllegalStateException("There are not tables defined.");
+    if (dynamoDBMap.getTables().isEmpty()) 
+      throw new IllegalStateException("There are no tables defined.");
 
-    for(String tableName : dynamoDBMap.getTables().keySet()){
-      compiler.compile(tableName, dynamoDBMap.getKeySchema(tableName), dynamoDBMap.getItems(tableName));
+    for(String tableName : dynamoDBMap.getTables().keySet()) {
+      compiler.compile(tableName, dynamoDBMap.getKeySchema(tableName), 
+          dynamoDBMap.getItems(tableName));
+      log.info("{} written without issues to {}", tableName, dest.getAbsolutePath());
     }
   }
 
   /**
-   * Method in charge of compiling a specific table using a key schema and a set of attributes
-   * @param pTableNameTable name
-   * @param pKeySchemaKey schema used
-   * @param pItemsList of items belonging to a specific table
+   * Method in charge of compiling a specific table using a key schema and a set 
+   * of attributes
+   * @param dest2 
+   * @param pTableNameTable 
+   *          name
+   * @param pKeySchemaKey 
+   *          schema used
+   * @param pItemsList 
+   *          of items belonging to a specific table
    */
-  private void compile(String pTableName, KeySchema pKeySchema, List<Map<String, String>> pItems){
-    // TODO define where the generated will go 
+  private void compile(String pTableName, ArrayList<KeySchemaElement> arrayList, Map<String, String> map){
     try {
       startFile(pTableName, pTableName);
-      setHeaders(null);
+      setHeaders(packageName);
       line(0, "");
       line(0, "@DynamoDBTable(tableName = \"" + pTableName + "\")");
       line(0, "public class " + pTableName + " implements Persistent {");
-      setKeyAttributes(pKeySchema, 2);
-      setKeyMethods(pKeySchema, 2);
-      setItems(pItems, 2);
-      setDefaultMethods(2);
+      for (KeySchemaElement pKeySchema : arrayList) {
+        setKeyAttributes(pKeySchema, map.get(pKeySchema.getAttributeName()), 2);
+        setKeyMethods(pKeySchema, map.get(pKeySchema.getAttributeName()), 2);
+        map.remove(pKeySchema.getAttributeName());
+      }
+      setItems(map, 2);
+      setDefaultMethods(2, pTableName);
       line(0, "}");
       out.flush();
       out.close();
     } catch (IOException e) {
-      log.error("Error while compiling table " + pTableName);
-      e.printStackTrace();
+      log.error("Error while compiling table {}",pTableName, e.getMessage());
+      throw new RuntimeException(e);
     }
   }
-  
+
   /**
    * Receives a list of all items and creates getters and setters for them
-   * @param pItemsThe items belonging to the table
-   * @param pIdenThe number of spaces used for identation
+   * @param pItemsThe 
+   *          items belonging to the table
+   * @param pIdenThe 
+   *          number of spaces used for identation
    * @throws IOException
    */
-  private void setItems(List<Map<String, String>> pItems, int pIden) throws IOException{
-    for(Map<String, String> item : pItems){
-      for (String itemName : item.keySet()){
-        String itemType = "String";
-        if (item.get(itemName).toString().equals("N"))
-          itemType = "double";
-        if (item.get(itemName).toString().equals("SS"))
-          itemType = "Set<String>";
-        if (item.get(itemName).toString().equals("SN"))
-          itemType = "Set<double>";
-        line(pIden, "private " + itemType + " " + itemName + ";");
-        setItemMethods(itemName, itemType, pIden);
-      }
+  private void setItems(Map<String, String> pItems, int pIden)
+      throws IOException {
+    for (String itemName : pItems.keySet()) {
+      String itemType = "String";
+      if (pItems.get(itemName).toString().equals("N"))
+        itemType = "double";
+      if (pItems.get(itemName).toString().equals("SS"))
+        itemType = "Set<String>";
+      if (pItems.get(itemName).toString().equals("SN"))
+        itemType = "Set<double>";
+      line(pIden, "private " + itemType + " " + itemName + ";");
+      setItemMethods(itemName, itemType, pIden);
     }
     line(0, "");
   }
-  
+
   /**
    * Creates item getters and setters
-   * @param pItemNameItem's name
-   * @param pItemTypeItem's type
-   * @param pIdenNumber of spaces used for indentation
+   * @param pItemNameItem
+   *          's name
+   * @param pItemTypeItem
+   *          's type
+   * @param pIdenNumber 
+   *          of spaces used for indentation
    * @throws IOException
    */
-  private void setItemMethods(String pItemName, String pItemType, int pIden) throws IOException{
-    line(pIden, "@DynamoDBAttribute(attributeName = \"" + camelCasify(pItemName) + "\")");
-    line(pIden, "public " + pItemType + " get" + camelCasify(pItemName) + "() {  return " + pItemName + ";  }");
-    line(pIden, "public void set" + camelCasify(pItemName) + "(" + pItemType + " p" + camelCasify(pItemName) + ") {  this." + pItemName + " = p"+ camelCasify(pItemName) +";  }");
+  private void setItemMethods(String pItemName, String pItemType, int pIden)
+      throws IOException {
+    line(pIden, "@DynamoDBAttribute(attributeName = \""
+        + camelCasify(pItemName) + "\")");
+    line(pIden, "public " + pItemType + " get" + camelCasify(pItemName)
+    + "() {  return " + pItemName + ";  }");
+    line(pIden, "public void set" + camelCasify(pItemName) + "(" + pItemType
+        + " p" + camelCasify(pItemName) + ") {  this." + pItemName + " = p"
+        + camelCasify(pItemName) + ";  }");
     line(0, "");
   }
-  
+
   /**
    * Creates key getters and setters 
-   * @param pKeySchemaThe key schema for a specific table
-   * @param pIdenNumber of spaces used for indentation
+   * @param pKeySchemaThe 
+   *          key schema for a specific table
+   * @param pIdenNumber 
+   *          of spaces used for indentation
    * @throws IOException
    */
-  private void setKeyMethods(KeySchema pKeySchema, int pIden) throws IOException{
-    KeySchemaElement hashKey = pKeySchema.getHashKeyElement();
-    KeySchemaElement rangeKey = pKeySchema.getRangeKeyElement();
+  private void setKeyMethods(KeySchemaElement pKeySchema, String attType,
+      int pIden) throws IOException {
     StringBuilder strBuilder = new StringBuilder();
+    attType = attType.equals("S") ? "String" : "double";
     // hash key
-    if(hashKey != null){
-      strBuilder.append("@DynamoDBHashKey(attributeName=\"" + hashKey.getAttributeName() + "\") \n");
-      strBuilder.append("    public String getHashKey() {  return " + hashKey.getAttributeName() + "; } \n");
-      strBuilder.append("    public void setHashKey(" + (hashKey.getAttributeType().equals("S")?"String ":"double "));
-      strBuilder.append("p" + camelCasify(hashKey.getAttributeName()) + "){  this." + hashKey.getAttributeName());
-      strBuilder.append(" = p" + camelCasify(hashKey.getAttributeName()) + "; }");
+    if (pKeySchema.getKeyType().equals(KeyType.HASH.toString())) {
+      strBuilder.append("@DynamoDBHashKey(attributeName=\""
+          + pKeySchema.getAttributeName() + "\") \n");
+      strBuilder.append("    public " + attType + " getHashKey() {  return "
+          + pKeySchema.getAttributeName() + "; } \n");
+      strBuilder.append("    public void setHashKey(" + attType + " ");
+      strBuilder.append("p" + camelCasify(pKeySchema.getAttributeName())
+      + "){  this." + pKeySchema.getAttributeName());
+      strBuilder.append(" = p" + camelCasify(pKeySchema.getAttributeName())
+      + "; }");
       line(pIden, strBuilder.toString());
     }
     strBuilder.delete(0, strBuilder.length());
     // range key
-    if(rangeKey != null){
-      strBuilder.append("@DynamoDBRangeKey(attributeName=\"" + rangeKey.getAttributeName() + "\") \n");
-      strBuilder.append("    public String getRangeKey() {  return " + rangeKey.getAttributeName() + "; } \n");
-      strBuilder.append("    public void setRangeKey(" + (rangeKey.getAttributeType().equals("S")?"String ":"double "));
-      strBuilder.append("p" + camelCasify(rangeKey.getAttributeName()) + "){  this." + rangeKey.getAttributeName());
-      strBuilder.append(" = p" + camelCasify(rangeKey.getAttributeName()) + "; }");
+    if (pKeySchema.getKeyType().equals(KeyType.RANGE.toString())) {
+      strBuilder.append("@DynamoDBRangeKey(attributeName=\""
+          + pKeySchema.getAttributeName() + "\") \n");
+      strBuilder.append("    public " + attType + " getRangeKey() { return "
+          + pKeySchema.getAttributeName() + "; } \n");
+      strBuilder.append("    public void setRangeKey(" + attType + " ");
+      strBuilder.append("p" + camelCasify(pKeySchema.getAttributeName())
+      + "){  this." + pKeySchema.getAttributeName());
+      strBuilder.append(" = p" + camelCasify(pKeySchema.getAttributeName())
+      + "; }");
       line(pIden, strBuilder.toString());
     }
     line(0, "");
   }
-  
+
   /**
    * Creates the key attributes within the generated class
-   * @param pKeySchemaKey schema
-   * @param pIdenNumber of spaces used for indentation
+   * @param pKeySchema
+   *          schema
+   * @param attType
+   *          attribute type
+   * @param pIden
+   *          of spaces used for indentation
    * @throws IOException
    */
-  private void setKeyAttributes(KeySchema pKeySchema, int pIden) throws IOException{
-    KeySchemaElement hashKey = pKeySchema.getHashKeyElement();
-    KeySchemaElement rangeKey = pKeySchema.getRangeKeyElement();
+  private void setKeyAttributes(KeySchemaElement pKeySchema, String attType,
+      int pIden) throws IOException {
     StringBuilder strBuilder = new StringBuilder();
-    // hash key
-    if(hashKey != null){
-      strBuilder.append("private " + (hashKey.getAttributeType().equals("S")?"String ":"double "));
-      strBuilder.append(hashKey.getAttributeName() + ";");
+    attType = attType.equals("S") ? "String " : "double ";
+    if (pKeySchema != null) {
+      strBuilder.append("private " + attType);
+      strBuilder.append(pKeySchema.getAttributeName() + ";");
       line(pIden, strBuilder.toString());
     }
     strBuilder.delete(0, strBuilder.length());
-    // range key
-    if(rangeKey != null){
-      strBuilder.append("private " + (rangeKey.getAttributeType().equals("S")?"String ":"double "));
-      strBuilder.append(rangeKey.getAttributeName() + ";");
-      line(pIden, strBuilder.toString());
-    }
     line(0, "");
   }
-  
+
   /**
    * Returns camel case version of a string
-   * @param sString to be camelcasified
+   * @param sString 
+   *          to be camelcasified
    * @return
    */
   private static String camelCasify(String s) {
-    return s.substring(0, 1).toUpperCase() + s.substring(1);
-  }
-
-  /** Recognizes camel case */
-  private static String toUpperCase(String s) {
-    StringBuilder builder = new StringBuilder();
-    for(int i=0; i<s.length(); i++) {
-      if(i > 0) {
-        if(Character.isUpperCase(s.charAt(i))
-         && Character.isLowerCase(s.charAt(i-1))
-         && Character.isLetter(s.charAt(i))) {
-            builder.append("_");
-        }
-      }
-      builder.append(Character.toUpperCase(s.charAt(i)));
-    }
-    return builder.toString();
+    return s.substring(0, 1).toUpperCase(Locale.getDefault()) + s.substring(1);
   }
 
   /**
    * Starts the java generated class file
-   * @param nameClass name
+   * @param nameClass 
+   *          name
    * @param space
+   *          spacing
    * @throws IOException
    */
   private void startFile(String name, String space) throws IOException {
-    File dir = new File(dest, space.replace('.', File.separatorChar));
+    String fullDest = FilenameUtils.normalize
+        (dest.getAbsolutePath() + File.separatorChar + packageName.replace('.', File.separatorChar));
+    File dir = new File(fullDest);
     if (!dir.exists())
       if (!dir.mkdirs())
         throw new IOException("Unable to create " + dir);
     name = cap(name) + ".java";
-    out = new OutputStreamWriter(new FileOutputStream(new File(dir, name)));
+    out = new OutputStreamWriter(new FileOutputStream(new File(dir, name)), Charset.defaultCharset());
 
   }
 
@@ -228,46 +262,36 @@ public class GoraDynamoDBCompiler {
    * @throws IOException
    */
   private void setHeaders(String namespace) throws IOException {
-    if(namespace != null) {
-      line(0, "package "+namespace+";\n");
+    if (namespace != null) {
+      line(0, "package " + namespace + ";\n");
     }
+    line(0, "import java.util.List;");
     line(0, "import java.util.Set;");
+    line(0, "");
+    line(0, "import org.apache.avro.Schema.Field;");
     line(0, "import org.apache.gora.persistency.Persistent;");
-    line(0, "import org.apache.gora.persistency.StateManager;");
-    line(0, "import com.amazonaws.services.dynamodb.datamodeling.DynamoDBAttribute;");
-    line(0, "import com.amazonaws.services.dynamodb.datamodeling.DynamoDBHashKey;");
-    line(0, "import com.amazonaws.services.dynamodb.datamodeling.DynamoDBRangeKey;");
-    line(0, "import com.amazonaws.services.dynamodb.datamodeling.DynamoDBTable;");
+    line(0, "import org.apache.gora.persistency.Tombstone;");
+    line(0, "import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;");
+    line(0, "import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;");
+    line(0, "import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;");
+    line(0, "import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;");
   }
 
   /**
    * Creates default methods inherited from upper classes
-   * @param pIdenNumber of spaces used for indentation
+   * @param pIden 
+   *          of spaces used for indentation
+   * @param tabName
+   *          table name
    * @throws IOException
    */
-  private void setDefaultMethods(int pIden) throws IOException {
+  private void setDefaultMethods(int pIden, String tabName) throws IOException {
     line(pIden, "public void setNew(boolean pNew){}");
     line(pIden, "public void setDirty(boolean pDirty){}");
     line(pIden, "@Override");
-    line(pIden, "public StateManager getStateManager() { return null; }");
-    line(pIden, "@Override");
-    line(pIden, "public Persistent newInstance(StateManager stateManager) { return null; }");
-    line(pIden, "@Override");
-    line(pIden, "public String[] getFields() { return null; }");
-    line(pIden, "@Override");
-    line(pIden, "public String getField(int index) {return null; }");
-    line(pIden, "@Override");
-    line(pIden, "public int getFieldIndex(String field) { return 0; }");
-    line(pIden, "@Override");
     line(pIden, "public void clear() { }");
     line(pIden, "@Override");
-    line(pIden, "public person clone() {return null; }");
-    line(pIden, "@Override");
-    line(pIden, "public boolean isNew() { return false; }");
-    line(pIden, "@Override");
-    line(pIden, "public void setNew() { }");
-    line(pIden, "@Override");
-    line(pIden, "public void clearNew() {}");
+    line(pIden, "public " + tabName + " clone() { return null; }");
     line(pIden, "@Override");
     line(pIden, "public boolean isDirty() { return false; }");
     line(pIden, "@Override");
@@ -287,29 +311,23 @@ public class GoraDynamoDBCompiler {
     line(pIden, "@Override");
     line(pIden, "public void clearDirty() { }");
     line(pIden, "@Override");
-    line(pIden, "public boolean isReadable(int fieldIndex) {return false; }");
+    line(pIden, "public Tombstone getTombstone() { return null; }");
     line(pIden, "@Override");
-    line(pIden, "public boolean isReadable(String field) { return false; }");
+    line(pIden, "public List<Field> getUnmanagedFields() { return null; }");
     line(pIden, "@Override");
-    line(pIden, "public void setReadable(int fieldIndex) { }");
-    line(pIden, "@Override");
-    line(pIden, "public void setReadable(String field) { }");
-    line(pIden, "@Override");
-    line(pIden, "public void clearReadable(int fieldIndex) { }");
-    line(pIden, "@Override");
-    line(pIden, "public void clearReadable(String field) { }");
-    line(pIden, "@Override");
-    line(pIden, "public void clearReadable() { }");
+    line(pIden, "public Persistent newInstance() { return new " + tabName + "(); }");
   }
 
   /**
    * Writes a line within the output stream
-   * @param indentNumber of spaces used for indentation
-   * @param textText to be written
+   * @param indentNumber 
+   *          of spaces used for indentation
+   * @param textText 
+   *          to be written
    * @throws IOException
    */
   private void line(int indent, String text) throws IOException {
-    for (int i = 0; i < indent; i ++) {
+    for (int i = 0; i < indent; i++) {
       out.append("  ");
     }
     out.append(text);
@@ -318,29 +336,38 @@ public class GoraDynamoDBCompiler {
 
   /**
    * Returns the string received with the first letter in uppercase
-   * @param nameString to be converted
+   * @param name 
+   *          to be converted
    * @return
    */
   static String cap(String name) {
-    return name.substring(0,1).toUpperCase()+name.substring(1,name.length());
+    return name.substring(0,1).toUpperCase(Locale.getDefault())
+        + name.substring(1,name.length());
   }
 
   /**
    * Start point of the compiler program
-   * @param argsReceives the schema file to be compiled and where this should be written
+   * @param argsReceives 
+   *          the schema file to be compiled and where this should be written
    * @throws Exception
    */
-  public static void main(String[] args) throws Exception {
-    if (args.length < 2) {
-      System.err.println("Usage: Compiler <schema file> <output dir>");
-      System.exit(1);
+  public static void main(String[] args) {
+    try {
+      if (args.length < 2) {
+        log.error("Usage: Compiler <schema file> <output dir>");
+        System.exit(1);
+      }
+      compileSchema(new File(args[0]), new File(args[1]));
+    } catch (Exception e) {
+      log.error("Something went wrong. Please check the input file.", e.getMessage());
+      throw new RuntimeException(e);
     }
-    compileSchema(new File(args[0]), new File(args[1]));
   }
 
   /**
    * Reads the schema file and converts it into a data structure to be used
-   * @param pMapFileThe schema file to be mapped into a table
+   * @param pMapFile
+   *          schema file to be mapped into a table
    * @return
    * @throws IOException
    */
@@ -352,50 +379,50 @@ public class GoraDynamoDBCompiler {
     try {
       SAXBuilder builder = new SAXBuilder();
       Document doc = builder.build(pMapFile);
-      
+
+      if (doc == null || doc.getRootElement() == null)
+        throw new GoraException("Unable to load " + MAPPING_FILE
+            + ". Please check its existance!");
+
       Element root = doc.getRootElement();
 
       List<Element> tableElements = root.getChildren("table");
-      for(Element tableElement : tableElements) {
-      
-      String tableName = tableElement.getAttributeValue("name");
-      long readCapacUnits = Long.parseLong(tableElement.getAttributeValue("readcunit"));
-      long writeCapacUnits = Long.parseLong(tableElement.getAttributeValue("readcunit"));
-    
-      mappingBuilder.setTableName(tableName);
-      mappingBuilder.setProvisionedThroughput(tableName, readCapacUnits, writeCapacUnits);
-      log.debug("Basic table properties have been set: Name, and Provisioned throughput.");
-    
-      // Retrieving key's features
-      List<Element> fieldElements = tableElement.getChildren("key");
-      for(Element fieldElement : fieldElements) {
-        String keyName  = fieldElement.getAttributeValue("name");
-        String keyType  = fieldElement.getAttributeValue("type");
-        String keyAttrType  = fieldElement.getAttributeValue("att-type");
-        if(keyType.equals("hash"))
-          mappingBuilder.setHashKeySchema(tableName, keyName, keyAttrType);
-        else if(keyType.equals("hashrange"))
-          mappingBuilder.setHashRangeKeySchema(tableName, keyName, keyAttrType);
-      }
-      log.debug("Table key schemas have been set.");
-    
-      // Retrieving attributes
-        fieldElements = tableElement.getChildren("attribute");
-        for(Element fieldElement : fieldElements) {
-          String attributeName  = fieldElement.getAttributeValue("name");
+      boolean keys = false;
+      for (Element tableElement : tableElements) {
+
+        String tableName = tableElement.getAttributeValue("name");
+        long readCapacUnits = Long.parseLong(tableElement
+            .getAttributeValue("readcunit"));
+        long writeCapacUnits = Long.parseLong(tableElement
+            .getAttributeValue("writecunit"));
+        this.packageName = tableElement.getAttributeValue("package");
+
+        mappingBuilder.setProvisionedThroughput(tableName, readCapacUnits,
+            writeCapacUnits);
+        log.debug("Table properties have been set for name, package and provisioned throughput.");
+
+        // Retrieving attributes
+        List<Element> fieldElements = tableElement.getChildren("attribute");
+        for (Element fieldElement : fieldElements) {
+          String key = fieldElement.getAttributeValue("key");
+          String attributeName = fieldElement.getAttributeValue("name");
           String attributeType = fieldElement.getAttributeValue("type");
-          mappingBuilder.addAttribute(tableName, attributeName, attributeType, 0);
+          mappingBuilder.addAttribute(tableName, attributeName, attributeType);
+          // Retrieving key's features
+          if (key != null) {
+            mappingBuilder.setKeySchema(tableName, attributeName, key);
+            keys = true;
+          }
         }
-        log.info("Table attributes have been read.");
+        log.debug("Attributes for table '{}' have been read.", tableName);
+        if (!keys)
+          log.warn("Keys for table '{}' have NOT been set.", tableName);
       }
-
     } catch(IOException ex) {
-      log.info("Error while performing xml mapping.");
-      ex.printStackTrace();
-      throw ex;
-
+      log.error("Error while performing xml mapping.", ex.getMessage());
+      throw new RuntimeException(ex);
     } catch(Exception ex) {
-      ex.printStackTrace();
+      log.error("An error occured whilst reading the xml mapping file!", ex.getMessage());
       throw new IOException(ex);
     }
 

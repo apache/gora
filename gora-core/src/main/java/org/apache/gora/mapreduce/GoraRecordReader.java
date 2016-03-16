@@ -42,31 +42,31 @@ public class GoraRecordReader<K, T extends PersistentBase> extends RecordReader<
 
   protected Query<K,T> query;
   protected Result<K,T> result;
-  
+
   private GoraRecordCounter counter = new GoraRecordCounter();
-  
+
   public GoraRecordReader(Query<K,T> query, TaskAttemptContext context) {
     this.query = query;
 
     Configuration configuration = context.getConfiguration();
     int recordsMax = configuration.getInt(BUFFER_LIMIT_READ_NAME, BUFFER_LIMIT_READ_VALUE);
-    
+
     // Check if result set will at least contain 2 rows
     if (recordsMax <= 1) {
       LOG.info("Limit " + recordsMax + " changed to " + BUFFER_LIMIT_READ_VALUE);
       recordsMax = BUFFER_LIMIT_READ_VALUE;
     }
-    
+
     counter.setRecordsMax(recordsMax);
     LOG.info("gora.buffer.read.limit = " + recordsMax);
-    
+
     this.query.setLimit(recordsMax);
   }
 
   public void executeQuery() throws Exception {
     this.result = query.execute();
   }
-  
+
   @Override
   public K getCurrentKey() throws IOException, InterruptedException {
     return result.getKey();
@@ -80,47 +80,47 @@ public class GoraRecordReader<K, T extends PersistentBase> extends RecordReader<
   @Override
   public float getProgress() throws IOException, InterruptedException {
     try{
-	  return result.getProgress();
-  	}
- 	catch(Exception e){
- 		return 0;
- 	}
+      return result.getProgress();
+    }
+    catch(Exception e){
+      return 0;
+    }
   }
 
   @Override
   public void initialize(InputSplit split, TaskAttemptContext context)
-  throws IOException, InterruptedException { }
+      throws IOException, InterruptedException { }
 
   @Override
   public boolean nextKeyValue() throws IOException, InterruptedException {
-	  try{
-	    if (counter.isModulo()) {
-	      boolean firstBatch = (this.result == null);
-	      if (! firstBatch) {
-	        this.query.setStartKey(this.result.getKey());
-	        if (this.query.getLimit() == counter.getRecordsMax()) {
-	          this.query.setLimit(counter.getRecordsMax() + 1);
-	        }
-	      }
-	      if (this.result != null) {
-	        this.result.close();
-	      }
-	      
-	      executeQuery();
-	      
-	      if (! firstBatch) {
-	        // skip first result
-	        this.result.next();
-	      }
-	    }
-	    
-	    counter.increment();
-	    return this.result.next();
-	  }
-	  catch(Exception e){
-	    LOG.error("Error reading Gora records: {}", e.getMessage());
-	    throw new RuntimeException(e);
-	  }
+    try{
+      if (counter.isModulo()) {
+        boolean firstBatch = (this.result == null);
+        if (! firstBatch) {
+          this.query.setStartKey(this.result.getKey());
+          if (this.query.getLimit() == counter.getRecordsMax()) {
+            this.query.setLimit(counter.getRecordsMax() + 1);
+          }
+        }
+        if (this.result != null) {
+          this.result.close();
+        }
+
+        executeQuery();
+
+        if (! firstBatch) {
+          // skip first result
+          this.result.next();
+        }
+      }
+
+      counter.increment();
+      return this.result.next();
+    }
+    catch(Exception e){
+      LOG.error("Error reading Gora records: {}", e.getMessage());
+      throw new RuntimeException(e);
+    }
   }
 
   //@Override

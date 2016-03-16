@@ -38,7 +38,6 @@ import org.apache.gora.mongodb.query.MongoDBQuery;
 import org.apache.gora.mongodb.query.MongoDBResult;
 import org.apache.gora.mongodb.utils.BSONDecorator;
 import org.apache.gora.mongodb.utils.GoraDBEncoder;
-import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.impl.BeanFactoryImpl;
 import org.apache.gora.persistency.impl.DirtyListWrapper;
 import org.apache.gora.persistency.impl.DirtyMapWrapper;
@@ -573,7 +572,7 @@ public class MongoStore<K, T extends PersistentBase> extends
       clazz = ClassLoadingUtils.loadClass(fieldSchema.getFullName());
     } catch (ClassNotFoundException e) {
     }
-    Persistent record = new BeanFactoryImpl(keyClass, clazz).newPersistent();
+    PersistentBase record = (PersistentBase) new BeanFactoryImpl(keyClass, clazz).newPersistent();
     for (Field recField : fieldSchema.getFields()) {
       Schema innerSchema = recField.schema();
       DocumentFieldType innerStoreType = mapping

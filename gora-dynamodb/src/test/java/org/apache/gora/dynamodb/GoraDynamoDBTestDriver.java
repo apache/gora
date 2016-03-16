@@ -23,9 +23,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.apache.gora.GoraTestDriver;
+import org.apache.gora.dynamodb.example.generated.Person;
 import org.apache.gora.dynamodb.query.DynamoDBKey;
 import org.apache.gora.dynamodb.store.DynamoDBStore;
-import org.apache.gora.examples.generated.person;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.ws.impl.WSDataStoreFactory;
@@ -33,10 +33,10 @@ import org.apache.gora.util.GoraException;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.PropertiesCredentials;
-import com.amazonaws.services.dynamodb.AmazonDynamoDBClient;
-import com.amazonaws.services.dynamodb.model.DescribeTableRequest;
-import com.amazonaws.services.dynamodb.model.ResourceNotFoundException;
-import com.amazonaws.services.dynamodb.model.TableDescription;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
+import com.amazonaws.services.dynamodbv2.model.DescribeTableRequest;
+import com.amazonaws.services.dynamodbv2.model.ResourceNotFoundException;
+import com.amazonaws.services.dynamodbv2.model.TableDescription;
 
 /**
  * Helper class for third part tests using gora-dynamodb backend. 
@@ -47,28 +47,28 @@ public class GoraDynamoDBTestDriver extends GoraTestDriver {
   /**
    * Data store to be used within the test driver
    */
-  private static DynamoDBStore<DynamoDBKey,person> personStore;
-  
+  private static DataStore<DynamoDBKey, Person> personStore;
+
   /**
    * DynamoDB client to be used from the test driver
    */
   static AmazonDynamoDBClient dynamoDBClient;
-  
+
   /**
    * Credentials file name
    */
   static String awsCredentialsFile = "AwsCredentials.properties";
-  
+
   /**
    * Test credential paths
    */
   static String awsCredentialsPath = "target/test-classes/";
-  
+
   /**
    * Authentication object
    */
   protected Object auth;
-  
+
   /**
    * Default constructor
    */
@@ -80,11 +80,11 @@ public class GoraDynamoDBTestDriver extends GoraTestDriver {
       credentials = new PropertiesCredentials(file);
       auth = credentials;
     } catch (FileNotFoundException e) {
-      e.printStackTrace();
+      throw new RuntimeException(e);
     } catch (IllegalArgumentException e) {
-      e.printStackTrace();
+      throw new IllegalArgumentException(e);
     } catch (IOException e) {
-      e.printStackTrace();
+      throw new RuntimeException(e);
     }
   }
 
@@ -97,7 +97,7 @@ public class GoraDynamoDBTestDriver extends GoraTestDriver {
     log.info("Initializing DynamoDB.");
     createDataStore();
   }
-  
+
   /**
    * Sets up the data store by creating the schema
    */
@@ -105,45 +105,48 @@ public class GoraDynamoDBTestDriver extends GoraTestDriver {
   public void setUp() throws Exception {
     personStore.createSchema();
   }
-  
+
   /**
    * Creates the DynamoDB store and returns an specific object
+   * 
    * @return
    * @throws IOException
    */
   @SuppressWarnings("unchecked")
-  protected DataStore<DynamoDBKey, person> createDataStore() throws IOException {
-    if(personStore == null)
-      personStore = WSDataStoreFactory.createDataStore(DynamoDBStore.class, 
-        DynamoDBKey.class,person.class, auth);
-      return personStore;
+  protected DataStore<DynamoDBKey, Person> createDataStore()
+      throws IOException {
+    if (personStore == null)
+      personStore = WSDataStoreFactory.createDataStore(DynamoDBStore.class,
+          DynamoDBKey.class, Person.class, auth);
+    return personStore;
   }
-  
+
   /**
    * Creates the DynamoDB store but returns a generic object
    */
   @SuppressWarnings("unchecked")
-  public<K, T extends Persistent> DataStore<K,T>
-    createDataStore(Class<K> keyClass, Class<T> persistentClass) throws GoraException {
-      personStore = (DynamoDBStore<DynamoDBKey, person>) WSDataStoreFactory.createDataStore(
-        (Class<? extends DataStore<K,T>>)dataStoreClass, keyClass, persistentClass, auth);
-      dataStores.add(personStore);
+  public <K, T extends Persistent> DataStore<K, T> createDataStore(
+      Class<K> keyClass, Class<T> persistentClass) throws GoraException {
+    personStore = (DynamoDBStore<DynamoDBKey, Person>) WSDataStoreFactory
+        .createDataStore((Class<? extends DataStore<K, T>>) dataStoreClass,
+            keyClass, persistentClass, auth);
+    dataStores.add(personStore);
     return (DataStore<K, T>) personStore;
   }
-  
+
   /**
    * Gets or create the DynamoDB data store
+   * 
    * @return
    */
-  public DataStore<DynamoDBKey, person> getDataStore(){
+  public DataStore<DynamoDBKey, Person> getDataStore(){
     try {
       if(personStore != null)
         return personStore;
       else
         return createDataStore();
     } catch (IOException e) {
-      e.printStackTrace();
-      return null;
+      throw new RuntimeException(e);
     }
   }
 
@@ -154,7 +157,7 @@ public class GoraDynamoDBTestDriver extends GoraTestDriver {
   public void tearDownClass() throws Exception {
     log.info("Finished DynamoDB driver.");
   }
-  
+
   /**
    * Tears down objects created
    */
@@ -162,39 +165,45 @@ public class GoraDynamoDBTestDriver extends GoraTestDriver {
   public void tearDown() throws Exception{
     super.tearDown();
   }
-  
+
   /**
    * Gets authentication object
+   * 
    * @return
    */
   public Object getAuth() {
     return auth;
   }
-  
+
   /**
    * Gets DynamoDBClient to be used
+   * 
    * @return
    */
   public AmazonDynamoDBClient getDynamoDBClient() {
     return dynamoDBClient;
   }
-  
+
   /**
    * Checks if a resource exists or not
-   * @param tableName	Table name to be checked
+   * 
+   * @param tableName
+   *          Table name to be checked
    * @return
    */
   public TableDescription checkResource(String tableName){
     TableDescription tableDescription = null;
-  
+
     try{
-      DescribeTableRequest describeTableRequest = new DescribeTableRequest().withTableName(tableName);
-      tableDescription = dynamoDBClient.describeTable(describeTableRequest).getTable();
+      DescribeTableRequest describeTableRequest = new DescribeTableRequest()
+          .withTableName(tableName);
+      tableDescription = dynamoDBClient.describeTable(describeTableRequest)
+          .getTable();
     }
     catch(ResourceNotFoundException e){
       tableDescription = null;
     }
-      
+
     return tableDescription;
   }
 }

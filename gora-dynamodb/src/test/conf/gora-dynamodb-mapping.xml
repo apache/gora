@@ -19,17 +19,17 @@
 
 <gora-otd>
 
-  <table name="person" readcunit="5" writecunit="5"> <!-- optional descriptors for tables -->
-  	<key name="ssn" type="hash" att-type="S"/>
-  	<key name="date" type="hashrange" att-type="S"/>
+  <table name="Person" readcunit="1" writecunit="1" package="org.apache.gora.dynamodb.example.generated"> <!-- optional descriptors for tables -->
+    <attribute name="ssn" type="N" key="hash"/>
+    <attribute name="date" type="S" key="hashrange"/>
     <attribute name="firstName" type="S"/>
     <attribute name="lastName" type="S"/>
     <attribute name="salary" type="N"/>
     <attribute name="visitedplaces" type="SS"/>
   </table>
 
-  <table name="webpage" readcunit="5" writecunit="5">
-  	<key name="id" type="hash" att-type="S"/>
+  <table name="Webpage" readcunit="1" writecunit="1" package="org.apache.gora.dynamodb.example.generated">
+    <attribute name="id" type="S" key="hash"/>
     <attribute name="common" type="S"/>
     <attribute name="content" type="S"/>
     <attribute name="parsedContent" type="S"/>

@@ -20,14 +20,11 @@ package org.apache.gora.persistency;
 import java.util.List;
 
 import org.apache.avro.Schema.Field;
-import org.apache.avro.specific.SpecificRecord;
-
-import org.apache.gora.persistency.Dirtyable;
 
 /**
 * Objects that are persisted by Gora implements this interface.
 */
-public interface Persistent extends SpecificRecord, Dirtyable {
+public interface Persistent extends Dirtyable {
 
   public static String DIRTY_BYTES_FIELD_NAME = "__g__dirty";
 
