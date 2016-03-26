@@ -701,6 +701,7 @@
     <module>gora-cassandra</module>
     <module>gora-goraci</module>
     <module>gora-hbase</module>
+    <module>gora-infinispan</module>
     <!-- module>gora-lucene</module -->
     <module>gora-dynamodb</module>
     <!--module>gora-sql</module -->
