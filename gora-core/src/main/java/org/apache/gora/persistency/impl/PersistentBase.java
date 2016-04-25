@@ -197,6 +197,17 @@ public abstract class PersistentBase extends SpecificRecordBase implements
   }
 
   @Override
+  public void clearField(String field) {
+    Collection<Field> unmanagedFields = getUnmanagedFields();
+    Field specificField = getSchema().getField(field);
+    if (unmanagedFields.contains(specificField)) {
+      put(specificField.pos(), PersistentData.get().deepCopy(specificField.schema(),
+              PersistentData.get().getDefaultValue(specificField)));
+    }
+    clearDirynessIfFieldIsDirtyable(specificField.pos());
+  }
+
+  @Override
   public boolean equals(Object that) {
     if (that == this) {
       return true;

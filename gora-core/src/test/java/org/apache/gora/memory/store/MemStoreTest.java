@@ -22,6 +22,8 @@ import java.io.IOException;
 import org.apache.gora.examples.WebPageDataCreator;
 import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.examples.generated.WebPage;
+import org.apache.gora.persistency.BeanFactory;
+import org.apache.gora.persistency.impl.BeanFactoryImpl;
 import org.apache.gora.query.Query;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
@@ -69,7 +71,7 @@ public class MemStoreTest extends DataStoreTestBase {
   @SuppressWarnings("unchecked")
   @Override
   protected DataStore<String, WebPage> createWebPageDataStore() throws IOException {
-    return DataStoreFactory.getDataStore(MemStore.class, String.class, Employee.class, conf);
+    return DataStoreFactory.getDataStore(MemStore.class, String.class, WebPage.class, conf);
   }
 
   @Test
@@ -110,11 +112,12 @@ public class MemStoreTest extends DataStoreTestBase {
   @Test
   public void testGetWithFields() {}
 
-  @Ignore("GORA-447")
   @Test
   public void testMemStoreDeleteByQueryFields() throws Exception {
 
     DataStore<String, WebPage> store = new MemStore<>();
+    BeanFactory<String, WebPage> beanFactory = new BeanFactoryImpl<>(String.class, WebPage.class);
+    store.setBeanFactory(beanFactory);
     Query<String, WebPage> query;
 
     //test 5 - delete all with some fields
@@ -124,9 +127,9 @@ public class MemStoreTest extends DataStoreTestBase {
     query.setFields("outlinks", "parsedContent", "content");
     
     Query<String, WebPage> newQuery = store.newQuery();
-    newQuery.setStartKey(URLS[0]);
-    newQuery.setEndKey(URLS[9]);
-    //newQuery.setFields("outlinks", "parsedContent", "content");
+    newQuery.setStartKey(SORTED_URLS[0]);
+    newQuery.setEndKey(SORTED_URLS[9]);
+    newQuery.setFields("outlinks", "parsedContent", "content");
 
     DataStoreTestUtil.assertNumResults(newQuery, URLS.length);
     store.deleteByQuery(query);
@@ -178,7 +181,7 @@ public class MemStoreTest extends DataStoreTestBase {
     for (int i = 0; i < URLS.length; i++) {
       WebPage page = store.get(URLS[i]);
       assertNotNull(page);
-      if( URLS[i].compareTo(startKey) < 0 || URLS[i].compareTo(endKey) >= 0) {
+      if( URLS[i].compareTo(startKey) < 0 || URLS[i].compareTo(endKey) > 0) {
         //not deleted
         DataStoreTestUtil.assertWebPage(page, i);
       } else {

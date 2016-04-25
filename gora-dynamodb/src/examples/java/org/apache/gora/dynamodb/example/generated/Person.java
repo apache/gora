@@ -51,6 +51,8 @@ public class Person implements Persistent {
     @Override
     public void clear() { }
     @Override
+    public void clearField(String Field) { }
+    @Override
     public Person clone() { return null; }
     @Override
     public boolean isDirty() { return false; }

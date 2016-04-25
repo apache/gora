@@ -106,13 +106,24 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
   @Override
   public long deleteByQuery(Query<K, T> query) {
-    try{
+    try {
       long deletedRows = 0;
-      Result<K,T> result = query.execute();
+      Result<K, T> result = query.execute();
 
-      while(result.next()) {
-        if(delete(result.getKey()))
-          deletedRows++;
+      String[] fields = getFieldsToQuery(query.getFields());
+      boolean isAllFields = Arrays.equals(fields, getFields());
+
+      while (result.next()) {
+        if (isAllFields) {
+          if (delete(result.getKey())) {
+            deletedRows++;
+            continue;
+          }
+        }
+        for (String field : fields) {
+          result.get().clearField(field);
+        }
+        deletedRows++;
       }
       return deletedRows;
     } catch (Exception e) {

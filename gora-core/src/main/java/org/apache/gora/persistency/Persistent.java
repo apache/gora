@@ -36,6 +36,13 @@ public interface Persistent extends Dirtyable {
   void clear();
 
   /**
+* Clears the inner state of the object based on field without any modification to the actual
+* data on the data store. This method should be called before re-using the existing fields on
+* object to hold the data for another result.
+*/
+  void clearField(String Field);
+
+  /**
 * Returns whether the field has been modified.
 *
 * @param fieldIndex

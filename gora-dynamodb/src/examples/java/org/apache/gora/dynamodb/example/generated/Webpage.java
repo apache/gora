@@ -44,6 +44,8 @@ public class Webpage implements Persistent {
     @Override
     public void clear() { }
     @Override
+    public void clearField(String Field) { }
+    @Override
     public Webpage clone() { return null; }
     @Override
     public boolean isDirty() { return false; }
