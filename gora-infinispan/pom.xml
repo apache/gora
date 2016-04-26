@@ -39,6 +39,8 @@
 
   <properties>
     <infinispan.version>7.2.5.Final</infinispan.version>
+    <infinispan.avro.version>1.0</infinispan.avro.version>
+    <infinispan.avro.server.client.version>1.0.Final</infinispan.avro.server.client.version>
   </properties>
 
   <build>
@@ -115,12 +117,12 @@
     <dependency>
       <groupId>org.infinispan</groupId>
       <artifactId>infinispan-avro-server</artifactId>
-      <version>${infinispan.version}</version>
+      <version>${infinispan.avro.server.client.version}</version>
     </dependency>
     <dependency>
       <groupId>org.infinispan</groupId>
       <artifactId>infinispan-avro-hotrod</artifactId>
-      <version>${infinispan.version}</version>
+      <version>${infinispan.avro.version}</version>
     </dependency>
 
     <!-- Logging Dependencies -->
