@@ -291,8 +291,6 @@ public class GoraDynamoDBCompiler {
     line(pIden, "@Override");
     line(pIden, "public void clear() { }");
     line(pIden, "@Override");
-    line(pIden, "public void clearField(String Field) { }");
-    line(pIden, "@Override");
     line(pIden, "public " + tabName + " clone() { return null; }");
     line(pIden, "@Override");
     line(pIden, "public boolean isDirty() { return false; }");

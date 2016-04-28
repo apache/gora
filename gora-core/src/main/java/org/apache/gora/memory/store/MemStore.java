@@ -19,11 +19,7 @@
 package org.apache.gora.memory.store;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NavigableMap;
+import java.util.*;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
@@ -117,13 +113,20 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
         if (isAllFields) {
           if (delete(result.getKey())) {
             deletedRows++;
-            continue;
+          }
+        } else {
+          ArrayList<String> excludedFields = new ArrayList<>();
+          for (String field : getFields()){
+            if (!Arrays.asList(fields).contains(field)){
+              excludedFields.add(field);
+            }
+          }
+          T newClonedObj = getPersistent(result.get(),excludedFields.toArray(new String[excludedFields.size()]));
+          if (delete(result.getKey())) {
+            put(result.getKey(),newClonedObj);
+            deletedRows++;
           }
         }
-        for (String field : fields) {
-          result.get().clearField(field);
-        }
-        deletedRows++;
       }
       return deletedRows;
     } catch (Exception e) {
@@ -190,7 +193,9 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
       return obj;
     }
     T newObj = AvroUtils.deepClonePersistent(obj);
-    for (Field otherField : otherFields) {
+    newObj.clear();
+    for (String field : fields) {
+      Field otherField = obj.getSchema().getField(field);
       int index = otherField.pos();
       newObj.put(index, obj.get(index));
     }
