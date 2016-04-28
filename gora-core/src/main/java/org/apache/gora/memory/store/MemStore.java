@@ -120,8 +120,8 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
           }
         } else {
           ArrayList<String> excludedFields = new ArrayList<>();
-          for (String field : getFields()){
-            if (!Arrays.asList(fields).contains(field)){
+          for (String field : getFields()) {
+            if (!Arrays.asList(fields).contains(field)) {
               excludedFields.add(field);
             }
           }
