@@ -45,6 +45,7 @@ import static org.infinispan.test.TestingUtil.blockUntilCacheStatusAchieved;
 public class SimulationDriver extends MultipleCacheManagersTest {
 
   private int numberOfNodes = 0 ;
+  @SuppressWarnings("unchecked")
   private List<String> cacheNames = EMPTY_LIST;
   private List<HotRodServer> servers = new ArrayList<>();
   private String connectionString ="";

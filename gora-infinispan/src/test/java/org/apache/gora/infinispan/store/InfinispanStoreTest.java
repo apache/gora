@@ -55,6 +55,7 @@ public class InfinispanStoreTest extends DataStoreTestBase {
 
   private Configuration conf;
   private InfinispanStore<String,Employee> employeeDataStore;
+  @SuppressWarnings("unused")
   private InfinispanStore<String,WebPage> webPageDataStore;
 
   @BeforeClass
@@ -76,14 +77,12 @@ public class InfinispanStoreTest extends DataStoreTestBase {
     webPageDataStore = (InfinispanStore<String, WebPage>) webPageStore;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   protected DataStore<String, Employee> createEmployeeDataStore()
       throws IOException {
     throw new IllegalStateException("Using driver.");
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   protected DataStore<String, WebPage> createWebPageDataStore()
       throws IOException {
@@ -118,7 +117,7 @@ public class InfinispanStoreTest extends DataStoreTestBase {
 
     // Test matching everything
     query = new InfinispanQuery<>(employeeDataStore);
-    SingleFieldValueFilter filter = new SingleFieldValueFilter();
+    SingleFieldValueFilter<String, Employee> filter = new SingleFieldValueFilter<String, Employee>();
     filter.setFieldName("name");
     filter.setFilterOp(FilterOp.EQUALS);
     List<Object> operaands = new ArrayList<>();
@@ -134,7 +133,7 @@ public class InfinispanStoreTest extends DataStoreTestBase {
 
     // Test matching nothing
     query = new InfinispanQuery<>(employeeDataStore);
-    filter = new SingleFieldValueFilter();
+    filter = new SingleFieldValueFilter<String, Employee>();
     filter.setFieldName("name");
     filter.setFilterOp(FilterOp.NOT_EQUALS);
     operaands.clear();

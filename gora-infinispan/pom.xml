@@ -214,6 +214,13 @@
       <version>${infinispan.version}</version>
       <scope>test</scope>
     </dependency>
+    
+    <!-- Testing Dependencies -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
 </project>

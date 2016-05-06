@@ -99,6 +99,7 @@ public class TestIOUtils {
     }
   }
   
+  @SafeVarargs
   @SuppressWarnings("unchecked")
   public static <T> void testSerializeDeserialize(T... objects) throws Exception {
     ByteBufferOutputStream os = new ByteBufferOutputStream();
