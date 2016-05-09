@@ -174,9 +174,9 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
    * pair for every schema, instead of one for every thread.
    */
 
-  public static final ConcurrentHashMap<String, SpecificDatumReader<?>> readerMap = new ConcurrentHashMap<>();
+  public static final ConcurrentHashMap<Schema, SpecificDatumReader<?>> readerMap = new ConcurrentHashMap<>();
 
-  public static final ConcurrentHashMap<String, SpecificDatumWriter<?>> writerMap = new ConcurrentHashMap<>();
+  public static final ConcurrentHashMap<Schema, SpecificDatumWriter<?>> writerMap = new ConcurrentHashMap<>();
 
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
@@ -487,12 +487,12 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
   }
 
   @SuppressWarnings("rawtypes")
-  private SpecificDatumReader getDatumReader(String schemaId, Schema fieldSchema) {
-    SpecificDatumReader<?> reader = readerMap.get(schemaId);
+  private SpecificDatumReader getDatumReader(Schema fieldSchema) {
+    SpecificDatumReader<?> reader = readerMap.get(fieldSchema);
     if (reader == null) {
       reader = new SpecificDatumReader(fieldSchema);// ignore dirty bits
       SpecificDatumReader localReader = null;
-      if ((localReader = readerMap.putIfAbsent(schemaId, reader)) != null) {
+      if ((localReader = readerMap.putIfAbsent(fieldSchema, reader)) != null) {
         reader = localReader;
       }
     }
@@ -500,11 +500,11 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
   }
 
   @SuppressWarnings("rawtypes")
-  private SpecificDatumWriter getDatumWriter(String schemaId, Schema fieldSchema) {
-    SpecificDatumWriter writer = writerMap.get(schemaId);
+  private SpecificDatumWriter getDatumWriter(Schema fieldSchema) {
+    SpecificDatumWriter writer = writerMap.get(fieldSchema);
     if (writer == null) {
       writer = new SpecificDatumWriter(fieldSchema);// ignore dirty bits
-      writerMap.put(schemaId, writer);
+      writerMap.put(fieldSchema, writer);
     }
 
     return writer;
@@ -519,8 +519,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
     case ARRAY:
     case RECORD:
       @SuppressWarnings("rawtypes")
-      SpecificDatumReader reader = getDatumReader(fieldSchema.getFullName(),
-          fieldSchema);
+      SpecificDatumReader reader = getDatumReader(fieldSchema);
       fieldValue = IOUtils.deserialize((byte[]) solrValue, reader,
           persistent.get(field.pos()));
       break;
@@ -556,8 +555,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
             persistent);
       } else {
         @SuppressWarnings("rawtypes")
-        SpecificDatumReader unionReader = getDatumReader(
-            String.valueOf(fieldSchema.hashCode()), fieldSchema);
+        SpecificDatumReader unionReader = getDatumReader(fieldSchema);
         fieldValue = IOUtils.deserialize((byte[]) solrValue, unionReader,
             persistent.get(field.pos()));
         break;
@@ -618,8 +616,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       byte[] data = null;
       try {
         @SuppressWarnings("rawtypes")
-        SpecificDatumWriter writer = getDatumWriter(fieldSchema.getFullName(),
-            fieldSchema);
+        SpecificDatumWriter writer = getDatumWriter(fieldSchema);
         data = IOUtils.serialize(writer, fieldValue);
       } catch (IOException e) {
         LOG.error(e.getMessage(), e);
@@ -644,8 +641,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
         byte[] serilazeData = null;
         try {
           @SuppressWarnings("rawtypes")
-          SpecificDatumWriter writer = getDatumWriter(
-              String.valueOf(fieldSchema.hashCode()), fieldSchema);
+          SpecificDatumWriter writer = getDatumWriter(fieldSchema);
           serilazeData = IOUtils.serialize(writer, fieldValue);
         } catch (IOException e) {
           LOG.error(e.getMessage(), e);

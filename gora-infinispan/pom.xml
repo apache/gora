@@ -30,11 +30,11 @@
   <name>Apache Gora :: Infinispan</name>
   <url>http://gora.apache.org</url>
   <description>
-        The Apache Gora open source framework provides an in-memory data model and
-        persistence for big data. Gora supports persisting to column stores, key value stores,
-        document stores and RDBMSs, and analyzing the data with extensive Apache Hadoop MapReduce
-        support. This module provides a Gora support for the Infinispan storage system.
-    </description>
+    The Apache Gora open source framework provides an in-memory data model and
+    persistence for big data. Gora supports persisting to column stores, key value stores,
+    document stores and RDBMSs, and analyzing the data with extensive Apache Hadoop MapReduce
+    support. This module provides a Gora support for the Infinispan storage system.
+  </description>
   <inceptionYear>2015</inceptionYear>
 
   <properties>
@@ -83,6 +83,9 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <argLine>-Xmx512m -XX:MaxPermSize=256m</argLine>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

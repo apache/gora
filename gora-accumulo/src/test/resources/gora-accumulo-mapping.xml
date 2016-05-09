@@ -49,6 +49,8 @@
     <field name="outlinks" family="outlinks"/>
     <field name="headers" family="headers"/>
     <field name="metadata" family="common" qualifier="metadata"/>
+    <field name="byteData" family="byteData" qualifier="byteData"/>
+    <field name="stringData" family="stringData" qualifier="stringData"/>
   </class>
 
   <class name="org.apache.gora.examples.generated.TokenDatum" keyClass="java.lang.String">

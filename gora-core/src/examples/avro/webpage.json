@@ -16,6 +16,8 @@
         {"name":"version","type":"int","default":0},
         {"name":"data","type":{"type":"map","values":"string"}, "default":null}
       ]
-    }}
+    }},
+    {"name": "byteData", "type": {"type":"map", "values":"bytes"}, "default":{}},
+    {"name": "stringData", "type": {"type":"map", "values":"string"}, "default":{}}
   ]
 }

@@ -109,6 +109,7 @@ public class DataStoreTestUtil {
     webpage.setParsedContent(new ArrayList<CharSequence>());
     Metadata metadata = Metadata.newBuilder().build();
     webpage.setMetadata(metadata);
+    
     return webpage;
   }
 
@@ -1101,8 +1102,7 @@ public class DataStoreTestUtil {
     }
 
   }
-
-
+  
   public static void testPutNested(DataStore<String, WebPage> store)
           throws Exception {
     String revUrl = "foo.com:http/";
@@ -1172,6 +1172,16 @@ public class DataStoreTestUtil {
     page.getOutlinks().put(new Utf8("http://example3.com"), new Utf8("anchor4"));
     store.put("com.example/http", page);
     store.close();
+  }
+  
+  public static void testPutMixedMapTypes(DataStore<String, WebPage> store) {
+    WebPage webpage = createWebPage();
+    webpage.getByteData().put(new Utf8("byteData"), ByteBuffer.wrap(ByteUtils.toBytes("hello map")));
+    webpage.getStringData().put(new Utf8("stringData"), "hello map");
+    store.createSchema();
+    store.put(webpage.getUrl().toString(), webpage);
+    store.flush();
+    assertNotNull(store.get(webpage.getUrl().toString()));
   }
 
   private static byte[] toByteArray(ByteBuffer buffer) {

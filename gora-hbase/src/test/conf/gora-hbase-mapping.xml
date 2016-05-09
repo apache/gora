@@ -46,6 +46,8 @@
     <field name="outlinks" family="outlinks"/>
     <field name="headers" family="headers"/>
     <field name="metadata" family="common" qualifier="metadata"/>
+    <field name="byteData" family="byteData" qualifier="byteData"/>
+    <field name="stringData" family="stringData" qualifier="stringData"/>
   </class>
 
 

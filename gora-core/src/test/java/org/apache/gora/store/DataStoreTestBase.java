@@ -205,6 +205,12 @@ public abstract class DataStoreTestBase {
 
   public void assertPutMap() throws IOException {
   }
+  
+  @Test
+  public void testPutMixedMaps() throws Exception {
+	  log.info("Testing put of map objects with different union data types");
+	  DataStoreTestUtil.testPutMixedMapTypes(webPageStore);
+  }
 
   @Test
   public void testUpdate() throws Exception {

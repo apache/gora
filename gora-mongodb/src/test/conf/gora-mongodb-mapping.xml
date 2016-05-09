@@ -33,6 +33,8 @@
         <field name="outlinks" docfield="links.out" type="document"/>
         <field name="headers" docfield="headers" type="document"/>
         <field name="metadata" docfield="metadata" type="document"/>
+        <field name="byteData" docfield="byteData" type="document"/>
+        <field name="stringData" docfield="stringData" type="document"/>
     </class>
 
     <class name="org.apache.gora.examples.generated.TokenDatum" keyClass="java.lang.String" document="TokenDatum">

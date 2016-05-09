@@ -84,6 +84,8 @@
     <field name="outlinks" family="sc" qualifier="p:outlinks" ttl="10"/>
     <field name="headers" family="sc" qualifier="p:headers" ttl="10"/>
     <field name="metadata" family="p" qualifier="c:mt" ttl="10"/>
+    <field name="byteData" family="sc" qualifier="p:byteData" ttl="10"/>
+    <field name="stringData" family="sc" qualifier="p:stringData" ttl="10"/>
   </class>
 
   <class name="org.apache.gora.examples.generated.TokenDatum" keyClass="java.lang.String" keyspace="TokenDatum">
