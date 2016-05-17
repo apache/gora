@@ -26,7 +26,7 @@
     <version>0.7-SNAPSHOT</version>
     <relativePath>../</relativePath>
   </parent>
-  <artifactId>gora-solr</artifactId>
+  <artifactId>gora-solr-4</artifactId>
   <packaging>bundle</packaging>
 
   <name>Apache Gora :: Solr4</name>
