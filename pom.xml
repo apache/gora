@@ -712,6 +712,7 @@
     <module>gora-shims-hadoop2</module>
     <module>gora-shims-distribution</module>
     <module>gora-solr</module>
+    <module>gora-solr-5</module>
     <module>gora-tutorial</module>
     <module>sources-dist</module>
   </modules>
@@ -721,7 +722,7 @@
     <osgi.version>4.2.0</osgi.version>
     <!-- Avro Dependencies -->
     <avro.version>1.7.6</avro.version>
-    <jackson.version>1.6.9</jackson.version>
+<!--     <jackson.version>1.6.9</jackson.version> -->
     <!-- Hadoop Dependencies -->
     <hadoop-1.version>1.2.1</hadoop-1.version>
     <hadoop-2.version>2.5.2</hadoop-2.version>
@@ -738,6 +739,8 @@
     <!-- Solr Dependencies -->
     <lucene-solr.version>4.10.3</lucene-solr.version>
     <solr-solrj.version>4.10.3</solr-solrj.version>
+    <lucene-solr-5.version>5.5.1</lucene-solr-5.version>
+    <solr-solrj-5.version>5.5.1</solr-solrj-5.version>
     <jetty.version>8.1.8.v20121106</jetty.version>
     <tika.version>1.7</tika.version>
     <httpcomponents.version>4.3.1</httpcomponents.version>
@@ -888,16 +891,16 @@
       </dependency>
 
       <!-- Avro needs this version of jackson -->
-      <dependency>
-        <groupId>org.codehaus.jackson</groupId>
-        <artifactId>jackson-core-asl</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.codehaus.jackson</groupId>
-        <artifactId>jackson-mapper-asl</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
+<!--       <dependency> -->
+<!--         <groupId>org.codehaus.jackson</groupId> -->
+<!--         <artifactId>jackson-core-asl</artifactId> -->
+<!--         <version>${jackson.version}</version> -->
+<!--       </dependency> -->
+<!--       <dependency> -->
+<!--         <groupId>org.codehaus.jackson</groupId> -->
+<!--         <artifactId>jackson-mapper-asl</artifactId> -->
+<!--         <version>${jackson.version}</version> -->
+<!--       </dependency> -->
 
       <dependency>
         <groupId>org.apache.hadoop</groupId>
@@ -1044,32 +1047,32 @@
       </dependency>
 
       <!-- Solr Dependencies -->
-      <dependency>
-        <groupId>org.apache.solr</groupId>
-        <artifactId>solr-core</artifactId>
-        <version>${lucene-solr.version}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.eclipse.jetty.orbit</groupId>
-            <artifactId>javax.servlet</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.solr</groupId>
-        <artifactId>solr-solrj</artifactId>
-        <version>${lucene-solr.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.solr</groupId>
-        <artifactId>solr-test-framework</artifactId>
-        <version>${lucene-solr.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-test-framework</artifactId>
-        <version>${lucene-solr.version}</version>
-      </dependency>
+<!--       <dependency> -->
+<!--         <groupId>org.apache.solr</groupId> -->
+<!--         <artifactId>solr-core</artifactId> -->
+<!--         <version>${lucene-solr.version}</version> -->
+<!--         <exclusions> -->
+<!--           <exclusion> -->
+<!--             <groupId>org.eclipse.jetty.orbit</groupId> -->
+<!--             <artifactId>javax.servlet</artifactId> -->
+<!--           </exclusion> -->
+<!--         </exclusions> -->
+<!--       </dependency> -->
+<!--       <dependency> -->
+<!--         <groupId>org.apache.solr</groupId> -->
+<!--         <artifactId>solr-solrj</artifactId> -->
+<!--         <version>${lucene-solr.version}</version> -->
+<!--       </dependency> -->
+<!--       <dependency> -->
+<!--         <groupId>org.apache.solr</groupId> -->
+<!--         <artifactId>solr-test-framework</artifactId> -->
+<!--         <version>${lucene-solr.version}</version> -->
+<!--       </dependency> -->
+<!--       <dependency> -->
+<!--         <groupId>org.apache.lucene</groupId> -->
+<!--         <artifactId>lucene-test-framework</artifactId> -->
+<!--         <version>${lucene-solr.version}</version> -->
+<!--       </dependency> -->
       <dependency>
         <groupId>com.ibm.icu</groupId>
         <artifactId>icu4j</artifactId>
@@ -1121,11 +1124,6 @@
             <artifactId>commons-logging</artifactId>
           </exclusion>
         </exclusions>
-      </dependency>
-      <dependency>
-        <groupId>org.noggit</groupId>
-        <artifactId>noggit</artifactId>
-        <version>0.5</version>
       </dependency>
       <dependency>
         <groupId>commons-logging</groupId>
@@ -1341,22 +1339,22 @@
         <version>2.0.10</version>
       </dependency>
 
-      <!-- Lucene Dependencies -->
-      <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-core</artifactId>
-        <version>${lucene-solr.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-analyzers-common</artifactId>
-        <version>${lucene-solr.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-queries</artifactId>
-        <version>${lucene-solr.version}</version>
-      </dependency>
+<!--       Lucene Dependencies -->
+<!--       <dependency> -->
+<!--         <groupId>org.apache.lucene</groupId> -->
+<!--         <artifactId>lucene-core</artifactId> -->
+<!--         <version>${lucene-solr.version}</version> -->
+<!--       </dependency> -->
+<!--       <dependency> -->
+<!--         <groupId>org.apache.lucene</groupId> -->
+<!--         <artifactId>lucene-analyzers-common</artifactId> -->
+<!--         <version>${lucene-solr.version}</version> -->
+<!--       </dependency> -->
+<!--       <dependency> -->
+<!--         <groupId>org.apache.lucene</groupId> -->
+<!--         <artifactId>lucene-queries</artifactId> -->
+<!--         <version>${lucene-solr.version}</version> -->
+<!--       </dependency> -->
 
       <!-- Amazon Dependencies -->
       <dependency>

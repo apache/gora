@@ -26,14 +26,15 @@
     <version>0.7-SNAPSHOT</version>
     <relativePath>../</relativePath>
   </parent>
-  <artifactId>gora-solr</artifactId>
+  <artifactId>gora-solr-5</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Apache Gora :: Solr4</name>
+  <name>Apache Gora :: Solr5</name>
 
   <properties>
     <osgi.import>*</osgi.import>
     <osgi.export>org.apache.gora.solr*;version="${project.version}";-noimport:=true</osgi.export>
+    <jetty.version>9.2.13.v20150730</jetty.version>
   </properties>
 
   <build>
@@ -147,7 +148,7 @@
     <dependency>
       <groupId>org.apache.solr</groupId>
       <artifactId>solr-core</artifactId>
-      <version>${lucene-solr.version}</version>
+      <version>${lucene-solr-5.version}</version>
       <exclusions>
         <exclusion>
           <groupId>org.eclipse.jetty.orbit</groupId>
@@ -158,7 +159,7 @@
     <dependency>
       <groupId>org.apache.solr</groupId>
       <artifactId>solr-solrj</artifactId>
-      <version>${lucene-solr.version}</version>
+      <version>${solr-solrj-5.version}</version>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
@@ -233,24 +234,24 @@
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.apache.solr</groupId>
-      <artifactId>solr-test-framework</artifactId>
-      <version>${lucene-solr.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.eclipse.jetty</groupId>
-          <artifactId>jetty-servlet</artifactId>
-        </exclusion>
-      </exclusions>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-test-framework</artifactId>
-      <version>${lucene-solr.version}</version>
-      <scope>test</scope>
-    </dependency>
+<!--     <dependency> -->
+<!--       <groupId>org.apache.solr</groupId> -->
+<!--       <artifactId>solr-test-framework</artifactId> -->
+<!--       <version>${lucene-solr-5.version}</version> -->
+<!--       <exclusions> -->
+<!--         <exclusion> -->
+<!--           <groupId>org.eclipse.jetty</groupId> -->
+<!--           <artifactId>jetty-servlet</artifactId> -->
+<!--         </exclusion> -->
+<!--       </exclusions> -->
+<!--       <scope>test</scope> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.apache.lucene</groupId> -->
+<!--       <artifactId>lucene-test-framework</artifactId> -->
+<!--       <version>${lucene-solr-5.version}</version> -->
+<!--       <scope>test</scope> -->
+<!--     </dependency> -->
   </dependencies>
 
   <url>http://gora.apache.org</url>
