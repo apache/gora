@@ -39,7 +39,7 @@ import com.mongodb.DBObject;
  * change factories implementations used.
  * </p>
  * 
- * @author Damien Raude-Morvan <draudemorvan@dictanova.com>
+ * @author Damien Raude-Morvan draudemorvan@dictanova.com
  * @see #setFilter(com.mongodb.DBObject, org.apache.gora.filter.Filter,
  *      org.apache.gora.mongodb.store.MongoStore)
  */

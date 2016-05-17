@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableList;
 
 /**
- * @author Fabien Poulard <fpoulard@dictanova.com>
+ * @author Fabien Poulard fpoulard@dictanova.com
  */
 public class MongoMapping {
 

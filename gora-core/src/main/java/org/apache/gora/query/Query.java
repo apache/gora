@@ -72,7 +72,7 @@ public interface Query<K, T extends Persistent> {
   String[] getFields();
   
   /**
-   * @param Set a filter on this query.
+   * @param filter Set a filter on this query.
    */
   public void setFilter(Filter<K, T> filter);
   
@@ -86,6 +86,7 @@ public interface Query<K, T extends Persistent> {
    * data store implementations that install the filter remotely
    * (for efficiency reasons) and therefore disable the local filter.
    * @param enable
+   *      true to enable local {@link org.apache.gora.filter.Filter}
    */
   void setLocalFilterEnabled(boolean enable);
   
@@ -145,6 +146,8 @@ public interface Query<K, T extends Persistent> {
   
   /**
    * Sets the maximum number of results to return.
+   * @param limit
+   *      long value for the limit permitted for a given query
    */
   void setLimit(long limit);
 

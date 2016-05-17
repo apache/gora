@@ -29,7 +29,7 @@ import com.mongodb.DBObject;
 /**
  * MongoDB specific implementation of the {@link Query} interface.
  * 
- * @author Fabien Poulard <fpoulard@dictanova.com>
+ * @author Fabien Poulard fpoulard@dictanova.com
  */
 public class MongoDBQuery<K, T extends PersistentBase> extends QueryBase<K, T> {
 

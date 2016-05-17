@@ -62,12 +62,14 @@ public class MemStoreTest extends DataStoreTestBase {
 
   @SuppressWarnings("unchecked")
   @Override
+  @Deprecated
   protected DataStore<String, Employee> createEmployeeDataStore() throws IOException {
     return DataStoreFactory.getDataStore(MemStore.class, String.class, Employee.class, conf);
   }
 
   @SuppressWarnings("unchecked")
   @Override
+  @Deprecated
   protected DataStore<String, WebPage> createWebPageDataStore() throws IOException {
     return DataStoreFactory.getDataStore(MemStore.class, String.class, WebPage.class, conf);
   }

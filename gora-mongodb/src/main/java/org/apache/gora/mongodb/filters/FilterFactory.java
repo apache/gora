@@ -28,7 +28,7 @@ import com.mongodb.DBObject;
 /**
  * Describe factory which create remote filter for MongoDB.
  * 
- * @author Damien Raude-Morvan <draudemorvan@dictanova.com>
+ * @author Damien Raude-Morvan draudemorvan@dictanova.com
  */
 public interface FilterFactory<K, T extends PersistentBase> {
 

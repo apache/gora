@@ -63,11 +63,11 @@ import com.mongodb.*;
  *          class to be used for the key
  * @param <T>
  *          class to be persisted within the store
- * @author Fabien Poulard <fpoulard@dictanova.com>
- * @author Damien Raude-Morvan <draudemorvan@dictanova.com>
+ * @author Fabien Poulard fpoulard@dictanova.com
+ * @author Damien Raude-Morvan draudemorvan@dictanova.com
  */
 public class MongoStore<K, T extends PersistentBase> extends
-    DataStoreBase<K, T> {
+DataStoreBase<K, T> {
 
   public static final Logger LOG = LoggerFactory.getLogger(MongoStore.class);
 
@@ -123,7 +123,7 @@ public class MongoStore<K, T extends PersistentBase> extends
           .getCollection(mapping.getCollectionName());
 
       LOG.info("Initialized Mongo store for database {} of {}.", new Object[] {
-              parameters.getDbname(), parameters.getServers() });
+          parameters.getDbname(), parameters.getServers() });
     } catch (IOException e) {
       LOG.error("Error while initializing MongoDB store: {}",
           new Object[] { e.getMessage() });
@@ -145,7 +145,7 @@ public class MongoStore<K, T extends PersistentBase> extends
       throws UnknownHostException {
     // Configure options
     MongoClientOptions.Builder optBuilder = new MongoClientOptions.Builder()
-            .dbEncoderFactory(GoraDBEncoder.FACTORY); // Utf8 serialization!
+        .dbEncoderFactory(GoraDBEncoder.FACTORY); // Utf8 serialization!
     if (params.getReadPreference() != null) {
       optBuilder.readPreference(ReadPreference.valueOf(params.getReadPreference()));
     }
@@ -284,7 +284,6 @@ public class MongoStore<K, T extends PersistentBase> extends
    *          identifier of the document in the database
    * @param fields
    *          list of fields to be loaded from the database
-   * @throws IOException
    */
   @Override
   public T get(final K key, final String[] fields) {
@@ -448,7 +447,6 @@ public class MongoStore<K, T extends PersistentBase> extends
    *          the list of fields to be mapped to the persistence class instance
    * @return a persistence class instance which content was deserialized from
    *         the {@link DBObject}
-   * @throws IOException
    */
   public T newInstance(final DBObject obj, final String[] fields) {
     if (obj == null)
@@ -579,22 +577,22 @@ public class MongoStore<K, T extends PersistentBase> extends
           .getDocumentFieldType(innerSchema.getName());
       String innerDocField = mapping.getDocumentField(recField.name()) != null ? mapping
           .getDocumentField(recField.name()) : recField.name();
-      String fieldPath = docf + "." + innerDocField;
-      LOG.debug(
-          "Load from DBObject (RECORD), field:{}, schemaType:{}, docField:{}, storeType:{}",
-          new Object[] { recField.name(), innerSchema.getType(), fieldPath,
-              innerStoreType });
-      record.put(
-          recField.pos(),
-          fromDBObject(innerSchema, innerStoreType, recField, innerDocField,
-              innerBson));
+          String fieldPath = docf + "." + innerDocField;
+          LOG.debug(
+              "Load from DBObject (RECORD), field:{}, schemaType:{}, docField:{}, storeType:{}",
+              new Object[] { recField.name(), innerSchema.getType(), fieldPath,
+                  innerStoreType });
+          record.put(
+              recField.pos(),
+              fromDBObject(innerSchema, innerStoreType, recField, innerDocField,
+                  innerBson));
     }
     result = record;
     return result;
   }
 
   /* pp */ Object fromMongoList(final String docf, final Schema fieldSchema,
-                       final BSONDecorator easybson, final Field f) {
+      final BSONDecorator easybson, final Field f) {
     List<Object> list = easybson.getDBList(docf);
     List<Object> rlist = new ArrayList<>();
     if (list == null) {
@@ -612,11 +610,11 @@ public class MongoStore<K, T extends PersistentBase> extends
   }
 
   /* pp */ Object fromMongoMap(final String docf, final Schema fieldSchema,
-                      final BSONDecorator easybson, final Field f) {
+      final BSONDecorator easybson, final Field f) {
     BasicDBObject map = easybson.getDBObject(docf);
     Map<Utf8, Object> rmap = new HashMap<>();
     if (map == null) {
-        return new DirtyMapWrapper(rmap);
+      return new DirtyMapWrapper(rmap);
     }
     for (Entry<String, Object> e : map.entrySet()) {
       String mapKey = e.getKey();
@@ -843,7 +841,7 @@ public class MongoStore<K, T extends PersistentBase> extends
         } catch (IllegalArgumentException e1) {
           // Unable to parse anything from Utf8 value, throw error
           throw new IllegalStateException("Field " + fieldSchema.getType()
-              + ": Invalid string: unable to convert to ObjectId");
+          + ": Invalid string: unable to convert to ObjectId");
         }
         result = id;
       }
@@ -865,7 +863,7 @@ public class MongoStore<K, T extends PersistentBase> extends
         if (calendar == null) {
           // Unable to parse anything from Utf8 value, throw error
           throw new IllegalStateException("Field " + fieldSchema.getType()
-              + ": Invalid date format '" + value + "'");
+          + ": Invalid date format '" + value + "'");
         }
         result = calendar.getTime();
       }
@@ -942,7 +940,7 @@ public class MongoStore<K, T extends PersistentBase> extends
   // //////////////////////////////////////////////////////// CLEANUP
 
   /**
-   * Ensure Key encoding -> dots replaced with middle dots
+   * Ensure Key encoding -&gt; dots replaced with middle dots
    * 
    * @param key
    *          char with only dots.
@@ -956,7 +954,7 @@ public class MongoStore<K, T extends PersistentBase> extends
   }
 
   /**
-   * Ensure Key decoding -> middle dots replaced with dots
+   * Ensure Key decoding -&gt; middle dots replaced with dots
    * 
    * @param key
    *          encoded string with "\u00B7" chars.

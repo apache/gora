@@ -84,8 +84,7 @@ public class MongoMappingBuilder<K, T extends PersistentBase> {
    * 
    * @param uri
    *          path to the file holding the mapping
-   * @return a {@link org.apache.gora.mongodb.store.MongoMapping} built from the
-   *         file
+   * @return a {@link MongoMapping} built from the file
    * @throws java.io.IOException
    */
   protected void fromFile(String uri) throws IOException {
@@ -153,10 +152,10 @@ public class MongoMappingBuilder<K, T extends PersistentBase> {
     // docNameFromMapping could be null here
     if (!collName.equals(docNameFromMapping)) {
       MongoStore.LOG
-          .info("Keyclass and nameclass match but mismatching table names "
-              + " mappingfile schema is '" + docNameFromMapping
-              + "' vs actual schema '" + collName
-              + "' , assuming they are the same.");
+      .info("Keyclass and nameclass match but mismatching table names "
+          + " mappingfile schema is '" + docNameFromMapping
+          + "' vs actual schema '" + collName
+          + "' , assuming they are the same.");
       if (docNameFromMapping != null) {
         mapping.renameCollection(docNameFromMapping, collName);
       }
@@ -167,9 +166,9 @@ public class MongoMappingBuilder<K, T extends PersistentBase> {
     List<Element> fields = classElement.getChildren(TAG_FIELD);
     for (Element field : fields) {
       mapping
-          .addClassField(field.getAttributeValue(ATT_NAME),
-              field.getAttributeValue(ATT_FIELD),
-              field.getAttributeValue(ATT_TYPE));
+      .addClassField(field.getAttributeValue(ATT_NAME),
+          field.getAttributeValue(ATT_FIELD),
+          field.getAttributeValue(ATT_TYPE));
     }
   }
 

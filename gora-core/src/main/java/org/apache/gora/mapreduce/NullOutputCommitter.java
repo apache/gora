@@ -33,6 +33,7 @@ public class NullOutputCommitter extends OutputCommitter {
   }
 
   @Override
+  @Deprecated
   public void cleanupJob(JobContext arg0) throws IOException {
   }
 
