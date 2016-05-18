@@ -147,6 +147,12 @@ public class LogManager {
     Pageview pageview = dataStore.get(key);
     printPageview(pageview);
   }
+
+  /** Fetches a single pageview object with required fields and prints it*/
+  private void get(long key, String[] fields) throws Exception {
+    Pageview pageview = dataStore.get(key, fields);
+    printPageview(pageview);
+  }
   
   /** Queries and prints a single pageview object */
   private void query(long key) throws Exception {
@@ -224,10 +230,11 @@ public class LogManager {
   
   private static final String USAGE = "LogManager -parse <input_log_file>\n" +
                                       "           -get <lineNum>\n" +
+                                      "           -get <lineNum> <fieldList>\n" +
                                       "           -query <lineNum>\n" +
                                       "           -query <startLineNum> <endLineNum>\n" +
-  		                                "           -delete <lineNum>\n" +
-  		                                "           -deleteByQuery <startLineNum> <endLineNum>\n";
+  		                              "           -delete <lineNum>\n" +
+  		                              "           -deleteByQuery <startLineNum> <endLineNum>\n";
   
   public static void main(String[] args) throws Exception {
     if(args.length < 2) {
@@ -240,7 +247,13 @@ public class LogManager {
     if("-parse".equals(args[0])) {
       manager.parse(args[1]);
     } else if("-get".equals(args[0])) {
-      manager.get(Long.parseLong(args[1]));
+      if(args.length == 2) {
+        manager.get(Long.parseLong(args[1]));
+      } else {
+        //field array should be input as comma ',' separated
+        String[] fields = args[2].split(",");
+        manager.get(Long.parseLong(args[1]), fields);
+      }
     } else if("-query".equals(args[0])) {
       if(args.length == 2) 
         manager.query(Long.parseLong(args[1]));
