@@ -666,6 +666,7 @@
     <module>gora-jcache</module>
     <!-- module>gora-lucene</module -->
     <module>gora-dynamodb</module>
+    <module>gora-couchdb</module>
     <!--module>gora-sql</module -->
     <module>gora-maven-plugin</module>
     <module>gora-mongodb</module>
@@ -826,6 +827,12 @@
         <artifactId>gora-hbase</artifactId>
         <version>${project.version}</version>
         <type>test-jar</type>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-couchdb</artifactId>
+        <version>${project.version}</version>
       </dependency>
 
       <dependency>
