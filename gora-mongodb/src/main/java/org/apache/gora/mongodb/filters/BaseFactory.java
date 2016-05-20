@@ -24,7 +24,7 @@ import org.apache.gora.persistency.impl.PersistentBase;
  * {@link org.apache.gora.mongodb.filters.FilterFactory} which just manage back
  * reference to {@link MongoFilterUtil}.
  * 
- * @author Damien Raude-Morvan <draudemorvan@dictanova.com>
+ * @author Damien Raude-Morvan draudemorvan@dictanova.com
  */
 public abstract class BaseFactory<K, T extends PersistentBase> implements
     FilterFactory<K, T> {

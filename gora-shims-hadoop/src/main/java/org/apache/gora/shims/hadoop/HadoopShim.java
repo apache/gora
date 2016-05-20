@@ -38,7 +38,7 @@ public abstract class HadoopShim {
    * @param configuration
    *            The job's configuration.
    * @return A newly created instance backed by the provided configuration.
-   * @throws IOException
+   * @throws IOException if the job cannot be created successfully from given configuration
    */
   public abstract Job createJob(Configuration configuration)
       throws IOException;

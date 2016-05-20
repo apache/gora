@@ -45,6 +45,7 @@ public interface Result<K, T extends Persistent> {
   /**
    * Advances to the next element and returns false if at end.
    * @return true if end is not reached yet
+   * @throws Exception if an error is encountered whilst advancing to next result
    */
   boolean next() throws Exception;
   
@@ -80,6 +81,12 @@ public interface Result<K, T extends Persistent> {
   
   /**
    * Returns how far along the result has iterated, a value between 0 and 1.
+   * @return 
+   *      a float value representing progress of the job
+   * @throws 
+   *      IOException if there is an erro obtaining progress
+   * @throws 
+   *      InterruptedException if progress stalls or is interrupted
    */
   float getProgress() throws IOException, InterruptedException;
 

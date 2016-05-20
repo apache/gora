@@ -30,7 +30,7 @@ import java.util.Date;
  * Utility class to build {@link DBObject} used by MongoDB in an easy way by
  * directly specifying the fully qualified names of fields.
  *
- * @author Fabien Poulard <fpoulard@dictanova.com>
+ * @author Fabien Poulard fpoulard@dictanova.com
  */
 public class BSONDecorator {
 
