@@ -65,10 +65,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * {@link org.apache.gora.cassandra.store.CassandraStore} is the primary class 
- * responsible for directing Gora CRUD operations into Cassandra. We (delegate) rely 
+ * {@link org.apache.gora.cassandra.store.CassandraStore} is the primary class
+ * responsible for directing Gora CRUD operations into Cassandra. We (delegate) rely
  * heavily on {@link org.apache.gora.cassandra.store.CassandraClient} for many operations
- * such as initialization, creating and deleting schemas (Cassandra Keyspaces), etc.  
+ * such as initialization, creating and deleting schemas (Cassandra Keyspaces), etc.
  */
 public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
@@ -132,9 +132,13 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
 
   /** 
    * Initialize is called when then the call to 
-   * {@link org.apache.gora.store.DataStoreFactory#createDataStore(Class<D> dataStoreClass, Class<K> keyClass, Class<T> persistent, org.apache.hadoop.conf.Configuration conf)}
+   * {@link org.apache.gora.store.DataStoreFactory#createDataStore}
    * is made. In this case, we merely delegate the store initialization to the 
-   * {@link org.apache.gora.cassandra.store.CassandraClient#initialize(Class<K> keyClass, Class<T> persistentClass)}. 
+   * {@link org.apache.gora.cassandra.store.CassandraClient#initialize}.
+   *
+   * @param keyClass
+   * @param persistent
+   * @param properties
    */
   public void initialize(Class<K> keyClass, Class<T> persistent, Properties properties) {
     try {
@@ -375,38 +379,37 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
   }
 
   /**
-   * 
-   * When doing the 
+   * When doing the
    * {@link org.apache.gora.cassandra.store.CassandraStore#put(Object, PersistentBase)}
    * operation, the logic is as follows:
    * <ol>
    * <li>Obtain the Avro {@link org.apache.avro.Schema} for the object.</li>
    * <li>Create a new duplicate instance of the object (explained in more detail below) **.</li>
-   * <li>Obtain a {@link java.util.List} of the {@link org.apache.avro.Schema} 
+   * <li>Obtain a {@link java.util.List} of the {@link org.apache.avro.Schema}
    * {@link org.apache.avro.Schema.Field}'s.</li>
-   * <li>Iterate through the field {@link java.util.List}. This allows us to 
+   * <li>Iterate through the field {@link java.util.List}. This allows us to
    * consequently process each item.</li>
-   * <li>Check to see if the {@link org.apache.avro.Schema.Field} is NOT dirty. 
+   * <li>Check to see if the {@link org.apache.avro.Schema.Field} is NOT dirty.
    * If this condition is true then we DO NOT process this field.</li>
-   * <li>Obtain the element at the specified position in this list so we can 
+   * <li>Obtain the element at the specified position in this list so we can
    * directly operate on it.</li>
-   * <li>Obtain the {@link org.apache.avro.Schema.Type} of the element obtained 
+   * <li>Obtain the {@link org.apache.avro.Schema.Type} of the element obtained
    * above and process it accordingly. N.B. For nested type ARRAY, MAP
-   * RECORD or UNION, we shadow the checks in bullet point 5 above to infer that the 
-   * {@link org.apache.avro.Schema.Field} is either at 
+   * RECORD or UNION, we shadow the checks in bullet point 5 above to infer that the
+   * {@link org.apache.avro.Schema.Field} is either at
    * position 0 OR it is NOT dirty. If one of these conditions is true then we DO NOT
-   * process this field. This is carried out in 
+   * process this field. This is carried out in
    * {@link org.apache.gora.cassandra.store.CassandraStore#getFieldValue(Schema, Type, Object)}</li>
-   * <li>We then insert the Key and Object into the {@link java.util.LinkedHashMap} buffer 
+   * <li>We then insert the Key and Object into the {@link java.util.LinkedHashMap} buffer
    * before being flushed. This performs a structural modification of the map.</li>
    * </ol>
    * ** We create a duplicate instance of the object to be persisted and insert processed
-   * objects into a synchronized {@link java.util.LinkedHashMap}. This allows 
+   * objects into a synchronized {@link java.util.LinkedHashMap}. This allows
    * us to keep all the objects in memory till flushing.
-   * @see org.apache.gora.store.DataStore#put(java.lang.Object, 
-   * org.apache.gora.persistency.Persistent).
-   * @param key for the Avro Record (object).
+   *
+   * @param key   for the Avro Record (object).
    * @param value Record object to be persisted in Cassandra
+   * @see org.apache.gora.store.DataStore#put(java.lang.Object,org.apache.gora.persistency.Persistent)
    */
   @Override
   public void put(K key, T value) {

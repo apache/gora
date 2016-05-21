@@ -142,7 +142,12 @@ public class GoraCompiler extends SpecificCompiler {
     }
   }
 
-  /** Recognizes camel case */
+  /**
+   * Recognizes camel case
+   *
+   * @param s converts the given input string to camel case
+   * @return the converted camel case string
+   */
   public static String toUpperCase(String s) {
     StringBuilder builder = new StringBuilder();
 

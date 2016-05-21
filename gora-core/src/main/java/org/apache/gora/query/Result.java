@@ -41,45 +41,56 @@ public interface Result<K, T extends Persistent> {
    * @return the Query object for this Result.
    */
   Query<K, T> getQuery();
-  
+
   /**
    * Advances to the next element and returns false if at end.
+   *
    * @return true if end is not reached yet
+   * @throws Exception if an error is encountered whilst advancing to next result
    */
   boolean next() throws Exception;
-  
+
   /**
    * Returns the current key.
+   *
    * @return current key
    */
   K getKey();
-  
+
   /**
    * Returns the current object.
+   *
    * @return current object
    */
   T get();
-  
+
   /**
    * Returns the class of the keys
+   *
    * @return class of the keys
    */
   Class<K> getKeyClass();
-    
+
   /**
    * Returns the class of the persistent objects
+   *
    * @return class of the persistent objects
    */
   Class<T> getPersistentClass();
-  
+
   /**
    * Returns the number of times next() is called with return value true.
+   *
    * @return the number of results so far
    */
   long getOffset();
-  
+
   /**
    * Returns how far along the result has iterated, a value between 0 and 1.
+   *
+   * @return a float value representing progress of the job
+   * @throws IOException          if there is an erro obtaining progress
+   * @throws InterruptedException if progress stalls or is interrupted
    */
   float getProgress() throws IOException, InterruptedException;
 

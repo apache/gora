@@ -96,10 +96,15 @@ public class GoraSparkEngine<K, V extends Persistent> {
     return initialize(sparkContext, hadoopConf, dataStore);
   }
 
-    /**
-     * Creates a job and sets the output parameters for the conf that Spark will use
-     * @param dataStore the datastore as the output
-     */
+  /**
+   * Creates a job and sets the output parameters for the conf that Spark will use
+   *
+   * @param dataStore the datastore as the output
+   * @param <K>
+   * @param <V>
+   * @return
+   * @throws IOException
+   */
     public <K, V extends Persistent> Configuration generateOutputConf(DataStore<K, V> dataStore)
        throws IOException {
 
@@ -111,25 +116,32 @@ public class GoraSparkEngine<K, V extends Persistent> {
            dataStore.getPersistentClass());
     }
 
-    /**
-     * Sets the output parameters for the conf that Spark will use
-     * @param job the job to set the properties for
-     * @param dataStore the datastore as the output
-     */
+  /**
+   * Sets the output parameters for the conf that Spark will use
+   *
+   * @param job the job to set the properties for
+   * @param dataStore the datastore as the output
+   * @param <K>
+   * @param <V>
+   * @return
+   */
     public <K, V extends Persistent> Configuration generateOutputConf(Job job,
         DataStore<K, V> dataStore) {
       return generateOutputConf(job, dataStore.getClass(), dataStore.getKeyClass(),
               dataStore.getPersistentClass());
     }
 
-    /**
-     * Sets the output parameters for the conf that Spark will use
-     *
-     * @param job             the job to set the properties for
-     * @param dataStoreClass  the datastore class
-     * @param keyClass        output key class
-     * @param persistentClass output value class
-     */
+  /**
+   * Sets the output parameters for the conf that Spark will use
+   *
+   * @param job             the job to set the properties for
+   * @param dataStoreClass  the datastore class
+   * @param keyClass        output key class
+   * @param persistentClass output value class
+   * @param <K>
+   * @param <V>
+   * @return
+   */
     @SuppressWarnings("rawtypes")
     public <K, V extends Persistent> Configuration generateOutputConf(Job job,
         Class<? extends DataStore> dataStoreClass,

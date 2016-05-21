@@ -116,7 +116,11 @@ public InputStream getInputStream() {
     return outputStream;
   }
 
-  /** Opens an InputStream for the input Hadoop path */
+  /** Opens an InputStream for the input Hadoop path
+   *
+   * @return
+   * @throws IOException
+   */
   protected InputStream createInputStream() throws IOException {
     //TODO: if input path is a directory, use smt like MultiInputStream to
     //read all the files recursively
@@ -126,7 +130,10 @@ public InputStream getInputStream() {
     return fs.open(path);
   }
 
-  /** Opens an OutputStream for the output Hadoop path */
+  /** Opens an OutputStream for the output Hadoop path
+   *
+   * @return
+   */
   protected OutputStream createOutputStream() {
     OutputStream conf = null;
     try{
@@ -192,12 +199,20 @@ public InputStream getInputStream() {
   /**
    * Executes a normal Query reading the whole data. #execute() calls this function
    * for non-PartitionQuery's.
+   *
+   * @param query
+   * @return
+   * @throws IOException
    */
   protected abstract Result<K,T> executeQuery(Query<K,T> query)
     throws IOException;
 
   /**
    * Executes a PartitialQuery, reading the data between start and end.
+   *
+   * @param query
+   * @return
+   * @throws IOException
    */
   protected abstract Result<K,T> executePartial(FileSplitPartitionQuery<K,T> query)
     throws IOException;

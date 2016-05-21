@@ -68,7 +68,7 @@ import org.slf4j.LoggerFactory;
  * {@link org.apache.gora.cassandra.store.CassandraStore#initialize(Class, Class, Properties)}.
  * CassandraClient deals with Cassandra data model definition, mutation, 
  * and general/specific mappings.
- * @see {@link org.apache.gora.cassandra.store.CassandraStore#initialize(Class, Class, Properties)} 
+ * {@link org.apache.gora.cassandra.store.CassandraStore#initialize} .
  *
  * @param <K>
  * @param <T>
@@ -100,20 +100,21 @@ public class CassandraClient<K, T extends PersistentBase> {
     throws Exception {
 	initialize(keyClass, persistentClass, null);
   }
-  
+
   /**
-   * Given our key, persistentClass from 
+   * Given our key, persistentClass from
    * {@link org.apache.gora.cassandra.store.CassandraStore#initialize(Class, Class, Properties)}
-   * we make best efforts to dictate our data model. 
-   * We make a quick check within {@link org.apache.gora.cassandra.store.CassandraClient#checkKeyspace(String)
-   * to see if our keyspace has already been invented, this simple check prevents us from 
-   * recreating the keyspace if it already exists. 
+   * we make best efforts to dictate our data model.
+   * We make a quick check within {@link org.apache.gora.cassandra.store.CassandraClient#checkKeyspace() }
+   * to see if our keyspace has already been invented, this simple check prevents us from
+   * recreating the keyspace if it already exists.
    * We then simple specify (based on the input keyclass) an appropriate serializer
    * via {@link org.apache.gora.cassandra.serializers.GoraSerializerTypeInferer} before
    * defining a mutator from and by which we can mutate this object.
-   * @param keyClass the Key by which we wish o assign a record object
-   * @param persistentClass the generated {@link org.apache.org.gora.persistency.Peristent} bean representing the data.
-   * @param properties key value pairs from gora.properties
+   *
+   * @param keyClass        the Key by which we wish o assign a record object
+   * @param persistentClass the generated {@link org.apache.gora.persistency.Persistent} bean representing the data.
+   * @param properties      key value pairs from gora.properties
    * @throws Exception
    */
   public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) throws Exception {
@@ -160,20 +161,20 @@ public class CassandraClient<K, T extends PersistentBase> {
     KeyspaceDefinition keyspaceDefinition = this.cluster.describeKeyspace(this.cassandraMapping.getKeyspaceName());
     return (keyspaceDefinition != null);
   }
-  
+
   /**
    * Check if keyspace already exists. If not, create it.
-   * In this method, we also utilize Hector's 
-   * {@link me.prettyprint.cassandra.model.ConfigurableConsistencyLevel} logic. 
-   * It is set by passing a 
-   * {@link me.prettyprint.cassandra.model.ConfigurableConsistencyLevel} object right 
-   * when the {@link me.prettyprint.hector.api.Keyspace} is created. 
-   * If we cannot find a consistency level within <code>gora.properites</code>, 
-   * then column family consistency level is set to QUORUM (by default) which permits 
+   * In this method, we also utilize Hector's
+   * {@link me.prettyprint.cassandra.model.ConfigurableConsistencyLevel} logic.
+   * It is set by passing a
+   * {@link me.prettyprint.cassandra.model.ConfigurableConsistencyLevel} object right
+   * when the {@link me.prettyprint.hector.api.Keyspace} is created.
+   * If we cannot find a consistency level within <code>gora.properites</code>,
+   * then column family consistency level is set to QUORUM (by default) which permits
    * consistency to wait for a quorum of replicas to respond regardless of data center.
    * QUORUM is Hector Client's default setting and we respect that here as well.
-   * 
-   * @see http://hector-client.github.io/hector/build/html/content/consistency_level.html
+   *
+   * @see <a href="http://hector-client.github.io/hector/build/html/content/consistency_level.html">Consistency Level</a>
    */
   public void checkKeyspace() {
     // "describe keyspace <keyspaceName>;" query
@@ -296,8 +297,9 @@ public class CassandraClient<K, T extends PersistentBase> {
 
   /**
    * Delete a row within the keyspace.
+   *
    * @param key
-   * @param fieldName
+   * @param familyName
    * @param columnName
    */
   public void deleteColumn(K key, String familyName, ByteBuffer columnName) {

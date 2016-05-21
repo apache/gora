@@ -347,9 +347,8 @@ public class GoraDynamoDBCompiler {
 
   /**
    * Start point of the compiler program
-   * @param argsReceives 
-   *          the schema file to be compiled and where this should be written
-   * @throws Exception
+   *
+   * @param args the schema file to be compiled and where this should be written
    */
   public static void main(String[] args) {
     try {

@@ -33,7 +33,7 @@ import java.util.Map;
 
 /**
  * A filter that checks for a single field in the persistent.
- * 
+ *
  * @param <K>
  * @param <T>
  */

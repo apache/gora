@@ -36,7 +36,13 @@ public class FsInput implements Closeable, SeekableInput {
   private final FSDataInputStream stream;
   private final long len;
 
-  /** Construct given a path and a configuration. */
+  /**
+   * Construct given a path and a configuration.
+   *
+   * @param path a path on HDFS to construct
+   * @param conf a Hadoop {@link org.apache.hadoop.conf.Configuration} object
+   * @throws IOException if there is an error opening path, or obtaining a file status from the file system
+   */
   public FsInput(Path path, Configuration conf) throws IOException {
     this.stream = path.getFileSystem(conf).open(path);
     this.len = path.getFileSystem(conf).getFileStatus(path).getLen();

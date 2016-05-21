@@ -97,7 +97,6 @@ public class Flushed extends org.apache.gora.persistency.impl.PersistentBase imp
   
   /**
    * Checks the dirty status of the 'count' field. A field is dirty if it represents a change that has not yet been written to the database.
-   * @param value the value to set.
    */
   public boolean isCountDirty() {
     return isDirty(0);
@@ -235,7 +234,6 @@ public class Flushed extends org.apache.gora.persistency.impl.PersistentBase imp
 	  
 	  /**
 	   * Checks the dirty status of the 'count' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
 	   */
 	  public boolean isCountDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");

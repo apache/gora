@@ -122,11 +122,9 @@ public class DynamoDBUtils {
 
   /**
    * Creates the AWSCredentials object based on the properties file.
-   * 
-   * @param awsCredentialsProperties
-   * @throws FileNotFoundException
-   * @throws IllegalArgumentException
-   * @throws IOException
+   *
+   * @param clazz
+   * @return
    */
   public static PropertiesCredentials getCredentials(Class<?> clazz) {
     PropertiesCredentials awsCredentials = null;

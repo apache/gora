@@ -30,7 +30,7 @@ import java.util.List;
 
 /**
  * {@link FilterList} enables us to utilize conditional operands
- * for advanced filtering within the construction and 
+ * for advanced filtering within the construction and
  * execution of Gora queries.
  *
  * @param <K>

@@ -32,13 +32,15 @@ import org.apache.gora.query.Result;
  * fetched, queried or deleted by the DataStore methods. DataStores can be
  * constructed by an instance of {@link DataStoreFactory}.
  *
- * <p> DataStores implementations should be thread safe.
- * <p><a name="visibility"><b>Note:</b> Results of updates ({@link #put(Object, Persistent)},
+ * <p> DataStores implementations should be thread safe.</p>
+ * <p><a name="visibility"><b>Note:</b></a> Results of updates ({@link #put(Object, Persistent)},
  * {@link #delete(Object)} and {@link #deleteByQuery(Query)} operations) are
  * guaranteed to be visible to subsequent get / execute operations ONLY
  * after a subsequent call to {@link #flush()}. Additionally, exception
  * handling is largely DataStore specific and is not largely dealt
  * with from within this interface.
+ * </p>
+ *
  * @param <K> the class of keys in the datastore
  * @param <T> the class of persistent objects in the datastore
  */
@@ -144,6 +146,9 @@ public interface DataStore<K, T extends Persistent> {
    * object with the same key already exists it will silently
    * be replaced. See also the note on 
    * <a href="#visibility">visibility</a>.
+   *
+   * @param key
+   * @param obj
    */
   void put(K key, T obj);
 
@@ -181,6 +186,8 @@ public interface DataStore<K, T extends Persistent> {
    * @param query the base query to create the partitions for. If the query
    * is null, then the data store returns the partitions for the default query
    * (returning every object)
+   *
+   * @param query
    * @return a List of PartitionQuery's
    * @throws IOException 
    */

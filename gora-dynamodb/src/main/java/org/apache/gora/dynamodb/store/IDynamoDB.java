@@ -24,7 +24,8 @@ public interface IDynamoDB<K, T extends Persistent> extends DataStore<K, T> {
 
   /**
    * Sets the handler to the main DynamoDB
-   * @param DynamoDBStore handler to main DynamoDB
+   *
+   * @param dynamoHandler handler to main DynamoDB
    */
   public abstract void setDynamoDBStoreHandler(DynamoDBStore<K, T> dynamoHandler);
 

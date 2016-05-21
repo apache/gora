@@ -29,8 +29,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A default implementation of the {@link BeanFactory} interface. Constructs 
- * the keys using by reflection, {@link Persistent} objects by calling 
- * {@link Persistent#newInstance(org.apache.gora.persistency.StateManager)}. 
+ * the keys using by reflection, {@link Persistent} objects by calling
+ *
+ * @param <K>
+ * @param <T>
  */
 public class BeanFactoryWSImpl<K, T extends Persistent> implements BeanFactory<K, T> {
 
@@ -65,9 +67,10 @@ public class BeanFactoryWSImpl<K, T extends Persistent> implements BeanFactory<K
    * Flag to be used to determine if a key is persistent or not
    */
   private boolean isKeyPersistent = false;
-  
+
   /**
    * Constructor
+   *
    * @param keyClass
    * @param persistentClass
    */

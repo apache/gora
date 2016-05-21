@@ -132,7 +132,6 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
   
   /**
    * Checks the dirty status of the 'url' field. A field is dirty if it represents a change that has not yet been written to the database.
-   * @param value the value to set.
    */
   public boolean isUrlDirty() {
     return isDirty(0);
@@ -156,7 +155,6 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
   
   /**
    * Checks the dirty status of the 'timestamp' field. A field is dirty if it represents a change that has not yet been written to the database.
-   * @param value the value to set.
    */
   public boolean isTimestampDirty() {
     return isDirty(1);
@@ -180,7 +178,6 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
   
   /**
    * Checks the dirty status of the 'ip' field. A field is dirty if it represents a change that has not yet been written to the database.
-   * @param value the value to set.
    */
   public boolean isIpDirty() {
     return isDirty(2);
@@ -204,7 +201,6 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
   
   /**
    * Checks the dirty status of the 'httpMethod' field. A field is dirty if it represents a change that has not yet been written to the database.
-   * @param value the value to set.
    */
   public boolean isHttpMethodDirty() {
     return isDirty(3);
@@ -228,7 +224,6 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
   
   /**
    * Checks the dirty status of the 'httpStatusCode' field. A field is dirty if it represents a change that has not yet been written to the database.
-   * @param value the value to set.
    */
   public boolean isHttpStatusCodeDirty() {
     return isDirty(4);
@@ -252,7 +247,6 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
   
   /**
    * Checks the dirty status of the 'responseSize' field. A field is dirty if it represents a change that has not yet been written to the database.
-   * @param value the value to set.
    */
   public boolean isResponseSizeDirty() {
     return isDirty(5);
@@ -276,7 +270,6 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
   
   /**
    * Checks the dirty status of the 'referrer' field. A field is dirty if it represents a change that has not yet been written to the database.
-   * @param value the value to set.
    */
   public boolean isReferrerDirty() {
     return isDirty(6);
@@ -300,7 +293,6 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
   
   /**
    * Checks the dirty status of the 'userAgent' field. A field is dirty if it represents a change that has not yet been written to the database.
-   * @param value the value to set.
    */
   public boolean isUserAgentDirty() {
     return isDirty(7);
@@ -653,7 +645,6 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
 	  
 	  /**
 	   * Checks the dirty status of the 'url' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
 	   */
 	  public boolean isUrlDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -676,7 +667,6 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
 	  
 	  /**
 	   * Checks the dirty status of the 'timestamp' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
 	   */
 	  public boolean isTimestampDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -699,7 +689,6 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
 	  
 	  /**
 	   * Checks the dirty status of the 'ip' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
 	   */
 	  public boolean isIpDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -722,7 +711,6 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
 	  
 	  /**
 	   * Checks the dirty status of the 'httpMethod' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
 	   */
 	  public boolean isHttpMethodDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -745,7 +733,6 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
 	  
 	  /**
 	   * Checks the dirty status of the 'httpStatusCode' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
 	   */
 	  public boolean isHttpStatusCodeDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -768,7 +755,6 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
 	  
 	  /**
 	   * Checks the dirty status of the 'responseSize' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
 	   */
 	  public boolean isResponseSizeDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -788,12 +774,11 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
 	  public void setReferrer(java.lang.CharSequence value) {
 	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
 	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'referrer' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
-	   */
-	  public boolean isReferrerDirty() {
+
+    /**
+     * Checks the dirty status of the 'referrer' field. A field is dirty if it represents a change that has not yet been written to the database.
+     */
+    public boolean isReferrerDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
 	  }
 	
@@ -803,10 +788,10 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
 	  public java.lang.CharSequence getUserAgent() {
 	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
 	  }
-	
-	  /**
-	   * Sets the value of the 'userAgent' field.
-		   * @param value the value to set.
+
+    /**
+     * Sets the value of the 'userAgent' field.
+     * @param value the value to set.
 	   */
 	  public void setUserAgent(java.lang.CharSequence value) {
 	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
@@ -814,7 +799,6 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
 	  
 	  /**
 	   * Checks the dirty status of the 'userAgent' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
 	   */
 	  public boolean isUserAgentDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");

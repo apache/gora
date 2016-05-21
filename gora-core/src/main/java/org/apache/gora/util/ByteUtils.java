@@ -624,7 +624,7 @@ public class ByteUtils {
   /**
    * @param left
    * @param right
-   * @return 0 if equal, < 0 if left is less than right, etc.
+   * @return 0 if equal, {@literal <} 0 if left is less than right, etc.
    */
   public static int compareTo(final byte [] left, final byte [] right) {
     return compareTo(left, 0, left.length, right, 0, right.length);
@@ -637,7 +637,7 @@ public class ByteUtils {
    * @param s2 Where to start comparing in the right buffer
    * @param l1 How much to compare from the left buffer
    * @param l2 How much to compare from the right buffer
-   * @return 0 if equal, < 0 if left is less than right, etc.
+   * @return 0 if equal, {@literal <} 0 if left is less than right, etc.
    */
   public static int compareTo(byte[] b1, int s1, int l1,
       byte[] b2, int s2, int l2) {

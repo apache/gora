@@ -32,8 +32,8 @@ import com.mongodb.DBObject;
  * MongoDB specific implementation of the {@link org.apache.gora.query.Result}
  * interface.
  *
- * @author Fabien Poulard <fpoulard@dictanova.com>
- * @author Damien Raude-Morvan <draudemorvan@dictanova.com>
+ * @author Fabien Poulard fpoulard@dictanova.com
+ * @author Damien Raude-Morvan draudemorvan@dictanova.com
  */
 public class MongoDBResult<K, T extends PersistentBase> extends
         ResultBase<K, T> {

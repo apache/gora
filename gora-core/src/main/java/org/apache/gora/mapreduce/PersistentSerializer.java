@@ -55,7 +55,10 @@ public class PersistentSerializer implements Serializer<PersistentBase> {
   }
 
   /**
-   * Do the serialization of the {@link Persistent} object
+   * Do the serialization of the {@link PersistentBase} object
+   *
+   * @param persistent
+   * @throws IOException
    */
   @Override
   public void serialize(PersistentBase persistent) throws IOException {

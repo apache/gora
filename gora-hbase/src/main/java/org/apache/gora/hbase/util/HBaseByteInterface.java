@@ -38,8 +38,7 @@ import org.apache.gora.util.AvroUtils;
 import org.apache.hadoop.hbase.util.Bytes;
 
 /**
- * Contains utility methods for byte[] <-> field
- * conversions.
+ * Contains utility methods for byte[] {@literal <->} field conversions.
  */
 public class HBaseByteInterface {
   /**

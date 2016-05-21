@@ -220,9 +220,6 @@ public class DynamoDBQuery<K, T extends Persistent> extends QueryWSBase<K, T> {
 
   /**
    * Builds scan query expression using a hash attribute value where to start
-   * 
-   * @param pHashAttrValueHash
-   *          attribute value where to start scanning
    */
   public void buildScanExpression() {
     K qKey = getKey();

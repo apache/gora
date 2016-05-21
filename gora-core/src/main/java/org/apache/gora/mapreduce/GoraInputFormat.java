@@ -48,9 +48,9 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
  * <p> The {@link InputSplit}s are prepared from the {@link PartitionQuery}s
  * obtained by calling {@link DataStore#getPartitions(Query)}.
  * <p>
- * Hadoop jobs can be either configured through static 
+ * Hadoop jobs can be either configured through static
  * <code>setInput()</code> methods, or from {@link GoraMapper}.
- * 
+ *
  * @see GoraMapper
  */
 public class GoraInputFormat<K, T extends PersistentBase>
@@ -127,9 +127,12 @@ public class GoraInputFormat<K, T extends PersistentBase>
 
   /**
    * Sets the input parameters for the job
-   * @param job the job to set the properties for
-   * @param query the query to get the inputs from
+   *
+   * @param job          the job to set the properties for
+   * @param query        the query to get the inputs from
    * @param reuseObjects whether to reuse objects in serialization
+   * @param <K1>
+   * @param <V1>
    * @throws IOException
    */
   public static <K1, V1 extends Persistent> void setInput(Job job
@@ -143,14 +146,17 @@ public class GoraInputFormat<K, T extends PersistentBase>
     job.setInputFormatClass(GoraInputFormat.class);
     GoraInputFormat.setQuery(job, query);
   }
-  
+
   /**
    * Sets the input parameters for the job
-   * @param job the job to set the properties for
+   *
+   * @param job            the job to set the properties for
    * @param dataStoreClass the datastore class
-   * @param inKeyClass Map input key class
-   * @param inValueClass Map input value class
-   * @param reuseObjects whether to reuse objects in serialization
+   * @param inKeyClass     Map input key class
+   * @param inValueClass   Map input value class
+   * @param reuseObjects   whether to reuse objects in serialization
+   * @param <K1>
+   * @param <V1>
    * @throws IOException
    */
   public static <K1, V1 extends Persistent> void setInput(

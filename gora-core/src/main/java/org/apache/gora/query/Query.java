@@ -70,25 +70,26 @@ public interface Query<K, T extends Persistent> {
   void setFields(String... fieldNames);
 
   String[] getFields();
-  
+
   /**
-   * @param Set a filter on this query.
+   * @param filter Set a filter on this query.
    */
   public void setFilter(Filter<K, T> filter);
-  
+
   /**
    * @return The filter on this query, or <code>null</code> if none.
    */
   public Filter<K, T> getFilter();
-  
+
   /**
    * Set whether the local filter is enabled. This is usually called by
    * data store implementations that install the filter remotely
    * (for efficiency reasons) and therefore disable the local filter.
-   * @param enable
+   *
+   * @param enable true to enable local {@link org.apache.gora.filter.Filter}
    */
   void setLocalFilterEnabled(boolean enable);
-  
+
   /**
    * @return Whether the local filter is enabled.
    * See {@link #setLocalFilterEnabled(boolean)}.
@@ -99,26 +100,20 @@ public interface Query<K, T extends Persistent> {
   void setKey(K key);
 
   /**
-   * 
-   * @param startKey
-   *          an inclusive start key
+   * @param startKey an inclusive start key
    */
   void setStartKey(K startKey);
 
   /**
-   * 
-   * @param endKey
-   *          an inclusive end key
+   * @param endKey an inclusive end key
    */
   void setEndKey(K endKey);
 
   /**
    * Set the range of keys over which the query will execute.
-   * 
-   * @param startKey
-   *          an inclusive start key
-   * @param endKey
-   *          an inclusive end key
+   *
+   * @param startKey an inclusive start key
+   * @param endKey   an inclusive end key
    */
   void setKeyRange(K startKey, K endKey);
 
@@ -142,14 +137,17 @@ public interface Query<K, T extends Persistent> {
   long getStartTime();
 
   long getEndTime();
-  
+
   /**
    * Sets the maximum number of results to return.
+   *
+   * @param limit long value for the limit permitted for a given query
    */
   void setLimit(long limit);
 
   /**
    * Returns the maximum number of results
+   *
    * @return the limit if it is set, otherwise a negative number
    */
   long getLimit();

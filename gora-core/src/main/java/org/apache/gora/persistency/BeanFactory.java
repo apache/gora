@@ -19,48 +19,58 @@
 package org.apache.gora.persistency;
 
 /**
- * BeanFactory's enable contruction of keys and Persistent objects. 
+ * BeanFactory's enable contruction of keys and Persistent objects.
+ *
+ * @param <K>
+ * @param <T>
  */
 public interface BeanFactory<K, T>{
 
   /**
    * Constructs a new instance of the key class
+   *
    * @return a new instance of the key class
+   * @throws Exception
    */
   K newKey() throws Exception;
 
   /**
    * Constructs a new instance of the Persistent class
+   *
    * @return a new instance of the Persistent class
    */
   T newPersistent();
 
   /**
-   * Returns an instance of the key object to be 
-   * used to access static fields of the object. Returned object MUST  
-   * be treated as read-only. No fields other than the static fields 
-   * of the object should be assumed to be readable. 
+   * Returns an instance of the key object to be
+   * used to access static fields of the object. Returned object MUST
+   * be treated as read-only. No fields other than the static fields
+   * of the object should be assumed to be readable.
+   *
    * @return a cached instance of the key object
    */
   K getCachedKey();
-  
+
   /**
-   * Returns an instance of the {@link Persistent} object to be 
-   * used to access static fields of the object. Returned object MUST  
-   * be treated as read-only. No fields other than the static fields 
-   * of the object should be assumed to be readable. 
+   * Returns an instance of the {@link Persistent} object to be
+   * used to access static fields of the object. Returned object MUST
+   * be treated as read-only. No fields other than the static fields
+   * of the object should be assumed to be readable.
+   *
    * @return a cached instance of the Persistent object
    */
   T getCachedPersistent();
 
   /**
    * Returns the key class
+   *
    * @return the key class
    */
   Class<K> getKeyClass();
 
   /**
    * Returns the persistent class
+   *
    * @return the persistent class
    */
   Class<T> getPersistentClass();

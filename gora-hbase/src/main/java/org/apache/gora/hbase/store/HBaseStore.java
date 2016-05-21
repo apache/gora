@@ -832,7 +832,7 @@ implements Configurable {
    * 
    * @see Scan#setCaching(int)
    * 
-   * @param numRows the number of rows for caching >= 0
+   * @param numRows the number of rows for caching {@literal >=} 0
    * @return &lt;&lt;Fluent interface&gt;&gt;
    */
   public HBaseStore<K, T> setScannerCaching(int numRows) {

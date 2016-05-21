@@ -86,9 +86,8 @@ public class AvroUtils {
 
   /**
    * Return the field names from a schema object
-   * 
-   * @param persistent
-   *          the persistent object to get the fields names from
+   *
+   * @param schema the schema object to get the fields names from
    * @return the field names
    */
   public static String[] getSchemaFieldNames(Schema schema) {

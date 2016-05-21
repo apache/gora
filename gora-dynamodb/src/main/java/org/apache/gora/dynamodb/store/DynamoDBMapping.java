@@ -186,10 +186,10 @@ public class DynamoDBMapping {
 
     /**
      * Sets the hash key schema for the specified table
+     *
      * @param tableName
      * @param keyName
      * @param keyType
-     * @param keyType2
      */
     public void setKeySchema(String tableName, String keyName, String keyType) {
       ArrayList<KeySchemaElement> kSchema = tablesToKeySchemas.get(tableName);
@@ -245,11 +245,10 @@ public class DynamoDBMapping {
 
     /**
      * Adds an attribute to an specific item
-     * 
+     *
      * @param tableName
      * @param attributeName
      * @param attrType
-     * @param itemNumber
      */
     public void addAttribute(String tableName, String attributeName,
         String attrType) {

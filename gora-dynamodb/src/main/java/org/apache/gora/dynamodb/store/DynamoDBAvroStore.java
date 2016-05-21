@@ -47,9 +47,8 @@ DataStoreBase<K, T> implements IDynamoDB<K, T> {
 
   /**
    * Sets the handler to the main DynamoDB
-   * 
-   * @param DynamoDBStore
-   *          handler to main DynamoDB
+   *
+   * @param dynamoHandler handler to main DynamoDB
    */
   @Override
   public void setDynamoDBStoreHandler(DynamoDBStore<K, T> dynamoHandler) {

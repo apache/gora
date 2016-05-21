@@ -160,6 +160,9 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
    * Checks whether the fields argument is null, and if so
    * returns all the fields of the Persistent object, else returns the
    * argument.
+   *
+   * @param fields
+   * @return String array
    */
   protected String[] getFieldsToQuery(String[] fields) {
     if(fields != null) {
@@ -253,8 +256,10 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
    * the schema name in the defined properties is returned. If null then
    * the provided mappingSchemaName is returned. If this is null too,
    * the class name, without the package, of the persistent class is returned.
+   *
    * @param mappingSchemaName the name of the schema as read from the mapping file
    * @param persistentClass persistent class
+   * @return String
    */
   protected String getSchemaName(String mappingSchemaName, Class<?> persistentClass) {
     String confSchemaName = getOrCreateConf().get("preferred.schema.name");

@@ -105,7 +105,6 @@ public class DynamoDBStore<K, T extends Persistent> implements DataStore<K, T> {
   /**
    * Creates the table within the data store for a preferred schema or for a
    * group of schemas defined within the mapping file
-   * @throws IOException
    */
   @Override
   public void createSchema() {
@@ -237,12 +236,10 @@ public class DynamoDBStore<K, T extends Persistent> implements DataStore<K, T> {
     dynamoDbStore.put(key, value);
   }
 
-
-
   /**
    * Verifies if the specified schemas exist
-   * 
-   * @throws IOException
+   *
+   * @return
    */
   @Override
   public boolean schemaExists() {
@@ -356,7 +353,7 @@ public class DynamoDBStore<K, T extends Persistent> implements DataStore<K, T> {
   /**
    * Executes a delete table request using the DynamoDB client
    * 
-   * @param tableName
+   * @param pTableName
    */
   public void executeDeleteTableRequest(String pTableName) {
     try {

@@ -27,15 +27,20 @@ import org.apache.hadoop.mapreduce.Reducer;
  */
 public class GoraReducer<K1, V1, K2, V2 extends Persistent>
   extends Reducer<K1, V1, K2, V2> {
- 
+
   /**
-   * Initializes the Reducer, and sets output parameters for the job. 
-   * @param job the job to set the properties for
-   * @param dataStoreClass the datastore class
-   * @param keyClass output key class
+   * Initializes the Reducer, and sets output parameters for the job.
+   *
+   * @param job             the job to set the properties for
+   * @param dataStoreClass  the datastore class
+   * @param keyClass        output key class
    * @param persistentClass output value class
-   * @param reducerClass the reducer class extending GoraReducer
-   * @param reuseObjects whether to reuse objects in serialization
+   * @param reducerClass    the reducer class extending GoraReducer
+   * @param reuseObjects    whether to reuse objects in serialization
+   * @param <K1>
+   * @param <V1>
+   * @param <K2>
+   * @param <V2>
    */
   public static <K1, V1, K2, V2 extends Persistent>
   void initReducerJob(
@@ -50,12 +55,17 @@ public class GoraReducer<K1, V1, K2, V2 extends Persistent>
     
     job.setReducerClass(reducerClass);
   }
-  
+
   /**
-   * Initializes the Reducer, and sets output parameters for the job. 
-   * @param job the job to set the properties for
-   * @param dataStore the datastore as the output
-   * @param reducerClass the reducer class extending GoraReducer
+   * Initializes the Reducer, and sets output parameters for the job.
+   *
+   * @param job          the job to set the properties for
+   * @param dataStore    the datastore as the output
+   * @param reducerClass the reducer class extending GoraReducer* @param reducerClass
+   * @param <K1>
+   * @param <V1>
+   * @param <K2>
+   * @param <V2>
    */
   public static <K1, V1, K2, V2 extends Persistent>
   void initReducerJob(
@@ -67,11 +77,16 @@ public class GoraReducer<K1, V1, K2, V2 extends Persistent>
   }
 
   /**
-   * Initializes the Reducer, and sets output parameters for the job. 
-   * @param job the job to set the properties for
-   * @param dataStore the datastore as the output
+   * Initializes the Reducer, and sets output parameters for the job.
+   *
+   * @param job          the job to set the properties for
+   * @param dataStore    the datastore as the output
    * @param reducerClass the reducer class extending GoraReducer
    * @param reuseObjects whether to reuse objects in serialization
+   * @param <K1>
+   * @param <V1>
+   * @param <K2>
+   * @param <V2>
    */
   public static <K1, V1, K2, V2 extends Persistent>
   void initReducerJob(

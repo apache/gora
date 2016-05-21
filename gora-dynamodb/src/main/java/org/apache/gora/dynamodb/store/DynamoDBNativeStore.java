@@ -59,8 +59,9 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
 
   /**
    * Deletes items using a specific query
-   * 
-   * @throws IOException
+   *
+   * @param query matching records to this query will be deleted
+   * @return
    */
   @Override
   @SuppressWarnings("unchecked")
@@ -181,8 +182,8 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
 
   /**
    * Returns a new instance of the key object.
-   * 
-   * @throws IOException
+   *
+   * @return
    */
   @Override
   public K newKey() {
@@ -192,8 +193,8 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
 
   /**
    * Returns a new persistent object
-   * 
-   * @throws IOException
+   *
+   * @return
    */
   @Override
   public T newPersistent() {
@@ -212,8 +213,9 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
 
   /**
    * Puts an object identified by a key
-   * 
-   * @throws IOException
+   *
+   * @param key
+   * @param obj
    */
   @Override
   public void put(K key, T obj) {
@@ -242,9 +244,9 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
 
   /**
    * Deletes the object using key
-   * 
+   *
+   * @param key the key of the object
    * @return true for a successful process
-   * @throws IOException
    */
   @Override
   public boolean delete(K key) {

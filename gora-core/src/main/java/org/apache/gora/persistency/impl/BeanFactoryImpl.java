@@ -25,9 +25,11 @@ import org.apache.gora.persistency.Persistent;
 import org.apache.gora.util.ReflectionUtils;
 
 /**
- * A default implementation of the {@link BeanFactory} interface. Constructs 
- * the keys using by reflection, {@link Persistent} objects by calling 
- * {@link Persistent#newInstance(org.apache.gora.persistency.StateManager)}. 
+ * A default implementation of the {@link BeanFactory} interface. Constructs
+ * the keys using by reflection, {@link Persistent} objects by calling
+ *
+ * @param <K>
+ * @param <T>
  */
 public class BeanFactoryImpl<K, T extends Persistent> implements BeanFactory<K, T> {
 
@@ -48,10 +50,11 @@ public class BeanFactoryImpl<K, T extends Persistent> implements BeanFactory<K, 
   
   /** Flag to be used to determine if a key is persistent or not */
   private boolean isKeyPersistent = false;
-  
+
   /**
    * Default constructor for this class.
-   * @param keyClass.
+   *
+   * @param keyClass
    * @param persistentClass
    */
   public BeanFactoryImpl(Class<K> keyClass, Class<T> persistentClass) {

@@ -107,7 +107,6 @@ public class CINode extends org.apache.gora.persistency.impl.PersistentBase impl
   
   /**
    * Checks the dirty status of the 'prev' field. A field is dirty if it represents a change that has not yet been written to the database.
-   * @param value the value to set.
    */
   public boolean isPrevDirty() {
     return isDirty(0);
@@ -131,7 +130,6 @@ public class CINode extends org.apache.gora.persistency.impl.PersistentBase impl
   
   /**
    * Checks the dirty status of the 'client' field. A field is dirty if it represents a change that has not yet been written to the database.
-   * @param value the value to set.
    */
   public boolean isClientDirty() {
     return isDirty(1);
@@ -155,7 +153,6 @@ public class CINode extends org.apache.gora.persistency.impl.PersistentBase impl
   
   /**
    * Checks the dirty status of the 'count' field. A field is dirty if it represents a change that has not yet been written to the database.
-   * @param value the value to set.
    */
   public boolean isCountDirty() {
     return isDirty(2);
@@ -354,7 +351,6 @@ public class CINode extends org.apache.gora.persistency.impl.PersistentBase impl
 	  
 	  /**
 	   * Checks the dirty status of the 'prev' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
 	   */
 	  public boolean isPrevDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -377,7 +373,6 @@ public class CINode extends org.apache.gora.persistency.impl.PersistentBase impl
 	  
 	  /**
 	   * Checks the dirty status of the 'client' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
 	   */
 	  public boolean isClientDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -400,7 +395,6 @@ public class CINode extends org.apache.gora.persistency.impl.PersistentBase impl
 	  
 	  /**
 	   * Checks the dirty status of the 'count' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
 	   */
 	  public boolean isCountDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
