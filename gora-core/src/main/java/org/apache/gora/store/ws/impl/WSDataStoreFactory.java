@@ -56,13 +56,6 @@ public class WSDataStoreFactory{
   public static final String MAPPING_FILE = "mapping.file";
 
 	public static final String SCHEMA_NAME = "schema.name";
-
-  /**
-   * Do not use! Deprecated because it shares system wide state. 
-   * Use {@link #createProps()} instead.
-   */
-  @Deprecated()
-  public static final Properties properties = createProps();
   
   /**
    * Creates a new {@link Properties}. It adds the default gora configuration

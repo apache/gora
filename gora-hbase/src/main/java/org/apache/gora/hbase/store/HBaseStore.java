@@ -83,8 +83,6 @@ implements Configurable {
 
   public static final String PARSE_MAPPING_FILE_KEY = "gora.hbase.mapping.file";
 
-  @Deprecated
-  private static final String DEPRECATED_MAPPING_FILE = "hbase-mapping.xml";
   public static final String DEFAULT_MAPPING_FILE = "gora-hbase-mapping.xml";
 
   private static final String SCANNER_CACHING_PROPERTIES_KEY = "scanner.caching" ;
@@ -116,18 +114,8 @@ implements Configurable {
       mapping = readMapping(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE));
       filterUtil = new HBaseFilterUtil<>(this.conf);
     } catch (FileNotFoundException ex) {
-      try {
-        mapping = readMapping(getConf().get(PARSE_MAPPING_FILE_KEY, DEPRECATED_MAPPING_FILE));
-        LOG.warn(DEPRECATED_MAPPING_FILE + " is deprecated, please rename the file to "
-            + DEFAULT_MAPPING_FILE);
-      } catch (FileNotFoundException ex1) {
-          LOG.error(ex1.getMessage(), ex1);
-          //throw (ex1); //throw the original exception
-      } catch (Exception ex1) {
-        LOG.warn(DEPRECATED_MAPPING_FILE + " is deprecated, please rename the file to "
-            + DEFAULT_MAPPING_FILE);
-        throw new RuntimeException(ex1);
-      } 
+      LOG.error("{}  is not found, please check the file.", DEFAULT_MAPPING_FILE);
+      throw new RuntimeException(ex);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
