@@ -59,13 +59,6 @@ public class DataStoreFactory{
   public static final String SCHEMA_NAME = "schema.name";
 
   /**
-   * Do not use! Deprecated because it shares system wide state. 
-   * Use {@link #createProps()} instead.
-   */
-  @Deprecated()
-  public static final Properties properties = createProps();
-
-  /**
    * Creates a new {@link Properties}. It adds the default gora configuration
    * resources. This properties object can be modified and used to instantiate
    * store instances. It is recommended to use a properties object for a single
