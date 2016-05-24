@@ -106,13 +106,31 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
   @Override
   public long deleteByQuery(Query<K, T> query) {
-    try{
+    try {
       long deletedRows = 0;
-      Result<K,T> result = query.execute();
+      Result<K, T> result = query.execute();
 
-      while(result.next()) {
-        if(delete(result.getKey()))
-          deletedRows++;
+      String[] fields = getFieldsToQuery(query.getFields());
+      boolean isAllFields = Arrays.equals(fields, getFields());
+
+      while (result.next()) {
+        if (isAllFields) {
+          if (delete(result.getKey())) {
+            deletedRows++;
+          }
+        } else {
+          ArrayList<String> excludedFields = new ArrayList<>();
+          for (String field : getFields()) {
+            if (!Arrays.asList(fields).contains(field)) {
+              excludedFields.add(field);
+            }
+          }
+          T newClonedObj = getPersistent(result.get(),excludedFields.toArray(new String[excludedFields.size()]));
+          if (delete(result.getKey())) {
+            put(result.getKey(),newClonedObj);
+            deletedRows++;
+          }
+        }
       }
       return deletedRows;
     } catch (Exception e) {
@@ -179,7 +197,9 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
       return obj;
     }
     T newObj = AvroUtils.deepClonePersistent(obj);
-    for (Field otherField : otherFields) {
+    newObj.clear();
+    for (String field : fields) {
+      Field otherField = obj.getSchema().getField(field);
       int index = otherField.pos();
       newObj.put(index, obj.get(index));
     }
