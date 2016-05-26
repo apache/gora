@@ -28,7 +28,7 @@ public class TimingUtil {
      * Calculate the elapsed time between two times specified in milliseconds.
      * @param start The start of the time period
      * @param end The end of the time period
-     * @return a string of the form "XhYmZs" when the elapsed time is X hours, Y minutes and Z seconds or null if start > end.
+     * @return a string of the form "XhYmZs" when the elapsed time is X hours, Y minutes and Z seconds or null if start {@literal >} end.
      */
     public static String elapsedTime(long start, long end){
         if (start > end) {
