@@ -34,7 +34,7 @@ public class PartitionTest {
 
   private static Encoder encoder = new SignedBinaryEncoder();
 
-  static long encl(long l) {
+  static long encl(long l) throws IOException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     DataOutputStream dos = new DataOutputStream(baos);
     try {
@@ -47,7 +47,7 @@ public class PartitionTest {
   }
 
   @Test
-  public void test1() {
+  public void test1() throws IOException {
     assertEquals(encl(0x006f000000000000l), (long) AccumuloStore.followingKey(encoder, Long.class, new byte[] {0x00, 0x6f}));
     assertEquals(encl(1l), (long) AccumuloStore.followingKey(encoder, Long.class, new byte[] {0, 0, 0, 0, 0, 0, 0, 0}));
     assertEquals(encl(0x106f000000000001l), (long) AccumuloStore.followingKey(encoder, Long.class, new byte[] {0x10, 0x6f, 0, 0, 0, 0, 0, 0}));
@@ -75,7 +75,7 @@ public class PartitionTest {
   }
   
   @Test
-  public void test2() {
+  public void test2() throws IOException {
     assertEquals(encl(0x00ffffffffffffffl), (long) AccumuloStore.lastPossibleKey(encoder, Long.class, new byte[] {0x01}));
     assertEquals(encl(0x006effffffffffffl), (long) AccumuloStore.lastPossibleKey(encoder, Long.class, new byte[] {0x00, 0x6f}));
     assertEquals(encl(0xff6effffffffffffl), (long) AccumuloStore.lastPossibleKey(encoder, Long.class, new byte[] {(byte) 0xff, 0x6f}));

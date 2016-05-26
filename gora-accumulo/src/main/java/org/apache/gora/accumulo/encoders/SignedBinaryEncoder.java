@@ -16,6 +16,7 @@
  */
 package org.apache.gora.accumulo.encoders;
 
+import java.io.IOException;
 
 /**
  * This class transforms this bits within a primitive type so that 
@@ -24,71 +25,80 @@ package org.apache.gora.accumulo.encoders;
  * before positive numbers, when compared lexographically.
  */
 public class SignedBinaryEncoder extends BinaryEncoder {
-  
-  public byte[] encodeShort(short s, byte ret[]){
+
+  @Override
+  public byte[] encodeShort(short s, byte[] ret) throws IOException{
     s = (short)((s & 0xffff) ^ 0x8000);
     return super.encodeShort(s, ret);
   }
-  
-  public short decodeShort(byte[] a){
+
+  @Override
+  public short decodeShort(byte[] a) throws IOException{
     short s = super.decodeShort(a);
     s = (short)((s & 0xffff) ^ 0x8000);
     return s;
   }
-  
-  public byte[] encodeInt(int i, byte ret[]){
+
+  @Override
+  public byte[] encodeInt(int i, byte[] ret) throws IOException{
     i = i ^ 0x80000000;
     return super.encodeInt(i, ret);
   }
-  
-  public int decodeInt(byte[] a){
+
+  @Override
+  public int decodeInt(byte[] a) throws IOException{
     int i = super.decodeInt(a);
     i = i ^ 0x80000000;
     return i;
   }
-  
-  public byte[] encodeLong(long l, byte ret[]){
-    l = l ^ 0x8000000000000000l;
+
+  @Override
+  public byte[] encodeLong(long l, byte[] ret) throws IOException{
+    l = l ^ 0x8000000000000000L;
     return super.encodeLong(l, ret);
   }
-  
-  public long decodeLong(byte[] a) {
+
+  @Override
+  public long decodeLong(byte[] a) throws IOException {
     long l = super.decodeLong(a);
-    l = l ^ 0x8000000000000000l;
+    l = l ^ 0x8000000000000000L;
     return l;
   }
-  
-  
-  public byte[] encodeDouble(double d, byte[] ret) {
+
+  @Override
+  public byte[] encodeDouble(double d, byte[] ret) throws IOException {
     long l = Double.doubleToRawLongBits(d);
     if(l < 0)
       l = ~l;
     else
-      l = l ^ 0x8000000000000000l;
+      l = l ^ 0x8000000000000000L;
     return super.encodeLong(l,ret);
   }
-  
-  public double decodeDouble(byte[] a){
+
+  @Override
+  public double decodeDouble(byte[] a) throws IOException{
     long l = super.decodeLong(a);
     if(l < 0)
-      l = l ^ 0x8000000000000000l;
+      l = l ^ 0x8000000000000000L;
     else
       l = ~l;
     return Double.longBitsToDouble(l);
   }
-  
-  public byte[] encodeFloat(float f, byte[] ret) {
+
+  @Override
+  public byte[] encodeFloat(float f, byte[] ret) throws IOException {
     int i = Float.floatToRawIntBits(f);
     if(i < 0)
       i = ~i;
     else
       i = i ^ 0x80000000;
-    
+
     return super.encodeInt(i, ret);
-    
+
   }
-  
-  public float decodeFloat(byte[] a){
+
+  @Override
+  public float decodeFloat(byte[] a) throws IOException{
     int i = super.decodeInt(a);
     if(i < 0)
       i = i ^ 0x80000000;
@@ -96,5 +106,5 @@ public class SignedBinaryEncoder extends BinaryEncoder {
       i = ~i;
     return Float.intBitsToFloat(i);
   }
-  
+
 }

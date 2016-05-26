@@ -16,6 +16,8 @@
  */
 package org.apache.gora.accumulo.encoders;
 
+import java.io.IOException;
+
 /**
  * 
  */
@@ -27,41 +29,41 @@ public interface Encoder {
   
   public byte decodeByte(byte[] a);
 
-  public byte[] encodeShort(short s);
+  public byte[] encodeShort(short s) throws IOException;
   
-  public byte[] encodeShort(short s, byte ret[]);
+  public byte[] encodeShort(short s, byte[] ret) throws IOException;
   
-  public short decodeShort(byte[] a);
+  public short decodeShort(byte[] a) throws IOException;
   
-  public byte[] encodeInt(int i);
+  public byte[] encodeInt(int i) throws IOException;
   
-  public byte[] encodeInt(int i, byte ret[]);
+  public byte[] encodeInt(int i, byte[] ret) throws IOException;
   
-  public int decodeInt(byte[] a);
+  public int decodeInt(byte[] a) throws IOException;
   
-  public byte[] encodeLong(long l);
+  public byte[] encodeLong(long l) throws IOException;
   
-  public byte[] encodeLong(long l, byte ret[]);
+  public byte[] encodeLong(long l, byte[] ret) throws IOException;
   
-  public long decodeLong(byte[] a);
+  public long decodeLong(byte[] a) throws IOException;
   
-  public byte[] encodeDouble(double d);
+  public byte[] encodeDouble(double d) throws IOException;
   
-  public byte[] encodeDouble(double d, byte[] ret);
+  public byte[] encodeDouble(double d, byte[] ret) throws IOException;
   
-  public double decodeDouble(byte[] a);
+  public double decodeDouble(byte[] a) throws IOException;
   
-  public byte[] encodeFloat(float d);
+  public byte[] encodeFloat(float d) throws IOException;
   
-  public byte[] encodeFloat(float f, byte[] ret);
+  public byte[] encodeFloat(float f, byte[] ret) throws IOException;
   
-  public float decodeFloat(byte[] a);
+  public float decodeFloat(byte[] a) throws IOException;
   
-  public boolean decodeBoolean(byte[] val);
+  public boolean decodeBoolean(byte[] val) throws IOException;
   
-  public byte[] encodeBoolean(boolean b);
+  public byte[] encodeBoolean(boolean b) throws IOException;
   
-  public byte[] encodeBoolean(boolean b, byte[] ret);
+  public byte[] encodeBoolean(boolean b, byte[] ret) throws IOException;
 
   byte[] followingKey(int size, byte[] per);
 

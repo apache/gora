@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -27,261 +27,163 @@ import org.apache.gora.accumulo.util.FixedByteArrayOutputStream;
  * 
  */
 public class BinaryEncoder implements Encoder {
-  public byte[] encodeShort(short s) {
+
+  @Override
+  public byte[] encodeShort(short s) throws IOException {
     return encodeShort(s, new byte[2]);
   }
-  
-  public byte[] encodeShort(short s, byte ret[]) {
-    DataOutputStream dos = null;
-    try {
-      dos = new DataOutputStream(new FixedByteArrayOutputStream(ret));
+
+  @Override
+  public byte[] encodeShort(short s, byte[] ret) throws IOException {
+    try (DataOutputStream dos = new DataOutputStream(new FixedByteArrayOutputStream(ret))){
       dos.writeShort(s);
       dos.close();
       return ret;
-    } catch (IOException ioe) {
-      throw new RuntimeException(ioe);
-    } finally {
-      try {
-        dos.close();
-      } catch (IOException ioe) {
-        throw new RuntimeException(ioe);
-      }
     }
   }
-  
-  public short decodeShort(byte[] a) {
-    DataInputStream dis = null;
-    try {
-      dis = new DataInputStream(new ByteArrayInputStream(a));
+
+  @Override
+  public short decodeShort(byte[] a) throws IOException {
+    try (DataInputStream dis = new DataInputStream(new ByteArrayInputStream(a))){
       short s = dis.readShort();
       dis.close();
       return s;
-    } catch (IOException ioe) {
-      throw new RuntimeException(ioe);
-    } finally {
-      try {
-        dis.close();
-      } catch (IOException ioe) {
-        throw new RuntimeException(ioe);
-      }
     }
   }
-  
-  public byte[] encodeInt(int i) {
+
+  @Override
+  public byte[] encodeInt(int i) throws IOException {
     return encodeInt(i, new byte[4]);
   }
-  
-  public byte[] encodeInt(int i, byte ret[]) {
-    DataOutputStream dos = null;
-    try {
-      dos = new DataOutputStream(new FixedByteArrayOutputStream(ret));
+
+  @Override
+  public byte[] encodeInt(int i, byte[] ret) throws IOException {
+    try (DataOutputStream dos = new DataOutputStream(new FixedByteArrayOutputStream(ret))){
       dos.writeInt(i);
       dos.close();
       return ret;
-    } catch (IOException ioe) {
-      throw new RuntimeException(ioe);
-    } finally {
-      try {
-        dos.close();
-      } catch (IOException ioe) {
-        throw new RuntimeException(ioe);
-      }
     }
   }
-  
-  public int decodeInt(byte[] a) {
-    DataInputStream dis = null;
-    try {
-      dis = new DataInputStream(new ByteArrayInputStream(a));
+
+  @Override
+  public int decodeInt(byte[] a) throws IOException {
+    try (DataInputStream dis = new DataInputStream(new ByteArrayInputStream(a))){
       int i = dis.readInt();
       dis.close();
       return i;
-    } catch (IOException ioe) {
-      throw new RuntimeException(ioe);
-    } finally {
-      try {
-        dis.close();
-      } catch (IOException ioe) {
-        throw new RuntimeException(ioe);
-      }
     }
   }
-  
-  public byte[] encodeLong(long l) {
+
+  @Override
+  public byte[] encodeLong(long l) throws IOException {
     return encodeLong(l, new byte[8]);
   }
-  
-  public byte[] encodeLong(long l, byte ret[]) {
-    DataOutputStream dos = null;
-    try {
-      dos = new DataOutputStream(new FixedByteArrayOutputStream(ret));
+
+  @Override
+  public byte[] encodeLong(long l, byte[] ret) throws IOException {
+    try (DataOutputStream dos = new DataOutputStream(new FixedByteArrayOutputStream(ret))){
       dos.writeLong(l);
       dos.close();
       return ret;
-    } catch (IOException ioe) {
-      throw new RuntimeException(ioe);
-    } finally {
-      try {
-        dos.close();
-      } catch (IOException ioe) {
-        throw new RuntimeException(ioe);
-      }
     }
   }
-  
-  public long decodeLong(byte[] a) {
-    DataInputStream dis = null;
-    try {
-      dis = new DataInputStream(new ByteArrayInputStream(a));
+
+  @Override
+  public long decodeLong(byte[] a) throws IOException {
+    try (DataInputStream dis = new DataInputStream(new ByteArrayInputStream(a))){
       long l = dis.readLong();
       dis.close();
       return l;
-    } catch (IOException ioe) {
-      throw new RuntimeException(ioe);
-    } finally {
-      try {
-        dis.close();
-      } catch (IOException ioe) {
-        throw new RuntimeException(ioe);
-      }
     }
   }
-  
-  public byte[] encodeDouble(double d) {
+
+  @Override
+  public byte[] encodeDouble(double d) throws IOException {
     return encodeDouble(d, new byte[8]);
   }
-  
-  public byte[] encodeDouble(double d, byte[] ret) {
-    DataOutputStream dos = null;
-    try {
+
+  @Override
+  public byte[] encodeDouble(double d, byte[] ret) throws IOException {
+    try (DataOutputStream dos = new DataOutputStream(new FixedByteArrayOutputStream(ret))){
       long l = Double.doubleToRawLongBits(d);
-      dos = new DataOutputStream(new FixedByteArrayOutputStream(ret));
       dos.writeLong(l);
       dos.close();
       return ret;
-    } catch (IOException ioe) {
-      throw new RuntimeException(ioe);
-    } finally {
-      try {
-        dos.close();
-      } catch (IOException ioe) {
-        throw new RuntimeException(ioe);
-      }
     }
   }
-  
-  public double decodeDouble(byte[] a) {
-    DataInputStream dis = null;
-    try {
-      dis = new DataInputStream(new ByteArrayInputStream(a));
+
+  @Override
+  public double decodeDouble(byte[] a) throws IOException {
+    try (DataInputStream dis = new DataInputStream(new ByteArrayInputStream(a))){
       long l = dis.readLong();
       dis.close();
       return Double.longBitsToDouble(l);
-    } catch (IOException ioe) {
-      throw new RuntimeException(ioe);
-    } finally {
-      try {
-        dis.close();
-      } catch (IOException ioe) {
-        throw new RuntimeException(ioe);
-      }
     }
   }
-  
-  public byte[] encodeFloat(float d) {
+
+  @Override
+  public byte[] encodeFloat(float d) throws IOException {
     return encodeFloat(d, new byte[4]);
   }
-  
-  public byte[] encodeFloat(float f, byte[] ret) {
-    DataOutputStream dos = null;
-    try {
+
+  @Override
+  public byte[] encodeFloat(float f, byte[] ret) throws IOException {
+    try (DataOutputStream dos = new DataOutputStream(new FixedByteArrayOutputStream(ret))){
       int i = Float.floatToRawIntBits(f);
-      dos = new DataOutputStream(new FixedByteArrayOutputStream(ret));
       dos.writeInt(i);
       return ret;
-    } catch (IOException ioe) {
-      throw new RuntimeException(ioe);
-    } finally {
-      try {
-        dos.close();
-      } catch (IOException ioe) {
-        throw new RuntimeException(ioe);
-      }
     }
   }
-  
-  public float decodeFloat(byte[] a) {
-    DataInputStream dis = null;
-    try {
-      dis = new DataInputStream(new ByteArrayInputStream(a));
+
+  @Override
+  public float decodeFloat(byte[] a) throws IOException {
+    try (DataInputStream dis = new DataInputStream(new ByteArrayInputStream(a))){
       int i = dis.readInt();
       return Float.intBitsToFloat(i);
-    } catch (IOException ioe) {
-      throw new RuntimeException(ioe);
-    } finally {
-      try {
-        dis.close();
-      } catch (IOException ioe) {
-        throw new RuntimeException(ioe);
-      }
     }
   }
-  
+
+  @Override
   public byte[] encodeByte(byte b, byte[] ret) {
     ret[0] = 0;
     return ret;
   }
-  
+
+  @Override
   public byte[] encodeByte(byte b) {
     return encodeByte(b, new byte[1]);
   }
-  
+
+  @Override
   public byte decodeByte(byte[] a) {
     return a[0];
   }
-  
-  public boolean decodeBoolean(byte[] a) {
-    DataInputStream dis = null;
-    try {
-      dis = new DataInputStream(new ByteArrayInputStream(a));
+
+  @Override
+  public boolean decodeBoolean(byte[] a) throws IOException {
+    try (DataInputStream dis = new DataInputStream(new ByteArrayInputStream(a))){
       return dis.readBoolean();
-    } catch (IOException ioe) {
-      throw new RuntimeException(ioe);
-    } finally {
-      try {
-        dis.close();
-      } catch (IOException ioe) {
-        throw new RuntimeException(ioe);
-      }
     }
   }
-  
-  public byte[] encodeBoolean(boolean b) {
+
+  @Override
+  public byte[] encodeBoolean(boolean b) throws IOException {
     return encodeBoolean(b, new byte[1]);
   }
-  
-  public byte[] encodeBoolean(boolean b, byte[] ret) {
-    DataOutputStream dos = null;
-    try {
-      dos = new DataOutputStream(new FixedByteArrayOutputStream(ret));
+
+  @Override
+  public byte[] encodeBoolean(boolean b, byte[] ret) throws IOException {
+    try (DataOutputStream dos = new DataOutputStream(new FixedByteArrayOutputStream(ret))){
       dos.writeBoolean(b);
       return ret;
-    } catch (IOException ioe) {
-      throw new RuntimeException(ioe);
-    } finally {
-      try {
-        dos.close();
-      } catch (IOException ioe) {
-        throw new RuntimeException(ioe);
-      }
     }
   }
-  
+
   @Override
   public byte[] lastPossibleKey(int size, byte[] er) {
     return Utils.lastPossibleKey(size, er);
   }
-  
+
   @Override
   public byte[] followingKey(int size, byte[] per) {
     return Utils.followingKey(size, per);

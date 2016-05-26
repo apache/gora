@@ -22,7 +22,7 @@ package org.apache.gora.accumulo.encoders;
 
 public class HexEncoder implements Encoder {
   
-  private byte chars[] = new byte[] {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+  private byte[] chars = new byte[] {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
   private void encode(byte[] a, long l) {
     for (int i = a.length - 1; i >= 0; i--) {
@@ -33,9 +33,9 @@ public class HexEncoder implements Encoder {
 
   private int fromChar(byte b) {
     if (b >= '0' && b <= '9') {
-      return (b - '0');
+      return b - '0';
     } else if (b >= 'a' && b <= 'f') {
-      return (b - 'a' + 10);
+      return b - 'a' + 10;
     }
     
     throw new IllegalArgumentException("Bad char " + b);

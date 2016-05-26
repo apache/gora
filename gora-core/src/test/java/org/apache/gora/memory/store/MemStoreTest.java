@@ -22,6 +22,8 @@ import java.io.IOException;
 import org.apache.gora.examples.WebPageDataCreator;
 import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.examples.generated.WebPage;
+import org.apache.gora.persistency.BeanFactory;
+import org.apache.gora.persistency.impl.BeanFactoryImpl;
 import org.apache.gora.query.Query;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
@@ -36,6 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import static org.apache.gora.examples.WebPageDataCreator.SORTED_URLS;
 import static org.apache.gora.examples.WebPageDataCreator.URLS;
+import static org.apache.gora.examples.WebPageDataCreator.URL_INDEXES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -50,7 +53,7 @@ import static org.junit.Assume.assumeTrue;
 public class MemStoreTest extends DataStoreTestBase {
 
   private static final Logger LOG = LoggerFactory.getLogger(MemStoreTest.class);
-  
+
   private static final int NUM_KEYS = 4;
 
   private Configuration conf;
@@ -106,15 +109,33 @@ public class MemStoreTest extends DataStoreTestBase {
   @Test
   public void testDeleteByQueryFields() {}
 
-  @Ignore("GORA-447")
   @Test
-  public void testGetWithFields() {}
+  public void testGetWithFields() throws Exception {
 
-  @Ignore("GORA-447")
+    DataStore<String, WebPage> store = new MemStore<>();
+    BeanFactory<String, WebPage> beanFactory = new BeanFactoryImpl<>(String.class, WebPage.class);
+    store.setBeanFactory(beanFactory);
+    WebPageDataCreator.createWebPageData(store);
+    String[] interestFields = new String[2];
+    interestFields[0] = "url";
+    interestFields[1] = "content";
+    WebPage page = store.get(URLS[1], interestFields);
+    assertNotNull(page);
+    assertNotNull(page.getUrl());
+    assertEquals(page.getUrl().toString(), URLS[1]);
+    assertNotNull(page.getContent());
+    assertEquals("Map of Outlinks should have a size of '0' as it is omitted at retrieval",
+            0, page.getOutlinks().size());
+    assertEquals("Map of Parsed Content should have a size of '0' as it is omitted at retrieval",
+            0, page.getParsedContent().size());
+  }
+
   @Test
   public void testMemStoreDeleteByQueryFields() throws Exception {
 
     DataStore<String, WebPage> store = new MemStore<>();
+    BeanFactory<String, WebPage> beanFactory = new BeanFactoryImpl<>(String.class, WebPage.class);
+    store.setBeanFactory(beanFactory);
     Query<String, WebPage> query;
 
     //test 5 - delete all with some fields
@@ -122,11 +143,11 @@ public class MemStoreTest extends DataStoreTestBase {
 
     query = store.newQuery();
     query.setFields("outlinks", "parsedContent", "content");
-    
+
     Query<String, WebPage> newQuery = store.newQuery();
-    newQuery.setStartKey(URLS[0]);
-    newQuery.setEndKey(URLS[9]);
-    //newQuery.setFields("outlinks", "parsedContent", "content");
+    newQuery.setStartKey(SORTED_URLS[0]);
+    newQuery.setEndKey(SORTED_URLS[9]);
+    newQuery.setFields("outlinks", "parsedContent", "content");
 
     DataStoreTestUtil.assertNumResults(newQuery, URLS.length);
     store.deleteByQuery(query);
@@ -178,7 +199,7 @@ public class MemStoreTest extends DataStoreTestBase {
     for (int i = 0; i < URLS.length; i++) {
       WebPage page = store.get(URLS[i]);
       assertNotNull(page);
-      if( URLS[i].compareTo(startKey) < 0 || URLS[i].compareTo(endKey) >= 0) {
+      if( URLS[i].compareTo(startKey) < 0 || URLS[i].compareTo(endKey) > 0) {
         //not deleted
         DataStoreTestUtil.assertWebPage(page, i);
       } else {

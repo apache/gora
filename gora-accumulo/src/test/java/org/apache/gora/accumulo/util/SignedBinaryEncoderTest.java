@@ -16,6 +16,7 @@
  */
 package org.apache.gora.accumulo.util;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -30,7 +31,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class SignedBinaryEncoderTest {
   @Test
-  public void testShort() {
+  public void testShort() throws IOException {
     short s = Short.MIN_VALUE;
     Text prev = null;
     
@@ -49,7 +50,7 @@ public class SignedBinaryEncoderTest {
     }
   }
 
-  private void testInt(int start, int finish) {
+  private void testInt(int start, int finish) throws IOException {
     int i = start;
     Text prev = null;
     
@@ -69,13 +70,13 @@ public class SignedBinaryEncoderTest {
   }
   
   @Test
-  public void testInt() {
+  public void testInt() throws IOException {
     testInt(Integer.MIN_VALUE, Integer.MIN_VALUE + (1 << 16));
     testInt(-(1 << 15), (1 << 15));
     testInt(Integer.MAX_VALUE - (1 << 16), Integer.MAX_VALUE);
   }
   
-  private void testLong(long start, long finish) {
+  private void testLong(long start, long finish) throws IOException {
     long l = start;
     Text prev = null;
     
@@ -95,14 +96,14 @@ public class SignedBinaryEncoderTest {
   }
   
   @Test
-  public void testLong() {
+  public void testLong() throws IOException {
     testLong(Long.MIN_VALUE, Long.MIN_VALUE + (1 << 16));
     testLong(-(1 << 15), (1 << 15));
     testLong(Long.MAX_VALUE - (1 << 16), Long.MAX_VALUE);
   }
   
   @Test
-  public void testDouble() {
+  public void testDouble() throws IOException {
     
     ArrayList<Double> testData = new ArrayList<>();
     testData.add(Double.NEGATIVE_INFINITY);
@@ -133,7 +134,7 @@ public class SignedBinaryEncoderTest {
   }
 
   @Test
-  public void testFloat() {
+  public void testFloat() throws IOException {
     
     ArrayList<Float> testData = new ArrayList<>();
     testData.add(Float.NEGATIVE_INFINITY);

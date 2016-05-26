@@ -43,7 +43,7 @@ public class Utils {
     
     bi = bi.subtract(BigInteger.ONE);
     
-    byte ret[] = new byte[size];
+    byte[] ret = new byte[size];
     Arrays.fill(ret, (byte) 0xff);
     
     System.arraycopy(getBytes(bi, er.length), 0, ret, 0, er.length);
@@ -56,13 +56,13 @@ public class Utils {
     
     if (ret[0] == 0) {
       // remove leading 0 that makes num positive
-      byte copy[] = new byte[ret.length - 1];
+      byte[] copy = new byte[ret.length - 1];
       System.arraycopy(ret, 1, copy, 0, copy.length);
       ret = copy;
     }
     
     // leading digits are dropped
-    byte copy[] = new byte[minLen];
+    byte[] copy = new byte[minLen];
     if (bi.compareTo(BigInteger.ZERO) < 0) {
       Arrays.fill(copy, (byte) 0xff);
     }

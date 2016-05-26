@@ -116,6 +116,8 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
   protected static final String PASSWORD_PROPERTY = "accumulo.password";
   protected static final String DEFAULT_MAPPING_FILE = "gora-accumulo-mapping.xml";
 
+  private final static String UNKOWN = "Unknown type ";
+
   private Connector conn;
   private BatchWriter batchWriter;
   private AccumuloMapping mapping;
@@ -124,7 +126,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
 
   public static final Logger LOG = LoggerFactory.getLogger(AccumuloStore.class);
 
-  public Object fromBytes(Schema schema, byte data[]) throws GoraException {
+  public Object fromBytes(Schema schema, byte[] data) throws IOException {
     Schema fromSchema = null;
     if (schema.getType() == Type.UNION) {
       try {
@@ -149,7 +151,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
     return fromBytes(encoder, fromSchema, data);
   }
 
-  public static Object fromBytes(Encoder encoder, Schema schema, byte data[]) {
+  public static Object fromBytes(Encoder encoder, Schema schema, byte data[]) throws IOException {
     switch (schema.getType()) {
     case BOOLEAN:
       return encoder.decodeBoolean(data);
@@ -182,7 +184,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
     default:
       break;
     }
-    throw new IllegalArgumentException("Unknown type " + schema.getType());
+    throw new IllegalArgumentException(UNKOWN + schema.getType());
 
   }
 
@@ -222,7 +224,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         return (K) new Utf8(val);
       }
 
-      throw new IllegalArgumentException("Unknown type " + clazz.getName());
+      throw new IllegalArgumentException(UNKOWN + clazz.getName());
     } catch (IOException ioe) {
       LOG.error(ioe.getMessage());
       throw new RuntimeException(ioe);
@@ -231,7 +233,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
 
   private static byte[] copyIfNeeded(byte b[], int offset, int len) {
     if (len != b.length || offset != 0) {
-      byte copy[] = new byte[len];
+      byte[] copy = new byte[len];
       System.arraycopy(b, offset, copy, 0, copy.length);
       b = copy;
     }
@@ -322,7 +324,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       throw new RuntimeException(ioe);
     }
 
-    throw new IllegalArgumentException("Uknown type " + o.getClass().getName());
+    throw new IllegalArgumentException(UNKOWN + o.getClass().getName());
   }
 
   private BatchWriter getBatchWriter() throws IOException {
@@ -330,7 +332,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       try {
         BatchWriterConfig batchWriterConfig = new BatchWriterConfig();
         batchWriterConfig.setMaxMemory(10000000);
-        batchWriterConfig.setMaxLatency(60000l, TimeUnit.MILLISECONDS);
+        batchWriterConfig.setMaxLatency(60000L, TimeUnit.MILLISECONDS);
         batchWriterConfig.setMaxWriteThreads(4);
         batchWriter = conn.createBatchWriter(mapping.tableName, batchWriterConfig);
       } catch (TableNotFoundException e) {
@@ -351,7 +353,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
 
       mapping = readMapping(mappingFile);
 
-      if (mapping.encoder == null || mapping.encoder.equals("")) {
+      if (mapping.encoder == null || "".equals(mapping.encoder)) {
         encoder = new BinaryEncoder();
       } else {
         try {
@@ -409,7 +411,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
             String name = fieldElement.getAttribute("name");
             String family = fieldElement.getAttribute("family");
             String qualifier = fieldElement.getAttribute("qualifier");
-            if (qualifier.equals(""))
+            if ("".equals(qualifier))
               qualifier = null;
 
             Pair<Text,Text> col = new Pair<>(new Text(family), qualifier == null ? null : new Text(qualifier));
@@ -603,7 +605,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
     return fieldName;
   }
 
-  private void setFetchColumns(Scanner scanner, String fields[]) {
+  private void setFetchColumns(Scanner scanner, String[] fields) {
     fields = getFieldsToQuery(fields);
     for (String field : fields) {
       Pair<Text,Text> col = mapping.fieldMap.get(field);
@@ -614,7 +616,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
           scanner.fetchColumn(col.getFirst(), col.getSecond());
         }
       } else {
-        LOG.error("Mapping not found for field: " + field);
+        LOG.error("Mapping not found for field: {}", field);
       }
     }
   }
@@ -733,7 +735,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       Object mapKey = ((Entry<?, ?>) entry).getKey();
       Object mapVal = ((Entry<?, ?>) entry).getValue();
       if ((o instanceof DirtyMapWrapper && ((DirtyMapWrapper<?, ?>)o).isDirty())
-          || !(o instanceof DirtyMapWrapper)) { //mapVal instanceof Dirtyable && ((Dirtyable)mapVal).isDirty()) {
+          || !(o instanceof DirtyMapWrapper)) {
         m.put(col.getFirst(), new Text(toBytes(mapKey)), new Value(toBytes(valueType, mapVal)));
         count++;
       }
@@ -971,7 +973,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       return fromBytes(encoder, clazz, er);
     }
 
-    throw new IllegalArgumentException("Unknown type " + clazz.getName());
+    throw new IllegalArgumentException(UNKOWN + clazz.getName());
   }
 
 
@@ -1004,7 +1006,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       return fromBytes(encoder, clazz, Arrays.copyOf(per, per.length + 1));
     }
 
-    throw new IllegalArgumentException("Unknown type " + clazz.getName());
+    throw new IllegalArgumentException(UNKOWN + clazz.getName());
   }
 
   @Override
