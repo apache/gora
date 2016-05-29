@@ -702,6 +702,7 @@
     <module>gora-goraci</module>
     <module>gora-hbase</module>
     <module>gora-infinispan</module>
+    <module>gora-jcache</module>
     <!-- module>gora-lucene</module -->
     <module>gora-dynamodb</module>
     <!--module>gora-sql</module -->
@@ -758,6 +759,10 @@
     <!-- Logging Dependencies -->
     <log4j.version>1.2.16</log4j.version>
     <slf4j.version>1.6.6</slf4j.version>
+
+    <!-- JCache Dependencies -->
+    <jsr107.api.version>1.0.0</jsr107.api.version>
+    <hazelcast.version>3.6.3</hazelcast.version>
 
     <!-- Testing Dependencies -->
     <junit.version>4.10</junit.version>
@@ -1454,6 +1459,19 @@
             <artifactId>jms</artifactId>
           </exclusion>
         </exclusions>
+      </dependency>
+
+      <!-- JCache Dependencies -->
+      <dependency>
+        <groupId>com.hazelcast</groupId>
+        <artifactId>hazelcast-all</artifactId>
+        <version>${hazelcast.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>javax.cache</groupId>
+        <artifactId>cache-api</artifactId>
+        <version>${jsr107.api.version}</version>
       </dependency>
 
       <!-- Testing Dependencies -->
