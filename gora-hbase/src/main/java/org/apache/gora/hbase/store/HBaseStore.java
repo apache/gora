@@ -100,7 +100,10 @@ implements Configurable {
 
   private int scannerCaching = SCANNER_CACHING_PROPERTIES_DEFAULT ;
   
-  public HBaseStore()  {
+  /**
+   * Default constructor
+   */
+  public HBaseStore() {//Empty Constrctor
   }
 
   @Override

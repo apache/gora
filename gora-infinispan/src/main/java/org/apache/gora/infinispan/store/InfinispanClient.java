@@ -75,7 +75,7 @@ public class InfinispanClient<K, T extends PersistentBase> implements Configurab
     properties.setProperty(ISPN_CONNECTION_STRING_KEY, host);
     LOG.info("Connecting client to "+host);
 
-    Marshaller<T> marshaller = new Marshaller<T>(persistentClass);
+    Marshaller<T> marshaller = new Marshaller<>(persistentClass);
     ConfigurationBuilder builder = new ConfigurationBuilder();
     builder.addServers(host);
     builder.marshaller(marshaller);

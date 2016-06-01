@@ -47,251 +47,256 @@ import static org.apache.gora.mapreduce.GoraRecordReader.BUFFER_LIMIT_READ_VALUE
  */
 public class InfinispanStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
-   public static final Logger LOG = LoggerFactory.getLogger(InfinispanStore.class);
+  public static final Logger LOG = LoggerFactory.getLogger(InfinispanStore.class);
 
-   private InfinispanClient<K, T> infinispanClient;
-   private String primaryFieldName;
-   private int primaryFieldPos;
-   private int splitSize;
+  private InfinispanClient<K, T> infinispanClient;
+  private String primaryFieldName;
+  private int primaryFieldPos;
+  private int splitSize;
 
-   public InfinispanStore() throws Exception {}
+  /**
+   * Default constructor
+   */
+  public InfinispanStore(){
+    //Empty default constructor
+  }
 
-   @Override
-   public synchronized void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) {
+  @Override
+  public synchronized void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) {
 
-      try {
+    try {
 
-         if (primaryFieldName!=null) {
-            LOG.info("Client already initialized; ignoring.");
-            return;
-         }
-
-         super.initialize(keyClass, persistentClass, properties);
-         infinispanClient  = new InfinispanClient<>();
-         infinispanClient.setConf(conf);
-
-         LOG.info("key class: "
-               + keyClass.getCanonicalName()
-               + ", persistent class: "
-               + persistentClass.getCanonicalName());
-         schema = persistentClass.newInstance().getSchema();
-
-         splitSize = Integer.valueOf(
-               properties.getProperty( BUFFER_LIMIT_READ_NAME,
-                     getConf().get(
-                           BUFFER_LIMIT_READ_NAME,
-                           Integer.toString(BUFFER_LIMIT_READ_VALUE))));
-         LOG.info("split size: "+splitSize);
-
-         primaryFieldPos = 0;
-         primaryFieldName = schema.getFields().get(0).name();
-         this.infinispanClient.initialize(keyClass, persistentClass, properties);
-
-      } catch (Exception e) {
-         throw new RuntimeException(e);
+      if (primaryFieldName!=null) {
+        LOG.info("Client already initialized; ignoring.");
+        return;
       }
-   }
 
-   @Override
-   public void close() {
-      LOG.debug("close()");
-      infinispanClient.close();
-   }
+      super.initialize(keyClass, persistentClass, properties);
+      infinispanClient  = new InfinispanClient<>();
+      infinispanClient.setConf(conf);
 
-   @Override
-   public void createSchema() {
-      LOG.debug("createSchema()");
-      this.infinispanClient.createCache();
-   }
+      LOG.info("key class: "
+          + keyClass.getCanonicalName()
+          + ", persistent class: "
+          + persistentClass.getCanonicalName());
+      schema = persistentClass.newInstance().getSchema();
 
-   @Override
-   public boolean delete(K key) {
-      LOG.debug("delete(" + key+")");
-      this.infinispanClient.deleteByKey(key);
-      return true;
-   }
+      splitSize = Integer.valueOf(
+          properties.getProperty( BUFFER_LIMIT_READ_NAME,
+              getConf().get(
+                  BUFFER_LIMIT_READ_NAME,
+                  Integer.toString(BUFFER_LIMIT_READ_VALUE))));
+      LOG.info("split size: "+splitSize);
 
-   @Override
-   public long deleteByQuery(Query<K, T> query) {
-      ((InfinispanQuery<K, T>) query).build();
-      LOG.debug("deleteByQuery("+query.toString()+")");
-      InfinispanQuery<K, T> q = (InfinispanQuery) query;
-      q.build();
-      for( T t : q.list()){
-         infinispanClient.deleteByKey((K) t.get(primaryFieldPos));
-      }
-      return q.getResultSize();
-   }
+      primaryFieldPos = 0;
+      primaryFieldName = schema.getFields().get(0).name();
+      this.infinispanClient.initialize(keyClass, persistentClass, properties);
 
-   @Override
-   public void deleteSchema() {
-      LOG.debug("deleteSchema()");
-      this.infinispanClient.dropCache();
-   }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
 
-   @Override
-   public Result<K, T> execute(Query<K, T> query) {
-      LOG.debug("execute()");
-      ((InfinispanQuery<K,T>)query).build();
-      InfinispanResult<K,T> result = new InfinispanResult<>(this, (InfinispanQuery<K,T>)query);
-      LOG.trace("query: " + query.toString());
-      LOG.trace("result size: " + result.size());
-      return result;
-   }
+  @Override
+  public void close() {
+    LOG.debug("close()");
+    infinispanClient.close();
+  }
 
-   @Override
-   public T get(K key){
-      LOG.debug("get("+key+")");
+  @Override
+  public void createSchema() {
+    LOG.debug("createSchema()");
+    this.infinispanClient.createCache();
+  }
+
+  @Override
+  public boolean delete(K key) {
+    LOG.debug("delete(" + key+")");
+    this.infinispanClient.deleteByKey(key);
+    return true;
+  }
+
+  @Override
+  public long deleteByQuery(Query<K, T> query) {
+    ((InfinispanQuery<K, T>) query).build();
+    LOG.debug("deleteByQuery("+query.toString()+")");
+    InfinispanQuery<K, T> q = (InfinispanQuery) query;
+    q.build();
+    for( T t : q.list()){
+      infinispanClient.deleteByKey((K) t.get(primaryFieldPos));
+    }
+    return q.getResultSize();
+  }
+
+  @Override
+  public void deleteSchema() {
+    LOG.debug("deleteSchema()");
+    this.infinispanClient.dropCache();
+  }
+
+  @Override
+  public Result<K, T> execute(Query<K, T> query) {
+    LOG.debug("execute()");
+    ((InfinispanQuery<K,T>)query).build();
+    InfinispanResult<K,T> result = new InfinispanResult<>(this, (InfinispanQuery<K,T>)query);
+    LOG.trace("query: " + query.toString());
+    LOG.trace("result size: " + result.size());
+    return result;
+  }
+
+  @Override
+  public T get(K key){
+    LOG.debug("get("+key+")");
+    return infinispanClient.get(key);
+  }
+
+  @Override
+  public T get(K key, String[] fields) {
+    LOG.debug("get("+key+","+fields+")");
+    if (fields==null)
       return infinispanClient.get(key);
-   }
 
-   @Override
-   public T get(K key, String[] fields) {
-      LOG.debug("get("+key+","+fields+")");
-      if (fields==null)
-         return infinispanClient.get(key);
-
-      InfinispanQuery query = new InfinispanQuery(this);
-      query.setKey(key);
-      query.setFields(fields);
-      query.build();
+    InfinispanQuery<K, T> query = new InfinispanQuery<K, T>(this);
+    query.setKey(key);
+    query.setFields(fields);
+    query.build();
 
 
-      Result<K,T> result = query.execute();
-      try {
-         result.next();
-         return result.get();
-      } catch (Exception e) {
-         throw new RuntimeException(e);
-      }
-   }
+    Result<K,T> result = query.execute();
+    try {
+      result.next();
+      return result.get();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
 
-   /**
-    *
-    * Split the query per infinispan node resulting in a list of queries.
-    * For each Infinispan server, this function returns a set of qeuries
-    * using pagination of the originial query. The size of each query
-    * in this pagination equals <i>gora.buffer.read.limit</i>.
-    *
-    * @param query the base query to create the partitions for. If the query
-    * is null, then the data store returns the partitions for the default query
-    * (returning every object)
-    * @return
-    * @throws IOException
-    */
-   @Override
-   public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query)
-         throws IOException {
-      LOG.debug("getPartitions()");
+  /**
+   *
+   * Split the query per infinispan node resulting in a list of queries.
+   * For each Infinispan server, this function returns a set of qeuries
+   * using pagination of the originial query. The size of each query
+   * in this pagination equals <i>gora.buffer.read.limit</i>.
+   *
+   * @param query the base query to create the partitions for. If the query
+   * is null, then the data store returns the partitions for the default query
+   * (returning every object)
+   * @return
+   * @throws IOException
+   */
+  @Override
+  public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query)
+      throws IOException {
+    LOG.debug("getPartitions()");
 
-      // 1 - split the query per location
-      List<PartitionQuery<K,T>> locations = ((InfinispanQuery<K,T>)query).split();
+    // 1 - split the query per location
+    List<PartitionQuery<K,T>> locations = ((InfinispanQuery<K,T>)query).split();
 
-      // 2 -split each location
-      List<PartitionQuery<K,T>> splitLocations = new ArrayList<>();
-      for(PartitionQuery<K,T> location : locations) {
+    // 2 -split each location
+    List<PartitionQuery<K,T>> splitLocations = new ArrayList<>();
+    for(PartitionQuery<K,T> location : locations) {
 
-         LOG.trace("location: "+ ((InfinispanQuery)location).getLocation().toString());
+      LOG.trace("location: "+ ((InfinispanQuery<K, T>)location).getLocation().toString());
 
-         // 2.1 - compute the result size
-         InfinispanQuery<K,T> sizeQuery = (InfinispanQuery<K, T>) ((InfinispanQuery<K, T>) location).clone();
-         sizeQuery.setFields(primaryFieldName);
-         sizeQuery.setLimit(1);
-         sizeQuery.rebuild();
+      // 2.1 - compute the result size
+      InfinispanQuery<K,T> sizeQuery = (InfinispanQuery<K, T>) ((InfinispanQuery<K, T>) location).clone();
+      sizeQuery.setFields(primaryFieldName);
+      sizeQuery.setLimit(1);
+      sizeQuery.rebuild();
 
-         // 2.2 - check if splitting is necessary
-         int resultSize = sizeQuery.getResultSize();
-         long queryLimit = query.getLimit();
-         long splitLimit = queryLimit>0 ? Math.min((long)resultSize,queryLimit) : resultSize;
-         LOG.trace("split limit: "+ splitLimit);
-         LOG.trace("split size: "+ splitSize);
-         if (splitLimit <= splitSize) {
-            LOG.trace("location returned");
-            splitLocations.add(location);
-            continue;
-         }
-
-         // 2.3 - compute the splits
-         for(int i=0; i<Math.ceil((double)splitLimit/(double)splitSize); i++) {
-            InfinispanQuery<K, T> split = (InfinispanQuery<K, T>) ((InfinispanQuery<K, T>) location).clone();
-            split.setOffset(i * splitSize);
-            split.setLimit(splitSize);
-            split.rebuild();
-            splitLocations.add(split);
-         }
+      // 2.2 - check if splitting is necessary
+      int resultSize = sizeQuery.getResultSize();
+      long queryLimit = query.getLimit();
+      long splitLimit = queryLimit>0 ? Math.min((long)resultSize,queryLimit) : resultSize;
+      LOG.trace("split limit: "+ splitLimit);
+      LOG.trace("split size: "+ splitSize);
+      if (splitLimit <= splitSize) {
+        LOG.trace("location returned");
+        splitLocations.add(location);
+        continue;
       }
 
-      return splitLocations;
-   }
+      // 2.3 - compute the splits
+      for(int i=0; i<Math.ceil((double)splitLimit/(double)splitSize); i++) {
+        InfinispanQuery<K, T> split = (InfinispanQuery<K, T>) ((InfinispanQuery<K, T>) location).clone();
+        split.setOffset(i * splitSize);
+        split.setLimit(splitSize);
+        split.rebuild();
+        splitLocations.add(split);
+      }
+    }
 
-   @Override
-   public void flush() {
-      LOG.debug("flush()");
-      infinispanClient.flush();
-   }
+    return splitLocations;
+  }
 
-   /**
-    * In Infinispan, Schemas are referred to as caches.
-    *
-    * @return Cache
-    */
-   @Override
-   public String getSchemaName() {
-      LOG.debug("getSchemaName()");
-      return this.infinispanClient.getCacheName();
-   }
+  @Override
+  public void flush() {
+    LOG.debug("flush()");
+    infinispanClient.flush();
+  }
 
-   @Override
-   public Query<K, T> newQuery() {
-      LOG.debug("newQuery()");
-      Query<K, T> query = new InfinispanQuery<K, T>(this);
-      query.setFields(getFieldsToQuery(null));
-      return query;
-   }
+  /**
+   * In Infinispan, Schemas are referred to as caches.
+   *
+   * @return Cache
+   */
+  @Override
+  public String getSchemaName() {
+    LOG.debug("getSchemaName()");
+    return this.infinispanClient.getCacheName();
+  }
 
-   @Override
-   public void put(K key, T obj) {
-      LOG.debug("put(" +key.toString()+")");
-      LOG.trace(obj.toString());
+  @Override
+  public Query<K, T> newQuery() {
+    LOG.debug("newQuery()");
+    Query<K, T> query = new InfinispanQuery<>(this);
+    query.setFields(getFieldsToQuery(null));
+    return query;
+  }
 
-      if (obj.get(primaryFieldPos)==null)
-         obj.put(primaryFieldPos,key);
+  @Override
+  public void put(K key, T obj) {
+    LOG.debug("put(" +key.toString()+")");
+    LOG.trace(obj.toString());
 
-      if (!obj.get(primaryFieldPos).equals(key) )
-         LOG.warn("Invalid or different primary field :"+key+"<->"+obj.get(primaryFieldPos));
+    if (obj.get(primaryFieldPos)==null)
+      obj.put(primaryFieldPos,key);
 
-      this.infinispanClient.put(key, obj);
-   }
+    if (!obj.get(primaryFieldPos).equals(key) )
+      LOG.warn("Invalid or different primary field :"+key+"<->"+obj.get(primaryFieldPos));
 
-   @Override
-   public boolean schemaExists() {
-      LOG.debug("schemaExists()");
-      return infinispanClient.cacheExists();
-   }
+    this.infinispanClient.put(key, obj);
+  }
 
-   public InfinispanClient<K, T> getClient() {
-      LOG.debug("getClient()");
-      return infinispanClient;
-   }
+  @Override
+  public boolean schemaExists() {
+    LOG.debug("schemaExists()");
+    return infinispanClient.cacheExists();
+  }
 
-   public String getPrimaryFieldName() {
-      LOG.debug("getPrimaryField()");
-      return primaryFieldName;
-   }
+  public InfinispanClient<K, T> getClient() {
+    LOG.debug("getClient()");
+    return infinispanClient;
+  }
 
-   public void setPrimaryFieldName(String name){
-      LOG.debug("getPrimaryFieldName()");
-      primaryFieldName = name;
-   }
+  public String getPrimaryFieldName() {
+    LOG.debug("getPrimaryField()");
+    return primaryFieldName;
+  }
 
-   public int getPrimaryFieldPos(){
-      LOG.debug("getPrimaryFieldPos()");
-      return primaryFieldPos;
-   }
+  public void setPrimaryFieldName(String name){
+    LOG.debug("getPrimaryFieldName()");
+    primaryFieldName = name;
+  }
 
-   public void setPrimaryFieldPos(int p){
-      LOG.debug("setPrimaryFieldPos()");
-      primaryFieldPos = p;
-   }
+  public int getPrimaryFieldPos(){
+    LOG.debug("getPrimaryFieldPos()");
+    return primaryFieldPos;
+  }
+
+  public void setPrimaryFieldPos(int p){
+    LOG.debug("setPrimaryFieldPos()");
+    primaryFieldPos = p;
+  }
 
 }
