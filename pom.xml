@@ -849,16 +849,12 @@
         <artifactId>gora-compiler</artifactId>
         <version>${project.version}</version>
       </dependency>
-      <!--dependency> <groupId>org.apache.gora</groupId> <artifactId>gora-core</artifactId> 
-        <version>${project.version}</version> <type>test-jar</type> </dependency -->
 
       <dependency>
         <groupId>org.apache.gora</groupId>
         <artifactId>gora-compiler-cli</artifactId>
         <version>${project.version}</version>
       </dependency>
-      <!--dependency> <groupId>org.apache.gora</groupId> <artifactId>gora-core</artifactId> 
-        <version>${project.version}</version> <type>test-jar</type> </dependency -->
 
       <dependency>
         <groupId>org.apache.gora</groupId>
@@ -889,18 +885,20 @@
         <version>${project.version}</version>
         <type>test-jar</type>
       </dependency>
+      <!-- End of Internal Depednecies -->
 
-      <!-- Avro needs this version of jackson -->
-<!--       <dependency> -->
-<!--         <groupId>org.codehaus.jackson</groupId> -->
-<!--         <artifactId>jackson-core-asl</artifactId> -->
-<!--         <version>${jackson.version}</version> -->
-<!--       </dependency> -->
-<!--       <dependency> -->
-<!--         <groupId>org.codehaus.jackson</groupId> -->
-<!--         <artifactId>jackson-mapper-asl</artifactId> -->
-<!--         <version>${jackson.version}</version> -->
-<!--       </dependency> -->
+      <dependency>
+        <groupId>org.apache.spark</groupId>
+        <artifactId>spark-core_2.10</artifactId>
+        <version>${spark.version}</version>
+        <scope>provided</scope>
+        <exclusions>
+          <exclusion>
+            <groupId>org.eclipse.jetty.orbit</groupId>
+            <artifactId>javax.servlet</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
 
       <dependency>
         <groupId>org.apache.hadoop</groupId>
@@ -1046,33 +1044,6 @@
         </exclusions>
       </dependency>
 
-      <!-- Solr Dependencies -->
-<!--       <dependency> -->
-<!--         <groupId>org.apache.solr</groupId> -->
-<!--         <artifactId>solr-core</artifactId> -->
-<!--         <version>${lucene-solr.version}</version> -->
-<!--         <exclusions> -->
-<!--           <exclusion> -->
-<!--             <groupId>org.eclipse.jetty.orbit</groupId> -->
-<!--             <artifactId>javax.servlet</artifactId> -->
-<!--           </exclusion> -->
-<!--         </exclusions> -->
-<!--       </dependency> -->
-<!--       <dependency> -->
-<!--         <groupId>org.apache.solr</groupId> -->
-<!--         <artifactId>solr-solrj</artifactId> -->
-<!--         <version>${lucene-solr.version}</version> -->
-<!--       </dependency> -->
-<!--       <dependency> -->
-<!--         <groupId>org.apache.solr</groupId> -->
-<!--         <artifactId>solr-test-framework</artifactId> -->
-<!--         <version>${lucene-solr.version}</version> -->
-<!--       </dependency> -->
-<!--       <dependency> -->
-<!--         <groupId>org.apache.lucene</groupId> -->
-<!--         <artifactId>lucene-test-framework</artifactId> -->
-<!--         <version>${lucene-solr.version}</version> -->
-<!--       </dependency> -->
       <dependency>
         <groupId>com.ibm.icu</groupId>
         <artifactId>icu4j</artifactId>
@@ -1339,23 +1310,6 @@
         <version>2.0.10</version>
       </dependency>
 
-<!--       Lucene Dependencies -->
-<!--       <dependency> -->
-<!--         <groupId>org.apache.lucene</groupId> -->
-<!--         <artifactId>lucene-core</artifactId> -->
-<!--         <version>${lucene-solr.version}</version> -->
-<!--       </dependency> -->
-<!--       <dependency> -->
-<!--         <groupId>org.apache.lucene</groupId> -->
-<!--         <artifactId>lucene-analyzers-common</artifactId> -->
-<!--         <version>${lucene-solr.version}</version> -->
-<!--       </dependency> -->
-<!--       <dependency> -->
-<!--         <groupId>org.apache.lucene</groupId> -->
-<!--         <artifactId>lucene-queries</artifactId> -->
-<!--         <version>${lucene-solr.version}</version> -->
-<!--       </dependency> -->
-
       <!-- Amazon Dependencies -->
       <dependency>
         <groupId>com.amazonaws</groupId>
@@ -1391,17 +1345,6 @@
           </exclusion>
         </exclusions>
       </dependency>
-
-      <!--dependency> <groupId>org.hsqldb</groupId> <artifactId>hsqldb</artifactId> 
-        <version>${hsqldb.version}</version> </dependency> <dependency> <groupId>mysql</groupId> 
-        <artifactId>mysql-connector-java</artifactId> <version>${mysql.version}</version> 
-        </dependency -->
-
-      <!--dependency>
-        <groupId>xerces</groupId>
-        <artifactId>xercesImpl</artifactId>
-        <version>${xerces.version}</version>
-      </dependency -->
 
       <!-- Logging Dependencies -->
       <dependency>

@@ -143,17 +143,9 @@
     </dependency>
 
     <!-- Spark dependency -->
-    <dependency> <!-- Spark dependency -->
+    <dependency>
       <groupId>org.apache.spark</groupId>
       <artifactId>spark-core_2.10</artifactId>
-      <version>${spark.version}</version>
-      <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.eclipse.jetty.orbit</groupId>
-          <artifactId>javax.servlet</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <!-- Logging Dependencies -->
