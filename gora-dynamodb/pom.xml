@@ -102,7 +102,7 @@
     <dependency>
       <groupId>org.apache.gora</groupId>
       <artifactId>gora-core</artifactId>
-      <scope>compile</compile>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.gora</groupId>
