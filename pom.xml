@@ -233,6 +233,15 @@
       </roles>
     </developer>
     <developer>
+      <id>otrack</id>
+      <name>Pierre Sutra</name>
+      <email>otrack [at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
       <id>talat</id>
       <name>Talat UYARER</name>
       <email>talat [at] apache [dot] org</email>
