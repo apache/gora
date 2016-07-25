@@ -29,21 +29,14 @@ public class JCacheCacheLoaderFactory<K, T extends PersistentBase>
 
   public static final long serialVersionUID = 201305101626L;
   private static final Logger LOG = LoggerFactory.getLogger(JCacheCacheLoaderFactory.class);
-  private Class<K> keyClass;
-  private Class<T> persistentClass;
+  private transient JCacheCacheLoader<K, T> instance;
 
-  public JCacheCacheLoaderFactory(Class<K> keyClass,
-                                      Class<T> persistentClass) {
-    this.keyClass = keyClass;
-    this.persistentClass = persistentClass;
+  public JCacheCacheLoaderFactory(JCacheCacheLoader<K, T> instance) {
+    this.instance = instance;
   }
 
-  public JCacheCacheLoader<K,T> create() {
-    try {
-      return (JCacheCacheLoader<K,T>) new JCacheCacheLoader(keyClass, persistentClass);
-    } catch (Exception ex) {
-      throw new RuntimeException("Failed to create an instance of " + JCacheCacheLoader.class, ex);
-    }
+  public JCacheCacheLoader<K, T> create() {
+    return (JCacheCacheLoader<K, T>) this.instance;
   }
 
   public boolean equals(Object other) {

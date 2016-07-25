@@ -21,14 +21,14 @@ import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.impl.QueryBase;
 import org.apache.gora.store.DataStore;
 
-public class JCacheQuery<K,T extends PersistentBase> extends QueryBase<K,T> {
-  
+public class JCacheQuery<K, T extends PersistentBase> extends QueryBase<K, T> {
+
   public JCacheQuery() {
     super(null);
   }
 
-  public JCacheQuery(DataStore<K,T> dataStore) {
+  public JCacheQuery(DataStore<K, T> dataStore) {
     super(dataStore);
   }
-  
+
 }

@@ -28,21 +28,14 @@ public class JCacheCacheWriterFactory<K, T extends PersistentBase> implements Fa
 
   public static final long serialVersionUID = 201205101621L;
   private static final Logger LOG = LoggerFactory.getLogger(JCacheCacheWriterFactory.class);
-  private Class<K> keyClass;
-  private Class<T> persistentClass;
+  private transient JCacheCacheWriter<K,T> instance;
 
-  public JCacheCacheWriterFactory(Class<K> keyClass,
-                                  Class<T> persistentClass) {
-    this.keyClass = keyClass;
-    this.persistentClass = persistentClass;
+  public JCacheCacheWriterFactory(JCacheCacheWriter<K,T> instance) {
+    this.instance = instance;
   }
 
   public JCacheCacheWriter<K,T> create() {
-    try {
-      return (JCacheCacheWriter<K,T>) new JCacheCacheWriter(keyClass, persistentClass);
-    } catch (Exception ex) {
-      throw new RuntimeException("Failed to create an instance of " + JCacheCacheWriter.class, ex);
-    }
+    return (JCacheCacheWriter<K,T>)this.instance;
   }
 
   public boolean equals(Object other) {

@@ -15,7 +15,7 @@ import org.apache.gora.persistency.Dirtyable;
  *          The type of the list that this wrapper wraps.
  */
 public class DirtyCollectionWrapper<T> implements Dirtyable,
-    Collection<T> {
+    Collection<T>, java.io.Serializable {
 
   /** The delegate list that the wrapper wraps */
   private final Collection<T> delegate;

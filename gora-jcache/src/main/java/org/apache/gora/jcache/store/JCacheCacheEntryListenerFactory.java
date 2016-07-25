@@ -26,8 +26,8 @@ import javax.cache.configuration.Factory;
 public class JCacheCacheEntryListenerFactory <K,T extends PersistentBase>
         implements Factory<JCacheCacheEntryListener<K, T>> {
 
-  private static final Logger LOG = LoggerFactory.getLogger(JCacheCacheEntryListenerFactory.class);
   public static final long serialVersionUID = 201305101634L;
+  private static final Logger LOG = LoggerFactory.getLogger(JCacheCacheEntryListenerFactory.class);
   private JCacheCacheEntryListener<K, T> instance;
 
   public JCacheCacheEntryListenerFactory(JCacheCacheEntryListener<K, T> instance) {

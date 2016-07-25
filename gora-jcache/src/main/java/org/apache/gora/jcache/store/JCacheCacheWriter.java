@@ -36,10 +36,8 @@ public class JCacheCacheWriter<K, T extends PersistentBase> implements CacheWrit
   private static final Logger LOG = LoggerFactory.getLogger(JCacheCacheWriter.class);
   private DataStore<K, T> dataStore;
 
-  public JCacheCacheWriter(Class<K> keyClass,
-                           Class<T> persistent) throws GoraException {
-    dataStore = DataStoreFactory.getDataStore(keyClass, persistent,
-            new Configuration());
+  public JCacheCacheWriter(DataStore<K, T> dataStore) {
+    this.dataStore = dataStore;
   }
 
   @Override

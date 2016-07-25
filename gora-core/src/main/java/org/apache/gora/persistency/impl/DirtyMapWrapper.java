@@ -9,7 +9,7 @@ import org.apache.gora.persistency.Dirtyable;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 
-public class DirtyMapWrapper<K, V> implements Map<K, V>, Dirtyable {
+public class DirtyMapWrapper<K, V> implements Map<K, V>, Dirtyable, java.io.Serializable {
 
   public static class DirtyEntryWrapper<K, V> implements Entry<K, V>, Dirtyable {
     private final Entry<K, V> entryDelegate;

@@ -18,6 +18,8 @@
 package org.apache.gora.jcache.query;
 
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.NavigableSet;
 
 import org.apache.gora.jcache.store.JCacheStore;
 import org.apache.gora.persistency.impl.PersistentBase;
@@ -25,29 +27,43 @@ import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.ResultBase;
 import org.apache.gora.store.DataStore;
 
-public class JCacheResult<K,T extends PersistentBase> extends ResultBase<K,T> {
-  
-  public JCacheStore<K,T> getDataStore() {
-    return (JCacheStore<K,T>) super.getDataStore();
-  }
+public class JCacheResult<K, T extends PersistentBase> extends ResultBase<K, T> {
 
-  public JCacheResult(DataStore<K,T> dataStore, Query<K,T> query) {
+  private NavigableSet<K> cacheKeySet;
+  private Iterator<K> iterator;
+
+  public JCacheResult(DataStore<K, T> dataStore, Query<K, T> query) {
     super(dataStore, query);
   }
-  
+
+  public JCacheResult(DataStore<K, T> dataStore, Query<K, T> query, NavigableSet<K> cacheKeySet) {
+    super(dataStore, query);
+    this.cacheKeySet = cacheKeySet;
+    this.iterator = cacheKeySet.iterator();
+  }
+
+  public JCacheStore<K, T> getDataStore() {
+    return (JCacheStore<K, T>) super.getDataStore();
+  }
+
   @Override
   public float getProgress() throws IOException {
     return 0;
   }
-  
+
   @Override
   public void close() throws IOException {
-    
+
   }
-  
+
   @Override
   protected boolean nextInner() throws IOException {
+    if (!iterator.hasNext()) {
+      return false;
+    }
+    key = iterator.next();
+    persistent = dataStore.get(key);
     return true;
   }
-  
+
 }

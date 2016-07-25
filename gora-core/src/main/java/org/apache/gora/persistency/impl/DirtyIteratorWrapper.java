@@ -5,7 +5,7 @@ import java.util.Iterator;
 /**
  * Sets the dirty flag if the iterator's remove method is called.
  */
-final class DirtyIteratorWrapper<T> implements Iterator<T> {
+final class DirtyIteratorWrapper<T> implements Iterator<T>, java.io.Serializable {
 
   private final DirtyFlag dirtyFlag;
   private Iterator<T> delegateIterator;

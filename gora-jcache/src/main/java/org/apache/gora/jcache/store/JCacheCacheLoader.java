@@ -36,10 +36,8 @@ public class JCacheCacheLoader<K, T extends PersistentBase> implements CacheLoad
   private static final Logger LOG = LoggerFactory.getLogger(JCacheCacheLoader.class);
   private DataStore<K, T> dataStore;
 
-  public JCacheCacheLoader(Class<K> keyClass,
-                           Class<T> persistent) throws GoraException {
-    dataStore = DataStoreFactory.getDataStore(keyClass, persistent,
-            new Configuration());
+  public JCacheCacheLoader(DataStore<K, T> dataStore) {
+      this.dataStore = dataStore;
   }
 
   @Override

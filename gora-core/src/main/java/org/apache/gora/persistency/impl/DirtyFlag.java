@@ -19,7 +19,7 @@ package org.apache.gora.persistency.impl;
 
 import org.apache.gora.persistency.Dirtyable;
 
-final class DirtyFlag implements Dirtyable {
+final class DirtyFlag implements Dirtyable, java.io.Serializable {
 
   private boolean dirty;
 
