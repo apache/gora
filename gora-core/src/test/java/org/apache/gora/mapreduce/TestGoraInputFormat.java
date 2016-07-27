@@ -28,8 +28,6 @@ import org.apache.gora.mock.persistency.MockPersistent;
 import org.apache.gora.mock.query.MockQuery;
 import org.apache.gora.mock.store.MockDataStore;
 import org.apache.gora.query.PartitionQuery;
-import org.apache.gora.shims.hadoop.HadoopShim;
-import org.apache.gora.shims.hadoop.HadoopShimFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Job;
@@ -38,14 +36,11 @@ import org.junit.Test;
 import static org.junit.Assert.assertTrue;
 
 public class TestGoraInputFormat {
-  
-  private static final HadoopShim hadoopShim = HadoopShimFactory.INSTANCE().getHadoopShim();
 
   public List<InputSplit> getInputSplits()
     throws IOException, InterruptedException {
 
-    //Job job = new Job();
-    Job job = hadoopShim.createJob(new Configuration());
+    Job job = Job.getInstance(new Configuration());
     MockDataStore store = MockDataStore.get();
 
     MockQuery query = store.newQuery();

@@ -21,8 +21,6 @@ package org.apache.gora.mapreduce;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.gora.shims.hadoop.HadoopShim;
-import org.apache.gora.shims.hadoop.HadoopShimFactory;
 import org.apache.gora.util.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -32,13 +30,12 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.task.JobContextImpl;
 
 /**
  * MapReduce related utilities for Gora
  */
 public class GoraMapReduceUtils {
-
-  private static final HadoopShim hadoopShim = HadoopShimFactory.INSTANCE().getHadoopShim();
 
   public static class HelperInputFormat<K,V> extends FileInputFormat<K, V> {
     @Override
@@ -60,7 +57,7 @@ public class GoraMapReduceUtils {
     String serializationClass =
       PersistentSerialization.class.getCanonicalName();
     String[] serializations = StringUtils.joinStringArrays(
-        conf.getStrings("io.serializations"), 
+        conf.getStrings("io.serializations"),
         "org.apache.hadoop.io.serializer.WritableSerialization",
         StringSerialization.class.getCanonicalName(),
         serializationClass); 
@@ -79,11 +76,11 @@ public class GoraMapReduceUtils {
     throws IOException {
     
     if(inputPath != null) {
-      Job job = hadoopShim.createJob(conf);
+      Job job = Job.getInstance(conf);
       FileInputFormat.addInputPath(job, new Path(inputPath));
-      return hadoopShim.createJobContext(job.getConfiguration());
+      return new JobContextImpl(job.getConfiguration(), null);
     } 
     
-    return hadoopShim.createJobContext(conf);
+    return new JobContextImpl(conf, null);
   }
 }
