@@ -716,10 +716,10 @@
     <!--module>gora-sql</module -->
     <module>gora-maven-plugin</module>
     <module>gora-mongodb</module>
-    <module>gora-shims-hadoop</module>
-    <module>gora-shims-hadoop1</module>
-    <module>gora-shims-hadoop2</module>
-    <module>gora-shims-distribution</module>
+    <!--<module>gora-shims-hadoop</module>-->
+    <!--<module>gora-shims-hadoop1</module>-->
+    <!--<module>gora-shims-hadoop2</module>-->
+    <!--<module>gora-shims-distribution</module>-->
     <module>gora-solr</module>
     <module>gora-solr-5</module>
     <module>gora-tutorial</module>
@@ -911,8 +911,15 @@
 
       <dependency>
         <groupId>org.apache.hadoop</groupId>
-		    <artifactId>hadoop-client</artifactId>
-		    <version>${hadoop-2.version}</version>
+        <artifactId>hadoop-client</artifactId>
+        <version>${hadoop-2.version}</version>
+        <optional>true</optional>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-minicluster</artifactId>
+        <version>${hadoop-2.test.version}</version>
+        <optional>true</optional>
       </dependency>
 
       <dependency>
