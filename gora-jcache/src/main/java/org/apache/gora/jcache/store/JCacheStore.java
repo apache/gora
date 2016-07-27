@@ -25,9 +25,13 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.TimeUnit;
 
 import com.hazelcast.cache.HazelcastCachingProvider;
 import com.hazelcast.cache.ICache;
+import com.hazelcast.config.CacheConfig;
+import com.hazelcast.config.EvictionConfig;
+import com.hazelcast.config.EvictionPolicy;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
@@ -51,8 +55,13 @@ import org.slf4j.LoggerFactory;
 
 import javax.cache.CacheManager;
 import javax.cache.Caching;
+import javax.cache.configuration.FactoryBuilder;
 import javax.cache.configuration.MutableCacheEntryListenerConfiguration;
-import javax.cache.configuration.MutableConfiguration;
+import javax.cache.expiry.AccessedExpiryPolicy;
+import javax.cache.expiry.ModifiedExpiryPolicy;
+import javax.cache.expiry.CreatedExpiryPolicy;
+import javax.cache.expiry.TouchedExpiryPolicy;
+import javax.cache.expiry.Duration;
 import javax.cache.spi.CachingProvider;
 
 public class JCacheStore<K,T extends PersistentBase> extends DataStoreBase<K,T> {
@@ -60,11 +69,27 @@ public class JCacheStore<K,T extends PersistentBase> extends DataStoreBase<K,T> 
   private ICache<K, T> cache;
   private CacheManager manager;
   private ConcurrentSkipListSet<K> cacheEntryList;
-  private static final String GORA_DEFAULT_JCACHE_PROVIDER_KEY = "gora.datastore.jcache.provider";
   private static final String GORA_DEFAULT_JCACHE_NAMESPACE = "gora.jcache.namespace";
+  private static final String GORA_DEFAULT_JCACHE_PROVIDER_KEY = "gora.datastore.jcache.provider";
+  private static final String JCACHE_READ_THROUGH_PROPERTY_KEY = "jcache.read.through.enable";
+  private static final String JCACHE_WRITE_THROUGH_PROPERTY_KEY = "jcache.write.through.enable";
+  private static final String JCACHE_STORE_BY_VALUE_PROPERTY_KEY = "jcache.store.by.value.enable";
+  private static final String JCACHE_STATISTICS_PROPERTY_KEY = "jcache.statistics.enable";
+  private static final String JCACHE_MANAGEMENT_PROPERTY_KEY = "jcache.management.enable";
+  private static final String JCACHE_CACHE_NAMESPACE_PROPERTY_KEY = "jcache.cache.namespace";
+  private static final String JCACHE_EVICTION_POLICY_PROPERTY_KEY = "jcache.eviction.policy";
+  private static final String JCACHE_EVICTION_MAX_SIZE_POLICY_PROPERTY_KEY = "jcache.eviction.max.size.policy";
+  private static final String JCACHE_EVICTION_SIZE_PROPERTY_KEY = "jcache.eviction.size";
+  private static final String JCACHE_EXPIRE_POLICY_PROPERTY_KEY = "jcache.expire.policy";
+  private static final String JCACHE_EXPIRE_POLICY_DURATION_PROPERTY_KEY = "jcache.expire.policy";
+  private static final String JCACHE_ACCESSED_EXPIRY_IDENTIFIER = "ACCESSED";
+  private static final String JCACHE_CREATED_EXPIRY_IDENTIFIER = "CREATED";
+  private static final String JCACHE_MODIFIED_EXPIRY_IDENTIFIER = "MODIFIED";
+  private static final String JCACHE_TOUCHED_EXPIRY_IDENTIFIER = "TOUCHED";
+  private String goraCacheNamespace = GORA_DEFAULT_JCACHE_NAMESPACE;
   private static final Logger LOG = LoggerFactory.getLogger(JCacheStore.class);
   private DataStore<K, T> persistentDataStore;
-  private MutableConfiguration<K, T> cacheConfig;
+  private CacheConfig<K, T> cacheConfig;
   private HazelcastInstance hazelcastInstance;
 
   @Override
@@ -73,6 +98,9 @@ public class JCacheStore<K,T extends PersistentBase> extends DataStoreBase<K,T> 
     CachingProvider cachingProvider = Caching.getCachingProvider(
            properties.getProperty(GORA_DEFAULT_JCACHE_PROVIDER_KEY)
     );
+    if (properties.getProperty(JCACHE_CACHE_NAMESPACE_PROPERTY_KEY) != null) {
+      goraCacheNamespace = properties.getProperty(JCACHE_CACHE_NAMESPACE_PROPERTY_KEY);
+    }
     try {
       this.persistentDataStore = DataStoreFactory.getDataStore(keyClass, persistentClass,
               new Configuration());
@@ -84,17 +112,66 @@ public class JCacheStore<K,T extends PersistentBase> extends DataStoreBase<K,T> 
     providerProperties.setProperty( HazelcastCachingProvider.HAZELCAST_INSTANCE_NAME,
             hazelcastInstance.getName());
     try {
-      manager = cachingProvider.getCacheManager(new URI(GORA_DEFAULT_JCACHE_NAMESPACE), null, providerProperties);
+      manager = cachingProvider.getCacheManager(new URI(goraCacheNamespace), null, providerProperties);
     } catch (URISyntaxException ex) {
-      LOG.error("Couldn't initialize cache manager to a bounded hazelcast instance");
+      LOG.error("Couldn't initialize cache manager to bounded hazelcast instance");
       manager = cachingProvider.getCacheManager();
     }
     cacheEntryList = new ConcurrentSkipListSet<>();
-    cacheConfig = new MutableConfiguration<K, T>();
+    cacheConfig = new CacheConfig<K, T>();
     cacheConfig.setTypes(keyClass, persistentClass);
-    cacheConfig.setReadThrough(true);
-    cacheConfig.setWriteThrough(true);
-    cacheConfig.setStoreByValue(true);
+    if (properties.getProperty(JCACHE_READ_THROUGH_PROPERTY_KEY) != null) {
+      cacheConfig.setReadThrough(Boolean.valueOf(properties.getProperty(JCACHE_READ_THROUGH_PROPERTY_KEY)));
+    }
+    if (properties.getProperty(JCACHE_WRITE_THROUGH_PROPERTY_KEY) != null) {
+      cacheConfig.setWriteThrough(Boolean.valueOf(properties.getProperty(JCACHE_WRITE_THROUGH_PROPERTY_KEY)));
+    }
+    if (properties.getProperty(JCACHE_STORE_BY_VALUE_PROPERTY_KEY) != null) {
+      cacheConfig.setStoreByValue(Boolean.valueOf(properties.getProperty(JCACHE_STORE_BY_VALUE_PROPERTY_KEY)));
+    }
+    if (properties.getProperty(JCACHE_STATISTICS_PROPERTY_KEY) != null) {
+      cacheConfig.setStatisticsEnabled(Boolean.valueOf(properties.getProperty(JCACHE_STATISTICS_PROPERTY_KEY)));
+    }
+    if (properties.getProperty(JCACHE_MANAGEMENT_PROPERTY_KEY) != null) {
+      cacheConfig.setStatisticsEnabled(Boolean.valueOf(properties.getProperty(JCACHE_MANAGEMENT_PROPERTY_KEY)));
+    }
+    if (properties.getProperty(JCACHE_EVICTION_POLICY_PROPERTY_KEY) != null) {
+      cacheConfig.getEvictionConfig()
+              .setEvictionPolicy(EvictionPolicy.valueOf(properties.getProperty(JCACHE_EVICTION_POLICY_PROPERTY_KEY)));
+    }
+    if (properties.getProperty(JCACHE_EVICTION_MAX_SIZE_POLICY_PROPERTY_KEY) != null) {
+      cacheConfig.getEvictionConfig()
+              .setMaximumSizePolicy(EvictionConfig.MaxSizePolicy
+                      .valueOf(properties.getProperty(JCACHE_EVICTION_MAX_SIZE_POLICY_PROPERTY_KEY)));
+    }
+    if (properties.getProperty(JCACHE_EVICTION_SIZE_PROPERTY_KEY) != null) {
+      cacheConfig.getEvictionConfig()
+              .setSize(Integer.valueOf(properties.getProperty(JCACHE_EVICTION_SIZE_PROPERTY_KEY)));
+    }
+    if (properties.getProperty(JCACHE_EXPIRE_POLICY_PROPERTY_KEY) != null) {
+      String expiryPolicyIdentifier = properties.getProperty(JCACHE_EXPIRE_POLICY_PROPERTY_KEY);
+      if (expiryPolicyIdentifier.equals(JCACHE_ACCESSED_EXPIRY_IDENTIFIER)){
+        cacheConfig.setExpiryPolicyFactory(FactoryBuilder.factoryOf(
+                new AccessedExpiryPolicy(new Duration(TimeUnit.SECONDS,
+                        Integer.valueOf(properties.getProperty(JCACHE_EXPIRE_POLICY_DURATION_PROPERTY_KEY))))
+        ));
+      } else if (expiryPolicyIdentifier.equals(JCACHE_CREATED_EXPIRY_IDENTIFIER)){
+        cacheConfig.setExpiryPolicyFactory(FactoryBuilder.factoryOf(
+                new CreatedExpiryPolicy(new Duration(TimeUnit.SECONDS,
+                        Integer.valueOf(properties.getProperty(JCACHE_EXPIRE_POLICY_DURATION_PROPERTY_KEY))))
+        ));
+      } else if (expiryPolicyIdentifier.equals(JCACHE_MODIFIED_EXPIRY_IDENTIFIER)){
+        cacheConfig.setExpiryPolicyFactory(FactoryBuilder.factoryOf(
+                new ModifiedExpiryPolicy(new Duration(TimeUnit.SECONDS,
+                        Integer.valueOf(properties.getProperty(JCACHE_EXPIRE_POLICY_DURATION_PROPERTY_KEY))))
+        ));
+      } else if (expiryPolicyIdentifier.equals(JCACHE_TOUCHED_EXPIRY_IDENTIFIER)){
+        cacheConfig.setExpiryPolicyFactory(FactoryBuilder.factoryOf(
+                new TouchedExpiryPolicy(new Duration(TimeUnit.SECONDS,
+                        Integer.valueOf(properties.getProperty(JCACHE_EXPIRE_POLICY_DURATION_PROPERTY_KEY))))
+        ));
+      }
+    }
     cacheConfig.setCacheLoaderFactory(JCacheCacheFactoryBuilder
             .factoryOfCacheLoader(this.persistentDataStore));
     cacheConfig.setCacheWriterFactory(JCacheCacheFactoryBuilder
