@@ -652,54 +652,6 @@
         </plugins>
       </build>
     </profile>
-    <profile>
-      <id>hadoop1</id>
-      <properties>
-        <hadoop.classifier>hadoop1</hadoop.classifier>
-      </properties>
-      <dependencyManagement>
-        <dependencies>
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-core</artifactId>
-            <version>${hadoop-1.version}</version>
-          </dependency>
-        </dependencies>
-      </dependencyManagement>
-    </profile>
-    <profile>
-      <id>hadoop2</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <properties>
-        <hadoop.classifier>hadoop2</hadoop.classifier>
-      </properties>
-      <dependencyManagement>
-        <dependencies>
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-common</artifactId>
-            <version>${hadoop-2.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-auth</artifactId>
-            <version>${hadoop-2.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-mapreduce-client-core</artifactId>
-            <version>${hadoop-2.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-yarn-common</artifactId>
-            <version>${hadoop-2.version}</version>
-          </dependency>
-        </dependencies>
-      </dependencyManagement>
-    </profile>
   </profiles>
 
   <modules>
@@ -716,10 +668,6 @@
     <!--module>gora-sql</module -->
     <module>gora-maven-plugin</module>
     <module>gora-mongodb</module>
-    <!--<module>gora-shims-hadoop</module>-->
-    <!--<module>gora-shims-hadoop1</module>-->
-    <!--<module>gora-shims-hadoop2</module>-->
-    <!--<module>gora-shims-distribution</module>-->
     <module>gora-solr</module>
     <module>gora-solr-5</module>
     <module>gora-tutorial</module>
@@ -733,9 +681,7 @@
     <avro.version>1.7.6</avro.version>
 <!--     <jackson.version>1.6.9</jackson.version> -->
     <!-- Hadoop Dependencies -->
-    <hadoop-1.version>1.2.1</hadoop-1.version>
     <hadoop-2.version>2.5.2</hadoop-2.version>
-    <hadoop-1.test.version>1.2.1</hadoop-1.test.version>
     <hadoop-2.test.version>2.5.2</hadoop-2.test.version>
     <hbase.version>0.98.8-hadoop2</hbase.version>
     <hbase.test.version>0.98.8-hadoop2</hbase.test.version>
@@ -915,12 +861,27 @@
         <version>${hadoop-2.version}</version>
         <optional>true</optional>
       </dependency>
-      <dependency>
-        <groupId>org.apache.hadoop</groupId>
-        <artifactId>hadoop-minicluster</artifactId>
-        <version>${hadoop-2.test.version}</version>
-        <optional>true</optional>
-      </dependency>
+      <!--<dependency>-->
+        <!--<groupId>org.apache.hadoop</groupId>-->
+        <!--<artifactId>hadoop-common</artifactId>-->
+        <!--<version>${hadoop-2.version}</version>-->
+      <!--</dependency>-->
+      <!--<dependency>-->
+        <!--<groupId>org.apache.hadoop</groupId>-->
+        <!--<artifactId>hadoop-auth</artifactId>-->
+        <!--<version>${hadoop-2.version}</version>-->
+      <!--</dependency>-->
+      <!--<dependency>-->
+        <!--<groupId>org.apache.hadoop</groupId>-->
+        <!--<artifactId>hadoop-mapreduce-client-core</artifactId>-->
+        <!--<version>${hadoop-2.version}</version>-->
+      <!--</dependency>-->
+      <!--<dependency>-->
+        <!--<groupId>org.apache.hadoop</groupId>-->
+        <!--<artifactId>hadoop-yarn-common</artifactId>-->
+        <!--<version>${hadoop-2.version}</version>-->
+      <!--</dependency>-->
+
 
       <dependency>
         <groupId>org.apache.cxf</groupId>
