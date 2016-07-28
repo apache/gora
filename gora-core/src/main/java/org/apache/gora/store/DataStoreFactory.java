@@ -250,6 +250,35 @@ public class DataStoreFactory{
   }
 
   /**
+   * Instantiate a new {@link DataStore}. Uses default properties. Uses 'null' schema.
+   * 
+   * @param dataStoreClass The datastore implementation class <i>as string</i>.
+   * @param keyClass The key class <i>as string</i>.
+   * @param persistentClass The value class <i>as string</i>.
+   * @param props Gora properties configuration
+   * @param conf {@link Configuration} to be used be the store.
+   * @return A new store instance.
+   * @throws GoraException
+   */
+  @SuppressWarnings({ "unchecked" })
+  public static <K, T extends Persistent> DataStore<K, T> getDataStore(
+      String dataStoreClass, String keyClass, String persistentClass, Properties props, Configuration conf)
+          throws GoraException {
+
+    try {
+      Class<? extends DataStore<K,T>> c
+          = (Class<? extends DataStore<K, T>>) Class.forName(dataStoreClass);
+      Class<K> k = (Class<K>) ClassLoadingUtils.loadClass(keyClass);
+      Class<T> p = (Class<T>) ClassLoadingUtils.loadClass(persistentClass);
+      return createDataStore(c, k, p, conf, props, null);
+    } catch(GoraException ex) {
+      throw ex;
+    } catch (Exception ex) {
+      throw new GoraException(ex);
+    }
+  }
+  
+  /**
    * Instantiate <i>the default</i> {@link DataStore}. Uses default properties. Uses 'null' schema.
    * 
    * Note:

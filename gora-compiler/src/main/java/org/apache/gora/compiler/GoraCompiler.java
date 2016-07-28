@@ -46,6 +46,8 @@ public class GoraCompiler extends SpecificCompiler {
 
   private static final Set<String> GORA_RESERVED_NAMES = new HashSet<>();
   
+  private static final String DEFAULT_TEMPLATES_PATH = "/org/apache/gora/compiler/templates/" ;
+  
   static {
     GORA_RESERVED_NAMES.addAll(Arrays.asList(DIRTY_BYTES_FIELD_NAME));
   }
@@ -67,12 +69,37 @@ public class GoraCompiler extends SpecificCompiler {
       //Schema newSchema = getSchemaWithDirtySupport(originalSchema, queue);
       Schema newSchema = originalSchema;
       GoraCompiler compiler = new GoraCompiler(newSchema);
-      compiler.setTemplateDir("/org/apache/gora/compiler/templates/");
+      compiler.setTemplateDir(DEFAULT_TEMPLATES_PATH);
       compiler.compileToDestination(src, dest);
       LOG.info("Compiled into: {}", dest.getAbsolutePath());
     }
   }
 
+  /**
+   * Compiles a single schema. Any subschemas must be included in the own schema.
+   * 
+   * @param sourceSchema String with the schema definition in json (avro)
+   * @param dest Path where .java classes will be written
+   * @param templatesPath Path where Gora's velocity templates are. If null, will use DEFAULT_TEMPLATES_PATH
+   * @return The compiled resulting Schema
+   * @throws IOException
+   */
+  public static Schema compileSchema(String sourceSchema, File dest, String templatesPath) throws IOException {
+    Schema.Parser parser = new Schema.Parser();
+
+    if (templatesPath == null) {
+      templatesPath = DEFAULT_TEMPLATES_PATH ;
+    }
+    
+    LOG.info("Compiling source schema from String into {} using templates in {}", dest.getPath(), templatesPath);
+    Schema newSchema = parser.parse(sourceSchema);
+    GoraCompiler compiler = new GoraCompiler(newSchema);
+    compiler.setTemplateDir(templatesPath);
+    compiler.compileToDestination(null, dest); // Will always write to destination
+    LOG.info("Compiled avro into: {}", dest.getAbsolutePath());
+    return newSchema;
+  }
+  
   public static String generateAppropriateImmutabilityModifier(Schema schema){
     switch (schema.getType()) {
       case BYTES:
