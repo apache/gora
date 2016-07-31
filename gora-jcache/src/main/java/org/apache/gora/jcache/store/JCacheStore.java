@@ -65,11 +65,8 @@ import javax.cache.expiry.TouchedExpiryPolicy;
 import javax.cache.expiry.Duration;
 import javax.cache.spi.CachingProvider;
 
-public class JCacheStore<K,T extends PersistentBase> extends DataStoreBase<K,T> {
+public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
-  private ICache<K, T> cache;
-  private CacheManager manager;
-  private ConcurrentSkipListSet<K> cacheEntryList;
   private static final String GORA_DEFAULT_JCACHE_NAMESPACE = "gora.jcache.namespace";
   private static final String GORA_DEFAULT_JCACHE_PROVIDER_KEY = "gora.datastore.jcache.provider";
   private static final String JCACHE_READ_THROUGH_PROPERTY_KEY = "jcache.read.through.enable";
@@ -91,18 +88,48 @@ public class JCacheStore<K,T extends PersistentBase> extends DataStoreBase<K,T> 
   private static final String HAZELCAST_CACHE_BINARY_IN_MEMORY_FORMAT_IDENTIFIER = "BINARY";
   private static final String HAZELCAST_CACHE_OBJECT_IN_MEMORY_FORMAT_IDENTIFIER = "OBJECT";
   private static final String HAZELCAST_CACHE_NATIVE_IN_MEMORY_FORMAT_IDENTIFIER = "NATIVE";
-  private static final String JCACHE_AUTO_CREATE_CACHE_PROPERTY_KEY ="jcache.auto.create.cache";
-  private String goraCacheNamespace = GORA_DEFAULT_JCACHE_NAMESPACE;
+  private static final String JCACHE_AUTO_CREATE_CACHE_PROPERTY_KEY = "jcache.auto.create.cache";
   private static final Logger LOG = LoggerFactory.getLogger(JCacheStore.class);
+  private ICache<K, T> cache;
+  private CacheManager manager;
+  private ConcurrentSkipListSet<K> cacheEntryList;
+  private String goraCacheNamespace = GORA_DEFAULT_JCACHE_NAMESPACE;
   private DataStore<K, T> persistentDataStore;
   private CacheConfig<K, T> cacheConfig;
   private HazelcastInstance hazelcastInstance;
+
+  private static <T extends PersistentBase> T getPersistent(T persitent, String[] fields) {
+    List<Schema.Field> otherFields = persitent.getSchema().getFields();
+    String[] otherFieldStrings = new String[otherFields.size()];
+    for (int i = 0; i < otherFields.size(); i++) {
+      otherFieldStrings[i] = otherFields.get(i).name();
+    }
+    if (Arrays.equals(fields, otherFieldStrings)) {
+      return persitent;
+    }
+    T clonedPersistent = AvroUtils.deepClonePersistent(persitent);
+    clonedPersistent.clear();
+    if (fields != null && fields.length > 0) {
+      for (String field : fields) {
+        Schema.Field otherField = persitent.getSchema().getField(field);
+        int index = otherField.pos();
+        clonedPersistent.put(index, persitent.get(index));
+      }
+    } else {
+      for (String field : otherFieldStrings) {
+        Schema.Field otherField = persitent.getSchema().getField(field);
+        int index = otherField.pos();
+        clonedPersistent.put(index, persitent.get(index));
+      }
+    }
+    return clonedPersistent;
+  }
 
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) {
     super.initialize(keyClass, persistentClass, properties);
     CachingProvider cachingProvider = Caching.getCachingProvider(
-           properties.getProperty(GORA_DEFAULT_JCACHE_PROVIDER_KEY)
+            properties.getProperty(GORA_DEFAULT_JCACHE_PROVIDER_KEY)
     );
     if (properties.getProperty(JCACHE_CACHE_NAMESPACE_PROPERTY_KEY) != null) {
       goraCacheNamespace = properties.getProperty(JCACHE_CACHE_NAMESPACE_PROPERTY_KEY);
@@ -115,7 +142,7 @@ public class JCacheStore<K,T extends PersistentBase> extends DataStoreBase<K,T> 
     }
     hazelcastInstance = Hazelcast.newHazelcastInstance();
     Properties providerProperties = new Properties();
-    providerProperties.setProperty( HazelcastCachingProvider.HAZELCAST_INSTANCE_NAME,
+    providerProperties.setProperty(HazelcastCachingProvider.HAZELCAST_INSTANCE_NAME,
             hazelcastInstance.getName());
     try {
       manager = cachingProvider.getCacheManager(new URI(goraCacheNamespace), null, providerProperties);
@@ -156,22 +183,22 @@ public class JCacheStore<K,T extends PersistentBase> extends DataStoreBase<K,T> 
     }
     if (properties.getProperty(JCACHE_EXPIRE_POLICY_PROPERTY_KEY) != null) {
       String expiryPolicyIdentifier = properties.getProperty(JCACHE_EXPIRE_POLICY_PROPERTY_KEY);
-      if (expiryPolicyIdentifier.equals(JCACHE_ACCESSED_EXPIRY_IDENTIFIER)){
+      if (expiryPolicyIdentifier.equals(JCACHE_ACCESSED_EXPIRY_IDENTIFIER)) {
         cacheConfig.setExpiryPolicyFactory(FactoryBuilder.factoryOf(
                 new AccessedExpiryPolicy(new Duration(TimeUnit.SECONDS,
                         Integer.valueOf(properties.getProperty(JCACHE_EXPIRE_POLICY_DURATION_PROPERTY_KEY))))
         ));
-      } else if (expiryPolicyIdentifier.equals(JCACHE_CREATED_EXPIRY_IDENTIFIER)){
+      } else if (expiryPolicyIdentifier.equals(JCACHE_CREATED_EXPIRY_IDENTIFIER)) {
         cacheConfig.setExpiryPolicyFactory(FactoryBuilder.factoryOf(
                 new CreatedExpiryPolicy(new Duration(TimeUnit.SECONDS,
                         Integer.valueOf(properties.getProperty(JCACHE_EXPIRE_POLICY_DURATION_PROPERTY_KEY))))
         ));
-      } else if (expiryPolicyIdentifier.equals(JCACHE_MODIFIED_EXPIRY_IDENTIFIER)){
+      } else if (expiryPolicyIdentifier.equals(JCACHE_MODIFIED_EXPIRY_IDENTIFIER)) {
         cacheConfig.setExpiryPolicyFactory(FactoryBuilder.factoryOf(
                 new ModifiedExpiryPolicy(new Duration(TimeUnit.SECONDS,
                         Integer.valueOf(properties.getProperty(JCACHE_EXPIRE_POLICY_DURATION_PROPERTY_KEY))))
         ));
-      } else if (expiryPolicyIdentifier.equals(JCACHE_TOUCHED_EXPIRY_IDENTIFIER)){
+      } else if (expiryPolicyIdentifier.equals(JCACHE_TOUCHED_EXPIRY_IDENTIFIER)) {
         cacheConfig.setExpiryPolicyFactory(FactoryBuilder.factoryOf(
                 new TouchedExpiryPolicy(new Duration(TimeUnit.SECONDS,
                         Integer.valueOf(properties.getProperty(JCACHE_EXPIRE_POLICY_DURATION_PROPERTY_KEY))))
@@ -193,7 +220,7 @@ public class JCacheStore<K,T extends PersistentBase> extends DataStoreBase<K,T> 
     cacheConfig.addCacheEntryListenerConfiguration(
             new MutableCacheEntryListenerConfiguration<>(
                     JCacheCacheFactoryBuilder
-                            .factoryOfEntryListener(new JCacheCacheEntryListener<K,T>(cacheEntryList)),
+                            .factoryOfEntryListener(new JCacheCacheEntryListener<K, T>(cacheEntryList)),
                     null, true, true
             )
     );
@@ -250,41 +277,14 @@ public class JCacheStore<K,T extends PersistentBase> extends DataStoreBase<K,T> 
     return getPersistent(persitent, fields);
   }
 
-  private static <T extends PersistentBase> T getPersistent(T persitent, String[] fields) {
-    List<Schema.Field> otherFields = persitent.getSchema().getFields();
-    String[] otherFieldStrings = new String[otherFields.size()];
-    for (int i = 0; i < otherFields.size(); i++) {
-      otherFieldStrings[i] = otherFields.get(i).name();
-    }
-    if (Arrays.equals(fields, otherFieldStrings)) {
-      return persitent;
-    }
-    T clonedPersistent = AvroUtils.deepClonePersistent(persitent);
-    clonedPersistent.clear();
-    if (fields != null && fields.length > 0) {
-      for (String field : fields) {
-        Schema.Field otherField = persitent.getSchema().getField(field);
-        int index = otherField.pos();
-        clonedPersistent.put(index, persitent.get(index));
-      }
-    } else {
-      for (String field : otherFieldStrings) {
-        Schema.Field otherField = persitent.getSchema().getField(field);
-        int index = otherField.pos();
-        clonedPersistent.put(index, persitent.get(index));
-      }
-    }
-    return clonedPersistent;
-  }
-
   @Override
-  public T get(K key){
+  public T get(K key) {
     return cache.get(key);
   }
 
   @Override
   public void put(K key, T val) {
-    cache.put(key,val);
+    cache.put(key, val);
   }
 
   @Override
@@ -353,7 +353,7 @@ public class JCacheStore<K,T extends PersistentBase> extends DataStoreBase<K,T> 
   }
 
   @Override
-  public Query<K,T> newQuery() {
+  public Query<K, T> newQuery() {
     return new JCacheQuery<>(this);
   }
 
