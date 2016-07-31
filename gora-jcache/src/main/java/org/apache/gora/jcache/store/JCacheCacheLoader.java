@@ -19,9 +19,6 @@ package org.apache.gora.jcache.store;
 
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.store.DataStore;
-import org.apache.gora.store.DataStoreFactory;
-import org.apache.gora.util.GoraException;
-import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +42,7 @@ public class JCacheCacheLoader<K, T extends PersistentBase> implements CacheLoad
     T persistent = null;
     try {
       persistent = dataStore.get(key);
+      LOG.info("Loaded data bean from persistent datastore on key " + key.toString());
     } catch (CacheLoaderException ex) {
       throw ex;
     }
@@ -56,6 +54,7 @@ public class JCacheCacheLoader<K, T extends PersistentBase> implements CacheLoad
     Map<K, T> loaded = new HashMap<K, T>();
     for (K key : keys) {
       T persistent = dataStore.get(key);
+      LOG.info("Loaded data bean from persistent datastore on key " + key.toString());
       if (persistent != null) {
         loaded.put(key, persistent);
       }

@@ -22,16 +22,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.cache.configuration.Factory;
-import java.lang.reflect.Constructor;
 
 public class JCacheCacheLoaderFactory<K, T extends PersistentBase>
         implements Factory<JCacheCacheLoader<K,T>> {
 
-  public static final long serialVersionUID = 201305101626L;
   private static final Logger LOG = LoggerFactory.getLogger(JCacheCacheLoaderFactory.class);
+  public static final long serialVersionUID = 201305101626L;
   private transient JCacheCacheLoader<K, T> instance;
 
   public JCacheCacheLoaderFactory(JCacheCacheLoader<K, T> instance) {
+    LOG.info("JCache cache entry loader factory initialized successfully.");
     this.instance = instance;
   }
 

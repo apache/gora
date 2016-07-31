@@ -19,9 +19,6 @@ package org.apache.gora.jcache.store;
 
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.store.DataStore;
-import org.apache.gora.store.DataStoreFactory;
-import org.apache.gora.util.GoraException;
-import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +41,7 @@ public class JCacheCacheWriter<K, T extends PersistentBase> implements CacheWrit
   public void write(Cache.Entry<? extends K,
           ? extends T> entry) throws CacheWriterException {
     dataStore.put(entry.getKey(), entry.getValue());
+    LOG.info("Written data bean to persistent datastore on key " + entry.getKey().toString());
   }
 
   @Override
@@ -59,6 +57,7 @@ public class JCacheCacheWriter<K, T extends PersistentBase> implements CacheWrit
   @Override
   public void delete(Object key) throws CacheWriterException {
     dataStore.delete((K) key);
+    LOG.info("Deleted data bean from persistent datastore on key " + key.toString());
   }
 
   @Override

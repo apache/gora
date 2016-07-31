@@ -40,7 +40,6 @@ public abstract class PersistentBase extends SpecificRecordBase implements
 
   public PersistentBase() {
     __g__dirty = new byte[getFieldsCount()];
-    //__g__dirty = java.nio.ByteBuffer.wrap(new byte[getFieldsCount()]);
   }
 
   public abstract int getFieldsCount();

@@ -22,15 +22,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.cache.configuration.Factory;
-import java.lang.reflect.Constructor;
 
 public class JCacheCacheWriterFactory<K, T extends PersistentBase> implements Factory<JCacheCacheWriter<K,T>> {
 
-  public static final long serialVersionUID = 201205101621L;
   private static final Logger LOG = LoggerFactory.getLogger(JCacheCacheWriterFactory.class);
+  public static final long serialVersionUID = 201205101621L;
   private transient JCacheCacheWriter<K,T> instance;
 
   public JCacheCacheWriterFactory(JCacheCacheWriter<K,T> instance) {
+    LOG.info("JCache entry writer factory initialized successfully.");
     this.instance = instance;
   }
 

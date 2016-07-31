@@ -32,6 +32,7 @@ import com.hazelcast.cache.ICache;
 import com.hazelcast.config.CacheConfig;
 import com.hazelcast.config.EvictionConfig;
 import com.hazelcast.config.EvictionPolicy;
+import com.hazelcast.config.InMemoryFormat;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
@@ -86,6 +87,10 @@ public class JCacheStore<K,T extends PersistentBase> extends DataStoreBase<K,T> 
   private static final String JCACHE_CREATED_EXPIRY_IDENTIFIER = "CREATED";
   private static final String JCACHE_MODIFIED_EXPIRY_IDENTIFIER = "MODIFIED";
   private static final String JCACHE_TOUCHED_EXPIRY_IDENTIFIER = "TOUCHED";
+  private static final String HAZELCAST_CACHE_IN_MEMORY_FORMAT_PROPERTY_KEY = "jcache.cache.inmemory.format";
+  private static final String HAZELCAST_CACHE_BINARY_IN_MEMORY_FORMAT_IDENTIFIER = "BINARY";
+  private static final String HAZELCAST_CACHE_OBJECT_IN_MEMORY_FORMAT_IDENTIFIER = "OBJECT";
+  private static final String HAZELCAST_CACHE_NATIVE_IN_MEMORY_FORMAT_IDENTIFIER = "NATIVE";
   private String goraCacheNamespace = GORA_DEFAULT_JCACHE_NAMESPACE;
   private static final Logger LOG = LoggerFactory.getLogger(JCacheStore.class);
   private DataStore<K, T> persistentDataStore;
@@ -172,6 +177,14 @@ public class JCacheStore<K,T extends PersistentBase> extends DataStoreBase<K,T> 
         ));
       }
     }
+    if (properties.getProperty(HAZELCAST_CACHE_IN_MEMORY_FORMAT_PROPERTY_KEY) != null) {
+      String inMemoryFormat = properties.getProperty(HAZELCAST_CACHE_IN_MEMORY_FORMAT_PROPERTY_KEY);
+      if (inMemoryFormat.equals(HAZELCAST_CACHE_BINARY_IN_MEMORY_FORMAT_IDENTIFIER) ||
+              inMemoryFormat.equals(HAZELCAST_CACHE_OBJECT_IN_MEMORY_FORMAT_IDENTIFIER) ||
+              inMemoryFormat.equals(HAZELCAST_CACHE_NATIVE_IN_MEMORY_FORMAT_IDENTIFIER)) {
+        cacheConfig.setInMemoryFormat(InMemoryFormat.valueOf(inMemoryFormat));
+      }
+    }
     cacheConfig.setCacheLoaderFactory(JCacheCacheFactoryBuilder
             .factoryOfCacheLoader(this.persistentDataStore));
     cacheConfig.setCacheWriterFactory(JCacheCacheFactoryBuilder
@@ -185,6 +198,7 @@ public class JCacheStore<K,T extends PersistentBase> extends DataStoreBase<K,T> 
     );
     cache = manager.createCache(persistentClass.getSimpleName(),
             cacheConfig).unwrap(ICache.class);
+    LOG.info("JCache Gora datastore initialized successfully.");
   }
 
   @Override
@@ -199,12 +213,16 @@ public class JCacheStore<K,T extends PersistentBase> extends DataStoreBase<K,T> 
               cacheConfig).unwrap(ICache.class);
     }
     persistentDataStore.createSchema();
+    LOG.info("Created schema on persistent store and initialized cache for persistent bean "
+            + super.getPersistentClass().getSimpleName());
   }
 
   @Override
   public void deleteSchema() {
     manager.destroyCache(super.getPersistentClass().getSimpleName());
     persistentDataStore.deleteSchema();
+    LOG.info("Deleted schema on persistent store and destroyed cache for persistent bean "
+            + super.getPersistentClass().getSimpleName());
   }
 
   @Override
@@ -283,8 +301,10 @@ public class JCacheStore<K,T extends PersistentBase> extends DataStoreBase<K,T> 
           }
         }
       }
+      LOG.info("JCache Gora datastore deleled " + deletedRows + " rows from Persistent datastore");
       return deletedRows;
     } catch (Exception e) {
+      LOG.error("Exception occured while deleting entries from JCache Gora datastore. Hence returning 0");
       return 0;
     }
   }
@@ -308,7 +328,7 @@ public class JCacheStore<K,T extends PersistentBase> extends DataStoreBase<K,T> 
     try {
       cacheEntrySubList = (ConcurrentSkipListSet<K>) cacheEntryList.subSet(startKey, true, endKey, true);
     } catch (NullPointerException npe) {
-      LOG.error("NPE occurred while executing the query for JCacheStore");
+      LOG.error("NPE occurred while executing the query for JCacheStore. Hence returning empty entry set.");
       return new JCacheResult<>(this, query, new ConcurrentSkipListSet<K>());
     }
     return new JCacheResult<>(this, query, cacheEntrySubList);
@@ -350,6 +370,7 @@ public class JCacheStore<K,T extends PersistentBase> extends DataStoreBase<K,T> 
   @Override
   public void flush() {
     persistentDataStore.flush();
+    LOG.info("JCache Gora datastore flushed successfully.");
   }
 
   @Override
@@ -362,6 +383,7 @@ public class JCacheStore<K,T extends PersistentBase> extends DataStoreBase<K,T> 
       manager.close();
     }
     persistentDataStore.close();
+    LOG.info("JCache Gora datastore destroyed successfully.");
   }
 
 }

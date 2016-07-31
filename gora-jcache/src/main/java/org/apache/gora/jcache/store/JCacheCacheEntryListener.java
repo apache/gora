@@ -18,17 +18,22 @@
 package org.apache.gora.jcache.store;
 
 import org.apache.gora.persistency.impl.PersistentBase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.cache.event.CacheEntryExpiredListener;
+import javax.cache.event.CacheEntryUpdatedListener;
 import javax.cache.event.CacheEntryCreatedListener;
+import javax.cache.event.CacheEntryRemovedListener;
 import javax.cache.event.CacheEntryEvent;
 import javax.cache.event.CacheEntryListenerException;
-import javax.cache.event.CacheEntryRemovedListener;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 public class JCacheCacheEntryListener<K, T extends PersistentBase>
         implements CacheEntryCreatedListener<K, T>,
-        CacheEntryRemovedListener<K, T> {
+        CacheEntryRemovedListener<K, T>, CacheEntryUpdatedListener<K, T>, CacheEntryExpiredListener<K, T> {
 
+  private static final Logger LOG = LoggerFactory.getLogger(JCacheCacheEntryListener.class);
   private ConcurrentSkipListSet<K> cacheEntryList;
 
   public JCacheCacheEntryListener(ConcurrentSkipListSet cacheEntryList) {
@@ -40,6 +45,7 @@ public class JCacheCacheEntryListener<K, T extends PersistentBase>
           throws CacheEntryListenerException {
     for (CacheEntryEvent<? extends K, ? extends T> event : cacheEntryEvents) {
       cacheEntryList.add(event.getKey());
+      LOG.info("Cache entry added on key " + event.getKey().toString());
     }
   }
 
@@ -48,6 +54,24 @@ public class JCacheCacheEntryListener<K, T extends PersistentBase>
           throws CacheEntryListenerException {
     for (CacheEntryEvent<? extends K, ? extends T> event : cacheEntryEvents) {
       cacheEntryList.remove(event.getKey());
+      LOG.info("Cache entry removed on key " + event.getKey().toString());
     }
   }
+
+  @Override
+  public void onUpdated(Iterable<CacheEntryEvent<? extends K, ? extends T>> cacheEntryEvents)
+          throws CacheEntryListenerException {
+    for (CacheEntryEvent<? extends K, ? extends T> event : cacheEntryEvents) {
+      LOG.info("Cache entry updated set on key " + event.getKey().toString());
+    }
+  }
+
+  @Override
+  public void onExpired(Iterable<CacheEntryEvent<? extends K, ? extends T>> cacheEntryEvents)
+          throws CacheEntryListenerException {
+    for (CacheEntryEvent<? extends K, ? extends T> event : cacheEntryEvents) {
+      LOG.warn("Cache entry expired on key " + event.getKey().toString());
+    }
+  }
+
 }

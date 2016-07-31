@@ -144,8 +144,6 @@ public class TestPersistentSerialization {
     page2.getParsedContent().add(new StringBuffer("coo2"));
     page3.setParsedContent(new ArrayList<CharSequence>());
     page3.getParsedContent().add(new StringBuffer("coo3"));
-    //page2.setOutlinks(new HashMap<CharSequence, CharSequence>());
-    //page2.getOutlinks().put(new StringBuffer("a"), new StringBuffer("b"));
 
     TestIOUtils.testSerializeDeserialize(page1, page2, page3);
   }
