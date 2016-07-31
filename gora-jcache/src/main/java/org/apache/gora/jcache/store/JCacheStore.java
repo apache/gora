@@ -91,6 +91,7 @@ public class JCacheStore<K,T extends PersistentBase> extends DataStoreBase<K,T> 
   private static final String HAZELCAST_CACHE_BINARY_IN_MEMORY_FORMAT_IDENTIFIER = "BINARY";
   private static final String HAZELCAST_CACHE_OBJECT_IN_MEMORY_FORMAT_IDENTIFIER = "OBJECT";
   private static final String HAZELCAST_CACHE_NATIVE_IN_MEMORY_FORMAT_IDENTIFIER = "NATIVE";
+  private static final String JCACHE_AUTO_CREATE_CACHE_PROPERTY_KEY ="jcache.auto.create.cache";
   private String goraCacheNamespace = GORA_DEFAULT_JCACHE_NAMESPACE;
   private static final Logger LOG = LoggerFactory.getLogger(JCacheStore.class);
   private DataStore<K, T> persistentDataStore;
@@ -196,8 +197,16 @@ public class JCacheStore<K,T extends PersistentBase> extends DataStoreBase<K,T> 
                     null, true, true
             )
     );
-    cache = manager.createCache(persistentClass.getSimpleName(),
-            cacheConfig).unwrap(ICache.class);
+    if (properties.getProperty(JCACHE_AUTO_CREATE_CACHE_PROPERTY_KEY) != null) {
+      Boolean createCache = Boolean.valueOf(properties.getProperty(JCACHE_AUTO_CREATE_CACHE_PROPERTY_KEY));
+      if (createCache) {
+        cache = manager.createCache(persistentClass.getSimpleName(),
+                cacheConfig).unwrap(ICache.class);
+      }
+    } else {
+      cache = manager.createCache(persistentClass.getSimpleName(),
+              cacheConfig).unwrap(ICache.class);
+    }
     LOG.info("JCache Gora datastore initialized successfully.");
   }
 
@@ -208,7 +217,8 @@ public class JCacheStore<K,T extends PersistentBase> extends DataStoreBase<K,T> 
 
   @Override
   public void createSchema() {
-    if (manager.getCache(super.getPersistentClass().getSimpleName()) == null) {
+    if (manager.getCache(super.getPersistentClass().getSimpleName(), keyClass, persistentClass) == null) {
+      cacheEntryList.clear();
       cache = manager.createCache(persistentClass.getSimpleName(),
               cacheConfig).unwrap(ICache.class);
     }
@@ -219,6 +229,7 @@ public class JCacheStore<K,T extends PersistentBase> extends DataStoreBase<K,T> 
 
   @Override
   public void deleteSchema() {
+    cacheEntryList.clear();
     manager.destroyCache(super.getPersistentClass().getSimpleName());
     persistentDataStore.deleteSchema();
     LOG.info("Deleted schema on persistent store and destroyed cache for persistent bean "
@@ -227,8 +238,7 @@ public class JCacheStore<K,T extends PersistentBase> extends DataStoreBase<K,T> 
 
   @Override
   public boolean schemaExists() {
-    return (manager.getCache(super.getPersistentClass().getSimpleName()) != null)
-            && persistentDataStore.schemaExists();
+    return (manager.getCache(super.getPersistentClass().getSimpleName(), keyClass, persistentClass) != null);
   }
 
   @Override
@@ -251,10 +261,18 @@ public class JCacheStore<K,T extends PersistentBase> extends DataStoreBase<K,T> 
     }
     T clonedPersistent = AvroUtils.deepClonePersistent(persitent);
     clonedPersistent.clear();
-    for (String field : fields) {
-      Schema.Field otherField = persitent.getSchema().getField(field);
-      int index = otherField.pos();
-      clonedPersistent.put(index, persitent.get(index));
+    if (fields != null && fields.length > 0) {
+      for (String field : fields) {
+        Schema.Field otherField = persitent.getSchema().getField(field);
+        int index = otherField.pos();
+        clonedPersistent.put(index, persitent.get(index));
+      }
+    } else {
+      for (String field : otherFieldStrings) {
+        Schema.Field otherField = persitent.getSchema().getField(field);
+        int index = otherField.pos();
+        clonedPersistent.put(index, persitent.get(index));
+      }
     }
     return clonedPersistent;
   }
@@ -376,7 +394,8 @@ public class JCacheStore<K,T extends PersistentBase> extends DataStoreBase<K,T> 
   @Override
   public void close() {
     flush();
-    if (!cache.isDestroyed()) {
+    cacheEntryList.clear();
+    if (!cache.isDestroyed() && !manager.isClosed()) {
       cache.destroy();
     }
     if (!manager.isClosed()) {

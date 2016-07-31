@@ -7,7 +7,7 @@ package org.apache.gora.examples.generated;
 @SuppressWarnings("all")
 public class Metadata extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
   public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Metadata\",\"namespace\":\"org.apache.gora.examples.generated\",\"fields\":[{\"name\":\"version\",\"type\":\"int\",\"default\":0},{\"name\":\"data\",\"type\":{\"type\":\"map\",\"values\":\"string\"},\"default\":null}]}");
-
+  private static final long serialVersionUID = -6468893522296178608L;
   /** Enum containing all data bean's fields. */
   public static enum Field {
     VERSION(0, "version"),
@@ -326,6 +326,33 @@ public class Metadata extends org.apache.gora.persistency.impl.PersistentBase im
 	
 		  
   }
-  
+
+  private static final org.apache.avro.io.DatumWriter
+          DATUM_WRITER$ = new org.apache.avro.specific.SpecificDatumWriter(SCHEMA$);
+  private static final org.apache.avro.io.DatumReader
+          DATUM_READER$ = new org.apache.avro.specific.SpecificDatumReader(SCHEMA$);
+
+  @Override
+  public void writeExternal(java.io.ObjectOutput out)
+          throws java.io.IOException {
+    out.write(super.getDirtyBytes().array());
+    DATUM_WRITER$.write
+            (this, org.apache.avro.io.EncoderFactory.get()
+                    .directBinaryEncoder((java.io.OutputStream) out,
+                            null));
+  }
+
+  @Override
+  public void readExternal(java.io.ObjectInput in)
+          throws java.io.IOException {
+    byte[] __g__dirty = new byte[getFieldsCount()];
+    in.read(__g__dirty);
+    super.setDirtyBytes(java.nio.ByteBuffer.wrap(__g__dirty));
+    DATUM_READER$.read
+            (this, org.apache.avro.io.DecoderFactory.get()
+                    .directBinaryDecoder((java.io.InputStream) in,
+                            null));
+  }
+
 }
 

@@ -17,7 +17,6 @@
 */
 package org.apache.gora.persistency.impl;
 
-import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.List;
@@ -33,13 +32,13 @@ import org.apache.gora.persistency.Persistent;
 * Base classs implementing common functionality for Persistent classes.
 */
 public abstract class PersistentBase extends SpecificRecordBase implements
-    Persistent, java.io.Serializable {
+    Persistent, java.io.Externalizable {
 
   /** Bytes used to represent weather or not a field is dirty. */
-  private byte[] __g__dirty;
+  private ByteBuffer __g__dirty;
 
   public PersistentBase() {
-    __g__dirty = new byte[getFieldsCount()];
+    __g__dirty = ByteBuffer.wrap(new byte[getFieldsCount()]);
   }
 
   public abstract int getFieldsCount();
@@ -182,8 +181,12 @@ public abstract class PersistentBase extends SpecificRecordBase implements
     setDirty(getSchema().getField(field).pos());
   }
 
-  private ByteBuffer getDirtyBytes() {
-    return java.nio.ByteBuffer.wrap(__g__dirty);
+  public ByteBuffer getDirtyBytes() {
+    return __g__dirty;
+  }
+
+  public void setDirtyBytes(ByteBuffer __g__dirty) {
+    this.__g__dirty = __g__dirty;
   }
 
   @Override

@@ -93,4 +93,31 @@ public class MockPersistent extends PersistentBase {
     return new MockPersistent();
   }
 
+  private final org.apache.avro.io.DatumWriter
+          DATUM_WRITER$ = new org.apache.avro.specific.SpecificDatumWriter(getSchema());
+  private final org.apache.avro.io.DatumReader
+          DATUM_READER$ = new org.apache.avro.specific.SpecificDatumReader(getSchema());
+
+  @Override
+  public void writeExternal(java.io.ObjectOutput out)
+          throws java.io.IOException {
+    out.write(super.getDirtyBytes().array());
+    DATUM_WRITER$.write
+            (this, org.apache.avro.io.EncoderFactory.get()
+                    .directBinaryEncoder((java.io.OutputStream) out,
+                            null));
+  }
+
+  @Override
+  public void readExternal(java.io.ObjectInput in)
+          throws java.io.IOException {
+    byte[] __g__dirty = new byte[getFieldsCount()];
+    in.read(__g__dirty);
+    super.setDirtyBytes(java.nio.ByteBuffer.wrap(__g__dirty));
+    DATUM_READER$.read
+            (this, org.apache.avro.io.DecoderFactory.get()
+                    .directBinaryDecoder((java.io.InputStream) in,
+                            null));
+  }
+
 }

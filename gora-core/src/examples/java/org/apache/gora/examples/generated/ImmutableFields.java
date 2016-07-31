@@ -19,7 +19,7 @@ package org.apache.gora.examples.generated;
 /** Record with only immutable or dirtyable fields, used for testing */
 public class ImmutableFields extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
   public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"ImmutableFields\",\"namespace\":\"org.apache.gora.examples.generated\",\"doc\":\"Record with only immutable or dirtyable fields, used for testing\",\"fields\":[{\"name\":\"v1\",\"type\":\"int\",\"default\":0},{\"name\":\"v2\",\"type\":[{\"type\":\"record\",\"name\":\"V2\",\"fields\":[{\"name\":\"v3\",\"type\":\"int\",\"default\":0}]},\"null\"],\"default\":null}]}");
-
+  private static final long serialVersionUID = -6468893522296148698L;
   /** Enum containing all data bean's fields. */
   public static enum Field {
     V1(0, "v1"),
@@ -338,6 +338,33 @@ public class ImmutableFields extends org.apache.gora.persistency.impl.Persistent
 	
 		  
   }
-  
+
+  private static final org.apache.avro.io.DatumWriter
+          DATUM_WRITER$ = new org.apache.avro.specific.SpecificDatumWriter(SCHEMA$);
+  private static final org.apache.avro.io.DatumReader
+          DATUM_READER$ = new org.apache.avro.specific.SpecificDatumReader(SCHEMA$);
+
+  @Override
+  public void writeExternal(java.io.ObjectOutput out)
+          throws java.io.IOException {
+    out.write(super.getDirtyBytes().array());
+    DATUM_WRITER$.write
+            (this, org.apache.avro.io.EncoderFactory.get()
+                    .directBinaryEncoder((java.io.OutputStream) out,
+                            null));
+  }
+
+  @Override
+  public void readExternal(java.io.ObjectInput in)
+          throws java.io.IOException {
+    byte[] __g__dirty = new byte[getFieldsCount()];
+    in.read(__g__dirty);
+    super.setDirtyBytes(java.nio.ByteBuffer.wrap(__g__dirty));
+    DATUM_READER$.read
+            (this, org.apache.avro.io.DecoderFactory.get()
+                    .directBinaryDecoder((java.io.InputStream) in,
+                            null));
+  }
+
 }
 

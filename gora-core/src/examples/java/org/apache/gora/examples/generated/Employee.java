@@ -17,7 +17,7 @@
 package org.apache.gora.examples.generated;  
 public class Employee extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
   public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Employee\",\"namespace\":\"org.apache.gora.examples.generated\",\"fields\":[{\"name\":\"name\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"dateOfBirth\",\"type\":\"long\",\"default\":0},{\"name\":\"ssn\",\"type\":\"string\",\"default\":\"\"},{\"name\":\"salary\",\"type\":\"int\",\"default\":0},{\"name\":\"boss\",\"type\":[\"null\",\"Employee\",\"string\"],\"default\":null},{\"name\":\"webpage\",\"type\":[\"null\",{\"type\":\"record\",\"name\":\"WebPage\",\"fields\":[{\"name\":\"url\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"content\",\"type\":[\"null\",\"bytes\"],\"default\":null},{\"name\":\"parsedContent\",\"type\":{\"type\":\"array\",\"items\":\"string\"},\"default\":{}},{\"name\":\"outlinks\",\"type\":{\"type\":\"map\",\"values\":[\"null\",\"string\"]},\"default\":{}},{\"name\":\"headers\",\"type\":[\"null\",{\"type\":\"map\",\"values\":[\"null\",\"string\"]}],\"default\":null},{\"name\":\"metadata\",\"type\":{\"type\":\"record\",\"name\":\"Metadata\",\"fields\":[{\"name\":\"version\",\"type\":\"int\",\"default\":0},{\"name\":\"data\",\"type\":{\"type\":\"map\",\"values\":\"string\"},\"default\":{}}]},\"default\":null}]}],\"default\":null}],\"default\":null}");
-
+  private static final long serialVersionUID = -6468893522296148608L;
   /** Enum containing all data bean's fields. */
   public static enum Field {
     NAME(0, "name"),
@@ -666,6 +666,33 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
 	  }
 	
 		  
+  }
+
+  private static final org.apache.avro.io.DatumWriter
+          DATUM_WRITER$ = new org.apache.avro.specific.SpecificDatumWriter(SCHEMA$);
+  private static final org.apache.avro.io.DatumReader
+          DATUM_READER$ = new org.apache.avro.specific.SpecificDatumReader(SCHEMA$);
+
+  @Override
+  public void writeExternal(java.io.ObjectOutput out)
+          throws java.io.IOException {
+    out.write(super.getDirtyBytes().array());
+    DATUM_WRITER$.write
+            (this, org.apache.avro.io.EncoderFactory.get()
+                    .directBinaryEncoder((java.io.OutputStream) out,
+                            null));
+  }
+
+  @Override
+  public void readExternal(java.io.ObjectInput in)
+          throws java.io.IOException {
+    byte[] __g__dirty = new byte[getFieldsCount()];
+    in.read(__g__dirty);
+    super.setDirtyBytes(java.nio.ByteBuffer.wrap(__g__dirty));
+    DATUM_READER$.read
+            (this, org.apache.avro.io.DecoderFactory.get()
+                    .directBinaryDecoder((java.io.InputStream) in,
+                            null));
   }
   
 }
