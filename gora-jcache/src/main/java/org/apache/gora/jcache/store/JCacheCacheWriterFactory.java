@@ -30,7 +30,7 @@ public class JCacheCacheWriterFactory<K, T extends PersistentBase> implements Fa
   private transient JCacheCacheWriter<K,T> instance;
 
   public JCacheCacheWriterFactory(JCacheCacheWriter<K,T> instance) {
-    LOG.info("JCache entry writer factory initialized successfully.");
+    LOG.info("JCache cache writer factory initialized successfully.");
     this.instance = instance;
   }
 

@@ -155,9 +155,13 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
     cacheConfig.setTypes(keyClass, persistentClass);
     if (properties.getProperty(JCACHE_READ_THROUGH_PROPERTY_KEY) != null) {
       cacheConfig.setReadThrough(Boolean.valueOf(properties.getProperty(JCACHE_READ_THROUGH_PROPERTY_KEY)));
+    } else {
+      cacheConfig.setReadThrough(true);
     }
     if (properties.getProperty(JCACHE_WRITE_THROUGH_PROPERTY_KEY) != null) {
       cacheConfig.setWriteThrough(Boolean.valueOf(properties.getProperty(JCACHE_WRITE_THROUGH_PROPERTY_KEY)));
+    } else {
+      cacheConfig.setWriteThrough(true);
     }
     if (properties.getProperty(JCACHE_STORE_BY_VALUE_PROPERTY_KEY) != null) {
       cacheConfig.setStoreByValue(Boolean.valueOf(properties.getProperty(JCACHE_STORE_BY_VALUE_PROPERTY_KEY)));
