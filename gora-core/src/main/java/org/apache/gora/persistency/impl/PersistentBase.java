@@ -35,10 +35,10 @@ public abstract class PersistentBase extends SpecificRecordBase implements
     Persistent, java.io.Externalizable {
 
   /** Bytes used to represent weather or not a field is dirty. */
-  private ByteBuffer __g__dirty;
+  private java.nio.ByteBuffer __g__dirty;
 
   public PersistentBase() {
-    __g__dirty = ByteBuffer.wrap(new byte[getFieldsCount()]);
+    __g__dirty = java.nio.ByteBuffer.wrap(new byte[getFieldsCount()]);
   }
 
   public abstract int getFieldsCount();
