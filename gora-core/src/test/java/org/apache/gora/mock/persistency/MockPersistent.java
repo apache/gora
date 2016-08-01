@@ -25,6 +25,9 @@ import org.apache.gora.persistency.impl.PersistentBase;
 
 public class MockPersistent extends PersistentBase {
 
+  private static final long serialVersionUID = -7468893532296148608L;
+  public static final org.apache.avro.Schema SCHEMA$ =
+          new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"MockPersistent\",\"namespace\":\"org.apache.gora.mock.persistency\",\"fields\":[{\"name\":\"foo\",\"type\":\"int\"},{\"name\":\"baz\",\"type\":\"int\"}]}");
   public static final String FOO = "foo";
   public static final String BAZ = "baz";
   
@@ -93,10 +96,10 @@ public class MockPersistent extends PersistentBase {
     return new MockPersistent();
   }
 
-  private final org.apache.avro.io.DatumWriter
-          DATUM_WRITER$ = new org.apache.avro.specific.SpecificDatumWriter(getSchema());
-  private final org.apache.avro.io.DatumReader
-          DATUM_READER$ = new org.apache.avro.specific.SpecificDatumReader(getSchema());
+  private static final org.apache.avro.io.DatumWriter
+          DATUM_WRITER$ = new org.apache.avro.specific.SpecificDatumWriter(SCHEMA$);
+  private static final org.apache.avro.io.DatumReader
+          DATUM_READER$ = new org.apache.avro.specific.SpecificDatumReader(SCHEMA$);
 
   @Override
   public void writeExternal(java.io.ObjectOutput out)
