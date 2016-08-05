@@ -42,6 +42,8 @@ public class DataStoreFactory{
 
   public static final String GORA_DEFAULT_DATASTORE_KEY = "gora.datastore.default";
 
+  public static final String GORA_DEFAULT_CACHE_DATASTORE_KEY = "gora.cache.datastore.default";
+
   public static final String GORA = "gora";
 
   public static final String DATASTORE = "datastore";
@@ -274,6 +276,39 @@ public class DataStoreFactory{
     return createDataStore(c, keyClass, persistent, conf, createProps, null);
   }
 
+
+  /**
+   * Instantiate <i>the default</i> {@link DataStore} wrapped over JCache datastore which provides caching
+   * abstraction over any GORA persistence dataStore.
+   * Uses default properties. Uses 'null' schema.
+   *
+   * Note:
+   *    consider that default dataStore is always visible
+   *
+   * @param keyClass The key class.
+   * @param persistent The value class.
+   * @param conf {@link Configuration} to be used be the store.
+   * @param isCacheEnabled caching enable
+   * @return A new store instance.
+   * @throws GoraException
+   */
+  @SuppressWarnings("unchecked")
+  public static <K, T extends Persistent> DataStore<K, T> getDataStore(
+          Class<K> keyClass, Class<T> persistent, Configuration conf, boolean isCacheEnabled) throws GoraException {
+    Properties createProps = createProps();
+    Class<? extends DataStore<K, T>> c;
+    try {
+      if (isCacheEnabled) {
+        c = (Class<? extends DataStore<K, T>>) Class.forName(getDefaultCacheDataStore(createProps));
+      } else {
+        c = (Class<? extends DataStore<K, T>>) Class.forName(getDefaultDataStore(createProps));
+      }
+    } catch (Exception ex) {
+      throw new GoraException(ex);
+    }
+    return createDataStore(c, keyClass, persistent, conf, createProps, null);
+  }
+
   /**
    * Tries to find a property with the given baseKey. First the property
    * key constructed as "gora.&lt;classname&gt;.&lt;baseKey&gt;" is searched.
@@ -379,6 +414,10 @@ public class DataStoreFactory{
 
   private static String getDefaultDataStore(Properties properties) {
     return getProperty(properties, GORA_DEFAULT_DATASTORE_KEY);
+  }
+
+  private static String getDefaultCacheDataStore(Properties properties) {
+    return getProperty(properties, GORA_DEFAULT_CACHE_DATASTORE_KEY);
   }
 
   private static String getProperty(Properties properties, String key) {

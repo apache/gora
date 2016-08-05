@@ -17,6 +17,8 @@
 */
 package org.apache.gora.persistency.impl;
 
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.List;
@@ -32,7 +34,7 @@ import org.apache.gora.persistency.Persistent;
 * Base classs implementing common functionality for Persistent classes.
 */
 public abstract class PersistentBase extends SpecificRecordBase implements
-    Persistent {
+    Persistent, java.io.Externalizable {
 
   /** Bytes used to represent weather or not a field is dirty. */
   private java.nio.ByteBuffer __g__dirty;
@@ -181,8 +183,38 @@ public abstract class PersistentBase extends SpecificRecordBase implements
     setDirty(getSchema().getField(field).pos());
   }
 
-  private ByteBuffer getDirtyBytes() {
+  /**
+   * Exposing dirty bytes over public method. Purpose is to preserve dirty bytes content
+   * while transporting AVRO data beans over TCP wire in serialized form.
+   * Since {@link org.apache.gora.persistency.impl.PersistentBase} implements {@link java.io.Externalizable},
+   * this method can be used to retrieve the dirty bytes as {@link java.nio.ByteBuffer} and and get the content
+   * as bytes[] and write byte stream to the TCP wire.
+   * See {@link java.io.Externalizable#writeExternal(ObjectOutput)} abstract method implementation
+   * on velocity template record.vm.
+   * <p>
+   * Note {@link java.nio.ByteBuffer} is not itself not in serializable form.
+   */
+  public ByteBuffer getDirtyBytes() {
     return __g__dirty;
+  }
+
+
+  /**
+   * Setter method for assign dirty bytes when deserializing AVRO bean from dirty bytes
+   * preserved in serialized bytes form.
+   * Since {@link org.apache.gora.persistency.impl.PersistentBase} implements {@link java.io.Externalizable}
+   * and when actual deserialization happens for {@link org.apache.gora.persistency.impl.PersistentBase}
+   * new instance, acquire byte stream from TCP wire, extracting specific byte[] from byte stream
+   * and create {@link java.nio.ByteBuffer} instance and set using this public method.
+   * See {@link java.io.Externalizable#readExternal(ObjectInput)} abstract method implementation
+   * on velocity template record.vm.
+   * <p>
+   * Note {@link java.io.Externalizable} extending means it is mandatory to have default public constructor.
+   *
+   * @param __g__dirty dirty bytes
+   */
+  public void setDirtyBytes(ByteBuffer __g__dirty) {
+    this.__g__dirty = __g__dirty;
   }
 
   @Override

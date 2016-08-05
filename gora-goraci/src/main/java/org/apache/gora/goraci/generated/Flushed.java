@@ -7,7 +7,7 @@ package org.apache.gora.goraci.generated;
 @SuppressWarnings("all")
 public class Flushed extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
   public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Flushed\",\"namespace\":\"org.apache.gora.goraci.generated\",\"fields\":[{\"name\":\"count\",\"type\":\"long\",\"default\":0}]}");
-
+  private static final long serialVersionUID = -6468883532296148608L;
   /** Enum containing all data bean's fields. */
   public static enum Field {
     COUNT(0, "count"),
@@ -240,6 +240,43 @@ public class Flushed extends org.apache.gora.persistency.impl.PersistentBase imp
 	  }
 	
 		  
+  }
+
+  private static final org.apache.avro.io.DatumWriter
+          DATUM_WRITER$ = new org.apache.avro.specific.SpecificDatumWriter(SCHEMA$);
+  private static final org.apache.avro.io.DatumReader
+          DATUM_READER$ = new org.apache.avro.specific.SpecificDatumReader(SCHEMA$);
+
+  /**
+   * Writes AVRO data bean to output stream in the form of AVRO Binary encoding format. This will transform
+   * AVRO data bean from its Java object form to it s serializable form.
+   *
+   * @param out java.io.ObjectOutput output stream to write data bean in serializable form
+   */
+  @Override
+  public void writeExternal(java.io.ObjectOutput out)
+          throws java.io.IOException {
+    out.write(super.getDirtyBytes().array());
+    DATUM_WRITER$.write(this, org.apache.avro.io.EncoderFactory.get()
+            .directBinaryEncoder((java.io.OutputStream) out,
+                    null));
+  }
+
+  /**
+   * Reads AVRO data bean from input stream in it s AVRO Binary encoding format to Java object format.
+   * This will transform AVRO data bean from it s serializable form to deserialized Java object form.
+   *
+   * @param in java.io.ObjectOutput input stream to read data bean in serializable form
+   */
+  @Override
+  public void readExternal(java.io.ObjectInput in)
+          throws java.io.IOException {
+    byte[] __g__dirty = new byte[getFieldsCount()];
+    in.read(__g__dirty);
+    super.setDirtyBytes(java.nio.ByteBuffer.wrap(__g__dirty));
+    DATUM_READER$.read(this, org.apache.avro.io.DecoderFactory.get()
+            .directBinaryDecoder((java.io.InputStream) in,
+                    null));
   }
   
 }

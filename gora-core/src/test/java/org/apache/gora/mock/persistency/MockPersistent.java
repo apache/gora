@@ -25,6 +25,9 @@ import org.apache.gora.persistency.impl.PersistentBase;
 
 public class MockPersistent extends PersistentBase {
 
+  private static final long serialVersionUID = -7468893532296148608L;
+  public static final org.apache.avro.Schema SCHEMA$ =
+          new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"MockPersistent\",\"namespace\":\"org.apache.gora.mock.persistency\",\"fields\":[{\"name\":\"foo\",\"type\":\"int\"},{\"name\":\"baz\",\"type\":\"int\"}]}");
   public static final String FOO = "foo";
   public static final String BAZ = "baz";
   
@@ -91,6 +94,33 @@ public class MockPersistent extends PersistentBase {
   @Override
   public Persistent newInstance() {
     return new MockPersistent();
+  }
+
+  private static final org.apache.avro.io.DatumWriter
+          DATUM_WRITER$ = new org.apache.avro.specific.SpecificDatumWriter(SCHEMA$);
+  private static final org.apache.avro.io.DatumReader
+          DATUM_READER$ = new org.apache.avro.specific.SpecificDatumReader(SCHEMA$);
+
+  @Override
+  public void writeExternal(java.io.ObjectOutput out)
+          throws java.io.IOException {
+    out.write(super.getDirtyBytes().array());
+    DATUM_WRITER$.write
+            (this, org.apache.avro.io.EncoderFactory.get()
+                    .directBinaryEncoder((java.io.OutputStream) out,
+                            null));
+  }
+
+  @Override
+  public void readExternal(java.io.ObjectInput in)
+          throws java.io.IOException {
+    byte[] __g__dirty = new byte[getFieldsCount()];
+    in.read(__g__dirty);
+    super.setDirtyBytes(java.nio.ByteBuffer.wrap(__g__dirty));
+    DATUM_READER$.read
+            (this, org.apache.avro.io.DecoderFactory.get()
+                    .directBinaryDecoder((java.io.InputStream) in,
+                            null));
   }
 
 }
