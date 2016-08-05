@@ -198,7 +198,6 @@ public abstract class PersistentBase extends SpecificRecordBase implements
     return __g__dirty;
   }
 
-
   /**
    * Setter method for assign dirty bytes when deserializing AVRO bean from dirty bytes
    * preserved in serialized bytes form.
