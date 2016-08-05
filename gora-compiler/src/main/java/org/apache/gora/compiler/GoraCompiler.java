@@ -274,6 +274,11 @@ public class GoraCompiler extends SpecificCompiler {
     return newSchema;
   }
 
+  /**
+   * Utility method by velocity templates to generate serialVersionUID on AVRO beans.
+   *
+   * @param schema Data bean AVRO schema.
+   */
   public static long fingerprint64(Schema schema) {
     return SchemaNormalization.parsingFingerprint64(schema);
   }
