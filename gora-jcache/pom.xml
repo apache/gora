@@ -111,6 +111,12 @@
       <artifactId>avro</artifactId>
     </dependency>
 
+    <!-- Hadoop Dependencies -->
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-client</artifactId>
+    </dependency>
+
     <!-- JCache Dependencies -->
     <dependency>
       <groupId>com.hazelcast</groupId>

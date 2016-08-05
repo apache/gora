@@ -31,6 +31,7 @@ public class JCacheResult<K, T extends PersistentBase> extends ResultBase<K, T> 
 
   private NavigableSet<K> cacheKeySet;
   private Iterator<K> iterator;
+  private int current;
 
   public JCacheResult(DataStore<K, T> dataStore, Query<K, T> query) {
     super(dataStore, query);
@@ -40,6 +41,7 @@ public class JCacheResult<K, T extends PersistentBase> extends ResultBase<K, T> 
     super(dataStore, query);
     this.cacheKeySet = cacheKeySet;
     this.iterator = cacheKeySet.iterator();
+    this.current = 0;
   }
 
   public JCacheStore<K, T> getDataStore() {
@@ -48,7 +50,11 @@ public class JCacheResult<K, T extends PersistentBase> extends ResultBase<K, T> 
 
   @Override
   public float getProgress() throws IOException {
-    return 0;
+    if (cacheKeySet.size() == 0) {
+      return 1;
+    }
+    float progress = ((float) current / (float) cacheKeySet.size());
+    return progress;
   }
 
   @Override
@@ -63,6 +69,7 @@ public class JCacheResult<K, T extends PersistentBase> extends ResultBase<K, T> 
     }
     key = iterator.next();
     persistent = dataStore.get(key);
+    this.current++;
     return true;
   }
 
