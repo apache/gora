@@ -28,6 +28,10 @@ import javax.cache.integration.CacheWriterException;
 import java.util.Collection;
 import java.util.Iterator;
 
+/**
+ * {@link org.apache.gora.jcache.store.JCacheCacheWriter} is the primary class
+ * responsible for writing data beans to persistency dataStore from in memory cache.
+ */
 public class JCacheCacheWriter<K, T extends PersistentBase> implements CacheWriter<K, T> {
 
   private static final Logger LOG = LoggerFactory.getLogger(JCacheCacheWriter.class);
@@ -41,7 +45,7 @@ public class JCacheCacheWriter<K, T extends PersistentBase> implements CacheWrit
   public void write(Cache.Entry<? extends K,
           ? extends T> entry) throws CacheWriterException {
     dataStore.put(entry.getKey(), entry.getValue());
-    LOG.info("Written data bean to persistent datastore on key " + entry.getKey().toString());
+    LOG.info("Written data bean to persistent datastore on key {}.", entry.getKey().toString());
   }
 
   @Override
@@ -57,7 +61,7 @@ public class JCacheCacheWriter<K, T extends PersistentBase> implements CacheWrit
   @Override
   public void delete(Object key) throws CacheWriterException {
     dataStore.delete((K) key);
-    LOG.info("Deleted data bean from persistent datastore on key " + key.toString());
+    LOG.info("Deleted data bean from persistent datastore on key {}.", key.toString());
   }
 
   @Override

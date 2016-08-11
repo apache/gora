@@ -26,9 +26,17 @@ import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.ResultBase;
 import org.apache.gora.store.DataStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * {@link org.apache.gora.jcache.query.JCacheResult} is the primary class
+ * responsible for representing result set of a cache manipulation query
+ * {@link org.apache.gora.jcache.query.JCacheQuery}
+ */
 public class JCacheResult<K, T extends PersistentBase> extends ResultBase<K, T> {
 
+  private static final Logger LOG = LoggerFactory.getLogger(JCacheResult.class);
   private NavigableSet<K> cacheKeySet;
   private Iterator<K> iterator;
   private int current;
@@ -68,6 +76,7 @@ public class JCacheResult<K, T extends PersistentBase> extends ResultBase<K, T> 
       return false;
     }
     key = iterator.next();
+    LOG.info("Results set pointer is now moved to key {}.", key);
     persistent = dataStore.get(key);
     this.current++;
     return true;

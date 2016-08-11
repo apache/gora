@@ -717,7 +717,7 @@
 
     <!-- JCache Dependencies -->
     <jsr107.api.version>1.0.0</jsr107.api.version>
-    <hazelcast.version>3.6.3</hazelcast.version>
+    <hazelcast.version>3.6.4</hazelcast.version>
 
     <!-- Testing Dependencies -->
     <junit.version>4.10</junit.version>

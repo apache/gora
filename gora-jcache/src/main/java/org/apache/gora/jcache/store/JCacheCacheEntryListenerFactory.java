@@ -23,6 +23,11 @@ import org.slf4j.LoggerFactory;
 
 import javax.cache.configuration.Factory;
 
+/**
+ * {@link org.apache.gora.jcache.store.JCacheCacheEntryListenerFactory} is the primary class
+ * responsible for creating cache entry listeners which listens on {@link javax.cache.event.CacheEntryEvent}
+ * cache entry events EG:- Creation, Removal, etc of keys on caches and trigger actions as specified.
+ */
 public class JCacheCacheEntryListenerFactory <K,T extends PersistentBase>
         implements Factory<JCacheCacheEntryListener<K, T>> {
 
@@ -50,7 +55,4 @@ public class JCacheCacheEntryListenerFactory <K,T extends PersistentBase>
     }
   }
 
-  public int hashCode() {
-    return this.instance.hashCode();
-  }
 }

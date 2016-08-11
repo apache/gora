@@ -21,6 +21,7 @@ package org.apache.gora.jcache.store;
 import org.apache.gora.examples.WebPageDataCreator;
 import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.examples.generated.WebPage;
+import org.apache.gora.jcache.GoraHazelcastTestDriver;
 import org.apache.gora.persistency.BeanFactory;
 import org.apache.gora.persistency.impl.BeanFactoryImpl;
 import org.apache.gora.query.Query;
@@ -29,8 +30,10 @@ import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.DataStoreTestBase;
 import org.apache.gora.store.DataStoreTestUtil;
 import org.apache.hadoop.conf.Configuration;
-import org.junit.After;
+import org.junit.BeforeClass;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.After;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +54,17 @@ public class JCacheGoraDataStoreTest extends DataStoreTestBase {
   private static final int NUM_KEYS = 4;
   private Configuration conf = new Configuration();
 
+  @BeforeClass
+  public static void setUpClass() throws Exception {
+    setTestDriver(new GoraHazelcastTestDriver());
+    DataStoreTestBase.setUpClass();
+  }
+
+  @AfterClass
+  public static void tearDownClass() throws Exception {
+    DataStoreTestBase.tearDownClass();
+  }
+
   @Before
   public void setUp() throws Exception {
     super.setUp();
@@ -59,7 +73,7 @@ public class JCacheGoraDataStoreTest extends DataStoreTestBase {
   @After
   public void tearDown() throws Exception {
     super.tearDown();
-    //mandatory to clean up hazelcast instances
+    //clean up for client side cache provider instances
     //this is not handled at super class level
     super.employeeStore.close();
     super.webPageStore.close();
@@ -107,7 +121,6 @@ public class JCacheGoraDataStoreTest extends DataStoreTestBase {
 
   @Test
   public void testGetWithFields() throws Exception {
-
     DataStore<String, WebPage> store = super.webPageStore;
     BeanFactory<String, WebPage> beanFactory = new BeanFactoryImpl<>(String.class, WebPage.class);
     store.setBeanFactory(beanFactory);
@@ -128,7 +141,6 @@ public class JCacheGoraDataStoreTest extends DataStoreTestBase {
 
   @Test
   public void testDeleteByQueryFields() throws Exception {
-
     DataStore<String, WebPage> store = super.webPageStore;
     BeanFactory<String, WebPage> beanFactory = new BeanFactoryImpl<>(String.class, WebPage.class);
     store.setBeanFactory(beanFactory);
@@ -189,6 +201,6 @@ public class JCacheGoraDataStoreTest extends DataStoreTestBase {
         assertTrue(page.getParsedContent().size() > 0);
       }
     }
-
   }
+
 }

@@ -21,6 +21,10 @@ import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.impl.QueryBase;
 import org.apache.gora.store.DataStore;
 
+/**
+ * {@link org.apache.gora.jcache.query.JCacheQuery} is the primary class
+ * responsible for representing a cache manipulation query.
+ */
 public class JCacheQuery<K, T extends PersistentBase> extends QueryBase<K, T> {
 
   public JCacheQuery() {

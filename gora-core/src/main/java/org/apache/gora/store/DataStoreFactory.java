@@ -41,7 +41,7 @@ public class DataStoreFactory{
   public static final String GORA_DEFAULT_PROPERTIES_FILE = "gora.properties";
 
   public static final String GORA_DEFAULT_DATASTORE_KEY = "gora.datastore.default";
-
+  /*This selects the default caching dataStore which wraps any GORA persistency dataStore*/
   public static final String GORA_DEFAULT_CACHE_DATASTORE_KEY = "gora.cache.datastore.default";
 
   public static final String GORA = "gora";
@@ -278,8 +278,8 @@ public class DataStoreFactory{
 
 
   /**
-   * Instantiate <i>the default</i> {@link DataStore} wrapped over JCache datastore which provides caching
-   * abstraction over any GORA persistence dataStore.
+   * Instantiate <i>the default</i> {@link DataStore} wrapped over caching dataStore which provides caching
+   * abstraction over the GORA persistence dataStore.
    * Uses default properties. Uses 'null' schema.
    *
    * Note:
@@ -287,10 +287,10 @@ public class DataStoreFactory{
    *
    * @param keyClass The key class.
    * @param persistent The value class.
-   * @param conf {@link Configuration} to be used be the store.
-   * @param isCacheEnabled caching enable
+   * @param conf {@link Configuration} To be used be the store.
+   * @param isCacheEnabled Caching enable or not.
    * @return A new store instance.
-   * @throws GoraException
+   * @throws GoraException If cache or persistency dataStore initialization interrupted.
    */
   @SuppressWarnings("unchecked")
   public static <K, T extends Persistent> DataStore<K, T> getDataStore(

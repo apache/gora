@@ -29,6 +29,11 @@ import javax.cache.event.CacheEntryEvent;
 import javax.cache.event.CacheEntryListenerException;
 import java.util.concurrent.ConcurrentSkipListSet;
 
+/**
+ * {@link org.apache.gora.jcache.store.JCacheCacheEntryListener} is the primary class
+ * responsible for listening on {@link javax.cache.event.CacheEntryEvent} cache entry events
+ * EG:- Creation, Removal, Expiry etc of entries on caches and trigger actions as specified.
+ */
 public class JCacheCacheEntryListener<K, T extends PersistentBase>
         implements CacheEntryCreatedListener<K, T>,
         CacheEntryRemovedListener<K, T>, CacheEntryUpdatedListener<K, T>, CacheEntryExpiredListener<K, T> {
@@ -45,7 +50,7 @@ public class JCacheCacheEntryListener<K, T extends PersistentBase>
           throws CacheEntryListenerException {
     for (CacheEntryEvent<? extends K, ? extends T> event : cacheEntryEvents) {
       cacheEntryList.add(event.getKey());
-      LOG.info("Cache entry added on key " + event.getKey().toString());
+      LOG.info("Cache entry added on key {}.", event.getKey().toString());
     }
   }
 
@@ -54,7 +59,7 @@ public class JCacheCacheEntryListener<K, T extends PersistentBase>
           throws CacheEntryListenerException {
     for (CacheEntryEvent<? extends K, ? extends T> event : cacheEntryEvents) {
       cacheEntryList.remove(event.getKey());
-      LOG.info("Cache entry removed on key " + event.getKey().toString());
+      LOG.info("Cache entry removed on key {}.", event.getKey().toString());
     }
   }
 
@@ -62,7 +67,7 @@ public class JCacheCacheEntryListener<K, T extends PersistentBase>
   public void onUpdated(Iterable<CacheEntryEvent<? extends K, ? extends T>> cacheEntryEvents)
           throws CacheEntryListenerException {
     for (CacheEntryEvent<? extends K, ? extends T> event : cacheEntryEvents) {
-      LOG.info("Cache entry updated set on key " + event.getKey().toString());
+      LOG.info("Cache entry updated set on key {}.", event.getKey().toString());
     }
   }
 
@@ -70,7 +75,7 @@ public class JCacheCacheEntryListener<K, T extends PersistentBase>
   public void onExpired(Iterable<CacheEntryEvent<? extends K, ? extends T>> cacheEntryEvents)
           throws CacheEntryListenerException {
     for (CacheEntryEvent<? extends K, ? extends T> event : cacheEntryEvents) {
-      LOG.warn("Cache entry expired on key " + event.getKey().toString());
+      LOG.warn("Cache entry expired on key {}.", event.getKey().toString());
     }
   }
 

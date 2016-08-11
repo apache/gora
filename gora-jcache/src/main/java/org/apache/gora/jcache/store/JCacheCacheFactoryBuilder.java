@@ -21,6 +21,10 @@ import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.store.DataStore;
 import javax.cache.configuration.Factory;
 
+/**
+ * {@link org.apache.gora.jcache.store.JCacheCacheFactoryBuilder} is a Generic Factory
+ * builder that creates Factory instances which extends {@link javax.cache.configuration.Factory}
+ */
 public class JCacheCacheFactoryBuilder {
 
   public static <K, T extends PersistentBase> Factory<JCacheCacheLoader<K,T>>

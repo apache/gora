@@ -23,6 +23,11 @@ import org.slf4j.LoggerFactory;
 
 import javax.cache.configuration.Factory;
 
+/**
+ * {@link org.apache.gora.jcache.store.JCacheCacheLoaderFactory} is the primary class
+ * responsible for creating cache loader {@link javax.cache.integration.CacheLoader} instances which itself
+ * loads data beans from persistency dataStore to in memory cache.
+ */
 public class JCacheCacheLoaderFactory<K, T extends PersistentBase>
         implements Factory<JCacheCacheLoader<K,T>> {
 

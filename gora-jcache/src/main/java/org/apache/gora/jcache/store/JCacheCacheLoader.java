@@ -27,7 +27,10 @@ import javax.cache.integration.CacheLoaderException;
 import java.util.HashMap;
 import java.util.Map;
 
-
+/**
+ * {@link org.apache.gora.jcache.store.JCacheCacheLoader} is the primary class
+ * responsible for loading data beans from persistency dataStore to in memory cache.
+ */
 public class JCacheCacheLoader<K, T extends PersistentBase> implements CacheLoader<K, T> {
 
   private static final Logger LOG = LoggerFactory.getLogger(JCacheCacheLoader.class);
@@ -42,7 +45,7 @@ public class JCacheCacheLoader<K, T extends PersistentBase> implements CacheLoad
     T persistent = null;
     try {
       persistent = dataStore.get(key);
-      LOG.info("Loaded data bean from persistent datastore on key " + key.toString());
+      LOG.info("Loaded data bean from persistent datastore on key {}.", key.toString());
     } catch (CacheLoaderException ex) {
       throw ex;
     }
@@ -54,7 +57,7 @@ public class JCacheCacheLoader<K, T extends PersistentBase> implements CacheLoad
     Map<K, T> loaded = new HashMap<K, T>();
     for (K key : keys) {
       T persistent = dataStore.get(key);
-      LOG.info("Loaded data bean from persistent datastore on key " + key.toString());
+      LOG.info("Loaded data bean from persistent datastore on key {}.", key.toString());
       if (persistent != null) {
         loaded.put(key, persistent);
       }

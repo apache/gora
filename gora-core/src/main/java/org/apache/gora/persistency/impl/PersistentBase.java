@@ -193,6 +193,8 @@ public abstract class PersistentBase extends SpecificRecordBase implements
    * on velocity template record.vm.
    * <p>
    * Note {@link java.nio.ByteBuffer} is not itself not in serializable form.
+   *
+   * @return __g__dirty dirty bytes
    */
   public ByteBuffer getDirtyBytes() {
     return __g__dirty;

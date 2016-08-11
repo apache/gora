@@ -16,19 +16,16 @@
 -->
 
 <!--
-  Hazelcast server side cache provider configuration.
+  Hazelcast client side cache provider configuration.
 -->
 
-<hazelcast xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xsi:schemaLocation="http://www.hazelcast.com/schema/config
-                               http://www.hazelcast.com/schema/config/hazelcast-config-3.6.xsd"
-           xmlns="http://www.hazelcast.com/schema/config">
+<hazelcast-client xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://www.hazelcast.com/schema/client-config
+                               http://www.hazelcast.com/schema/client-config/hazelcast-client-config-3.6.xsd"
+                  xmlns="http://www.hazelcast.com/schema/client-config">
     <network>
-        <join>
-            <multicast enabled="false"/>
-            <tcp-ip enabled="true">
-                <member>127.0.0.1</member>
-            </tcp-ip>
-        </join>
+        <cluster-members>
+            <address>127.0.0.1</address>
+        </cluster-members>
     </network>
-</hazelcast>
+</hazelcast-client>

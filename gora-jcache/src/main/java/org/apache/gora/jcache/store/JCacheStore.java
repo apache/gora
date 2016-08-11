@@ -20,18 +20,24 @@ package org.apache.gora.jcache.store;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Iterator;
+import java.util.Properties;
 import java.util.List;
 import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.Properties;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.TimeUnit;
 
 import com.hazelcast.cache.HazelcastCachingProvider;
 import com.hazelcast.cache.ICache;
+import com.hazelcast.client.HazelcastClient;
+import com.hazelcast.client.config.ClientConfig;
+import com.hazelcast.client.config.XmlClientConfigBuilder;
 import com.hazelcast.config.CacheConfig;
-import com.hazelcast.config.EvictionConfig;
+import com.hazelcast.config.Config;
+import com.hazelcast.config.ClasspathXmlConfig;
 import com.hazelcast.config.EvictionPolicy;
+import com.hazelcast.config.EvictionConfig;
 import com.hazelcast.config.InMemoryFormat;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
@@ -54,6 +60,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.cache.Cache;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.cache.configuration.FactoryBuilder;
@@ -65,10 +72,19 @@ import javax.cache.expiry.TouchedExpiryPolicy;
 import javax.cache.expiry.Duration;
 import javax.cache.spi.CachingProvider;
 
+/**
+ * {@link org.apache.gora.jcache.store.JCacheStore} is the primary class
+ * responsible for GORA CRUD operations on Hazelcast Caches. This class can be think
+ * of as caching layer that can is wrapped over any persistency dataStore implementations
+ * which extends {@link org.apache.gora.store.DataStore}.  This class delegates
+ * most operations to it s persistency dataStore. Hazelcast cache implementation is based on
+ * JCache JSR 107 specification.
+ */
 public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
   private static final String GORA_DEFAULT_JCACHE_NAMESPACE = "gora.jcache.namespace";
   private static final String GORA_DEFAULT_JCACHE_PROVIDER_KEY = "gora.datastore.jcache.provider";
+  private static final String GORA_DEFAULT_JCACHE_HAZELCAST_CONFIG_KEY = "gora.datastore.jcache.hazelcast.config";
   private static final String JCACHE_READ_THROUGH_PROPERTY_KEY = "jcache.read.through.enable";
   private static final String JCACHE_WRITE_THROUGH_PROPERTY_KEY = "jcache.write.through.enable";
   private static final String JCACHE_STORE_BY_VALUE_PROPERTY_KEY = "jcache.store.by.value.enable";
@@ -89,6 +105,7 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
   private static final String HAZELCAST_CACHE_OBJECT_IN_MEMORY_FORMAT_IDENTIFIER = "OBJECT";
   private static final String HAZELCAST_CACHE_NATIVE_IN_MEMORY_FORMAT_IDENTIFIER = "NATIVE";
   private static final String JCACHE_AUTO_CREATE_CACHE_PROPERTY_KEY = "jcache.auto.create.cache";
+  private static final String HAZELCAST_SERVER_CACHE_PROVIDER_IDENTIFIER = "Server";
   private static final Logger LOG = LoggerFactory.getLogger(JCacheStore.class);
   private ICache<K, T> cache;
   private CacheManager manager;
@@ -138,16 +155,28 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
       this.persistentDataStore = DataStoreFactory.getDataStore(keyClass, persistentClass,
               new Configuration());
     } catch (GoraException ex) {
-      LOG.error("Couldn't initialize persistent DataStore");
+      LOG.error("Couldn't initialize persistent DataStore.", ex);
     }
-    hazelcastInstance = Hazelcast.newHazelcastInstance();
+    if (properties.getProperty(GORA_DEFAULT_JCACHE_PROVIDER_KEY)
+            .contains(HAZELCAST_SERVER_CACHE_PROVIDER_IDENTIFIER)) {
+      Config config = new ClasspathXmlConfig(properties.getProperty(GORA_DEFAULT_JCACHE_HAZELCAST_CONFIG_KEY));
+      hazelcastInstance = Hazelcast.newHazelcastInstance(config);
+    } else {
+      try {
+        ClientConfig config =
+                new XmlClientConfigBuilder(properties.getProperty(GORA_DEFAULT_JCACHE_HAZELCAST_CONFIG_KEY)).build();
+        hazelcastInstance = HazelcastClient.newHazelcastClient(config);
+      } catch (IOException ex) {
+        LOG.error("Couldn't locate the client side cache provider configuration.", ex);
+      }
+    }
     Properties providerProperties = new Properties();
     providerProperties.setProperty(HazelcastCachingProvider.HAZELCAST_INSTANCE_NAME,
             hazelcastInstance.getName());
     try {
       manager = cachingProvider.getCacheManager(new URI(goraCacheNamespace), null, providerProperties);
     } catch (URISyntaxException ex) {
-      LOG.error("Couldn't initialize cache manager to bounded hazelcast instance");
+      LOG.error("Couldn't initialize cache manager to bounded hazelcast instance.", ex);
       manager = cachingProvider.getCacheManager();
     }
     cacheEntryList = new ConcurrentSkipListSet<>();
@@ -225,9 +254,7 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
             new MutableCacheEntryListenerConfiguration<>(
                     JCacheCacheFactoryBuilder
                             .factoryOfEntryListener(new JCacheCacheEntryListener<K, T>(cacheEntryList)),
-                    null, true, true
-            )
-    );
+                    null, true, true));
     if (properties.getProperty(JCACHE_AUTO_CREATE_CACHE_PROPERTY_KEY) != null) {
       Boolean createCache = Boolean.valueOf(properties.getProperty(JCACHE_AUTO_CREATE_CACHE_PROPERTY_KEY));
       if (createCache) {
@@ -235,8 +262,14 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
                 cacheConfig).unwrap(ICache.class);
       }
     } else {
-      cache = manager.createCache(persistentClass.getSimpleName(),
-              cacheConfig).unwrap(ICache.class);
+      if (manager.getCache(super.getPersistentClass().getSimpleName(), keyClass, persistentClass) == null) {
+        cache = manager.createCache(persistentClass.getSimpleName(),
+                cacheConfig).unwrap(ICache.class);
+      } else {
+        cache = manager.getCache(super.getPersistentClass().getSimpleName(),
+                keyClass, persistentClass).unwrap(ICache.class);
+        this.populateLocalCacheEntrySet(cache.iterator());
+      }
     }
     LOG.info("JCache Gora datastore initialized successfully.");
   }
@@ -254,8 +287,8 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
               cacheConfig).unwrap(ICache.class);
     }
     persistentDataStore.createSchema();
-    LOG.info("Created schema on persistent store and initialized cache for persistent bean "
-            + super.getPersistentClass().getSimpleName());
+    LOG.info("Created schema on persistent store and initialized cache for persistent bean {}."
+            , super.getPersistentClass().getSimpleName());
   }
 
   @Override
@@ -263,8 +296,8 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
     cacheEntryList.clear();
     manager.destroyCache(super.getPersistentClass().getSimpleName());
     persistentDataStore.deleteSchema();
-    LOG.info("Deleted schema on persistent store and destroyed cache for persistent bean "
-            + super.getPersistentClass().getSimpleName());
+    LOG.info("Deleted schema on persistent store and destroyed cache for persistent bean {}."
+            , super.getPersistentClass().getSimpleName());
   }
 
   @Override
@@ -323,10 +356,10 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
           }
         }
       }
-      LOG.info("JCache Gora datastore deleled " + deletedRows + " rows from Persistent datastore");
+      LOG.info("JCache Gora datastore deleled {} rows from Persistent datastore.", deletedRows);
       return deletedRows;
     } catch (Exception e) {
-      LOG.error("Exception occured while deleting entries from JCache Gora datastore. Hence returning 0");
+      LOG.error("Exception occurred while deleting entries from JCache Gora datastore. Hence returning 0.", e);
       return 0;
     }
   }
@@ -350,7 +383,7 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
     try {
       cacheEntrySubList = (ConcurrentSkipListSet<K>) cacheEntryList.subSet(startKey, true, endKey, true);
     } catch (NullPointerException npe) {
-      LOG.error("NPE occurred while executing the query for JCacheStore. Hence returning empty entry set.");
+      LOG.error("NPE occurred while executing the query for JCacheStore. Hence returning empty entry set.", npe);
       return new JCacheResult<>(this, query, new ConcurrentSkipListSet<K>());
     }
     return new JCacheResult<>(this, query, cacheEntrySubList);
@@ -383,9 +416,10 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
         partitions.add(partition);
       }
     } catch (java.lang.Exception ex) {
-      LOG.error("Exception occurred while partitioning the query based on Hazelcast partitions.");
+      LOG.error("Exception occurred while partitioning the query based on Hazelcast partitions.", ex);
       return null;
     }
+    LOG.info("Query is partitioned to {} number of partitions.", partitions.size());
     return partitions;
   }
 
@@ -400,13 +434,22 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
     flush();
     cacheEntryList.clear();
     if (!cache.isDestroyed() && !manager.isClosed()) {
-      cache.destroy();
+      cache.close();
     }
     if (!manager.isClosed()) {
       manager.close();
     }
+    hazelcastInstance.shutdown();
     persistentDataStore.close();
     LOG.info("JCache Gora datastore destroyed successfully.");
+  }
+
+  private void populateLocalCacheEntrySet(Iterator<Cache.Entry<K, T>> cacheEntryIterator) {
+    cacheEntryList.clear();
+    while (cacheEntryIterator.hasNext()) {
+      cacheEntryList.add(cacheEntryIterator.next().getKey());
+    }
+    LOG.info("Populated local cache entry set with respect to remote cache provider.");
   }
 
 }

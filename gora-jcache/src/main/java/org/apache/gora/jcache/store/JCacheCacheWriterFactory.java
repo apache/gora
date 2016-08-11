@@ -23,6 +23,11 @@ import org.slf4j.LoggerFactory;
 
 import javax.cache.configuration.Factory;
 
+/**
+ * {@link org.apache.gora.jcache.store.JCacheCacheWriterFactory} is the primary class
+ * responsible for creating cache writer {@link javax.cache.integration.CacheWriter} instances which itself
+ * writes data beans to persistency dataStore from in memory cache.
+ */
 public class JCacheCacheWriterFactory<K, T extends PersistentBase> implements Factory<JCacheCacheWriter<K,T>> {
 
   private static final Logger LOG = LoggerFactory.getLogger(JCacheCacheWriterFactory.class);
