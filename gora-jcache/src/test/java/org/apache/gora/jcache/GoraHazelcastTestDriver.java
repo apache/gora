@@ -55,8 +55,8 @@ public class GoraHazelcastTestDriver extends GoraTestDriver {
     properties.setProperty(GORA_DEFAULT_JCACHE_PROVIDER_KEY, PROVIDER);
     properties.setProperty(GORA_DEFAULT_JCACHE_HAZELCAST_CONFIG_KEY, CONFIG);
     properties.setProperty(GORA_DEFAULT_DATASTORE_KEY, MEMSTORE);
-    properties.setProperty(JCACHE_READ_THROUGH_PROPERTY_KEY,FALSE);
-    properties.setProperty(JCACHE_WRITE_THROUGH_PROPERTY_KEY,FALSE);
+    properties.setProperty(JCACHE_READ_THROUGH_PROPERTY_KEY, FALSE);
+    properties.setProperty(JCACHE_WRITE_THROUGH_PROPERTY_KEY, FALSE);
     serverCacheProvider = new JCacheStore();
     serverCacheProvider.initialize(String.class, WebPage.class, properties);
   }

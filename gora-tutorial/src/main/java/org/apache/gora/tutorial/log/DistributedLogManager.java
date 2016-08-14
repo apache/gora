@@ -109,7 +109,7 @@ import java.util.StringTokenizer;
  *      now data bean ( key/value ) is now loaded to Hazelcast DATA GRID, entries created data beans
  *      are now available to all the SERVER and CLIENT instances. Data beans which were loaded to Hazelcast
  *      DATA Grid can be retrieved from cache so that the latency is reduced compared to when data bean is
- *      direct retrieved from persistent data store. *
+ *      direct retrieved from persistent data store. 
  *  (d) Executing with (b) will not create cache entries on keys since the data beans were directly put into
  *      to persistent store.
  *      Executing following command
