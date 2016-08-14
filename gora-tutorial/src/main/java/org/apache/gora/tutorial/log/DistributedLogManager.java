@@ -109,7 +109,7 @@ import java.util.StringTokenizer;
  *      now data bean ( key/value ) is now loaded to Hazelcast DATA GRID, entries created data beans
  *      are now available to all the SERVER and CLIENT instances. Data beans which were loaded to Hazelcast
  *      DATA Grid can be retrieved from cache so that the latency is reduced compared to when data bean is
- *      direct retrieved from persistent data store. 
+ *      direct retrieved from persistent data store.
  *  (d) Executing with (b) will not create cache entries on keys since the data beans were directly put into
  *      to persistent store.
  *      Executing following command
@@ -238,7 +238,6 @@ public class DistributedLogManager {
             new Configuration());
     //this dataStore talks to persistent store via the cache
     cacheStore = DataStoreFactory.getDataStore(Long.class, Pageview.class, new Configuration(), true);
-
   }
 
   /**
@@ -289,7 +288,6 @@ public class DistributedLogManager {
     String referrer = matcher.nextToken("\"");
     matcher.nextToken("\"");
     String userAgent = matcher.nextToken("\"");
-
     //construct and return pageview object
     Pageview pageview = new Pageview();
     pageview.setIp(new Utf8(ip));
@@ -300,7 +298,6 @@ public class DistributedLogManager {
     pageview.setResponseSize(responseSize);
     pageview.setReferrer(new Utf8(referrer));
     pageview.setUserAgent(new Utf8(userAgent));
-
     return pageview;
   }
 
@@ -346,9 +343,7 @@ public class DistributedLogManager {
     //set the properties of query
     query.setStartKey(startKey);
     query.setEndKey(endKey);
-
     Result<Long, Pageview> result = query.execute();
-
     printResult(result);
   }
 
@@ -371,7 +366,6 @@ public class DistributedLogManager {
     //set the properties of query
     query.setStartKey(startKey);
     query.setEndKey(endKey);
-
     cacheStore.deleteByQuery(query);
     log.info("pageviews with keys between {} and {} are deleted.", startKey, endKey);
   }
@@ -381,11 +375,9 @@ public class DistributedLogManager {
     while (result.next()) { //advances the Result object and breaks if at end
       long resultKey = result.getKey(); //obtain current key
       Pageview resultPageview = result.get(); //obtain current value object
-
       log.info("{} :", resultKey);
       printPageview(resultPageview);
     }
-
     log.info("Number of pageviews from the query: {}", result.getOffset());
   }
 
@@ -403,7 +395,6 @@ public class DistributedLogManager {
   private void deleteSchema() {
     cacheStore.deleteSchema();
     log.info("Deleted schema on dataStore");
-
   }
 
   private void close() throws Exception {
