@@ -28,19 +28,19 @@ import javax.cache.configuration.Factory;
  * responsible for creating cache writer {@link javax.cache.integration.CacheWriter} instances which itself
  * writes data beans to persistency dataStore from in memory cache.
  */
-public class JCacheCacheWriterFactory<K, T extends PersistentBase> implements Factory<JCacheCacheWriter<K,T>> {
+public class JCacheCacheWriterFactory<K, T extends PersistentBase> implements Factory<JCacheCacheWriter<K, T>> {
 
-  private static final Logger LOG = LoggerFactory.getLogger(JCacheCacheWriterFactory.class);
   public static final long serialVersionUID = 201205101621L;
-  private transient JCacheCacheWriter<K,T> instance;
+  private static final Logger LOG = LoggerFactory.getLogger(JCacheCacheWriterFactory.class);
+  private JCacheCacheWriter<K, T> instance;
 
-  public JCacheCacheWriterFactory(JCacheCacheWriter<K,T> instance) {
+  public JCacheCacheWriterFactory(JCacheCacheWriter<K, T> instance) {
     LOG.info("JCache cache writer factory initialized successfully.");
     this.instance = instance;
   }
 
-  public JCacheCacheWriter<K,T> create() {
-    return (JCacheCacheWriter<K,T>)this.instance;
+  public JCacheCacheWriter<K, T> create() {
+    return (JCacheCacheWriter<K, T>) this.instance;
   }
 
   public boolean equals(Object other) {

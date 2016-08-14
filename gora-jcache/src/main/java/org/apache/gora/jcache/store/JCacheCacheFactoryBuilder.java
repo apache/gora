@@ -19,6 +19,7 @@ package org.apache.gora.jcache.store;
 
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.store.DataStore;
+
 import javax.cache.configuration.Factory;
 
 /**
@@ -27,17 +28,17 @@ import javax.cache.configuration.Factory;
  */
 public class JCacheCacheFactoryBuilder {
 
-  public static <K, T extends PersistentBase> Factory<JCacheCacheLoader<K,T>>
+  public static <K, T extends PersistentBase> Factory<JCacheCacheLoader<K, T>>
   factoryOfCacheLoader(DataStore<K, T> dataStore) {
     return new JCacheCacheLoaderFactory<>(new JCacheCacheLoader<>(dataStore));
   }
 
-  public static <K, T extends PersistentBase> Factory<JCacheCacheWriter<K,T>>
+  public static <K, T extends PersistentBase> Factory<JCacheCacheWriter<K, T>>
   factoryOfCacheWriter(DataStore<K, T> dataStore) {
     return new JCacheCacheWriterFactory<>(new JCacheCacheWriter<>(dataStore));
   }
 
-  public static <K,T extends PersistentBase> Factory<JCacheCacheEntryListener<K, T>>
+  public static <K, T extends PersistentBase> Factory<JCacheCacheEntryListener<K, T>>
   factoryOfEntryListener(JCacheCacheEntryListener<K, T> instance) {
     return new JCacheCacheEntryListenerFactory<>(instance);
   }

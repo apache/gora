@@ -830,6 +830,18 @@
 
       <dependency>
         <groupId>org.apache.gora</groupId>
+        <artifactId>gora-jcache</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-jcache</artifactId>
+        <version>${project.version}</version>
+        <type>test-jar</type>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.gora</groupId>
         <artifactId>gora-tutorial</artifactId>
         <version>${project.version}</version>
       </dependency>

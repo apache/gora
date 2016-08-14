@@ -39,6 +39,9 @@ public class GoraHazelcastTestDriver extends GoraTestDriver {
   private static final String CONFIG = "hazelcast.xml";
   public static final String GORA_DEFAULT_DATASTORE_KEY = "gora.datastore.default";
   public static final String MEMSTORE = "org.apache.gora.memory.store.MemStore";
+  private static final String JCACHE_READ_THROUGH_PROPERTY_KEY = "jcache.read.through.enable";
+  private static final String JCACHE_WRITE_THROUGH_PROPERTY_KEY = "jcache.write.through.enable";
+  private static final String FALSE = "false";
 
   public GoraHazelcastTestDriver() {
     super(JCacheStore.class);
@@ -52,6 +55,8 @@ public class GoraHazelcastTestDriver extends GoraTestDriver {
     properties.setProperty(GORA_DEFAULT_JCACHE_PROVIDER_KEY, PROVIDER);
     properties.setProperty(GORA_DEFAULT_JCACHE_HAZELCAST_CONFIG_KEY, CONFIG);
     properties.setProperty(GORA_DEFAULT_DATASTORE_KEY, MEMSTORE);
+    properties.setProperty(JCACHE_READ_THROUGH_PROPERTY_KEY,FALSE);
+    properties.setProperty(JCACHE_WRITE_THROUGH_PROPERTY_KEY,FALSE);
     serverCacheProvider = new JCacheStore();
     serverCacheProvider.initialize(String.class, WebPage.class, properties);
   }

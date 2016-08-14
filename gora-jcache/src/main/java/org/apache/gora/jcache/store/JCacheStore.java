@@ -21,9 +21,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Iterator;
-import java.util.Properties;
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.TimeUnit;
@@ -63,6 +63,7 @@ import org.slf4j.LoggerFactory;
 import javax.cache.Cache;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
+import javax.cache.configuration.CacheEntryListenerConfiguration;
 import javax.cache.configuration.FactoryBuilder;
 import javax.cache.configuration.MutableCacheEntryListenerConfiguration;
 import javax.cache.expiry.AccessedExpiryPolicy;
@@ -145,9 +146,8 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) {
     super.initialize(keyClass, persistentClass, properties);
-    CachingProvider cachingProvider = Caching.getCachingProvider(
-            properties.getProperty(GORA_DEFAULT_JCACHE_PROVIDER_KEY)
-    );
+    CachingProvider cachingProvider = Caching.getCachingProvider
+            (properties.getProperty(GORA_DEFAULT_JCACHE_PROVIDER_KEY));
     if (properties.getProperty(JCACHE_CACHE_NAMESPACE_PROPERTY_KEY) != null) {
       goraCacheNamespace = properties.getProperty(JCACHE_CACHE_NAMESPACE_PROPERTY_KEY);
     }
@@ -179,97 +179,92 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
       LOG.error("Couldn't initialize cache manager to bounded hazelcast instance.", ex);
       manager = cachingProvider.getCacheManager();
     }
-    cacheEntryList = new ConcurrentSkipListSet<>();
-    cacheConfig = new CacheConfig<K, T>();
-    cacheConfig.setTypes(keyClass, persistentClass);
-    if (properties.getProperty(JCACHE_READ_THROUGH_PROPERTY_KEY) != null) {
-      cacheConfig.setReadThrough(Boolean.valueOf(properties.getProperty(JCACHE_READ_THROUGH_PROPERTY_KEY)));
-    } else {
-      cacheConfig.setReadThrough(true);
-    }
-    if (properties.getProperty(JCACHE_WRITE_THROUGH_PROPERTY_KEY) != null) {
-      cacheConfig.setWriteThrough(Boolean.valueOf(properties.getProperty(JCACHE_WRITE_THROUGH_PROPERTY_KEY)));
-    } else {
-      cacheConfig.setWriteThrough(true);
-    }
-    if (properties.getProperty(JCACHE_STORE_BY_VALUE_PROPERTY_KEY) != null) {
-      cacheConfig.setStoreByValue(Boolean.valueOf(properties.getProperty(JCACHE_STORE_BY_VALUE_PROPERTY_KEY)));
-    }
-    if (properties.getProperty(JCACHE_STATISTICS_PROPERTY_KEY) != null) {
-      cacheConfig.setStatisticsEnabled(Boolean.valueOf(properties.getProperty(JCACHE_STATISTICS_PROPERTY_KEY)));
-    }
-    if (properties.getProperty(JCACHE_MANAGEMENT_PROPERTY_KEY) != null) {
-      cacheConfig.setStatisticsEnabled(Boolean.valueOf(properties.getProperty(JCACHE_MANAGEMENT_PROPERTY_KEY)));
-    }
-    if (properties.getProperty(JCACHE_EVICTION_POLICY_PROPERTY_KEY) != null) {
-      cacheConfig.getEvictionConfig()
-              .setEvictionPolicy(EvictionPolicy.valueOf(properties.getProperty(JCACHE_EVICTION_POLICY_PROPERTY_KEY)));
-    }
-    if (properties.getProperty(JCACHE_EVICTION_MAX_SIZE_POLICY_PROPERTY_KEY) != null) {
-      cacheConfig.getEvictionConfig()
-              .setMaximumSizePolicy(EvictionConfig.MaxSizePolicy
-                      .valueOf(properties.getProperty(JCACHE_EVICTION_MAX_SIZE_POLICY_PROPERTY_KEY)));
-    }
-    if (properties.getProperty(JCACHE_EVICTION_SIZE_PROPERTY_KEY) != null) {
-      cacheConfig.getEvictionConfig()
-              .setSize(Integer.valueOf(properties.getProperty(JCACHE_EVICTION_SIZE_PROPERTY_KEY)));
-    }
-    if (properties.getProperty(JCACHE_EXPIRE_POLICY_PROPERTY_KEY) != null) {
-      String expiryPolicyIdentifier = properties.getProperty(JCACHE_EXPIRE_POLICY_PROPERTY_KEY);
-      if (expiryPolicyIdentifier.equals(JCACHE_ACCESSED_EXPIRY_IDENTIFIER)) {
-        cacheConfig.setExpiryPolicyFactory(FactoryBuilder.factoryOf(
-                new AccessedExpiryPolicy(new Duration(TimeUnit.SECONDS,
-                        Integer.valueOf(properties.getProperty(JCACHE_EXPIRE_POLICY_DURATION_PROPERTY_KEY))))
-        ));
-      } else if (expiryPolicyIdentifier.equals(JCACHE_CREATED_EXPIRY_IDENTIFIER)) {
-        cacheConfig.setExpiryPolicyFactory(FactoryBuilder.factoryOf(
-                new CreatedExpiryPolicy(new Duration(TimeUnit.SECONDS,
-                        Integer.valueOf(properties.getProperty(JCACHE_EXPIRE_POLICY_DURATION_PROPERTY_KEY))))
-        ));
-      } else if (expiryPolicyIdentifier.equals(JCACHE_MODIFIED_EXPIRY_IDENTIFIER)) {
-        cacheConfig.setExpiryPolicyFactory(FactoryBuilder.factoryOf(
-                new ModifiedExpiryPolicy(new Duration(TimeUnit.SECONDS,
-                        Integer.valueOf(properties.getProperty(JCACHE_EXPIRE_POLICY_DURATION_PROPERTY_KEY))))
-        ));
-      } else if (expiryPolicyIdentifier.equals(JCACHE_TOUCHED_EXPIRY_IDENTIFIER)) {
-        cacheConfig.setExpiryPolicyFactory(FactoryBuilder.factoryOf(
-                new TouchedExpiryPolicy(new Duration(TimeUnit.SECONDS,
-                        Integer.valueOf(properties.getProperty(JCACHE_EXPIRE_POLICY_DURATION_PROPERTY_KEY))))
-        ));
-      }
-    }
-    if (properties.getProperty(HAZELCAST_CACHE_IN_MEMORY_FORMAT_PROPERTY_KEY) != null) {
-      String inMemoryFormat = properties.getProperty(HAZELCAST_CACHE_IN_MEMORY_FORMAT_PROPERTY_KEY);
-      if (inMemoryFormat.equals(HAZELCAST_CACHE_BINARY_IN_MEMORY_FORMAT_IDENTIFIER) ||
-              inMemoryFormat.equals(HAZELCAST_CACHE_OBJECT_IN_MEMORY_FORMAT_IDENTIFIER) ||
-              inMemoryFormat.equals(HAZELCAST_CACHE_NATIVE_IN_MEMORY_FORMAT_IDENTIFIER)) {
-        cacheConfig.setInMemoryFormat(InMemoryFormat.valueOf(inMemoryFormat));
-      }
-    }
-    cacheConfig.setCacheLoaderFactory(JCacheCacheFactoryBuilder
-            .factoryOfCacheLoader(this.persistentDataStore));
-    cacheConfig.setCacheWriterFactory(JCacheCacheFactoryBuilder
-            .factoryOfCacheWriter(this.persistentDataStore));
-    cacheConfig.addCacheEntryListenerConfiguration(
-            new MutableCacheEntryListenerConfiguration<>(
-                    JCacheCacheFactoryBuilder
-                            .factoryOfEntryListener(new JCacheCacheEntryListener<K, T>(cacheEntryList)),
-                    null, true, true));
-    if (properties.getProperty(JCACHE_AUTO_CREATE_CACHE_PROPERTY_KEY) != null) {
-      Boolean createCache = Boolean.valueOf(properties.getProperty(JCACHE_AUTO_CREATE_CACHE_PROPERTY_KEY));
-      if (createCache) {
-        cache = manager.createCache(persistentClass.getSimpleName(),
-                cacheConfig).unwrap(ICache.class);
-      }
-    } else {
-      if (manager.getCache(super.getPersistentClass().getSimpleName(), keyClass, persistentClass) == null) {
-        cache = manager.createCache(persistentClass.getSimpleName(),
-                cacheConfig).unwrap(ICache.class);
+    if (((properties.getProperty(JCACHE_AUTO_CREATE_CACHE_PROPERTY_KEY) != null) &&
+            Boolean.valueOf(properties.getProperty(JCACHE_AUTO_CREATE_CACHE_PROPERTY_KEY)))
+            || ((manager.getCache(super.getPersistentClass().getSimpleName(), keyClass, persistentClass) == null))) {
+      cacheEntryList = new ConcurrentSkipListSet<>();
+      cacheConfig = new CacheConfig<K, T>();
+      cacheConfig.setTypes(keyClass, persistentClass);
+      if (properties.getProperty(JCACHE_READ_THROUGH_PROPERTY_KEY) != null) {
+        cacheConfig.setReadThrough(Boolean.valueOf(properties.getProperty(JCACHE_READ_THROUGH_PROPERTY_KEY)));
       } else {
-        cache = manager.getCache(super.getPersistentClass().getSimpleName(),
-                keyClass, persistentClass).unwrap(ICache.class);
-        this.populateLocalCacheEntrySet(cache.iterator());
+        cacheConfig.setReadThrough(true);
       }
+      if (properties.getProperty(JCACHE_WRITE_THROUGH_PROPERTY_KEY) != null) {
+        cacheConfig.setWriteThrough(Boolean.valueOf(properties.getProperty(JCACHE_WRITE_THROUGH_PROPERTY_KEY)));
+      } else {
+        cacheConfig.setWriteThrough(true);
+      }
+      if (properties.getProperty(JCACHE_STORE_BY_VALUE_PROPERTY_KEY) != null) {
+        cacheConfig.setStoreByValue(Boolean.valueOf(properties.getProperty(JCACHE_STORE_BY_VALUE_PROPERTY_KEY)));
+      }
+      if (properties.getProperty(JCACHE_STATISTICS_PROPERTY_KEY) != null) {
+        cacheConfig.setStatisticsEnabled(Boolean.valueOf(properties.getProperty(JCACHE_STATISTICS_PROPERTY_KEY)));
+      }
+      if (properties.getProperty(JCACHE_MANAGEMENT_PROPERTY_KEY) != null) {
+        cacheConfig.setStatisticsEnabled(Boolean.valueOf(properties.getProperty(JCACHE_MANAGEMENT_PROPERTY_KEY)));
+      }
+      if (properties.getProperty(JCACHE_EVICTION_POLICY_PROPERTY_KEY) != null) {
+        cacheConfig.getEvictionConfig()
+                .setEvictionPolicy(EvictionPolicy.valueOf(properties.getProperty(JCACHE_EVICTION_POLICY_PROPERTY_KEY)));
+      }
+      if (properties.getProperty(JCACHE_EVICTION_MAX_SIZE_POLICY_PROPERTY_KEY) != null) {
+        cacheConfig.getEvictionConfig()
+                .setMaximumSizePolicy(EvictionConfig.MaxSizePolicy
+                        .valueOf(properties.getProperty(JCACHE_EVICTION_MAX_SIZE_POLICY_PROPERTY_KEY)));
+      }
+      if (properties.getProperty(JCACHE_EVICTION_SIZE_PROPERTY_KEY) != null) {
+        cacheConfig.getEvictionConfig()
+                .setSize(Integer.valueOf(properties.getProperty(JCACHE_EVICTION_SIZE_PROPERTY_KEY)));
+      }
+      if (properties.getProperty(JCACHE_EXPIRE_POLICY_PROPERTY_KEY) != null) {
+        String expiryPolicyIdentifier = properties.getProperty(JCACHE_EXPIRE_POLICY_PROPERTY_KEY);
+        if (expiryPolicyIdentifier.equals(JCACHE_ACCESSED_EXPIRY_IDENTIFIER)) {
+          cacheConfig.setExpiryPolicyFactory(FactoryBuilder.factoryOf(
+                  new AccessedExpiryPolicy(new Duration(TimeUnit.SECONDS,
+                          Integer.valueOf(properties.getProperty(JCACHE_EXPIRE_POLICY_DURATION_PROPERTY_KEY))))
+          ));
+        } else if (expiryPolicyIdentifier.equals(JCACHE_CREATED_EXPIRY_IDENTIFIER)) {
+          cacheConfig.setExpiryPolicyFactory(FactoryBuilder.factoryOf(
+                  new CreatedExpiryPolicy(new Duration(TimeUnit.SECONDS,
+                          Integer.valueOf(properties.getProperty(JCACHE_EXPIRE_POLICY_DURATION_PROPERTY_KEY))))
+          ));
+        } else if (expiryPolicyIdentifier.equals(JCACHE_MODIFIED_EXPIRY_IDENTIFIER)) {
+          cacheConfig.setExpiryPolicyFactory(FactoryBuilder.factoryOf(
+                  new ModifiedExpiryPolicy(new Duration(TimeUnit.SECONDS,
+                          Integer.valueOf(properties.getProperty(JCACHE_EXPIRE_POLICY_DURATION_PROPERTY_KEY))))
+          ));
+        } else if (expiryPolicyIdentifier.equals(JCACHE_TOUCHED_EXPIRY_IDENTIFIER)) {
+          cacheConfig.setExpiryPolicyFactory(FactoryBuilder.factoryOf(
+                  new TouchedExpiryPolicy(new Duration(TimeUnit.SECONDS,
+                          Integer.valueOf(properties.getProperty(JCACHE_EXPIRE_POLICY_DURATION_PROPERTY_KEY))))
+          ));
+        }
+      }
+      if (properties.getProperty(HAZELCAST_CACHE_IN_MEMORY_FORMAT_PROPERTY_KEY) != null) {
+        String inMemoryFormat = properties.getProperty(HAZELCAST_CACHE_IN_MEMORY_FORMAT_PROPERTY_KEY);
+        if (inMemoryFormat.equals(HAZELCAST_CACHE_BINARY_IN_MEMORY_FORMAT_IDENTIFIER) ||
+                inMemoryFormat.equals(HAZELCAST_CACHE_OBJECT_IN_MEMORY_FORMAT_IDENTIFIER) ||
+                inMemoryFormat.equals(HAZELCAST_CACHE_NATIVE_IN_MEMORY_FORMAT_IDENTIFIER)) {
+          cacheConfig.setInMemoryFormat(InMemoryFormat.valueOf(inMemoryFormat));
+        }
+      }
+      cacheConfig.setCacheLoaderFactory(JCacheCacheFactoryBuilder
+              .factoryOfCacheLoader(this.persistentDataStore));
+      cacheConfig.setCacheWriterFactory(JCacheCacheFactoryBuilder
+              .factoryOfCacheWriter(this.persistentDataStore));
+      cacheConfig.addCacheEntryListenerConfiguration(
+              new MutableCacheEntryListenerConfiguration<>(
+                      JCacheCacheFactoryBuilder
+                              .factoryOfEntryListener(new JCacheCacheEntryListener<K, T>(cacheEntryList)),
+                      null, true, true));
+      cache = manager.createCache(persistentClass.getSimpleName(),
+              cacheConfig).unwrap(ICache.class);
+    } else {
+      cache = manager.getCache(super.getPersistentClass().getSimpleName(),
+              keyClass, persistentClass).unwrap(ICache.class);
+      this.populateLocalCacheEntrySet(cache);
+      this.populateLocalCacheConfig(cache);
     }
     LOG.info("JCache Gora datastore initialized successfully.");
   }
@@ -293,7 +288,7 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
 
   @Override
   public void deleteSchema() {
-    cacheEntryList.clear();
+    cache.removeAll();
     manager.destroyCache(super.getPersistentClass().getSimpleName());
     persistentDataStore.deleteSchema();
     LOG.info("Deleted schema on persistent store and destroyed cache for persistent bean {}."
@@ -444,12 +439,34 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
     LOG.info("JCache Gora datastore destroyed successfully.");
   }
 
-  private void populateLocalCacheEntrySet(Iterator<Cache.Entry<K, T>> cacheEntryIterator) {
-    cacheEntryList.clear();
+  private void populateLocalCacheEntrySet(ICache<K, T> cache) {
+    cacheEntryList = new ConcurrentSkipListSet<>();
+    Iterator<Cache.Entry<K, T>> cacheEntryIterator = cache.iterator();
     while (cacheEntryIterator.hasNext()) {
       cacheEntryList.add(cacheEntryIterator.next().getKey());
     }
+    cacheConfig = cache.getConfiguration(CacheConfig.class);
+    Iterator<CacheEntryListenerConfiguration<K, T>> itr =
+            cacheConfig.getCacheEntryListenerConfigurations().iterator();
+    while (itr.hasNext()) {
+      JCacheCacheEntryListenerFactory<K, T> listenerFac = (JCacheCacheEntryListenerFactory<K, T>)
+              ((MutableCacheEntryListenerConfiguration) itr.next()).getCacheEntryListenerFactory();
+      //populate transient field in Cache Entry Listener
+      listenerFac.create().setCacheEntryList(cacheEntryList);
+      //register exactly one listener on each local node either client/server
+      break;
+    }
     LOG.info("Populated local cache entry set with respect to remote cache provider.");
+  }
+
+  private void populateLocalCacheConfig(ICache<K, T> cache) {
+    cacheConfig = cache.getConfiguration(CacheConfig.class);
+    //populate transient fields in Cache Loader/Cache Listener
+    ((JCacheCacheLoaderFactory) cacheConfig.getCacheLoaderFactory())
+            .create().setDataStore(this.persistentDataStore);
+    ((JCacheCacheWriterFactory) cacheConfig.getCacheWriterFactory())
+            .create().setDataStore(this.persistentDataStore);
+    LOG.info("Populated transient cache loader/writer in local cache configuration.");
   }
 
 }

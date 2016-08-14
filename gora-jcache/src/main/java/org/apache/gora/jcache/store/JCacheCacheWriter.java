@@ -32,10 +32,10 @@ import java.util.Iterator;
  * {@link org.apache.gora.jcache.store.JCacheCacheWriter} is the primary class
  * responsible for writing data beans to persistency dataStore from in memory cache.
  */
-public class JCacheCacheWriter<K, T extends PersistentBase> implements CacheWriter<K, T> {
+public class JCacheCacheWriter<K, T extends PersistentBase> implements CacheWriter<K, T>, java.io.Serializable {
 
   private static final Logger LOG = LoggerFactory.getLogger(JCacheCacheWriter.class);
-  private DataStore<K, T> dataStore;
+  private transient DataStore<K, T> dataStore;
 
   public JCacheCacheWriter(DataStore<K, T> dataStore) {
     this.dataStore = dataStore;
@@ -71,6 +71,10 @@ public class JCacheCacheWriter<K, T extends PersistentBase> implements CacheWrit
       delete(iterator.next());
       iterator.remove();
     }
+  }
+
+  public void setDataStore(DataStore<K, T> dataStore) {
+    this.dataStore = dataStore;
   }
 
 }

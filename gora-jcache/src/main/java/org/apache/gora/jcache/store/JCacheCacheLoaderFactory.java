@@ -29,11 +29,11 @@ import javax.cache.configuration.Factory;
  * loads data beans from persistency dataStore to in memory cache.
  */
 public class JCacheCacheLoaderFactory<K, T extends PersistentBase>
-        implements Factory<JCacheCacheLoader<K,T>> {
+        implements Factory<JCacheCacheLoader<K, T>> {
 
-  private static final Logger LOG = LoggerFactory.getLogger(JCacheCacheLoaderFactory.class);
   public static final long serialVersionUID = 201305101626L;
-  private transient JCacheCacheLoader<K, T> instance;
+  private static final Logger LOG = LoggerFactory.getLogger(JCacheCacheLoaderFactory.class);
+  private JCacheCacheLoader<K, T> instance;
 
   public JCacheCacheLoaderFactory(JCacheCacheLoader<K, T> instance) {
     LOG.info("JCache cache entry loader factory initialized successfully.");

@@ -36,10 +36,11 @@ import java.util.concurrent.ConcurrentSkipListSet;
  */
 public class JCacheCacheEntryListener<K, T extends PersistentBase>
         implements CacheEntryCreatedListener<K, T>,
-        CacheEntryRemovedListener<K, T>, CacheEntryUpdatedListener<K, T>, CacheEntryExpiredListener<K, T> {
+        CacheEntryRemovedListener<K, T>, CacheEntryUpdatedListener<K, T>,
+        CacheEntryExpiredListener<K, T>, java.io.Serializable {
 
   private static final Logger LOG = LoggerFactory.getLogger(JCacheCacheEntryListener.class);
-  private ConcurrentSkipListSet<K> cacheEntryList;
+  private transient ConcurrentSkipListSet<K> cacheEntryList;
 
   public JCacheCacheEntryListener(ConcurrentSkipListSet cacheEntryList) {
     this.cacheEntryList = cacheEntryList;
@@ -48,6 +49,10 @@ public class JCacheCacheEntryListener<K, T extends PersistentBase>
   @Override
   public void onCreated(Iterable<CacheEntryEvent<? extends K, ? extends T>> cacheEntryEvents)
           throws CacheEntryListenerException {
+    //get rid execution of listener chain/executing only one initialized
+    if (cacheEntryList == null) {
+      return;
+    }
     for (CacheEntryEvent<? extends K, ? extends T> event : cacheEntryEvents) {
       cacheEntryList.add(event.getKey());
       LOG.info("Cache entry added on key {}.", event.getKey().toString());
@@ -57,6 +62,10 @@ public class JCacheCacheEntryListener<K, T extends PersistentBase>
   @Override
   public void onRemoved(Iterable<CacheEntryEvent<? extends K, ? extends T>> cacheEntryEvents)
           throws CacheEntryListenerException {
+    //get rid execution of listener chain/executing only one initialized
+    if (cacheEntryList == null) {
+      return;
+    }
     for (CacheEntryEvent<? extends K, ? extends T> event : cacheEntryEvents) {
       cacheEntryList.remove(event.getKey());
       LOG.info("Cache entry removed on key {}.", event.getKey().toString());
@@ -66,6 +75,10 @@ public class JCacheCacheEntryListener<K, T extends PersistentBase>
   @Override
   public void onUpdated(Iterable<CacheEntryEvent<? extends K, ? extends T>> cacheEntryEvents)
           throws CacheEntryListenerException {
+    //get rid execution of listener chain/executing only one initialized
+    if (cacheEntryList == null) {
+      return;
+    }
     for (CacheEntryEvent<? extends K, ? extends T> event : cacheEntryEvents) {
       LOG.info("Cache entry updated set on key {}.", event.getKey().toString());
     }
@@ -74,9 +87,17 @@ public class JCacheCacheEntryListener<K, T extends PersistentBase>
   @Override
   public void onExpired(Iterable<CacheEntryEvent<? extends K, ? extends T>> cacheEntryEvents)
           throws CacheEntryListenerException {
+    //get rid execution of listener chain/executing only one initialized
+    if (cacheEntryList == null) {
+      return;
+    }
     for (CacheEntryEvent<? extends K, ? extends T> event : cacheEntryEvents) {
       LOG.warn("Cache entry expired on key {}.", event.getKey().toString());
     }
+  }
+
+  public void setCacheEntryList(ConcurrentSkipListSet<K> cacheEntryList) {
+    this.cacheEntryList = cacheEntryList;
   }
 
 }

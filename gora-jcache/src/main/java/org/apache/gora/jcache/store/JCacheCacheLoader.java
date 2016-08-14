@@ -31,13 +31,13 @@ import java.util.Map;
  * {@link org.apache.gora.jcache.store.JCacheCacheLoader} is the primary class
  * responsible for loading data beans from persistency dataStore to in memory cache.
  */
-public class JCacheCacheLoader<K, T extends PersistentBase> implements CacheLoader<K, T> {
+public class JCacheCacheLoader<K, T extends PersistentBase> implements CacheLoader<K, T>, java.io.Serializable {
 
   private static final Logger LOG = LoggerFactory.getLogger(JCacheCacheLoader.class);
-  private DataStore<K, T> dataStore;
+  private transient DataStore<K, T> dataStore;
 
   public JCacheCacheLoader(DataStore<K, T> dataStore) {
-      this.dataStore = dataStore;
+    this.dataStore = dataStore;
   }
 
   @Override
@@ -63,6 +63,10 @@ public class JCacheCacheLoader<K, T extends PersistentBase> implements CacheLoad
       }
     }
     return loaded;
+  }
+
+  public void setDataStore(DataStore<K, T> dataStore) {
+    this.dataStore = dataStore;
   }
 
 }

@@ -28,12 +28,12 @@ import javax.cache.configuration.Factory;
  * responsible for creating cache entry listeners which listens on {@link javax.cache.event.CacheEntryEvent}
  * cache entry events EG:- Creation, Removal, etc of keys on caches and trigger actions as specified.
  */
-public class JCacheCacheEntryListenerFactory <K,T extends PersistentBase>
+public class JCacheCacheEntryListenerFactory<K, T extends PersistentBase>
         implements Factory<JCacheCacheEntryListener<K, T>> {
 
-  private static final Logger LOG = LoggerFactory.getLogger(JCacheCacheEntryListenerFactory.class);
   public static final long serialVersionUID = 201305101634L;
-  private transient JCacheCacheEntryListener<K, T> instance;
+  private static final Logger LOG = LoggerFactory.getLogger(JCacheCacheEntryListenerFactory.class);
+  private JCacheCacheEntryListener<K, T> instance;
 
   public JCacheCacheEntryListenerFactory(JCacheCacheEntryListener<K, T> instance) {
     LOG.info("JCache cache entry listener factory initialized successfully.");
@@ -45,10 +45,10 @@ public class JCacheCacheEntryListenerFactory <K,T extends PersistentBase>
   }
 
   public boolean equals(Object other) {
-    if(this == other) {
+    if (this == other) {
       return true;
-    } else if(other != null && this.getClass() == other.getClass()) {
-      JCacheCacheEntryListenerFactory that = (JCacheCacheEntryListenerFactory)other;
+    } else if (other != null && this.getClass() == other.getClass()) {
+      JCacheCacheEntryListenerFactory that = (JCacheCacheEntryListenerFactory) other;
       return this.instance.equals(that.instance);
     } else {
       return false;
