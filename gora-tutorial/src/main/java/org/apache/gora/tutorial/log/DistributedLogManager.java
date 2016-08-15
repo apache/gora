@@ -143,8 +143,8 @@ import java.util.StringTokenizer;
  *      <br><b>INFO 17:13:22,652 Direct Backend took 1973 ms</b>
  *      <br><b>INFO 17:18:49,252 Via Cache took 1923 ms</b>
  * <p>
- *  (f) For standalone/single node DistributedLogManager usage, Start the DistributedLogManager in SERVER mode.
- *      Follow the the commands over the command line console of SERVER instance.
+ *  (f) For standalone/single node DistributedLogManager usage, start the DistributedLogManager in SERVER mode.
+ *      Follow the same commands as above over the command line console of SERVER instance.
  * <p>
  * In the data model, keys are the line numbers in the log file,
  * and the values are Pageview objects, generated from
