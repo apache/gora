@@ -18,8 +18,11 @@
 
 package org.apache.gora.jcache;
 
+import com.hazelcast.config.ClasspathXmlConfig;
+import com.hazelcast.config.Config;
+import com.hazelcast.core.Hazelcast;
+import com.hazelcast.core.HazelcastInstance;
 import org.apache.gora.GoraTestDriver;
-import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.jcache.store.JCacheStore;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.store.DataStore;
@@ -27,21 +30,11 @@ import org.apache.gora.util.GoraException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Properties;
-
 public class GoraHazelcastTestDriver extends GoraTestDriver {
 
   private static Logger log = LoggerFactory.getLogger(GoraHazelcastTestDriver.class);
-  private JCacheStore<String, WebPage> serverCacheProvider;
-  private static final String GORA_DEFAULT_JCACHE_PROVIDER_KEY = "gora.datastore.jcache.provider";
-  private static final String PROVIDER = "com.hazelcast.cache.impl.HazelcastServerCachingProvider";
-  private static final String GORA_DEFAULT_JCACHE_HAZELCAST_CONFIG_KEY = "gora.datastore.jcache.hazelcast.config";
   private static final String CONFIG = "hazelcast.xml";
-  public static final String GORA_DEFAULT_DATASTORE_KEY = "gora.datastore.default";
-  public static final String MEMSTORE = "org.apache.gora.memory.store.MemStore";
-  private static final String JCACHE_READ_THROUGH_PROPERTY_KEY = "jcache.read.through.enable";
-  private static final String JCACHE_WRITE_THROUGH_PROPERTY_KEY = "jcache.write.through.enable";
-  private static final String FALSE = "false";
+  private HazelcastInstance hazelcastInstance;
 
   public GoraHazelcastTestDriver() {
     super(JCacheStore.class);
@@ -51,21 +44,15 @@ public class GoraHazelcastTestDriver extends GoraTestDriver {
   public void setUpClass() throws Exception {
     super.setUpClass();
     log.info("Starting Hazelcast server side cache provider.");
-    Properties properties = new Properties();
-    properties.setProperty(GORA_DEFAULT_JCACHE_PROVIDER_KEY, PROVIDER);
-    properties.setProperty(GORA_DEFAULT_JCACHE_HAZELCAST_CONFIG_KEY, CONFIG);
-    properties.setProperty(GORA_DEFAULT_DATASTORE_KEY, MEMSTORE);
-    properties.setProperty(JCACHE_READ_THROUGH_PROPERTY_KEY, FALSE);
-    properties.setProperty(JCACHE_WRITE_THROUGH_PROPERTY_KEY, FALSE);
-    serverCacheProvider = new JCacheStore();
-    serverCacheProvider.initialize(String.class, WebPage.class, properties);
+    Config config = new ClasspathXmlConfig(CONFIG);
+    hazelcastInstance = Hazelcast.newHazelcastInstance(config);
   }
 
   @Override
   public void tearDownClass() throws Exception {
     super.tearDownClass();
     log.info("Stopping Hazelcast server side cache provider.");
-    serverCacheProvider.close();
+    hazelcastInstance.shutdown();
   }
 
   @Override

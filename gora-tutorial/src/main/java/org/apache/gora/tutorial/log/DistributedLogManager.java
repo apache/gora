@@ -46,106 +46,113 @@ import java.util.StringTokenizer;
  * illustrate the basic distributed features that can be gained when persistent dataStore is used together with
  * cache dataStore similar to {@link org.apache.gora.jcache.store.JCacheStore}. Since Hazelcast provides cache as
  * a service approach, Apache Gora data stores can now be exposed as a data SERVICE when persistent data store is
- * exposed over the JCache store.
- *
+ * exposed over the JCache store/distributed caching layer.
+ * <p>
  * JCache data store has two modes.
- *
- * 1. Server mode - Participate in Hazelcast cluster as a member. ( Data grid ) and communicates directly
+ * <p>
+ * 1. Server mode - Participate in Hazelcast cluster as a member. ( DATA GRID ) and communicates directly
  * with persistent store to full fill cache read/write operations.
- *
+ * <p>
  * Add following properties gora.properties file to start JCache store in server mode.
- *
- * gora.cache.datastore.default=org.apache.gora.jcache.store.JCacheStore
- * gora.datastore.jcache.provider=com.hazelcast.cache.impl.HazelcastServerCachingProvider
- * gora.datastore.jcache.hazelcast.config=hazelcast.xml
- *
+ * <p>
+ * <b>gora.cache.datastore.default=org.apache.gora.jcache.store.JCacheStore</b>
+ * <br><b>gora.datastore.jcache.provider=com.hazelcast.cache.impl.HazelcastServerCachingProvider</b>
+ * <br><b>gora.datastore.jcache.hazelcast.config=hazelcast.xml</b>
+ * <p>
  * For cluster member network configuration use hazelcast.xml.
  * <p>See Network Configuration on
  * <a href="http://docs.hazelcast.org/docs/3.5/manual/html/networkconfiguration.html">
- * web site</a>for more information.</p>
- *
- * 2. Client mode - DOES not participate in Hazelcast cluster as a member. ( Data grid ) and For cache
+ * official documentation</a> for more information.</p>
+ * <p>
+ * 2. Client mode - DOES not participate in Hazelcast cluster as a member. ( DATA GRID ) and For cache
  * read/write operations client forwards the requests to hazelcast cluster members which run in SERVER mode.
- *
+ * <p>
  * Add following properties gora.properties file to start JCache store in client mode.
- *
- * gora.cache.datastore.default=org.apache.gora.jcache.store.JCacheStore
- * gora.datastore.jcache.provider=com.hazelcast.client.cache.impl.HazelcastClientCachingProvider
- * gora.datastore.jcache.hazelcast.config=hazelcast-client.xml
- *
+ * <p>
+ * <b>gora.cache.datastore.default=org.apache.gora.jcache.store.JCacheStore</b>
+ * <br><b>gora.datastore.jcache.provider=com.hazelcast.client.cache.impl.HazelcastClientCachingProvider</b>
+ * <br><b>gora.datastore.jcache.hazelcast.config=hazelcast-client.xml</b>
+ * <p>
  * For Hazelcast client configuration use hazelcast-client.xml.
  * <p>See Java Client Configuration on
  * <a href="http://docs.hazelcast.org/docs/3.5/manual/html/javaclientconfiguration.html#java-client-configuration">
- * web site</a>for more information.</p>
- *
+ * official documentation</a> for more information.</p>
+ * <p>
  * Sample
  * ------
- * 1. Start DistributedLogManager in SERVER for two or higher instances. ( separate JVMs ).
+ * <p>
+ * 1. Start DistributedLogManager in SERVER mode for two or higher instances. ( separate JVMs )
  * Notice the Hazelcast cluster is well formed by following Hazelcast logs.
- * Members [2] {
+ * <br><b>Members [2] {
  *     Member [127.0.0.1]:5701
  *     Member [127.0.0.1]:5702 this
- * }
- *
- * 2. Start DistributedLogManager in CLIENT mode for one instances.
+ * }</b>
+ * <p>
+ * 2. Start DistributedLogManager in CLIENT mode for one instance.
  * Notice the client correctly connected to the cluster by following Hazelcast logs.
- * Members [2] {
+ * <br><b>Members [2] {
  *     Member [127.0.0.1]:5701
  *     Member [127.0.0.1]:5702
- * }
- * INFO: HazelcastClient[hz.client_0_dev][3.6.4] is CLIENT_CONNECTED
- *
+ * }</b>
+ * <br><b>INFO: HazelcastClient[hz.client_0_dev][3.6.4] is CLIENT_CONNECTED</b>
+ * <p>
  * 3. Now use CLIENT's command line console to forward cache queries to cluster.
- *
- *  (a) -parse cache <input_log_file> - This will parse logs from logs file and put Pageview data beans to
- *      persistent store via the cache.
- *      Notice following logs
- *      INFO 19:46:34,833 Written data bean to persistent datastore on key 45.
- *      on SERVER instance of DistributedLogManager. Notice the persistent data bean writes are LOAD BALANCED
- *      among SERVER instances.
- *  (b) -parse persistent <input_log_file> - This will write parsed log data beans directly to persistent store.
+ * <p>
+ *  (a) <b>-parse cache <-input_log_file-></b> - This will parse logs from logs file and put Pageview data beans to
+ *      persistent store via the cache. Notice following logs
+ *      <br><b>INFO 19:46:34,833 Written data bean to persistent datastore on key 45.</b>
+ *      <br>on SERVER instance of DistributedLogManager.
+ *      <br>Notice the persistent data bean writes are LOAD BALANCED among SERVER instances.
+ * <p>
+ *  (b) <b>-parse persistent <-input_log_file-></b> - This will write parsed log data beans directly to persistent store.
  *      NOT via cache.
+ * <p>
  *  (c) Executing with (a) will create cache entry per each data bean key on each SERVER and CLIENT instances. Since
  *      now data bean ( key/value ) is now loaded to Hazelcast DATA GRID, entries created data beans
  *      are now available to all the SERVER and CLIENT instances. Data beans which were loaded to Hazelcast
  *      DATA Grid can be retrieved from cache so that the latency is reduced compared to when data bean is
  *      direct retrieved from persistent data store.
+ * <p>
  *  (d) Executing with (b) will not create cache entries on keys since the data beans were directly put into
  *      to persistent store.
  *      Executing following command
- *      -get <lineNum>
- *      Data will be first loaded from persistent store to cache from one of SERVER instances. Then cache
+ *      <br><b>get <-lineNum-></b>
+ *      <br>Data will be first loaded from persistent store to cache from one of SERVER instances. Then cache
  *      entry on given key will be created on all SERVER/CLIENT instances.
  *      Notice the persistent data bean load on SINGLE SERVER instance. Only one SERVER instance will handle this work.
- *      INFO 17:13:22,652 Loaded data bean from persistent datastore on key 4.
- *      Notice the cache entry creation on ALL SERVER/CLIENT instances
- *      INFO 17:13:22,656 Cache entry added on key 4.
- *      Once the cache entry is created, data bean is now available to be retrieved from cache without reaching the
+ *      <br><b>INFO 17:13:22,652 Loaded data bean from persistent datastore on key 4.</b>
+ *      <br>Notice the cache entry creation on ALL SERVER/CLIENT instances
+ *      <br><b>INFO 17:13:22,656 Cache entry added on key 4.</b>
+ *      <br>Once the cache entry is created, data bean is now available to be retrieved from cache without reaching the
  *      persistent store.
  *      Execute the above command consecutively for several times.
- *      -get <lineNum>
+ *      <br><b>-get <-lineNum-></b>
  *      Notice there will be NO log entry similar to below
- *      INFO 17:13:22,652 Loaded data bean from persistent datastore on key 4.
- *      Since there will be no data bean load from persistent data store and the data bean is now loaded from
+ *      <br><b>INFO 17:13:22,652 Loaded data bean from persistent datastore on key 4.</b>
+ *      <br>Since there will be no data bean load from persistent data store and the data bean is now loaded from
  *      cache.
+ * <p>
  *  (e) DistributedLogManager has two Apache Gora data stores instances.
  *      dataStore - which call directly underline persistent data store.
  *      cacheStore - which call same persistent data store via the caching layer.
  *      Simple benchmarking purposes use
- *      -benchmark <startLineNum> <endLineNum> <iterations>
- *      to compare data beans read for two cases. ( Cache layer is present and Not present when executing
+ *      <br><b>-benchmark <-startLineNum-> <-endLineNum-> <-iterations-></b>
+ *      <br>to compare data beans read for two cases. ( Cache layer is present and Not present when executing
  *      consecutive data reads for same data items in nearby intervals )
  *      It generates LOG entries similar to below which indicates time spent for two cases in milliseconds
- *      INFO 17:13:22,652 Direct Backend took 1973 ms
- *      INFO 17:18:49,252 Via Cache took 1923 ms
- *
- * <p>In the data model, keys are the line numbers in the log file,
+ *      <br><b>INFO 17:13:22,652 Direct Backend took 1973 ms</b>
+ *      <br><b>INFO 17:18:49,252 Via Cache took 1923 ms</b>
+ * <p>
+ *  (f) For standalone/single node DistributedLogManager usage, Start the DistributedLogManager in SERVER mode.
+ *      Follow the the commands over the command line console of SERVER instance.
+ * <p>
+ * In the data model, keys are the line numbers in the log file,
  * and the values are Pageview objects, generated from
  * <code>gora-tutorial/src/main/avro/pageview.json</code>.
  *
  * <p>See the tutorial.html file in docs or go to the
  * <a href="http://gora.apache.org/docs/current/tutorial.html">
- * web site</a>for more information.</p>
+ * web site</a> for more information.</p>
  */
 
 public class DistributedLogManager {

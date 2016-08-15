@@ -250,22 +250,20 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
         }
       }
       cacheConfig.setCacheLoaderFactory(JCacheCacheFactoryBuilder
-              .factoryOfCacheLoader(this.persistentDataStore));
+              .factoryOfCacheLoader(this.persistentDataStore, keyClass, persistentClass));
       cacheConfig.setCacheWriterFactory(JCacheCacheFactoryBuilder
-              .factoryOfCacheWriter(this.persistentDataStore));
-      cacheConfig.addCacheEntryListenerConfiguration(
-              new MutableCacheEntryListenerConfiguration<>(
-                      JCacheCacheFactoryBuilder
-                              .factoryOfEntryListener(new JCacheCacheEntryListener<K, T>(cacheEntryList)),
-                      null, true, true));
+              .factoryOfCacheWriter(this.persistentDataStore, keyClass, persistentClass));
       cache = manager.createCache(persistentClass.getSimpleName(),
               cacheConfig).unwrap(ICache.class);
     } else {
       cache = manager.getCache(super.getPersistentClass().getSimpleName(),
               keyClass, persistentClass).unwrap(ICache.class);
       this.populateLocalCacheEntrySet(cache);
-      this.populateLocalCacheConfig(cache);
     }
+    cache.registerCacheEntryListener(new MutableCacheEntryListenerConfiguration<>(
+            JCacheCacheFactoryBuilder
+                    .factoryOfEntryListener(new JCacheCacheEntryListener<K, T>(cacheEntryList)),
+            null, true, true));
     LOG.info("JCache Gora datastore initialized successfully.");
   }
 
@@ -281,6 +279,10 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
       cache = manager.createCache(persistentClass.getSimpleName(),
               cacheConfig).unwrap(ICache.class);
     }
+    cache.registerCacheEntryListener(new MutableCacheEntryListenerConfiguration<>(
+            JCacheCacheFactoryBuilder
+                    .factoryOfEntryListener(new JCacheCacheEntryListener<K, T>(cacheEntryList)),
+            null, true, true));
     persistentDataStore.createSchema();
     LOG.info("Created schema on persistent store and initialized cache for persistent bean {}."
             , super.getPersistentClass().getSimpleName());
@@ -446,27 +448,7 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
       cacheEntryList.add(cacheEntryIterator.next().getKey());
     }
     cacheConfig = cache.getConfiguration(CacheConfig.class);
-    Iterator<CacheEntryListenerConfiguration<K, T>> itr =
-            cacheConfig.getCacheEntryListenerConfigurations().iterator();
-    while (itr.hasNext()) {
-      JCacheCacheEntryListenerFactory<K, T> listenerFac = (JCacheCacheEntryListenerFactory<K, T>)
-              ((MutableCacheEntryListenerConfiguration) itr.next()).getCacheEntryListenerFactory();
-      //populate transient field in Cache Entry Listener
-      listenerFac.create().setCacheEntryList(cacheEntryList);
-      //register exactly one listener on each local node either client/server
-      break;
-    }
     LOG.info("Populated local cache entry set with respect to remote cache provider.");
-  }
-
-  private void populateLocalCacheConfig(ICache<K, T> cache) {
-    cacheConfig = cache.getConfiguration(CacheConfig.class);
-    //populate transient fields in Cache Loader/Cache Listener
-    ((JCacheCacheLoaderFactory) cacheConfig.getCacheLoaderFactory())
-            .create().setDataStore(this.persistentDataStore);
-    ((JCacheCacheWriterFactory) cacheConfig.getCacheWriterFactory())
-            .create().setDataStore(this.persistentDataStore);
-    LOG.info("Populated transient cache loader/writer in local cache configuration.");
   }
 
 }

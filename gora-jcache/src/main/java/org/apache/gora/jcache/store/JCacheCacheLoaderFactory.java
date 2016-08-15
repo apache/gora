@@ -18,6 +18,9 @@
 package org.apache.gora.jcache.store;
 
 import org.apache.gora.persistency.impl.PersistentBase;
+import org.apache.gora.store.DataStoreFactory;
+import org.apache.gora.util.GoraException;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,15 +36,32 @@ public class JCacheCacheLoaderFactory<K, T extends PersistentBase>
 
   public static final long serialVersionUID = 201305101626L;
   private static final Logger LOG = LoggerFactory.getLogger(JCacheCacheLoaderFactory.class);
-  private JCacheCacheLoader<K, T> instance;
+  private transient JCacheCacheLoader<K, T> instance;
+  private Class<K> keyClass;
+  private Class<T> persistentClass;
 
-  public JCacheCacheLoaderFactory(JCacheCacheLoader<K, T> instance) {
+  public JCacheCacheLoaderFactory(JCacheCacheLoader<K, T> instance,
+                                  Class<K> keyClass,
+                                  Class<T> persistentClass) {
+    this.keyClass = keyClass;
+    this.persistentClass = persistentClass;
     LOG.info("JCache cache entry loader factory initialized successfully.");
     this.instance = instance;
   }
 
   public JCacheCacheLoader<K, T> create() {
-    return (JCacheCacheLoader<K, T>) this.instance;
+    if (this.instance != null) {
+      return (JCacheCacheLoader<K, T>) this.instance;
+    } else {
+      try {
+        this.instance = new JCacheCacheLoader<>(DataStoreFactory
+                .getDataStore(keyClass, persistentClass, new Configuration()));
+      } catch (GoraException ex) {
+        LOG.error("Couldn't initialize persistent dataStore for cache loader.", ex);
+        return null;
+      }
+      return (JCacheCacheLoader<K, T>) this.instance;
+    }
   }
 
   public boolean equals(Object other) {

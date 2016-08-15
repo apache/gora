@@ -29,13 +29,13 @@ import javax.cache.configuration.Factory;
 public class JCacheCacheFactoryBuilder {
 
   public static <K, T extends PersistentBase> Factory<JCacheCacheLoader<K, T>>
-  factoryOfCacheLoader(DataStore<K, T> dataStore) {
-    return new JCacheCacheLoaderFactory<>(new JCacheCacheLoader<>(dataStore));
+  factoryOfCacheLoader(DataStore<K, T> dataStore, Class<K> keyClass, Class<T> persistentClass) {
+    return new JCacheCacheLoaderFactory<>(new JCacheCacheLoader<>(dataStore), keyClass, persistentClass);
   }
 
   public static <K, T extends PersistentBase> Factory<JCacheCacheWriter<K, T>>
-  factoryOfCacheWriter(DataStore<K, T> dataStore) {
-    return new JCacheCacheWriterFactory<>(new JCacheCacheWriter<>(dataStore));
+  factoryOfCacheWriter(DataStore<K, T> dataStore, Class<K> keyClass, Class<T> persistentClass) {
+    return new JCacheCacheWriterFactory<>(new JCacheCacheWriter<>(dataStore), keyClass, persistentClass);
   }
 
   public static <K, T extends PersistentBase> Factory<JCacheCacheEntryListener<K, T>>

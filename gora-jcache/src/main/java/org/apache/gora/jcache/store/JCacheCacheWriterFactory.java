@@ -18,6 +18,9 @@
 package org.apache.gora.jcache.store;
 
 import org.apache.gora.persistency.impl.PersistentBase;
+import org.apache.gora.store.DataStoreFactory;
+import org.apache.gora.util.GoraException;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,15 +35,32 @@ public class JCacheCacheWriterFactory<K, T extends PersistentBase> implements Fa
 
   public static final long serialVersionUID = 201205101621L;
   private static final Logger LOG = LoggerFactory.getLogger(JCacheCacheWriterFactory.class);
-  private JCacheCacheWriter<K, T> instance;
+  private transient JCacheCacheWriter<K, T> instance;
+  private Class<K> keyClass;
+  private Class<T> persistentClass;
 
-  public JCacheCacheWriterFactory(JCacheCacheWriter<K, T> instance) {
+  public JCacheCacheWriterFactory(JCacheCacheWriter<K, T> instance,
+                                  Class<K> keyClass,
+                                  Class<T> persistentClass) {
+    this.keyClass = keyClass;
+    this.persistentClass = persistentClass;
     LOG.info("JCache cache writer factory initialized successfully.");
     this.instance = instance;
   }
 
   public JCacheCacheWriter<K, T> create() {
-    return (JCacheCacheWriter<K, T>) this.instance;
+    if (this.instance != null) {
+      return (JCacheCacheWriter<K, T>) this.instance;
+    } else {
+      try {
+        this.instance = new JCacheCacheWriter<>(DataStoreFactory
+                .getDataStore(keyClass, persistentClass, new Configuration()));
+      } catch (GoraException ex) {
+        LOG.error("Couldn't initialize persistent dataStore for cache writer.", ex);
+        return null;
+      }
+      return (JCacheCacheWriter<K, T>) this.instance;
+    }
   }
 
   public boolean equals(Object other) {
