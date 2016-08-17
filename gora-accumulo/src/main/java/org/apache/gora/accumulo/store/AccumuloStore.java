@@ -97,6 +97,7 @@ import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.AvroUtils;
 import org.apache.gora.util.GoraException;
+import org.apache.gora.util.IOUtils;
 import org.apache.hadoop.io.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -690,12 +691,9 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
           }
           // continue like a regular top-level union
         case RECORD:
-          SpecificDatumWriter<Object> writer = new SpecificDatumWriter<>(field.schema());
-          ByteArrayOutputStream os = new ByteArrayOutputStream();
-          org.apache.avro.io.BinaryEncoder encoder = EncoderFactory.get().binaryEncoder(os, null);
-          writer.write(o, encoder);
-          encoder.flush();
-          m.put(col.getFirst(), col.getSecond(), new Value(os.toByteArray()));
+          final SpecificDatumWriter<Object> writer = new SpecificDatumWriter<>(field.schema());
+          final byte[] byteData = IOUtils.serialize(writer,o);
+          m.put(col.getFirst(), col.getSecond(), new Value(byteData));
           count++;
           break;
         default:
