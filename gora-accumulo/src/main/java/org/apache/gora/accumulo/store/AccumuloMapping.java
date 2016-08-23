@@ -22,9 +22,21 @@ import java.util.Map;
 import org.apache.accumulo.core.util.Pair;
 import org.apache.hadoop.io.Text;
 
+/**
+ * Mapping definitions for Accumulo.
+ */
 public class AccumuloMapping {
+
+  /**
+   * A map of field names to Field objects containing schema's fields
+   */
   Map<String,Pair<Text,Text>> fieldMap = new HashMap<>();
+
+  /**
+   * Look up the column associated to the Avro field.
+   */
   Map<Pair<Text,Text>,String> columnMap = new HashMap<>();
+
   Map<String,String> tableConfig = new HashMap<>();
   String tableName;
   String encoder;

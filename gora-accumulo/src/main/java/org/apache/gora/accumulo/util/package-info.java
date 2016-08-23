@@ -14,32 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.gora.accumulo.util;
-
-import java.io.IOException;
-import java.io.OutputStream;
-
 /**
- * It is a implementation of {@link java.io.OutputStream} must always provide at least a method that writes one byte of output.
+ * This package contains Accumulo store related util classes.
  */
-public class FixedByteArrayOutputStream extends OutputStream {
-  
-  private int i;
-  byte out[];
-  
-  public FixedByteArrayOutputStream(byte out[]) {
-    this.out = out;
-  }
-  
-  @Override
-  public void write(int b) throws IOException {
-    out[i++] = (byte) b;
-  }
-  
-  @Override
-  public void write(byte b[], int off, int len) throws IOException {
-    System.arraycopy(b, off, out, i, len);
-    i += len;
-  }
-  
-}
+package org.apache.gora.accumulo.util;

@@ -32,12 +32,15 @@ import org.apache.gora.query.impl.ResultBase;
 import org.apache.gora.store.DataStore;
 
 /**
- * 
+ * Accumulo specific implementation of the {@link org.apache.gora.query.Result} interface.
  */
 public class AccumuloResult<K,T extends PersistentBase> extends ResultBase<K,T> {
   
   private RowIterator iterator;
 
+  /**
+   * Gets the data store used
+   */
   public AccumuloStore<K,T> getDataStore() {
     return (AccumuloStore<K,T>) super.getDataStore();
   }
@@ -53,7 +56,10 @@ public class AccumuloResult<K,T extends PersistentBase> extends ResultBase<K,T> 
     // TODO set batch size based on limit, and construct iterator later
     iterator = new RowIterator(scanner.iterator());
   }
-  
+
+  /**
+   * Gets the items reading progress
+   */
   @Override
   public float getProgress() throws IOException {
     // TODO Auto-generated method stub
@@ -64,7 +70,10 @@ public class AccumuloResult<K,T extends PersistentBase> extends ResultBase<K,T> 
   public void close() throws IOException {
     
   }
-  
+
+  /**
+   * Gets the next item
+   */
   @Override
   protected boolean nextInner() throws IOException {
     

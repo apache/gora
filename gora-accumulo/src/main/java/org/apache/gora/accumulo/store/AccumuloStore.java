@@ -106,7 +106,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 /**
- * Directs CRUD operations into Accumulo.
+ * Implementation of a Accumulo data store to be used by gora.
+ *
+ * @param <K> class to be used for the key
+ * @param <T> class to be persisted within the store
  */
 public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T> {
 
@@ -342,6 +345,15 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
     return batchWriter;
   }
 
+  /**
+   * Initialize the data store by reading the credentials, setting the client's properties up and
+   * reading the mapping file. Initialize is called when then the call to
+   * {@link org.apache.gora.store.DataStoreFactory#createDataStore} is made.
+   *
+   * @param keyClass
+   * @param persistentClass
+   * @param properties
+   */
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) {
     try{
@@ -845,6 +857,9 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
     return scanner;
   }
 
+  /**
+   * Execute the query and return the result.
+   */
   @Override
   public Result<K,T> execute(Query<K,T> query) {
     try {
@@ -974,13 +989,6 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
     throw new IllegalArgumentException(UNKOWN + clazz.getName());
   }
 
-
-
-  /**
-   * @param keyClass
-   * @param bytes
-   * @return
-   */
   @SuppressWarnings("unchecked")
   static <K> K followingKey(Encoder encoder, Class<K> clazz, byte[] per) {
 
