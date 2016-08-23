@@ -25,7 +25,8 @@ import org.ektorp.impl.ObjectMapperFactory;
 import org.ektorp.impl.jackson.EktorpJacksonModule;
 
 /**
- *
+ * This class is implemantation of {@link org.ektorp.impl.ObjectMapperFactory}.
+ * Created a object mapper instance.
  */
 public class CouchDBObjectMapperFactory implements ObjectMapperFactory {
 
@@ -34,6 +35,7 @@ public class CouchDBObjectMapperFactory implements ObjectMapperFactory {
 
   /**
    * Create a object mapper instance
+   *
    * @return
    */
   public synchronized ObjectMapper createObjectMapper() {
