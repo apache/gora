@@ -26,10 +26,10 @@
     <version>0.7-SNAPSHOT</version>
     <relativePath>../</relativePath>
   </parent>
-  <artifactId>gora-tutorial</artifactId>
+  <artifactId>gora-couchdb</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Apache Gora :: Tutorial</name>
+  <name>Apache Gora :: CouchDB</name>
   <url>http://gora.apache.org</url>
   <description>The Apache Gora open source framework provides an in-memory data model and 
     persistence for big data. Gora supports persisting to column stores, key value stores, 
@@ -51,8 +51,26 @@
 
   <properties>
     <osgi.import>*</osgi.import>
-    <osgi.export>org.apache.gora.tutorial*;version="${project.version}";-noimport:=true</osgi.export>
+    <osgi.export>org.apache.gora.couchdb*;version="${project.version}";-noimport:=true</osgi.export>
   </properties>
+
+  <profiles>
+    <profile>
+      <id>couchdb-with-test</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>2.4.2</version>
+            <configuration>
+              <skipTests>false</skipTests>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
   <build>
     <directory>target</directory>
@@ -61,15 +79,23 @@
     <testOutputDirectory>target/test-classes</testOutputDirectory>
     <testSourceDirectory>src/test/java</testSourceDirectory>
     <sourceDirectory>src/main/java</sourceDirectory>
-    <resources>
-      <resource>
-        <directory>${basedir}/src/main/resources</directory>
-      </resource>
-      <resource>
-        <directory>${basedir}/conf</directory>
-      </resource>
-    </resources>
+    <testResources>
+      <testResource>
+        <directory>${project.basedir}/src/test/conf</directory>
+        <includes>
+          <include>**/*</include>
+        </includes>
+      </testResource>
+    </testResources>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.4.2</version>
+        <configuration>
+          <skipTests>true</skipTests>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
@@ -91,75 +117,43 @@
     </plugins>
   </build>
 
+  <repositories>
+    <repository>
+      <id>clojars.org</id>
+      <url>http://clojars.org/repo</url>
+    </repository>
+  </repositories>
+
   <dependencies>
     <!-- Gora Internal Dependencies -->
     <dependency>
       <groupId>org.apache.gora</groupId>
       <artifactId>gora-core</artifactId>
+      <scope>compile</scope>
     </dependency>
 
     <dependency>
       <groupId>org.apache.gora</groupId>
-      <artifactId>gora-hbase</artifactId>
+      <artifactId>gora-core</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
     </dependency>
+
 
     <dependency>
       <groupId>org.apache.gora</groupId>
-      <artifactId>gora-jcache</artifactId>
+      <artifactId>gora-core</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>org.apache.gora</groupId>
-      <artifactId>gora-couchdb</artifactId>
-    </dependency>
+    <!-- END of Gora Internal Dependencies -->
 
-    <dependency>
-      <groupId>org.apache.gora</groupId>
-      <artifactId>gora-cassandra</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.gora</groupId>
-      <artifactId>gora-solr</artifactId>
-    </dependency>
-
-    <!-- Hadoop Dependencies -->
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-client</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.avro</groupId>
-      <artifactId>avro</artifactId>
-    </dependency>
-
-    <!-- Spark Dependencies -->
-    <dependency>
-      <groupId>org.apache.spark</groupId>
-      <artifactId>spark-core_2.10</artifactId>
-    </dependency>
-
-    <!-- Misc Dependencies -->
-    <dependency>
-      <groupId>org.jdom</groupId>
-      <artifactId>jdom</artifactId>
-    </dependency>
-
-    <!-- Logging Dependencies -->
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>javax.jms</groupId>
-          <artifactId>jms</artifactId>
-        </exclusion>
-      </exclusions>
+      <scope>compile</scope>
+      <optional>true</optional>
     </dependency>
 
     <!-- Apache CouchDB java client -->
@@ -169,6 +163,73 @@
       <version>1.4.2</version>
     </dependency>
 
+
+    <dependency>
+      <groupId>org.apache.avro</groupId>
+      <artifactId>avro</artifactId>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- Misc Dependencies -->
+    <dependency>
+      <groupId>org.jdom</groupId>
+      <artifactId>jdom</artifactId>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- Logging Dependencies -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <scope>runtime</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>javax.jms</groupId>
+          <artifactId>jms</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <!-- END of Logging Dependencies -->
+
+    <!-- Testing Dependencies -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-minicluster</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>testcontainers</artifactId>
+      <version>1.1.0</version>
+    </dependency>
+
+    <!-- END of Testing Dependencies -->
   </dependencies>
 
 </project>
