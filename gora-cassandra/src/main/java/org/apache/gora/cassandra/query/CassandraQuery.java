@@ -26,24 +26,48 @@ import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.QueryBase;
 import org.apache.gora.store.DataStore;
 
+/**
+ * Cassandra specific implementation of the {@link Query} interface.
+ */
 public class CassandraQuery<K, T extends PersistentBase> extends QueryBase<K, T> {
 
+  /**
+   * Cassandra specific implementation of the {@link Query} interface.
+   */
   private Query<K, T> query;
   
   /**
    * Maps Avro fields to Cassandra columns.
    */
   private Map<String, List<String>> familyMap;
-  
+
+  /**
+   * Constructor for the query
+   */
   public CassandraQuery() {
     super(null);
   }
+
+  /**
+   * Constructor for the query
+   *
+   * @param dataStore Data store used
+   *
+   */
   public CassandraQuery(DataStore<K, T> dataStore) {
     super(dataStore);
   }
+
+  /**
+   * Setter of familyMap.
+   */
   public void setFamilyMap(Map<String, List<String>> familyMap) {
     this.familyMap = familyMap;
   }
+
+  /**
+   * Getter of familyMap.
+   */
   public Map<String, List<String>> getFamilyMap() {
     return familyMap;
   }
@@ -61,9 +85,19 @@ public class CassandraQuery<K, T extends PersistentBase> extends QueryBase<K, T>
     }
     return columns;
   }
+
+  /**
+   *
+   * @return get {@link org.apache.gora.cassandra.query.CassandraQuery}
+   */
   public Query<K, T> getQuery() {
     return query;
   }
+
+  /**
+   *
+   * @return set a {@link org.apache.gora.cassandra.query.CassandraQuery}
+   */
   public void setQuery(Query<K, T> query) {
     this.query = query;
   }

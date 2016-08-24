@@ -31,6 +31,9 @@ import org.jdom.input.SAXBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A builder for creating the mapper.
+ */
 public class CassandraMappingManager {
   
   public static final Logger LOG = LoggerFactory.getLogger(CassandraMappingManager.class);
