@@ -24,6 +24,7 @@ import org.apache.gora.filter.SingleFieldValueFilter;
 import org.apache.gora.infinispan.store.InfinispanStore;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
+import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.QueryBase;
 import org.apache.hadoop.io.WritableUtils;
 import org.infinispan.avro.client.Support;
@@ -43,7 +44,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-/*
+/**
+ * Infinispan specific implementation of the {@link Query} interface.
  * * @author Pierre Sutra
  */
 public class InfinispanQuery<K,T extends PersistentBase>
