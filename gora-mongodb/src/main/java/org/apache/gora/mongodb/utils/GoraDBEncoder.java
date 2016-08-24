@@ -25,6 +25,9 @@ import com.mongodb.DBEncoder;
 import com.mongodb.DBEncoderFactory;
 import com.mongodb.DefaultDBEncoder;
 
+/**
+ * BSON encoder for BSONObject instances.
+ */
 public class GoraDBEncoder extends DefaultDBEncoder {
 
   public static DBEncoderFactory FACTORY = new DefaultFactory();
