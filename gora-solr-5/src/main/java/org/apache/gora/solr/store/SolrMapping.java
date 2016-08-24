@@ -19,6 +19,9 @@ package org.apache.gora.solr.store;
 
 import java.util.HashMap;
 
+/**
+ * Mapping definitions for Solr.
+ */
 public class SolrMapping {
   HashMap<String,String> mapping;
   String coreName;
