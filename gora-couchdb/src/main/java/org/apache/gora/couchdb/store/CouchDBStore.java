@@ -198,7 +198,7 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
   @Override
   public T get(final K key, final String[] fields) {
 
-    final Map result;
+    final Map<String, Object>  result;
     try {
       result = db.get(Map.class, key.toString());
       return newInstance(result, getFieldsToQuery(fields));
