@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 /**
- * This package contains all the unit tests for basic CRUD operations
- * functionality of the CouchDB dataStore.
+ * This package contains CouchDB datastore related all classes.
  */
-package org.apache.gora.couchdb.store;
+package org.apache.gora.couchdb;
