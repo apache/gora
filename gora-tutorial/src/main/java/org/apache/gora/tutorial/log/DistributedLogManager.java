@@ -98,13 +98,13 @@ import java.util.StringTokenizer;
  * <p>
  * 3. Now use CLIENT's command line console to forward cache queries to cluster.
  * <p>
- *  (a) <b>-parse cache <-input_log_file-></b> - This will parse logs from logs file and put Pageview data beans to
+ *  (a) <b>-parse cache #input_log_file</b> - This will parse logs from logs file and put Pageview data beans to
  *      persistent store via the cache. Notice following logs
  *      <br><b>INFO 19:46:34,833 Written data bean to persistent datastore on key 45.</b>
  *      <br>on SERVER instance of DistributedLogManager.
  *      <br>Notice the persistent data bean writes are LOAD BALANCED among SERVER instances.
  * <p>
- *  (b) <b>-parse persistent <-input_log_file-></b> - This will write parsed log data beans directly to persistent store.
+ *  (b) <b>-parse persistent #input_log_file</b> - This will write parsed log data beans directly to persistent store.
  *      NOT via cache.
  * <p>
  *  (c) Executing with (a) will create cache entry per each data bean key on each SERVER and CLIENT instances. Since
@@ -116,7 +116,7 @@ import java.util.StringTokenizer;
  *  (d) Executing with (b) will not create cache entries on keys since the data beans were directly put into
  *      to persistent store.
  *      Executing following command
- *      <br><b>get <-lineNum-></b>
+ *      <br><b>-get #lineNum</b>
  *      <br>Data will be first loaded from persistent store to cache from one of SERVER instances. Then cache
  *      entry on given key will be created on all SERVER/CLIENT instances.
  *      Notice the persistent data bean load on SINGLE SERVER instance. Only one SERVER instance will handle this work.
@@ -126,7 +126,7 @@ import java.util.StringTokenizer;
  *      <br>Once the cache entry is created, data bean is now available to be retrieved from cache without reaching the
  *      persistent store.
  *      Execute the above command consecutively for several times.
- *      <br><b>-get <-lineNum-></b>
+ *      <br><b>-get #lineNum</b>
  *      Notice there will be NO log entry similar to below
  *      <br><b>INFO 17:13:22,652 Loaded data bean from persistent datastore on key 4.</b>
  *      <br>Since there will be no data bean load from persistent data store and the data bean is now loaded from
@@ -136,7 +136,7 @@ import java.util.StringTokenizer;
  *      dataStore - which call directly underline persistent data store.
  *      cacheStore - which call same persistent data store via the caching layer.
  *      Simple benchmarking purposes use
- *      <br><b>-benchmark <-startLineNum-> <-endLineNum-> <-iterations-></b>
+ *      <br><b>-benchmark #startLineNum #endLineNum #iterations</b>
  *      <br>to compare data beans read for two cases. ( Cache layer is present and Not present when executing
  *      consecutive data reads for same data items in nearby intervals )
  *      It generates LOG entries similar to below which indicates time spent for two cases in milliseconds
