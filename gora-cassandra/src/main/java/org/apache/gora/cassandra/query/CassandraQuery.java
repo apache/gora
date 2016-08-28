@@ -96,7 +96,7 @@ public class CassandraQuery<K, T extends PersistentBase> extends QueryBase<K, T>
 
   /**
    *
-   * @return set a {@link org.apache.gora.cassandra.query.CassandraQuery}
+   * @param query set a {@link org.apache.gora.cassandra.query.CassandraQuery}
    */
   public void setQuery(Query<K, T> query) {
     this.query = query;
