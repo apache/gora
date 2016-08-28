@@ -15,9 +15,7 @@
  * limitations under the License.
  */
 /**
- * Tests for <code>gora-dynamodb</code> including
- * the test driver for {@link org.apache.gora.dynamodb.GoraDynamoDBTestDriver}
- * and all the unit tests for basic CRUD operations functionality of the
- * DynamoDB dataStore.
+ * This package contains the query and store implementation and
+ * all their representing classes for Avro .
  */
-package org.apache.gora.dynamodb;
+package org.apache.gora.avro;

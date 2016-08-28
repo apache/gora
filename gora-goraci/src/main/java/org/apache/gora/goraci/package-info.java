@@ -15,9 +15,8 @@
  * limitations under the License.
  */
 /**
- * Tests for <code>gora-dynamodb</code> including
- * the test driver for {@link org.apache.gora.dynamodb.GoraDynamoDBTestDriver}
- * and all the unit tests for basic CRUD operations functionality of the
- * DynamoDB dataStore.
+ * A custom testing suite called GoraCI (Continuous Ingestion) which
+ * stress tests Gora functionality at scale. This package contains releated
+ * classes.
  */
-package org.apache.gora.dynamodb;
+package org.apache.gora.goraci;

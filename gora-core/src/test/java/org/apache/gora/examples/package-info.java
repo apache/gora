@@ -15,9 +15,6 @@
  * limitations under the License.
  */
 /**
- * Tests for <code>gora-dynamodb</code> including
- * the test driver for {@link org.apache.gora.dynamodb.GoraDynamoDBTestDriver}
- * and all the unit tests for basic CRUD operations functionality of the
- * DynamoDB dataStore.
+ * Creates and stores some data to be used in the tests.
  */
-package org.apache.gora.dynamodb;
+package org.apache.gora.examples;

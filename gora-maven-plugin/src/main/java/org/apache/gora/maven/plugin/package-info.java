@@ -15,9 +15,7 @@
  * limitations under the License.
  */
 /**
- * Tests for <code>gora-dynamodb</code> including
- * the test driver for {@link org.apache.gora.dynamodb.GoraDynamoDBTestDriver}
- * and all the unit tests for basic CRUD operations functionality of the
- * DynamoDB dataStore.
+ * This package contains some classes that helps to generate Java code
+ * from Apache Avro *.json files using Apache Gora compiler.
  */
-package org.apache.gora.dynamodb;
+package org.apache.gora.maven.plugin;

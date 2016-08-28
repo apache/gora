@@ -15,9 +15,7 @@
  * limitations under the License.
  */
 /**
- * Tests for <code>gora-dynamodb</code> including
- * the test driver for {@link org.apache.gora.dynamodb.GoraDynamoDBTestDriver}
- * and all the unit tests for basic CRUD operations functionality of the
- * DynamoDB dataStore.
+ * Tests for <code>gora-jcache</code> including
+ * the test driver for {@link org.apache.gora.jcache.GoraHazelcastTestDriver}
  */
-package org.apache.gora.dynamodb;
+package org.apache.gora.jcache;

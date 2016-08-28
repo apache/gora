@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 /**
- * Tests for <code>gora-dynamodb</code> including
- * the test driver for {@link org.apache.gora.dynamodb.GoraDynamoDBTestDriver}
- * and all the unit tests for basic CRUD operations functionality of the
- * DynamoDB dataStore.
+ * Gora source code is organized in a modular architecture. The <b>gora-core</b>
+ * module is the main module which contains the core of the code.
+ * All other modules depend on the gora-core module. Each data store backend
+ * in Gora resides in it's own module. The documentation for the specific module
+ * can be found at the module's documentation directory.
  */
-package org.apache.gora.dynamodb;
+package org.apache.gora;
