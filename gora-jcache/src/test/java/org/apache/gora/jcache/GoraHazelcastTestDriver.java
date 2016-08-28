@@ -41,16 +41,14 @@ public class GoraHazelcastTestDriver extends GoraTestDriver {
   }
 
   @Override
-  public void setUpClass() throws Exception {
-    super.setUpClass();
+  public void setUpClass() {
     log.info("Starting Hazelcast server side cache provider.");
     Config config = new ClasspathXmlConfig(CONFIG);
     hazelcastInstance = Hazelcast.newHazelcastInstance(config);
   }
 
   @Override
-  public void tearDownClass() throws Exception {
-    super.tearDownClass();
+  public void tearDownClass() {
     log.info("Stopping Hazelcast server side cache provider.");
     hazelcastInstance.shutdown();
   }

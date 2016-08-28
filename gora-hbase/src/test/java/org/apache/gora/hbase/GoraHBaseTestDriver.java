@@ -43,15 +43,13 @@ public class GoraHBaseTestDriver extends GoraTestDriver {
   }
   
   @Override
-  public void setUpClass() throws Exception {
-    super.setUpClass();
+  public void setUpClass() {
     conf = getConf();
     log.info("Setting up HBase Test Driver");
   }
 
   @Override
-  public void tearDownClass() throws Exception {
-    super.tearDownClass();
+  public void tearDownClass() {
     log.info("Teardown HBase test driver");
   }
 

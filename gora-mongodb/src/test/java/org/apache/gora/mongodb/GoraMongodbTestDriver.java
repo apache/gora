@@ -37,6 +37,8 @@ import org.apache.gora.mongodb.store.MongoStoreParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+
 /**
  * Driver to set up an embedded MongoDB database instance for use in our
  * unit tests. We use embedded mongodb which is available from
@@ -68,9 +70,7 @@ public class GoraMongodbTestDriver extends GoraTestDriver {
    * Initiate the MongoDB server on the default port
    */
   @Override
-  public void setUpClass() throws Exception {
-    super.setUpClass();
-
+  public void setUpClass() throws IOException {
     IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder()
             .defaultsWithLogger(Command.MongoD, log)
             .processOutput(ProcessOutput.getDefaultInstanceSilent())
@@ -104,9 +104,8 @@ public class GoraMongodbTestDriver extends GoraTestDriver {
    * Tear the server down
    */
   @Override
-  public void tearDownClass() throws Exception {
+  public void tearDownClass() {
     log.info("Shutting down mongodb server...");
-    super.tearDownClass();
     _mongod.stop();
     _mongodExe.stop();
   }

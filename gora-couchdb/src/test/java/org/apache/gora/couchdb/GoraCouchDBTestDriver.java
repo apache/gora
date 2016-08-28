@@ -51,8 +51,14 @@ public class GoraCouchDBTestDriver extends GoraTestDriver {
   }
 
   @Override
-  public void setUpClass() throws Exception {
+  public void setUpClass() {
+    log.info("Setting up CouchDB Test Driver");
     properties.put(CouchDBParameters.PROP_COUCHDB_PORT, couchdbContainer.getMappedPort(5984).toString());
+  }
+
+  @Override
+  public void tearDownClass() {
+    log.info("Teardown CouchDB test driver");
   }
 
   /**
