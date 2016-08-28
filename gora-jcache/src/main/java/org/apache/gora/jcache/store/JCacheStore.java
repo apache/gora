@@ -410,6 +410,7 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
         PartitionQueryImpl<K, T> partition = new PartitionQueryImpl<>(
                 query, memberOwnedCacheEntries.first(),
                 memberOwnedCacheEntries.last(), member.getSocketAddress().getHostString());
+        partition.setConf(this.getConf());
         partitions.add(partition);
       }
     } catch (java.lang.Exception ex) {
