@@ -25,7 +25,7 @@ import java.util.Map;
 import org.apache.gora.persistency.Persistent;
 
 /**
- * Base classs implementing common functionality for Web services 
+ * Base class implementing common functionality for Web services
  * backed persistent classes.
  */
 public abstract class PersistentWSBase implements Persistent  {
