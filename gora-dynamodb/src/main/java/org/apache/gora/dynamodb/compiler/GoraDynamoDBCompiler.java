@@ -46,7 +46,7 @@ import com.amazonaws.services.dynamodbv2.model.KeyType;
 
 /** 
  * Generate specific Java classes for defined schemas. 
- * Different from the {@link org.apache.gora.compiler.GoraCompiler}, 
+ * Different from the @see org.apache.gora.compiler.GoraCompiler,
  * which uses an .avsc or .json schema definition, this compiler 
  * expects an XML schema file as input.
  */
