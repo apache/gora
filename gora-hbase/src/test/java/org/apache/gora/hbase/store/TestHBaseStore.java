@@ -26,6 +26,9 @@ import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.DataStoreTestBase;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTable;
@@ -49,17 +52,17 @@ import static org.junit.Assert.assertNotNull;
 public class TestHBaseStore extends DataStoreTestBase {
 
   private Configuration conf;
-  
+
   static {
     setTestDriver(new GoraHBaseTestDriver());
   }
-  
+
   @Override
   public void setUp() throws Exception {
     super.setUp();
     conf = getTestDriver().getConf();
   }
-    
+
   @SuppressWarnings("unchecked")
   @Override
   protected DataStore<String, Employee> createEmployeeDataStore()
@@ -83,25 +86,27 @@ public class TestHBaseStore extends DataStoreTestBase {
   @Override
   public void assertSchemaExists(String schemaName) throws Exception {
     HBaseAdmin admin = getTestDriver().getHbaseUtil().getHBaseAdmin();
-    assertTrue(admin.tableExists(schemaName));
+    assertTrue(admin.tableExists(TableName.valueOf(schemaName)));
   }
 
   @Override
-  public void assertPutArray() throws IOException { 
-    HTable table = new HTable(conf,"WebPage");
+  public void assertPutArray() throws IOException {
+    Connection connection = ConnectionFactory.createConnection(conf);
+    HTable table = (HTable)connection.getTable(TableName.valueOf("WebPage"));
+    //HTable table = new HTable(conf,"WebPage");
     Get get = new Get(Bytes.toBytes("com.example/http"));
     org.apache.hadoop.hbase.client.Result result = table.get(get);
-    
+
     assertEquals(result.getFamilyMap(Bytes.toBytes("parsedContent")).size(), 4);
     assertTrue(Arrays.equals(result.getValue(Bytes.toBytes("parsedContent")
         ,Bytes.toBytes(0)), Bytes.toBytes("example")));
-    
+
     assertTrue(Arrays.equals(result.getValue(Bytes.toBytes("parsedContent")
         ,Bytes.toBytes(3)), Bytes.toBytes("example.com")));
     table.close();
   }
-  
-  
+
+
   /**
    * Asserts that writing bytes actually works at low level in HBase.
    * Checks writing null unions too.
@@ -110,10 +115,12 @@ public class TestHBaseStore extends DataStoreTestBase {
   public void assertPutBytes(byte[] contentBytes) throws IOException {    
 
     // Check first the parameter "contentBytes" if written+read right.
-    HTable table = new HTable(conf,"WebPage");
+    Connection connection = ConnectionFactory.createConnection(conf);
+    HTable table = (HTable)connection.getTable(TableName.valueOf("WebPage"));
+    //HTableHTable table = new HTable(conf,"WebPage");
     Get get = new Get(Bytes.toBytes("com.example/http"));
     org.apache.hadoop.hbase.client.Result result = table.get(get);
-    
+
     byte[] actualBytes = result.getValue(Bytes.toBytes("content"), null);
     assertNotNull(actualBytes);
     assertTrue(Arrays.equals(contentBytes, actualBytes));
@@ -121,7 +128,7 @@ public class TestHBaseStore extends DataStoreTestBase {
 
     // Since "content" is an optional field, we are forced to reopen the DataStore
     // to retrieve the union correctly
-    
+
     // Test writing+reading a null value. FIELD in HBASE MUST become DELETED
     WebPage page = webPageStore.get("com.example/http") ;
     page.setContent(null) ;
@@ -131,13 +138,14 @@ public class TestHBaseStore extends DataStoreTestBase {
     page = webPageStore.get("com.example/http") ;
     assertNull(page.getContent()) ;
     // Check directly with HBase
-    table = new HTable(conf,"WebPage");
+    table = (HTable)connection.getTable(TableName.valueOf("WebPage"));
+    //HTabletable = new HTable(conf,"WebPage");
     get = new Get(Bytes.toBytes("com.example/http"));
     result = table.get(get);
     actualBytes = result.getValue(Bytes.toBytes("content"), null);
     assertNull(actualBytes);
     table.close();
-    
+
     // Test writing+reading an empty bytes field. FIELD in HBASE MUST 
     // become EMPTY (byte[0])
     page = webPageStore.get("com.example/http") ;
@@ -148,7 +156,8 @@ public class TestHBaseStore extends DataStoreTestBase {
     page = webPageStore.get("com.example/http") ;
     assertTrue(Arrays.equals("".getBytes(Charset.defaultCharset()),page.getContent().array())) ;
     // Check directly with HBase
-    table = new HTable(conf,"WebPage");
+    table = (HTable)connection.getTable(TableName.valueOf("WebPage"));
+    //HTabletable = new HTable(conf,"WebPage");
     get = new Get(Bytes.toBytes("com.example/http"));
     result = table.get(get);
     actualBytes = result.getValue(Bytes.toBytes("content"), null);
@@ -156,7 +165,7 @@ public class TestHBaseStore extends DataStoreTestBase {
     assertEquals(0, actualBytes.length) ;
     table.close();
   }
-  
+
   /**
    * Checks that when writing a top level union <code>['null','type']</code> 
    * the value is written in raw format
@@ -165,7 +174,7 @@ public class TestHBaseStore extends DataStoreTestBase {
   @Test
   public void assertTopLevelUnions() throws Exception {
     WebPage page = webPageStore.newPersistent();
-    
+
     // Write webpage data
     page.setUrl(new Utf8("http://example.com"));
     byte[] contentBytes = "example content in example.com".getBytes(Charset.defaultCharset());
@@ -173,19 +182,21 @@ public class TestHBaseStore extends DataStoreTestBase {
     page.setContent(buff);
     webPageStore.put("com.example/http", page);
     webPageStore.flush() ;
-    
+
     // Read directly from HBase
-    HTable table = new HTable(conf,"WebPage");
+    Connection connection = ConnectionFactory.createConnection(conf);
+    HTable table = (HTable)connection.getTable(TableName.valueOf("WebPage"));
+    //HTableHTable table = new HTable(conf,"WebPage");
     Get get = new Get(Bytes.toBytes("com.example/http"));
     org.apache.hadoop.hbase.client.Result result = table.get(get);
 
     byte[] bytesRead = result.getValue(Bytes.toBytes("content"), null);
-    
+
     assertNotNull(bytesRead) ;
     assertTrue(Arrays.equals(bytesRead, contentBytes));
     table.close();
   }
-  
+
   /**
    * Checks that when writing a top level union <code>['null','type']</code> 
    * with the option <code>RAW_ROOT_FIELDS_OPTION=true</code>
@@ -197,16 +208,18 @@ public class TestHBaseStore extends DataStoreTestBase {
   @Test
   public void assertTopLevelUnionsNull() throws Exception {
     WebPage page = webPageStore.newPersistent();
-    
+
     // Write webpage data
     page.setUrl(new Utf8("http://example.com"));
     page.setContent(null);     // This won't change internal field status to dirty, so
     page.setDirty("content") ; // need to change it manually
     webPageStore.put("com.example/http", page);
     webPageStore.flush() ;
-    
+
     // Read directly from HBase
-    HTable table = new HTable(conf,"WebPage");
+    Connection connection = ConnectionFactory.createConnection(conf);
+    HTable table = (HTable)connection.getTable(TableName.valueOf("WebPage"));
+    //HTableHTable table = new HTable(conf,"WebPage");
     Get get = new Get(Bytes.toBytes("com.example/http"));
     org.apache.hadoop.hbase.client.Result result = table.get(get);
     table.close();
@@ -215,13 +228,14 @@ public class TestHBaseStore extends DataStoreTestBase {
     assertNull(webPageStore.get("com.example/http", new String[]{"content"})) ;
     assertTrue(contentBytes == null || contentBytes.length == 0) ;
   }
-  
+
   @Override
   public void assertPutMap() throws IOException {
-    HTable table = new HTable(conf,"WebPage");
+    Connection connection = ConnectionFactory.createConnection(conf);
+    HTable table = (HTable)connection.getTable(TableName.valueOf("WebPage"));
     Get get = new Get(Bytes.toBytes("com.example/http"));
     org.apache.hadoop.hbase.client.Result result = table.get(get);
-    
+
     byte[] anchor2Raw = result.getValue(Bytes.toBytes("outlinks")
         , Bytes.toBytes("http://example2.com"));
     assertNotNull(anchor2Raw);
@@ -245,13 +259,13 @@ public class TestHBaseStore extends DataStoreTestBase {
   @Ignore("We need to skip this test since gora considers endRow inclusive, while its exclusive for HBase.")
   @Override
   public void testQueryKeyRange() throws IOException {
-     //TODO: We should raise an issue for HBase to allow us to specify if the endRow will be inclusive or exclusive.
+    //TODO: We should raise an issue for HBase to allow us to specify if the endRow will be inclusive or exclusive.
   }
 
   @Ignore("We need to skip this test since gora considers endRow inclusive, while its exclusive for HBase.")
   @Override
   public void testDeleteByQuery() throws IOException {
-   //TODO: We should raise an issue for HBase to allow us to specify if the endRow will be inclusive or exclusive.
+    //TODO: We should raise an issue for HBase to allow us to specify if the endRow will be inclusive or exclusive.
   }
 
 }

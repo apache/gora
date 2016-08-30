@@ -29,6 +29,8 @@ import org.apache.hadoop.hbase.HRegionLocation;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Append;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Durability;
 import org.apache.hadoop.hbase.client.Get;
@@ -65,13 +67,13 @@ public class HBaseTableConnection implements HTableInterface {
    * drawbacks that are only solved in later releases.
    * 
    */
-  
+
   private final Configuration conf;
   private final ThreadLocal<HTable> tables;
   private final BlockingQueue<HTable> pool = new LinkedBlockingQueue<>();
   private final boolean autoFlush;
   private final TableName tableName;
-  
+
   /**
    * Instantiate new connection.
    * 
@@ -87,23 +89,25 @@ public class HBaseTableConnection implements HTableInterface {
     this.tableName = TableName.valueOf(tableName);
     this.autoFlush = autoflush;
   }
-  
+
   private HTable getTable() throws IOException {
     HTable table = tables.get();
     if (table == null) {
-      table = new HTable(conf, tableName) {
-        @Override
-        public synchronized void flushCommits() throws RetriesExhaustedWithDetailsException, InterruptedIOException {
-          super.flushCommits();
-        }
-      };
-      table.setAutoFlushTo(autoFlush);
+      Connection connection = ConnectionFactory.createConnection(conf);
+      table = (HTable)connection.getTable(tableName);
+      //      table = new HTable(conf, tableName) {
+      //        @Override
+      //        public synchronized void flushCommits() throws IOException,RetriesExhaustedWithDetailsException, InterruptedIOException {
+      //          super.flushCommits();
+      //        }
+      //      };
+      //table.setAutoFlushTo(autoFlush);
       pool.add(table); //keep track
       tables.set(table);
     }
     return table;
   }
-  
+
   @Override
   public void close() throws IOException {
     // Flush and close all instances.
@@ -133,18 +137,18 @@ public class HBaseTableConnection implements HTableInterface {
 
   /**
    * getStartEndKeys provided by {@link HTable} but not {@link HTableInterface}.
-   * @see HTable#getStartEndKeys()
+   * @see RegionLocator#getStartEndKeys()
    */
   public Pair<byte[][], byte[][]> getStartEndKeys() throws IOException {
-    return getTable().getStartEndKeys();
+    return getTable().getRegionLocator().getStartEndKeys();
   }
   /**
    * getRegionLocation provided by {@link HTable} but not 
    * {@link HTableInterface}.
-   * @see HTable#getRegionLocation(byte[])
+   * @see RegionLocator#getRegionLocation(byte[])
    */
   public HRegionLocation getRegionLocation(final byte[] bs) throws IOException {
-    return getTable().getRegionLocation(bs);
+    return getTable().getRegionLocator().getRegionLocation(bs);
   }
 
   @Override
@@ -167,10 +171,10 @@ public class HBaseTableConnection implements HTableInterface {
     return getTable().get(gets);
   }
 
-  @Override
-  public Result getRowOrBefore(byte[] row, byte[] family) throws IOException {
-    return getTable().getRowOrBefore(row, family);
-  }
+  //  @Override
+  //  public Result getRowOrBefore(byte[] row, byte[] family) throws IOException {
+  //    return getTable().getRowOrBefore(row, family);
+  //  }
 
   @Override
   public ResultScanner getScanner(Scan scan) throws IOException {
@@ -212,7 +216,7 @@ public class HBaseTableConnection implements HTableInterface {
   @Override
   public void delete(List<Delete> deletes) throws IOException {
     getTable().delete(deletes);
-    
+
   }
 
   @Override
@@ -226,11 +230,11 @@ public class HBaseTableConnection implements HTableInterface {
     return getTable().increment(increment);
   }
 
-  @Override
-  public long incrementColumnValue(byte[] row, byte[] family, byte[] qualifier,
-      long amount) throws IOException {
-    return getTable().incrementColumnValue(row, family, qualifier, amount);
-  }
+  //  @Override
+  //  public long incrementColumnValue(byte[] row, byte[] family, byte[] qualifier,
+  //      long amount) throws IOException {
+  //    return getTable().incrementColumnValue(row, family, qualifier, amount);
+  //  }
 
   @Deprecated
   @Override
@@ -251,7 +255,7 @@ public class HBaseTableConnection implements HTableInterface {
   public void batch(List<? extends Row> actions, Object[] results)
       throws IOException, InterruptedException {
     getTable().batch(actions, results);
-    
+
   }
 
   @Override
@@ -267,7 +271,6 @@ public class HBaseTableConnection implements HTableInterface {
   @Override
   public void setAutoFlush(boolean autoFlush) {
     // TODO Auto-generated method stub
-    
   }
 
   @Override
@@ -291,25 +294,25 @@ public class HBaseTableConnection implements HTableInterface {
     return tableName;
   }
 
-  @Override
-  public Boolean[] exists(List<Get> gets) throws IOException {
-    return getTable().exists(gets);
-  }
+  //  @Override
+  //  public Boolean[] exists(List<Get> gets) throws IOException {
+  //    return getTable().exists(gets);
+  //  }
 
   @Override
   public <R> void
-      batchCallback(List<? extends Row> actions, Object[] results, Callback<R> callback)
-          throws IOException, InterruptedException {
+  batchCallback(List<? extends Row> actions, Object[] results, Callback<R> callback)
+      throws IOException, InterruptedException {
     getTable().batchCallback(actions, results, callback);
-    
+
   }
 
-  @Deprecated
-  @Override
-  public <R> Object[] batchCallback(List<? extends Row> actions, Callback<R> callback)
-      throws IOException, InterruptedException {
-    return getTable().batchCallback(actions, callback);
-  }
+  //  @Deprecated
+  //  @Override
+  //  public <R> Object[] batchCallback(List<? extends Row> actions, Callback<R> callback)
+  //      throws IOException, InterruptedException {
+  //    return getTable().batchCallback(actions, callback);
+  //  }
 
   @Override
   public long incrementColumnValue(byte[] row, byte[] family, byte[] qualifier, long amount,
@@ -350,21 +353,74 @@ public class HBaseTableConnection implements HTableInterface {
   @Override
   public <R extends Message> void batchCoprocessorService(MethodDescriptor methodDescriptor,
       Message request, byte[] startKey, byte[] endKey, R responsePrototype, Callback<R> callback)
-      throws Throwable {
+          throws Throwable {
     getTable().batchCoprocessorService(methodDescriptor, request, startKey, endKey, responsePrototype, callback);
-    
+
   }
 
-  @Deprecated
-  @Override
-  public Object[] batch(List<? extends Row> actions) throws IOException, InterruptedException {
-    return getTable().batch(actions);
-  }
+  //  @Deprecated
+  //  @Override
+  //  public Object[] batch(List<? extends Row> actions) throws IOException, InterruptedException {
+  //    return getTable().batch(actions);
+  //  }
 
   @Override
   public boolean checkAndMutate(byte[] arg0, byte[] arg1, byte[] arg2, CompareOp arg3, byte[] arg4,
       RowMutations arg5) throws IOException {
     // TODO Auto-generated method stub
     return false;
+  }
+
+  @Override
+  public Object[] batch(List<? extends Row> arg0)
+      throws IOException, InterruptedException {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public <R> Object[] batchCallback(List<? extends Row> arg0, Callback<R> arg1)
+      throws IOException, InterruptedException {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public boolean checkAndDelete(byte[] arg0, byte[] arg1, byte[] arg2,
+      CompareOp arg3, byte[] arg4, Delete arg5) throws IOException {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  @Override
+  public boolean checkAndPut(byte[] arg0, byte[] arg1, byte[] arg2,
+      CompareOp arg3, byte[] arg4, Put arg5) throws IOException {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  @Override
+  public boolean[] existsAll(List<Get> arg0) throws IOException {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public long incrementColumnValue(byte[] arg0, byte[] arg1, byte[] arg2,
+      long arg3) throws IOException {
+    // TODO Auto-generated method stub
+    return 0;
+  }
+
+  @Override
+  public Boolean[] exists(List<Get> arg0) throws IOException {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Result getRowOrBefore(byte[] arg0, byte[] arg1) throws IOException {
+    // TODO Auto-generated method stub
+    return null;
   }
 }
