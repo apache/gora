@@ -26,9 +26,8 @@ import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.DataStoreTestBase;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HBaseAdmin;
-import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -87,8 +86,10 @@ public class TestHBaseStore extends DataStoreTestBase {
   }
 
   @Override
-  public void assertPutArray() throws IOException { 
-    HTable table = new HTable(conf,"WebPage");
+  public void assertPutArray() throws IOException {
+    Connection conn = ConnectionFactory.createConnection(conf);
+    TableName webPageTab = TableName.valueOf("WebPage");
+    Table table = conn.getTable(webPageTab);
     Get get = new Get(Bytes.toBytes("com.example/http"));
     org.apache.hadoop.hbase.client.Result result = table.get(get);
     
@@ -100,8 +101,7 @@ public class TestHBaseStore extends DataStoreTestBase {
         ,Bytes.toBytes(3)), Bytes.toBytes("example.com")));
     table.close();
   }
-  
-  
+
   /**
    * Asserts that writing bytes actually works at low level in HBase.
    * Checks writing null unions too.
@@ -110,7 +110,10 @@ public class TestHBaseStore extends DataStoreTestBase {
   public void assertPutBytes(byte[] contentBytes) throws IOException {    
 
     // Check first the parameter "contentBytes" if written+read right.
-    HTable table = new HTable(conf,"WebPage");
+    Connection conn = ConnectionFactory.createConnection(conf);
+    TableName webPageTab = TableName.valueOf("WebPage");
+    Table table = conn.getTable(webPageTab);
+
     Get get = new Get(Bytes.toBytes("com.example/http"));
     org.apache.hadoop.hbase.client.Result result = table.get(get);
     
@@ -131,7 +134,7 @@ public class TestHBaseStore extends DataStoreTestBase {
     page = webPageStore.get("com.example/http") ;
     assertNull(page.getContent()) ;
     // Check directly with HBase
-    table = new HTable(conf,"WebPage");
+    table = conn.getTable(webPageTab);
     get = new Get(Bytes.toBytes("com.example/http"));
     result = table.get(get);
     actualBytes = result.getValue(Bytes.toBytes("content"), null);
@@ -148,6 +151,8 @@ public class TestHBaseStore extends DataStoreTestBase {
     page = webPageStore.get("com.example/http") ;
     assertTrue(Arrays.equals("".getBytes(Charset.defaultCharset()),page.getContent().array())) ;
     // Check directly with HBase
+
+
     table = new HTable(conf,"WebPage");
     get = new Get(Bytes.toBytes("com.example/http"));
     result = table.get(get);
@@ -206,7 +211,9 @@ public class TestHBaseStore extends DataStoreTestBase {
     webPageStore.flush() ;
     
     // Read directly from HBase
-    HTable table = new HTable(conf,"WebPage");
+    Connection conn = ConnectionFactory.createConnection(conf);
+    TableName webPageTab = TableName.valueOf("WebPage");
+    Table table = conn.getTable(webPageTab);
     Get get = new Get(Bytes.toBytes("com.example/http"));
     org.apache.hadoop.hbase.client.Result result = table.get(get);
     table.close();
@@ -218,7 +225,9 @@ public class TestHBaseStore extends DataStoreTestBase {
   
   @Override
   public void assertPutMap() throws IOException {
-    HTable table = new HTable(conf,"WebPage");
+    Connection conn = ConnectionFactory.createConnection(conf);
+    TableName webPageTab = TableName.valueOf("WebPage");
+    Table table = conn.getTable(webPageTab);
     Get get = new Get(Bytes.toBytes("com.example/http"));
     org.apache.hadoop.hbase.client.Result result = table.get(get);
     

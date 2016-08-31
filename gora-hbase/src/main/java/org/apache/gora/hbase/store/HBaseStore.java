@@ -57,13 +57,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.client.Delete;
-import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HBaseAdmin;
-import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.client.Result;
-import org.apache.hadoop.hbase.client.ResultScanner;
-import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.util.Pair;
 import org.jdom.Document;
@@ -88,7 +82,7 @@ implements Configurable {
   private static final String SCANNER_CACHING_PROPERTIES_KEY = "scanner.caching" ;
   private static final int SCANNER_CACHING_PROPERTIES_DEFAULT = 0 ;
   
-  private volatile HBaseAdmin admin;
+  private volatile Admin admin;
 
   private volatile HBaseTableConnection table;
 
@@ -110,10 +104,10 @@ implements Configurable {
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
       Properties properties) {
     try {
-      
       super.initialize(keyClass, persistentClass, properties);
+
       this.conf = HBaseConfiguration.create(getConf());
-      admin = new HBaseAdmin(this.conf);
+      admin = ConnectionFactory.createConnection(getConf()).getAdmin();
       mapping = readMapping(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE));
       filterUtil = new HBaseFilterUtil<>(this.conf);
     } catch (FileNotFoundException ex) {
@@ -175,8 +169,8 @@ implements Configurable {
       if(!schemaExists()) {
         return;
       }
-      admin.disableTable(getSchemaName());
-      admin.deleteTable(getSchemaName());
+      admin.disableTable(mapping.getTable().getTableName());
+      admin.deleteTable(mapping.getTable().getTableName());
     } catch(IOException ex2){
       LOG.error(ex2.getMessage(), ex2);
     }
@@ -185,7 +179,7 @@ implements Configurable {
   @Override
   public boolean schemaExists() {
     try{
-      return admin.tableExists(mapping.getTableName());
+      return admin.tableExists(mapping.getTable().getTableName());
     } catch(IOException ex2){
       LOG.error(ex2.getMessage(), ex2);
       return false;
@@ -241,13 +235,14 @@ implements Configurable {
         addPutsAndDeletes(put, delete, o, field.schema().getType(),
             field.schema(), hcol, hcol.getQualifier());
       }
-      if (put.size() > 0) {
-        table.put(put);
-      }
+
       if (delete.size() > 0) {
         table.delete(delete);
-        table.delete(delete);
-        table.delete(delete); // HBase sometimes does not delete arbitrarily
+//        table.delete(delete);
+//        table.delete(delete); // HBase sometimes does not delete arbitrarily
+      }
+      if (put.size() > 0) {
+        table.put(put);
       }
     } catch (IOException ex2) {
       LOG.error(ex2.getMessage(), ex2);
@@ -260,16 +255,18 @@ implements Configurable {
     case UNION:
       if (isNullable(schema) && o == null) {
         if (qualifier == null) {
-          delete.deleteFamily(hcol.getFamily());
+//          delete.deleteFamily(hcol.getFamily());
+          delete.addFamily(hcol.getFamily());
         } else {
-          delete.deleteColumn(hcol.getFamily(), qualifier);
+//          delete.deleteColumn(hcol.getFamily(), qualifier);
+          delete.addColumn(hcol.getFamily(), qualifier);
         }
       } else {
 //        int index = GenericData.get().resolveUnion(schema, o);
         int index = getResolvedUnionIndex(schema);
         if (index > 1) {  //if more than 2 type in union, serialize directly for now
           byte[] serializedBytes = toBytes(o, schema);
-          put.add(hcol.getFamily(), qualifier, serializedBytes);
+          put.addColumn(hcol.getFamily(), qualifier, serializedBytes);
         } else {
           Schema resolvedSchema = schema.getTypes().get(index);
           addPutsAndDeletes(put, delete, o, resolvedSchema.getType(),
@@ -281,9 +278,11 @@ implements Configurable {
       // if it's a map that has been modified, then the content should be replaced by the new one
       // This is because we don't know if the content has changed or not.
       if (qualifier == null) {
-        delete.deleteFamily(hcol.getFamily());
+        //delete.deleteFamily(hcol.getFamily());
+        delete.addFamily(hcol.getFamily());
       } else {
-        delete.deleteColumn(hcol.getFamily(), qualifier);
+        //delete.deleteColumn(hcol.getFamily(), qualifier);
+        delete.addColumn(hcol.getFamily(), qualifier);
       }
       @SuppressWarnings({ "rawtypes", "unchecked" })
       Set<Entry> set = ((Map) o).entrySet();
@@ -303,7 +302,7 @@ implements Configurable {
       break;
     default:
       byte[] serializedBytes = toBytes(o, schema);
-      put.add(hcol.getFamily(), qualifier, serializedBytes);
+      put.addColumn(hcol.getFamily(), qualifier, serializedBytes);
       break;
     }
   }

@@ -138,4 +138,8 @@
     <value>localhost</value>
     <description>The directory shared by region servers.</description>
   </property>
+  <property>
+    <name>zookeeper.session.timeout</name>
+    <value>60000</value>
+  </property>
 </configuration>

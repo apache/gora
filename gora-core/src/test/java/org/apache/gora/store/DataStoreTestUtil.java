@@ -1079,12 +1079,13 @@ public class DataStoreTestUtil {
     store.deleteByQuery(query);
     store.deleteByQuery(query);//don't you love that HBase sometimes does not delete arbitrarily
     
-    store.flush();
-
     assertNumResults(store.newQuery(), URLS.length);
+
+
 
     //assert that data is deleted
     for (int i = 0; i < URLS.length; i++) {
+      store.flush();
       WebPage page = store.get(URLS[i]);
       assertNotNull(page);
       if( URLS[i].compareTo(startKey) < 0 || URLS[i].compareTo(endKey) >= 0) {
