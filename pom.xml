@@ -666,6 +666,7 @@
     <module>gora-jcache</module>
     <!-- module>gora-lucene</module -->
     <module>gora-dynamodb</module>
+    <module>gora-couchdb</module>
     <!--module>gora-sql</module -->
     <module>gora-maven-plugin</module>
     <module>gora-mongodb</module>
@@ -679,7 +680,7 @@
     <!-- Dependencies -->
     <osgi.version>4.2.0</osgi.version>
     <!-- Avro Dependencies -->
-    <avro.version>1.7.6</avro.version>
+    <avro.version>1.8.1</avro.version>
 <!--     <jackson.version>1.6.9</jackson.version> -->
     <!-- Hadoop Dependencies -->
     <hadoop-2.version>2.5.2</hadoop-2.version>
@@ -743,9 +744,9 @@
 
     <!-- General Properties -->
     <implementation.build>${scmBranch}@r${buildNumber}</implementation.build>
-    <javac.src.version>1.7</javac.src.version>
-    <javac.target.version>1.7</javac.target.version>
-    <maven.compiler.target>1.7</maven.compiler.target>
+    <javac.src.version>1.8</javac.src.version>
+    <javac.target.version>1.8</javac.target.version>
+    <maven.compiler.target>1.8</maven.compiler.target>
     <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ssZ</maven.build.timestamp.format>
     <skipTests>false</skipTests>
     <assembly.finalName>apache-${project.build.finalName}</assembly.finalName>
@@ -826,6 +827,12 @@
         <artifactId>gora-hbase</artifactId>
         <version>${project.version}</version>
         <type>test-jar</type>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-couchdb</artifactId>
+        <version>${project.version}</version>
       </dependency>
 
       <dependency>

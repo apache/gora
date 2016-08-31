@@ -96,7 +96,7 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
   private static final String JCACHE_EVICTION_MAX_SIZE_POLICY_PROPERTY_KEY = "jcache.eviction.max.size.policy";
   private static final String JCACHE_EVICTION_SIZE_PROPERTY_KEY = "jcache.eviction.size";
   private static final String JCACHE_EXPIRE_POLICY_PROPERTY_KEY = "jcache.expire.policy";
-  private static final String JCACHE_EXPIRE_POLICY_DURATION_PROPERTY_KEY = "jcache.expire.policy";
+  private static final String JCACHE_EXPIRE_POLICY_DURATION_PROPERTY_KEY = "jcache.expire.policy.duration";
   private static final String JCACHE_ACCESSED_EXPIRY_IDENTIFIER = "ACCESSED";
   private static final String JCACHE_CREATED_EXPIRY_IDENTIFIER = "CREATED";
   private static final String JCACHE_MODIFIED_EXPIRY_IDENTIFIER = "MODIFIED";
@@ -410,6 +410,7 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
         PartitionQueryImpl<K, T> partition = new PartitionQueryImpl<>(
                 query, memberOwnedCacheEntries.first(),
                 memberOwnedCacheEntries.last(), member.getSocketAddress().getHostString());
+        partition.setConf(this.getConf());
         partitions.add(partition);
       }
     } catch (java.lang.Exception ex) {

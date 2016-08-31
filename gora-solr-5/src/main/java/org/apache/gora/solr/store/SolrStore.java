@@ -65,6 +65,12 @@ import org.jdom.input.SAXBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Implementation of a Solr data store to be used by gora.
+ *
+ * @param <K> class to be used for the key
+ * @param <T> class to be persisted within the store
+ */
 public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
   private static final Logger LOG = LoggerFactory.getLogger(SolrStore.class);
@@ -182,6 +188,15 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
 
   public static final ConcurrentHashMap<Schema, SpecificDatumWriter<?>> writerMap = new ConcurrentHashMap<>();
 
+  /**
+   * Initialize the data store by reading the credentials, setting the client's properties up and
+   * reading the mapping file. Initialize is called when then the call to
+   * {@link org.apache.gora.store.DataStoreFactory#createDataStore} is made.
+   *
+   * @param keyClass
+   * @param persistentClass
+   * @param properties
+   */
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
       Properties properties) {

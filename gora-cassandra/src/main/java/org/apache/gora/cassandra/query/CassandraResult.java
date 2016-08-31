@@ -35,11 +35,18 @@ import org.apache.gora.store.DataStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * CassandraResult specific implementation of the {@link org.apache.gora.query.Result}
+ * interface.
+ */
 public class CassandraResult<K, T extends PersistentBase> extends ResultBase<K, T> {
   public static final Logger LOG = LoggerFactory.getLogger(CassandraResult.class);
   
   private int rowNumber;
 
+  /**
+   * Result set containing query results
+   */
   private CassandraResultSet<K> cassandraResultSet;
   
   /**
@@ -47,10 +54,20 @@ public class CassandraResult<K, T extends PersistentBase> extends ResultBase<K, 
    */
   private Map<String, String> reverseMap;
 
+
+  /**
+   * Constructor for the result set
+   *
+   * @param dataStore Data store used
+   * @param query     Query used
+   */
   public CassandraResult(DataStore<K, T> dataStore, Query<K, T> query) {
     super(dataStore, query);
   }
 
+  /**
+   * Gets the next item
+   */
   @Override
   protected boolean nextInner() throws IOException {
     if (this.rowNumber < this.cassandraResultSet.size()) {
@@ -153,15 +170,23 @@ public class CassandraResult<K, T extends PersistentBase> extends ResultBase<K, 
     
   }
 
+  /**
+   * Gets the items reading progress
+   */
   @Override
   public float getProgress() throws IOException {
     return (((float) this.rowNumber) / this.cassandraResultSet.size());
   }
 
+  /**
+   * Set the Result set containing query results
+   *
+   * @param cassandraResultSet
+   */
   public void setResultSet(CassandraResultSet<K> cassandraResultSet) {
     this.cassandraResultSet = cassandraResultSet;
   }
-  
+
   public void setReverseMap(Map<String, String> reverseMap) {
     this.reverseMap = reverseMap;
   }

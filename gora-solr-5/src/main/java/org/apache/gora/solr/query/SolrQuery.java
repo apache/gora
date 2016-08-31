@@ -18,24 +18,42 @@
 package org.apache.gora.solr.query;
 
 import org.apache.gora.persistency.impl.PersistentBase;
+import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.QueryBase;
 import org.apache.gora.solr.store.SolrMapping;
 import org.apache.gora.solr.store.SolrStore;
 import org.apache.gora.store.DataStore;
 
+/**
+ * Solr specific implementation of the {@link Query} interface.
+ */
 public class SolrQuery<K, T extends PersistentBase> extends QueryBase<K, T> {
   SolrStore<K, T> store;
 
+  /**
+   * Constructor for the query
+   */
   public SolrQuery() {
     super(null);
     store = null;
   }
-  
+
+  /**
+   * Constructor for the query
+   *
+   * @param dataStore Data store used
+   *
+   */
   public SolrQuery(DataStore<K, T> dataStore) {
     super(dataStore);
     store = (SolrStore<K, T>)dataStore;
   }
-  
+
+  /**
+   * Create a solr query
+   *
+   * @return the solr query string
+   */
   public String toSolrQuery() {
     SolrMapping mapping = store.getMapping();
     String fld = mapping.getPrimaryKey();

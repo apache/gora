@@ -46,7 +46,7 @@ import com.amazonaws.services.dynamodbv2.model.KeyType;
 
 /** 
  * Generate specific Java classes for defined schemas. 
- * Different from the {@link org.apache.gora.compiler.GoraCompiler}, 
+ * Different from the @see org.apache.gora.compiler.GoraCompiler,
  * which uses an .avsc or .json schema definition, this compiler 
  * expects an XML schema file as input.
  */
@@ -59,8 +59,7 @@ public class GoraDynamoDBCompiler {
   /**
    * GoraDynamoDBCompiler
    * 
-   * @param File
-   *          where the data bean will be written.
+   * @param dest where the data bean will be written.
    */
   private GoraDynamoDBCompiler(File dest) {
     this.dest = dest;
@@ -82,15 +81,12 @@ public class GoraDynamoDBCompiler {
   }
 
   /**
-   * Method in charge of compiling a specific table using a key schema and a set 
+   * Method in charge of compiling a specific table using a key schema and a set
    * of attributes
-   * @param dest2 
-   * @param pTableNameTable 
-   *          name
-   * @param pKeySchemaKey 
-   *          schema used
-   * @param pItemsList 
-   *          of items belonging to a specific table
+   *
+   * @param pTableName
+   * @param arrayList
+   * @param map
    */
   private void compile(String pTableName, ArrayList<KeySchemaElement> arrayList, Map<String, String> map){
     try {
@@ -117,10 +113,9 @@ public class GoraDynamoDBCompiler {
 
   /**
    * Receives a list of all items and creates getters and setters for them
-   * @param pItemsThe 
-   *          items belonging to the table
-   * @param pIdenThe 
-   *          number of spaces used for identation
+   *
+   * @param pItems The items belonging to the table
+   * @param pIden  The number of spaces used for identation
    * @throws IOException
    */
   private void setItems(Map<String, String> pItems, int pIden)
@@ -141,12 +136,10 @@ public class GoraDynamoDBCompiler {
 
   /**
    * Creates item getters and setters
-   * @param pItemNameItem
-   *          's name
-   * @param pItemTypeItem
-   *          's type
-   * @param pIdenNumber 
-   *          of spaces used for indentation
+   *
+   * @param pItemName Item's name
+   * @param pItemType Item's type
+   * @param pIden     Number of spaces used for indentation
    * @throws IOException
    */
   private void setItemMethods(String pItemName, String pItemType, int pIden)
@@ -162,11 +155,10 @@ public class GoraDynamoDBCompiler {
   }
 
   /**
-   * Creates key getters and setters 
-   * @param pKeySchemaThe 
-   *          key schema for a specific table
-   * @param pIdenNumber 
-   *          of spaces used for indentation
+   * Creates key getters and setters
+   *
+   * @param pKeySchema The key schema for a specific table
+   * @param pIden      Number of spaces used for indentation
    * @throws IOException
    */
   private void setKeyMethods(KeySchemaElement pKeySchema, String attType,
@@ -228,8 +220,8 @@ public class GoraDynamoDBCompiler {
 
   /**
    * Returns camel case version of a string
-   * @param sString 
-   *          to be camelcasified
+   *
+   * @param s String to be camelcasified
    * @return
    */
   private static String camelCasify(String s) {
@@ -238,10 +230,9 @@ public class GoraDynamoDBCompiler {
 
   /**
    * Starts the java generated class file
-   * @param nameClass 
-   *          name
-   * @param space
-   *          spacing
+   *
+   * @param name  Class name
+   * @param space spacing
    * @throws IOException
    */
   private void startFile(String name, String space) throws IOException {
@@ -320,10 +311,9 @@ public class GoraDynamoDBCompiler {
 
   /**
    * Writes a line within the output stream
-   * @param indentNumber 
-   *          of spaces used for indentation
-   * @param textText 
-   *          to be written
+   *
+   * @param indent Number of spaces used for indentation
+   * @param text   Text to be written
    * @throws IOException
    */
   private void line(int indent, String text) throws IOException {

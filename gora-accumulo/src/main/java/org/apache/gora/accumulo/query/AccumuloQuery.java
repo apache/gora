@@ -21,14 +21,23 @@ import org.apache.gora.query.impl.QueryBase;
 import org.apache.gora.store.DataStore;
 
 /**
- * 
+ *  Accumulo specific implementation of the {@link org.apache.gora.query.Query} interface.
  */
 public class AccumuloQuery<K,T extends PersistentBase> extends QueryBase<K,T> {
-  
+
+  /**
+   * Constructor for the query
+   */
   public AccumuloQuery() {
     super(null);
   }
 
+  /**
+   * Constructor for the query
+   *
+   * @param dataStore Data store used
+   *
+   */
   public AccumuloQuery(DataStore<K,T> dataStore) {
     super(dataStore);
   }

@@ -19,6 +19,9 @@ package org.apache.gora.accumulo.util;
 import java.io.IOException;
 import java.io.OutputStream;
 
+/**
+ * It is a implementation of {@link java.io.OutputStream} must always provide at least a method that writes one byte of output.
+ */
 public class FixedByteArrayOutputStream extends OutputStream {
   
   private int i;

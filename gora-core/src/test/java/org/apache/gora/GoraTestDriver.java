@@ -99,12 +99,13 @@ public class GoraTestDriver {
   @SuppressWarnings("unchecked")
   public<K, T extends Persistent> DataStore<K,T>
     createDataStore(Class<K> keyClass, Class<T> persistentClass) throws GoraException {
-    setProperties(DataStoreFactory.createProps());
-    DataStore<K,T> dataStore = DataStoreFactory.createDataStore(
-        (Class<? extends DataStore<K,T>>)dataStoreClass, keyClass, persistentClass, conf);
+    final Properties properties = DataStoreFactory.createProps();
+    final DataStore<K, T> dataStore = DataStoreFactory.createDataStore(
+        (Class<? extends DataStore<K, T>>) dataStoreClass, keyClass, persistentClass, conf, properties);
+
     dataStores.add(dataStore);
 
-    log.info("Datastore for "+persistentClass+" was added.");
+    log.info("Datastore for {} was added.", persistentClass);
     return dataStore;
   }
   
