@@ -18,19 +18,26 @@
 package org.apache.gora.hbase.store;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HRegionLocation;
-import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.*;
-import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
+import org.apache.hadoop.hbase.client.BufferedMutator;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
+import org.apache.hadoop.hbase.client.Delete;
+import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.Mutation;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.RegionLocator;
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Pair;
 
 /**
@@ -44,7 +51,6 @@ public class HBaseTableConnection {
    * the connection when it is closed. HBase itself provides a utility called
    * HTablePool for maintaining a tPool of tables, but there are still some
    * drawbacks that are only solved in later releases.
-   *
    */
 
   private final Configuration conf;
@@ -56,26 +62,10 @@ public class HBaseTableConnection {
 
   private final BlockingQueue<Table> tPool = new LinkedBlockingQueue<>();
   private final BlockingQueue<ConcurrentLinkedQueue<Mutation>> bPool = new LinkedBlockingQueue<>();
+  @SuppressWarnings("unused")
   private final boolean autoFlush;
   private final TableName tableName;
 
-//  public class MutationPair {
-//    private Mutation mutation;
-//    private boolean type;
-//
-//    public void MutationPair(Mutation m, boolean t) {
-//      this.mutation = m;
-//      this.type = t;
-//    }
-//
-//    public boolean isType() {
-//      return type;
-//    }
-//
-//    public Mutation getMutation() {
-//      return mutation;
-//    }
-//  }
   /**
    * Instantiate new connection.
    *
@@ -101,7 +91,6 @@ public class HBaseTableConnection {
     Table table = tables.get();
     if (table == null) {
       table = connection.getTable(tableName);
-//      table.setAutoFlushTo(autoFlush);
       tPool.add(table); //keep track
       tables.set(table);
     }
@@ -111,8 +100,6 @@ public class HBaseTableConnection {
   private ConcurrentLinkedQueue<Mutation> getBuffer() throws IOException {
     ConcurrentLinkedQueue<Mutation> buffer = buffers.get();
     if (buffer == null) {
-//      BufferedMutatorParams params = new BufferedMutatorParams(this.tableName).listener(listener);
-//      buffer = connection.getBufferedMutator(this.tableName);
       buffer = new ConcurrentLinkedQueue<>();
       bPool.add(buffer);
       buffers.set(buffer);
@@ -125,9 +112,9 @@ public class HBaseTableConnection {
     for (ConcurrentLinkedQueue<Mutation> buffer : bPool) {
       for (Mutation m: buffer) {
         bufMutator.mutate(m);
-        bufMutator.flush();
       }
     }
+    bufMutator.flush();
     bufMutator.close();
   }
 
@@ -184,29 +171,18 @@ public class HBaseTableConnection {
 
   public void put(Put put) throws IOException {
     getBuffer().add(put);
-//    getBuffer().flush();
-//    getTable().put(put);
   }
 
-//  @Override
   public void put(List<Put> puts) throws IOException {
-//    getTable().put(puts);
     getBuffer().addAll(puts);
-//    getBuffer().flush();
   }
 
-//  @Override
   public void delete(Delete delete) throws IOException {
     getBuffer().add(delete);
-//    getBuffer().flush();
-//    getTable().delete(delete);
   }
 
-//  @Override
   public void delete(List<Delete> deletes) throws IOException {
-//    getTable().delete(deletes);
     getBuffer().addAll(deletes);
-//    getBuffer().flush();
   }
 
   public TableName getName() {

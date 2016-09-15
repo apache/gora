@@ -57,7 +57,14 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.client.*;
+import org.apache.hadoop.hbase.client.Admin;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
+import org.apache.hadoop.hbase.client.Delete;
+import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.util.Pair;
 import org.jdom.Document;
@@ -133,7 +140,7 @@ implements Configurable {
               SCANNER_CACHING_PROPERTIES_KEY,
               String.valueOf(SCANNER_CACHING_PROPERTIES_DEFAULT)))) ;
     }catch(Exception e){
-      LOG.error("Can not load " + SCANNER_CACHING_PROPERTIES_KEY + " from gora.properties. Setting to default value: " + SCANNER_CACHING_PROPERTIES_DEFAULT, e) ;
+      LOG.error("Can not load {} from gora.properties. Setting to default value: {}.", SCANNER_CACHING_PROPERTIES_KEY, SCANNER_CACHING_PROPERTIES_DEFAULT);
       this.setScannerCaching(SCANNER_CACHING_PROPERTIES_DEFAULT) ; // Default value if something is wrong
     }
 
@@ -146,6 +153,7 @@ implements Configurable {
     } catch(IOException ex2){
       LOG.error(ex2.getMessage(), ex2);
     }
+    closeHBaseAdmin();
   }
 
   @Override
@@ -170,6 +178,7 @@ implements Configurable {
     } catch(IOException ex2){
       LOG.error(ex2.getMessage(), ex2);
     }
+    closeHBaseAdmin();
   }
 
   @Override
@@ -183,6 +192,7 @@ implements Configurable {
     } catch(IOException ex2){
       LOG.error(ex2.getMessage(), ex2);
     }
+    closeHBaseAdmin();
   }
 
   @Override
@@ -202,7 +212,7 @@ implements Configurable {
       Get get = new Get(toBytes(key));
       addFields(get, fields);
       Result result = table.get(get);
-      return newInstance(result, fields);      
+      return newInstance(result, fields);
     } catch(IOException ex2){
       LOG.error(ex2.getMessage(), ex2);
       return null;
@@ -572,10 +582,10 @@ implements Configurable {
       break;
     case MAP:
     case ARRAY:
-      delete.deleteFamily(col.family);
+      delete.addFamily(col.family);
       break;
     default:
-      delete.deleteColumn(col.family, col.qualifier);
+      delete.addColumn(col.family, col.qualifier);
       break;
     }
   }
@@ -756,9 +766,7 @@ implements Configurable {
           //tableNameFromMapping could be null here
           if (!tableName.equals(tableNameFromMapping)) {
           //TODO this might not be the desired behavior as the user might have actually made a mistake.
-            LOG.warn("Mismatching schema's names. Mappingfile schema: '" + tableNameFromMapping 
-                + "'. PersistentClass schema's name: '" + tableName + "'"
-                + "Assuming they are the same.");
+            LOG.warn("Mismatching schema's names. Mappingfile schema: '{}'. PersistentClass schema's name: '{}'. Assuming they are the same.", tableNameFromMapping, tableName);
             if (tableNameFromMapping != null) {
               mappingBuilder.renameTable(tableNameFromMapping, tableName);
             }
@@ -836,10 +844,18 @@ implements Configurable {
    */
   public HBaseStore<K, T> setScannerCaching(int numRows) {
     if (numRows < 0) {
-      LOG.warn("Invalid Scanner Caching optimization value. Cannot set to: " + numRows + ".") ;
+      LOG.warn("Invalid Scanner Caching optimization value. Cannot set to: {}.", numRows) ;
       return this ;
     }
     this.scannerCaching = numRows ;
     return this ;
+  }
+  
+  private void closeHBaseAdmin(){
+    try {
+      admin.close();
+    } catch (IOException ioe) {
+      LOG.error("An error occured whilst closing HBase Admin", ioe);
+    }
   }
 }

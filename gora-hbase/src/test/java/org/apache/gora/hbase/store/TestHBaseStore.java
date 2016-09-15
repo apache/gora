@@ -82,7 +82,7 @@ public class TestHBaseStore extends DataStoreTestBase {
   @Override
   public void assertSchemaExists(String schemaName) throws Exception {
     HBaseAdmin admin = getTestDriver().getHbaseUtil().getHBaseAdmin();
-    assertTrue(admin.tableExists(schemaName));
+    assertTrue("Table should exist for...", admin.tableExists(schemaName));
   }
 
   @Override
