@@ -19,6 +19,7 @@ package org.apache.gora.persistency;
 
 import java.util.List;
 
+import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 
 /**
@@ -113,4 +114,11 @@ public interface Persistent extends Dirtyable {
    * @return a new instance of the object
    */
   Persistent newInstance();
+  
+  /**
+   * Returns the avro's data schema
+   * @return the parsed schema definition
+   */
+  public Schema getSchema() ;
+  
 }
