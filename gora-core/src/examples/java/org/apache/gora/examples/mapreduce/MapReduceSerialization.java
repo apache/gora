@@ -43,7 +43,6 @@ public class MapReduceSerialization extends Configured implements Tool {
   private static final Logger LOG = LoggerFactory.getLogger(MapReduceSerialization.class);
 
   public MapReduceSerialization() {
-
   }
 
   public MapReduceSerialization(Configuration conf) {
@@ -56,13 +55,12 @@ public class MapReduceSerialization extends Configured implements Tool {
    */
   public static class CheckDirtyBitsSerializationMapper
           extends GoraMapper<String, WebPage, Text, WebPage> {
-
     @Override
     protected void map(String key, WebPage page, Context context)
-            throws IOException ,InterruptedException {
-      page.setUrl("hola") ;
-      context.write(new Text(key), page) ;
-    };
+            throws IOException, InterruptedException {
+      page.setUrl("hola");
+      context.write(new Text(key), page);
+    }
   }
 
   /**
@@ -71,29 +69,29 @@ public class MapReduceSerialization extends Configured implements Tool {
    */
   public static class CheckDirtyBytesSerializationReducer extends GoraReducer<Text, WebPage,
           String, WebPage> {
-
     @Override
     protected void reduce(Text key, Iterable<WebPage> values, Context context)
-            throws IOException ,InterruptedException {
+            throws IOException, InterruptedException {
       for (WebPage val : values) {
-        LOG.info(key.toString()) ;
-        LOG.info(val.toString()) ;
-        LOG.info(String.valueOf(val.isDirty())) ;
+        LOG.info(key.toString());
+        LOG.info(val.toString());
+        LOG.info(String.valueOf(val.isDirty()));
         context.write(key.toString(), val);
       }
-    };
-
+    }
   }
 
   /**
    * Creates and returns the {@link Job} for submitting to Hadoop mapreduce.
-   * @param inStore
-   * @param query
-   * @return
+   *
+   * @param inStore  input store on MR jobs runs on
+   * @param query    query to select input set run MR
+   * @param outStore output store which stores results of MR jobs
+   * @return job MR job definition
    * @throws IOException
    */
-  public Job createJob(DataStore<String,WebPage> inStore, Query<String,WebPage> query
-          , DataStore<String,WebPage> outStore) throws IOException {
+  public Job createJob(DataStore<String, WebPage> inStore, Query<String, WebPage> query
+          , DataStore<String, WebPage> outStore) throws IOException {
     Job job = new Job(getConf());
 
     job.setJobName("Check serialization of dirty bits");
@@ -118,10 +116,11 @@ public class MapReduceSerialization extends Configured implements Tool {
     return job;
   }
 
-  public int mapReduceSerialization(DataStore<String,WebPage> inStore,
-                                    DataStore<String, WebPage> outStore) throws IOException, InterruptedException, ClassNotFoundException {
-    Query<String,WebPage> query = inStore.newQuery();
-    query.setFields("url") ;
+  public int mapReduceSerialization(DataStore<String, WebPage> inStore,
+                                    DataStore<String, WebPage> outStore)
+          throws IOException, InterruptedException, ClassNotFoundException {
+    Query<String, WebPage> query = inStore.newQuery();
+    query.setFields("url");
 
     Job job = createJob(inStore, query, outStore);
     return job.waitForCompletion(true) ? 0 : 1;
@@ -130,14 +129,14 @@ public class MapReduceSerialization extends Configured implements Tool {
   @Override
   public int run(String[] args) throws Exception {
 
-    DataStore<String,WebPage> inStore;
-    DataStore<String,WebPage> outStore;
+    DataStore<String, WebPage> inStore;
+    DataStore<String, WebPage> outStore;
     Configuration conf = new Configuration();
-    if(args.length > 0) {
+    if (args.length > 0) {
       String dataStoreClass = args[0];
       inStore = DataStoreFactory.getDataStore(dataStoreClass,
               String.class, WebPage.class, conf);
-      if(args.length > 1) {
+      if (args.length > 1) {
         dataStoreClass = args[1];
       }
       outStore = DataStoreFactory.getDataStore(dataStoreClass,
