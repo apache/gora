@@ -92,8 +92,7 @@ public class GoraDynamoDBTestDriver extends GoraTestDriver {
    * Sets up the class
    */
   @Override
-  public void setUpClass() throws Exception {
-    super.setUpClass();
+  public void setUpClass() throws IOException {
     log.info("Initializing DynamoDB.");
     createDataStore();
   }
@@ -154,7 +153,7 @@ public class GoraDynamoDBTestDriver extends GoraTestDriver {
    * Tears down the class
    */
   @Override
-  public void tearDownClass() throws Exception {
+  public void tearDownClass() {
     log.info("Finished DynamoDB driver.");
   }
 

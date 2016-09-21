@@ -74,7 +74,6 @@ public class GoraInfinispanTestDriver extends GoraTestDriver {
 
   @Override
   public void setUpClass() throws Exception {
-    super.setUpClass();
     log.info("Starting Infinispan...");
     delegate = new SimulationDriver(numbderOfNodes,cacheNames);
     try{
@@ -86,7 +85,6 @@ public class GoraInfinispanTestDriver extends GoraTestDriver {
 
   @Override
   public void tearDownClass() throws Exception {
-    super.tearDownClass();
     log.info("Stopping Infinispan...");
     delegate.destroy();
   }

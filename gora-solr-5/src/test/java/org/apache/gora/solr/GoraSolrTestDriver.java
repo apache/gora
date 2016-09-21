@@ -40,14 +40,12 @@ public class GoraSolrTestDriver extends GoraTestDriver {
 
   @Override
   public void setUpClass() throws Exception {
-    super.setUpClass();
     solr = new JettySolrRunner("src/test/conf/solr","/solr", 9876);
     solr.start();
   }
 
   @Override
   public void tearDownClass() throws Exception {
-    super.tearDownClass();
     if (solr != null) {
       solr.stop();
       solr = null;
@@ -91,11 +89,6 @@ public class GoraSolrTestDriver extends GoraTestDriver {
     if (webpageDirFile.exists()) {
       FileUtils.deleteDirectory(webpageDirFile);
     }
-  }
-
-  @Override
-  protected void setProperties(Properties properties) {
-    super.setProperties(properties);
   }
 
 }

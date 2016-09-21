@@ -26,6 +26,8 @@ import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+
 /**
  * @author lmcgibbn
  *
@@ -44,8 +46,7 @@ public class GoraAccumuloTestDriver extends GoraTestDriver {
   }
 
   @Override
-  public void setUpClass() throws Exception {
-    super.setUpClass();
+  public void setUpClass() throws IOException, InterruptedException {
     log.info("Starting Accumulo MiniAccumuloCluster...");
     try {
       tmpDir.create();
@@ -62,8 +63,7 @@ public class GoraAccumuloTestDriver extends GoraTestDriver {
   }
 
   @Override
-  public void tearDownClass() throws Exception {
-    super.tearDownClass();
+  public void tearDownClass() throws IOException, InterruptedException {
     log.info("Shutting down Accumulo MiniAccumuloCluster...");
     if (cluster != null) {
       cluster.stop();
