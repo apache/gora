@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 package org.apache.gora.goraci.generated;
-@SuppressWarnings("all")
+
 public class CINode extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
   public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"CINode\",\"namespace\":\"org.apache.gora.goraci.generated\",\"fields\":[{\"name\":\"prev\",\"type\":\"long\",\"default\":0},{\"name\":\"client\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"count\",\"type\":\"long\",\"default\":0}]}");
   private static final long serialVersionUID = 1014651356631895518L;

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 package org.apache.gora.tutorial.log.generated;
-@SuppressWarnings("all")
+
 public class Pageview extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
   public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Pageview\",\"namespace\":\"org.apache.gora.tutorial.log.generated\",\"fields\":[{\"name\":\"url\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"timestamp\",\"type\":\"long\",\"default\":0},{\"name\":\"ip\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"httpMethod\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"httpStatusCode\",\"type\":\"int\",\"default\":0},{\"name\":\"responseSize\",\"type\":\"int\",\"default\":0},{\"name\":\"referrer\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"userAgent\",\"type\":[\"null\",\"string\"],\"default\":null}],\"default\":null}");
   private static final long serialVersionUID = -6136058768384995982L;

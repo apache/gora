@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 package org.apache.gora.examples.generated;
-@SuppressWarnings("all")
+
 /** Record with only immutable or dirtyable fields, used for testing */
 public class ImmutableFields extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
   public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"ImmutableFields\",\"namespace\":\"org.apache.gora.examples.generated\",\"doc\":\"Record with only immutable or dirtyable fields, used for testing\",\"fields\":[{\"name\":\"v1\",\"type\":\"int\",\"default\":0},{\"name\":\"v2\",\"type\":[{\"type\":\"record\",\"name\":\"V2\",\"fields\":[{\"name\":\"v3\",\"type\":\"int\",\"default\":0}]},\"null\"],\"default\":null}]}");

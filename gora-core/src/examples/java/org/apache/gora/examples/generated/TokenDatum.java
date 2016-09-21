@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 package org.apache.gora.examples.generated;
-@SuppressWarnings("all")
+
 public class TokenDatum extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
   public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"TokenDatum\",\"namespace\":\"org.apache.gora.examples.generated\",\"fields\":[{\"name\":\"count\",\"type\":\"int\",\"default\":0}]}");
   private static final long serialVersionUID = -4481652577902636424L;

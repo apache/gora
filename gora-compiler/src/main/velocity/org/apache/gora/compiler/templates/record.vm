@@ -18,7 +18,7 @@
 #if ($schema.getNamespace())
 package $schema.getNamespace();  
 #end
-@SuppressWarnings("all")
+
 #if ($schema.getDoc())
 /** $schema.getDoc() */
 #end

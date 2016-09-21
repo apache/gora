@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 package org.apache.gora.examples.generated;
-@SuppressWarnings("all")
+
 public class V2 extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
   public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"V2\",\"namespace\":\"org.apache.gora.examples.generated\",\"fields\":[{\"name\":\"v3\",\"type\":\"int\",\"default\":0}]}");
   private static final long serialVersionUID = -6538763924317658547L;
