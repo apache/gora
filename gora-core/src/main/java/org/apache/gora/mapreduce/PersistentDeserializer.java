@@ -68,6 +68,10 @@ public class PersistentDeserializer
 
   @Override
   public PersistentBase deserialize(PersistentBase persistent) throws IOException {
-    return datumReader.read(reuseObjects ? persistent : null, decoder);
+    persistent = datumReader.read(reuseObjects ? persistent : null, decoder);
+    byte[] __g__dirty = new byte[persistent.getFieldsCount()];
+    decoder.readFixed(__g__dirty);
+    persistent.setDirtyBytes(java.nio.ByteBuffer.wrap(__g__dirty));
+    return persistent;
   }
 }
