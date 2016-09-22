@@ -14,11 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.gora.examples.generated;  
-@SuppressWarnings("all")
+package org.apache.gora.examples.generated;
+
 public class TokenDatum extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
   public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"TokenDatum\",\"namespace\":\"org.apache.gora.examples.generated\",\"fields\":[{\"name\":\"count\",\"type\":\"int\",\"default\":0}]}");
-  private static final long serialVersionUID = -6468894522296148608L;
+  private static final long serialVersionUID = -4481652577902636424L;
   /** Enum containing all data bean's fields. */
   public static enum Field {
     COUNT(0, "count"),
@@ -60,7 +60,7 @@ public class TokenDatum extends org.apache.gora.persistency.impl.PersistentBase 
   };
 
   public static final String[] _ALL_FIELDS = {
-  "count",
+          "count",
   };
 
   /**
@@ -73,20 +73,20 @@ public class TokenDatum extends org.apache.gora.persistency.impl.PersistentBase 
 
   private int count;
   public org.apache.avro.Schema getSchema() { return SCHEMA$; }
-  // Used by DatumWriter.  Applications should not call. 
+  // Used by DatumWriter.  Applications should not call.
   public java.lang.Object get(int field$) {
     switch (field$) {
-    case 0: return count;
-    default: throw new org.apache.avro.AvroRuntimeException("Bad index");
+      case 0: return count;
+      default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
-  
-  // Used by DatumReader.  Applications should not call. 
+
+  // Used by DatumReader.  Applications should not call.
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: count = (java.lang.Integer)(value); break;
-    default: throw new org.apache.avro.AvroRuntimeException("Bad index");
+      case 0: count = (java.lang.Integer)(value); break;
+      default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
 
@@ -105,7 +105,7 @@ public class TokenDatum extends org.apache.gora.persistency.impl.PersistentBase 
     this.count = value;
     setDirty(0);
   }
-  
+
   /**
    * Checks the dirty status of the 'count' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
@@ -118,19 +118,19 @@ public class TokenDatum extends org.apache.gora.persistency.impl.PersistentBase 
   public static org.apache.gora.examples.generated.TokenDatum.Builder newBuilder() {
     return new org.apache.gora.examples.generated.TokenDatum.Builder();
   }
-  
+
   /** Creates a new TokenDatum RecordBuilder by copying an existing Builder */
   public static org.apache.gora.examples.generated.TokenDatum.Builder newBuilder(org.apache.gora.examples.generated.TokenDatum.Builder other) {
     return new org.apache.gora.examples.generated.TokenDatum.Builder(other);
   }
-  
+
   /** Creates a new TokenDatum RecordBuilder by copying an existing TokenDatum instance */
   public static org.apache.gora.examples.generated.TokenDatum.Builder newBuilder(org.apache.gora.examples.generated.TokenDatum other) {
     return new org.apache.gora.examples.generated.TokenDatum.Builder(other);
   }
-  
+
   private static java.nio.ByteBuffer deepCopyToReadOnlyBuffer(
-      java.nio.ByteBuffer input) {
+          java.nio.ByteBuffer input) {
     java.nio.ByteBuffer copy = java.nio.ByteBuffer.allocate(input.capacity());
     int position = input.position();
     input.reset();
@@ -151,12 +151,12 @@ public class TokenDatum extends org.apache.gora.persistency.impl.PersistentBase 
     copy.limit(limit);
     return copy.asReadOnlyBuffer();
   }
-  
+
   /**
    * RecordBuilder for TokenDatum instances.
    */
   public static class Builder extends org.apache.avro.specific.SpecificRecordBuilderBase<TokenDatum>
-    implements org.apache.avro.data.RecordBuilder<TokenDatum> {
+          implements org.apache.avro.data.RecordBuilder<TokenDatum> {
 
     private int count;
 
@@ -164,15 +164,15 @@ public class TokenDatum extends org.apache.gora.persistency.impl.PersistentBase 
     private Builder() {
       super(org.apache.gora.examples.generated.TokenDatum.SCHEMA$);
     }
-    
+
     /** Creates a Builder by copying an existing Builder */
     private Builder(org.apache.gora.examples.generated.TokenDatum.Builder other) {
       super(other);
     }
-    
+
     /** Creates a Builder by copying an existing TokenDatum instance */
     private Builder(org.apache.gora.examples.generated.TokenDatum other) {
-            super(org.apache.gora.examples.generated.TokenDatum.SCHEMA$);
+      super(org.apache.gora.examples.generated.TokenDatum.SCHEMA$);
       if (isValidValue(fields()[0], other.count)) {
         this.count = (java.lang.Integer) data().deepCopy(fields()[0].schema(), other.count);
         fieldSetFlags()[0] = true;
@@ -183,26 +183,26 @@ public class TokenDatum extends org.apache.gora.persistency.impl.PersistentBase 
     public java.lang.Integer getCount() {
       return count;
     }
-    
+
     /** Sets the value of the 'count' field */
     public org.apache.gora.examples.generated.TokenDatum.Builder setCount(int value) {
       validate(fields()[0], value);
       this.count = value;
       fieldSetFlags()[0] = true;
-      return this; 
+      return this;
     }
-    
+
     /** Checks whether the 'count' field has been set */
     public boolean hasCount() {
       return fieldSetFlags()[0];
     }
-    
+
     /** Clears the value of the 'count' field */
     public org.apache.gora.examples.generated.TokenDatum.Builder clearCount() {
       fieldSetFlags()[0] = false;
       return this;
     }
-    
+
     @Override
     public TokenDatum build() {
       try {
@@ -214,9 +214,9 @@ public class TokenDatum extends org.apache.gora.persistency.impl.PersistentBase 
       }
     }
   }
-  
+
   public TokenDatum.Tombstone getTombstone(){
-  	return TOMBSTONE;
+    return TOMBSTONE;
   }
 
   public TokenDatum newInstance(){
@@ -224,35 +224,35 @@ public class TokenDatum extends org.apache.gora.persistency.impl.PersistentBase 
   }
 
   private static final Tombstone TOMBSTONE = new Tombstone();
-  
+
   public static final class Tombstone extends TokenDatum implements org.apache.gora.persistency.Tombstone {
-  
-      private Tombstone() { }
-  
-	  		  /**
-	   * Gets the value of the 'count' field.
-		   */
-	  public java.lang.Integer getCount() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'count' field.
-		   * @param value the value to set.
-	   */
-	  public void setCount(java.lang.Integer value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'count' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
-	   */
-	  public boolean isCountDirty() {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-		  
+
+    private Tombstone() { }
+
+    /**
+     * Gets the value of the 'count' field.
+     */
+    public java.lang.Integer getCount() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+
+    /**
+     * Sets the value of the 'count' field.
+     * @param value the value to set.
+     */
+    public void setCount(java.lang.Integer value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+
+    /**
+     * Checks the dirty status of the 'count' field. A field is dirty if it represents a change that has not yet been written to the database.
+     * @param value the value to set.
+     */
+    public boolean isCountDirty() {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+
+
   }
 
   private static final org.apache.avro.io.DatumWriter
@@ -291,6 +291,5 @@ public class TokenDatum extends org.apache.gora.persistency.impl.PersistentBase 
             .directBinaryDecoder((java.io.InputStream) in,
                     null));
   }
-  
-}
 
+}

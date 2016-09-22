@@ -18,7 +18,7 @@
 #if ($schema.getNamespace())
 package $schema.getNamespace();  
 #end
-@SuppressWarnings("all")
+
 #if ($schema.getDoc())
 /** $schema.getDoc() */
 #end
@@ -353,6 +353,11 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
 	#end
   
   }
+
+  private static final org.apache.avro.io.DatumWriter
+            DATUM_WRITER$ = new org.apache.avro.specific.SpecificDatumWriter(SCHEMA$);
+  private static final org.apache.avro.io.DatumReader
+            DATUM_READER$ = new org.apache.avro.specific.SpecificDatumReader(SCHEMA$);
 
   /**
    * Writes AVRO data bean to output stream in the form of AVRO Binary encoding format. This will transform
