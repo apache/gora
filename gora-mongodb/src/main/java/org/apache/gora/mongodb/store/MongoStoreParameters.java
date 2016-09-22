@@ -23,11 +23,11 @@ import org.apache.hadoop.conf.Configuration;
 import java.util.Properties;
 
 /**
+ * Configuration properties
+ *
  * @author Damien Raude-Morvan
  */
 public class MongoStoreParameters {
-
-  // Configuration properties
 
   /**
    * Property indicating if the hadoop configuration has priority or not

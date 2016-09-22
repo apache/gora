@@ -248,9 +248,10 @@ public class IOUtils {
    * @throws ClassNotFoundException */
   public static<T> T deserialize(Configuration conf, byte[] in
       , T obj) throws IOException, ClassNotFoundException {
-    DataInputBuffer buffer = new DataInputBuffer();
-    buffer.reset(in, in.length);
-    return deserialize(conf, buffer, obj);
+    try (DataInputBuffer buffer = new DataInputBuffer()) {
+      buffer.reset(in, in.length);
+      return deserialize(conf, buffer, obj);
+    }
   }
 
   /**

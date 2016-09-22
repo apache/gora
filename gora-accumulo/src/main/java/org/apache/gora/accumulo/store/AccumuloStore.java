@@ -97,6 +97,7 @@ import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.AvroUtils;
 import org.apache.gora.util.GoraException;
+import org.apache.gora.util.IOUtils;
 import org.apache.hadoop.io.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,7 +106,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 /**
- * Directs CRUD operations into Accumulo.
+ * Implementation of a Accumulo data store to be used by gora.
+ *
+ * @param <K> class to be used for the key
+ * @param <T> class to be persisted within the store
  */
 public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T> {
 
@@ -341,6 +345,15 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
     return batchWriter;
   }
 
+  /**
+   * Initialize the data store by reading the credentials, setting the client's properties up and
+   * reading the mapping file. Initialize is called when then the call to
+   * {@link org.apache.gora.store.DataStoreFactory#createDataStore} is made.
+   *
+   * @param keyClass
+   * @param persistentClass
+   * @param properties
+   */
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) {
     try{
@@ -690,12 +703,9 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
           }
           // continue like a regular top-level union
         case RECORD:
-          SpecificDatumWriter<Object> writer = new SpecificDatumWriter<>(field.schema());
-          ByteArrayOutputStream os = new ByteArrayOutputStream();
-          org.apache.avro.io.BinaryEncoder encoder = EncoderFactory.get().binaryEncoder(os, null);
-          writer.write(o, encoder);
-          encoder.flush();
-          m.put(col.getFirst(), col.getSecond(), new Value(os.toByteArray()));
+          final SpecificDatumWriter<Object> writer = new SpecificDatumWriter<>(field.schema());
+          final byte[] byteData = IOUtils.serialize(writer,o);
+          m.put(col.getFirst(), col.getSecond(), new Value(byteData));
           count++;
           break;
         default:
@@ -847,6 +857,9 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
     return scanner;
   }
 
+  /**
+   * Execute the query and return the result.
+   */
   @Override
   public Result<K,T> execute(Query<K,T> query) {
     try {
@@ -976,13 +989,6 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
     throw new IllegalArgumentException(UNKOWN + clazz.getName());
   }
 
-
-
-  /**
-   * @param keyClass
-   * @param bytes
-   * @return
-   */
   @SuppressWarnings("unchecked")
   static <K> K followingKey(Encoder encoder, Class<K> clazz, byte[] per) {
 

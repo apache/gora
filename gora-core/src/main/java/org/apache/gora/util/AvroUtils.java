@@ -100,26 +100,21 @@ public class AvroUtils {
   }
 
   public static <T extends PersistentBase> T deepClonePersistent(T persistent) {
-    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    BinaryEncoder enc = EncoderFactory.get().binaryEncoder(bos, null);
-    SpecificDatumWriter<PersistentBase> writer = new SpecificDatumWriter<>(
-        persistent.getSchema());
+    final SpecificDatumWriter<PersistentBase> writer = new SpecificDatumWriter<>(persistent.getSchema());
+    final byte[] byteData;
     try {
-      writer.write(persistent, enc);
-      enc.flush();
+      byteData = IOUtils.serialize(writer, persistent);
     } catch (IOException e) {
       throw new RuntimeException(
           "Unable to serialize avro object to byte buffer - "
               + "please report this issue to the Gora bugtracker "
               + "or your administrator.");
     }
-    byte[] value = bos.toByteArray();
-    Decoder dec = DecoderFactory.get().binaryDecoder(value, null);
+
     @SuppressWarnings("unchecked")
-    SpecificDatumReader<T> reader = new SpecificDatumReader<>(
-        (Class<T>) persistent.getClass());
+    final SpecificDatumReader<T> reader = new SpecificDatumReader<>((Class<T>) persistent.getClass());
     try {
-      return reader.read(null, dec);
+      return IOUtils.deserialize(byteData, reader, null);
     } catch (IOException e) {
       throw new RuntimeException(
           "Unable to deserialize avro object from byte buffer - "

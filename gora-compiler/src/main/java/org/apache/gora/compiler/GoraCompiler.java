@@ -29,6 +29,7 @@ import java.util.Set;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
+import org.apache.avro.SchemaNormalization;
 import org.apache.avro.compiler.specific.SpecificCompiler;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
@@ -298,6 +299,16 @@ public class GoraCompiler extends SpecificCompiler {
     }
     newSchema.setFields(newFields);
     return newSchema;
+  }
+
+  /**
+   * Utility method used by velocity templates to generate serialVersionUID on AVRO beans.
+   *
+   * @param schema Data bean AVRO schema.
+   * @return serialVersionUID for Serializable AVRO databeans.
+   */
+  public static long fingerprint64(Schema schema) {
+    return SchemaNormalization.parsingFingerprint64(schema);
   }
 
 }

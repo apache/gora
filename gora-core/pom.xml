@@ -105,11 +105,6 @@
 
   <dependencies>
     <!-- Hadoop Dependencies -->
-    <dependency>
-      <groupId>org.apache.gora</groupId>
-      <artifactId>gora-shims-distribution</artifactId>
-      <version>${project.version}</version>
-    </dependency>
 
     <dependency>
       <groupId>org.apache.hadoop</groupId>

@@ -134,10 +134,8 @@ DataStoreBase<K, T> {
   /**
    * Retrieve a client connected to the MongoDB server to be used.
    *
-   * @param servers
-   *          This value should specify the host:port (at least one) for
-   *          connecting to remote MongoDB. Multiple values must be separated by
-   *          coma.
+   * @param params This value should specify the host:port (at least one) for
+   *               connecting to remote MongoDB.
    * @return a {@link Mongo} instance connected to the server
    * @throws UnknownHostException
    */

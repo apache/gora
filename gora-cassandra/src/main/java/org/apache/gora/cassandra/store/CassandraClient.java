@@ -92,10 +92,13 @@ public class CassandraClient<K, T extends PersistentBase> {
   
   /** Cassandra serializer to be used for serializing Gora's keys. */
   private Serializer<K> keySerializer;
-  
+
   /**
-   * Method to maintain backward compatibility with earlier versions. 
-  */
+   * Method to maintain backward compatibility with earlier versions.
+   * @param keyClass
+   * @param persistentClass
+   * @throws Exception
+   */
   public void initialize(Class<K> keyClass, Class<T> persistentClass)
     throws Exception {
 	initialize(keyClass, persistentClass, null);
@@ -156,6 +159,8 @@ public class CassandraClient<K, T extends PersistentBase> {
 
   /**
    * Check if keyspace already exists.
+   *
+   * @return if keyspace already exists return true.
    */
   public boolean keyspaceExists() {
     KeyspaceDefinition keyspaceDefinition = this.cluster.describeKeyspace(this.cassandraMapping.getKeyspaceName());

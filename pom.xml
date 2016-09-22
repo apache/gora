@@ -621,120 +621,6 @@
         </plugins>
       </build>
     </profile>
-    <profile>
-      <id>hadoop1</id>
-      <properties>
-        <hadoop.classifier>hadoop1</hadoop.classifier>
-      </properties>
-      <dependencyManagement>
-        <dependencies>
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-core</artifactId>
-            <version>${hadoop-1.version}</version>
-          </dependency>
-        </dependencies>
-      </dependencyManagement>
-    </profile>
-    <profile>
-      <id>hadoop2</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <properties>
-        <hadoop.classifier>hadoop2</hadoop.classifier>
-      </properties>
-      <dependencyManagement>
-        <dependencies>
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-common</artifactId>
-            <version>${hadoop-2.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-auth</artifactId>
-            <version>${hadoop-2.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-mapreduce-client-core</artifactId>
-            <version>${hadoop-2.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-yarn-common</artifactId>
-            <version>${hadoop-2.version}</version>
-          </dependency>
-        </dependencies>
-      </dependencyManagement>
-    </profile>
-    <profile>
-        <id>only-eclipse</id>
-        <activation>
-            <property>
-                <name>m2e.version</name>
-            </property>
-        </activation>
-        <build>
-    <pluginManagement>
-      <plugins>
-        <!--This plugin's configuration is used to store Eclipse m2e settings 
-          only. It has no influence on the Maven build itself. -->
-        <plugin>
-          <groupId>org.eclipse.m2e</groupId>
-          <artifactId>lifecycle-mapping</artifactId>
-          <version>1.0.0</version>
-          <configuration>
-            <lifecycleMappingMetadata>
-              <pluginExecutions>
-                <pluginExecution>
-                  <pluginExecutionFilter>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-dependency-plugin</artifactId>
-                    <versionRange>[2.4,)</versionRange>
-                    <goals>
-                      <goal>copy-dependencies</goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <ignore />
-                  </action>
-                </pluginExecution>
-                <pluginExecution>
-                  <pluginExecutionFilter>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>build-helper-maven-plugin</artifactId>
-                    <versionRange>[1.7,)</versionRange>
-                    <goals>
-                      <goal>reserve-network-port</goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <ignore />
-                  </action>
-                </pluginExecution>
-                <pluginExecution>
-                  <pluginExecutionFilter>
-                    <groupId>de.thetaphi</groupId>
-                    <artifactId>forbiddenapis</artifactId>
-                    <versionRange>2.0</versionRange>
-                    <goals>
-                      <goal>testCheck</goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <ignore></ignore>
-                  </action>
-                </pluginExecution>
-              </pluginExecutions>
-            </lifecycleMappingMetadata>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-  </build>
-    </profile>
   </profiles>
 
   <modules>
@@ -746,15 +632,13 @@
     <module>gora-goraci</module>
     <module>gora-hbase</module>
     <module>gora-infinispan</module>
+    <module>gora-jcache</module>
     <!-- module>gora-lucene</module -->
     <module>gora-dynamodb</module>
+    <module>gora-couchdb</module>
     <!--module>gora-sql</module -->
     <module>gora-maven-plugin</module>
     <module>gora-mongodb</module>
-    <module>gora-shims-hadoop</module>
-    <module>gora-shims-hadoop1</module>
-    <module>gora-shims-hadoop2</module>
-    <module>gora-shims-distribution</module>
     <module>gora-solr</module>
     <module>gora-solr-5</module>
     <module>gora-tutorial</module>
@@ -765,12 +649,10 @@
     <!-- Dependencies -->
     <osgi.version>4.2.0</osgi.version>
     <!-- Avro Dependencies -->
-    <avro.version>1.7.6</avro.version>
+    <avro.version>1.8.1</avro.version>
 <!--     <jackson.version>1.6.9</jackson.version> -->
     <!-- Hadoop Dependencies -->
-    <hadoop-1.version>1.2.1</hadoop-1.version>
     <hadoop-2.version>2.5.2</hadoop-2.version>
-    <hadoop-1.test.version>1.2.1</hadoop-1.test.version>
     <hadoop-2.test.version>2.5.2</hadoop-2.test.version>
     <hbase.version>0.98.8-hadoop2</hbase.version>
     <hbase.test.version>0.98.8-hadoop2</hbase.test.version>
@@ -803,6 +685,10 @@
     <log4j.version>1.2.16</log4j.version>
     <slf4j.version>1.6.6</slf4j.version>
 
+    <!-- JCache Dependencies -->
+    <jsr107.api.version>1.0.0</jsr107.api.version>
+    <hazelcast.version>3.6.4</hazelcast.version>
+
     <!-- Testing Dependencies -->
     <junit.version>4.10</junit.version>
 
@@ -827,9 +713,9 @@
 
     <!-- General Properties -->
     <implementation.build>${scmBranch}@r${buildNumber}</implementation.build>
-    <javac.src.version>1.7</javac.src.version>
-    <javac.target.version>1.7</javac.target.version>
-    <maven.compiler.target>1.7</maven.compiler.target>
+    <javac.src.version>1.8</javac.src.version>
+    <javac.target.version>1.8</javac.target.version>
+    <maven.compiler.target>1.8</maven.compiler.target>
     <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ssZ</maven.build.timestamp.format>
     <skipTests>false</skipTests>
     <assembly.finalName>apache-${project.build.finalName}</assembly.finalName>
@@ -914,6 +800,24 @@
 
       <dependency>
         <groupId>org.apache.gora</groupId>
+        <artifactId>gora-couchdb</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-jcache</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-jcache</artifactId>
+        <version>${project.version}</version>
+        <type>test-jar</type>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.gora</groupId>
         <artifactId>gora-tutorial</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -944,10 +848,12 @@
         </exclusions>
       </dependency>
 
+      <!--Hadoop dependencies -->
       <dependency>
         <groupId>org.apache.hadoop</groupId>
-		    <artifactId>hadoop-client</artifactId>
-		    <version>${hadoop-2.version}</version>
+        <artifactId>hadoop-client</artifactId>
+        <version>${hadoop-2.version}</version>
+        <optional>true</optional>
       </dependency>
 
       <dependency>
@@ -1441,6 +1347,19 @@
             <artifactId>jms</artifactId>
           </exclusion>
         </exclusions>
+      </dependency>
+
+      <!-- JCache Dependencies -->
+      <dependency>
+        <groupId>com.hazelcast</groupId>
+        <artifactId>hazelcast-all</artifactId>
+        <version>${hazelcast.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>javax.cache</groupId>
+        <artifactId>cache-api</artifactId>
+        <version>${jsr107.api.version}</version>
       </dependency>
 
       <!-- Testing Dependencies -->

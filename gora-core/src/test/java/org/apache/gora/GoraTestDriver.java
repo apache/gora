@@ -35,7 +35,7 @@ import org.apache.hadoop.conf.Configuration;
  * or Cassandra cluster, local Hsqldb instance, etc) so that these 
  * details are abstracted away.
  */
-public class GoraTestDriver {
+public abstract class GoraTestDriver {
 
   protected static final Logger log = LoggerFactory.getLogger(GoraTestDriver.class);
 
@@ -54,16 +54,12 @@ public class GoraTestDriver {
   /** Should be called once before the tests are started, probably in the
    * method annotated with org.junit.BeforeClass
    */
-  public void setUpClass() throws Exception {
-    setProperties(DataStoreFactory.createProps());
-  }
+  public abstract void setUpClass() throws Exception;
 
   /** Should be called once after the tests have finished, probably in the
    * method annotated with org.junit.AfterClass
    */
-  public void tearDownClass() throws Exception {
-
-  }
+  public abstract void tearDownClass() throws Exception;
 
   /** Should be called once before each test, probably in the
    * method annotated with org.junit.Before
@@ -84,7 +80,6 @@ public class GoraTestDriver {
     //delete everything
     for(DataStore store : dataStores) {
       try {
-        //store.flush();
         store.deleteSchema();
         store.close();
       }catch (Exception ignore) {
@@ -93,25 +88,47 @@ public class GoraTestDriver {
     dataStores.clear();
   }
 
-  protected void setProperties(Properties properties) {
-  }
-
+  /**
+   * Instantiate a new {@link org.apache.gora.store.DataStore}. Uses default properties.
+   *
+   * @param keyClass        The key class.
+   * @param persistentClass The value class.
+   * @param <K>             class to be used for the key
+   * @param <T>             class to be persisted within the store
+   * @return a new store instance.
+   * @throws GoraException Gora specific exception. This extends IOException.
+   */
   @SuppressWarnings("unchecked")
-  public<K, T extends Persistent> DataStore<K,T>
-    createDataStore(Class<K> keyClass, Class<T> persistentClass) throws GoraException {
-    setProperties(DataStoreFactory.createProps());
-    DataStore<K,T> dataStore = DataStoreFactory.createDataStore(
-        (Class<? extends DataStore<K,T>>)dataStoreClass, keyClass, persistentClass, conf);
+  public <K, T extends Persistent> DataStore<K, T>
+  createDataStore(Class<K> keyClass, Class<T> persistentClass) throws GoraException {
+    final DataStore<K, T> dataStore = DataStoreFactory.createDataStore(
+        (Class<? extends DataStore<K, T>>) dataStoreClass, keyClass, persistentClass, conf);
     dataStores.add(dataStore);
-
-    log.info("Datastore for "+persistentClass+" was added.");
+    log.info("Datastore for {} was added.", persistentClass);
     return dataStore;
   }
-  
-  public Class<?> getDataStoreClass() {
-    return dataStoreClass;
+
+  /**
+   * Instantiate a new {@link org.apache.gora.store.DataStore}.
+   *
+   * @param keyClass        The key class.
+   * @param persistentClass The value class.
+   * @param properties      The properties to be used be the store.
+   * @param <K>             class to be used for the key
+   * @param <T>             class to be persisted within the store
+   * @return new store instance.
+   * @throws GoraException Gora specific exception. This extends IOException.
+   */
+  @SuppressWarnings("unchecked")
+  public<K, T extends Persistent> DataStore<K,T>
+  createDataStore(Class<K> keyClass, Class<T> persistentClass, Properties properties) throws GoraException {
+    final DataStore<K, T> dataStore = DataStoreFactory.createDataStore(
+        (Class<? extends DataStore<K, T>>) dataStoreClass, keyClass, persistentClass, conf, properties);
+    dataStores.add(dataStore);
+    log.info("Datastore for {} was added.", persistentClass);
+    return dataStore;
   }
-  
+
   public Configuration getConfiguration() {
     return this.conf;
   }

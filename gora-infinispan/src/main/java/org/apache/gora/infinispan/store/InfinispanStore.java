@@ -61,6 +61,15 @@ public class InfinispanStore<K, T extends PersistentBase> extends DataStoreBase<
     //Empty default constructor
   }
 
+  /**
+   * Initialize the data store by reading the credentials, setting the client's properties up and
+   * reading the mapping file. Initialize is called when then the call to
+   * {@link org.apache.gora.store.DataStoreFactory#createDataStore} is made.
+   *
+   * @param keyClass
+   * @param persistentClass
+   * @param properties
+   */
   @Override
   public synchronized void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) {
 
@@ -134,6 +143,9 @@ public class InfinispanStore<K, T extends PersistentBase> extends DataStoreBase<
     this.infinispanClient.dropCache();
   }
 
+  /**
+   * Execute the query and return the result.
+   */
   @Override
   public Result<K, T> execute(Query<K, T> query) {
     LOG.debug("execute()");

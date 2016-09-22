@@ -138,13 +138,11 @@ public class TestIOUtils {
       }
       
       //assert that the end of input is reached
-      try {
-        long skipped = dis.skip(1);
-        assertEquals(0, skipped);
-      }catch (EOFException expected) {
-        //either should throw exception or return 0 as skipped
-      }
-    }finally {
+      long skipped = dis.skip(1);
+      assertEquals(0, skipped);
+    } catch (EOFException expected) {
+      //either should throw exception or return 0 as skipped
+    } finally {
       org.apache.hadoop.io.IOUtils.closeStream(dos);
       org.apache.hadoop.io.IOUtils.closeStream(os);
       org.apache.hadoop.io.IOUtils.closeStream(dis);

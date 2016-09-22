@@ -72,8 +72,7 @@ public class GoraCassandraTestDriver extends GoraTestDriver {
    * 	if an error occurs
    */
   @Override
-  public void setUpClass() throws Exception {
-    super.setUpClass();
+  public void setUpClass(){
     log.info("Starting embedded Cassandra Server...");
     try {
       cleanupDirectoriesFailover();
@@ -111,8 +110,7 @@ public class GoraCassandraTestDriver extends GoraTestDriver {
    * 	if an error occurs
    */
   @Override
-  public void tearDownClass() throws Exception {
-    super.tearDownClass();
+  public void tearDownClass(){
     log.info("Shutting down Embedded Cassandra server...");
     if (cassandraThread != null) {
       cassandraDaemon.stop();

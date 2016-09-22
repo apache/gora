@@ -189,6 +189,15 @@ public class DynamoDBStore<K, T extends Persistent> implements DataStore<K, T> {
     return this.getPreferredSchema();
   }
 
+  /**
+   * Initialize the data store by reading the credentials, setting the client's properties up and
+   * reading the mapping file. Initialize is called when then the call to
+   * {@link org.apache.gora.store.DataStoreFactory#createDataStore} is made.
+   *
+   * @param keyClass
+   * @param persistentClass
+   * @param properties
+   */
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
       Properties properties) {
@@ -287,9 +296,7 @@ public class DynamoDBStore<K, T extends Persistent> implements DataStore<K, T> {
 
   /** 
    * Reads the schema file and converts it into a data structure to be used
-   * 
-   * @param pMapFile
-   *          The schema file to be mapped into a table
+   *
    * @return DynamoDBMapping Object containing all necessary information to
    *         create tables
    * @throws IOException

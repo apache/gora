@@ -33,6 +33,9 @@ import org.jdom.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Mapping definitions for CouchDB.
+ */
 public class CassandraMapping {
   
   public static final Logger LOG = LoggerFactory.getLogger(CassandraMapping.class);

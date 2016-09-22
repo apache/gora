@@ -52,7 +52,7 @@ public class TestPersistentSerialization {
   public void testSerdeEmployee() throws Exception {
 
     MemStore<String, Employee> store = DataStoreFactory.getDataStore(
-        MemStore.class, String.class, Employee.class, new Configuration());
+            MemStore.class, String.class, Employee.class, new Configuration());
 
     Employee employee = DataStoreTestUtil.createEmployee();
 
@@ -62,7 +62,7 @@ public class TestPersistentSerialization {
   /**
    * Creates an Employee object but only sets one field as dirty.
    * We then do (de)serialization and check 'before' and 'after'
-   * states. 
+   * states.
    * @throws Exception
    */
   @Test
@@ -76,7 +76,7 @@ public class TestPersistentSerialization {
   /**
    * Creates an Employee object setting only two fields as dirty.
    * We then do (de)serialization and check 'before' and 'after'
-   * states. 
+   * states.
    * @throws Exception
    */
   @Test
@@ -89,12 +89,12 @@ public class TestPersistentSerialization {
   }
 
   /**
-   * Creates an WebPage object in-memory setting several fields to dirty. 
+   * Creates an WebPage object in-memory setting several fields to dirty.
    * Run a query over the persistent data.
-   * Asserts that the results can be serialized and 
+   * Asserts that the results can be serialized and
    * deserialzed without loosing data. We do this by asserting
    * what we get 'before' and 'after' (de)serialization processes.
-   * Also simple assertion for equal number of URL's in WebPage 
+   * Also simple assertion for equal number of URL's in WebPage
    * and results.
    * @throws Exception
    */
@@ -103,7 +103,7 @@ public class TestPersistentSerialization {
   public void testSerdeWebPage() throws Exception {
 
     MemStore<String, WebPage> store = DataStoreFactory.getDataStore(
-        MemStore.class, String.class, WebPage.class, new Configuration());
+            MemStore.class, String.class, WebPage.class, new Configuration());
     WebPageDataCreator.createWebPageData(store);
 
     Result<String, WebPage> result = store.newQuery().execute();
@@ -118,8 +118,8 @@ public class TestPersistentSerialization {
   }
 
   /**
-   * Creates multiple WebPage objects setting several fields to dirty. 
-   * Asserts that the data can be serialized and 
+   * Creates multiple WebPage objects setting several fields to dirty.
+   * Asserts that the data can be serialized and
    * deserialzed without loosing data. We do this by asserting
    * what we get 'before' and 'after' (de)serialization processes.
    * @throws Exception
@@ -142,3 +142,4 @@ public class TestPersistentSerialization {
   }
 
 }
+
