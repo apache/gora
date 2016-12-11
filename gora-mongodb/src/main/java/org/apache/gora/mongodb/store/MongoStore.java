@@ -17,6 +17,7 @@
  */
 package org.apache.gora.mongodb.store;
 
+import static com.mongodb.AuthenticationMechanism.*;
 import static org.apache.gora.mongodb.store.MongoMapping.DocumentFieldType;
 
 import java.io.IOException;
@@ -152,8 +153,8 @@ DataStoreBase<K, T> {
     }
     // If configuration contains a login + secret, try to authenticated with DB
     List<MongoCredential> credentials = new ArrayList<>();
-    if (params.getLogin() != null && params.getSecret() != null) {
-      credentials.add(MongoCredential.createCredential(params.getLogin(), params.getDbname(), params.getSecret().toCharArray()));
+    if (params.getAuthenticationType() != null) {
+      credentials.add(createCredential(params.getAuthenticationType(), params.getLogin(), params.getDbname(), params.getSecret()));
     }
     // Build server address
     List<ServerAddress> addrs = new ArrayList<>();
@@ -177,6 +178,25 @@ DataStoreBase<K, T> {
     }
     // Connect to the Mongo server
     return new MongoClient(addrs, credentials, optBuilder.build());
+  }
+
+  private MongoCredential createCredential(String authenticationType, String username, String database, String password) {
+    MongoCredential credential = null;
+    if (authenticationType.equals(PLAIN.getMechanismName())) {
+      credential = MongoCredential.createPlainCredential(username, database, password.toCharArray());
+    } else if (authenticationType.equals(SCRAM_SHA_1.getMechanismName())) {
+      credential = MongoCredential.createScramSha1Credential(username, database, password.toCharArray());
+    } else if (authenticationType.equals(MONGODB_CR.getMechanismName())) {
+      credential = MongoCredential.createMongoCRCredential(username, database, password.toCharArray());
+    } else if (authenticationType.equals(GSSAPI.getMechanismName())) {
+      credential = MongoCredential.createGSSAPICredential(username);
+    } else if (authenticationType.equals(MONGODB_X509.getMechanismName())) {
+      credential = MongoCredential.createMongoX509Credential(username);
+    } else {
+      LOG.error("Error while initializing MongoDB store: Invalid Authentication type.");
+      throw new RuntimeException("Error while initializing MongoDB store: Invalid Authentication type.");
+    }
+    return credential;
   }
 
   /**

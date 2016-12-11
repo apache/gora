@@ -49,6 +49,12 @@ public class MongoStoreParameters {
    */
   public static final String PROP_MONGO_LOGIN = "gora.mongodb.login";
 
+
+  /**
+   * Property pointing to the authentication type to connect to the server
+   */
+  public static final String PROP_MONGO_AUTHENTICATION_TYPE = "gora.mongodb.authentication.type";
+
   /**
    * Property pointing to the secret to connect to the server
    */
@@ -77,6 +83,7 @@ public class MongoStoreParameters {
 
   private final String mappingFile;
   private final String servers;
+  private final String authenticationType;
   private final String dbname;
   private final String login;
   private final String secret;
@@ -87,15 +94,17 @@ public class MongoStoreParameters {
    * @param mappingFile
    * @param servers
    * @param dbname         Name of database to connect to.
+   * @param authenticationType Authentication type to login
    * @param login          Optionnal login for remote database.
    * @param secret         Optional secret for remote database.
    * @param readPreference
    * @param writeConcern   @return a {@link DB} instance from <tt>mongoClient</tt> or null if
    */
-  private MongoStoreParameters(String mappingFile, String servers, String dbname, String login, String secret, String readPreference, String writeConcern) {
+  private MongoStoreParameters(String mappingFile, String servers, String dbname, String authenticationType, String login, String secret, String readPreference, String writeConcern) {
     this.mappingFile = mappingFile;
     this.servers = servers;
     this.dbname = dbname;
+    this.authenticationType = authenticationType;
     this.login = login;
     this.secret = secret;
     this.readPreference = readPreference;
@@ -118,6 +127,10 @@ public class MongoStoreParameters {
     return login;
   }
 
+  public String getAuthenticationType() {
+    return authenticationType;
+  }
+
   public String getSecret() {
     return secret;
   }
@@ -134,6 +147,7 @@ public class MongoStoreParameters {
     // Prepare the configuration
     String vPropMappingFile = properties.getProperty(PROP_MAPPING_FILE, MongoStore.DEFAULT_MAPPING_FILE);
     String vPropMongoServers = properties.getProperty(PROP_MONGO_SERVERS);
+    String vPropMongoAuthenticationType = properties.getProperty(PROP_MONGO_AUTHENTICATION_TYPE);
     String vPropMongoLogin = properties.getProperty(PROP_MONGO_LOGIN);
     String vPropMongoSecret = properties.getProperty(PROP_MONGO_SECRET);
     String vPropMongoDb = properties.getProperty(PROP_MONGO_DB);
@@ -144,12 +158,13 @@ public class MongoStoreParameters {
       MongoStore.LOG.debug("Hadoop configuration has priority.");
       vPropMappingFile = conf.get(PROP_MAPPING_FILE, vPropMappingFile);
       vPropMongoServers = conf.get(PROP_MONGO_SERVERS, vPropMongoServers);
+      vPropMongoAuthenticationType = conf.get(PROP_MONGO_AUTHENTICATION_TYPE, vPropMongoAuthenticationType);
       vPropMongoLogin = conf.get(PROP_MONGO_LOGIN, vPropMongoLogin);
       vPropMongoSecret = conf.get(PROP_MONGO_SECRET, vPropMongoSecret);
       vPropMongoDb = conf.get(PROP_MONGO_DB, vPropMongoDb);
       vPropMongoRead = conf.get(PROP_MONGO_READPREFERENCE, vPropMongoRead);
       vPropMongoWrite = conf.get(PROP_MONGO_WRITECONCERN, vPropMongoWrite);
     }
-    return new MongoStoreParameters(vPropMappingFile, vPropMongoServers, vPropMongoDb, vPropMongoLogin, vPropMongoSecret, vPropMongoRead, vPropMongoWrite);
+    return new MongoStoreParameters(vPropMappingFile, vPropMongoServers, vPropMongoDb, vPropMongoAuthenticationType, vPropMongoLogin, vPropMongoSecret, vPropMongoRead, vPropMongoWrite);
   }
 }
