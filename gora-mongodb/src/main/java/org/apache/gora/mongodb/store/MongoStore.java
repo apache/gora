@@ -153,7 +153,7 @@ DataStoreBase<K, T> {
     }
     // If configuration contains a login + secret, try to authenticated with DB
     List<MongoCredential> credentials = new ArrayList<>();
-    if (params.getAuthenticationType() != null) {
+    if (params.getLogin() != null && params.getSecret() != null) {
       credentials.add(createCredential(params.getAuthenticationType(), params.getLogin(), params.getDbname(), params.getSecret()));
     }
     // Build server address
@@ -180,21 +180,30 @@ DataStoreBase<K, T> {
     return new MongoClient(addrs, credentials, optBuilder.build());
   }
 
+  /**
+   * This method creates credentials according to the Authentication type.
+   *
+   * @param authenticationType authentication Type (Authentication Mechanism)
+   * @param username           username
+   * @param database           database
+   * @param password           password
+   * @return Mongo Crendential
+   * @see <a href="http://api.mongodb.com/java/current/com/mongodb/AuthenticationMechanism.html">AuthenticationMechanism in MongoDB Java Driver</a>
+   */
   private MongoCredential createCredential(String authenticationType, String username, String database, String password) {
     MongoCredential credential = null;
-    if (authenticationType.equals(PLAIN.getMechanismName())) {
+    if (PLAIN.getMechanismName().equals(authenticationType)) {
       credential = MongoCredential.createPlainCredential(username, database, password.toCharArray());
-    } else if (authenticationType.equals(SCRAM_SHA_1.getMechanismName())) {
+    } else if (SCRAM_SHA_1.getMechanismName().equals(authenticationType)) {
       credential = MongoCredential.createScramSha1Credential(username, database, password.toCharArray());
-    } else if (authenticationType.equals(MONGODB_CR.getMechanismName())) {
+    } else if (MONGODB_CR.getMechanismName().equals(authenticationType)) {
       credential = MongoCredential.createMongoCRCredential(username, database, password.toCharArray());
-    } else if (authenticationType.equals(GSSAPI.getMechanismName())) {
+    } else if (GSSAPI.getMechanismName().equals(authenticationType)) {
       credential = MongoCredential.createGSSAPICredential(username);
-    } else if (authenticationType.equals(MONGODB_X509.getMechanismName())) {
+    } else if (MONGODB_X509.getMechanismName().equals(authenticationType)) {
       credential = MongoCredential.createMongoX509Credential(username);
     } else {
-      LOG.error("Error while initializing MongoDB store: Invalid Authentication type.");
-      throw new RuntimeException("Error while initializing MongoDB store: Invalid Authentication type.");
+      credential = MongoCredential.createCredential(username, database, password.toCharArray());
     }
     return credential;
   }

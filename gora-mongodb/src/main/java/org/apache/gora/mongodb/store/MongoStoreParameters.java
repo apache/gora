@@ -52,6 +52,7 @@ public class MongoStoreParameters {
 
   /**
    * Property pointing to the authentication type to connect to the server
+   * @see <a href="http://api.mongodb.com/java/current/com/mongodb/AuthenticationMechanism.html">AuthenticationMechanism in MongoDB Java Driver</a>
    */
   public static final String PROP_MONGO_AUTHENTICATION_TYPE = "gora.mongodb.authentication.type";
 
