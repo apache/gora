@@ -12,8 +12,9 @@ public class ClassLoadingUtils {
      * 2. The thread context class loader is being used.
      * If both approaches fail, returns null.
      *
-     * @param className    The name of the class to load.
+     * @param className The name of the class to load.
      * @return The class or null if no class loader could load the class.
+     * @throws ClassNotFoundException if and only if no definition for the class with the specified name could be found.
      */
     public static Class<?> loadClass(String className) throws ClassNotFoundException {
         return ClassLoadingUtils.loadClass(ClassLoadingUtils.class,className);
@@ -26,8 +27,9 @@ public class ClassLoadingUtils {
      * If both approaches fail, returns null.
      *
      * @param contextClass The name of a context class to use.
-     * @param className    The name of the class to load
+     * @param className    The name of the class to load.
      * @return The class or null if no class loader could load the class.
+     * @throws ClassNotFoundException Aif and only if no definition for the class with the specified name could be found.
      */
     public static Class<?> loadClass(Class<?> contextClass, String className) throws ClassNotFoundException {
         Class<?> clazz = null;
@@ -46,9 +48,9 @@ public class ClassLoadingUtils {
     /**
      * Loads a {@link Class} from the specified {@link ClassLoader} without throwing {@ClassNotFoundException}.
      *
-     * @param className
-     * @param classLoader
-     * @return
+     * @param className The name of the class to load.
+     * @param classLoader Class loader instance where given class to be loaded.
+     * @return The class or null if no class loader could load the class.
      */
     private static Class<?> loadClass(String className, ClassLoader classLoader) {
         Class<?> clazz = null;

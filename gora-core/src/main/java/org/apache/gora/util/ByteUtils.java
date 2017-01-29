@@ -85,12 +85,13 @@ public class ByteUtils {
 
   /**
    * Put bytes at the specified byte array position.
-   * @param tgtBytes the byte array
-   * @param tgtOffset position in the array
-   * @param srcBytes byte to write out
-   * @param srcOffset
-   * @param srcLength
-   * @return incremented offset
+   *
+   * @param tgtBytes the byte array which source/input bytes are written.
+   * @param tgtOffset offset position in the array to be considered to write bytes.
+   * @param srcBytes source of byte to write out on target byte array.
+   * @param srcOffset offset of source byte array to be considered.
+   * @param srcLength length from offset of source byte array to be considered.
+   * @return incremented offset.
    */
   public static int putBytes(byte[] tgtBytes, int tgtOffset, byte[] srcBytes,
       int srcOffset, int srcLength) {
@@ -100,10 +101,11 @@ public class ByteUtils {
 
   /**
    * Write a single byte out to the specified byte array position.
-   * @param bytes the byte array
-   * @param offset position in the array
-   * @param b byte to write out
-   * @return incremented offset
+   *
+   * @param bytes the byte array input.
+   * @param offset position in the array.
+   * @param b byte to write out.
+   * @return incremented offset.
    */
   public static int putByte(byte[] bytes, int offset, byte b) {
     bytes[offset] = b;
@@ -112,8 +114,9 @@ public class ByteUtils {
 
   /**
    * Returns a new byte array, copied from the passed ByteBuffer.
-   * @param bb A ByteBuffer
-   * @return the byte array
+   *
+   * @param bb A ByteBuffer as input.
+   * @return the byte array of <code>bb</code>.
    */
   public static byte[] toBytes(ByteBuffer bb) {
     int length = bb.limit();
@@ -123,8 +126,10 @@ public class ByteUtils {
   }
 
   /**
+   * Converts a byte array to it s String representation.
+   *
    * @param b Presumed UTF-8 encoded byte array.
-   * @return String made from <code>b</code>
+   * @return String made from <code>b</code>.
    */
   public static String toString(final byte [] b) {
     if (b == null) {
@@ -133,6 +138,14 @@ public class ByteUtils {
     return toString(b, 0, b.length);
   }
 
+  /**
+   * Converts two byte array given a separator string in between to single String representation.
+   *
+   * @param b1 Presumed UTF-8 encoded byte array input 1.
+   * @param b2 Presumed UTF-8 encoded byte array input 2.
+   * @param sep Separator String.
+   * @return String made from <code>b1</code>+<code>sep</code>+<code>b2</code>.
+   */
   public static String toString(final byte [] b1,
                                 String sep,
                                 final byte [] b2) {
@@ -140,10 +153,12 @@ public class ByteUtils {
   }
 
   /**
+   * Converts byte array given offset and length to it s String representation.
+   *
    * @param b Presumed UTF-8 encoded byte array.
-   * @param off
-   * @param len
-   * @return String made from <code>b</code>
+   * @param off offset to be from the input byte array.
+   * @param len length to be considered from the offset.
+   * @return String made from <code>b</code>.
    */
   public static String toString(final byte [] b, int off, int len) {
     if(b == null) {
@@ -161,10 +176,12 @@ public class ByteUtils {
     }
     return result;
   }
+
   /**
    * Converts a string to a UTF-8 byte array.
-   * @param s
-   * @return the byte array
+   *
+   * @param s input String value.
+   * @return the byte array.
    */
   public static byte[] toBytes(String s) {
     if (s == null) {
@@ -182,7 +199,8 @@ public class ByteUtils {
 
   /**
    * Convert a boolean to a byte array.
-   * @param b
+   *
+   * @param b input boolean value.
    * @return <code>b</code> encoded in a byte array.
    */
   public static byte [] toBytes(final boolean b) {
@@ -192,8 +210,10 @@ public class ByteUtils {
   }
 
   /**
-   * @param b
-   * @return True or false.
+   * Convert a byte array to it s boolean value.
+   *
+   * @param b input byte array.
+   * @return boolean value either True or false.
    */
   public static boolean toBoolean(final byte [] b) {
     if (b == null || b.length > 1) {
@@ -203,9 +223,10 @@ public class ByteUtils {
   }
 
   /**
-   * Convert a long value to a byte array
-   * @param val
-   * @return the byte array
+   * Convert a long value to a byte array.
+   *
+   * @param val input long value.
+   * @return the byte array.
    */
   public static byte[] toBytes(long val) {
     byte [] b = new byte[8];
@@ -218,30 +239,33 @@ public class ByteUtils {
   }
 
   /**
-   * Converts a byte array to a long value
-   * @param bytes
-   * @return the long value
+   * Converts a byte array to a long value.
+   *
+   * @param bytes input byte array.
+   * @return the long value.
    */
   public static long toLong(byte[] bytes) {
     return toLong(bytes, 0);
   }
 
   /**
-   * Converts a byte array to a long value
-   * @param bytes
-   * @param offset
-   * @return the long value
+   * Converts a byte array to a long value.
+   *
+   * @param bytes input byte array.
+   * @param offset offset to be from the input byte array.
+   * @return the long value.
    */
   public static long toLong(byte[] bytes, int offset) {
     return toLong(bytes, offset, SIZEOF_LONG);
   }
 
   /**
-   * Converts a byte array to a long value
-   * @param bytes
-   * @param offset
-   * @param length
-   * @return the long value
+   * Converts a byte array to a long value.
+   *
+   * @param bytes input byte array.
+   * @param offset offset to be from the input byte array.
+   * @param length length to be considered from the offset.
+   * @return the long value.
    */
   public static long toLong(byte[] bytes, int offset, final int length) {
     if (bytes == null || length != SIZEOF_LONG ||
@@ -257,8 +281,9 @@ public class ByteUtils {
   }
 
   /**
-   * Presumes float encoded as IEEE 754 floating-point "single format"
-   * @param bytes
+   * Presumes float encoded as IEEE 754 floating-point "single format".
+   *
+   * @param bytes offset to be considered from byte array.
    * @return Float made from passed byte array.
    */
   public static float toFloat(byte [] bytes) {
@@ -266,9 +291,10 @@ public class ByteUtils {
   }
 
   /**
-   * Presumes float encoded as IEEE 754 floating-point "single format"
-   * @param bytes
-   * @param offset
+   * Presumes float encoded as IEEE 754 floating-point "single format".
+   *
+   * @param bytes input byte array to be considered.
+   * @param offset offset to be considered from byte array.
    * @return Float made from passed byte array.
    */
   public static float toFloat(byte [] bytes, int offset) {
@@ -276,8 +302,10 @@ public class ByteUtils {
     return Float.intBitsToFloat(i);
   }
   /**
-   * @param f
-   * @return the float represented as byte []
+   * Converts float value to it s byte array representation.
+   *
+   * @param f input float value.
+   * @return the float represented as byte [].
    */
   public static byte [] toBytes(final float f) {
     // Encode it as int
@@ -286,7 +314,9 @@ public class ByteUtils {
   }
 
   /**
-   * @param bytes
+   * Converts byte array to a double value.
+   *
+   * @param bytes input byte array to be considered.
    * @return Return double made from passed bytes.
    */
   public static double toDouble(final byte [] bytes) {
@@ -294,8 +324,10 @@ public class ByteUtils {
   }
 
   /**
-   * @param bytes
-   * @param offset
+   * Converts byte array given offset to double value.
+   *
+   * @param bytes input byte array.
+   * @param offset offset to be considered from input array.
    * @return Return double made from passed bytes.
    */
   public static double toDouble(final byte [] bytes, final int offset) {
@@ -304,8 +336,10 @@ public class ByteUtils {
   }
 
   /**
-   * @param d
-   * @return the double represented as byte []
+   * Converts double value to byte array.
+   *
+   * @param d double input value.
+   * @return the double represented as byte [].
    */
   public static byte [] toBytes(final double d) {
     // Encode it as a long
@@ -314,9 +348,10 @@ public class ByteUtils {
   }
 
   /**
-   * Convert an int value to a byte array
-   * @param val
-   * @return the byte array
+   * Convert an int value to a byte array.
+   *
+   * @param val int input value.
+   * @return the byte array.
    */
   public static byte[] toBytes(int val) {
     byte [] b = new byte[4];
@@ -329,8 +364,9 @@ public class ByteUtils {
   }
 
   /**
-   * Converts a byte array to an int value
-   * @param bytes
+   * Converts a byte array to an int value.
+   *
+   * @param bytes input byte array to be converted.
    * @return the int value
    */
   public static int toInt(byte[] bytes) {
@@ -338,21 +374,23 @@ public class ByteUtils {
   }
 
   /**
-   * Converts a byte array to an int value
-   * @param bytes
-   * @param offset
-   * @return the int value
+   * Converts a byte array to an int value.
+   *
+   * @param bytes input byte array.
+   * @param offset input byte array offset.
+   * @return the int value.
    */
   public static int toInt(byte[] bytes, int offset) {
     return toInt(bytes, offset, SIZEOF_INT);
   }
 
   /**
-   * Converts a byte array to an int value
-   * @param bytes
-   * @param offset
-   * @param length
-   * @return the int value
+   * Converts a byte array to an int value.
+   *
+   * @param bytes input byte array.
+   * @param offset input byte array offset.
+   * @param length length from offset position.
+   * @return the int value.
    */
   public static int toInt(byte[] bytes, int offset, final int length) {
     if (bytes == null || length != SIZEOF_INT ||
@@ -368,9 +406,10 @@ public class ByteUtils {
   }
 
   /**
-   * Convert a short value to a byte array
-   * @param val
-   * @return the byte array
+   * Convert a short value to a byte array.
+   *
+   * @param val input short value.
+   * @return the byte array.
    */
   public static byte[] toBytes(short val) {
     byte[] b = new byte[SIZEOF_SHORT];
@@ -381,30 +420,33 @@ public class ByteUtils {
   }
 
   /**
-   * Converts a byte array to a short value
-   * @param bytes
-   * @return the short value
+   * Converts a byte array to a short value.
+   *
+   * @param bytes input byte array.
+   * @return the short value.
    */
   public static short toShort(byte[] bytes) {
     return toShort(bytes, 0);
   }
 
   /**
-   * Converts a byte array to a short value
-   * @param bytes
-   * @param offset
-   * @return the short value
+   * Converts a byte array to a short value.
+   *
+   * @param bytes input byte array.
+   * @param offset offset position of input array.
+   * @return the short value.
    */
   public static short toShort(byte[] bytes, int offset) {
     return toShort(bytes, offset, SIZEOF_SHORT);
   }
 
   /**
-   * Converts a byte array to a short value
-   * @param bytes
-   * @param offset
-   * @param length
-   * @return the short value
+   * Converts a byte array to a short value.
+   *
+   * @param bytes input byte array.
+   * @param offset offset position from input byte array.
+   * @param length length to be considered from offset.
+   * @return the short value.
    */
   public static short toShort(byte[] bytes, int offset, final int length) {
     if (bytes == null || length != SIZEOF_SHORT ||
@@ -419,10 +461,10 @@ public class ByteUtils {
   }
 
   /**
-   * Convert a char value to a byte array
+   * Convert a char value to a byte array.
    *
-   * @param val
-   * @return the byte array
+   * @param val input char value.
+   * @return the byte array.
    */
   public static byte[] toBytes(char val) {
     byte[] b = new byte[SIZEOF_CHAR];
@@ -433,10 +475,10 @@ public class ByteUtils {
   }
 
   /**
-   * Converts a byte array to a char value
+   * Converts a byte array to a char value.
    *
-   * @param bytes
-   * @return the char value
+   * @param bytes input bytes array.
+   * @return the char value.
    */
   public static char toChar(byte[] bytes) {
     return toChar(bytes, 0);
@@ -444,23 +486,23 @@ public class ByteUtils {
 
 
   /**
-   * Converts a byte array to a char value
+   * Converts a byte array to a char value.
    *
-   * @param bytes
-   * @param offset
-   * @return the char value
+   * @param bytes input bytes array.
+   * @param offset offset to be considered from input array.
+   * @return the char value.
    */
   public static char toChar(byte[] bytes, int offset) {
     return toChar(bytes, offset, SIZEOF_CHAR);
   }
 
   /**
-   * Converts a byte array to a char value
+   * Converts a byte array to a char value.
    *
-   * @param bytes
-   * @param offset
-   * @param length
-   * @return the char value
+   * @param bytes input byte array.
+   * @param offset offset to be considered from input array.
+   * @param length length to be considered from offset.
+   * @return the char value.
    */
   public static char toChar(byte[] bytes, int offset, final int length) {
     if (bytes == null || length != SIZEOF_CHAR ||
@@ -475,33 +517,33 @@ public class ByteUtils {
   }
 
   /**
-   * Converts a byte array to a char array value
+   * Converts a byte array to a char array value.
    *
-   * @param bytes
-   * @return the char value
+   * @param bytes input byte array.
+   * @return the char value.
    */
   public static char[] toChars(byte[] bytes) {
     return toChars(bytes, 0, bytes.length);
   }
 
   /**
-   * Converts a byte array to a char array value
+   * Converts a byte array to a char array value.
    *
-   * @param bytes
-   * @param offset
-   * @return the char value
+   * @param bytes input byte array.
+   * @param offset offset to be considered from input array.
+   * @return the char value.
    */
   public static char[] toChars(byte[] bytes, int offset) {
     return toChars(bytes, offset, bytes.length-offset);
   }
 
   /**
-   * Converts a byte array to a char array value
+   * Converts a byte array to a char array value.
    *
-   * @param bytes
-   * @param offset
-   * @param length
-   * @return the char value
+   * @param bytes input byte array.
+   * @param offset offset to be considered from input array.
+   * @param length length to be considered from offset.
+   * @return the char value.
    */
   public static char[] toChars(byte[] bytes, int offset, final int length) {
     int max = offset + length;
@@ -521,6 +563,8 @@ public class ByteUtils {
   }
 
   /**
+   * Converts a int value to it s variable length byte array representation.
+   *
    * @param vint Integer to make a vint of.
    * @return Vint as bytes array.
    */
@@ -559,7 +603,9 @@ public class ByteUtils {
   }
 
   /**
-   * @param buffer
+   * Converts variable length byte array to it s long value representation.
+   *
+   * @param buffer input byte array.
    * @return vint bytes as an integer.
    */
   public static long bytesToVlong(final byte [] buffer) {
@@ -579,7 +625,9 @@ public class ByteUtils {
   }
 
   /**
-   * @param buffer
+   * Converts variable length byte array to it s  int value representation.
+   *
+   * @param buffer input byte array.
    * @return vint bytes as an integer.
    */
   public static int bytesToVint(final byte [] buffer) {
@@ -600,9 +648,10 @@ public class ByteUtils {
 
   /**
    * Reads a zero-compressed encoded long from input stream and returns it.
-   * @param buffer Binary array
+   *
+   * @param buffer Binary input array.
    * @param offset Offset into array at which vint begins.
-   * @throws java.io.IOException
+   * @throws java.io.IOException when read error occurs while extracting data from input stream.
    * @return deserialized long from stream.
    */
   public static long readVLong(final byte [] buffer, final int offset)
@@ -622,8 +671,10 @@ public class ByteUtils {
   }
 
   /**
-   * @param left
-   * @param right
+   * Compare byte two byte arrays, and returns a int value accordingly.
+   *
+   * @param left left byte array to be considered.
+   * @param right right byte array to be considered.
    * @return 0 if equal, {@literal <} 0 if left is less than right, etc.
    */
   public static int compareTo(final byte [] left, final byte [] right) {
@@ -631,12 +682,14 @@ public class ByteUtils {
   }
 
   /**
-   * @param b1
-   * @param b2
-   * @param s1 Where to start comparing in the left buffer
-   * @param s2 Where to start comparing in the right buffer
-   * @param l1 How much to compare from the left buffer
-   * @param l2 How much to compare from the right buffer
+   * Compare byte two byte arrays given offset and length, and returns a int value accordingly.
+   *
+   * @param b1 left byte array to be considered.
+   * @param b2 right byte array to be considered.
+   * @param s1 Where to start comparing in the left buffer.
+   * @param s2 Where to start comparing in the right buffer.
+   * @param l1 How much to compare from the left buffer.
+   * @param l2 How much to compare from the right buffer.
    * @return 0 if equal, {@literal <} 0 if left is less than right, etc.
    */
   public static int compareTo(byte[] b1, int s1, int l1,
@@ -655,9 +708,11 @@ public class ByteUtils {
   }
 
   /**
-   * @param left
-   * @param right
-   * @return True if equal
+   * Compare byte two byte arrays for equality, and returns a boolean value accordingly.
+   *
+   * @param left left byte array to be considered.
+   * @param right right byte array to be considered.
+   * @return True if equal.
    */
   public static boolean equals(final byte [] left, final byte [] right) {
     // Could use Arrays.equals?
