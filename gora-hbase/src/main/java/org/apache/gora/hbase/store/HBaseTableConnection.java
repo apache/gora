@@ -51,31 +51,14 @@ public class HBaseTableConnection {
   private final Connection connection;
   private final RegionLocator regionLocator;
   // BufferedMutator used for doing async flush i.e. autoflush = false
-  private final ThreadLocal<ConcurrentLinkedQueue<Mutation>> buffers;
+  private final ThreadLocal<BufferedMutator> buffers;
   private final ThreadLocal<Table> tables;
 
   private final BlockingQueue<Table> tPool = new LinkedBlockingQueue<>();
-  private final BlockingQueue<ConcurrentLinkedQueue<Mutation>> bPool = new LinkedBlockingQueue<>();
+  private final BlockingQueue<BufferedMutator> bPool = new LinkedBlockingQueue<>();
   private final boolean autoFlush;
   private final TableName tableName;
 
-//  public class MutationPair {
-//    private Mutation mutation;
-//    private boolean type;
-//
-//    public void MutationPair(Mutation m, boolean t) {
-//      this.mutation = m;
-//      this.type = t;
-//    }
-//
-//    public boolean isType() {
-//      return type;
-//    }
-//
-//    public Mutation getMutation() {
-//      return mutation;
-//    }
-//  }
   /**
    * Instantiate new connection.
    *
@@ -108,12 +91,12 @@ public class HBaseTableConnection {
     return table;
   }
 
-  private ConcurrentLinkedQueue<Mutation> getBuffer() throws IOException {
-    ConcurrentLinkedQueue<Mutation> buffer = buffers.get();
+  private BufferedMutator getBuffer() throws IOException {
+    BufferedMutator buffer = buffers.get();
     if (buffer == null) {
 //      BufferedMutatorParams params = new BufferedMutatorParams(this.tableName).listener(listener);
 //      buffer = connection.getBufferedMutator(this.tableName);
-      buffer = new ConcurrentLinkedQueue<>();
+      buffer = connection.getBufferedMutator(this.tableName);
       bPool.add(buffer);
       buffers.set(buffer);
     }
@@ -121,14 +104,25 @@ public class HBaseTableConnection {
   }
 
   public void flushCommits() throws IOException {
-    BufferedMutator bufMutator = connection.getBufferedMutator(this.tableName);
-    for (ConcurrentLinkedQueue<Mutation> buffer : bPool) {
-      for (Mutation m: buffer) {
-        bufMutator.mutate(m);
-        bufMutator.flush();
-      }
+//    BufferedMutator bufMutator = connection.getBufferedMutator(this.tableName);
+    for (BufferedMutator buffer : bPool) {
+      buffer.flush();
+//      getTable().batch(buffer, obsj);
+//      for (Mutation m: buffer) {
+//        bufMutator.mutate(m);
+//        bufMutator.flush();
+//      }
+      buffer.close();
+      Table t = getTable();
+      t.close();
+      t = null;
+      buffer = null;
+      buffers.set(buffer);
+      tables.set(t);
     }
-    bufMutator.close();
+//    bufMutator.close();
+//    getTable().close();
+
   }
 
   public void close() throws IOException {
@@ -183,7 +177,7 @@ public class HBaseTableConnection {
   }
 
   public void put(Put put) throws IOException {
-    getBuffer().add(put);
+    getBuffer().mutate(put);
 //    getBuffer().flush();
 //    getTable().put(put);
   }
@@ -191,13 +185,13 @@ public class HBaseTableConnection {
 //  @Override
   public void put(List<Put> puts) throws IOException {
 //    getTable().put(puts);
-    getBuffer().addAll(puts);
+    getBuffer().mutate(puts);
 //    getBuffer().flush();
   }
 
 //  @Override
   public void delete(Delete delete) throws IOException {
-    getBuffer().add(delete);
+    getBuffer().mutate(delete);
 //    getBuffer().flush();
 //    getTable().delete(delete);
   }
@@ -205,7 +199,7 @@ public class HBaseTableConnection {
 //  @Override
   public void delete(List<Delete> deletes) throws IOException {
 //    getTable().delete(deletes);
-    getBuffer().addAll(deletes);
+    getBuffer().mutate(deletes);
 //    getBuffer().flush();
   }
 

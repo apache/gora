@@ -655,24 +655,24 @@
   </profiles>
 
   <modules>
-    <module>gora-compiler</module>
-    <module>gora-compiler-cli</module>
+    <!--<module>gora-compiler</module>-->
+    <!--<module>gora-compiler-cli</module>-->
     <module>gora-core</module>
-    <module>gora-accumulo</module>
-    <module>gora-cassandra</module>
-    <module>gora-goraci</module>
+    <!--<module>gora-accumulo</module>-->
+    <!--<module>gora-cassandra</module>-->
+    <!--<module>gora-goraci</module>-->
     <module>gora-hbase</module>
-    <module>gora-infinispan</module>
-    <module>gora-jcache</module>
+    <!--<module>gora-infinispan</module>-->
+    <!--<module>gora-jcache</module>-->
     <!-- module>gora-lucene</module -->
-    <module>gora-dynamodb</module>
-    <module>gora-couchdb</module>
+    <!--<module>gora-dynamodb</module>-->
+    <!--<module>gora-couchdb</module>-->
     <!--module>gora-sql</module -->
     <module>gora-maven-plugin</module>
-    <module>gora-mongodb</module>
-    <module>gora-solr</module>
-    <module>gora-solr-5</module>
-    <module>gora-tutorial</module>
+    <!--<module>gora-mongodb</module>-->
+    <!--<module>gora-solr</module>-->
+    <!--<module>gora-solr-5</module>-->
+    <!--<module>gora-tutorial</module>-->
     <module>sources-dist</module>
   </modules>
 
@@ -744,9 +744,9 @@
 
     <!-- General Properties -->
     <implementation.build>${scmBranch}@r${buildNumber}</implementation.build>
-    <javac.src.version>1.8</javac.src.version>
-    <javac.target.version>1.8</javac.target.version>
-    <maven.compiler.target>1.8</maven.compiler.target>
+    <javac.src.version>1.7</javac.src.version>
+    <javac.target.version>1.7</javac.target.version>
+    <maven.compiler.target>1.7</maven.compiler.target>
     <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ssZ</maven.build.timestamp.format>
     <skipTests>false</skipTests>
     <assembly.finalName>apache-${project.build.finalName}</assembly.finalName>

@@ -33,7 +33,7 @@ public class GoraHBaseTestDriver extends GoraTestDriver {
   /**
    * Cluster object used for testing.
    */
-  private static final HBaseClusterSingleton cluster = HBaseClusterSingleton.build(1);
+  private static  HBaseClusterSingleton cluster ;//= HBaseClusterSingleton.build(1);
 
   /**
    * Default Constructor.

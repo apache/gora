@@ -803,6 +803,7 @@ implements Configurable {
   public void close() {
     try{
       table.close();
+      admin.close();
     }catch(IOException ex){
       LOG.error(ex.getMessage(), ex);
     }
