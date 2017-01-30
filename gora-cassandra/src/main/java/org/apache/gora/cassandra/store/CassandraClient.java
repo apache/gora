@@ -208,10 +208,10 @@ public class CassandraClient<K, T extends PersistentBase> {
       ccl.setReadCfConsistencyLevels(clmap);
       ccl.setWriteCfConsistencyLevels(clmap);
       // Operations consistency levels
-      String opConsisLvl = (readOpConsLvl!=null || !readOpConsLvl.isEmpty())?readOpConsLvl:DEFAULT_HECTOR_CONSIS_LEVEL;
+      String opConsisLvl = (readOpConsLvl!=null && !readOpConsLvl.isEmpty())?readOpConsLvl:DEFAULT_HECTOR_CONSIS_LEVEL;
       ccl.setDefaultReadConsistencyLevel(HConsistencyLevel.valueOf(opConsisLvl));
       LOG.debug("Hector read consistency configured to '" + opConsisLvl + "'.");
-      opConsisLvl = (writeOpConsLvl!=null || !writeOpConsLvl.isEmpty())?writeOpConsLvl:DEFAULT_HECTOR_CONSIS_LEVEL;
+      opConsisLvl = (writeOpConsLvl!=null && !writeOpConsLvl.isEmpty())?writeOpConsLvl:DEFAULT_HECTOR_CONSIS_LEVEL;
       ccl.setDefaultWriteConsistencyLevel(HConsistencyLevel.valueOf(opConsisLvl));
       LOG.debug("Hector write consistency configured to '" + opConsisLvl + "'.");
 
