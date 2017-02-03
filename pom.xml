@@ -728,8 +728,8 @@
     <!-- Hadoop Dependencies -->
     <hadoop-2.version>2.5.2</hadoop-2.version>
     <hadoop-2.test.version>2.5.2</hadoop-2.test.version>
-    <hbase.version>0.98.8-hadoop2</hbase.version>
-    <hbase.test.version>0.98.8-hadoop2</hbase.test.version>
+    <hbase.version>1.2.3</hbase.version>
+    <hbase.test.version>1.2.3</hbase.test.version>
     <cxf-rt-frontend-jaxrs.version>2.5.2</cxf-rt-frontend-jaxrs.version>
     <!-- Amazon Dependencies -->
     <amazon.version>1.10.55</amazon.version>
