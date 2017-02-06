@@ -63,7 +63,7 @@ public class PersistentSerializer implements Serializer<PersistentBase> {
   @Override
   public void serialize(PersistentBase persistent) throws IOException {
     datumWriter.setSchema(persistent.getSchema());
-        
     datumWriter.write(persistent, encoder);
+    encoder.writeFixed(persistent.getDirtyBytes().array());
   }
 }

@@ -17,6 +17,7 @@
  */
 package org.apache.gora.mongodb.store;
 
+import static com.mongodb.AuthenticationMechanism.*;
 import static org.apache.gora.mongodb.store.MongoMapping.DocumentFieldType;
 
 import java.io.IOException;
@@ -153,7 +154,7 @@ DataStoreBase<K, T> {
     // If configuration contains a login + secret, try to authenticated with DB
     List<MongoCredential> credentials = new ArrayList<>();
     if (params.getLogin() != null && params.getSecret() != null) {
-      credentials.add(MongoCredential.createCredential(params.getLogin(), params.getDbname(), params.getSecret().toCharArray()));
+      credentials.add(createCredential(params.getAuthenticationType(), params.getLogin(), params.getDbname(), params.getSecret()));
     }
     // Build server address
     List<ServerAddress> addrs = new ArrayList<>();
@@ -177,6 +178,34 @@ DataStoreBase<K, T> {
     }
     // Connect to the Mongo server
     return new MongoClient(addrs, credentials, optBuilder.build());
+  }
+
+  /**
+   * This method creates credentials according to the Authentication type.
+   *
+   * @param authenticationType authentication Type (Authentication Mechanism)
+   * @param username           username
+   * @param database           database
+   * @param password           password
+   * @return Mongo Crendential
+   * @see <a href="http://api.mongodb.com/java/current/com/mongodb/AuthenticationMechanism.html">AuthenticationMechanism in MongoDB Java Driver</a>
+   */
+  private MongoCredential createCredential(String authenticationType, String username, String database, String password) {
+    MongoCredential credential = null;
+    if (PLAIN.getMechanismName().equals(authenticationType)) {
+      credential = MongoCredential.createPlainCredential(username, database, password.toCharArray());
+    } else if (SCRAM_SHA_1.getMechanismName().equals(authenticationType)) {
+      credential = MongoCredential.createScramSha1Credential(username, database, password.toCharArray());
+    } else if (MONGODB_CR.getMechanismName().equals(authenticationType)) {
+      credential = MongoCredential.createMongoCRCredential(username, database, password.toCharArray());
+    } else if (GSSAPI.getMechanismName().equals(authenticationType)) {
+      credential = MongoCredential.createGSSAPICredential(username);
+    } else if (MONGODB_X509.getMechanismName().equals(authenticationType)) {
+      credential = MongoCredential.createMongoX509Credential(username);
+    } else {
+      credential = MongoCredential.createCredential(username, database, password.toCharArray());
+    }
+    return credential;
   }
 
   /**

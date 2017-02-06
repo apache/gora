@@ -159,6 +159,15 @@
       </roles>
     </developer>
     <developer>
+      <id>djkevincr</id>
+      <name>Kevin Ratnasekera</name>
+      <email>djkevincr [at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
       <id>lewismc</id>
       <name>Lewis John McGibbney</name>
       <email>lewismc [at] apache [dot] org</email>
@@ -431,6 +440,37 @@
             <fork>true</fork>
           </configuration>
         </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>${maven-javadoc-plugin.version}</version>
+          <configuration>
+            <excludePackageNames>org.apache.gora.tutorial.log.generated;org.apache.gora.goraci.generated</excludePackageNames>
+          </configuration>
+          <executions>
+            <execution>
+              <id>attach-javadocs</id>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+              <configuration>
+                <quiet>true</quiet>
+                <archive>
+                  <manifest>
+                    <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                    <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                  </manifest>
+                  <manifestEntries>
+                    <Implementation-Build>${implementation.build}</Implementation-Build>
+                    <Implementation-Build-Date>${maven.build.timestamp}</Implementation-Build-Date>
+                    <X-Compile-Source-JDK>${javac.src.version}</X-Compile-Source-JDK>
+                    <X-Compile-Target-JDK>${javac.target.version}</X-Compile-Target-JDK>
+                  </manifestEntries>
+                </archive>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
@@ -575,6 +615,9 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
             <version>${maven-javadoc-plugin.version}</version>
+            <configuration>
+              <excludePackageNames>org.apache.gora.tutorial.log.generated;org.apache.gora.goraci.generated</excludePackageNames>
+            </configuration>
             <executions>
               <execution>
                 <id>attach-javadocs</id>
@@ -654,8 +697,8 @@
     <!-- Hadoop Dependencies -->
     <hadoop-2.version>2.5.2</hadoop-2.version>
     <hadoop-2.test.version>2.5.2</hadoop-2.test.version>
-    <hbase.version>0.98.8-hadoop2</hbase.version>
-    <hbase.test.version>0.98.8-hadoop2</hbase.test.version>
+    <hbase.version>1.2.3</hbase.version>
+    <hbase.test.version>1.2.3</hbase.test.version>
     <cxf-rt-frontend-jaxrs.version>2.5.2</cxf-rt-frontend-jaxrs.version>
     <!-- Amazon Dependencies -->
     <amazon.version>1.10.55</amazon.version>

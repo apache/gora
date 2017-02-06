@@ -97,9 +97,17 @@ public class IOUtils {
         + out.getClass());
   }
 
-  /** Serializes the object to the given dataoutput using
-   * available Hadoop serializations
-   * @throws IOException */
+  /**
+   * Serializes the object to the given data output using
+   * available Hadoop serializations.
+   *
+   * @param conf Hadoop conf.
+   * @param obj object instance to be serialized.
+   * @param out data stream which serialized content is written.
+   * @param objClass Class type of the object to be serialized.
+   * @param <T> class type of object to be serialized.
+   * @throws IOException occurred while serializing the object to bytes.
+   */
   public static<T> void serialize(Configuration conf, DataOutput out
       , T obj, Class<T> objClass) throws IOException {
 
@@ -128,9 +136,16 @@ public class IOUtils {
     }
   }
 
-  /** Serializes the object to the given dataoutput using
-   * available Hadoop serializations
-   * @throws IOException */
+  /**
+   * Serializes the object to the given data output using
+   * available Hadoop serializations.
+   *
+   * @param <T> class type of object to be serialized.
+   * @param conf Hadoop conf.
+   * @param obj object instance to be serialized.
+   * @param out data stream which serialized content is written.
+   * @throws IOException occurred while serializing the object to bytes.
+   */
   @SuppressWarnings("unchecked")
   public static<T> void serialize(Configuration conf, DataOutput out
       , T obj) throws IOException {
@@ -138,8 +153,16 @@ public class IOUtils {
     serialize(conf, out, obj, (Class<T>)obj.getClass());
   }
 
-  /** Serializes the object to the given dataoutput using
-   * available Hadoop serializations*/
+  /**
+   * Serializes the object to the given data output using
+   * available Hadoop serializations
+   *
+   * @param conf Hadoop conf.
+   * @param <T> class type of object to be serialized.
+   * @param obj object instance to be serialized.
+   * @return serialized byte array.
+   * @throws IOException occurred while serializing the object to bytes.
+   */
   public static<T> byte[] serialize(Configuration conf, T obj) throws IOException {
     DataOutputBuffer buffer = new DataOutputBuffer();
     serialize(conf, buffer, obj);
@@ -149,6 +172,12 @@ public class IOUtils {
 
   /**
    * Serializes the field object using the datumWriter.
+   *
+   * @param <T> class type of object to be serialized.
+   * @param datumWriter AVRO datum writer for given schema.
+   * @param object object to be serialized.
+   * @param os output stream which serialized content is written.
+   * @throws IOException occurred while serializing the object to bytes.
    */
   public static<T extends SpecificRecord> void serialize(OutputStream os,
       SpecificDatumWriter<T> datumWriter, T object)
@@ -161,6 +190,12 @@ public class IOUtils {
 
   /**
    * Serializes the field object using the datumWriter.
+   *
+   * @param <T> class type of object to be serialized.
+   * @param datumWriter AVRO datum writer for given schema.
+   * @param object object to be serialized.
+   * @param os output stream which serialized content is written.
+   * @throws IOException occurred while serializing the object to bytes.
    */
   public static<T> void serialize(OutputStream os,
       SpecificDatumWriter<T> datumWriter, T object)
@@ -173,6 +208,12 @@ public class IOUtils {
   
   /**
    * Serializes the field object using the datumWriter.
+   *
+   * @param <T> class type of object to be serialized.
+   * @param datumWriter AVRO datum writer for given schema.
+   * @param object object to be serialized.
+   * @return serialized byte array.
+   * @throws IOException occurred while serializing the object to bytes.
    */
   public static<T extends SpecificRecord> byte[] serialize(SpecificDatumWriter<T> datumWriter
       , T object) throws IOException {
@@ -183,6 +224,12 @@ public class IOUtils {
 
   /**
    * Serializes the field object using the datumWriter.
+   *
+   * @param <T> class type of object to be serialized.
+   * @param datumWriter AVRO datum writer for given schema.
+   * @param object object to be serialized.
+   * @return serialized byte array.
+   * @throws IOException occurred while serializing the object to bytes.
    */
   public static<T> byte[] serialize(SpecificDatumWriter<T> datumWriter
       , T object) throws IOException {
@@ -191,10 +238,19 @@ public class IOUtils {
     return os.toByteArray();
   }
   
-  /** Deserializes the object in the given datainput using
+  /**
+   * Deserializes the object in the given data input using
    * available Hadoop serializations.
-   * @throws IOException
-   * @throws ClassNotFoundException */
+   *
+   * @param conf Hadoop conf.
+   * @param in data input stream where serialized content is read.
+   * @param <T> object class type.
+   * @param obj data object.
+   * @param objClass object class type as String.
+   * @return deserialized object.
+   * @throws IOException occurred while deserializing the byte content.
+   * @throws ClassNotFoundException class definition cannot be found for given class name.
+   */
   @SuppressWarnings("unchecked")
   public static<T> T deserialize(Configuration conf, DataInput in
       , T obj , String objClass) throws IOException, ClassNotFoundException {
@@ -204,9 +260,18 @@ public class IOUtils {
     return deserialize(conf, in, obj, c);
   }
 
-  /** Deserializes the object in the given datainput using
+  /**
+   * Deserializes the object in the given data input using
    * available Hadoop serializations.
-   * @throws IOException */
+   *
+   * @param conf Hadoop conf.
+   * @param in data input stream where serialized content is read.
+   * @param <T> object class type.
+   * @param obj data object.
+   * @param objClass object class type.
+   * @throws IOException occurred while deserializing the byte content.
+   * @return deserialized object.
+   */
   public static<T> T deserialize(Configuration conf, DataInput in
       , T obj , Class<T> objClass) throws IOException {
     SerializationFactory serializationFactory = new SerializationFactory(getOrCreateConf(conf));
@@ -230,10 +295,18 @@ public class IOUtils {
     }
   }
 
-  /** Deserializes the object in the given datainput using
+  /**
+   * Deserializes the object in the given data input using
    * available Hadoop serializations.
-   * @throws IOException
-   * @throws ClassNotFoundException */
+   *
+   * @param conf Hadoop conf.
+   * @param in data input stream where serialized content is read.
+   * @param <T> object class type.
+   * @param obj data object.
+   * @throws IOException occurred while deserializing the byte content.
+   * @throws ClassNotFoundException class definition cannot be found for given class name.
+   * @return deserialized object.
+   */
   @SuppressWarnings("unchecked")
   public static<T> T deserialize(Configuration conf, DataInput in
       , T obj) throws IOException, ClassNotFoundException {
@@ -242,10 +315,18 @@ public class IOUtils {
     return deserialize(conf, in, obj, c);
   }
 
-  /** Deserializes the object in the given datainput using
+  /**
+   * Deserializes the object in the given data input using
    * available Hadoop serializations.
-   * @throws IOException
-   * @throws ClassNotFoundException */
+   *
+   * @param conf Hadoop conf.
+   * @param in serialized byte array of  object.
+   * @param <T> object class type.
+   * @param obj data object.
+   * @throws IOException occurred while deserializing the byte content.
+   * @throws ClassNotFoundException class definition cannot be found for given class name.
+   * @return deserialized object.
+   */
   public static<T> T deserialize(Configuration conf, byte[] in
       , T obj) throws IOException, ClassNotFoundException {
     try (DataInputBuffer buffer = new DataInputBuffer()) {
@@ -256,6 +337,14 @@ public class IOUtils {
 
   /**
    * Deserializes the field object using the datumReader.
+   *
+   * @param is data input stream.
+   * @param datumReader AVRO datum reader associated schema.
+   * @param <T> field class type.
+   * @param <K> key class type.
+   * @param object data field object.
+   * @return deserialized field object.
+   * @throws IOException while deserializing the byte content.
    */
   public static<K, T extends SpecificRecord> T deserialize(InputStream is,
       SpecificDatumReader<T> datumReader, T object)
@@ -266,6 +355,14 @@ public class IOUtils {
 
   /**
    * Deserializes the field object using the datumReader.
+   *
+   * @param bytes serialized byte array of field.
+   * @param datumReader AVRO datum reader associated schema.
+   * @param <T> field class type.
+   * @param <K> key class type.
+   * @param object data field object.
+   * @return deserialized field object.
+   * @throws IOException while deserializing the byte content.
    */
   public static<K, T extends SpecificRecord> T deserialize(byte[] bytes,
       SpecificDatumReader<T> datumReader, T object)
@@ -276,6 +373,14 @@ public class IOUtils {
 
   /**
    * Deserializes the field object using the datumReader.
+   *
+   * @param bytes serialized byte array of field.
+   * @param datumReader AVRO datum reader associated schema.
+   * @param object data field object.
+   * @param <T> field class type.
+   * @param <K> key class type.
+   * @return deserialized field object.
+   * @throws IOException while deserializing the byte content.
    */
   public static<K, T> T deserialize(byte[] bytes,
       SpecificDatumReader<T> datumReader, T object)
@@ -287,9 +392,10 @@ public class IOUtils {
   /**
    * Writes a byte[] to the output, representing whether each given field is null
    * or not. A Vint and ceil( fields.length / 8 ) bytes are written to the output.
-   * @param out the output to write to
-   * @param fields the fields to check for null
-   * @see #readNullFieldsInfo(DataInput)
+   *
+   * @param out the output to write to.
+   * @param fields the fields to check for null. @see #readNullFieldsInfo(DataInput).
+   * @throws IOException when writing the data to the stream.
    */
   public static void writeNullFieldsInfo(DataOutput out, Object ... fields)
     throws IOException {
@@ -306,8 +412,10 @@ public class IOUtils {
   /**
    * Reads the data written by {@link #writeNullFieldsInfo(DataOutput, Object...)}
    * and returns a boolean array representing whether each field is null or not.
-   * @param in the input to read from
+   *
+   * @param in the input to read from.
    * @return a boolean[] representing whether each field is null or not.
+   * @throws IOException when value is too long to fit in integer.
    */
   public static boolean[] readNullFieldsInfo(DataInput in) throws IOException {
     return readBoolArray(in);
@@ -315,6 +423,10 @@ public class IOUtils {
 
   /**
    * Writes a boolean[] to the output.
+   *
+   * @param out the output to write to.
+   * @param boolArray boolean array.
+   * @throws IOException when writing the data to the stream.
    */
   public static void writeBoolArray(DataOutput out, boolean[] boolArray)
     throws IOException {
@@ -345,8 +457,11 @@ public class IOUtils {
   }
 
   /**
-   * Reads a boolean[] from input
-   * @throws IOException
+   * Reads a boolean[] from input.
+   *
+   * @param in data input stream to read values.
+   * @return boolean array.
+   * @throws IOException when value too long to fit in integer.
    */
   public static boolean[] readBoolArray(DataInput in) throws IOException {
     int length = WritableUtils.readVInt(in);
@@ -366,6 +481,10 @@ public class IOUtils {
 
   /**
    * Writes a boolean[] to the output.
+   *
+   * @param out encoder instance which wraps the output stream where data is written.
+   * @param boolArray boolean array.
+   * @throws IOException when failed writing the data to the stream.
    */
   public static void writeBoolArray(Encoder out, boolean[] boolArray)
     throws IOException {
@@ -401,8 +520,11 @@ public class IOUtils {
   }
 
   /**
-   * Reads a boolean[] from input
-   * @throws IOException
+   * Reads a boolean[] from input.
+   *
+   * @param in decoder instance which wraps the input stream where data is read.
+   * @return boolean array.
+   * @throws IOException when failed reading the data from stream.
    */
   public static boolean[] readBoolArray(Decoder in) throws IOException {
 
@@ -427,9 +549,10 @@ public class IOUtils {
 
   /**
    * Writes the String array to the given DataOutput.
-   * @param out the data output to write to
-   * @param arr the array to write
-   * @see #readStringArray(DataInput)
+   *
+   * @param out the data output to write to.
+   * @param arr the array to write. @see #readStringArray(DataInput).
+   * @throws IOException when failed writing the data to output stream.
    */
   public static void writeStringArray(DataOutput out, String[] arr)
     throws IOException {
@@ -442,8 +565,10 @@ public class IOUtils {
   /**
    * Reads and returns a String array that is written by
    * {@link #writeStringArray(DataOutput, String[])}.
-   * @param in the data input to read from
-   * @return read String[]
+   *
+   * @param in the data input to read from.
+   * @return read String[].
+   * @throws IOException when failed reading the data from stream.
    */
   public static String[] readStringArray(DataInput in) throws IOException {
     int len = WritableUtils.readVInt(in);
@@ -455,10 +580,13 @@ public class IOUtils {
   }
 
   /**
-   * Stores the given object in the configuration under the given dataKey
-   * @param obj the object to store
-   * @param conf the configuration to store the object into
-   * @param dataKey the key to store the data
+   * Stores the given object in the configuration under the given dataKey.
+   *
+   * @param obj the object to store.
+   * @param conf the configuration to store the object into.
+   * @param dataKey the key to store the data.
+   * @param <T> the given object class type.
+   * @throws IOException when failed storing the given data in Hadoop conf.
    */
   public static<T> void storeToConf(T obj, Configuration conf, String dataKey)
     throws IOException {
@@ -470,9 +598,12 @@ public class IOUtils {
   /**
    * Loads the object stored by {@link #storeToConf(Object, Configuration, String)}
    * method from the configuration under the given dataKey.
-   * @param conf the configuration to read from
-   * @param dataKey the key to get the data from
-   * @return the store object
+   *
+   * @param conf the configuration to read from.
+   * @param dataKey the key to get the data from.
+   * @param <T> the given object class type.
+   * @return the store object.
+   * @throws IOException when failed retrieving the data given key from Hadoop conf.
    */
   @SuppressWarnings("unchecked")
   public static<T> T loadFromConf(Configuration conf, String dataKey)
@@ -488,7 +619,10 @@ public class IOUtils {
   }
 
   /**
-   * Copies the contents of the buffers into a single byte[]
+   * Copies the contents of the buffers into a single byte[].
+   *
+   * @param buffers input buffers to be merged.
+   * @return merged byte array.
    */
   //TODO: not tested
   public static byte[] getAsBytes(List<ByteBuffer> buffers) {
@@ -511,7 +645,11 @@ public class IOUtils {
   }
 
   /**
-   * Reads until the end of the input stream, and returns the contents as a byte[]
+   * Reads until the end of the input stream, and returns the contents as a byte[].
+   *
+   * @param in input stream where the data is read.
+   * @return byte array of read data from the stream.
+   * @throws IOException when failed reading the data from input stream.
    */
   public static byte[] readFully(InputStream in) throws IOException {
     List<ByteBuffer> buffers = new ArrayList<>(4);

@@ -32,6 +32,10 @@ public class StringUtils {
 
   /**
    * Joins the two given arrays, removing dup elements.
+   *
+   * @param arr1 first string array.
+   * @param arr2 second string array.
+   * @return joined array.
    */
   public static String[] joinStringArrays(String[] arr1, String... arr2) {
     HashSet<String> set = new HashSet<>();
@@ -67,7 +71,12 @@ public class StringUtils {
     return builder;
   }
 
-  /** helper for string null and empty checking*/
+  /**
+   * Helper for string null and empty checking
+   *
+   * @param str input string.
+   * @return True or False indicating not null condition.
+   */
   public static boolean is(String str) {
     return str != null && str.length() > 0;
   }
@@ -77,6 +86,7 @@ public class StringUtils {
    * Returns the power set from the given set by using a binary counter
    * Example: S = {a,b,c}
    * P(S) = {[], [c], [b], [b, c], [a], [a, c], [a, b], [a, b, c]}
+   *
    * @param set String[]
    * @return LinkedHashSet
    */
@@ -117,11 +127,12 @@ public class StringUtils {
 
   /**
    * Converts the given integer to a String representing a binary number
-   * with the specified number of digits
-   * For example when using 4 digits the binary 1 is 0001
-   * @param binary int
-   * @param digits int
-   * @return String
+   * with the specified number of digits.
+   * For example when using 4 digits the binary 1 is 0001.
+   *
+   * @param binary int.
+   * @param digits int.
+   * @return String.
    */
   private static String intToBinary(int binary, int digits) {
     String temp = Integer.toBinaryString(binary);
@@ -142,6 +153,9 @@ public class StringUtils {
 
   /**
    * Returns the name of the class without the package name.
+   *
+   * @param clazz Class type instance which name is to be returned.
+   * @return class name string.
    */
   public static String getClassname(Class<?> clazz) {
     return getClassname(clazz.getName());
@@ -149,6 +163,9 @@ public class StringUtils {
 
   /**
    * Returns the name of the class without the package name.
+   *
+   * @param classname class name including package as string.
+   * @return class name as string.
    */
   public static String getClassname(String classname) {
     String[] parts = classname.split("\\.");

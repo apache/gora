@@ -36,12 +36,15 @@ import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.gora.persistency.impl.PersistentBase;
 
 /**
- * An utility class for Avro related tasks
+ * An utility class for Avro related tasks.
  */
 public class AvroUtils {
 
   /**
    * Returns a map of field name to Field for schema's fields.
+   *
+   * @param schema the schema object to get the map of field name to Field.
+   * @return map of field name to Field.
    */
   public static Map<String, Field> getFieldMap(Schema schema) {
     List<Field> fields = schema.getFields();
@@ -63,7 +66,16 @@ public class AvroUtils {
   }
 
   /**
-   * Returns the schema of the class
+   * Returns the schema of the class.
+   *
+   * @param clazz Class instance of the persistent bean.
+   * @throws SecurityException if the caller's class loader is not the same as the
+   *          class loader of above class.
+   * @throws NoSuchFieldException if a field with the specified name is not found.
+   * @throws IllegalArgumentException this will not be thrown since <code>field.get(obj)</code> passing obj is ignored
+   *         since the SCHEMA field is a static class level variable inside the persistent bean class.
+   * @throws IllegalAccessException if the field is inaccessible due to java language access control.
+   * @return the schema of persistent bean instance.
    */
   public static Schema getSchema(Class<? extends PersistentBase> clazz)
       throws SecurityException, NoSuchFieldException, IllegalArgumentException,
@@ -74,21 +86,20 @@ public class AvroUtils {
   }
 
   /**
-   * Return the field names from a persistent object
+   * Return the field names from a persistent object.
    * 
-   * @param persistent
-   *          the persistent object to get the fields names from
-   * @return the field names
+   * @param persistent the persistent object to get the fields names from.
+   * @return the field names String array.
    */
   public static String[] getPersistentFieldNames(PersistentBase persistent) {
     return getSchemaFieldNames(persistent.getSchema());
   }
 
   /**
-   * Return the field names from a schema object
+   * Return the field names from a schema object.
    *
-   * @param schema the schema object to get the fields names from
-   * @return the field names
+   * @param schema the schema object to get the fields names from.
+   * @return the field names String array.
    */
   public static String[] getSchemaFieldNames(Schema schema) {
     List<Field> fields = schema.getFields();
@@ -99,6 +110,13 @@ public class AvroUtils {
     return fieldNames;
   }
 
+  /**
+   * Utility method for deep clone a given AVRO persistent bean instance.
+   *
+   * @param persistent source persistent bean instance.
+   * @param <T> persistent bean type.
+   * @return cloned persistent bean to be returned.
+   */
   public static <T extends PersistentBase> T deepClonePersistent(T persistent) {
     final SpecificDatumWriter<PersistentBase> writer = new SpecificDatumWriter<>(persistent.getSchema());
     final byte[] byteData;

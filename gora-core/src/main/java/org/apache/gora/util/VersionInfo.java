@@ -40,7 +40,8 @@ public class VersionInfo {
 
   /**
    * Get the meta-data for the Gora package.
-   * @return
+   *
+   * @return package instance.
    */
   static Package getPackage() {
     return myPackage;
@@ -48,15 +49,17 @@ public class VersionInfo {
   
   /**
    * Get the Gora version.
-   * @return the Gora version string, eg. "X.Y"
+   *
+   * @return the Gora version string, eg. "X.Y".
    */
   public static String getVersion() {
     return version != null ? version.version() : "Unknown";
   }
   
   /**
-   * Get the subversion revision number for the root directory
-   * @return the revision number, eg. "451451"
+   * Get the subversion revision number for the root directory.
+   *
+   * @return the revision number, eg. "451451".
    */
   public static String getRevision() {
     return version != null ? version.revision() : "Unknown";
@@ -64,6 +67,7 @@ public class VersionInfo {
   
   /**
    * The date that Gora was compiled.
+   *
    * @return the compilation date in unix date format
    */
   public static String getDate() {
@@ -72,7 +76,8 @@ public class VersionInfo {
   
   /**
    * The user that compiled Gora.
-   * @return the username of the user
+   *
+   * @return the username of the user.
    */
   public static String getUser() {
     return version != null ? version.user() : "Unknown";
@@ -80,6 +85,8 @@ public class VersionInfo {
   
   /**
    * Get the subversion URL for the root Gora directory.
+   *
+   * @return subversion URL.
    */
   public static String getUrl() {
     return version != null ? version.url() : "Unknown";
@@ -88,14 +95,18 @@ public class VersionInfo {
   /**
    * Get the checksum of the source files from which Gora was
    * built.
-   **/
+   *
+   * @return checksum of the source files.
+   */
   public static String getSrcChecksum() {
     return version != null ? version.srcChecksum() : "Unknown";
   }
   
   /**
    * Returns the buildVersion which includes version, 
-   * revision, user and date. 
+   * revision, user and date.
+   *
+   * @return build version.
    */
   public static String getBuildVersion(){
     return VersionInfo.getVersion() + 

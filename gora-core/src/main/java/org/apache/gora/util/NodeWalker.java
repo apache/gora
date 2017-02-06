@@ -42,7 +42,7 @@ public class NodeWalker {
   /**
    * Starts the <code>Node</code> tree from the root node.
    * 
-   * @param rootNode
+   * @param rootNode reference for noot node of the DOM tree.
    */
   public NodeWalker(Node rootNode) {
 
@@ -105,6 +105,8 @@ public class NodeWalker {
   
   /**
    * Returns true if there are more nodes on the current stack.
+   *
+   * @return node size.
    */
   public boolean hasNext() {
     return (nodes.size() > 0);
