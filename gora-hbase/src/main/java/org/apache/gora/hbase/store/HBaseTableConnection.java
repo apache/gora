@@ -112,9 +112,9 @@ public class HBaseTableConnection {
     for (ConcurrentLinkedQueue<Mutation> buffer : bPool) {
       for (Mutation m: buffer) {
         bufMutator.mutate(m);
+        bufMutator.flush();
       }
     }
-    bufMutator.flush();
     bufMutator.close();
   }
 
