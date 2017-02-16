@@ -278,7 +278,7 @@ implements Configurable {
           delete.addFamily(hcol.getFamily());
         } else {
 //          delete.deleteColumn(hcol.getFamily(), qualifier);
-          delete.addColumn(hcol.getFamily(), qualifier);
+          delete.addColumns(hcol.getFamily(), qualifier);
         }
       } else {
 //        int index = GenericData.get().resolveUnion(schema, o);
@@ -301,7 +301,7 @@ implements Configurable {
         delete.addFamily(hcol.getFamily());
       } else {
         //delete.deleteColumn(hcol.getFamily(), qualifier);
-        delete.addColumn(hcol.getFamily(), qualifier);
+        delete.addColumns(hcol.getFamily(), qualifier);
       }
       @SuppressWarnings({ "rawtypes", "unchecked" })
       Set<Entry> set = ((Map) o).entrySet();
@@ -585,7 +585,7 @@ implements Configurable {
       delete.addFamily(col.family);
       break;
     default:
-      delete.addColumn(col.family, col.qualifier);
+      delete.addColumns(col.family, col.qualifier);
       break;
     }
   }
