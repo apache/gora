@@ -50,6 +50,7 @@ import org.apache.accumulo.core.client.TableExistsException;
 import org.apache.accumulo.core.client.TableNotFoundException;
 import org.apache.accumulo.core.client.TableOfflineException;
 import org.apache.accumulo.core.client.ZooKeeperInstance;
+import org.apache.accumulo.core.client.impl.ClientContext;
 import org.apache.accumulo.core.client.impl.Tables;
 import org.apache.accumulo.core.client.impl.TabletLocator;
 import org.apache.accumulo.core.client.mock.MockConnector;
@@ -69,7 +70,6 @@ import org.apache.accumulo.core.iterators.user.TimestampFilter;
 import org.apache.accumulo.core.master.state.tables.TableState;
 import org.apache.accumulo.core.security.Authorizations;
 import org.apache.accumulo.core.security.ColumnVisibility;
-import org.apache.accumulo.core.client.impl.ClientContext;
 import org.apache.accumulo.core.client.impl.Credentials;
 import org.apache.accumulo.core.util.Pair;
 import org.apache.accumulo.core.util.UtilWaitThread;
@@ -110,8 +110,10 @@ import org.w3c.dom.NodeList;
 /**
  * Implementation of a Accumulo data store to be used by gora.
  *
- * @param <K> class to be used for the key
- * @param <T> class to be persisted within the store
+ * @param <K>
+ *            class to be used for the key
+ * @param <T>
+ *            class to be persisted within the store
  */
 public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T> {
 
