@@ -88,6 +88,9 @@ implements Configurable {
 
   private static final String SCANNER_CACHING_PROPERTIES_KEY = "scanner.caching" ;
   private static final int SCANNER_CACHING_PROPERTIES_DEFAULT = 0 ;
+
+  private static final int PUTS_AND_DELETES_PUT_TS_OFFSET = 1;
+  private static final int PUTS_AND_DELETES_DELETE_TS_OFFSET = 2;
   
   private volatile Admin admin;
 
@@ -236,8 +239,11 @@ implements Configurable {
     try {
       Schema schema = persistent.getSchema();
       byte[] keyRaw = toBytes(key);
-      Put put = new Put(keyRaw);
-      Delete delete = new Delete(keyRaw);
+      long timeStamp = System.currentTimeMillis();
+      // Guarantee Put after Delete
+      Put put = new Put(keyRaw, timeStamp - PUTS_AND_DELETES_PUT_TS_OFFSET);
+      Delete delete = new Delete(keyRaw, timeStamp - PUTS_AND_DELETES_DELETE_TS_OFFSET);
+
       List<Field> fields = schema.getFields();
       for (int i = 0; i < fields.size(); i++) {
         if (!persistent.isDirty(i)) {
