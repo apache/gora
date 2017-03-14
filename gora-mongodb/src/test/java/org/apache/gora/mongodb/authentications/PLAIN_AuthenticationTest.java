@@ -31,7 +31,7 @@ public class PLAIN_AuthenticationTest extends TestMongoStore {
           .getLogger(PLAIN_AuthenticationTest.class);
   static {
     try {
-      setTestDriver(new GoraMongodbAuthenticationTestDriver("PLAIN", Version.Main.V3_2));
+      setTestDriver(new GoraMongodbAuthenticationTestDriver("PLAIN", Version.Main.V3_4));
     } catch (Exception e) {
       log.error("MongoDb Test Driver initialization failed. "+ e.getMessage());
     }
