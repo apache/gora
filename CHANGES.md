@@ -1,12 +1,108 @@
- =======================================================================
- ==CHANGES.txt
- =======================================================================
+ CHANGES.txt
+ ===========
 
-Current Development
+# Apache Gora 0.7 Release - 16/03/17 (dd/mm/yyyy)
+Release report - https://s.apache.org/YrmC
 
-Release Report to go here
+Sub-task
 
-Apache Gora 0.6.1 Release - 05/09/2015 (dd/mm/yyyy)
+    [GORA-55] - Fix TestHBaseStore
+    [GORA-98] - Support CQL through Gora Hector API usage in Gora
+    [GORA-99] - Implement Speed4j within Hector API
+    [GORA-100] - Implement Kerberos security within gora-cassandra
+    [GORA-227] - Failing assertions when putting and getting Values using MemStore#execute
+    [GORA-316] - Upgrade to Avro 1.8.x in gora-dynamodb
+    [GORA-409] - JCache Datastore
+    [GORA-446] - java.util.NoSuchElementException thrown by accessing java.util.concurrent.ConcurrentSkipListMap.firstKey in MemStore
+    [GORA-447] - Fix NPE within MemStoreTest.testMemStoreDeleteByQueryFields and failed assertion within MemStoreTest.testGetWithFields
+    [GORA-489] - Adding CouchDB Datastore Documentation
+
+Bug
+
+    [GORA-291] - Gora-core, unable to wire up packages not known in advance.
+    [GORA-293] - getDatastore use Class.forName() when use String parameters for dataStoreClass
+    [GORA-367] - testCountQuery(org.apache.gora.avro.mapreduce.TestDataFileAvroStoreMapReduce) failing in new environments
+    [GORA-398] - Create and initialize Gora master Jenkins job which uses Hadoop 2.X shims
+    [GORA-401] - Serialization and deserialization of Persistent does not hold the entity dirty state from Map to Reduce
+    [GORA-438] - Erroneous Exception Message at IOUtils.java
+    [GORA-440] - Fix several instances of 'Method may fail to close stream' within gora-accumulo BinaryEncoder
+    [GORA-441] - Update build.gradle within gora-gradle-plugin to reference canonical Apache links
+    [GORA-453] - Implement bootstraping of GoraCI nodes with Chef and the JClouds ComputeService
+    [GORA-458] - DataOutputStream is not closed in BinaryEncoder#encodeXXX() methods
+    [GORA-459] - Resource leak due to unclosed Table
+    [GORA-460] - InputStream is not closed in DataStoreFactory#getMappingFile()
+    [GORA-462] - Potential null dereference of serializer in CassandraSubColumn#getFieldValue()
+    [GORA-463] - Missing assignment in CassandraSubColumn#getUnionSchema()
+    [GORA-467] - Flushing DataOutputStream before calling toByteArray on the underlying ByteArrayOutputStream
+    [GORA-474] - bug in org.apache.gora.solr.store.SolrStore#getDatumWriter & #getDatumReader
+    [GORA-478] - Address Sonar issues within gora-accumulo Encoder classes
+    [GORA-479] - Various compilation errors in gora-infinispan module
+    [GORA-480] - Compilation issues with gora-dynamodb
+    [GORA-491] - JCache test fail under JDK 1.8
+    [GORA-492] - javadoc:jar build error
+    [GORA-493] - Unclosed DataInputBuffer in IOUtils#deserialize()
+    [GORA-494] - Lack of synchronization accessing cacheManager in InfinispanClient#createSchema()
+    [GORA-495] - Gora compiler generates uncompilable databeans
+    [GORA-496] - gora commands doesn't output results to console
+    [GORA-499] - Potential NPE issue
+    [GORA-503] - Field index 0 is always considered as clean even if it is dirty
+    [GORA-505] - TestContainers should be moved to test scope
+
+Improvement
+
+    [GORA-49] - Fix failing JUint tests in Gora modules
+    [GORA-78] - Umbrella parent issue for Hector usage
+    [GORA-125] - Clean up logging libraries
+    [GORA-135] - Add gora-env.sh and other Hadoop related configuration to /conf
+    [GORA-240] - Tests for MemStore
+    [GORA-274] - Extend the LogManager to support -get <lineNum> <field list>
+    [GORA-277] - Create gora-maven-plugin
+    [GORA-315] - Define <scope> for * dependencies in pom.xml
+    [GORA-359] - Add integration to other distributed system frameworks to allow Gora as data ingest
+    [GORA-362] - Refactor gora-dynamodb to support avro serialization
+    [GORA-368] - Address flagged Sonar error in Gora package design
+    [GORA-412] - Consider location of @SuppressWarnings("all") in compiled classes
+    [GORA-414] - Upgrade to Accumulo 1.6.4
+    [GORA-439] - Remove Unused Method Parameters
+    [GORA-443] - Upgrade HBase to 1.2.3
+    [GORA-448] - Upgrade MongoDB Java Driver Version
+    [GORA-452] - Upgrade goraci prior to Chef and the ComputeService implementations
+    [GORA-466] - Upgrade to Avro 1.8.X
+    [GORA-469] - Gora doesn't build under JDK 1.8
+    [GORA-477] - Add support for Solr 5.x
+    [GORA-482] - Move into supporting only Hadoop2
+    [GORA-483] - CI build for Gora
+    [GORA-487] - Using IOUtils methods instead of duplicate code lines
+    [GORA-488] - setProperties method contains no code
+    [GORA-490] - Adding package-info.java for gora datastore packages
+    [GORA-498] - Adding MongoDB Authentications
+    [GORA-504] - Switched Accumulo Dependency to 1.7.1 and ported AccumuloStore Class to work with accumulo 1.7.1
+
+New Feature
+
+    [GORA-102] - Implement a datastore for Hypertable
+    [GORA-224] - Pluggable client archiecture for gora-cassandra
+    [GORA-295] - Dynamic support for Cache Providers using JCache
+    [GORA-343] - Update Gora to support HBase version >= 0.96
+    [GORA-437] - Implement CouchDB Datastore
+    [GORA-445] - Review extent of transative dependencies post GORA-386
+    [GORA-471] - Datastore for Infinispan
+
+Task
+
+    [GORA-294] - Setup Pre-Commit build for gora-trunk Jenkins job
+    [GORA-442] - Create documentation for GoraSparkEngine
+    [GORA-484] - Add documentation to JCache Datastore
+    [GORA-501] - Fix Javadoc for JDK1.8 compliance
+
+Test
+
+    [GORA-370] - Implement MapReduce 2.X tests
+    [GORA-454] - Implement FilterList tests
+    [GORA-465] - Remove @Deprecated logic for hbase-mapping.xml
+    [GORA-506] - Investigate timing of HBase tests
+
+# Apache Gora 0.6.1 Release - 05/09/2015 (dd/mm/yyyy)
 Release Report - http://s.apache.org/l69
 
 * GORA-436 Improve Source Code as Java 7 Compatible (Furkan KAMACI via lewismc)
@@ -50,7 +146,7 @@ Release Report - http://s.apache.org/l69
 * GORA-330 Import Gora Gradle plugin (drazzib)
 
 
-Apache Gora 0.6 Release - 12/02/2015 (dd/mm/yyyy)
+# Apache Gora 0.6 Release - 12/02/2015 (dd/mm/yyyy)
 Release Report - http://s.apache.org/gora-0.6
 
 * GORA-406 Upgrade Solr dependencies to 4.10.3 (lewismc)
@@ -77,7 +173,7 @@ Release Report - http://s.apache.org/gora-0.6
 
 * GORA-372: Fixed runtime error with the slf4j-api version conflict. (Viacheslav Dobromyslov (dobromyslov) via hsaputra)
 
-Apache Gora 0.5 Release - 15/09/14
+# Apache Gora 0.5 Release - 15/09/14
 Release Report - http://s.apache.org/0.5report
 
 * GORA-369 Obtain consistent formatting of all pom.xml's (lewismc)
@@ -128,7 +224,7 @@ Release Report - http://s.apache.org/0.5report
 
 * GORA-325 Add Gora 0.4 Javadoc to site (lewismc)
 
-Gora 0.4 release: (14/04/2014)
+# Gora 0.4 release: (14/04/2014)
 Release Report: http://s.apache.org/4lx
 
 * GORA-201 Upgrade HBase to 0.94.13 (various)
@@ -208,7 +304,7 @@ Release Report: http://s.apache.org/4lx
 
 * GORA-239 Add null checks and better message in AccumuloStore (David Medinets via hsaputra)
 
-0.3 release: 05/03/2013 (mm/dd/yyyy)
+# 0.3 release: 05/03/2013 (mm/dd/yyyy)
 Release Report: https://issues.apache.org/jira/secure/ReleaseNote.jspa?projectId=12311172&version=12317954Gora Change Log
 
 * GORA-191 Support multiple Avro Schemas within GoraCompiler (Udesh Liyanaarachchi, rmarroquin, lewismc) 
@@ -259,7 +355,7 @@ Release Report: https://issues.apache.org/jira/secure/ReleaseNote.jspa?projectId
 
 * GORA-XX ensure directory cleanup succeeds in gora-* (Simone Tripodi via lewismc)
 
-0.2.1 release: 26/07/2012
+# 0.2.1 release: 26/07/2012
 Release Report: https://issues.apache.org/jira/secure/ReleaseNote.jspa?projectId=12311172&version=12322496
 
 * GORA-157 gora-cassandra test failure - proposal to skip 10 test cases for a while (kazk)
@@ -408,7 +504,7 @@ write operations. (lewismc)
 
 * GORA-31. jersey-json dependency not in repositories currently in ivysettings.xml (Marsall Pierce via hsaputra)
 
-0.1-incubating release:
+# 0.1-incubating release:
 
 *  INFRA-3038. Initial import of code.
 
