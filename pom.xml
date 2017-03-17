@@ -713,7 +713,7 @@
     <!--module>gora-sql</module -->
     <module>gora-maven-plugin</module>
     <module>gora-mongodb</module>
-    <module>gora-solr</module>
+    <!--module>gora-solr</module-->
     <module>gora-solr-5</module>
     <module>gora-tutorial</module>
     <module>sources-dist</module>
@@ -820,6 +820,18 @@
       <dependency>
         <groupId>org.apache.gora</groupId>
         <artifactId>gora-solr</artifactId>
+        <version>${project.version}</version>
+        <classifier>tests</classifier>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-solr-5</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-solr-5</artifactId>
         <version>${project.version}</version>
         <classifier>tests</classifier>
       </dependency>
