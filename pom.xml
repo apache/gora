@@ -394,7 +394,7 @@
             <mavenExecutorId>forked-path</mavenExecutorId>
             <useReleaseProfile>false</useReleaseProfile>
             <tagNameFormat>apache-gora-@{project.version}</tagNameFormat>
-            <arguments>-Papache-release,release,hadoop2</arguments>
+            <arguments>-Papache-release,release</arguments>
             <autoVersionSubmodules>true</autoVersionSubmodules>
           </configuration>
           <dependencies>
