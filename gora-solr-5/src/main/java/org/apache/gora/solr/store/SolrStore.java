@@ -17,7 +17,13 @@ package org.apache.gora.solr.store;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.avro.Schema;
