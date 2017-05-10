@@ -17,11 +17,7 @@ package org.apache.gora.solr.store;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.avro.Schema;
@@ -741,11 +737,41 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
 
   @Override
   public long deleteByQuery(Query<K, T> query) {
-    String q = ((SolrQuery<K, T>) query).toSolrQuery();
+    UpdateResponse rsp;
     try {
-      UpdateResponse rsp = server.deleteByQuery(q);
-      server.commit();
-      LOG.info(rsp.toString());
+      /*
+        In this If block we check whether, user needs to delete full document or some fields in the document. We can't delete fields in a document by using solr deleteByQuery method.
+        therefore what we have done here is setting the particular fields values into null.
+       */
+      if (query.getFields() != null && query.getFields().length < mapping.mapping.size() && !(Arrays.asList(query.getFields()).contains(mapping.getPrimaryKey()))) {
+        Result<K, T> result = query.execute();
+        Map<String, String> partialUpdateNull = new HashMap<>();
+        partialUpdateNull.put("set", null);
+        while (result.next()) {
+          SolrInputDocument inputDoc = new SolrInputDocument();
+          inputDoc.setField(mapping.getPrimaryKey(), result.getKey());
+          for (String field : query.getFields()) {
+            inputDoc.setField(field, partialUpdateNull);
+          }
+          batch.add(inputDoc);
+        }
+        if (commitWithin == 0) {
+          rsp = server.add(batch);
+          server.commit(false, true, true);
+          batch.clear();
+          LOG.info(rsp.toString());
+        } else {
+          rsp = server.add(batch, commitWithin);
+          batch.clear();
+          LOG.info(rsp.toString());
+        }
+      } else {
+        SolrQuery<K, T> solrQuery = (SolrQuery<K, T>) query;
+        String q = solrQuery.toSolrQuery();
+        rsp = server.deleteByQuery(q);
+        server.commit();
+        LOG.info(rsp.toString());
+      }
     } catch (Exception e) {
       LOG.error(e.getMessage(), e);
     }
