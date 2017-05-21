@@ -504,7 +504,11 @@ implements Configurable {
       scan.setStartRow(toBytes(query.getStartKey()));
     }
     if (query.getEndKey() != null) {
-      scan.setStopRow(toBytes(query.getEndKey()));
+      // In HBase the end key is exclusive, so we add a trail zero to make it inclusive
+      // as the Gora's query interface declares.
+      byte[] endKey = toBytes(query.getEndKey());
+      byte[] inclusiveEndKey = Arrays.copyOf(endKey, endKey.length+1);
+      scan.setStopRow(inclusiveEndKey);
     }
     addFields(scan, query);
     if (query.getFilter() != null) {
