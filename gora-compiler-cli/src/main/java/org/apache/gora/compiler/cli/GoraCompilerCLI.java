@@ -46,18 +46,31 @@ public class GoraCompilerCLI {
       printHelp();
       System.exit(1);
     }
-    File[] inputs = new File[args.length-1];
-    for(int i  = 0; i<inputs.length; i++){
-      File inputFile = new File(args[i]);
-      if(!inputFile.isFile()){
-        LOG.error("Input must be a file.");
+    // Processing input directory or input files
+    File inputDir = new File(args[0]);
+    File[] inputFiles = null;
+    if (inputDir.isDirectory()) {
+      if (inputDir.length() > 0)
+        inputFiles = inputDir.listFiles();
+      else {
+        LOG.error("Input directory must include at least one file.");
         printHelp();
         System.exit(1);
       }
-      inputs[i] = inputFile;
+    } else {
+      inputFiles = new File[args.length - 1];
+      for (int i = 0; i < inputFiles.length; i++) {
+        File inputFile = new File(args[i]);
+        if (!inputFile.isFile()) {
+          LOG.error("Input must be a file.");
+          printHelp();
+          System.exit(1);
+        }
+        inputFiles[i] = inputFile;
+      }
     }
     try {
-      GoraCompiler.compileSchema(inputs, outputDir);
+      GoraCompiler.compileSchema(inputFiles, outputDir);
       LOG.info("Compiler executed SUCCESSFULL.");
     } catch (IOException e) {
       LOG.error("Error while compiling schema files. Check that the schemas are properly formatted.");
