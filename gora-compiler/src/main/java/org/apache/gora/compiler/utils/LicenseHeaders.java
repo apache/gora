@@ -263,4 +263,17 @@ public class LicenseHeaders {
   public String getLicenseName(){
     return licenseName;
   }
+
+  /**
+   * Validate a given license name against the supported license
+   * @param licenseName name of the license
+   * @return a booolean whether the license is supported or not
+   */
+  public boolean isValidLicense(String licenseName) {
+    for (int i = 0; i < supportedLicenses.length; i++) {
+      if (supportedLicenses[i].equals(licenseName))
+        return true;
+    }
+    return false;
+  }
 }
