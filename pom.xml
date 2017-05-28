@@ -470,6 +470,22 @@
             <!-- executable>{JAVA_HOME_1_7}/bin/javac</executable -->
             <fork>true</fork>
           </configuration>
+          <executions>
+            <!-- Eclipse do not support duplicated package-info.java, in both main and test. -->
+            <!-- https://stackoverflow.com/questions/11246223/eclipse-javadoc-the-type-package-info-is-already-defined/35101574#35101574 -->
+            <execution>
+              <id>default-testCompile</id>
+              <phase>test-compile</phase>
+              <configuration>
+                <testExcludes>
+                  <exclude>**/package-info.java</exclude>
+                </testExcludes>
+              </configuration>
+              <goals>
+                <goal>testCompile</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
