@@ -245,22 +245,4 @@ public class TestHBaseStore extends DataStoreTestBase {
     assertEquals(1000, ((HBaseStore<String,Employee>)this.employeeStore).getScannerCaching()) ;
   }
 
-  @Ignore("We need to skip this test since gora considers endRow inclusive, while its exclusive for HBase.")
-  @Override
-  public void testQueryEndKey() throws IOException {
-    //TODO: We should raise an issue for HBase to allow us to specify if the endRow will be inclusive or exclusive.
-  }
-
-  @Ignore("We need to skip this test since gora considers endRow inclusive, while its exclusive for HBase.")
-  @Override
-  public void testQueryKeyRange() throws IOException {
-     //TODO: We should raise an issue for HBase to allow us to specify if the endRow will be inclusive or exclusive.
-  }
-
-  @Ignore("We need to skip this test since gora considers endRow inclusive, while its exclusive for HBase.")
-  @Override
-  public void testDeleteByQuery() throws IOException {
-   //TODO: We should raise an issue for HBase to allow us to specify if the endRow will be inclusive or exclusive.
-  }
-
 }
