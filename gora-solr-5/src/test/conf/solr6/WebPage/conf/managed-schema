@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Solr managed schema - automatically generated - DO NOT EDIT -->
+<schema name="test example WebPage" version="1.5">
+  <uniqueKey>url</uniqueKey>
+  <fieldType name="binary" class="solr.BinaryField"/>
+  <fieldType name="long" class="solr.TrieLongField" positionIncrementGap="0" precisionStep="0"/>
+  <fieldType name="string" class="solr.StrField" sortMissingLast="true"/>
+  <field name="_version_" type="long" indexed="true" stored="true"/>
+  <field name="byteData" type="binary" stored="true"/>
+  <field name="content" type="binary" stored="true"/>
+  <field name="headers" type="binary" stored="true"/>
+  <field name="metadata" type="binary" stored="true"/>
+  <field name="outlinks" type="binary" stored="true"/>
+  <field name="parsedContent" type="binary" stored="true"/>
+  <field name="stringData" type="binary" stored="true"/>
+  <field name="url" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
+</schema>

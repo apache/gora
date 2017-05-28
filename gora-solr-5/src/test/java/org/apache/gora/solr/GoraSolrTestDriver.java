@@ -17,15 +17,14 @@
  */
 package org.apache.gora.solr;
 
-import java.io.File;
-import java.util.Properties;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.gora.GoraTestDriver;
 import org.apache.gora.solr.store.SolrStore;
 import org.apache.solr.client.solrj.embedded.JettySolrRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
 
 public class GoraSolrTestDriver extends GoraTestDriver {
   private static final Logger logger = LoggerFactory.getLogger(GoraSolrTestDriver.class);
