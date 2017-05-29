@@ -1,3 +1,20 @@
+/*
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package org.apache.gora.solr;
 
 import org.apache.commons.io.FileUtils;
@@ -8,17 +25,17 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 
 /**
- * Created by madhawa on 5/28/17.
+ * This class provides Gora Solr Test Driver to run test cases with managed schemas.
  */
-public class GoraSolr6TestDriver extends GoraSolrTestDriver {
-    private static final Logger logger = LoggerFactory.getLogger(GoraSolr6TestDriver.class);
+public class GoraSolrManagedSchemaTestDriver extends GoraSolrTestDriver {
+    private static final Logger logger = LoggerFactory.getLogger(GoraSolrManagedSchemaTestDriver.class);
 
     //Embedded JettySolr server
     JettySolrRunner solr;
 
     @Override
     public void setUpClass() throws Exception {
-        solr = new JettySolrRunner("src/test/conf/solr6","/solr", 9876);
+        solr = new JettySolrRunner("src/test/conf/solr-managed-schema","/solr", 9876);
         solr.start();
     }
 
@@ -59,8 +76,8 @@ public class GoraSolr6TestDriver extends GoraSolrTestDriver {
      *    if an error occurs
      */
     private void cleanupDirectories() throws Exception {
-        File employeeDirFile = new File("src/test/conf/solr6/Employee/data");
-        File webpageDirFile = new File("src/test/conf/solr6/WebPage/data");
+        File employeeDirFile = new File("src/test/conf/solr-managed-schema/Employee/data");
+        File webpageDirFile = new File("src/test/conf/solr-managed-schema/WebPage/data");
         if (employeeDirFile.exists()) {
             FileUtils.deleteDirectory(employeeDirFile);
         }

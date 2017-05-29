@@ -76,8 +76,8 @@ public class TestSolrStore extends DataStoreTestBase {
               + "not only removes the data but also the data structure.", 0, page.getOutlinks().size());
       assertEquals(0, page.getParsedContent().size());
       if (page.getContent() != null) {
-        LOG.info("url:" + page.getUrl().toString());
-        LOG.info("limit:" + page.getContent().limit());
+        LOG.info("url: {}", page.getUrl().toString());
+        LOG.info("limit: {}", page.getContent().limit());
       } else {
         assertNull(page.getContent());
       }

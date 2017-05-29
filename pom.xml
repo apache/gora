@@ -758,7 +758,7 @@
     <lucene-solr-5.version>6.5.1</lucene-solr-5.version>
     <solr-solrj-5.version>6.5.1</solr-solrj-5.version>
     <jetty.version>9.3.14.v20161028</jetty.version>
-    <tika.version>1.7</tika.version>
+    <tika.version>1.12</tika.version>
     <httpcomponents.version>4.4.1</httpcomponents.version>
     <commons-io.version>2.5</commons-io.version>
     <restlet.version>2.3.1</restlet.version>
