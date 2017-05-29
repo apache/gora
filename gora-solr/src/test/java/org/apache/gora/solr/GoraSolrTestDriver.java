@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,15 +17,18 @@
  */
 package org.apache.gora.solr;
 
-import java.io.File;
-import java.util.Properties;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.gora.GoraTestDriver;
 import org.apache.gora.solr.store.SolrStore;
 import org.apache.solr.client.solrj.embedded.JettySolrRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
 
 public class GoraSolrTestDriver extends GoraTestDriver {
+  private static final Logger logger = LoggerFactory.getLogger(GoraSolrTestDriver.class);
+
   //Embedded JettySolr server
   JettySolrRunner solr;
 
@@ -35,7 +38,7 @@ public class GoraSolrTestDriver extends GoraTestDriver {
 
   @Override
   public void setUpClass() throws Exception {
-    solr = new JettySolrRunner("src/test/conf/solr","/solr", 9876);
+    solr = new JettySolrRunner("src/test/conf/solr", "/solr", 9876);
     solr.start();
   }
 
@@ -67,7 +70,7 @@ public class GoraSolrTestDriver extends GoraTestDriver {
         }
       }
     }
-  } 
+  }
 
   /**
    * Cleans up Solr's temp base directory.
@@ -85,4 +88,5 @@ public class GoraSolrTestDriver extends GoraTestDriver {
       FileUtils.deleteDirectory(webpageDirFile);
     }
   }
+
 }
