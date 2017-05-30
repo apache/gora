@@ -1083,7 +1083,7 @@ public class DataStoreTestUtil {
     for (int i = 0; i < URLS.length; i++) {
       WebPage page = store.get(URLS[i]);
       assertNotNull(page);
-      if( URLS[i].compareTo(startKey) < 0 || URLS[i].compareTo(endKey) >= 0) {
+      if( URLS[i].compareTo(startKey) < 0 || URLS[i].compareTo(endKey) > 0) {
         //not deleted
         assertWebPage(page, i);
       } else {
