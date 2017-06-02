@@ -79,16 +79,6 @@ public class JCacheGoraDataStoreTest extends DataStoreTestBase {
     super.webPageStore.close();
   }
 
-  @SuppressWarnings("unchecked")
-  protected DataStore<String, Employee> createEmployeeDataStore() throws IOException {
-    return DataStoreFactory.getDataStore(String.class, Employee.class, conf, true);
-  }
-
-  @SuppressWarnings("unchecked")
-  protected DataStore<String, WebPage> createWebPageDataStore() throws IOException {
-    return DataStoreFactory.getDataStore(String.class, WebPage.class, conf, true);
-  }
-
   @Test
   public void testGetMissingValue() throws IOException {
     DataStore<String, WebPage> store = super.webPageStore;

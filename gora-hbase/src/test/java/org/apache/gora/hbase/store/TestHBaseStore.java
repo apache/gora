@@ -58,22 +58,6 @@ public class TestHBaseStore extends DataStoreTestBase {
     super.setUp();
     conf = getTestDriver().getConf();
   }
-    
-  @SuppressWarnings("unchecked")
-  @Override
-  protected DataStore<String, Employee> createEmployeeDataStore()
-      throws IOException {
-    return DataStoreFactory.createDataStore(HBaseStore.class, String.class, 
-        Employee.class, conf);
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  protected DataStore<String, WebPage> createWebPageDataStore()
-      throws IOException {
-    return DataStoreFactory.createDataStore(HBaseStore.class, String.class, 
-        WebPage.class, conf);
-  }
 
   public GoraHBaseTestDriver getTestDriver() {
     return (GoraHBaseTestDriver) testDriver;

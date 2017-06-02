@@ -42,20 +42,6 @@ public abstract class TestMongoStore extends DataStoreTestBase {
 
   private int keySequence;
 
-  @Deprecated
-  @Override
-  protected DataStore<String, Employee> createEmployeeDataStore()
-          throws IOException {
-    throw new UnsupportedOperationException();
-  }
-
-  @Deprecated
-  @Override
-  protected DataStore<String, WebPage> createWebPageDataStore()
-          throws IOException {
-    throw new UnsupportedOperationException();
-  }
-
   @Before
   @Override
   public void setUp() throws Exception {

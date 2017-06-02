@@ -51,18 +51,6 @@ public class TestCassandraStore extends DataStoreTestBase{
     super.setUp();
   }
 
-  @SuppressWarnings("unchecked")
-  @Override
-  protected DataStore<String, Employee> createEmployeeDataStore() throws IOException {
-    return DataStoreFactory.getDataStore(CassandraStore.class, String.class, Employee.class, conf);
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  protected DataStore<String, WebPage> createWebPageDataStore() throws IOException {
-    return DataStoreFactory.getDataStore(CassandraStore.class, String.class, WebPage.class, conf);
-  }
-
   public GoraCassandraTestDriver getTestDriver() {
     return (GoraCassandraTestDriver) testDriver;
   }
