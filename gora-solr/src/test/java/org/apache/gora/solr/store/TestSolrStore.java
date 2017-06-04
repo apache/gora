@@ -18,17 +18,12 @@
 package org.apache.gora.solr.store;
 
 import org.apache.gora.examples.WebPageDataCreator;
-import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.query.Query;
 import org.apache.gora.solr.GoraSolrTestDriver;
-import org.apache.gora.store.DataStore;
-import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.DataStoreTestBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 import static junit.framework.Assert.assertNull;
 import static org.apache.gora.examples.WebPageDataCreator.SORTED_URLS;
@@ -44,22 +39,6 @@ public class TestSolrStore extends DataStoreTestBase {
   
   static {
     setTestDriver(new GoraSolrTestDriver());
-  }
-
-  @Override
-  protected DataStore<String, Employee> createEmployeeDataStore()
-      throws IOException {
-    SolrStore<String, Employee> store = new SolrStore<>();
-    store.initialize(String.class, Employee.class, DataStoreFactory.createProps());
-    return store;
-  }
-
-  @Override
-  protected DataStore<String, WebPage> createWebPageDataStore()
-      throws IOException {
-    SolrStore<String, WebPage> store = new SolrStore<>();
-    store.initialize(String.class, WebPage.class, DataStoreFactory.createProps());
-    return store;
   }
 
   @Override
