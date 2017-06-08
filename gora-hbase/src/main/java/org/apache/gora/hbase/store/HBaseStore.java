@@ -73,6 +73,8 @@ import org.jdom.input.SAXBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.naming.ConfigurationException;
+
 /**
  * DataStore for HBase. Thread safe.
  *
@@ -798,8 +800,9 @@ implements Configurable {
           break;
         }
       }
-      if(!keyClassMatches)
-        LOG.error("KeyClass in gora-hbase-mapping is not the same as the one in the databean.");
+      if (!keyClassMatches) {
+        throw new ConfigurationException("Gora-hbase-mapping does not include the name and keyClass in the databean.");
+      }
     } catch (MalformedURLException ex) {
       LOG.error("Error while trying to read the mapping file {}. "
               + "Expected to be in the classpath "
