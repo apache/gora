@@ -733,6 +733,7 @@
     <module>gora-solr-5</module>
     <module>gora-tutorial</module>
     <module>sources-dist</module>
+    <module>gora-aerospike</module>
   </modules>
 
   <properties>
@@ -764,6 +765,7 @@
     <restlet.version>2.3.1</restlet.version>
 
     <spark.version>1.4.1</spark.version>
+    <aerospike.version>3.3.2</aerospike.version>
     <!-- Misc Dependencies -->
     <guava.version>13.0</guava.version>
     <commons-lang.version>2.6</commons-lang.version>
@@ -934,6 +936,11 @@
         <artifactId>gora-dynamodb</artifactId>
         <version>${project.version}</version>
         <type>test-jar</type>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-aerospike</artifactId>
+        <version>${project.version}</version>
       </dependency>
       <!-- End of Internal Depednecies -->
 
