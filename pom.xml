@@ -749,6 +749,7 @@
     <!-- Amazon Dependencies -->
     <amazon.version>1.10.55</amazon.version>
     <!-- Cassandra Dependencies -->
+    <cassandra-driver.version>3.1.3</cassandra-driver.version>
     <cassandra.version>2.0.2</cassandra.version>
     <hector.version>1.1-4</hector.version>
     <!-- Solr Dependencies -->
