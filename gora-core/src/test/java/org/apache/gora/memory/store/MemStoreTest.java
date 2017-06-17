@@ -58,21 +58,13 @@ public class MemStoreTest extends DataStoreTestBase {
 
   private Configuration conf;
 
+  static {
+    setTestDriver(new MemStoreTestDriver());
+  }
+
   @Before
   public void setUp() throws Exception {
     super.setUp();
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  protected DataStore<String, Employee> createEmployeeDataStore() throws IOException {
-    return DataStoreFactory.getDataStore(MemStore.class, String.class, Employee.class, conf);
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  protected DataStore<String, WebPage> createWebPageDataStore() throws IOException {
-    return DataStoreFactory.getDataStore(MemStore.class, String.class, WebPage.class, conf);
   }
 
   @Test

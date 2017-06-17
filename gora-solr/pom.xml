@@ -23,17 +23,18 @@
   <parent>
     <groupId>org.apache.gora</groupId>
     <artifactId>gora</artifactId>
-    <version>0.7-SNAPSHOT</version>
+    <version>0.8-SNAPSHOT</version>
     <relativePath>../</relativePath>
   </parent>
-  <artifactId>gora-solr-4</artifactId>
+  <artifactId>gora-solr</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Apache Gora :: Solr4</name>
+  <name>Apache Gora :: Solr</name>
 
   <properties>
     <osgi.import>*</osgi.import>
     <osgi.export>org.apache.gora.solr*;version="${project.version}";-noimport:=true</osgi.export>
+    <jetty.version>9.3.14.v20161028</jetty.version>
   </properties>
 
   <build>
@@ -158,7 +159,7 @@
     <dependency>
       <groupId>org.apache.solr</groupId>
       <artifactId>solr-solrj</artifactId>
-      <version>${lucene-solr.version}</version>
+      <version>${solr-solrj.version}</version>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
@@ -219,6 +220,51 @@
       <artifactId>jetty-webapp</artifactId>
       <scope>runtime</scope>
     </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-http</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-io</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-deploy</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-continuation</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-jmx</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-rewrite</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-security</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-servlets</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-xml</artifactId>
+      <scope>runtime</scope>
+    </dependency>
 
     <!-- ADDED TO AVOID PROBLEMS WITH JAVAX -->
     <dependency>
@@ -233,24 +279,24 @@
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.apache.solr</groupId>
-      <artifactId>solr-test-framework</artifactId>
-      <version>${lucene-solr.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.eclipse.jetty</groupId>
-          <artifactId>jetty-servlet</artifactId>
-        </exclusion>
-      </exclusions>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-test-framework</artifactId>
-      <version>${lucene-solr.version}</version>
-      <scope>test</scope>
-    </dependency>
+<!--     <dependency> -->
+<!--       <groupId>org.apache.solr</groupId> -->
+<!--       <artifactId>solr-test-framework</artifactId> -->
+<!--       <version>${lucene-solr-5.version}</version> -->
+<!--       <exclusions> -->
+<!--         <exclusion> -->
+<!--           <groupId>org.eclipse.jetty</groupId> -->
+<!--           <artifactId>jetty-servlet</artifactId> -->
+<!--         </exclusion> -->
+<!--       </exclusions> -->
+<!--       <scope>test</scope> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.apache.lucene</groupId> -->
+<!--       <artifactId>lucene-test-framework</artifactId> -->
+<!--       <version>${lucene-solr-5.version}</version> -->
+<!--       <scope>test</scope> -->
+<!--     </dependency> -->
   </dependencies>
 
   <url>http://gora.apache.org</url>

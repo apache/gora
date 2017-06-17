@@ -25,12 +25,16 @@ import org.apache.gora.hbase.GoraHBaseTestDriver;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.DataStoreTestBase;
+import org.apache.gora.util.GoraException;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -57,22 +61,6 @@ public class TestHBaseStore extends DataStoreTestBase {
   public void setUp() throws Exception {
     super.setUp();
     conf = getTestDriver().getConf();
-  }
-    
-  @SuppressWarnings("unchecked")
-  @Override
-  protected DataStore<String, Employee> createEmployeeDataStore()
-      throws IOException {
-    return DataStoreFactory.createDataStore(HBaseStore.class, String.class, 
-        Employee.class, conf);
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  protected DataStore<String, WebPage> createWebPageDataStore()
-      throws IOException {
-    return DataStoreFactory.createDataStore(HBaseStore.class, String.class, 
-        WebPage.class, conf);
   }
 
   public GoraHBaseTestDriver getTestDriver() {
@@ -243,6 +231,19 @@ public class TestHBaseStore extends DataStoreTestBase {
   public void assertScannerCachingValue() {
     assertEquals(1000, ((HBaseStore<String,WebPage>)this.webPageStore).getScannerCaching()) ;
     assertEquals(1000, ((HBaseStore<String,Employee>)this.employeeStore).getScannerCaching()) ;
+  }
+
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
+
+  @Test
+  public void assertConfigurationException() throws GoraException {
+    expectedException.expect(GoraException.class);
+    expectedException.expectMessage("Gora-hbase-mapping does not include the name and keyClass in the databean.");
+
+    Configuration exceptionalConf = HBaseConfiguration.create(conf);
+    exceptionalConf.set("gora.hbase.mapping.file","gora-hbase-mapping-mismatch.xml");
+    DataStoreFactory.createDataStore(HBaseStore.class, String.class, WebPage.class, exceptionalConf);
   }
 
 }

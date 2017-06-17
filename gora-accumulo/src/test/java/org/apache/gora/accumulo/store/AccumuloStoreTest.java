@@ -51,18 +51,7 @@ public class AccumuloStoreTest extends DataStoreTestBase {
     return (GoraAccumuloTestDriver) testDriver;
   }
 
-  @Override
-  protected DataStore<String,Employee> createEmployeeDataStore() throws IOException {
-    return DataStoreFactory.getDataStore(String.class, Employee.class, new Configuration());
-  }
-
-  @Override
-  protected DataStore<String,WebPage> createWebPageDataStore() throws IOException {
-    return DataStoreFactory.getDataStore(String.class, WebPage.class, new Configuration());
-  }
-
-
-  //Until GORA-66 is resolved this test will always fail, so 
+  //Until GORA-66 is resolved this test will always fail, so
   //do not run it
   @Ignore("skipped until GORA-66 is resolved")
   @Override

@@ -17,9 +17,11 @@ package org.apache.gora.solr.store;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -44,9 +46,13 @@ import org.apache.gora.util.AvroUtils;
 import org.apache.gora.util.IOUtils;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.*;
+import org.apache.solr.client.solrj.impl.CloudSolrClient;
+import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrClient;
+import org.apache.solr.client.solrj.impl.HttpClientUtil;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.client.solrj.impl.LBHttpSolrClient;
 import org.apache.solr.client.solrj.request.CoreAdminRequest;
 import org.apache.solr.client.solrj.response.CoreAdminResponse;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -61,6 +67,12 @@ import org.jdom.input.SAXBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Implementation of a Solr data store to be used by gora.
+ *
+ * @param <K> class to be used for the key
+ * @param <T> class to be persisted within the store
+ */
 public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
   private static final Logger LOG = LoggerFactory.getLogger(SolrStore.class);
@@ -83,7 +95,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
    */
   protected static final String SOLR_BATCH_SIZE_PROPERTY = "solr.batch_size";
 
-  /** The solrj implementation to use. This has a default value of <i>http</i> for HttpSolrServer.
+  /** The solrj implementation to use. This has a default value of <i>http</i> for HttpSolrClient.
    * Available options include <b>http</b>, <b>cloud</b>, <b>concurrent</b> and <b>loadbalance</b>. 
    * Defined in <code>gora.properties</code>
    * This value must be of type <b>String</b>.
@@ -143,9 +155,9 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
 
   private SolrMapping mapping;
 
-  private String solrServerUrl, solrConfig, solrSchema, solrJServerImpl;
+  private String SolrClientUrl, solrConfig, solrSchema, solrJServerImpl;
 
-  private SolrServer server, adminServer;
+  private SolrClient server, adminServer;
 
   private boolean serverUserAuth;
 
@@ -178,6 +190,15 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
 
   public static final ConcurrentHashMap<Schema, SpecificDatumWriter<?>> writerMap = new ConcurrentHashMap<>();
 
+  /**
+   * Initialize the data store by reading the credentials, setting the client's properties up and
+   * reading the mapping file. Initialize is called when then the call to
+   * {@link org.apache.gora.store.DataStoreFactory#createDataStore} is made.
+   *
+   * @param keyClass
+   * @param persistentClass
+   * @param properties
+   */
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
       Properties properties) {
@@ -190,7 +211,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       LOG.error(e.getMessage(), e);
     }
 
-    solrServerUrl = DataStoreFactory.findProperty(properties, this,
+    SolrClientUrl = DataStoreFactory.findProperty(properties, this,
         SOLR_URL_PROPERTY, null);
     solrConfig = DataStoreFactory.findProperty(properties, this,
         SOLR_CONFIG_PROPERTY, null);
@@ -206,60 +227,60 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       serverPassword = DataStoreFactory.findProperty(properties, this,
           SOLR_SERVER_PASSWORD, null);
     }
-    LOG.info("Using Solr server at " + solrServerUrl);
+    LOG.info("Using Solr server at " + SolrClientUrl);
     String solrJServerType = ((solrJServerImpl == null || solrJServerImpl.equals(""))?"http":solrJServerImpl);
-    // HttpSolrServer - denoted by "http" in properties
+    // HttpSolrClient - denoted by "http" in properties
     if (solrJServerType.toLowerCase(Locale.getDefault()).equals("http")) {
-      LOG.info("Using HttpSolrServer Solrj implementation.");
-      this.adminServer = new HttpSolrServer(solrServerUrl);
-      this.server = new HttpSolrServer( solrServerUrl + "/" + mapping.getCoreName() );
+      LOG.info("Using HttpSolrClient Solrj implementation.");
+      this.adminServer = new HttpSolrClient(SolrClientUrl);
+      this.server = new HttpSolrClient( SolrClientUrl + "/" + mapping.getCoreName() );
       if (serverUserAuth) {
         HttpClientUtil.setBasicAuth(
-            (DefaultHttpClient) ((HttpSolrServer) adminServer).getHttpClient(),
+            (DefaultHttpClient) ((HttpSolrClient) adminServer).getHttpClient(),
             serverUsername, serverPassword);
         HttpClientUtil.setBasicAuth(
-            (DefaultHttpClient) ((HttpSolrServer) server).getHttpClient(),
+            (DefaultHttpClient) ((HttpSolrClient) server).getHttpClient(),
             serverUsername, serverPassword);
       }
-      // CloudSolrServer - denoted by "cloud" in properties
+      // CloudSolrClient - denoted by "cloud" in properties
     } else if (solrJServerType.toLowerCase(Locale.getDefault()).equals("cloud")) {
-      LOG.info("Using CloudSolrServer Solrj implementation.");
-      this.adminServer = new CloudSolrServer(solrServerUrl);
-      this.server = new CloudSolrServer( solrServerUrl + "/" + mapping.getCoreName() );
+      LOG.info("Using CloudSolrClient Solrj implementation.");
+      this.adminServer = new CloudSolrClient(SolrClientUrl);
+      this.server = new CloudSolrClient( SolrClientUrl + "/" + mapping.getCoreName() );
       if (serverUserAuth) {
         HttpClientUtil.setBasicAuth(
-            (DefaultHttpClient) ((CloudSolrServer) adminServer).getLbServer().getHttpClient(),
+            (DefaultHttpClient) ((CloudSolrClient) adminServer).getLbClient().getHttpClient(),
             serverUsername, serverPassword);
         HttpClientUtil.setBasicAuth(
-            (DefaultHttpClient) ((CloudSolrServer) server).getLbServer().getHttpClient(),
+            (DefaultHttpClient) ((CloudSolrClient) server).getLbClient().getHttpClient(),
             serverUsername, serverPassword);
       }
     } else if (solrJServerType.toLowerCase(Locale.getDefault()).equals("concurrent")) {
-      LOG.info("Using ConcurrentUpdateSolrServer Solrj implementation.");
-      this.adminServer = new ConcurrentUpdateSolrServer(solrServerUrl, 1000, 10);
-      this.server = new ConcurrentUpdateSolrServer( solrServerUrl + "/" + mapping.getCoreName(), 1000, 10);
-      // LBHttpSolrServer - denoted by "loadbalance" in properties
+      LOG.info("Using ConcurrentUpdateSolrClient Solrj implementation.");
+      this.adminServer = new ConcurrentUpdateSolrClient(SolrClientUrl, 1000, 10);
+      this.server = new ConcurrentUpdateSolrClient( SolrClientUrl + "/" + mapping.getCoreName(), 1000, 10);
+      // LBHttpSolrClient - denoted by "loadbalance" in properties
     } else if (solrJServerType.toLowerCase(Locale.getDefault()).equals("loadbalance")) {
-      LOG.info("Using LBHttpSolrServer Solrj implementation.");
-      String[] solrUrlElements = StringUtils.split(solrServerUrl);
+      LOG.info("Using LBHttpSolrClient Solrj implementation.");
+      String[] solrUrlElements = StringUtils.split(SolrClientUrl);
       try {
-        this.adminServer = new LBHttpSolrServer(solrUrlElements);
+        this.adminServer = new LBHttpSolrClient(solrUrlElements);
       } catch (MalformedURLException e) {
         LOG.error(e.getMessage());
         throw new RuntimeException(e);
       }
       try {
-        this.server = new LBHttpSolrServer( solrUrlElements + "/" + mapping.getCoreName() );
+        this.server = new LBHttpSolrClient( solrUrlElements + "/" + mapping.getCoreName() );
       } catch (MalformedURLException e) {
         LOG.error(e.getMessage());
         throw new RuntimeException(e);
       }
       if (serverUserAuth) {
         HttpClientUtil.setBasicAuth(
-            (DefaultHttpClient) ((LBHttpSolrServer) adminServer).getHttpClient(),
+            (DefaultHttpClient) ((LBHttpSolrClient) adminServer).getHttpClient(),
             serverUsername, serverPassword);
         HttpClientUtil.setBasicAuth(
-            (DefaultHttpClient) ((LBHttpSolrServer) server).getHttpClient(),
+            (DefaultHttpClient) ((LBHttpSolrClient) server).getHttpClient(),
             serverUsername, serverPassword);
       }
     }
@@ -722,11 +743,41 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
 
   @Override
   public long deleteByQuery(Query<K, T> query) {
-    String q = ((SolrQuery<K, T>) query).toSolrQuery();
+    UpdateResponse rsp;
     try {
-      UpdateResponse rsp = server.deleteByQuery(q);
-      server.commit();
-      LOG.info(rsp.toString());
+      /*
+        In this If block we check whether, user needs to delete full document or some fields in the document. We can't delete fields in a document by using solr deleteByQuery method.
+        therefore what we have done here is setting the particular fields values into null.
+       */
+      if (query.getFields() != null && query.getFields().length < mapping.mapping.size() && !(Arrays.asList(query.getFields()).contains(mapping.getPrimaryKey()))) {
+        Result<K, T> result = query.execute();
+        Map<String, String> partialUpdateNull = new HashMap<>();
+        partialUpdateNull.put("set", null);
+        while (result.next()) {
+          SolrInputDocument inputDoc = new SolrInputDocument();
+          inputDoc.setField(mapping.getPrimaryKey(), result.getKey());
+          for (String field : query.getFields()) {
+            inputDoc.setField(field, partialUpdateNull);
+          }
+          batch.add(inputDoc);
+        }
+        if (commitWithin == 0) {
+          rsp = server.add(batch);
+          server.commit(false, true, true);
+          batch.clear();
+          LOG.info(rsp.toString());
+        } else {
+          rsp = server.add(batch, commitWithin);
+          batch.clear();
+          LOG.info(rsp.toString());
+        }
+      } else {
+        SolrQuery<K, T> solrQuery = (SolrQuery<K, T>) query;
+        String q = solrQuery.toSolrQuery();
+        rsp = server.deleteByQuery(q);
+        server.commit();
+        LOG.info(rsp.toString());
+      }
     } catch (Exception e) {
       LOG.error(e.getMessage(), e);
     }

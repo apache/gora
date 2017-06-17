@@ -62,18 +62,6 @@ public class TestCouchDBStore extends DataStoreTestBase {
     super.setUp();
   }
 
-  @SuppressWarnings("unchecked")
-  @Override
-  protected DataStore<String, Employee> createEmployeeDataStore() throws IOException {
-    throw new UnsupportedOperationException();
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  protected DataStore<String, WebPage> createWebPageDataStore() throws IOException {
-    throw new UnsupportedOperationException();
-  }
-
   @Test
   public void testPutAndGet() {
     WebPage page = webPageStore.newPersistent();

@@ -17,42 +17,15 @@
  */
 package org.apache.gora.solr.store;
 
-import java.util.HashMap;
+import org.apache.gora.solr.GoraSolrManagedSchemaTestDriver;
 
 /**
- * Mapping definitions for Solr.
+ * In this class, All the test cases will run with managed schemas in Solr.
  */
-public class SolrMapping {
-  HashMap<String,String> mapping;
-  String coreName;
-  String primaryKey;
-  
-  public SolrMapping() {
-    mapping = new HashMap<>();
+public class TestSolrManagedSchemaStore extends TestSolrStore {
+
+  static {
+    setTestDriver(new GoraSolrManagedSchemaTestDriver());
   }
-  
-  public void addField(String goraField, String solrField) {
-    mapping.put(goraField, solrField);
-  }
-  
-  public void setPrimaryKey(String solrKey) {
-    primaryKey = solrKey;
-  }
-  
-  public void setCoreName(String coreName) {
-    this.coreName = coreName;
-  }
-  
-  public String getCoreName() {
-    return coreName;
-  }
-  
-  public String getPrimaryKey() {
-    return primaryKey;
-  }
-  
-  public String getSolrField(String goraField) {
-    return mapping.get(goraField);
-  }
-  
+
 }

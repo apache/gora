@@ -15,44 +15,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.gora.solr.store;
 
-import java.util.HashMap;
+package org.apache.gora.memory.store;
+
+import org.apache.gora.GoraTestDriver;
 
 /**
- * Mapping definitions for Solr.
+ * MemStoreTestDriver class is used to initialize
+ * the data stores for MemStoreTest
  */
-public class SolrMapping {
-  HashMap<String,String> mapping;
-  String coreName;
-  String primaryKey;
-  
-  public SolrMapping() {
-    mapping = new HashMap<>();
+public class MemStoreTestDriver extends GoraTestDriver {
+
+  public MemStoreTestDriver() {
+    super(MemStore.class);
   }
-  
-  public void addField(String goraField, String solrField) {
-    mapping.put(goraField, solrField);
+
+  @Override
+  public void setUpClass() throws Exception {
+    // Method is not implemented as MemStore does not include
+    // third party clusters
   }
-  
-  public void setPrimaryKey(String solrKey) {
-    primaryKey = solrKey;
+
+  @Override
+  public void tearDownClass() throws Exception {
+    // Method is not implemented as MemStore does not include
+    // third party clusters
   }
-  
-  public void setCoreName(String coreName) {
-    this.coreName = coreName;
-  }
-  
-  public String getCoreName() {
-    return coreName;
-  }
-  
-  public String getPrimaryKey() {
-    return primaryKey;
-  }
-  
-  public String getSolrField(String goraField) {
-    return mapping.get(goraField);
-  }
-  
 }

@@ -729,8 +729,7 @@
     <!--module>gora-sql</module -->
     <module>gora-maven-plugin</module>
     <module>gora-mongodb</module>
-    <!--module>gora-solr</module-->
-    <module>gora-solr-5</module>
+    <module>gora-solr</module>
     <module>gora-tutorial</module>
     <module>sources-dist</module>
     <module>gora-aerospike</module>
@@ -754,14 +753,12 @@
     <cassandra.version>2.0.2</cassandra.version>
     <hector.version>1.1-4</hector.version>
     <!-- Solr Dependencies -->
-    <lucene-solr.version>4.10.3</lucene-solr.version>
-    <solr-solrj.version>4.10.3</solr-solrj.version>
-    <lucene-solr-5.version>5.5.1</lucene-solr-5.version>
-    <solr-solrj-5.version>5.5.1</solr-solrj-5.version>
-    <jetty.version>8.1.8.v20121106</jetty.version>
-    <tika.version>1.7</tika.version>
-    <httpcomponents.version>4.3.1</httpcomponents.version>
-    <commons-io.version>2.4</commons-io.version>
+    <lucene-solr.version>6.5.1</lucene-solr.version>
+    <solr-solrj.version>6.5.1</solr-solrj.version>
+    <jetty.version>9.3.14.v20161028</jetty.version>
+    <tika.version>1.12</tika.version>
+    <httpcomponents.version>4.4.1</httpcomponents.version>
+    <commons-io.version>2.5</commons-io.version>
     <restlet.version>2.3.1</restlet.version>
 
     <spark.version>1.4.1</spark.version>
@@ -844,12 +841,12 @@
 
       <dependency>
         <groupId>org.apache.gora</groupId>
-        <artifactId>gora-solr-5</artifactId>
+        <artifactId>gora-solr</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.gora</groupId>
-        <artifactId>gora-solr-5</artifactId>
+        <artifactId>gora-solr</artifactId>
         <version>${project.version}</version>
         <classifier>tests</classifier>
       </dependency>
@@ -1290,7 +1287,7 @@
       <dependency>
         <groupId>org.apache.zookeeper</groupId>
         <artifactId>zookeeper</artifactId>
-        <version>3.4.5</version>
+        <version>3.4.6</version>
       </dependency>
       <dependency>
         <groupId>org.carrot2</groupId>
@@ -1316,6 +1313,51 @@
       <dependency>
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-server</artifactId>
+        <version>${jetty.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-http</artifactId>
+        <version>${jetty.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-io</artifactId>
+        <version>${jetty.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-deploy</artifactId>
+        <version>${jetty.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-continuation</artifactId>
+        <version>${jetty.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-jmx</artifactId>
+        <version>${jetty.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-rewrite</artifactId>
+        <version>${jetty.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-security</artifactId>
+        <version>${jetty.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-servlets</artifactId>
+        <version>${jetty.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-xml</artifactId>
         <version>${jetty.version}</version>
       </dependency>
       <dependency>

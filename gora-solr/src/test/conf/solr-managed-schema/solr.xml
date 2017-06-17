@@ -26,27 +26,8 @@
    http://wiki.apache.org/solr/CoreAdmin
 -->
 
-<!--
- All (relative) paths are relative to the Solr Home Directory
-
-  persistent: Save changes made via the API to this file
-  sharedLib: path to a lib directory that will be shared across all cores
--->
 <solr>
-  <!-- by default, this is 50 @ WARN
-  <logging enabled="true">
-        <watcher size="100" threshold="DEBUG" />
-  </logging>
-   -->
 
-  <!--
-  adminPath: RequestHandler path to manage cores.
-    If 'null' (or absent), cores will not be manageable via request handler
-  defaultCoreName: (optional) core to use when no core name is specified in an access url
-
-  All of the attributes in cores after defaultCoreName only apply when running in SolrCloud mode.
-  You can read more about SolrCloud mode at http://wiki.apache.org/solr/SolrCloud
-  -->
   <solrcloud>
 
     <str name="host">${host:}</str>
@@ -58,12 +39,15 @@
     <int name="zkClientTimeout">${zkClientTimeout:30000}</int>
     <int name="distribUpdateSoTimeout">${distribUpdateSoTimeout:600000}</int>
     <int name="distribUpdateConnTimeout">${distribUpdateConnTimeout:60000}</int>
+    <str name="zkCredentialsProvider">${zkCredentialsProvider:org.apache.solr.common.cloud.DefaultZkCredentialsProvider}</str>
+    <str name="zkACLProvider">${zkACLProvider:org.apache.solr.common.cloud.DefaultZkACLProvider}</str>
 
   </solrcloud>
 
   <shardHandlerFactory name="shardHandlerFactory"
-    class="HttpShardHandlerFactory">
+                       class="HttpShardHandlerFactory">
     <int name="socketTimeout">${socketTimeout:600000}</int>
     <int name="connTimeout">${connTimeout:60000}</int>
   </shardHandlerFactory>
+
 </solr>
