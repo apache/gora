@@ -22,6 +22,8 @@ import java.util.Properties;
 
 import com.aerospike.client.*;
 import com.aerospike.client.policy.ClientPolicy;
+import org.apache.avro.Schema;
+import org.apache.avro.Schema.Field;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
@@ -92,6 +94,18 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
   @Override
   public void put(K key, T value) {
 
+    Key recordKey = new Key(aerospikeParameters.getAerospikeMapping().getNamespace(), aerospikeParameters
+      .getAerospikeMapping().getSet(), Value.get(key));
+
+    List<Field> fields = value.getSchema().getFields();
+
+    for (int i = 0; i < fields.size(); i++) {
+
+      // In retrieving the bin name, it is checked whether the server is single bin valued
+      String binName = aerospikeParameters.getBinName(fields.get(i).name());
+      Bin bin = getBin(binName, value.get(i), fields.get(i));
+      aerospikeClient.put(aerospikeParameters.getAerospikeMapping().getWritePolicy(), recordKey, bin);
+    }
   }
 
   @Override
@@ -125,5 +139,34 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
   @Override
   public void close() {
     aerospikeClient.close();
+  }
+
+  /**
+   * Aerospike does not support Utf8 format returned from Avro.
+   * This method provides those utf8 valued bin values as strings
+   * for aerospike Value to obtain the corresponding bin value,
+   * and returns the Bin
+   *
+   * @param binName name of the bin
+   * @param value value of the bin
+   * @param field field corresponding to bin
+   * @return
+   */
+  private Bin getBin(String binName, Object value, Field field){
+    
+    boolean isStringType = false;
+    if (field.schema().getType().equals(Schema.Type.STRING))
+      isStringType = true;
+    if (field.schema().getType().equals(Schema.Type.UNION)){
+      for (Schema schema :field.schema().getTypes()) {
+        if (schema.getName().equals("string"))
+          isStringType = true;
+      }
+    }
+
+    if (isStringType)
+      return new Bin(binName, Value.get(value.toString()));
+    else
+      return new Bin(binName, Value.get(value));
   }
 }
