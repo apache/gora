@@ -19,15 +19,20 @@ package org.apache.gora.aerospike.store;
 import com.aerospike.client.policy.Policy;
 import com.aerospike.client.policy.WritePolicy;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class AerospikeMapping {
   private String namespace;
   private String set;
   private WritePolicy writePolicy;
   private Policy readPolicy;
+  private Map<String, String> binMapping;
 
   public AerospikeMapping() {
     writePolicy = new WritePolicy();
     readPolicy = new Policy();
+    binMapping = new HashMap<>();
   }
 
   public String getNamespace() {
@@ -60,5 +65,13 @@ public class AerospikeMapping {
 
   public void setReadPolicy(Policy readPolicy) {
     this.readPolicy = readPolicy;
+  }
+
+  public Map<String, String> getBinMapping() {
+    return binMapping;
+  }
+
+  public void setBinMapping(Map<String, String> binMapping) {
+    this.binMapping = binMapping;
   }
 }

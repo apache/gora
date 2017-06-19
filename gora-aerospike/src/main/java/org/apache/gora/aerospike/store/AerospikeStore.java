@@ -42,60 +42,59 @@ import org.slf4j.LoggerFactory;
 public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
   public static final Logger LOG = LoggerFactory.getLogger(AerospikeStore.class);
+
   private static final String PARSE_MAPPING_FILE_KEY = "gora.aerospike.mapping.file";
+
   private static final String DEFAULT_MAPPING_FILE = "gora-aerospike-mapping.xml";
 
-
   private AerospikeClient aerospikeClient;
+
   private AerospikeParameters aerospikeParameters;
 
-  @Override
-  public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) {
+  @Override public void initialize(Class<K> keyClass, Class<T> persistentClass,
+          Properties properties) {
     super.initialize(keyClass, persistentClass, properties);
 
     try {
-      AerospikeMappingBuilder aerospikeMappingBuilder = new AerospikeMappingBuilder(getConf().get
-        (PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE), keyClass,
-        persistentClass);
-      aerospikeParameters = new AerospikeParameters(aerospikeMappingBuilder.getAerospikeMapping(), properties);
+      AerospikeMappingBuilder aerospikeMappingBuilder = new AerospikeMappingBuilder();
+      aerospikeMappingBuilder
+              .readMappingFile(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE),
+                      keyClass, persistentClass);
+      aerospikeParameters = new AerospikeParameters(aerospikeMappingBuilder.getAerospikeMapping(),
+              properties);
       ClientPolicy policy = new ClientPolicy();
       policy.writePolicyDefault = aerospikeParameters.getAerospikeMapping().getWritePolicy();
       policy.readPolicyDefault = aerospikeParameters.getAerospikeMapping().getReadPolicy();
-      aerospikeClient = new AerospikeClient(aerospikeParameters.getHost(), aerospikeParameters.getPort());
+      aerospikeClient = new AerospikeClient(aerospikeParameters.getHost(),
+              aerospikeParameters.getPort());
       aerospikeParameters.setServerSpecificParameters(aerospikeClient);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
 
-  @Override
-  public String getSchemaName() {
+  @Override public String getSchemaName() {
     return null;
   }
 
-  @Override
-  public void createSchema() {
+  @Override public void createSchema() {
   }
 
-  @Override
-  public void deleteSchema() {
+  @Override public void deleteSchema() {
   }
 
-  @Override
-  public boolean schemaExists() {
+  @Override public boolean schemaExists() {
     return true;
   }
 
-  @Override
-  public T get(K key, String[] fields) {
+  @Override public T get(K key, String[] fields) {
     return null;
   }
 
-  @Override
-  public void put(K key, T value) {
+  @Override public void put(K key, T value) {
 
-    Key recordKey = new Key(aerospikeParameters.getAerospikeMapping().getNamespace(), aerospikeParameters
-      .getAerospikeMapping().getSet(), Value.get(key));
+    Key recordKey = new Key(aerospikeParameters.getAerospikeMapping().getNamespace(),
+            aerospikeParameters.getAerospikeMapping().getSet(), Value.get(key));
 
     List<Field> fields = value.getSchema().getFields();
 
@@ -104,40 +103,35 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
       // In retrieving the bin name, it is checked whether the server is single bin valued
       String binName = aerospikeParameters.getBinName(fields.get(i).name());
       Bin bin = getBin(binName, value.get(i), fields.get(i));
-      aerospikeClient.put(aerospikeParameters.getAerospikeMapping().getWritePolicy(), recordKey, bin);
+      aerospikeClient
+              .put(aerospikeParameters.getAerospikeMapping().getWritePolicy(), recordKey, bin);
     }
   }
 
-  @Override
-  public boolean delete(K key) {
+  @Override public boolean delete(K key) {
     return true;
   }
 
-  @Override
-  public long deleteByQuery(Query<K, T> query) {
+  @Override public long deleteByQuery(Query<K, T> query) {
     return 0;
   }
 
-  @Override
-  public Result<K, T> execute(Query<K, T> query) {
+  @Override public Result<K, T> execute(Query<K, T> query) {
     return null;
   }
 
-  @Override
-  public Query<K, T> newQuery() {
+  @Override public Query<K, T> newQuery() {
     return null;
   }
 
-  @Override
-  public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query) throws IOException {
+  @Override public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query) throws IOException {
     return null;
   }
 
   public void flush() {
   }
 
-  @Override
-  public void close() {
+  @Override public void close() {
     aerospikeClient.close();
   }
 
@@ -148,17 +142,17 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
    * and returns the Bin
    *
    * @param binName name of the bin
-   * @param value value of the bin
-   * @param field field corresponding to bin
+   * @param value   value of the bin
+   * @param field   field corresponding to bin
    * @return
    */
-  private Bin getBin(String binName, Object value, Field field){
-    
+  private Bin getBin(String binName, Object value, Field field) {
+
     boolean isStringType = false;
     if (field.schema().getType().equals(Schema.Type.STRING))
       isStringType = true;
-    if (field.schema().getType().equals(Schema.Type.UNION)){
-      for (Schema schema :field.schema().getTypes()) {
+    if (field.schema().getType().equals(Schema.Type.UNION)) {
+      for (Schema schema : field.schema().getTypes()) {
         if (schema.getName().equals("string"))
           isStringType = true;
       }

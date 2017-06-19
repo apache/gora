@@ -25,12 +25,14 @@ import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.jdom.JDOMException;
 import javax.naming.ConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.HashMap;
 
 public class AerospikeMappingBuilder {
 
@@ -38,107 +40,108 @@ public class AerospikeMappingBuilder {
 
   private AerospikeMapping aerospikeMapping;
 
-  public AerospikeMappingBuilder(String mappingFile, Class<?> keyClass, Class<?> persistentClass) throws IOException {
+  public AerospikeMappingBuilder() throws IOException {
     this.aerospikeMapping = new AerospikeMapping();
-    this.readMappingFile(mappingFile, keyClass, persistentClass);
   }
 
   public AerospikeMapping getAerospikeMapping() {
     return this.aerospikeMapping;
   }
 
-  private void readMappingFile(String fileName, Class<?> keyClass, Class<?> persistentClass) throws IOException {
-    try {
-      SAXBuilder saxBuilder = new SAXBuilder();
-      InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
-      if (inputStream == null) {
-        LOG.warn("Mapping file '" + fileName + "' could not be found!");
-        throw new IOException("Mapping file '" + fileName + "' could not be found!");
-      }
-      Document document = saxBuilder.build(inputStream);
-      if (document == null) {
-        LOG.warn("Mapping file '" + fileName + "' could not be found!");
-        throw new IOException("Mapping file '" + fileName + "' could not be found!");
-      }
+  public void readMappingFile(String mappingFile, Class<?> keyClass, Class<?> persistentClass)
+          throws IOException, JDOMException, ConfigurationException {
 
-      Element root = document.getRootElement();
-
-      // Mapping the defined policies
-      List<Element> policyElements = root.getChildren("policy");
-
-      for (Element policyElement : policyElements) {
-
-        String policy = policyElement.getAttributeValue("name");
-        if (policy != null) {
-          if (policy.equals("write")) {
-            WritePolicy writePolicy = new WritePolicy();
-            if (policyElement.getAttributeValue("gen") != null)
-              writePolicy.generationPolicy = getGenerationPolicyMapping(policyElement.getAttributeValue
-                ("gen").toUpperCase(Locale.getDefault()));
-            if (policyElement.getAttributeValue("exists") != null)
-              writePolicy.recordExistsAction = getRecordExistsAction(policyElement.getAttributeValue
-                ("exists").toUpperCase(Locale.getDefault()));
-            if (policyElement.getAttributeValue("key") != null)
-              writePolicy.sendKey = getKeyUsagePolicy(policyElement.getAttributeValue("key").toUpperCase
-                (Locale.getDefault()));
-            if (policyElement.getAttributeValue("retry") != null)
-              writePolicy.retryOnTimeout = getRetryOnTimeoutPolicy(policyElement.getAttributeValue
-                ("retry").toUpperCase(Locale.getDefault()));
-            if (policyElement.getAttributeValue("timeout") != null)
-              writePolicy.timeout = getTimeoutValue(policyElement.getAttributeValue("timeout"));
-            aerospikeMapping.setWritePolicy(writePolicy);
-          } else if (policy.equals("read")) {
-            Policy readPolicy = new Policy();
-            if (policyElement.getAttributeValue("key") != null)
-              readPolicy.sendKey = getKeyUsagePolicy(policyElement.getAttributeValue("key").toUpperCase(Locale
-                .getDefault()));
-            if (policyElement.getAttributeValue("timeout") != null)
-              readPolicy.timeout = getTimeoutValue(policyElement.getAttributeValue("timeout"));
-            aerospikeMapping.setReadPolicy(readPolicy);
-          }
-        }
-      }
-
-      // Mapping the defined classes
-      List<Element> classElements = root.getChildren("class");
-
-      boolean persistentAndKeyClassMatches = false;
-      for (Element classElement : classElements) {
-
-        String mappingKeyClass = classElement.getAttributeValue("keyClass");
-        String mappingClassName = classElement.getAttributeValue("name");
-
-        if (mappingKeyClass != null && mappingClassName != null) {
-          if (mappingKeyClass.equals(keyClass.getCanonicalName())
-            && mappingClassName.equals(persistentClass.getCanonicalName())) {
-
-            persistentAndKeyClassMatches = true;
-
-            String nameSpace = classElement.getAttributeValue("namespace");
-            if (nameSpace == null || nameSpace.isEmpty()) {
-              throw new ConfigurationException("Gora-aerospike-mapping does not include the relevant namespace for " +
-                "the class");
-            }
-            aerospikeMapping.setNamespace(nameSpace);
-
-            String set = classElement.getAttributeValue("set");
-            if (set != null && !set.isEmpty()) {
-              aerospikeMapping.setSet(set);
-            }
-          }
-        }
-
-      }
-      if (!persistentAndKeyClassMatches)
-        throw new ConfigurationException("Gora-aerospike-mapping does not include the name and keyClass in the " +
-          "databean");
-    } catch (IOException e) {
-      LOG.error(e.getMessage(), e);
-      throw new IOException(e);
-    } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
-      throw new IOException(e);
+    SAXBuilder saxBuilder = new SAXBuilder();
+    InputStream inputStream = getClass().getClassLoader().getResourceAsStream(mappingFile);
+    if (inputStream == null) {
+      LOG.warn("Mapping file '" + mappingFile + "' could not be found!");
+      throw new IOException("Mapping file '" + mappingFile + "' could not be found!");
     }
+    Document document = saxBuilder.build(inputStream);
+    if (document == null) {
+      LOG.warn("Mapping file '" + mappingFile + "' could not be found!");
+      throw new IOException("Mapping file '" + mappingFile + "' could not be found!");
+    }
+
+    Element root = document.getRootElement();
+
+    List<Element> policyElements = root.getChildren("policy");
+
+    for (Element policyElement : policyElements) {
+
+      String policy = policyElement.getAttributeValue("name");
+      if (policy != null) {
+        if (policy.equals("write")) {
+          WritePolicy writePolicy = new WritePolicy();
+          if (policyElement.getAttributeValue("gen") != null)
+            writePolicy.generationPolicy = getGenerationPolicyMapping(
+                    policyElement.getAttributeValue("gen").toUpperCase(Locale.getDefault()));
+          if (policyElement.getAttributeValue("exists") != null)
+            writePolicy.recordExistsAction = getRecordExistsAction(
+                    policyElement.getAttributeValue("exists").toUpperCase(Locale.getDefault()));
+          if (policyElement.getAttributeValue("key") != null)
+            writePolicy.sendKey = getKeyUsagePolicy(
+                    policyElement.getAttributeValue("key").toUpperCase(Locale.getDefault()));
+          if (policyElement.getAttributeValue("retry") != null)
+            writePolicy.retryOnTimeout = getRetryOnTimeoutPolicy(
+                    policyElement.getAttributeValue("retry").toUpperCase(Locale.getDefault()));
+          if (policyElement.getAttributeValue("timeout") != null)
+            writePolicy.timeout = getTimeoutValue(policyElement.getAttributeValue("timeout"));
+          aerospikeMapping.setWritePolicy(writePolicy);
+        } else if (policy.equals("read")) {
+          Policy readPolicy = new Policy();
+          if (policyElement.getAttributeValue("key") != null)
+            readPolicy.sendKey = getKeyUsagePolicy(
+                    policyElement.getAttributeValue("key").toUpperCase(Locale.getDefault()));
+          if (policyElement.getAttributeValue("timeout") != null)
+            readPolicy.timeout = getTimeoutValue(policyElement.getAttributeValue("timeout"));
+          aerospikeMapping.setReadPolicy(readPolicy);
+        }
+      }
+    }
+
+    List<Element> classElements = root.getChildren("class");
+
+    boolean persistentClassAndKeyClassMatches = false;
+    for (Element classElement : classElements) {
+
+      String mappingKeyClass = classElement.getAttributeValue("keyClass");
+      String mappingClassName = classElement.getAttributeValue("name");
+
+      if (mappingKeyClass != null && mappingClassName != null) {
+        if (mappingKeyClass.equals(keyClass.getCanonicalName()) && mappingClassName
+                .equals(persistentClass.getCanonicalName())) {
+
+          persistentClassAndKeyClassMatches = true;
+
+          List<Element> fields = classElement.getChildren("field");
+          Map<String, String> binMapping = new HashMap<>();
+          for (Element field : fields) {
+            String fieldName = field.getAttributeValue("name");
+            String binName = field.getAttributeValue("bin");
+            if (fieldName != null && binName != null)
+              binMapping.put(fieldName, binName);
+          }
+          aerospikeMapping.setBinMapping(binMapping);
+
+          String nameSpace = classElement.getAttributeValue("namespace");
+          if (nameSpace == null || nameSpace.isEmpty()) {
+            throw new ConfigurationException(
+                    "Gora-aerospike-mapping does not include the relevant namespace for "
+                            + "the class");
+          }
+          aerospikeMapping.setNamespace(nameSpace);
+
+          String set = classElement.getAttributeValue("set");
+          if (set != null && !set.isEmpty()) {
+            aerospikeMapping.setSet(set);
+          }
+        }
+      }
+    }
+    if (!persistentClassAndKeyClassMatches)
+      throw new ConfigurationException(
+              "Gora-aerospike-mapping does not include the name and keyClass in the databean");
   }
 
   private GenerationPolicy getGenerationPolicyMapping(String genPolicy) {
