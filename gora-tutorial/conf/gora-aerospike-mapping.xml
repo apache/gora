@@ -24,7 +24,21 @@
   <policy name="write" gen="IGNORE" exists="CREATE" key="DIGEST" retry="ONCE" timeout="1000"/>
   <policy name="read" key="DIGEST" timeout="1000"/>
 
-  <class name="org.apache.gora.tutorial.log.generated.Pageview" keyClass="java.lang.Long" set="AccessLog" namespace = "test" />
-  <class name="org.apache.gora.tutorial.log.generated.MetricDatum" keyClass="java.lang.String" set="Metrics" namespace = "test"/>
+  <class name="org.apache.gora.tutorial.log.generated.Pageview" keyClass="java.lang.Long" set="AccessLog" namespace = "test">
+    <field name="url" bin="url"/>
+    <field name="timestamp" bin="timestamp"/>
+    <field name="ip" bin="ip" />
+    <field name="httpMethod" bin="httpMethod"/>
+    <field name="httpStatusCode" bin="httpStatusCode"/>
+    <field name="responseSize" bin="responseSize"/>
+    <field name="referrer" bin="referrer"/>
+    <field name="userAgent" bin="userAgent"/>
+  </class>
+
+  <class name="org.apache.gora.tutorial.log.generated.MetricDatum" keyClass="java.lang.String" set="Metrics" namespace = "test">
+    <field name="metricDimension" bin="metricDimension"/>
+    <field name="timestamp" bin="ts"/>
+    <field name="metric" bin="metric"/>
+  </class>
 
 </gora-otd>
