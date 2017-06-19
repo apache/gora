@@ -91,18 +91,21 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
     return null;
   }
 
-  @Override public void put(K key, T value) {
+  @Override public void put(K key, T persistent) {
 
     Key recordKey = new Key(aerospikeParameters.getAerospikeMapping().getNamespace(),
             aerospikeParameters.getAerospikeMapping().getSet(), Value.get(key));
 
-    List<Field> fields = value.getSchema().getFields();
-
+    List<Field> fields = persistent.getSchema().getFields();
     for (int i = 0; i < fields.size(); i++) {
-
-      // In retrieving the bin name, it is checked whether the server is single bin valued
-      String binName = aerospikeParameters.getBinName(fields.get(i).name());
-      Bin bin = getBin(binName, value.get(i), fields.get(i));
+      String mappingBinName = aerospikeParameters.getAerospikeMapping().getBinMapping()
+              .get(fields.get(i).name());
+      if (mappingBinName == null) {
+        throw new RuntimeException(
+                "Aerospike mapping for field [" + persistent.getClass().getName() + "#" + fields
+                        .get(i).name() + "] not found. Wrong gora-aerospike-mapping.xml?");
+      }
+      Bin bin = getBin(mappingBinName, persistent.get(i), fields.get(i));
       aerospikeClient
               .put(aerospikeParameters.getAerospikeMapping().getWritePolicy(), recordKey, bin);
     }
