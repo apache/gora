@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -73,5 +73,9 @@ public class AerospikeMapping {
 
   public void setBinMapping(Map<String, String> binMapping) {
     this.binMapping = binMapping;
+  }
+
+  public String getBinName(String fieldName){
+    return binMapping.get(fieldName);
   }
 }
