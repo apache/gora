@@ -44,6 +44,12 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
+/**
+ * Implementation of Cassandra Store.
+ *
+ * @param <K> key class
+ * @param <T> persistent class
+ */
 public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
   private static final String DEFAULT_MAPPING_FILE = "gora-cassandra-mapping.xml";
@@ -64,6 +70,15 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
     super();
   }
 
+  /**
+   * {@inheritDoc}
+   * In initializing the cassandra datastore, read the mapping file, creates the basic connection to cassandra cluster,
+   * according to the gora properties
+   *
+   * @param keyClass        key class
+   * @param persistentClass persistent class
+   * @param properties      properties
+   */
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) {
     LOG.debug("Initializing Cassandra store");
@@ -89,6 +104,13 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
     }
   }
 
+  /**
+   * In this method we reads the mapping file and creates the Cassandra Mapping.
+   *
+   * @param filename mapping file name
+   * @return @{@link CassandraMapping}
+   * @throws IOException
+   */
   private CassandraMapping readMapping(String filename) throws IOException {
     CassandraMapping map = new CassandraMapping();
     try {
