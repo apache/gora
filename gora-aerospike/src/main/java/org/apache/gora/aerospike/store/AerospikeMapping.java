@@ -24,9 +24,13 @@ import java.util.Map;
 
 public class AerospikeMapping {
   private String namespace;
+
   private String set;
+
   private WritePolicy writePolicy;
+
   private Policy readPolicy;
+
   private Map<String, String> binMapping;
 
   public AerospikeMapping() {
@@ -75,7 +79,7 @@ public class AerospikeMapping {
     this.binMapping = binMapping;
   }
 
-  public String getBinName(String fieldName){
+  public String getBinName(String fieldName) {
     return binMapping.get(fieldName);
   }
 }

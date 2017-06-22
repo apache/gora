@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
-  public static final Logger logger = LoggerFactory.getLogger(AerospikeStore.class);
+  private static final Logger LOG = LoggerFactory.getLogger(AerospikeStore.class);
 
   private static final String PARSE_MAPPING_FILE_KEY = "gora.aerospike.mapping.file";
 
@@ -60,39 +60,41 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
    * @param properties      properties
    */
   @Override
-  public void initialize(Class<K> keyClass, Class<T> persistentClass,
-          Properties properties) {
+  public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) {
     super.initialize(keyClass, persistentClass, properties);
 
-    try {
-      AerospikeMappingBuilder aerospikeMappingBuilder = new AerospikeMappingBuilder();
-      aerospikeMappingBuilder
-              .readMappingFile(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE),
-                      keyClass, persistentClass);
-      aerospikeParameters = new AerospikeParameters(aerospikeMappingBuilder.getAerospikeMapping(),
-              properties);
-      ClientPolicy policy = new ClientPolicy();
-      policy.writePolicyDefault = aerospikeParameters.getAerospikeMapping().getWritePolicy();
-      policy.readPolicyDefault = aerospikeParameters.getAerospikeMapping().getReadPolicy();
-      aerospikeClient = new AerospikeClient(aerospikeParameters.getHost(),
-              aerospikeParameters.getPort());
-      aerospikeParameters.setServerSpecificParameters(aerospikeClient);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    AerospikeMappingBuilder aerospikeMappingBuilder = new AerospikeMappingBuilder();
+    aerospikeMappingBuilder
+            .readMappingFile(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE), keyClass,
+                    persistentClass);
+    aerospikeParameters = new AerospikeParameters(aerospikeMappingBuilder.getAerospikeMapping(),
+            properties);
+    ClientPolicy policy = new ClientPolicy();
+    policy.writePolicyDefault = aerospikeParameters.getAerospikeMapping().getWritePolicy();
+    policy.readPolicyDefault = aerospikeParameters.getAerospikeMapping().getReadPolicy();
+
+    aerospikeClient = new AerospikeClient(aerospikeParameters.getHost(),
+            aerospikeParameters.getPort());
+    aerospikeParameters.setServerSpecificParameters(aerospikeClient);
+    aerospikeParameters.validateServerBinConfiguration(persistentClass.getFields());
+    LOG.info("Aerospike Gora datastore initialized successfully.");
   }
 
-  @Override public String getSchemaName() {
+  @Override
+  public String getSchemaName() {
     return null;
   }
 
-  @Override public void createSchema() {
+  @Override
+  public void createSchema() {
   }
 
-  @Override public void deleteSchema() {
+  @Override
+  public void deleteSchema() {
   }
 
-  @Override public boolean schemaExists() {
+  @Override
+  public boolean schemaExists() {
     return true;
   }
 
@@ -121,8 +123,8 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
    * In writing the records, the policy defined in the mapping file is used to decide on the
    * behaviour of transaction handling.
    *
-   * @param key         key of the object
-   * @param persistent  object to be persisted
+   * @param key        key of the object
+   * @param persistent object to be persisted
    */
   @Override
   public void put(K key, T persistent) {
@@ -135,6 +137,8 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
       String mappingBinName = aerospikeParameters.getAerospikeMapping().getBinMapping()
               .get(fields.get(i).name());
       if (mappingBinName == null) {
+        LOG.error("Aerospike mapping for field {}#{} not found. Wrong gora-aerospike-mapping.xml?",
+                persistent.getClass().getName(), fields.get(i).name());
         throw new RuntimeException(
                 "Aerospike mapping for field [" + persistent.getClass().getName() + "#" + fields
                         .get(i).name() + "] not found. Wrong gora-aerospike-mapping.xml?");
@@ -145,23 +149,28 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
     }
   }
 
-  @Override public boolean delete(K key) {
+  @Override
+  public boolean delete(K key) {
     return true;
   }
 
-  @Override public long deleteByQuery(Query<K, T> query) {
+  @Override
+  public long deleteByQuery(Query<K, T> query) {
     return 0;
   }
 
-  @Override public Result<K, T> execute(Query<K, T> query) {
+  @Override
+  public Result<K, T> execute(Query<K, T> query) {
     return null;
   }
 
-  @Override public Query<K, T> newQuery() {
+  @Override
+  public Query<K, T> newQuery() {
     return null;
   }
 
-  @Override public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query) throws IOException {
+  @Override
+  public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query) throws IOException {
     return null;
   }
 
@@ -175,14 +184,13 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
   @Override
   public void close() {
     aerospikeClient.close();
+    LOG.info("Aerospike Gora datastore destroyed successfully.");
   }
 
   /**
-   * Aerospike does not support Utf8 format returned from Avro.
-   * This method provides those utf8 valued bin values as strings
-   * for aerospike Value to obtain the corresponding bin value,
-   * and returns the Bin
-   * Bin is the concept in Aerospike equivalent to a column in RDBMS
+   * Aerospike does not support Utf8 format returned from Avro. This method provides those utf8
+   * valued bin (column) values as strings for aerospike Value to obtain the corresponding bin
+   * value, and returns the Bin (column in RDBMS)
    *
    * @param binName name of the bin
    * @param value   value of the bin
@@ -227,14 +235,16 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
   /**
    * Method to set a field in the persistent object
    *
-   * @param field   field name
-   * @param record  record retrieved from database
+   * @param field      field name
+   * @param record     record retrieved from database
    * @param persistent persistent object for the field to be set
    */
   private void setPersistentField(String field, Record record, T persistent) {
 
     String binName = aerospikeParameters.getAerospikeMapping().getBinName(field);
     if (binName == null) {
+      LOG.error("Aerospike mapping for field {} not found. Wrong gora-aerospike-mapping.xml",
+              field);
       throw new RuntimeException("Aerospike mapping for field [" + field + "] not found. "
               + "Wrong gora-aerospike-mapping.xml?");
     }

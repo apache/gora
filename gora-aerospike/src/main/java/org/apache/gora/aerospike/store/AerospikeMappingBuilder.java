@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -26,6 +26,7 @@ import org.jdom.input.SAXBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.jdom.JDOMException;
+
 import javax.naming.ConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,11 +37,11 @@ import java.util.HashMap;
 
 public class AerospikeMappingBuilder {
 
-  public static final Logger LOG = LoggerFactory.getLogger(AerospikeMappingBuilder.class);
+  private static final Logger LOG = LoggerFactory.getLogger(AerospikeMappingBuilder.class);
 
   private AerospikeMapping aerospikeMapping;
 
-  public AerospikeMappingBuilder() throws IOException {
+  public AerospikeMappingBuilder() {
     this.aerospikeMapping = new AerospikeMapping();
   }
 
@@ -48,102 +49,125 @@ public class AerospikeMappingBuilder {
     return this.aerospikeMapping;
   }
 
-  public void readMappingFile(String mappingFile, Class<?> keyClass, Class<?> persistentClass)
-          throws IOException, JDOMException, ConfigurationException {
+  /**
+   * Reads the gora aerospike mapping file
+   *
+   * @param mappingFile     mapping file path
+   * @param keyClass        key class
+   * @param persistentClass persistent class
+   */
+  public void readMappingFile(String mappingFile, Class<?> keyClass, Class<?> persistentClass) {
 
-    SAXBuilder saxBuilder = new SAXBuilder();
-    InputStream inputStream = getClass().getClassLoader().getResourceAsStream(mappingFile);
-    if (inputStream == null) {
-      LOG.warn("Mapping file '" + mappingFile + "' could not be found!");
-      throw new IOException("Mapping file '" + mappingFile + "' could not be found!");
-    }
-    Document document = saxBuilder.build(inputStream);
-    if (document == null) {
-      LOG.warn("Mapping file '" + mappingFile + "' could not be found!");
-      throw new IOException("Mapping file '" + mappingFile + "' could not be found!");
-    }
-
-    Element root = document.getRootElement();
-
-    List<Element> policyElements = root.getChildren("policy");
-
-    for (Element policyElement : policyElements) {
-
-      String policy = policyElement.getAttributeValue("name");
-      if (policy != null) {
-        if (policy.equals("write")) {
-          WritePolicy writePolicy = new WritePolicy();
-          if (policyElement.getAttributeValue("gen") != null)
-            writePolicy.generationPolicy = getGenerationPolicyMapping(
-                    policyElement.getAttributeValue("gen").toUpperCase(Locale.getDefault()));
-          if (policyElement.getAttributeValue("exists") != null)
-            writePolicy.recordExistsAction = getRecordExistsAction(
-                    policyElement.getAttributeValue("exists").toUpperCase(Locale.getDefault()));
-          if (policyElement.getAttributeValue("key") != null)
-            writePolicy.sendKey = getKeyUsagePolicy(
-                    policyElement.getAttributeValue("key").toUpperCase(Locale.getDefault()));
-          if (policyElement.getAttributeValue("retry") != null)
-            writePolicy.retryOnTimeout = getRetryOnTimeoutPolicy(
-                    policyElement.getAttributeValue("retry").toUpperCase(Locale.getDefault()));
-          if (policyElement.getAttributeValue("timeout") != null)
-            writePolicy.timeout = getTimeoutValue(policyElement.getAttributeValue("timeout"));
-          aerospikeMapping.setWritePolicy(writePolicy);
-        } else if (policy.equals("read")) {
-          Policy readPolicy = new Policy();
-          if (policyElement.getAttributeValue("key") != null)
-            readPolicy.sendKey = getKeyUsagePolicy(
-                    policyElement.getAttributeValue("key").toUpperCase(Locale.getDefault()));
-          if (policyElement.getAttributeValue("timeout") != null)
-            readPolicy.timeout = getTimeoutValue(policyElement.getAttributeValue("timeout"));
-          aerospikeMapping.setReadPolicy(readPolicy);
-        }
+    try {
+      SAXBuilder saxBuilder = new SAXBuilder();
+      InputStream inputStream = getClass().getClassLoader().getResourceAsStream(mappingFile);
+      if (inputStream == null) {
+        LOG.error("Mapping file '{}' could not be found!", mappingFile);
+        throw new IOException("Mapping file '" + mappingFile + "' could not be found!");
       }
-    }
+      Document document = saxBuilder.build(inputStream);
+      if (document == null) {
+        LOG.error("Mapping file '{}' could not be found!", mappingFile);
+        throw new IOException("Mapping file '" + mappingFile + "' could not be found!");
+      }
 
-    List<Element> classElements = root.getChildren("class");
+      Element root = document.getRootElement();
 
-    boolean persistentClassAndKeyClassMatches = false;
-    for (Element classElement : classElements) {
+      List<Element> policyElements = root.getChildren("policy");
 
-      String mappingKeyClass = classElement.getAttributeValue("keyClass");
-      String mappingClassName = classElement.getAttributeValue("name");
+      for (Element policyElement : policyElements) {
 
-      if (mappingKeyClass != null && mappingClassName != null) {
-        if (mappingKeyClass.equals(keyClass.getCanonicalName()) && mappingClassName
-                .equals(persistentClass.getCanonicalName())) {
-
-          persistentClassAndKeyClassMatches = true;
-
-          List<Element> fields = classElement.getChildren("field");
-          Map<String, String> binMapping = new HashMap<>();
-          for (Element field : fields) {
-            String fieldName = field.getAttributeValue("name");
-            String binName = field.getAttributeValue("bin");
-            if (fieldName != null && binName != null)
-              binMapping.put(fieldName, binName);
-          }
-          aerospikeMapping.setBinMapping(binMapping);
-
-          String nameSpace = classElement.getAttributeValue("namespace");
-          if (nameSpace == null || nameSpace.isEmpty()) {
-            throw new ConfigurationException(
-                    "Gora-aerospike-mapping does not include the relevant namespace for "
-                            + "the class");
-          }
-          aerospikeMapping.setNamespace(nameSpace);
-
-          String set = classElement.getAttributeValue("set");
-          if (set != null && !set.isEmpty()) {
-            aerospikeMapping.setSet(set);
+        String policy = policyElement.getAttributeValue("name");
+        if (policy != null) {
+          if (policy.equals("write")) {
+            WritePolicy writePolicy = new WritePolicy();
+            if (policyElement.getAttributeValue("gen") != null)
+              writePolicy.generationPolicy = getGenerationPolicyMapping(
+                      policyElement.getAttributeValue("gen").toUpperCase(Locale.getDefault()));
+            if (policyElement.getAttributeValue("exists") != null)
+              writePolicy.recordExistsAction = getRecordExistsAction(
+                      policyElement.getAttributeValue("exists").toUpperCase(Locale.getDefault()));
+            if (policyElement.getAttributeValue("key") != null)
+              writePolicy.sendKey = getKeyUsagePolicy(
+                      policyElement.getAttributeValue("key").toUpperCase(Locale.getDefault()));
+            if (policyElement.getAttributeValue("retry") != null)
+              writePolicy.retryOnTimeout = getRetryOnTimeoutPolicy(
+                      policyElement.getAttributeValue("retry").toUpperCase(Locale.getDefault()));
+            if (policyElement.getAttributeValue("timeout") != null)
+              writePolicy.timeout = getTimeoutValue(policyElement.getAttributeValue("timeout"));
+            aerospikeMapping.setWritePolicy(writePolicy);
+          } else if (policy.equals("read")) {
+            Policy readPolicy = new Policy();
+            if (policyElement.getAttributeValue("key") != null)
+              readPolicy.sendKey = getKeyUsagePolicy(
+                      policyElement.getAttributeValue("key").toUpperCase(Locale.getDefault()));
+            if (policyElement.getAttributeValue("timeout") != null)
+              readPolicy.timeout = getTimeoutValue(policyElement.getAttributeValue("timeout"));
+            aerospikeMapping.setReadPolicy(readPolicy);
           }
         }
       }
+
+      List<Element> classElements = root.getChildren("class");
+
+      boolean persistentClassAndKeyClassMatches = false;
+      for (Element classElement : classElements) {
+
+        String mappingKeyClass = classElement.getAttributeValue("keyClass");
+        String mappingClassName = classElement.getAttributeValue("name");
+
+        if (mappingKeyClass != null && mappingClassName != null) {
+          if (mappingKeyClass.equals(keyClass.getCanonicalName()) && mappingClassName
+                  .equals(persistentClass.getCanonicalName())) {
+
+            persistentClassAndKeyClassMatches = true;
+
+            List<Element> fields = classElement.getChildren("field");
+            Map<String, String> binMapping = new HashMap<>();
+            for (Element field : fields) {
+              String fieldName = field.getAttributeValue("name");
+              String binName = field.getAttributeValue("bin");
+              if (fieldName != null && binName != null)
+                binMapping.put(fieldName, binName);
+            }
+            aerospikeMapping.setBinMapping(binMapping);
+
+            String nameSpace = classElement.getAttributeValue("namespace");
+            if (nameSpace == null || nameSpace.isEmpty()) {
+              LOG.error("Gora-aerospike-mapping does not include the relevant namespace for the "
+                      + "{} class", mappingClassName);
+              throw new ConfigurationException(
+                      "Gora-aerospike-mapping does not include the relevant namespace for the "
+                              + mappingClassName + "class");
+            }
+            aerospikeMapping.setNamespace(nameSpace);
+
+            String set = classElement.getAttributeValue("set");
+            if (set != null && !set.isEmpty()) {
+              aerospikeMapping.setSet(set);
+            }
+          }
+        }
+      }
+      if (!persistentClassAndKeyClassMatches) {
+        LOG.error("Gora-aerospike-mapping does not include the name and keyClass specified in the "
+                + "databean");
+        throw new ConfigurationException(
+                "Gora-aerospike-mapping does not include the name and keyClass specified in the "
+                        + "databean");
+      }
+    } catch (IOException | JDOMException | ConfigurationException e) {
+      throw new RuntimeException(e);
     }
-    if (!persistentClassAndKeyClassMatches)
-      throw new ConfigurationException(
-              "Gora-aerospike-mapping does not include the name and keyClass in the databean");
+    LOG.info("Gora Aerospike mapping file is read successfully.");
   }
 
+  /**
+   * Returns the corresponding generation policy from the user specified generation policy name
+   *
+   * @param genPolicy generation policy name
+   * @return corresponding generation policy
+   */
   private GenerationPolicy getGenerationPolicyMapping(String genPolicy) {
 
     if (genPolicy == null)
@@ -168,6 +192,12 @@ public class AerospikeMappingBuilder {
     return generationPolicy;
   }
 
+  /**
+   * Returns the corresponding record exist action from the user specified exists policy name
+   *
+   * @param existsPolicy exists policy name
+   * @return corresponding record exist action
+   */
   private RecordExistsAction getRecordExistsAction(String existsPolicy) {
     if (existsPolicy == null)
       return RecordExistsAction.UPDATE;
@@ -197,6 +227,12 @@ public class AerospikeMappingBuilder {
     return recordExistsAction;
   }
 
+  /**
+   * Returns the corresponding key usage policy from the user specified key policy name
+   *
+   * @param keyPolicy key policy name
+   * @return corresponding key usage policy
+   */
   private boolean getKeyUsagePolicy(String keyPolicy) {
 
     if (keyPolicy == null)
@@ -218,6 +254,12 @@ public class AerospikeMappingBuilder {
     return sendKey;
   }
 
+  /**
+   * Returns the corresponding retry on timeout policy from the user specified retry policy name
+   *
+   * @param retry retry policy name
+   * @return corresponding retry on timeout policy
+   */
   private boolean getRetryOnTimeoutPolicy(String retry) {
 
     if (retry == null)
@@ -239,6 +281,12 @@ public class AerospikeMappingBuilder {
     return retryOnTimeout;
   }
 
+  /**
+   * Returns the timeout value from the user specified timeout value
+   *
+   * @param timeout user specified timeout value
+   * @return timeout value
+   */
   private int getTimeoutValue(String timeout) {
 
     if (timeout == null)

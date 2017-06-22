@@ -50,7 +50,6 @@
   </ciManagement>
 
   <properties>
-    <aerospike.version>3.3.2</aerospike.version>
     <osgi.import>*</osgi.import>
     <osgi.export>org.apache.gora.aerospike*;version="${project.version}";-noimport:=true</osgi.export>
   </properties>
