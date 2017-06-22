@@ -17,15 +17,24 @@
 
 package org.apache.gora.cassandra.store;
 
+import com.datastax.driver.mapping.Mapper;
+import com.datastax.driver.mapping.MappingManager;
 import com.datastax.driver.core.*;
 import com.datastax.driver.core.policies.*;
+import org.apache.gora.cassandra.bean.Field;
+import org.apache.gora.cassandra.bean.KeySpace;
 import org.apache.gora.persistency.BeanFactory;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
+import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.hadoop.conf.Configuration;
+import org.jdom.Attribute;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.input.SAXBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,24 +46,17 @@ import java.util.Properties;
 
 public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
-  /**
-   * Consistency property level for Cassandra column families
-   */
-  private static final String COL_FAM_CL = "cf.consistency.level";
-
-  /**
-   * Consistency property level for Cassandra read operations.
-   */
-  private static final String READ_OP_CL = "read.consistency.level";
-
-  /**
-   * Consistency property level for Cassandra write operations.
-   */
-  private static final String WRITE_OP_CL = "write.consistency.level";
+  private static final String DEFAULT_MAPPING_FILE = "gora-cassandra-mapping.xml";
 
   public static final Logger LOG = LoggerFactory.getLogger(CassandraStore.class);
 
   private Cluster cluster;
+
+  private CassandraMapping mapping;
+
+  private boolean isUseCassandraMappingManager;
+
+  private Mapper<T> mapper;
 
   private Session session;
 
@@ -67,15 +69,144 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
     LOG.debug("Initializing Cassandra store");
     super.initialize(keyClass, persistentClass, properties);
     try {
+      String mappingFile = DataStoreFactory.getMappingFile(properties, this,
+              DEFAULT_MAPPING_FILE);
+      mapping = readMapping(mappingFile);
+      isUseCassandraMappingManager = Boolean.parseBoolean(properties.getProperty(Constants.USE_CASSANDRA_MAPPING_MANAGER));
       Cluster.Builder builder = Cluster.builder();
       populateSettings(builder, properties);
       this.cluster = builder.build();
       this.session = this.cluster.connect();
+      if (isUseCassandraMappingManager) {
+        MappingManager mappingManager = new MappingManager(session);
+        mapper = mappingManager.mapper(persistentClass);
+      }
+
     } catch (Exception e) {
       LOG.error("Error while initializing Cassandra store: {}",
               new Object[]{e.getMessage()});
       throw new RuntimeException(e);
     }
+  }
+
+  private CassandraMapping readMapping(String filename) throws IOException {
+    CassandraMapping map = new CassandraMapping();
+    try {
+      SAXBuilder builder = new SAXBuilder();
+      Document doc = builder.build(getClass().getClassLoader()
+              .getResourceAsStream(filename));
+
+      List<Element> keyspaces = doc.getRootElement().getChildren("keyspace");
+
+      List<Element> classes = doc.getRootElement().getChildren("class");
+
+      boolean classMatched = false;
+      for (Element classElement : classes) {
+        if (classElement.getAttributeValue("keyClass").equals(
+                keyClass.getCanonicalName())
+                && classElement.getAttributeValue("name").equals(
+                persistentClass.getCanonicalName())) {
+
+          classMatched = true;
+          String tableName = getSchemaName(
+                  classElement.getAttributeValue("table"), persistentClass);
+          map.setCoreName(tableName);
+
+          List classAttributes = classElement.getAttributes();
+          for (Object anAttributeList : classAttributes) {
+            Attribute attribute = (Attribute) anAttributeList;
+            String attributeName = attribute.getName();
+            String attributeValue = attribute.getValue();
+            map.addProperty(attributeName, attributeValue);
+          }
+
+          List<Element> fields = classElement.getChildren("field");
+
+          for (Element field : fields) {
+            Field cassandraField = new Field();
+
+            List fieldAttributes = field.getAttributes();
+            for (Object anAttributeList : fieldAttributes) {
+              Attribute attribute = (Attribute) anAttributeList;
+              String attributeName = attribute.getName();
+              String attributeValue = attribute.getValue();
+              switch (attributeName) {
+                case "name":
+                  cassandraField.setFieldName(attributeValue);
+                  break;
+                case "column":
+                  cassandraField.setColumnName(attributeValue);
+                  break;
+                default:
+                  cassandraField.addProperty(attributeName, attributeValue);
+                  break;
+              }
+            }
+            map.addCassandraField(cassandraField);
+          }
+          break;
+        }
+        LOG.warn("Check that 'keyClass' and 'name' parameters in gora-solr-mapping.xml "
+                + "match with intended values. A mapping mismatch has been found therefore "
+                + "no mapping has been initialized for class mapping at position "
+                + " {} in mapping file.", classes.indexOf(classElement));
+      }
+      if (!classMatched) {
+        LOG.error("Check that 'keyClass' and 'name' parameters in {} no mapping has been initialized for {} class mapping", filename, persistentClass);
+      }
+
+      String keyspaceName = map.getProperty("keyspace");
+      if (keyspaceName != null) {
+        KeySpace keyspace = null;
+        for (Element keyspaceElement : keyspaces) {
+          if (keyspaceName.equals(keyspaceElement.getAttributeValue("name"))) {
+            keyspace = new KeySpace();
+            List fieldAttributes = keyspaceElement.getAttributes();
+            for (Object attributeObject : fieldAttributes) {
+              Attribute attribute = (Attribute) attributeObject;
+              String attributeName = attribute.getName();
+              String attributeValue = attribute.getValue();
+              switch (attributeName) {
+                case "name":
+                  keyspace.setName(attributeValue);
+                  break;
+                case "durableWrite":
+                  keyspace.setDurableWritesEnabled(Boolean.parseBoolean(attributeValue));
+                  break;
+                default:
+                  keyspace.addProperty(attributeName, attributeValue);
+                  break;
+              }
+            }
+            Element placementStrategy =  keyspaceElement.getChild("placementStrategy");
+            switch (KeySpace.PlacementStrategy.valueOf(placementStrategy.getAttributeValue("name"))) {
+              case SimpleStrategy:
+                keyspace.setPlacementStrategy(KeySpace.PlacementStrategy.SimpleStrategy);
+                keyspace.setReplicationFactor(Integer.parseInt(placementStrategy.getAttributeValue("replication_factor")));
+                break;
+              case NetworkTopologyStrategy:
+                List<Element> dataCenters =  placementStrategy.getChildren("datacenter");
+                keyspace.setPlacementStrategy(KeySpace.PlacementStrategy.NetworkTopologyStrategy);
+                for(Element dataCenter : dataCenters) {
+                 String dataCenterName = dataCenter.getAttributeValue("name");
+                  Integer dataCenterReplicationFactor = Integer.valueOf(dataCenter.getAttributeValue("replication_factor"));
+                  keyspace.addDataCenter(dataCenterName, dataCenterReplicationFactor);
+                }
+                break;
+            }
+            map.setKeySpace(keyspace);
+            break;
+          }
+
+        }
+
+      }
+
+    } catch (Exception ex) {
+      throw new IOException(ex);
+    }
+
+    return map;
   }
 
   private void populateSettings(Cluster.Builder builder, Properties properties) {
@@ -416,7 +547,11 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
 
   @Override
   public T get(K key) {
-    return super.get(key);
+    if (isUseCassandraMappingManager) {
+      return mapper.get(key);
+    } else {
+      return super.get(key);
+    }
   }
 
   @Override
@@ -426,12 +561,21 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
 
   @Override
   public void put(K key, T obj) {
-
+    if (isUseCassandraMappingManager) {
+      mapper.save(obj);
+    } else {
+      super.get(key);
+    }
   }
 
   @Override
   public boolean delete(K key) {
-    return false;
+    if (isUseCassandraMappingManager) {
+      mapper.delete(key);
+      return true;
+    } else {
+      return false;
+    }
   }
 
   @Override

@@ -49,47 +49,49 @@
    at http://gora.apache.org/current/gora-cassandra.html
 -->
 
+
 <gora-otd>
-  <keyspace name="Employee" host="localhost:9160" placement_strategy="org.apache.cassandra.locator.SimpleStrategy"
-      replication_factor="1" cluster="Gora Cassandra Test Cluster">
-    <family name="p" gc_grace_seconds="5"/>
-     <family name="sc" type="super" />
-  </keyspace>
+    <keyspace name="EmployeeSpace" durableWrite="false">
+        <placementStrategy name="SimpleStrategy" replication_factor="1"/>
+    </keyspace>
 
-  <keyspace name="WebPage" host="localhost:9160" placement_strategy="org.apache.cassandra.locator.SimpleStrategy"
-      replication_factor="1" cluster="Gora Cassandra Test Cluster">
-    <family name="p" gc_grace_seconds="5"/>
-    <family name="sc" type="super"/>
-  </keyspace>
+    <keyspace name="WebPage" durableWrite="true">
+        <placementStrategy name="NetworkTopologyStrategy">
+            <datacenter name="dc1" replication_factor="1"/>
+            <datacenter name="dc2" replication_factor="1"/>
+        </placementStrategy>
+    </keyspace>
 
-  <keyspace name="TokenDatum" host="localhost:9160" placement_strategy="org.apache.cassandra.locator.SimpleStrategy"
-      replication_factor="1" cluster="Gora Cassandra Test Cluster">
-    <family name="p" gc_grace_seconds="5"/>
-    <family name="sc" type="super"/>
-  </keyspace>
+    <class name="org.apache.gora.examples.generated.Employee1" keyClass="java.lang.String" keyspace="EmployeeSpace"
+           table="Employee" compactStorage="true" id="31323131">
+        <field name="lname" column="name" type="text" ttl="10" static="true"/>
+        <field name="fname" column="name" type="text" ttl="10"/>
+        <field name="srilankan" column="srilankan" type="boolean" ttl="10"/>
+        <field name="age" column="srilankan" type="int" ttl="10"/>
+        <field name="id" column="srilankan" type="uuid" ttl="10"/>
+    </class>
 
-  <class name="org.apache.gora.examples.generated.Employee" keyClass="java.lang.String" keyspace="Employee">
-    <field name="name"  family="p" qualifier="info:nm" ttl="10"/>
-    <field name="dateOfBirth"  family="p" qualifier="info:db" ttl="10"/>
-    <field name="ssn"  family="p" qualifier="info:sn" ttl="10"/>
-    <field name="salary"  family="p" qualifier="info:sl" ttl="10"/>
-    <field name="boss" family="p" qualifier="info:bs" ttl="10"/>
-    <field name="webpage" family="p" qualifier="info:wp" ttl="10"/>
-  </class>
+    <class name="org.apache.gora.examples.generated.Employee" keyClass="org.apache.gora.examples.generated.SensorKey" keyspace="WebPage"
+           compactStorage="true" id="31323131">
+        <field name="lname" column="name" type="text" ttl="10" primarykey="true"/>
+        <field name="fname" column="name" type="text" ttl="10"/>
+        <field name="srilankan" column="srilankan" type="boolean" ttl="10"/>
+        <field name="age" column="srilankan" type="int" ttl="10"/>
+        <field name="id" column="srilankan" type="uuid" ttl="10"/>
+    </class>
 
-  <class name="org.apache.gora.examples.generated.WebPage" keyClass="java.lang.String" keyspace="WebPage">
-    <field name="url" family="p" qualifier="c:u" ttl="10"/>
-    <field name="content" family="p" qualifier="p:cnt:c" ttl="10"/>
-    <field name="parsedContent" family="sc" qualifier="p:parsedContent" ttl="10"/>
-    <field name="outlinks" family="sc" qualifier="p:outlinks" ttl="10"/>
-    <field name="headers" family="sc" qualifier="p:headers" ttl="10"/>
-    <field name="metadata" family="p" qualifier="c:mt" ttl="10"/>
-    <field name="byteData" family="sc" qualifier="p:byteData" ttl="10"/>
-    <field name="stringData" family="sc" qualifier="p:stringData" ttl="10"/>
-  </class>
-
-  <class name="org.apache.gora.examples.generated.TokenDatum" keyClass="java.lang.String" keyspace="TokenDatum">
-    <field name="count"  family="p" qualifier="common:count" ttl="10"/>
-  </class>
+    <cassandraKey name="org.apache.gora.examples.generated.SensorKey">
+        <partitionKey>
+            <field composite="true">
+                <column name="id" type=""/>
+                <column name="name" type=""/>
+            </field>
+            <field name="sensorId" type="UTF8Type"/>
+            <field name="year" type="IntegerType"/>
+        </partitionKey>
+        <clusterKey>
+            <field name="date" type="LongType" order="desc"/>
+        </clusterKey>
+    </cassandraKey>
 
 </gora-otd>

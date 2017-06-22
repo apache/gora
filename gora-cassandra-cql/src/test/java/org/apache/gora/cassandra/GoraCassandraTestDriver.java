@@ -40,8 +40,7 @@ import org.slf4j.LoggerFactory;
  * This driver is the base for all test cases that require an embedded Cassandra
  * server. In this case we draw on Hector's @see EmbeddedServerHelper.
  * It starts (setUp) and stops (tearDown) embedded Cassandra server.
- * 
- * @author lewismc
+ *
  */
 
 public class GoraCassandraTestDriver extends GoraTestDriver {
