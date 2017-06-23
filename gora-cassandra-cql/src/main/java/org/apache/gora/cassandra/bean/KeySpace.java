@@ -25,6 +25,24 @@ import java.util.Map;
  * This class represents the Cassandra Keyspace.
  */
 public class KeySpace {
+
+  public enum PlacementStrategy {
+    SimpleStrategy,
+    NetworkTopologyStrategy,
+  }
+
+  private String name;
+
+  private PlacementStrategy placementStrategy;
+
+  private Map<String, String> properties;
+
+  private boolean durableWritesEnabled;
+
+  private int replicationFactor;
+
+  private Map<String, Integer> dataCenters;
+
   public String getName() {
     return name;
   }
@@ -49,19 +67,8 @@ public class KeySpace {
     this.dataCenters.put(key, value);
   }
 
-  private String name;
-
-  private Map<String, String> properties;
-
-  private boolean durableWritesEnabled;
-
   public KeySpace() {
     this.properties = new HashMap<>();
-  }
-
-  public enum PlacementStrategy {
-    SimpleStrategy,
-    NetworkTopologyStrategy,
   }
 
   public void setPlacementStrategy(PlacementStrategy placementStrategy) {
@@ -71,15 +78,9 @@ public class KeySpace {
     }
   }
 
-  private PlacementStrategy placementStrategy;
-
   public void setReplicationFactor(int replicationFactor) {
     this.replicationFactor = replicationFactor;
   }
-
-  private int replicationFactor;
-
-  private Map<String, Integer> dataCenters;
 
   private List<String> tables;
 

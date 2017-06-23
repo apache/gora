@@ -21,8 +21,7 @@ import com.datastax.driver.mapping.Mapper;
 import com.datastax.driver.mapping.MappingManager;
 import com.datastax.driver.core.*;
 import com.datastax.driver.core.policies.*;
-import org.apache.gora.cassandra.bean.Field;
-import org.apache.gora.cassandra.bean.KeySpace;
+import org.apache.gora.cassandra.bean.*;
 import org.apache.gora.persistency.BeanFactory;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
@@ -115,12 +114,11 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
     CassandraMapping map = new CassandraMapping();
     try {
       SAXBuilder builder = new SAXBuilder();
-      Document doc = builder.build(getClass().getClassLoader()
-              .getResourceAsStream(filename));
+      Document doc = builder.build(getClass().getClassLoader().getResourceAsStream(filename));
 
       List<Element> keyspaces = doc.getRootElement().getChildren("keyspace");
-
       List<Element> classes = doc.getRootElement().getChildren("class");
+      List<Element> keys = doc.getRootElement().getChildren("cassandraKey");
 
       boolean classMatched = false;
       for (Element classElement : classes) {
@@ -179,7 +177,7 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
 
       String keyspaceName = map.getProperty("keyspace");
       if (keyspaceName != null) {
-        KeySpace keyspace = null;
+        KeySpace keyspace;
         for (Element keyspaceElement : keyspaces) {
           if (keyspaceName.equals(keyspaceElement.getAttributeValue("name"))) {
             keyspace = new KeySpace();
@@ -200,17 +198,17 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
                   break;
               }
             }
-            Element placementStrategy =  keyspaceElement.getChild("placementStrategy");
+            Element placementStrategy = keyspaceElement.getChild("placementStrategy");
             switch (KeySpace.PlacementStrategy.valueOf(placementStrategy.getAttributeValue("name"))) {
               case SimpleStrategy:
                 keyspace.setPlacementStrategy(KeySpace.PlacementStrategy.SimpleStrategy);
                 keyspace.setReplicationFactor(Integer.parseInt(placementStrategy.getAttributeValue("replication_factor")));
                 break;
               case NetworkTopologyStrategy:
-                List<Element> dataCenters =  placementStrategy.getChildren("datacenter");
+                List<Element> dataCenters = placementStrategy.getChildren("datacenter");
                 keyspace.setPlacementStrategy(KeySpace.PlacementStrategy.NetworkTopologyStrategy);
-                for(Element dataCenter : dataCenters) {
-                 String dataCenterName = dataCenter.getAttributeValue("name");
+                for (Element dataCenter : dataCenters) {
+                  String dataCenterName = dataCenter.getAttributeValue("name");
                   Integer dataCenterReplicationFactor = Integer.valueOf(dataCenter.getAttributeValue("replication_factor"));
                   keyspace.addDataCenter(dataCenterName, dataCenterReplicationFactor);
                 }
@@ -224,10 +222,97 @@ public class CassandraStore<K, T extends PersistentBase> extends DataStoreBase<K
 
       }
 
+      for (Element key : keys) {
+        if (keyClass.getName().equals(key.getAttributeValue("name"))) {
+          CassandraKey cassandraKey = new CassandraKey(keyClass.getName());
+          Element partitionKeys = key.getChild("partitionKey");
+          Element clusterKeys = key.getChild("clusterKey");
+          List<Element> partitionKeyFields = partitionKeys.getChildren("field");
+          List<Element> partitionCompositeKeyFields = partitionKeys.getChildren("compositeField");
+          // process non composite partition keys
+          for (Element partitionKeyField : partitionKeyFields) {
+            PartitionKeyField fieldKey = new PartitionKeyField();
+            List fieldAttributes = partitionKeyField.getAttributes();
+            for (Object anAttributeList : fieldAttributes) {
+              Attribute attribute = (Attribute) anAttributeList;
+              String attributeName = attribute.getName();
+              String attributeValue = attribute.getValue();
+              switch (attributeName) {
+                case "name":
+                  fieldKey.setFieldName(attributeValue);
+                  break;
+                case "column":
+                  fieldKey.setColumnName(attributeValue);
+                  break;
+                default:
+                  fieldKey.addProperty(attributeName, attributeValue);
+                  break;
+              }
+            }
+            cassandraKey.addPartitionKeyField(fieldKey);
+          }
+          // process composite partitions keys
+          for (Element partitionCompositeKeyField : partitionCompositeKeyFields) {
+            PartitionKeyField compositeFieldKey = new PartitionKeyField();
+            compositeFieldKey.setComposite(true);
+            List<Element> compositeKeyFields = partitionCompositeKeyField.getChildren("field");
+            for (Element partitionKeyField : compositeKeyFields) {
+              PartitionKeyField fieldKey = new PartitionKeyField();
+              List fieldAttributes = partitionKeyField.getAttributes();
+              for (Object anAttributeList : fieldAttributes) {
+                Attribute attribute = (Attribute) anAttributeList;
+                String attributeName = attribute.getName();
+                String attributeValue = attribute.getValue();
+                switch (attributeName) {
+                  case "name":
+                    fieldKey.setFieldName(attributeValue);
+                    break;
+                  case "column":
+                    fieldKey.setColumnName(attributeValue);
+                    break;
+                  default:
+                    fieldKey.addProperty(attributeName, attributeValue);
+                    break;
+                }
+              }
+              compositeFieldKey.addField(fieldKey);
+            }
+            cassandraKey.addPartitionKeyField(compositeFieldKey);
+
+          }
+
+          //process cluster keys
+          List<Element> clusterKeyFields = clusterKeys.getChildren("field");
+          for (Element clusterKeyField : clusterKeyFields) {
+            ClusterKeyField keyField = new ClusterKeyField();
+            List fieldAttributes = clusterKeyField.getAttributes();
+            for (Object anAttributeList : fieldAttributes) {
+              Attribute attribute = (Attribute) anAttributeList;
+              String attributeName = attribute.getName();
+              String attributeValue = attribute.getValue();
+              switch (attributeName) {
+                case "name":
+                  keyField.setFieldName(attributeValue);
+                  break;
+                case "column":
+                  keyField.setColumnName(attributeValue);
+                  break;
+                case "order":
+                  keyField.setOrder(ClusterKeyField.Order.valueOf(attributeValue.toUpperCase()));
+                  break;
+                default:
+                  keyField.addProperty(attributeName, attributeValue);
+                  break;
+              }
+            }
+            cassandraKey.addClusterKeyField(keyField);
+          }
+          map.setCassandraKey(cassandraKey);
+        }
+      }
     } catch (Exception ex) {
       throw new IOException(ex);
     }
-
     return map;
   }
 

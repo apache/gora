@@ -21,45 +21,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This Class represents the Cassandra Key.
+ * This class represents Cassandra Partition Key.
  */
-public class CassandraKey{
+public class PartitionKeyField extends Field {
 
-  private String name;
+  private boolean isComposite;
 
-  private List<ClusterKeyField> clusterKeyFields;
+  private List<Field> fields;
 
-  private List<PartitionKeyField> partitionKeyFields;
-
-
-  public CassandraKey(String name) {
-    this.name = name;
+  public boolean isComposite() {
+    return isComposite;
   }
 
-  public String getName() {
-    return name;
-  }
-
-  public List<ClusterKeyField> getClusterKeyFields() {
-    return clusterKeyFields;
-  }
-
-  public List<PartitionKeyField> getPartitionKeyFields() {
-    return partitionKeyFields;
-  }
-
-  public void addPartitionKeyField(PartitionKeyField partitionKeyField) {
-    if(this.partitionKeyFields == null) {
-      this.partitionKeyFields = new ArrayList<>();
+  public void setComposite(boolean composite) {
+    isComposite = composite;
+    if(isComposite && fields == null) {
+      fields = new ArrayList<>();
     }
-    this.partitionKeyFields.add(partitionKeyField);
   }
 
-  public void addClusterKeyField(ClusterKeyField clusterKeyField) {
-    if(this.clusterKeyFields == null) {
-      this.clusterKeyFields = new ArrayList<>();
-    }
-    this.clusterKeyFields.add(clusterKeyField);
+  public void addField(Field field) {
+    this.fields.add(field);
+  }
+
+  public List<Field> getFields() {
+    return fields;
   }
 
 }

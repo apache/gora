@@ -17,6 +17,7 @@
 
 package org.apache.gora.cassandra.store;
 
+import org.apache.gora.cassandra.bean.CassandraKey;
 import org.apache.gora.cassandra.bean.Field;
 import org.apache.gora.cassandra.bean.KeySpace;
 
@@ -26,9 +27,19 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This class represents the Cassandra Mapping
+ * This class represents the Cassandra Mapping.
  */
 public class CassandraMapping {
+
+  private CassandraKey cassandraKey;
+
+  private Map<String, String> tableProperties;
+
+  private KeySpace keySpace;
+
+  private List<Field> fieldList;
+
+  private String coreName;
 
   public KeySpace getKeySpace() {
     return keySpace;
@@ -38,15 +49,17 @@ public class CassandraMapping {
     this.keySpace = keySpace;
   }
 
-  private KeySpace keySpace;
-
   public List<Field> getFieldList() {
     return fieldList;
   }
 
-  private List<Field> fieldList;
+  public CassandraKey getCassandraKey() {
+    return cassandraKey;
+  }
 
-  private Map<String, String> tableProperties;
+  public void setCassandraKey(CassandraKey cassandraKey) {
+    this.cassandraKey = cassandraKey;
+  }
 
   public CassandraMapping() {
     this.fieldList = new ArrayList<>();
@@ -60,8 +73,6 @@ public class CassandraMapping {
   public String getCoreName() {
     return coreName;
   }
-
-  private String coreName;
 
   public void addCassandraField(Field field) {
     this.fieldList.add(field);
