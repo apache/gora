@@ -14,7 +14,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.apache.gora.cassandra.store;
 
 import org.apache.gora.cassandra.bean.Field;
@@ -30,7 +29,7 @@ class CassandraQueryFactory {
   static String getCreateKeySpaceQuery(CassandraMapping mapping) {
     KeySpace keySpace = mapping.getKeySpace();
     StringBuilder stringBuffer = new StringBuilder();
-    stringBuffer.append("CREATE KEYSPACE ").append(keySpace.getName()).append(" WITH REPLICATION = { 'class' : ");
+    stringBuffer.append("CREATE KEYSPACE IF NOT EXISTS ").append(keySpace.getName()).append(" WITH REPLICATION = { 'class' : ");
     KeySpace.PlacementStrategy placementStrategy = keySpace.getPlacementStrategy();
     stringBuffer.append("'").append(placementStrategy).append("'").append(", ").append("'");
     switch (placementStrategy) {
@@ -50,7 +49,7 @@ class CassandraQueryFactory {
         break;
     }
 
-    if(keySpace.isDurableWritesEnabled()) {
+    if (keySpace.isDurableWritesEnabled()) {
       stringBuffer.append(" AND DURABLE_WRITES = ").append(keySpace.isDurableWritesEnabled());
     }
     return stringBuffer.toString();
@@ -58,20 +57,33 @@ class CassandraQueryFactory {
 
   static String getCreateTableQuery(CassandraMapping mapping) {
     StringBuilder stringBuffer = new StringBuilder();
-stringBuffer.append("CREATE TABLE ").append(mapping.getCoreName()).append(" (");
+    stringBuffer.append("CREATE TABLE IF NOT EXISTS ").append(mapping.getKeySpace().getName()).append(".").append(mapping.getCoreName()).append(" (");
     boolean isCommaNeeded = false;
-    for(Field field : mapping.getFieldList()) {
-      if(isCommaNeeded) {
+    for (Field field : mapping.getFieldList()) {
+      if (isCommaNeeded) {
         stringBuffer.append(", ");
       }
       stringBuffer.append(field.getColumnName()).append(" ").append(field.getType());
       boolean isStaticColumn = Boolean.parseBoolean(field.getProperty("static"));
-      if( isStaticColumn) {
+      boolean isPrimaryKey = Boolean.parseBoolean(field.getProperty("primarykey"));
+      if (isStaticColumn) {
         stringBuffer.append(" STATIC");
       }
-      isCommaNeeded =true;
+      if(isPrimaryKey) {
+        stringBuffer.append("  PRIMARY KEY ");
+      }
+      isCommaNeeded = true;
     }
 
+    stringBuffer.append(")");
+    if(Boolean.parseBoolean(mapping.getProperty("compactStorage"))) {
+      stringBuffer.append(" WITH COMPACT STORAGE ");
+    } else {
+      String id = mapping.getProperty("id");
+      if (id != null) {
+        stringBuffer.append(" WITH ID = '").append(id).append("'");
+      }
+    }
     return stringBuffer.toString();
   }
 

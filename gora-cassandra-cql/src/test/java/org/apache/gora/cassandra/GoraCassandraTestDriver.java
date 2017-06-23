@@ -22,6 +22,7 @@
 
 package org.apache.gora.cassandra;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.apache.cassandra.io.util.FileUtils;
 import org.apache.cassandra.service.CassandraDaemon;
 import org.apache.gora.GoraTestDriver;
@@ -35,6 +36,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.Properties;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 // Logging imports
 
@@ -50,7 +56,7 @@ import java.util.Properties;
 public class GoraCassandraTestDriver extends GoraTestDriver {
   private static Logger log = LoggerFactory.getLogger(GoraCassandraTestDriver.class);
   
-  private String baseDirectory = "target/test";
+  private static String baseDirectory = "target/test";
 
   private CassandraDaemon cassandraDaemon;
 
@@ -94,9 +100,11 @@ public class GoraCassandraTestDriver extends GoraTestDriver {
       System.setProperty("cassandra.config", "cassandra.yaml");
       
       cassandraDaemon = new CassandraDaemon();
+      cassandraDaemon.completeSetup();
+      cassandraDaemon.applyConfig();
       cassandraDaemon.init(null);
       cassandraThread = new Thread(new Runnable() {
-	
+
         public void run() {
           try {
             cassandraDaemon.start();
@@ -116,6 +124,7 @@ public class GoraCassandraTestDriver extends GoraTestDriver {
     }
   }
 
+
   /**
    * Stops embedded Cassandra server.
    *
@@ -128,10 +137,20 @@ public class GoraCassandraTestDriver extends GoraTestDriver {
     if (cassandraThread != null) {
       cassandraDaemon.stop();
       cassandraDaemon.destroy();
-      cassandraThread.interrupt();
-      cassandraThread = null;
+//      cassandraThread.interrupt();
+//      cassandraThread = null;
     }
-    cleanupDirectoriesFailover();
+/*    Thread cleanupThread = new Thread(() -> {
+      try {
+        Thread.sleep(5000);
+        cleanupDirectoriesFailover();
+      } catch (Exception e) {
+        log.error("Embedded casandra server run failed!", e);
+      }
+    });
+    cleanupThread.setDaemon(true);
+    cleanupThread.start();*/
+
   }  
 
   /**
@@ -139,7 +158,7 @@ public class GoraCassandraTestDriver extends GoraTestDriver {
    *
    * In case o failure waits for 250 msecs and then tries it again, 3 times totally.
    */
-  public void cleanupDirectoriesFailover() {
+  public static void cleanupDirectoriesFailover() {
     int tries = 3;
     while (tries-- > 0) {
       try {
@@ -148,7 +167,7 @@ public class GoraCassandraTestDriver extends GoraTestDriver {
       } catch (Exception e) {
         // ignore exception
         try {
-          Thread.sleep(250);
+          Thread.sleep(2500);
         } catch (InterruptedException e1) {
           // ignore exception
         }
@@ -162,7 +181,7 @@ public class GoraCassandraTestDriver extends GoraTestDriver {
    * @throws Exception
    * 	if an error occurs
    */
-  public void cleanupDirectories() throws Exception {
+  private static void cleanupDirectories() throws Exception {
     File dirFile = new File(baseDirectory);
     if (dirFile.exists()) {
       FileUtils.deleteRecursive(dirFile);

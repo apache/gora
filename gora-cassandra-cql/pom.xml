@@ -16,10 +16,11 @@
   ~  limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>    
+    <parent>
         <groupId>org.apache.gora</groupId>
         <artifactId>gora</artifactId>
         <version>0.8-SNAPSHOT</version>
@@ -29,11 +30,12 @@
     <packaging>bundle</packaging>
 
     <name>Apache Gora :: Cassandra - CQL</name>
-        <url>http://gora.apache.org</url>
-    <description>The Apache Gora open source framework provides an in-memory data model and 
-    persistence for big data. Gora supports persisting to column stores, key value stores, 
-    document stores and RDBMSs, and analyzing the data with extensive Apache Hadoop MapReduce 
-    support.</description>
+    <url>http://gora.apache.org</url>
+    <description>The Apache Gora open source framework provides an in-memory data model and
+        persistence for big data. Gora supports persisting to column stores, key value stores,
+        document stores and RDBMSs, and analyzing the data with extensive Apache Hadoop MapReduce
+        support.
+    </description>
     <inceptionYear>2010</inceptionYear>
     <organization>
         <name>The Apache Software Foundation</name>
@@ -49,7 +51,7 @@
     </ciManagement>
 
     <properties>
-        <guava.version>17.0</guava.version>
+        <guava.version>18.0</guava.version>
         <osgi.import>*</osgi.import>
         <osgi.export>org.apache.gora.cassandra*;version="${project.version}";-noimport:=true</osgi.export>
     </properties>
@@ -62,13 +64,13 @@
         <testSourceDirectory>src/test/java</testSourceDirectory>
         <sourceDirectory>src/main/java</sourceDirectory>
         <testResources>
-          <testResource>
-            <directory>${project.basedir}/src/test/conf</directory>
-            <includes>
-              <include>**/*</include>
-            </includes>
-            <!--targetPath>${project.basedir}/target/classes/</targetPath-->
-          </testResource>
+            <testResource>
+                <directory>${project.basedir}/src/test/conf</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+                <!--targetPath>${project.basedir}/target/classes/</targetPath-->
+            </testResource>
         </testResources>
         <plugins>
             <plugin>
@@ -88,6 +90,21 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.maven.surefire</groupId>
+                        <artifactId>surefire-junit47</artifactId>
+                        <version>2.20</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <forkMode>always</forkMode>
+                    <argLine>-Xmx1024m -XX:MaxPermSize=512m</argLine>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -124,8 +141,14 @@
         </dependency>
 
         <dependency>
-        <groupId>com.datastax.cassandra</groupId>
-        <artifactId>cassandra-driver-mapping</artifactId>
+            <groupId>com.datastax.cassandra</groupId>
+            <artifactId>cassandra-driver-mapping</artifactId>
+            <version>${cassandra-driver.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.datastax.cassandra</groupId>
+            <artifactId>cassandra-driver-extras</artifactId>
             <version>${cassandra-driver.version}</version>
         </dependency>
 
@@ -144,10 +167,20 @@
                     <artifactId>slf4j-log4j12</artifactId>
                 </exclusion>
                 <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-handler</artifactId>
+                </exclusion>
+                <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>log4j-over-slf4j</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-transport-native-epoll</artifactId>
+            <version>4.0.37.Final</version>
         </dependency>
 
         <!-- Misc Dependencies -->
@@ -193,7 +226,7 @@
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-minicluster</artifactId>
         </dependency>
-        
+
     </dependencies>
 
 </project>

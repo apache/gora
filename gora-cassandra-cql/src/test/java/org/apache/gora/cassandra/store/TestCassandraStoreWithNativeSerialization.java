@@ -5,6 +5,7 @@ import org.apache.gora.cassandra.test.nativeSerialization.User;
 import org.apache.gora.store.DataStore;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -14,7 +15,7 @@ import java.util.Properties;
 import java.util.UUID;
 
 /**
- * This class tests Cassandra Store functionality with Cassandra Native Serialization
+ * This class tests Cassandra Store functionality with Cassandra Native Serialization.
  */
 public class TestCassandraStoreWithNativeSerialization {
   private static GoraCassandraTestDriver testDriver = new GoraCassandraTestDriver();
@@ -25,18 +26,19 @@ public class TestCassandraStoreWithNativeSerialization {
   public static void setUpClass() throws Exception {
     setProperties();
     testDriver.setParameters(parameter);
-    testDriver.setUpClass();
+//    testDriver.setUpClass();
     userDataStore = testDriver.createDataStore(UUID.class, User.class);
-
   }
 
   private static void setProperties() {
     parameter = new Properties();
-    parameter.setProperty(CassandraStoreParameters.CASSANDRA_SERVERS,"localhost");
-    parameter.setProperty(CassandraStoreParameters.PORT,"9160");
+    parameter.setProperty(CassandraStoreParameters.CASSANDRA_SERVERS, "localhost");
+    parameter.setProperty(CassandraStoreParameters.PORT, "9042");
     parameter.setProperty(CassandraStoreParameters.USE_CASSANDRA_NATIVE_SERIALIZATION, "true");
+    parameter.setProperty(CassandraStoreParameters.PROTOCOL_VERSION, "3");
+    parameter.setProperty(CassandraStoreParameters.CLUSTER_NAME,"Test Cluster");
+    parameter.setProperty("gora.cassandrastore.mapping.file", "nativeSerialization/gora-cassandra-mapping.xml");
   }
-
 
   @After
   public void tearDown() throws Exception {
@@ -45,13 +47,41 @@ public class TestCassandraStoreWithNativeSerialization {
 
   @AfterClass
   public static void tearDownClass() throws Exception {
-    testDriver.tearDownClass();
+//    testDriver.tearDownClass();
   }
 
+  /**
+   * In this test case, put and get behavior of the data store are testing.
+   */
   @Test
-  public void testCreate() {
+  public void testSimplePutandGet() {
     UUID id = UUID.randomUUID();
     User user1 = new User(id, "madhawa", Date.from(Instant.now()));
+    // storing data;
     userDataStore.put(id, user1);
+    // get data;
+    User olduser = userDataStore.get(id);
+    Assert.assertEquals(olduser.getName(), user1.getName());
+    Assert.assertEquals(olduser.getDateOfBirth(), user1.getDateOfBirth());
+  }
+
+  /**
+   * In this test case, put and delete behavior of the data store are testing.
+   */
+  @Test
+  public void testSimplePutDeleteandGet() {
+    UUID id = UUID.randomUUID();
+    User user1 = new User(id, "kasun", Date.from(Instant.now()));
+    // storing data;
+    userDataStore.put(id, user1);
+    // get data;
+    User olduser =  userDataStore.get(id);
+    Assert.assertEquals(olduser.getName(), user1.getName());
+    Assert.assertEquals(olduser.getDateOfBirth(), user1.getDateOfBirth());
+    // delete data;
+    userDataStore.delete(id);
+    // get data
+    User deletedUser = userDataStore.get(id);
+    Assert.assertNull(deletedUser);
   }
 }

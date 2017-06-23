@@ -17,11 +17,33 @@
 
 package org.apache.gora.cassandra.store;
 
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.ConsistencyLevel;
+import com.datastax.driver.core.HostDistance;
+import com.datastax.driver.core.PoolingOptions;
+import com.datastax.driver.core.ProtocolOptions;
+import com.datastax.driver.core.ProtocolVersion;
+import com.datastax.driver.core.QueryOptions;
+import com.datastax.driver.core.Session;
+import com.datastax.driver.core.SocketOptions;
+import com.datastax.driver.core.TypeCodec;
+import com.datastax.driver.core.policies.ConstantReconnectionPolicy;
+import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
+import com.datastax.driver.core.policies.DefaultRetryPolicy;
+import com.datastax.driver.core.policies.DowngradingConsistencyRetryPolicy;
+import com.datastax.driver.core.policies.ExponentialReconnectionPolicy;
+import com.datastax.driver.core.policies.FallthroughRetryPolicy;
+import com.datastax.driver.core.policies.LatencyAwarePolicy;
+import com.datastax.driver.core.policies.LoggingRetryPolicy;
+import com.datastax.driver.core.policies.RoundRobinPolicy;
+import com.datastax.driver.core.policies.TokenAwarePolicy;
 import com.datastax.driver.mapping.Mapper;
 import com.datastax.driver.mapping.MappingManager;
-import com.datastax.driver.core.*;
-import com.datastax.driver.core.policies.*;
-import org.apache.gora.cassandra.bean.*;
+import org.apache.gora.cassandra.bean.CassandraKey;
+import org.apache.gora.cassandra.bean.ClusterKeyField;
+import org.apache.gora.cassandra.bean.Field;
+import org.apache.gora.cassandra.bean.KeySpace;
+import org.apache.gora.cassandra.bean.PartitionKeyField;
 import org.apache.gora.persistency.BeanFactory;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.query.PartitionQuery;
@@ -32,11 +54,13 @@ import org.apache.gora.store.DataStoreFactory;
 import org.jdom.Attribute;
 import org.jdom.Document;
 import org.jdom.Element;
+import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
@@ -63,7 +87,7 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   private CassandraMapping mapping;
 
-  private boolean isUseCassandraMappingManager;
+  private boolean isUseNativeSerialization;
 
   private Mapper<T> mapper;
 
@@ -74,7 +98,6 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
   }
 
   /**
-   *
    * In initializing the cassandra datastore, read the mapping file, creates the basic connection to cassandra cluster,
    * according to the gora properties
    *
@@ -87,15 +110,19 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
     try {
       this.keyClass = keyClass;
       this.persistentClass = persistentClass;
-      String mappingFile = DataStoreFactory.getMappingFile(properties, this,
-              DEFAULT_MAPPING_FILE);
+      String mappingFile = DataStoreFactory.getMappingFile(properties, this, DEFAULT_MAPPING_FILE);
+      List<String> codecs = readCustomCodec(properties);
       mapping = readMapping(mappingFile);
-      isUseCassandraMappingManager = Boolean.parseBoolean(properties.getProperty(CassandraStoreParameters.USE_CASSANDRA_NATIVE_SERIALIZATION));
+      isUseNativeSerialization = Boolean.parseBoolean(properties.getProperty(CassandraStoreParameters.USE_CASSANDRA_NATIVE_SERIALIZATION));
       Cluster.Builder builder = Cluster.builder();
-      populateSettings(builder, properties);
+      builder = populateSettings(builder, properties);
       this.cluster = builder.build();
+      if (codecs != null) {
+        registerCustomCodecs(codecs);
+      }
       this.session = this.cluster.connect();
-      if (isUseCassandraMappingManager) {
+      if (isUseNativeSerialization) {
+        this.createSchema();
         MappingManager mappingManager = new MappingManager(session);
         mapper = mappingManager.mapper(persistentClass);
       }
@@ -104,6 +131,12 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
       LOG.error("Error while initializing Cassandra store: {}",
               new Object[]{e.getMessage()});
       throw new RuntimeException(e);
+    }
+  }
+
+  private void registerCustomCodecs(List<String> codecs) throws Exception {
+    for (String codec : codecs) {
+      this.cluster.getConfiguration().getCodecRegistry().register((TypeCodec<?>) Class.forName(codec).newInstance());
     }
   }
 
@@ -149,22 +182,7 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
             Field cassandraField = new Field();
 
             List fieldAttributes = field.getAttributes();
-            for (Object anAttributeList : fieldAttributes) {
-              Attribute attribute = (Attribute) anAttributeList;
-              String attributeName = attribute.getName();
-              String attributeValue = attribute.getValue();
-              switch (attributeName) {
-                case "name":
-                  cassandraField.setFieldName(attributeValue);
-                  break;
-                case "column":
-                  cassandraField.setColumnName(attributeValue);
-                  break;
-                default:
-                  cassandraField.addProperty(attributeName, attributeValue);
-                  break;
-              }
-            }
+            processAttributes(fieldAttributes, cassandraField);
             map.addCassandraField(cassandraField);
           }
           break;
@@ -236,22 +254,7 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
           for (Element partitionKeyField : partitionKeyFields) {
             PartitionKeyField fieldKey = new PartitionKeyField();
             List fieldAttributes = partitionKeyField.getAttributes();
-            for (Object anAttributeList : fieldAttributes) {
-              Attribute attribute = (Attribute) anAttributeList;
-              String attributeName = attribute.getName();
-              String attributeValue = attribute.getValue();
-              switch (attributeName) {
-                case "name":
-                  fieldKey.setFieldName(attributeValue);
-                  break;
-                case "column":
-                  fieldKey.setColumnName(attributeValue);
-                  break;
-                default:
-                  fieldKey.addProperty(attributeName, attributeValue);
-                  break;
-              }
-            }
+            processAttributes(fieldAttributes, fieldKey);
             cassandraKey.addPartitionKeyField(fieldKey);
           }
           // process composite partitions keys
@@ -262,26 +265,10 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
             for (Element partitionKeyField : compositeKeyFields) {
               PartitionKeyField fieldKey = new PartitionKeyField();
               List fieldAttributes = partitionKeyField.getAttributes();
-              for (Object anAttributeList : fieldAttributes) {
-                Attribute attribute = (Attribute) anAttributeList;
-                String attributeName = attribute.getName();
-                String attributeValue = attribute.getValue();
-                switch (attributeName) {
-                  case "name":
-                    fieldKey.setFieldName(attributeValue);
-                    break;
-                  case "column":
-                    fieldKey.setColumnName(attributeValue);
-                    break;
-                  default:
-                    fieldKey.addProperty(attributeName, attributeValue);
-                    break;
-                }
-              }
+              processAttributes(fieldAttributes, fieldKey);
               compositeFieldKey.addField(fieldKey);
             }
             cassandraKey.addPartitionKeyField(compositeFieldKey);
-
           }
 
           //process cluster keys
@@ -299,6 +286,9 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
                   break;
                 case "column":
                   keyField.setColumnName(attributeValue);
+                  break;
+                case "type":
+                  keyField.setType(attributeValue);
                   break;
                 case "order":
                   keyField.setOrder(ClusterKeyField.Order.valueOf(attributeValue.toUpperCase(Locale.ENGLISH)));
@@ -319,7 +309,44 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
     return map;
   }
 
-  private void populateSettings(Cluster.Builder builder, Properties properties) {
+  private void processAttributes(List<Element> attributes, Field fieldKey) {
+    for (Object anAttributeList : attributes) {
+      Attribute attribute = (Attribute) anAttributeList;
+      String attributeName = attribute.getName();
+      String attributeValue = attribute.getValue();
+      switch (attributeName) {
+        case "name":
+          fieldKey.setFieldName(attributeValue);
+          break;
+        case "column":
+          fieldKey.setColumnName(attributeValue);
+          break;
+        case "type":
+          fieldKey.setType(attributeValue);
+          break;
+        default:
+          fieldKey.addProperty(attributeName, attributeValue);
+          break;
+      }
+    }
+  }
+
+  private List<String> readCustomCodec(Properties properties) throws JDOMException, IOException {
+    String filename = properties.getProperty(CassandraStoreParameters.CUSTOM_CODEC_FILE);
+    if (filename != null) {
+      List<String> codecs = new ArrayList<>();
+      SAXBuilder builder = new SAXBuilder();
+      Document doc = builder.build(getClass().getClassLoader().getResourceAsStream(filename));
+      List<Element> codecElementList = doc.getRootElement().getChildren("codec");
+      for (Element codec : codecElementList) {
+        codecs.add(codec.getValue());
+      }
+      return codecs;
+    }
+    return null;
+  }
+
+  private Cluster.Builder populateSettings(Cluster.Builder builder, Properties properties) {
     String serversParam = properties.getProperty(CassandraStoreParameters.CASSANDRA_SERVERS);
     String[] servers = serversParam.split(",");
     for (String server : servers) {
@@ -366,6 +393,7 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
         builder = builder.withSSL();
       }
     }
+    return builder;
   }
 
 
@@ -594,6 +622,15 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
     return builder.withSocketOptions(options);
   }
 
+  /**
+   * {@inheritDoc}
+   * <p>
+   * This is a setter method to set the class of persistent objects.
+   *
+   * @param persistentClass class of persistent objects
+   *                        {@link org.apache.gora.cassandra.serializers.CassandraNativePersistent}
+   *                        {@link  org.apache.gora.persistency.Persistent}
+   */
   @Override
   public void setPersistentClass(Class<T> persistentClass) {
     this.persistentClass = persistentClass;
@@ -611,7 +648,10 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   @Override
   public void createSchema() {
-
+    LOG.debug("creating Cassandra keyspace");
+    this.session.execute(CassandraQueryFactory.getCreateKeySpaceQuery(mapping));
+    LOG.debug("creating Cassandra column family / table");
+    this.session.execute(CassandraQueryFactory.getCreateTableQuery(mapping));
   }
 
   @Override
@@ -656,12 +696,13 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   @Override
   public void close() {
-
+    this.session.close();
+    this.cluster.close();
   }
 
   @Override
   public T get(K key) {
-    if (isUseCassandraMappingManager) {
+    if (isUseNativeSerialization) {
       return mapper.get(key);
     } else {
       return null;
@@ -675,7 +716,7 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   @Override
   public void put(K key, T obj) {
-    if (isUseCassandraMappingManager) {
+    if (isUseNativeSerialization) {
       mapper.save(obj);
     } else {
 
@@ -684,7 +725,7 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   @Override
   public boolean delete(K key) {
-    if (isUseCassandraMappingManager) {
+    if (isUseNativeSerialization) {
       mapper.delete(key);
       return true;
     } else {

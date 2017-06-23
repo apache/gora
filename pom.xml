@@ -718,7 +718,7 @@
     <module>gora-compiler-cli</module>
     <module>gora-core</module>
     <module>gora-accumulo</module>
-    <module>gora-cassandra</module>
+    <module>gora-cassandra-cql</module>
     <module>gora-goraci</module>
     <module>gora-hbase</module>
     <module>gora-infinispan</module>
@@ -787,7 +787,7 @@
     <maven-jar-plugin.version>2.3.2</maven-jar-plugin.version>
     <maven-dependency-plugin.version>2.9</maven-dependency-plugin.version>
     <build-helper-maven-plugin.version>1.7</build-helper-maven-plugin.version>
-    <maven-surfire-plugin.version>2.12</maven-surfire-plugin.version>
+    <maven-surfire-plugin.version>2.20</maven-surfire-plugin.version>
     <maven-release-plugin.version>2.5</maven-release-plugin.version>
     <maven-bundle-plugin.version>2.5.3</maven-bundle-plugin.version>
     <maven-source-plugin.version>2.1.2</maven-source-plugin.version>
@@ -852,12 +852,12 @@
 
       <dependency>
         <groupId>org.apache.gora</groupId>
-        <artifactId>gora-cassandra</artifactId>
+        <artifactId>gora-cassandra-cql</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.gora</groupId>
-        <artifactId>gora-cassandra</artifactId>
+        <artifactId>gora-cassandra-cql</artifactId>
         <version>${project.version}</version>
         <type>test-jar</type>
       </dependency>
