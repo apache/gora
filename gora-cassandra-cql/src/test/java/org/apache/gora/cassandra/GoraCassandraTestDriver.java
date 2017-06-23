@@ -22,17 +22,21 @@
 
 package org.apache.gora.cassandra;
 
-import org.apache.gora.GoraTestDriver;
-
-import java.io.File;
-
 import org.apache.cassandra.io.util.FileUtils;
 import org.apache.cassandra.service.CassandraDaemon;
-
-// Logging imports
+import org.apache.gora.GoraTestDriver;
 import org.apache.gora.cassandra.store.CassandraStore;
+import org.apache.gora.persistency.Persistent;
+import org.apache.gora.store.DataStore;
+import org.apache.gora.store.DataStoreFactory;
+import org.apache.gora.util.GoraException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.Properties;
+
+// Logging imports
 
 /**
  * Helper class for third party tests using gora-cassandra backend. 
@@ -51,6 +55,17 @@ public class GoraCassandraTestDriver extends GoraTestDriver {
   private CassandraDaemon cassandraDaemon;
 
   private Thread cassandraThread;
+
+  private Properties properties;
+
+  public void setParameters(Properties parameters) {
+    this.properties = parameters;
+  }
+
+  @Override
+  public <K, T extends Persistent> DataStore<K, T> createDataStore(Class<K> keyClass, Class<T> persistentClass) throws GoraException {
+    return DataStoreFactory.createDataStore(CassandraStore.class, keyClass, persistentClass , conf, properties, null);
+  }
 
   /**
    * @return temporary base directory of running cassandra instance
