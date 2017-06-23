@@ -939,6 +939,12 @@
         <artifactId>gora-aerospike</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-aerospike</artifactId>
+        <version>${project.version}</version>
+        <type>test-jar</type>
+      </dependency>
       <!-- End of Internal Depednecies -->
 
       <dependency>
