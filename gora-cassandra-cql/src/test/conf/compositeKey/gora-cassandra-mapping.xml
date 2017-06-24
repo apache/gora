@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ~  Licensed to the Apache Software Foundation (ASF) under one or more
+  ~  contributor license agreements.  See the NOTICE file distributed with
+  ~  this work for additional information regarding copyright ownership.
+  ~  The ASF licenses this file to You under the Apache License, Version 2.0
+  ~  (the "License"); you may not use this file except in compliance with
+  ~  the License.  You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  -->
+
+<!--
+   The value of 'host' attribute of keyspace tag should match exactly what is in
+   gora.properties file. Essentially this means that if you are using port number, you should
+   use it every where regardless of whether it is the default port or not.
+   At runtime Gora will otherwise try to connect to localhost
+   https://issues.apache.org/jira/browse/GORA-269
+
+   The values of 'replication_factor' and 'placement_strategy' attribute of keyspace tag
+   only apply if gora create the kyespace. they have no effect if this is being used against 
+   an existing keyspace. the default value for 'replication_factor' is '1'
+   
+   The value of 'placement_strategy' should be a fully qualifed class name that is known to
+   the cassansra cluster, not the application or gora. As of this writing, the classes that ship
+   with cassandra are:
+   'org.apache.cassandra.locator.SimpleStrategy'
+   'org.apache.cassandra.locator.NetworkTopologyStrategy'
+   gora cassandra would use SimpleStrategy by default if no value for this attribute is specified
+   
+   The default value of 'gc_grace_seconds' is '0' which is ONLY VIABLE FOR SINGLE NODE
+   CLUSTER. you should update this value according to your cluster configuration. 
+   https://wiki.apache.org/cassandra/StorageConfiguration
+
+   The value of 'ttl' (time to live) attribute of field tag should most likely always
+   be zero unless you want Cassandra to create Tombstones and delete portions of your
+   data once this period expires. Any positive value is read and bound to the number
+   of seconds after which the value for that field will disappear. The default value of ttl
+   is '0'
+
+   More information on gora-cassandra configuration and mapping's can be found
+   at http://gora.apache.org/current/gora-cassandra.html
+-->
+
+
+<gora-otd>
+    <keyspace name="EmployeeSpace" durableWrite="false">
+        <placementStrategy name="SimpleStrategy" replication_factor="1"/>
+    </keyspace>
+
+    <class name="org.apache.gora.examples.generated.Employee" keyClass="org.apache.gora.examples.generated.WebPage" keyspace="EmployeeSpace"
+           table="Employee"  compactStorage="true" id="31323131">
+        <field name="name" column="name" type="text" ttl="10"/>
+        <field name="dateOfBirth" column="dob" type="timestamp" ttl="10"/>
+    </class>
+
+    <cassandraKey name="org.apache.gora.examples.generated.WebPage">
+        <partitionKey>
+            <compositeKey>
+                <field name="city" column="city" type="text"/>
+                <field name="country" column="country" type="text"/>
+            </compositeKey>
+            <field name="employerId" column="empID" type="int"/>
+            <field name="departmentId" column="deptID" type="int"/>
+        </partitionKey>
+        <clusterKey>
+            <field name="joinDate" column="joinDate" type="timestamp" order="desc"/>
+        </clusterKey>
+    </cassandraKey>
+
+</gora-otd>

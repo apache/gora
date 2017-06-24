@@ -20,12 +20,14 @@ package org.apache.gora.cassandra.store;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.driver.core.HostDistance;
+import com.datastax.driver.core.KeyspaceMetadata;
 import com.datastax.driver.core.PoolingOptions;
 import com.datastax.driver.core.ProtocolOptions;
 import com.datastax.driver.core.ProtocolVersion;
 import com.datastax.driver.core.QueryOptions;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.SocketOptions;
+import com.datastax.driver.core.TableMetadata;
 import com.datastax.driver.core.TypeCodec;
 import com.datastax.driver.core.policies.ConstantReconnectionPolicy;
 import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
@@ -249,7 +251,7 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
           Element partitionKeys = key.getChild("partitionKey");
           Element clusterKeys = key.getChild("clusterKey");
           List<Element> partitionKeyFields = partitionKeys.getChildren("field");
-          List<Element> partitionCompositeKeyFields = partitionKeys.getChildren("compositeField");
+          List<Element> partitionCompositeKeyFields = partitionKeys.getChildren("compositeKey");
           // process non composite partition keys
           for (Element partitionKeyField : partitionKeyFields) {
             PartitionKeyField fieldKey = new PartitionKeyField();
@@ -458,7 +460,7 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
           break;
         }
         default:
-          LOG.error("Unsupported Cassandra load balancing " + "policy: " + loadBalancingProp);
+          LOG.error("Unsupported Cassandra load balancing  policy: {} ", loadBalancingProp);
           break;
       }
     }
@@ -549,7 +551,7 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
           break;
         }
         default:
-          LOG.error("Unsupported reconnection policy " + reconnectionPolicy);
+          LOG.error("Unsupported reconnection policy : {} ", reconnectionPolicy);
       }
     }
     return builder;
@@ -578,7 +580,7 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
           builder = builder.withRetryPolicy(new LoggingRetryPolicy(FallthroughRetryPolicy.INSTANCE));
           break;
         default:
-          LOG.error("Unsupported retry policy " + retryPolicy);
+          LOG.error("Unsupported retry policy : {} ", retryPolicy);
           break;
       }
     }
@@ -643,20 +645,23 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   @Override
   public String getSchemaName() {
-    return null;
+    return mapping.getCoreName();
   }
 
   @Override
   public void createSchema() {
-    LOG.debug("creating Cassandra keyspace");
+    LOG.debug("creating Cassandra keyspace {}", mapping.getKeySpace().getName());
     this.session.execute(CassandraQueryFactory.getCreateKeySpaceQuery(mapping));
-    LOG.debug("creating Cassandra column family / table");
+    LOG.debug("creating Cassandra column family / table {}", mapping.getCoreName());
     this.session.execute(CassandraQueryFactory.getCreateTableQuery(mapping));
   }
 
   @Override
   public void deleteSchema() {
-
+    LOG.debug("dropping Cassandra table {}", mapping.getCoreName());
+    this.session.execute(CassandraQueryFactory.getDropTableQuery(mapping));
+    LOG.debug("dropping Cassandra keyspace {}", mapping.getKeySpace().getName());
+    this.session.execute(CassandraQueryFactory.getDropKeySpaceQuery(mapping));
   }
 
   @Override
@@ -765,11 +770,19 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   @Override
   public void truncateSchema() {
+    LOG.debug("truncating Cassandra table {}", mapping.getCoreName());
+    this.session.execute(CassandraQueryFactory.getTruncateTableQuery(mapping));
   }
 
   @Override
   public boolean schemaExists() {
-    return false;
+    KeyspaceMetadata keyspace = cluster.getMetadata().getKeyspace(mapping.getKeySpace().getName());
+    if (keyspace != null) {
+      TableMetadata table = keyspace.getTable(mapping.getCoreName());
+      return table != null;
+    } else {
+      return false;
+    }
   }
 
 }

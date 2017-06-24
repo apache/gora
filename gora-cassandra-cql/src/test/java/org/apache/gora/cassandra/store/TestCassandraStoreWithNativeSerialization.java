@@ -26,7 +26,7 @@ public class TestCassandraStoreWithNativeSerialization {
   public static void setUpClass() throws Exception {
     setProperties();
     testDriver.setParameters(parameter);
-//    testDriver.setUpClass();
+    testDriver.setUpClass();
     userDataStore = testDriver.createDataStore(UUID.class, User.class);
   }
 
@@ -47,7 +47,7 @@ public class TestCassandraStoreWithNativeSerialization {
 
   @AfterClass
   public static void tearDownClass() throws Exception {
-//    testDriver.tearDownClass();
+    testDriver.tearDownClass();
   }
 
   /**
@@ -83,5 +83,35 @@ public class TestCassandraStoreWithNativeSerialization {
     // get data
     User deletedUser = userDataStore.get(id);
     Assert.assertNull(deletedUser);
+  }
+
+  /**
+   * In this test case, schema exists method behavior of the data store is testing.
+   */
+  @Test
+  public void testSchemaExists() {
+    userDataStore.deleteSchema();
+    Assert.assertFalse(userDataStore.schemaExists());
+    userDataStore.createSchema();
+    Assert.assertTrue(userDataStore.schemaExists());
+  }
+
+  /**
+   * In this test case, schema exists method behavior of the data store is testing.
+   */
+  @Test
+  public void testTruncateSchema() {
+    if(!userDataStore.schemaExists()) {
+      userDataStore.createSchema();
+    }
+    UUID id = UUID.randomUUID();
+    User user1 = new User(id, "Madhawa Kasun", Date.from(Instant.now()));
+    userDataStore.put(id, user1);
+    User olduser =  userDataStore.get(id);
+    Assert.assertEquals(olduser.getName(), user1.getName());
+    Assert.assertEquals(olduser.getDateOfBirth(), user1.getDateOfBirth());
+    userDataStore.truncateSchema();
+    olduser =  userDataStore.get(id);
+    Assert.assertNull(olduser);
   }
 }
