@@ -134,7 +134,7 @@ public class TestAerospikeStore extends DataStoreTestBase {
   }
 
   @Test
-  @Ignore("To be implemented")
+  @Ignore("Functionality is to be implemented in the next iteration as this incurs query execution")
   @Override
   public void testDelete() throws Exception {
     super.testDelete();

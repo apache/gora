@@ -143,16 +143,9 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
   @Override
   public T get(K key, String[] fields) {
 
-    Value keyValue;
-    if (keyClass.getSimpleName().equalsIgnoreCase("string")) {
-      keyValue = Value.get(key.toString());
-    } else {
-      keyValue = Value.get(key);
-    }
-
+    Key recordKey = getAerospikeKey(key);
     fields = getFieldsToQuery(fields);
-    Key recordKey = new Key(aerospikeParameters.getAerospikeMapping().getNamespace(),
-            aerospikeParameters.getAerospikeMapping().getSet(), keyValue);
+
     Record record = aerospikeClient
             .get(aerospikeParameters.getAerospikeMapping().getReadPolicy(), recordKey, fields);
     if (record == null) {
@@ -172,15 +165,7 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
   @Override
   public void put(K key, T persistent) {
 
-    Value keyValue;
-    if (keyClass.getSimpleName().equalsIgnoreCase("string")) {
-      keyValue = Value.get(key.toString());
-    } else {
-      keyValue = Value.get(key);
-    }
-
-    Key recordKey = new Key(aerospikeParameters.getAerospikeMapping().getNamespace(),
-            aerospikeParameters.getAerospikeMapping().getSet(), keyValue);
+    Key recordKey = getAerospikeKey(key);
 
     List<Field> fields = persistent.getSchema().getFields();
     for (int i = 0; i < fields.size(); i++) {
@@ -204,9 +189,17 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
     }
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @param key the key of the object
+   * @return whether the object was successfully deleted
+   */
   @Override
   public boolean delete(K key) {
-    return true;
+    Key recordKey = getAerospikeKey(key);
+    return aerospikeClient
+            .delete(aerospikeParameters.getAerospikeMapping().getWritePolicy(), recordKey);
   }
 
   @Override
@@ -240,6 +233,24 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
   public void close() {
     aerospikeClient.close();
     LOG.info("Aerospike Gora datastore destroyed successfully.");
+  }
+
+  /**
+   * Method to get the aerospike key from the provided K
+   *
+   * @param key persistent key
+   * @return aerospike key for the record
+   */
+  public Key getAerospikeKey(K key) {
+    Value keyValue;
+    if (keyClass.getSimpleName().equalsIgnoreCase("string")) {
+      keyValue = Value.get(key.toString());
+    } else {
+      keyValue = Value.get(key);
+    }
+
+    return new Key(aerospikeParameters.getAerospikeMapping().getNamespace(),
+            aerospikeParameters.getAerospikeMapping().getSet(), keyValue);
   }
 
   /**
