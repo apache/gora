@@ -218,7 +218,7 @@ public class CassandraStoreParameters {
    * Property pointing to use Native Cassandra Native Serialization.
    * boolean
    */
-  public static final String USE_CASSANDRA_NATIVE_SERIALIZATION = "gora.cassandrastore.useCassandraNativeSerialization";
+  public static final String CASSANDRA_SERIALIZATION_TYPE = "gora.cassandrastore.cassandraSerializationType";
   /**
    * Property pointing to the custom codec file.
    * string

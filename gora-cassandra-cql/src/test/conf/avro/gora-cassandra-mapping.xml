@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~  Licensed to the Apache Software Foundation (ASF) under one or more
-  ~  contributor license agreements.  See the NOTICE file distributed with
-  ~  this work for additional information regarding copyright ownership.
-  ~  The ASF licenses this file to You under the Apache License, Version 2.0
-  ~  (the "License"); you may not use this file except in compliance with
-  ~  the License.  You may obtain a copy of the License at
-  ~
-  ~      http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~  Unless required by applicable law or agreed to in writing, software
-  ~  distributed under the License is distributed on an "AS IS" BASIS,
-  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~  See the License for the specific language governing permissions and
-  ~  limitations under the License.
-  -->
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
 
 <!--
    The value of 'host' attribute of keyspace tag should match exactly what is in
@@ -49,17 +49,25 @@
    at http://gora.apache.org/current/gora-cassandra.html
 -->
 
-
 <gora-otd>
-    <keyspace name="nativeTestKeySpace" durableWrite="false">
-        <placementStrategy name="SimpleStrategy" replication_factor="1"/>
-    </keyspace>
 
-    <class name="org.apache.gora.cassandra.example.generated.nativeSerialization.User" keyClass="java.util.UUID" keyspace="nativeTestKeySpace"
-           table="Users" compactStorage="true" >
-        <field name="userId" column="user_id" type="uuid" ttl="10" primarykey="true"/>
-        <field name="name" column="name" type="text" ttl="10"/>
-        <field name="dateOfBirth" column="dob" type="timestamp" ttl="10"/>
-    </class>
+  <keyspace name="avroKeySpace" durableWrite="false">
+    <placementStrategy name="SimpleStrategy" replication_factor="1"/>
+  </keyspace>
+  
+  <class name="org.apache.gora.examples.generated.WebPage" keyClass="java.lang.String" table="WebPage" keyspace="avroKeySpace">
+    <field name="url" column="url" length="128" primarykey="true"/>
+    <field name="content" column="content" type="blob"/>
+    <field name="parsedContent" column="parsedContent" type="list"/>
+    <field name="outlinks" column="outlinks" type="map"/>
+  </class>
+
+  <class name="org.apache.gora.examples.generated.Employee" keyClass="java.lang.String" keyspace="avroKeySpace"
+         table="Employee" compactStorage="true" >
+    <field name="name" column="name" type="text" ttl="10"/>
+    <field name="dateOfBirth" column="dob" type="bigint" ttl="10"/>
+    <field name="ssn" column="ssn" type="int" ttl="10" primarykey="true"/>
+    <field name="salary" column="salary" type="int" ttl="10" />
+   </class>
 
 </gora-otd>

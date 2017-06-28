@@ -1,10 +1,10 @@
-package org.apache.gora.cassandra.test.nativeSerialization;
+package org.apache.gora.cassandra.example.generated.nativeSerialization;
 
 import com.datastax.driver.mapping.annotations.Column;
 import com.datastax.driver.mapping.annotations.PartitionKey;
 import com.datastax.driver.mapping.annotations.Table;
 import com.datastax.driver.mapping.annotations.Transient;
-import org.apache.gora.cassandra.serializers.CassandraNativePersistent;
+import org.apache.gora.cassandra.persistent.CassandraNativePersistent;
 
 import java.util.Date;
 import java.util.UUID;

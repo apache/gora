@@ -14,13 +14,15 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.apache.gora.cassandra.store;
+package org.apache.gora.cassandra.serializers;
 
 import org.apache.gora.cassandra.bean.CassandraKey;
 import org.apache.gora.cassandra.bean.ClusterKeyField;
 import org.apache.gora.cassandra.bean.Field;
 import org.apache.gora.cassandra.bean.KeySpace;
 import org.apache.gora.cassandra.bean.PartitionKeyField;
+import org.apache.gora.cassandra.store.CassandraMapping;
+import org.apache.gora.persistency.Persistent;
 
 import java.util.List;
 import java.util.Map;
@@ -66,6 +68,16 @@ class CassandraQueryFactory {
     return stringBuffer.toString();
   }
 
+  /**
+   * This method returns the CQL query to table.
+   * refer : http://docs.datastax.com/en/cql/3.1/cql/cql_reference/create_table_r.html
+   * <p>
+   * Trick : To have a consistency of the order of the columns, first we append partition keys, second cluster keys and finally other columns.
+   * It's very much needed to follow the same order in other CRUD operations as well.
+   *
+   * @param mapping Cassandra mapping
+   * @return CQL
+   */
   static String getCreateTableQuery(CassandraMapping mapping) {
     StringBuilder stringBuffer = new StringBuilder();
     stringBuffer.append("CREATE TABLE IF NOT EXISTS ").append(mapping.getKeySpace().getName()).append(".").append(mapping.getCoreName()).append(" (");
@@ -220,5 +232,17 @@ class CassandraQueryFactory {
    */
   static String getTruncateTableQuery(CassandraMapping mapping) {
     return "TRUNCATE TABLE " + mapping.getKeySpace().getName() + "." + mapping.getCoreName();
+  }
+
+  /**
+   *
+   * refer : http://docs.datastax.com/en/cql/3.1/cql/cql_reference/insert_r.html
+   * @return
+   */
+  static String getInsertDataQuery(CassandraMapping mapping, Object obj) {
+//    ( (Persistent) obj).getS
+    StringBuilder stringBuffer = new StringBuilder();
+//    o
+return null;
   }
 }

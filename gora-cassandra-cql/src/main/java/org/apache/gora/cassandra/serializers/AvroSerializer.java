@@ -15,36 +15,37 @@
  *  limitations under the License.
  */
 
-package org.apache.gora.cassandra.test.nativeSerialization;
+package org.apache.gora.cassandra.serializers;
 
-import com.datastax.driver.core.TypeCodec;
-import com.datastax.driver.extras.codecs.MappingCodec;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+import org.apache.gora.cassandra.store.CassandraClient;
+import org.apache.gora.cassandra.store.CassandraMapping;
+import org.apache.gora.persistency.impl.PersistentBase;
 
 /**
- * Sample Class for Custom Codec
- * {@link com.datastax.driver.extras.codecs.MappingCodec}
+ * Created by madhawa on 6/26/17.
  */
-public class DateAsStringCodec extends MappingCodec<String, Date> {
-  public DateAsStringCodec() {
-    super(TypeCodec.timestamp(), String.class);
+public class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
+
+
+  public AvroSerializer(CassandraClient cassandraClient, Class<K> keyClass, Class<T> persistentClass, CassandraMapping mapping) {
+    super(cassandraClient, keyClass, persistentClass, mapping);
+  }
+
+
+  @Override
+  public PersistentBase get(Object key) {
+    return null;
   }
 
   @Override
-  protected Date serialize(String value) {
-    try {
-      return new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH).parse(value);
-    } catch (ParseException e) {
-      throw new RuntimeException(e);
-    }
+  public void put(Object key, Object value) {
+
   }
 
   @Override
-  protected String deserialize(Date value) {
-    return String.valueOf(value);
+  public boolean delete(Object key) {
+    return false;
   }
+
+
 }
