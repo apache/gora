@@ -62,7 +62,7 @@ public class GoraAerospikeTestDriver extends GoraTestDriver {
    * @param keyClass The key class.
    * @param persistentClass The value class.
    * @return A new store instance.
-   * @throws GoraException
+   * @throws GoraException If an error occur in creating the data store
    */
   @Override
   public <K, T extends Persistent> DataStore<K, T> createDataStore(Class<K> keyClass, Class<T> persistentClass)

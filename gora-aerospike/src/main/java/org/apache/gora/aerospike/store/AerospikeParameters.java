@@ -39,9 +39,9 @@ public class AerospikeParameters {
   private boolean isSingleBinEnabled;
 
   // Property names
-  private static final String AS_SERVER_IP = "server.ip";
+  private static final String AS_SERVER_IP = "gora.aerospikestore.server.ip";
 
-  private static final String AS_SERVER_PORT = "server.port";
+  private static final String AS_SERVER_PORT = "gora.aerospikestore.server.port";
 
   // Default property values
   private static final String DEFAULT_SERVER_IP = "localhost";
