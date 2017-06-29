@@ -41,7 +41,7 @@ public class AerospikeParameters {
   // Property names
   private static final String AS_SERVER_IP = "server.ip";
 
-  private static final String AS_SERVER_port = "server.port";
+  private static final String AS_SERVER_PORT = "server.port";
 
   // Default property values
   private static final String DEFAULT_SERVER_IP = "localhost";
@@ -59,7 +59,7 @@ public class AerospikeParameters {
   public AerospikeParameters(AerospikeMapping aerospikeMapping, Properties properties) {
     this.aerospikeMapping = aerospikeMapping;
     this.host = properties.getProperty(AS_SERVER_IP, DEFAULT_SERVER_IP);
-    this.port = Integer.parseInt(properties.getProperty(AS_SERVER_port, DEFAULT_SERVER_PORT));
+    this.port = Integer.parseInt(properties.getProperty(AS_SERVER_PORT, DEFAULT_SERVER_PORT));
   }
 
   public String getHost() {
@@ -170,13 +170,10 @@ public class AerospikeParameters {
    * @param fields fields of the persistent class
    */
   public void validateServerBinConfiguration(Field[] fields) {
-    if (isSingleBinEnabled) {
-      if (fields.length != 1) {
-        LOG.error(
-                "Aerospike server is single bin enabled and cannot allow multiple bin operations");
-        throw new RuntimeException("Aerospike server is single bin enabled and cannot allow "
-                + "multiple bin operations");
-      }
+    if (isSingleBinEnabled && fields.length != 1) {
+      LOG.error("Aerospike server is single bin enabled and cannot allow multiple bin operations");
+      throw new RuntimeException("Aerospike server is single bin enabled and cannot allow "
+              + "multiple bin operations");
     }
   }
 }

@@ -280,9 +280,10 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
       case MAP:
         Map<Object, Object> newMap = new HashMap<>();
         Map<?, ?> fieldMap = (Map<?, ?>) object;
-        for (Object key : fieldMap.keySet()) {
-          newMap.put(key.toString(),
-                  getSerializableValue(fieldMap.get(key), schema.getValueType()));
+
+        for (Map.Entry<?, ?> entry : fieldMap.entrySet()) {
+          newMap.put(entry.getKey().toString(),
+                  getSerializableValue(fieldMap.get(entry.getKey()), schema.getValueType()));
         }
         value = Value.get(newMap);
         break;
@@ -444,28 +445,39 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
     int unionSchemaPos = 0;
     for (Schema currentSchema : unionSchema.getTypes()) {
       Schema.Type schemaType = currentSchema.getType();
-      if (instanceValue instanceof CharSequence && schemaType.equals(Schema.Type.STRING))
+      if (instanceValue instanceof CharSequence && schemaType.equals(Schema.Type.STRING)) {
         return unionSchemaPos;
-      else if (instanceValue instanceof ByteBuffer && schemaType.equals(Schema.Type.BYTES))
+      }
+      if (instanceValue instanceof ByteBuffer && schemaType.equals(Schema.Type.BYTES)) {
         return unionSchemaPos;
-      else if (instanceValue instanceof byte[] && schemaType.equals(Schema.Type.BYTES))
+      }
+      if (instanceValue instanceof byte[] && schemaType.equals(Schema.Type.BYTES)) {
         return unionSchemaPos;
-      else if (instanceValue instanceof Integer && schemaType.equals(Schema.Type.INT))
+      }
+      if (instanceValue instanceof Integer && schemaType.equals(Schema.Type.INT)) {
         return unionSchemaPos;
-      else if (instanceValue instanceof Long && schemaType.equals(Schema.Type.LONG))
+      }
+      if (instanceValue instanceof Long && schemaType.equals(Schema.Type.LONG)) {
         return unionSchemaPos;
-      else if (instanceValue instanceof Double && schemaType.equals(Schema.Type.DOUBLE))
+      }
+      if (instanceValue instanceof Double && schemaType.equals(Schema.Type.DOUBLE)) {
         return unionSchemaPos;
-      else if (instanceValue instanceof Float && schemaType.equals(Schema.Type.FLOAT))
+      }
+      if (instanceValue instanceof Float && schemaType.equals(Schema.Type.FLOAT)) {
         return unionSchemaPos;
-      else if (instanceValue instanceof Boolean && schemaType.equals(Schema.Type.BOOLEAN))
+      }
+      if (instanceValue instanceof Boolean && schemaType.equals(Schema.Type.BOOLEAN)) {
         return unionSchemaPos;
-      else if (instanceValue instanceof Map && schemaType.equals(Schema.Type.MAP))
+      }
+      if (instanceValue instanceof Map && schemaType.equals(Schema.Type.MAP)) {
         return unionSchemaPos;
-      else if (instanceValue instanceof List && schemaType.equals(Schema.Type.ARRAY))
+      }
+      if (instanceValue instanceof List && schemaType.equals(Schema.Type.ARRAY)) {
         return unionSchemaPos;
-      else if (instanceValue instanceof Persistent && schemaType.equals(Schema.Type.RECORD))
+      }
+      if (instanceValue instanceof Persistent && schemaType.equals(Schema.Type.RECORD)) {
         return unionSchemaPos;
+      }
       unionSchemaPos++;
     }
     return 0;

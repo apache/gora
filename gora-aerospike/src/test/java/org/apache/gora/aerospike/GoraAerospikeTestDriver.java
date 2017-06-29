@@ -34,8 +34,8 @@ import java.util.Properties;
  */
 public class GoraAerospikeTestDriver extends GoraTestDriver {
 
-  private GenericContainer aerospikeContainer;
-  private Properties properties = DataStoreFactory.createProps();
+  private final GenericContainer aerospikeContainer;
+  private final Properties properties = DataStoreFactory.createProps();
 
   public GoraAerospikeTestDriver(GenericContainer aerospikeContainer) {
     super(AerospikeStore.class);

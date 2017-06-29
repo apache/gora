@@ -39,7 +39,7 @@ public class AerospikeMappingBuilder {
 
   private static final Logger LOG = LoggerFactory.getLogger(AerospikeMappingBuilder.class);
 
-  private AerospikeMapping aerospikeMapping;
+  private final AerospikeMapping aerospikeMapping;
 
   public AerospikeMappingBuilder() {
     this.aerospikeMapping = new AerospikeMapping();
@@ -81,28 +81,35 @@ public class AerospikeMappingBuilder {
         if (policy != null) {
           if (policy.equals("write")) {
             WritePolicy writePolicy = new WritePolicy();
-            if (policyElement.getAttributeValue("gen") != null)
+            if (policyElement.getAttributeValue("gen") != null) {
               writePolicy.generationPolicy = getGenerationPolicyMapping(
                       policyElement.getAttributeValue("gen").toUpperCase(Locale.getDefault()));
-            if (policyElement.getAttributeValue("exists") != null)
+            }
+            if (policyElement.getAttributeValue("exists") != null) {
               writePolicy.recordExistsAction = getRecordExistsAction(
                       policyElement.getAttributeValue("exists").toUpperCase(Locale.getDefault()));
-            if (policyElement.getAttributeValue("key") != null)
+            }
+            if (policyElement.getAttributeValue("key") != null) {
               writePolicy.sendKey = getKeyUsagePolicy(
                       policyElement.getAttributeValue("key").toUpperCase(Locale.getDefault()));
-            if (policyElement.getAttributeValue("retry") != null)
+            }
+            if (policyElement.getAttributeValue("retry") != null) {
               writePolicy.retryOnTimeout = getRetryOnTimeoutPolicy(
                       policyElement.getAttributeValue("retry").toUpperCase(Locale.getDefault()));
-            if (policyElement.getAttributeValue("timeout") != null)
+            }
+            if (policyElement.getAttributeValue("timeout") != null) {
               writePolicy.timeout = getTimeoutValue(policyElement.getAttributeValue("timeout"));
+            }
             aerospikeMapping.setWritePolicy(writePolicy);
           } else if (policy.equals("read")) {
             Policy readPolicy = new Policy();
-            if (policyElement.getAttributeValue("key") != null)
+            if (policyElement.getAttributeValue("key") != null) {
               readPolicy.sendKey = getKeyUsagePolicy(
                       policyElement.getAttributeValue("key").toUpperCase(Locale.getDefault()));
-            if (policyElement.getAttributeValue("timeout") != null)
+            }
+            if (policyElement.getAttributeValue("timeout") != null) {
               readPolicy.timeout = getTimeoutValue(policyElement.getAttributeValue("timeout"));
+            }
             aerospikeMapping.setReadPolicy(readPolicy);
           }
         }
@@ -116,36 +123,36 @@ public class AerospikeMappingBuilder {
         String mappingKeyClass = classElement.getAttributeValue("keyClass");
         String mappingClassName = classElement.getAttributeValue("name");
 
-        if (mappingKeyClass != null && mappingClassName != null) {
-          if (mappingKeyClass.equals(keyClass.getCanonicalName()) && mappingClassName
-                  .equals(persistentClass.getCanonicalName())) {
+        if (mappingKeyClass != null && mappingClassName != null && mappingKeyClass
+                .equals(keyClass.getCanonicalName()) && mappingClassName
+                .equals(persistentClass.getCanonicalName())) {
 
-            persistentClassAndKeyClassMatches = true;
+          persistentClassAndKeyClassMatches = true;
 
-            List<Element> fields = classElement.getChildren("field");
-            Map<String, String> binMapping = new HashMap<>();
-            for (Element field : fields) {
-              String fieldName = field.getAttributeValue("name");
-              String binName = field.getAttributeValue("bin");
-              if (fieldName != null && binName != null)
-                binMapping.put(fieldName, binName);
+          List<Element> fields = classElement.getChildren("field");
+          Map<String, String> binMapping = new HashMap<>();
+          for (Element field : fields) {
+            String fieldName = field.getAttributeValue("name");
+            String binName = field.getAttributeValue("bin");
+            if (fieldName != null && binName != null) {
+              binMapping.put(fieldName, binName);
             }
-            aerospikeMapping.setBinMapping(binMapping);
+          }
+          aerospikeMapping.setBinMapping(binMapping);
 
-            String nameSpace = classElement.getAttributeValue("namespace");
-            if (nameSpace == null || nameSpace.isEmpty()) {
-              LOG.error("Gora-aerospike-mapping does not include the relevant namespace for the "
-                      + "{} class", mappingClassName);
-              throw new ConfigurationException(
-                      "Gora-aerospike-mapping does not include the relevant namespace for the "
-                              + mappingClassName + "class");
-            }
-            aerospikeMapping.setNamespace(nameSpace);
+          String nameSpace = classElement.getAttributeValue("namespace");
+          if (nameSpace == null || nameSpace.isEmpty()) {
+            LOG.error("Gora-aerospike-mapping does not include the relevant namespace for the "
+                    + "{} class", mappingClassName);
+            throw new ConfigurationException(
+                    "Gora-aerospike-mapping does not include the relevant namespace for the "
+                            + mappingClassName + "class");
+          }
+          aerospikeMapping.setNamespace(nameSpace);
 
-            String set = classElement.getAttributeValue("set");
-            if (set != null && !set.isEmpty()) {
-              aerospikeMapping.setSet(set);
-            }
+          String set = classElement.getAttributeValue("set");
+          if (set != null && !set.isEmpty()) {
+            aerospikeMapping.setSet(set);
           }
         }
       }
@@ -262,8 +269,9 @@ public class AerospikeMappingBuilder {
    */
   private boolean getRetryOnTimeoutPolicy(String retry) {
 
-    if (retry == null)
+    if (retry == null) {
       return false;
+    }
 
     boolean retryOnTimeout;
     switch (retry) {
@@ -289,8 +297,9 @@ public class AerospikeMappingBuilder {
    */
   private int getTimeoutValue(String timeout) {
 
-    if (timeout == null)
+    if (timeout == null) {
       return 0;
+    }
     int timeoutInt = 0;
     try {
       timeoutInt = Integer.valueOf(timeout);
@@ -299,5 +308,4 @@ public class AerospikeMappingBuilder {
     }
     return timeoutInt;
   }
-
 }
