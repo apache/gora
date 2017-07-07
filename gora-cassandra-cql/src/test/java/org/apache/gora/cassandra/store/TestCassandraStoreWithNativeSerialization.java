@@ -19,6 +19,8 @@ package org.apache.gora.cassandra.store;
 
 import org.apache.gora.cassandra.GoraCassandraTestDriver;
 import org.apache.gora.cassandra.example.generated.nativeSerialization.User;
+import org.apache.gora.query.Query;
+import org.apache.gora.query.Result;
 import org.apache.gora.store.DataStore;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -28,6 +30,8 @@ import org.junit.Test;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -53,7 +57,7 @@ public class TestCassandraStoreWithNativeSerialization {
     parameter.setProperty(CassandraStoreParameters.PORT, "9042");
     parameter.setProperty(CassandraStoreParameters.CASSANDRA_SERIALIZATION_TYPE, "native");
     parameter.setProperty(CassandraStoreParameters.PROTOCOL_VERSION, "3");
-    parameter.setProperty(CassandraStoreParameters.CLUSTER_NAME,"Test Cluster");
+    parameter.setProperty(CassandraStoreParameters.CLUSTER_NAME, "Test Cluster");
     parameter.setProperty("gora.cassandrastore.mapping.file", "nativeSerialization/gora-cassandra-mapping.xml");
   }
 
@@ -92,7 +96,7 @@ public class TestCassandraStoreWithNativeSerialization {
     // storing data;
     userDataStore.put(id, user1);
     // get data;
-    User olduser =  userDataStore.get(user1.getUserId());
+    User olduser = userDataStore.get(user1.getUserId());
     Assert.assertEquals(olduser.getName(), user1.getName());
     Assert.assertEquals(olduser.getDateOfBirth(), user1.getDateOfBirth());
     // delete data;
@@ -105,7 +109,7 @@ public class TestCassandraStoreWithNativeSerialization {
   /**
    * In this test case, schema exists method behavior of the data store is testing.
    */
-  @Test
+  @Test()
   public void testSchemaExists() {
     userDataStore.deleteSchema();
     Assert.assertFalse(userDataStore.schemaExists());
@@ -118,17 +122,80 @@ public class TestCassandraStoreWithNativeSerialization {
    */
   @Test
   public void testTruncateSchema() {
-    if(!userDataStore.schemaExists()) {
+    if (!userDataStore.schemaExists()) {
       userDataStore.createSchema();
     }
     UUID id = UUID.randomUUID();
     User user1 = new User(id, "Madhawa Kasun", Date.from(Instant.now()));
     userDataStore.put(id, user1);
-    User olduser =  userDataStore.get(id);
+    User olduser = userDataStore.get(id);
     Assert.assertEquals(olduser.getName(), user1.getName());
     Assert.assertEquals(olduser.getDateOfBirth(), user1.getDateOfBirth());
     userDataStore.truncateSchema();
-    olduser =  userDataStore.get(id);
+    olduser = userDataStore.get(id);
     Assert.assertNull(olduser);
+  }
+
+  /**
+   * In this test case, get with fields method behavior of the data store is testing.
+   */
+  @Test
+  public void testGetWithFields() {
+    UUID id = UUID.randomUUID();
+    User user1 = new User(id, "Madhawa Kasun Gunasekara", Date.from(Instant.now()));
+    userDataStore.put(id, user1);
+    // get data;
+    User olduser = userDataStore.get(user1.getUserId());
+    Assert.assertEquals(olduser.getName(), user1.getName());
+    Assert.assertEquals(olduser.getDateOfBirth(), user1.getDateOfBirth());
+    User olduserWithFields = userDataStore.get(id, new String[]{"name"});
+    Assert.assertNull(olduserWithFields.getDateOfBirth());
+  }
+
+  /**
+   * In this test case, get with fields method behavior of the data store is testing.
+   */
+  @Test
+  public void testExecute() throws Exception {
+    userDataStore.truncateSchema();
+    Map<UUID, User> users = new HashMap<>();
+    UUID id1 = UUID.randomUUID();
+    User user1 = new User(id1, "user1", Date.from(Instant.now()));
+    users.put(id1, user1);
+    userDataStore.put(id1, user1);
+    UUID id2 = UUID.randomUUID();
+    User user2 = new User(id2, "user2", Date.from(Instant.now()));
+    users.put(id2, user2);
+    userDataStore.put(id2, user2);
+    UUID id3 = UUID.randomUUID();
+    User user3 = new User(id3, "user3", Date.from(Instant.now()));
+    users.put(id3, user3);
+    userDataStore.put(id3, user3);
+    Query<UUID, User> query1 = userDataStore.newQuery();
+    Result<UUID, User> result1 = userDataStore.execute(query1);
+    int i = 0;
+    Assert.assertEquals(result1.getProgress(),0.0,0.0);
+    while (result1.next()) {
+      // check objects values
+      Assert.assertEquals(result1.get().getName(), users.get(result1.getKey()).getName());
+      Assert.assertEquals(result1.get().getDateOfBirth(), users.get(result1.getKey()).getDateOfBirth());
+      Assert.assertEquals(result1.get().getUserId(), users.get(result1.getKey()).getUserId());
+      i++;
+    }
+    Assert.assertEquals(result1.getProgress(),1.0,0.0);
+    Assert.assertEquals(i, 3);
+
+    // Check limit query
+    Query<UUID, User> query2 = userDataStore.newQuery();
+    query2.setLimit(2);
+    Result<UUID, User> result2 = userDataStore.execute(query2);
+    i = 0;
+    while (result2.next()) {
+      Assert.assertEquals(result2.get().getName(), users.get(result2.getKey()).getName());
+      Assert.assertEquals(result2.get().getDateOfBirth(), users.get(result2.getKey()).getDateOfBirth());
+      Assert.assertEquals(result2.get().getUserId(), users.get(result2.getKey()).getUserId());
+      i++;
+    }
+    Assert.assertEquals(i, 2);
   }
 }

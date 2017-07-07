@@ -53,6 +53,24 @@ public class CassandraMapping {
     return fieldList;
   }
 
+  public Field getField(String field) {
+    for (Field field1 : fieldList) {
+      if (field1.getFieldName().equals(field)) {
+        return field1;
+      }
+    }
+    return null;
+  }
+
+  public String[] getFieldNames() {
+    List<String> fieldNames = new ArrayList<>(fieldList.size());
+    for (Field field : fieldList) {
+      fieldNames.add(field.getFieldName());
+    }
+    String[] fieldNameArray = new String[fieldNames.size()];
+    return fieldNames.toArray(fieldNameArray);
+  }
+
   public CassandraKey getCassandraKey() {
     return cassandraKey;
   }

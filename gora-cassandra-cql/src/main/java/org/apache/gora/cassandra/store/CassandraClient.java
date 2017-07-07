@@ -33,11 +33,12 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * Created by madhawa on 6/28/17.
+ * This class provides the Cassandra Client Connection.
+ * Initialize the Cassandra Connection according to the Properties.
  */
 public class CassandraClient {
 
-  public static final Logger LOG = LoggerFactory.getLogger(CassandraClient.class);
+  private static final Logger LOG = LoggerFactory.getLogger(CassandraClient.class);
 
 
   private Cluster cluster;

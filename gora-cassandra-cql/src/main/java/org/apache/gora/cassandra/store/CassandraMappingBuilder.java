@@ -18,12 +18,12 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Created by madhawa on 6/28/17.
+ * This Class reads the Cassandra Mapping file and create tha Cassandra Mapping object.
+ * {@link org.apache.gora.cassandra.store.CassandraMapping}
  */
 public class CassandraMappingBuilder<K, T extends Persistent> {
 
   private static final Logger LOG = LoggerFactory.getLogger(CassandraMappingBuilder.class);
-
 
   private CassandraStore dataStore;
 
@@ -31,7 +31,7 @@ public class CassandraMappingBuilder<K, T extends Persistent> {
   /**
    * Constructor for builder to create the mapper.
    *
-   * @param store
+   * @param store Cassandra Store
    */
   public CassandraMappingBuilder(final CassandraStore<K, T> store) {
     this.dataStore = store;

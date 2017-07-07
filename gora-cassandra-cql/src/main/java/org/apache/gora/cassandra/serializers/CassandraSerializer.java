@@ -22,22 +22,26 @@ import com.datastax.driver.core.TableMetadata;
 import org.apache.gora.cassandra.store.CassandraClient;
 import org.apache.gora.cassandra.store.CassandraMapping;
 import org.apache.gora.cassandra.store.CassandraStore;
+import org.apache.gora.persistency.Persistent;
+import org.apache.gora.query.Query;
+import org.apache.gora.query.Result;
+import org.apache.gora.store.DataStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Locale;
 
 /**
- * Created by madhawa on 6/26/17.
+ * This is the abstract Cassandra Serializer class.
  */
-public abstract class CassandraSerializer<K, T> {
+public abstract class CassandraSerializer<K, T extends Persistent> {
   CassandraClient client;
 
-  private Class<K> keyClass;
+  protected Class<K> keyClass;
 
-  private Class<T> persistentClass;
+  protected Class<T> persistentClass;
 
-  private CassandraMapping mapping;
+  protected CassandraMapping mapping;
 
   private static final Logger LOG = LoggerFactory.getLogger(CassandraStore.class);
 
@@ -81,19 +85,30 @@ public abstract class CassandraSerializer<K, T> {
     }
   }
 
+  /**
+   * This method returns the Cassandra Serializer according the Casssandra serializer property.
+   *
+   * @param cc              Cassandra Client
+   * @param type            Serialization type
+   * @param keyClass        key class
+   * @param persistentClass persistent class
+   * @param mapping         Cassandra Mapping
+   * @param <K>             key class
+   * @param <T>             persistent class
+   * @return Serializer
+   */
   public static <K, T> CassandraSerializer getSerializer(CassandraClient cc, String type, final Class<K> keyClass, final Class<T> persistentClass, CassandraMapping mapping) {
     CassandraStore.SerializerType serType = type.isEmpty() ? CassandraStore.SerializerType.NATIVE : CassandraStore.SerializerType.valueOf(type.toUpperCase(Locale.ENGLISH));
-    CassandraSerializer ser;
+    CassandraSerializer serializer;
     switch (serType) {
       case AVRO:
-        ser = new AvroSerializer(cc,keyClass, persistentClass, mapping);
+        serializer = new AvroSerializer(cc, keyClass, persistentClass, mapping);
         break;
       case NATIVE:
       default:
-        ser = new NativeSerializer(cc, keyClass, persistentClass, mapping);
-
+        serializer = new NativeSerializer(cc, keyClass, persistentClass, mapping);
     }
-    return ser;
+    return serializer;
   }
 
   public abstract void put(K key, T value);
@@ -101,5 +116,9 @@ public abstract class CassandraSerializer<K, T> {
   public abstract T get(K key);
 
   public abstract boolean delete(K key);
+
+  public abstract T get(K key, String[] fields);
+
+  public abstract Result<K, T> execute(DataStore<K, T> dataStore,Query<K, T> query);
 
 }

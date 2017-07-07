@@ -16,13 +16,16 @@
  */
 package org.apache.gora.cassandra.serializers;
 
+import com.datastax.driver.core.querybuilder.QueryBuilder;
+import com.datastax.driver.core.querybuilder.Select;
 import org.apache.gora.cassandra.bean.CassandraKey;
 import org.apache.gora.cassandra.bean.ClusterKeyField;
 import org.apache.gora.cassandra.bean.Field;
 import org.apache.gora.cassandra.bean.KeySpace;
 import org.apache.gora.cassandra.bean.PartitionKeyField;
+import org.apache.gora.cassandra.query.CassandraRow;
 import org.apache.gora.cassandra.store.CassandraMapping;
-import org.apache.gora.persistency.Persistent;
+import org.apache.gora.query.Query;
 
 import java.util.List;
 import java.util.Map;
@@ -235,14 +238,116 @@ class CassandraQueryFactory {
   }
 
   /**
-   *
    * refer : http://docs.datastax.com/en/cql/3.1/cql/cql_reference/insert_r.html
+   *
    * @return
    */
-  static String getInsertDataQuery(CassandraMapping mapping, Object obj) {
-//    ( (Persistent) obj).getS
-    StringBuilder stringBuffer = new StringBuilder();
-//    o
-return null;
+  static String getInsertDataQuery(CassandraMapping mapping, CassandraRow row) {
+    String query = QueryBuilder.insertInto(mapping.getKeySpace().getName(), mapping.getCoreName()).values(row.getFields(), row.getValues()).getQueryString();
+    return query;
+  }
+
+//  static <T> String getUpdateDataQuery(CassandraMapping mapping, T obj) {
+////    QueryBuilder.update(mapping.getKeySpace().getName(),mapping.getCoreName()).
+//  }
+
+  static <K> String getObjectWithFieldsQuery(CassandraMapping mapping, String[] fields, K key, List<Object> objects) {
+    String cqlQuery = null;
+    Select select = QueryBuilder.select(fields).from(mapping.getKeySpace().getName(), mapping.getCoreName());
+    CassandraKey cKey = mapping.getCassandraKey();
+    if (cKey != null) {
+      Select.Where query = null;
+      boolean isWhereNeeded = true;
+      for (PartitionKeyField field : cKey.getPartitionKeyFields()) {
+        if (field.isComposite()) {
+          for (Field compositeField : field.getFields()) {
+            if (isWhereNeeded) {
+              query = select.where(QueryBuilder.eq(compositeField.getColumnName(), "?"));
+              isWhereNeeded = false;
+            }
+            query = query.and(QueryBuilder.eq(compositeField.getColumnName(), "?"));
+          }
+        } else {
+          if (isWhereNeeded) {
+            query = select.where(QueryBuilder.eq(field.getColumnName(), "?"));
+            isWhereNeeded = false;
+          }
+          query = query.and(QueryBuilder.eq(field.getColumnName(), "?"));
+        }
+      }
+      cqlQuery = query != null ? query.getQueryString() : null;
+    } else {
+      for (Field field : mapping.getFieldList()) {
+        boolean isPrimaryKey = Boolean.parseBoolean(field.getProperty("primarykey"));
+        if (isPrimaryKey) {
+          cqlQuery = select.where(QueryBuilder.eq(field.getColumnName(), "?")).getQueryString();
+          objects.add(key);
+          break;
+        }
+      }
+    }
+    return cqlQuery;
+  }
+
+
+  static<K> String getExecuteQuery(CassandraMapping mapping, Query cassandraQuery, List<Object> objects ) {
+    String[] fields = cassandraQuery.getFields();
+    fields = fields != null ? fields : mapping.getFieldNames();
+    Object startKey = cassandraQuery.getStartKey();
+    Object endKey = cassandraQuery.getEndKey();
+    long limit =  cassandraQuery.getLimit();
+    Select select = QueryBuilder.select(getColumnNames(mapping,fields)).from(mapping.getKeySpace().getName(), mapping.getCoreName());
+    if(limit > 0) {
+      select = select.limit((int)limit);
+    }
+    Select.Where query = null;
+    boolean isWhereNeeded = true;
+    if(startKey != null) {
+      if (mapping.getCassandraKey() != null) {
+//todo avro serialization
+      } else {
+        for (Field field : mapping.getFieldList()) {
+          boolean isPrimaryKey = Boolean.parseBoolean(field.getProperty("primarykey"));
+          if (isPrimaryKey) {
+              query = select.where(QueryBuilder.gte(field.getColumnName(), "?"));
+              objects.add(startKey);
+              isWhereNeeded = false;
+            break;
+          }
+        }
+      }
+    }
+    if(endKey != null) {
+      if (mapping.getCassandraKey() != null) {
+//todo avro serialization
+      } else {
+        for (Field field : mapping.getFieldList()) {
+          boolean isPrimaryKey = Boolean.parseBoolean(field.getProperty("primarykey"));
+          if (isPrimaryKey) {
+            if(isWhereNeeded) {
+              query = select.where(QueryBuilder.lte(field.getColumnName(), "?"));
+            } else {
+              query = query.and(QueryBuilder.lte(field.getColumnName(), "?"));
+            }
+            objects.add(endKey);
+            break;
+          }
+        }
+      }
+    }
+    if(startKey == null && endKey == null) {
+      return select.getQueryString();
+    }
+    return  query.getQueryString();
+  }
+
+  private static String[] getColumnNames(CassandraMapping mapping, String[] fields) {
+    String[] columnNames = new String[fields.length];
+    int i = 0;
+    for(String field : fields) {
+     columnNames[i] = mapping.getField(field).getColumnName();
+      i++;
+    }
+    return columnNames;
   }
 }

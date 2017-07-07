@@ -66,7 +66,7 @@
          table="Employee" compactStorage="true" >
     <field name="name" column="name" type="text" ttl="10"/>
     <field name="dateOfBirth" column="dob" type="bigint" ttl="10"/>
-    <field name="ssn" column="ssn" type="int" ttl="10" primarykey="true"/>
+    <field name="ssn" column="ssn" type="text" ttl="10" primarykey="true"/>
     <field name="salary" column="salary" type="int" ttl="10" />
    </class>
 

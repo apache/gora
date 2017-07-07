@@ -18,6 +18,7 @@
 package org.apache.gora.cassandra.store;
 
 import org.apache.gora.cassandra.persistent.CassandraNativePersistent;
+import org.apache.gora.cassandra.query.CassandraQuery;
 import org.apache.gora.cassandra.serializers.CassandraSerializer;
 import org.apache.gora.persistency.BeanFactory;
 import org.apache.gora.persistency.Persistent;
@@ -194,7 +195,7 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   @Override
   public T get(K key, String[] fields) {
-    return null;
+    return (T) cassandraSerializer.get(key, fields);
   }
 
   @Override
@@ -214,12 +215,18 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   @Override
   public Result<K, T> execute(Query<K, T> query) {
-    return null;
+    return (Result<K,T>) cassandraSerializer.execute(this, query);
+  }
+
+  public void updateByQuery(Query<K,T> query) {
+
   }
 
   @Override
   public Query<K, T> newQuery() {
-    return null;
+    Query<K,T> query = new CassandraQuery(this);
+    query.setFields(mapping.getFieldNames());
+    return query;
   }
 
   @Override

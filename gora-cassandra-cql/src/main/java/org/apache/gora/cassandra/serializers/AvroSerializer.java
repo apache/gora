@@ -17,29 +17,51 @@
 
 package org.apache.gora.cassandra.serializers;
 
+import com.datastax.driver.core.ColumnMetadata;
+import org.apache.avro.Schema;
+import org.apache.avro.specific.SpecificData;
+import org.apache.gora.cassandra.query.CassandraColumn;
+import org.apache.gora.cassandra.query.CassandraRow;
 import org.apache.gora.cassandra.store.CassandraClient;
 import org.apache.gora.cassandra.store.CassandraMapping;
+import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.impl.PersistentBase;
+import org.apache.gora.query.Query;
+import org.apache.gora.query.Result;
+import org.apache.gora.store.DataStore;
+
+import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.Map;
 
 /**
- * Created by madhawa on 6/26/17.
+ * This class contains the operations relates to Avro Serialization
  */
 public class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
 
+
+  /**
+   * Default schema index with value "0" used when AVRO Union data types are stored
+   */
+  public static final int DEFAULT_UNION_SCHEMA = 0;
 
   public AvroSerializer(CassandraClient cassandraClient, Class<K> keyClass, Class<T> persistentClass, CassandraMapping mapping) {
     super(cassandraClient, keyClass, persistentClass, mapping);
   }
 
-
   @Override
-  public PersistentBase get(Object key) {
+  public Persistent get(Object key, String[] fields) {
     return null;
   }
 
   @Override
-  public void put(Object key, Object value) {
+  public void put(Object key, Persistent value) {
 
+  }
+
+  @Override
+  public Persistent get(Object key) {
+    return null;
   }
 
   @Override
@@ -47,5 +69,10 @@ public class AvroSerializer<K, T extends PersistentBase> extends CassandraSerial
     return false;
   }
 
+
+  @Override
+  public Result execute(DataStore dataStore,Query query) {
+    return null;
+  }
 
 }
