@@ -16,6 +16,7 @@
  */
 package org.apache.gora.cassandra.serializers;
 
+import com.datastax.driver.core.querybuilder.Delete;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
 import org.apache.gora.cassandra.bean.CassandraKey;
@@ -27,6 +28,7 @@ import org.apache.gora.cassandra.query.CassandraRow;
 import org.apache.gora.cassandra.store.CassandraMapping;
 import org.apache.gora.query.Query;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -290,64 +292,125 @@ class CassandraQueryFactory {
   }
 
 
-  static<K> String getExecuteQuery(CassandraMapping mapping, Query cassandraQuery, List<Object> objects ) {
+  static String getExecuteQuery(CassandraMapping mapping, Query cassandraQuery, List<Object> objects) {
     String[] fields = cassandraQuery.getFields();
     fields = fields != null ? fields : mapping.getFieldNames();
     Object startKey = cassandraQuery.getStartKey();
     Object endKey = cassandraQuery.getEndKey();
-    long limit =  cassandraQuery.getLimit();
-    Select select = QueryBuilder.select(getColumnNames(mapping,fields)).from(mapping.getKeySpace().getName(), mapping.getCoreName());
-    if(limit > 0) {
-      select = select.limit((int)limit);
+    Object key = cassandraQuery.getKey();
+    String primaryKey = null;
+    long limit = cassandraQuery.getLimit();
+    Select select = QueryBuilder.select(getColumnNames(mapping, fields)).from(mapping.getKeySpace().getName(), mapping.getCoreName());
+    if (limit > 0) {
+      select = select.limit((int) limit);
     }
     Select.Where query = null;
     boolean isWhereNeeded = true;
-    if(startKey != null) {
-      if (mapping.getCassandraKey() != null) {
+    if (key != null) {
+      primaryKey = getPKey(mapping.getFieldList());
+      query = select.where(QueryBuilder.eq(primaryKey, "?"));
+      objects.add(key);
+    } else {
+      if (startKey != null) {
+        if (mapping.getCassandraKey() != null) {
 //todo avro serialization
-      } else {
-        for (Field field : mapping.getFieldList()) {
-          boolean isPrimaryKey = Boolean.parseBoolean(field.getProperty("primarykey"));
-          if (isPrimaryKey) {
-              query = select.where(QueryBuilder.gte(field.getColumnName(), "?"));
-              objects.add(startKey);
-              isWhereNeeded = false;
-            break;
+        } else {
+          primaryKey = getPKey(mapping.getFieldList());
+          query = select.where(QueryBuilder.gte(primaryKey, "?"));
+          objects.add(startKey);
+          isWhereNeeded = false;
+        }
+      }
+      if (endKey != null) {
+        if (mapping.getCassandraKey() != null) {
+//todo avro serialization
+        } else {
+          primaryKey = primaryKey != null ? primaryKey : getPKey(mapping.getFieldList());
+          if (isWhereNeeded) {
+            query = select.where(QueryBuilder.lte(primaryKey, "?"));
+          } else {
+            query = query.and(QueryBuilder.lte(primaryKey, "?"));
           }
+          objects.add(endKey);
         }
       }
     }
-    if(endKey != null) {
-      if (mapping.getCassandraKey() != null) {
-//todo avro serialization
-      } else {
-        for (Field field : mapping.getFieldList()) {
-          boolean isPrimaryKey = Boolean.parseBoolean(field.getProperty("primarykey"));
-          if (isPrimaryKey) {
-            if(isWhereNeeded) {
-              query = select.where(QueryBuilder.lte(field.getColumnName(), "?"));
-            } else {
-              query = query.and(QueryBuilder.lte(field.getColumnName(), "?"));
-            }
-            objects.add(endKey);
-            break;
-          }
-        }
-      }
-    }
-    if(startKey == null && endKey == null) {
+    if (startKey == null && endKey == null && key == null) {
       return select.getQueryString();
     }
-    return  query.getQueryString();
+    return query.getQueryString();
   }
 
   private static String[] getColumnNames(CassandraMapping mapping, String[] fields) {
     String[] columnNames = new String[fields.length];
     int i = 0;
-    for(String field : fields) {
-     columnNames[i] = mapping.getField(field).getColumnName();
+    for (String field : fields) {
+      columnNames[i] = mapping.getField(field).getColumnName();
       i++;
     }
     return columnNames;
   }
+
+  private static String getPKey(List<Field> fields) {
+    for (Field field : fields) {
+      boolean isPrimaryKey = Boolean.parseBoolean(field.getProperty("primarykey"));
+      if (isPrimaryKey) {
+        return field.getColumnName();
+      }
+    }
+    return null;
+  }
+
+  static String getDeleteByQuery(CassandraMapping mapping, Query cassandraQuery, List<Object> objects) {
+    String[] columns = null;
+    if(!Arrays.equals(cassandraQuery.getFields(), mapping.getFieldNames())) {
+      columns = getColumnNames(mapping, cassandraQuery.getFields());
+    }
+    Object startKey = cassandraQuery.getStartKey();
+    Object endKey = cassandraQuery.getEndKey();
+    Object key = cassandraQuery.getKey();
+    String primaryKey = null;
+    Delete delete;
+    if (columns != null) {
+      delete = QueryBuilder.delete(columns).from(mapping.getKeySpace().getName(), mapping.getCoreName());
+    } else {
+      delete = QueryBuilder.delete().from(mapping.getKeySpace().getName(), mapping.getCoreName());
+    }
+    Delete.Where query = null;
+    boolean isWhereNeeded = true;
+    if (key != null) {
+      primaryKey = getPKey(mapping.getFieldList());
+      query = delete.where(QueryBuilder.eq(primaryKey, "?"));
+      objects.add(key);
+    } else {
+      if (startKey != null) {
+        if (mapping.getCassandraKey() != null) {
+//todo avro serialization
+        } else {
+          primaryKey = getPKey(mapping.getFieldList());
+          query = delete.where(QueryBuilder.gte(primaryKey, "?"));
+          objects.add(startKey);
+          isWhereNeeded = false;
+        }
+      }
+      if (endKey != null) {
+        if (mapping.getCassandraKey() != null) {
+//todo avro serialization
+        } else {
+          primaryKey = primaryKey != null ? primaryKey : getPKey(mapping.getFieldList());
+          if (isWhereNeeded) {
+            query = delete.where(QueryBuilder.lte(primaryKey, "?"));
+          } else {
+            query = query.and(QueryBuilder.lte(primaryKey, "?"));
+          }
+          objects.add(endKey);
+        }
+      }
+    }
+    if (startKey == null && endKey == null && key == null) {
+      return delete.getQueryString();
+    }
+    return query.getQueryString();
+  }
+
 }

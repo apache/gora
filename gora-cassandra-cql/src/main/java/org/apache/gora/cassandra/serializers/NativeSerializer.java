@@ -72,6 +72,19 @@ public class NativeSerializer<K, T extends CassandraNativePersistent> extends Ca
   }
 
   @Override
+  public long deleteByQuery(Query query) {
+    List<Object> objectArrayList = new ArrayList<>();
+    String cqlQuery = CassandraQueryFactory.getDeleteByQuery(mapping, query, objectArrayList);
+    ResultSet results;
+    if (objectArrayList.size() == 0) {
+      results = client.getSession().execute(cqlQuery);
+    } else {
+      results = client.getSession().execute(cqlQuery, objectArrayList.toArray());
+    }
+    return 0;
+  }
+
+  @Override
   public org.apache.gora.query.Result execute(DataStore dataStore, Query query) {
     List<Object> objectArrayList = new ArrayList<>();
     CassandraResultSet<K, T> cassandraResult = new CassandraResultSet<K, T>(dataStore, query);

@@ -119,6 +119,8 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
 
   public abstract T get(K key, String[] fields);
 
-  public abstract Result<K, T> execute(DataStore<K, T> dataStore,Query<K, T> query);
+  public abstract Result<K, T> execute(DataStore<K, T> dataStore, Query<K, T> query);
+
+  public abstract long deleteByQuery(Query<K, T> query);
 
 }

@@ -75,4 +75,9 @@ public class AvroSerializer<K, T extends PersistentBase> extends CassandraSerial
     return null;
   }
 
+  @Override
+  public long deleteByQuery(Query query) {
+    return 0;
+  }
+
 }

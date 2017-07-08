@@ -90,9 +90,7 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
       cassandraClient.initialize(properties);
       cassandraSerializer = CassandraSerializer.getSerializer(cassandraClient, properties.getProperty(CassandraStoreParameters.CASSANDRA_SERIALIZATION_TYPE), keyClass, persistentClass, mapping);
     } catch (Exception e) {
-      LOG.error("Error while initializing Cassandra store: {}",
-              new Object[]{e.getMessage()});
-      throw new RuntimeException(e);
+      throw new RuntimeException("Error while initializing Cassandra store: "+ e.getMessage(),e);
     }
   }
 
@@ -152,8 +150,7 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
         return keyClass.newInstance();
       }
     } catch (Exception ex) {
-      LOG.error(ex.getMessage(), ex);
-      return null;
+      throw new RuntimeException("Error while instantiating a key: "+ ex.getMessage(),ex);
     }
   }
 
@@ -168,8 +165,7 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
         return persistentClass.newInstance();
       }
     } catch (Exception ex) {
-      LOG.error(ex.getMessage(), ex);
-      return null;
+      throw new RuntimeException("Error while instantiating a persistent: "+ ex.getMessage(),ex);
     }
   }
 
@@ -210,7 +206,7 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   @Override
   public long deleteByQuery(Query<K, T> query) {
-    return 0;
+    return cassandraSerializer.deleteByQuery(query);
   }
 
   @Override

@@ -183,7 +183,7 @@ public class TestCassandraStoreWithNativeSerialization {
       i++;
     }
     Assert.assertEquals(result1.getProgress(),1.0,0.0);
-    Assert.assertEquals(i, 3);
+    Assert.assertEquals(3, i);
 
     // Check limit query
     Query<UUID, User> query2 = userDataStore.newQuery();
@@ -196,6 +196,45 @@ public class TestCassandraStoreWithNativeSerialization {
       Assert.assertEquals(result2.get().getUserId(), users.get(result2.getKey()).getUserId());
       i++;
     }
-    Assert.assertEquals(i, 2);
+    Assert.assertEquals(2, i);
+
+    // check key element
+    Query<UUID, User> query3 = userDataStore.newQuery();
+    query3.setKey(id1);
+
+    Result<UUID, User> result3 = userDataStore.execute(query3);
+    i = 0;
+    while (result3.next()) {
+      Assert.assertEquals(result3.get().getName(), users.get(result3.getKey()).getName());
+      Assert.assertEquals(result3.get().getDateOfBirth(), users.get(result3.getKey()).getDateOfBirth());
+      Assert.assertEquals(result3.get().getUserId(), users.get(result3.getKey()).getUserId());
+      i++;
+    }
+    Assert.assertEquals(1, i);
+  }
+
+  @Test
+  public void testDeleteByQuery() throws Exception {
+    userDataStore.truncateSchema();
+    UUID id1 = UUID.randomUUID();
+    User user1 = new User(id1, "user1", Date.from(Instant.now()));
+    userDataStore.put(id1, user1);
+    UUID id2 = UUID.randomUUID();
+    User user2 = new User(id2, "user2", Date.from(Instant.now()));
+    userDataStore.put(id2, user2);
+    Query<UUID, User> query1 = userDataStore.newQuery();
+    query1.setKey(id1);
+    userDataStore.deleteByQuery(query1);
+    User user = userDataStore.get(id1);
+    Assert.assertNull(user);
+
+    //test deleteByFields
+    Query<UUID, User> query2 = userDataStore.newQuery();
+    query2.setKey(id2);
+    query2.setFields("name");
+    userDataStore.deleteByQuery(query2);
+    User partialDeletedUser = userDataStore.get(id2);
+    Assert.assertNull(partialDeletedUser.getName());
+    Assert.assertEquals(partialDeletedUser.getDateOfBirth(),user2.getDateOfBirth());
   }
 }
