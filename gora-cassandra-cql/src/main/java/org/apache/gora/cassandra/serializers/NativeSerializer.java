@@ -128,6 +128,19 @@ class NativeSerializer<K, T extends CassandraNativePersistent> extends Cassandra
     mapper = mappingManager.mapper(persistentClass);
   }
 
+  @Override
+  public boolean updateByQuery(Query query) {
+    List<Object> objectArrayList = new ArrayList<>();
+    String cqlQuery = CassandraQueryFactory.getUpdateByQuery(mapping, query, objectArrayList);
+    ResultSet results;
+    if (objectArrayList.size() == 0) {
+      results = client.getSession().execute(cqlQuery);
+    } else {
+      results = client.getSession().execute(cqlQuery, objectArrayList.toArray());
+    }
+    return results.wasApplied();
+  }
+
   private K getKey(T object) {
     String keyField = null;
     for (Field field : mapping.getFieldList()) {

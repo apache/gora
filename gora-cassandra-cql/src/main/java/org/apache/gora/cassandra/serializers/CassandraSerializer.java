@@ -123,4 +123,6 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
 
   public abstract long deleteByQuery(Query<K, T> query);
 
+  public abstract boolean updateByQuery(Query<K, T> query);
+
 }

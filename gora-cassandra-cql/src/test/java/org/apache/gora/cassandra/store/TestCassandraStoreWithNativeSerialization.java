@@ -19,6 +19,7 @@ package org.apache.gora.cassandra.store;
 
 import org.apache.gora.cassandra.GoraCassandraTestDriver;
 import org.apache.gora.cassandra.example.generated.nativeSerialization.User;
+import org.apache.gora.cassandra.query.CassandraQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.store.DataStore;
@@ -236,5 +237,26 @@ public class TestCassandraStoreWithNativeSerialization {
     User partialDeletedUser = userDataStore.get(id2);
     Assert.assertNull(partialDeletedUser.getName());
     Assert.assertEquals(partialDeletedUser.getDateOfBirth(),user2.getDateOfBirth());
+  }
+
+  @Test
+  public void testUpdateByQuery() {
+    userDataStore.truncateSchema();
+    UUID id1 = UUID.randomUUID();
+    User user1 = new User(id1, "user1", Date.from(Instant.now()));
+    userDataStore.put(id1, user1);
+    UUID id2 = UUID.randomUUID();
+    User user2 = new User(id2, "user2", Date.from(Instant.now()));
+    userDataStore.put(id2, user2);
+    Query<UUID, User> query1 = userDataStore.newQuery();
+    if(query1 instanceof CassandraQuery) {
+      ((CassandraQuery) query1).addUpdateField("name", "madhawa");
+    }
+    query1.setKey(id1);
+    if(userDataStore instanceof CassandraStore) {
+      ((CassandraStore) userDataStore).updateByQuery(query1);
+    }
+    User user = userDataStore.get(id1);
+    Assert.assertEquals(user.getName(),"madhawa");
   }
 }

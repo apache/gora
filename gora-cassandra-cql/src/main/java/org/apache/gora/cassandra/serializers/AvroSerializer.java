@@ -80,4 +80,8 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
     return 0;
   }
 
+  @Override
+  public boolean updateByQuery(Query query) {
+    return false;
+  }
 }

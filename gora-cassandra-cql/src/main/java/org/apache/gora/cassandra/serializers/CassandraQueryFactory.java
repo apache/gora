@@ -19,11 +19,13 @@ package org.apache.gora.cassandra.serializers;
 import com.datastax.driver.core.querybuilder.Delete;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
+import com.datastax.driver.core.querybuilder.Update;
 import org.apache.gora.cassandra.bean.CassandraKey;
 import org.apache.gora.cassandra.bean.ClusterKeyField;
 import org.apache.gora.cassandra.bean.Field;
 import org.apache.gora.cassandra.bean.KeySpace;
 import org.apache.gora.cassandra.bean.PartitionKeyField;
+import org.apache.gora.cassandra.query.CassandraQuery;
 import org.apache.gora.cassandra.query.CassandraRow;
 import org.apache.gora.cassandra.store.CassandraMapping;
 import org.apache.gora.query.Query;
@@ -249,10 +251,6 @@ class CassandraQueryFactory {
     return query;
   }
 
-//  static <T> String getUpdateDataQuery(CassandraMapping mapping, T obj) {
-////    QueryBuilder.update(mapping.getKeySpace().getName(),mapping.getCoreName()).
-//  }
-
   static <K> String getObjectWithFieldsQuery(CassandraMapping mapping, String[] fields, K key, List<Object> objects) {
     String cqlQuery = null;
     Select select = QueryBuilder.select(fields).from(mapping.getKeySpace().getName(), mapping.getCoreName());
@@ -363,7 +361,7 @@ class CassandraQueryFactory {
 
   static String getDeleteByQuery(CassandraMapping mapping, Query cassandraQuery, List<Object> objects) {
     String[] columns = null;
-    if(!Arrays.equals(cassandraQuery.getFields(), mapping.getFieldNames())) {
+    if (!Arrays.equals(cassandraQuery.getFields(), mapping.getFieldNames())) {
       columns = getColumnNames(mapping, cassandraQuery.getFields());
     }
     Object startKey = cassandraQuery.getStartKey();
@@ -409,6 +407,58 @@ class CassandraQueryFactory {
     }
     if (startKey == null && endKey == null && key == null) {
       return delete.getQueryString();
+    }
+    return query.getQueryString();
+  }
+
+  static String getUpdateByQuery(CassandraMapping mapping, Query cassandraQuery, List<Object> objects) {
+    Update update = QueryBuilder.update(mapping.getKeySpace().getName(), mapping.getCoreName());
+    Update.Assignments updateAssignments = null;
+    if (cassandraQuery instanceof CassandraQuery) {
+      String[] fields = cassandraQuery.getFields();
+      String[] columnNames = getColumnNames(mapping, fields);
+      for (String column : columnNames) {
+        updateAssignments = update.with(QueryBuilder.set(column, "?"));
+        objects.add(((CassandraQuery) cassandraQuery).getUpdateFieldValue(column));
+      }
+    }
+    String primaryKey = null;
+    Update.Where query = null;
+    Object startKey = cassandraQuery.getStartKey();
+    Object endKey = cassandraQuery.getEndKey();
+    Object key = cassandraQuery.getKey();
+    boolean isWhereNeeded = true;
+    if (key != null) {
+      primaryKey = getPKey(mapping.getFieldList());
+      query = updateAssignments.where(QueryBuilder.eq(primaryKey, "?"));
+      objects.add(key);
+    } else {
+      if (startKey != null) {
+        if (mapping.getCassandraKey() != null) {
+//todo avro serialization
+        } else {
+          primaryKey = getPKey(mapping.getFieldList());
+          query = updateAssignments.where(QueryBuilder.gte(primaryKey, "?"));
+          objects.add(startKey);
+          isWhereNeeded = false;
+        }
+      }
+      if (endKey != null) {
+        if (mapping.getCassandraKey() != null) {
+//todo avro serialization
+        } else {
+          primaryKey = primaryKey != null ? primaryKey : getPKey(mapping.getFieldList());
+          if (isWhereNeeded) {
+            query = updateAssignments.where(QueryBuilder.lte(primaryKey, "?"));
+          } else {
+            query = query.and(QueryBuilder.lte(primaryKey, "?"));
+          }
+          objects.add(endKey);
+        }
+      }
+    }
+    if (startKey == null && endKey == null && key == null) {
+      return updateAssignments.getQueryString();
     }
     return query.getQueryString();
   }
