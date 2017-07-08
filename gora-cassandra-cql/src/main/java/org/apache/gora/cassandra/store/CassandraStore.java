@@ -25,12 +25,15 @@ import org.apache.gora.persistency.Persistent;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
+import org.apache.gora.query.impl.PartitionQueryImpl;
+import org.apache.gora.query.ws.impl.PartitionWSQueryImpl;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -227,7 +230,11 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   @Override
   public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query) throws IOException {
-    return null;
+    List<PartitionQuery<K,T>> partitions = new ArrayList<>();
+    PartitionWSQueryImpl<K, T> pqi = new PartitionWSQueryImpl<>(query);
+    pqi.setDataStore(this);
+    partitions.add(pqi);
+    return partitions;
   }
 
   @Override
