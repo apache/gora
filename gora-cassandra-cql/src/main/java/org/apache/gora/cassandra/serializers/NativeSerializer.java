@@ -29,6 +29,8 @@ import org.apache.gora.cassandra.store.CassandraMapping;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.query.Query;
 import org.apache.gora.store.DataStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -38,22 +40,32 @@ import java.util.List;
 /**
  * This Class contains the operation relates to Native Serialization.
  */
-public class NativeSerializer<K, T extends CassandraNativePersistent> extends CassandraSerializer {
+class NativeSerializer<K, T extends CassandraNativePersistent> extends CassandraSerializer {
+
+  private static final Logger LOG = LoggerFactory.getLogger(CassandraNativePersistent.class);
 
   private Mapper<T> mapper;
 
   @Override
   public void put(Object key, Persistent value) {
+    LOG.debug("Object is saved with key : {} and value : {}",key,value);
     mapper.save((T) value);
   }
 
   @Override
   public T get(Object key) {
-    return mapper.get(key);
+    T object = mapper.get(key);
+    if(object != null) {
+      LOG.debug("Object is found for key : {}", key);
+    } else {
+      LOG.debug("Object is not found for key : {}", key);
+    }
+    return object;
   }
 
   @Override
   public boolean delete(Object key) {
+    LOG.debug("Object is deleted for key : {}", key);
     mapper.delete(key);
     return true;
   }
@@ -66,8 +78,10 @@ public class NativeSerializer<K, T extends CassandraNativePersistent> extends Ca
     Result<T> objects = mapper.map(results);
     List<T> objectList = objects.all();
     if (objectList != null) {
+      LOG.debug("Object is found for key : {}", key);
       return objectList.get(0);
     }
+    LOG.debug("Object is not found for key : {}" , key);
     return null;
   }
 
@@ -81,6 +95,8 @@ public class NativeSerializer<K, T extends CassandraNativePersistent> extends Ca
     } else {
       results = client.getSession().execute(cqlQuery, objectArrayList.toArray());
     }
+    LOG.debug("Delete by Query was applied : " + results.wasApplied());
+    LOG.info("Delete By Query method doesn't return the deleted element count.");
     return 0;
   }
 
@@ -105,7 +121,7 @@ public class NativeSerializer<K, T extends CassandraNativePersistent> extends Ca
     return cassandraResult;
   }
 
-  public NativeSerializer(CassandraClient cassandraClient, Class<K> keyClass, Class<T> persistentClass, CassandraMapping mapping) {
+  NativeSerializer(CassandraClient cassandraClient, Class<K> keyClass, Class<T> persistentClass, CassandraMapping mapping) {
     super(cassandraClient, keyClass, persistentClass, mapping);
     this.createSchema();
     MappingManager mappingManager = new MappingManager(cassandraClient.getSession());

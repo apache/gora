@@ -37,7 +37,7 @@ import java.util.Map;
 /**
  * This class contains the operations relates to Avro Serialization
  */
-public class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
+class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
 
 
   /**
@@ -45,7 +45,7 @@ public class AvroSerializer<K, T extends PersistentBase> extends CassandraSerial
    */
   public static final int DEFAULT_UNION_SCHEMA = 0;
 
-  public AvroSerializer(CassandraClient cassandraClient, Class<K> keyClass, Class<T> persistentClass, CassandraMapping mapping) {
+  AvroSerializer(CassandraClient cassandraClient, Class<K> keyClass, Class<T> persistentClass, CassandraMapping mapping) {
     super(cassandraClient, keyClass, persistentClass, mapping);
   }
 

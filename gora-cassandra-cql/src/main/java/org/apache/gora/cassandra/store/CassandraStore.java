@@ -44,7 +44,7 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   private static final String DEFAULT_MAPPING_FILE = "gora-cassandra-mapping.xml";
 
-  public static final Logger LOG = LoggerFactory.getLogger(CassandraStore.class);
+  private static final Logger LOG = LoggerFactory.getLogger(CassandraStore.class);
 
   private BeanFactory<K, T> beanFactory;
 
