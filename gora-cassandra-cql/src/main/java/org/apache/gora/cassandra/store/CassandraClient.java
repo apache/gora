@@ -2,6 +2,7 @@ package org.apache.gora.cassandra.store;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ConsistencyLevel;
+import com.datastax.driver.core.DataType;
 import com.datastax.driver.core.HostDistance;
 import com.datastax.driver.core.PoolingOptions;
 import com.datastax.driver.core.ProtocolOptions;
@@ -20,6 +21,15 @@ import com.datastax.driver.core.policies.LatencyAwarePolicy;
 import com.datastax.driver.core.policies.LoggingRetryPolicy;
 import com.datastax.driver.core.policies.RoundRobinPolicy;
 import com.datastax.driver.core.policies.TokenAwarePolicy;
+import com.datastax.driver.extras.codecs.arrays.DoubleArrayCodec;
+import com.datastax.driver.extras.codecs.arrays.FloatArrayCodec;
+import com.datastax.driver.extras.codecs.arrays.IntArrayCodec;
+import com.datastax.driver.extras.codecs.arrays.LongArrayCodec;
+import com.datastax.driver.extras.codecs.arrays.ObjectArrayCodec;
+import com.datastax.driver.extras.codecs.date.SimpleDateCodec;
+import com.datastax.driver.extras.codecs.date.SimpleTimestampCodec;
+import com.datastax.driver.extras.codecs.jdk8.OptionalCodec;
+import org.apache.gora.cassandra.bean.Field;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -30,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 
 /**
@@ -53,18 +64,139 @@ public class CassandraClient {
 
   private Session session;
 
+  private CassandraMapping mapping;
 
-  public void initialize(Properties properties) throws Exception {
+
+  void initialize(Properties properties, CassandraMapping mapping) throws Exception {
     Cluster.Builder builder = Cluster.builder();
     List<String> codecs = readCustomCodec(properties);
     builder = populateSettings(builder, properties);
+    this.mapping = mapping;
     this.cluster = builder.build();
     if (codecs != null) {
       registerCustomCodecs(codecs);
     }
+    registerOptionalCodecs();
     this.session = this.cluster.connect();
   }
 
+  private void registerOptionalCodecs() {
+    // Optional Codecs for natives
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.ascii()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.bigint()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.blob()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.cboolean()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.cdouble()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.cfloat()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.cint()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.counter()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.date()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.decimal()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.inet()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.smallInt()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.time()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.timestamp()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.timeUUID()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.tinyInt()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.varint()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.varchar()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.uuid()));
+    // Optional Array Codecs
+    this.cluster.getConfiguration().getCodecRegistry().register(new IntArrayCodec());
+    this.cluster.getConfiguration().getCodecRegistry().register(new DoubleArrayCodec());
+    this.cluster.getConfiguration().getCodecRegistry().register(new FloatArrayCodec());
+    this.cluster.getConfiguration().getCodecRegistry().register(new LongArrayCodec());
+    this.cluster.getConfiguration().getCodecRegistry().register(new ObjectArrayCodec<>(
+            DataType.list(DataType.varchar()),
+            String[].class,
+            TypeCodec.varchar()));
+    // Optional Time Codecs
+    this.cluster.getConfiguration().getCodecRegistry().register(new SimpleDateCodec());
+    this.cluster.getConfiguration().getCodecRegistry().register(new SimpleTimestampCodec());
+
+    for (Field field : this.mapping.getFieldList()) {
+      String columnType = field.getType().toLowerCase(Locale.ENGLISH);
+      //http://docs.datastax.com/en/cql/3.3/cql/cql_reference/cql_data_types_c.html
+      if (columnType.contains("list")) {
+        columnType = columnType.substring(columnType.indexOf("<") + 1, columnType.indexOf(">"));
+        this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.list(getTypeCodec(columnType))));
+      } else if (columnType.contains("set")) {
+        columnType = columnType.substring(columnType.indexOf("<") + 1, columnType.indexOf(">"));
+        this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.set(getTypeCodec(columnType))));
+      } else if (columnType.contains("map")) {
+        String[] columnTypes = columnType.substring(columnType.indexOf("<") + 1, columnType.indexOf(">")).split(",");
+        this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.map(TypeCodec.set(getTypeCodec(columnTypes[0])), TypeCodec.set(getTypeCodec(columnTypes[1])))));
+      }
+    }
+  }
+
+  private TypeCodec getTypeCodec(String columnType) {
+    TypeCodec typeCodec;
+    switch (columnType) {
+      case "ascii":
+        typeCodec = TypeCodec.ascii();
+        break;
+      case "bigint":
+        typeCodec = TypeCodec.bigint();
+        break;
+      case "blob":
+        typeCodec = TypeCodec.blob();
+        break;
+      case "boolean":
+        typeCodec = TypeCodec.cboolean();
+        break;
+      case "counter":
+        typeCodec = TypeCodec.counter();
+        break;
+      case "date":
+        typeCodec = TypeCodec.date();
+        break;
+      case "decimal":
+        typeCodec = TypeCodec.decimal();
+        break;
+      case "double":
+        typeCodec = TypeCodec.cdouble();
+        break;
+      case "float":
+        typeCodec = TypeCodec.cfloat();
+        break;
+      case "inet":
+        typeCodec = TypeCodec.inet();
+        break;
+      case "int":
+        typeCodec = TypeCodec.cint();
+        break;
+      case "smallint":
+        typeCodec = TypeCodec.smallInt();
+        break;
+      case "time":
+        typeCodec = TypeCodec.time();
+        break;
+      case "timestamp":
+        typeCodec = TypeCodec.timestamp();
+        break;
+      case "timeuuid":
+        typeCodec = TypeCodec.timeUUID();
+        break;
+      case "tinyint":
+        typeCodec = TypeCodec.tinyInt();
+        break;
+      case "uuid":
+        typeCodec = TypeCodec.uuid();
+        break;
+      case "varint":
+        typeCodec = TypeCodec.varint();
+        break;
+      case "varchar":
+      case "text":
+        typeCodec = TypeCodec.varchar();
+        break;
+      default:
+        LOG.error("Unsupported Cassandra datatype: {} ", columnType);
+        throw new RuntimeException("Unsupported Cassandra datatype: " + columnType);
+    }
+    return typeCodec;
+  }
 
   private Cluster.Builder populateSettings(Cluster.Builder builder, Properties properties) {
     String serversParam = properties.getProperty(CassandraStoreParameters.CASSANDRA_SERVERS);

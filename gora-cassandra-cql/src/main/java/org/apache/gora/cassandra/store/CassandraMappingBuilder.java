@@ -188,7 +188,7 @@ public class CassandraMappingBuilder<K, T extends Persistent> {
                   keyField.setColumnName(attributeValue);
                   break;
                 case "type":
-                  keyField.setType(attributeValue);
+                  keyField.setType(attributeValue.replace("(","<").replace(")",">"));
                   break;
                 case "order":
                   keyField.setOrder(ClusterKeyField.Order.valueOf(attributeValue.toUpperCase(Locale.ENGLISH)));
@@ -222,7 +222,7 @@ public class CassandraMappingBuilder<K, T extends Persistent> {
           fieldKey.setColumnName(attributeValue);
           break;
         case "type":
-          fieldKey.setType(attributeValue);
+          fieldKey.setType(attributeValue.replace("(","<").replace(")",">"));
           break;
         default:
           fieldKey.addProperty(attributeName, attributeValue);

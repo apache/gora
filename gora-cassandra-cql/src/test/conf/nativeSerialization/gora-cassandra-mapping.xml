@@ -56,10 +56,21 @@
     </keyspace>
 
     <class name="org.apache.gora.cassandra.example.generated.nativeSerialization.User" keyClass="java.util.UUID" keyspace="nativeTestKeySpace"
-           table="Users" >
-        <field name="userId" column="user_id" type="uuid" ttl="10" primarykey="true"/>
-        <field name="name" column="name" type="text" ttl="10"/>
-        <field name="dateOfBirth" column="dob" type="timestamp" ttl="10"/>
+           table="users" >
+        <field name="userId" column="user_id" type="uuid" primarykey="true"/>
+        <field name="name" column="name" type="text" />
+        <field name="dateOfBirth" column="dob" type="timestamp" />
+    </class>
+
+    <class name="org.apache.gora.cassandra.example.generated.nativeSerialization.ComplexTypes" keyClass="java.lang.String" keyspace="nativeTestKeySpace"
+           table="documents" >
+        <field name="id" column="id" type="text" primarykey="true"/>
+        <field name="listDataType" column="listDataType" type="list(text)"/>
+        <field name="listUUIDDataType" column="listUUIDDataType" type="list(uuid)"/>
+        <field name="mapDataType" column="mapDataType" type="map(text,text)" />
+        <field name="stringArrayDataType" column="stringArrayDataType" type="list(text)" />
+        <field name="intArrayDataType" column="intArrayDataType" type="list(int)" />
+        <field name="setDataType" column="setDataType" type="set(text)" />
     </class>
 
 </gora-otd>

@@ -43,9 +43,6 @@ public class User extends CassandraNativePersistent {
   @Column(name = "dob")
   private Date dateOfBirth;
 
-  @Transient
-  private boolean dirty;
-
   public User() {
 
   }

@@ -18,11 +18,13 @@
 package org.apache.gora.cassandra.store;
 
 import org.apache.gora.cassandra.GoraCassandraTestDriver;
+import org.apache.gora.cassandra.example.generated.nativeSerialization.ComplexTypes;
 import org.apache.gora.cassandra.example.generated.nativeSerialization.User;
 import org.apache.gora.cassandra.query.CassandraQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.store.DataStore;
+import org.apache.gora.util.GoraException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -30,8 +32,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
@@ -214,6 +219,9 @@ public class TestCassandraStoreWithNativeSerialization {
     Assert.assertEquals(1, i);
   }
 
+  /**
+   * In this test case, delete by query method behavior of the data store is testing.
+   */
   @Test
   public void testDeleteByQuery() throws Exception {
     userDataStore.truncateSchema();
@@ -239,6 +247,9 @@ public class TestCassandraStoreWithNativeSerialization {
     Assert.assertEquals(partialDeletedUser.getDateOfBirth(),user2.getDateOfBirth());
   }
 
+  /**
+   * In this test case, update by quert method behavior of the data store is testing.
+   */
   @Test
   public void testUpdateByQuery() {
     userDataStore.truncateSchema();
@@ -258,5 +269,37 @@ public class TestCassandraStoreWithNativeSerialization {
     }
     User user = userDataStore.get(id1);
     Assert.assertEquals(user.getName(),"madhawa");
+  }
+
+  @Test
+  public void testComplexTypes() throws GoraException {
+    DataStore<String, ComplexTypes> documentDataStore = testDriver.createDataStore(String.class, ComplexTypes.class);
+    ComplexTypes document = new ComplexTypes("document1");
+    document.setIntArrayDataType(new int[]{1,2,3});
+    document.setStringArrayDataType(new String[] {"madhawa", "kasun", "gunasekara", "pannipitiya", "srilanka"});
+    document.setListDataType(new ArrayList<>(Arrays.asList("gora","nutch","tika","opennlp", "olingo")));
+    document.setSetDataType(new HashSet<>(Arrays.asList("important", "keeper")));
+    HashMap<String,String> map = new HashMap<>();
+    map.put("LK","Colombo");
+    document.setMapDataType(map);
+    documentDataStore.put("document1", document);
+    ComplexTypes retrievedDocuemnt = documentDataStore.get("document1");
+    // verify list data
+    for(int i=0; i<document.getListDataType().size(); i++) {
+      Assert.assertEquals(document.getListDataType().get(i), retrievedDocuemnt.getListDataType().get(i));
+    }
+    // verify set data
+    for(int i=0; i<document.getSetDataType().size(); i++) {
+      Assert.assertTrue(Arrays.equals(document.getSetDataType().toArray(), retrievedDocuemnt.getSetDataType().toArray()));
+    }
+    // verify array data
+    for(int i=0; i<document.getIntArrayDataType().length; i++) {
+      Assert.assertTrue(Arrays.equals(document.getIntArrayDataType(), retrievedDocuemnt.getIntArrayDataType()));
+    }
+    for(int i=0; i<document.getStringArrayDataType().length; i++) {
+      Assert.assertTrue(Arrays.equals(document.getStringArrayDataType(), retrievedDocuemnt.getStringArrayDataType()));
+    }
+    // verify map data
+    Assert.assertEquals(map.get("LK"),retrievedDocuemnt.getMapDataType().get("LK"));
   }
 }
