@@ -50,16 +50,18 @@ import org.apache.accumulo.core.client.TableExistsException;
 import org.apache.accumulo.core.client.TableNotFoundException;
 import org.apache.accumulo.core.client.TableOfflineException;
 import org.apache.accumulo.core.client.ZooKeeperInstance;
+import org.apache.accumulo.core.client.impl.ClientContext;
 import org.apache.accumulo.core.client.impl.Tables;
 import org.apache.accumulo.core.client.impl.TabletLocator;
 import org.apache.accumulo.core.client.mock.MockConnector;
 import org.apache.accumulo.core.client.mock.MockInstance;
-import org.apache.accumulo.core.client.mock.MockTabletLocator;
+import org.apache.accumulo.core.client.mock.impl.MockTabletLocator;
 import org.apache.accumulo.core.client.security.tokens.AuthenticationToken;
 import org.apache.accumulo.core.client.security.tokens.PasswordToken;
+import org.apache.accumulo.core.conf.AccumuloConfiguration;
 import org.apache.accumulo.core.data.ByteSequence;
 import org.apache.accumulo.core.data.Key;
-import org.apache.accumulo.core.data.KeyExtent;
+import org.apache.accumulo.core.data.impl.KeyExtent;
 import org.apache.accumulo.core.data.Mutation;
 import org.apache.accumulo.core.data.Range;
 import org.apache.accumulo.core.data.Value;
@@ -68,7 +70,7 @@ import org.apache.accumulo.core.iterators.user.TimestampFilter;
 import org.apache.accumulo.core.master.state.tables.TableState;
 import org.apache.accumulo.core.security.Authorizations;
 import org.apache.accumulo.core.security.ColumnVisibility;
-import org.apache.accumulo.core.security.Credentials;
+import org.apache.accumulo.core.client.impl.Credentials;
 import org.apache.accumulo.core.util.Pair;
 import org.apache.accumulo.core.util.UtilWaitThread;
 import org.apache.avro.Schema;
@@ -108,8 +110,10 @@ import org.w3c.dom.NodeList;
 /**
  * Implementation of a Accumulo data store to be used by gora.
  *
- * @param <K> class to be used for the key
- * @param <T> class to be persisted within the store
+ * @param <K>
+ *            class to be used for the key
+ * @param <T>
+ *            class to be persisted within the store
  */
 public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T> {
 
@@ -895,12 +899,12 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       if (conn instanceof MockConnector)
         tl = new MockTabletLocator();
       else
-        tl = TabletLocator.getLocator(conn.getInstance(), new Text(Tables.getTableId(conn.getInstance(), mapping.tableName)));
+        tl = TabletLocator.getLocator(new ClientContext(conn.getInstance(), credentials, AccumuloConfiguration.getTableConfiguration(conn, Tables.getTableId(conn.getInstance(), mapping.tableName))), new Text(Tables.getTableId(conn.getInstance(), mapping.tableName)));
 
       Map<String,Map<KeyExtent,List<Range>>> binnedRanges = new HashMap<>();
 
       tl.invalidateCache();
-      while (tl.binRanges(credentials, Collections.singletonList(createRange(query)), binnedRanges).size() > 0) {
+      while (tl.binRanges(new ClientContext(conn.getInstance(), credentials, AccumuloConfiguration.getTableConfiguration(conn, Tables.getTableId(conn.getInstance(), mapping.tableName))), Collections.singletonList(createRange(query)), binnedRanges).size() > 0) {
         // TODO log?
         if (!Tables.exists(conn.getInstance(), Tables.getTableId(conn.getInstance(), mapping.tableName)))
           throw new TableDeletedException(Tables.getTableId(conn.getInstance(), mapping.tableName));

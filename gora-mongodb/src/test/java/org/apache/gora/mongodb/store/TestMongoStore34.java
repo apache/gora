@@ -15,24 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.gora.mongodb.authentications;
+package org.apache.gora.mongodb.store;
 
 import de.flapdoodle.embed.mongo.distribution.Version;
-import org.apache.gora.mongodb.store.TestMongoStore;
-
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import org.apache.gora.mongodb.GoraMongodbTestDriver;
 
 /**
- * Perform {@link TestMongoStore} tests on MongoDB 3.2.x server with SCRAM-SHA-1 Authentication mechanism
+ * Perform {@link TestMongoStore} tests on MongoDB 3.4.x server.
  */
-public class SCRAM_SHA_1_AuthenticationTest extends TestMongoStore {
+public class TestMongoStore34 extends TestMongoStore {
+
   static {
-    try {
-      setTestDriver(new GoraMongodbAuthenticationTestDriver("SCRAM-SHA-1", Version.Main.V3_4));
-    } catch (Exception e) {
-      log.error("MongoDb Test Driver initialization failed. "+ e.getMessage());
-    }
+    setTestDriver(new GoraMongodbTestDriver(Version.Main.V3_4));
   }
 }

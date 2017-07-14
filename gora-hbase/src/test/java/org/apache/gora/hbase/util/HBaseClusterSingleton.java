@@ -165,7 +165,7 @@ public final class HBaseClusterSingleton {
   public void truncateAllTables() throws Exception {
     HBaseAdmin admin = htu.getHBaseAdmin();
     for(HTableDescriptor table:admin.listTables()) {
-      HTable hTable = htu.truncateTable(table.getName());
+      HTable hTable = htu.deleteTableData(table.getName());
       hTable.close();
     }
   }
