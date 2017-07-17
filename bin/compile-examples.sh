@@ -36,8 +36,42 @@ DIR=$GORA_HOME/$MODULE/src/examples/avro/
 OUTDIR=$GORA_HOME/$MODULE/src/examples/java
 GORA_BIN=$GORA_HOME/bin/gora
 
+rm -r $OUTDIR/org/apache/gora/examples/generated/*
+
 for f in `ls $DIR` ; do
   echo "Compiling $DIR$f"
-  $GORA_BIN compile $DIR$f $OUTDIR 
+  echo "Command: $GORA_BIN goracompiler $DIR$f $OUTDIR"
+  $GORA_BIN goracompiler $DIR$f $OUTDIR 
 done
 
+
+# GORACI
+
+MODULE=gora-goraci
+DIR=$GORA_HOME/$MODULE/src/main/avro/
+OUTDIR=$GORA_HOME/$MODULE/src/main/java
+GORA_BIN=$GORA_HOME/bin/gora
+
+rm -r $OUTDIR/org/apache/gora/goraci/generated/*
+
+for f in `ls $DIR` ; do
+  echo "Compiling $DIR$f"
+  echo "Command: $GORA_BIN goracompiler $DIR$f $OUTDIR"
+  $GORA_BIN goracompiler $DIR$f $OUTDIR 
+done
+
+
+# TUTORIAL
+
+MODULE=gora-tutorial
+DIR=$GORA_HOME/$MODULE/src/main/avro/
+OUTDIR=$GORA_HOME/$MODULE/src/main/java
+GORA_BIN=$GORA_HOME/bin/gora
+
+rm -r $OUTDIR/org/apache/gora/tutorial/log/generated/*
+
+for f in `ls $DIR` ; do
+  echo "Compiling $DIR$f"
+  echo "Command: $GORA_BIN goracompiler $DIR$f $OUTDIR"
+  $GORA_BIN goracompiler $DIR$f $OUTDIR 
+done

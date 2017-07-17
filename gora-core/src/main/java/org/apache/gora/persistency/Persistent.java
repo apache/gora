@@ -25,7 +25,7 @@ import org.apache.avro.Schema.Field;
 /**
 * Objects that are persisted by Gora implements this interface.
 */
-public interface Persistent extends Dirtyable {
+public interface Persistent extends Dirtyable, Cloneable {
 
   public static String DIRTY_BYTES_FIELD_NAME = "__g__dirty";
 
@@ -120,5 +120,7 @@ public interface Persistent extends Dirtyable {
    * @return the parsed schema definition
    */
   public Schema getSchema() ;
+  
+  public Persistent clone();
   
 }
