@@ -19,11 +19,16 @@
 package org.apache.gora.aerospike.store;
 
 import org.apache.gora.aerospike.GoraAerospikeTestDriver;
+import org.apache.gora.examples.WebPageDataCreator;
+import org.apache.gora.examples.generated.WebPage;
+import org.apache.gora.query.Query;
 import org.apache.gora.store.DataStoreTestBase;
 import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.testcontainers.containers.GenericContainer;
+
+import static org.apache.gora.examples.WebPageDataCreator.URLS;
 
 /**
  * Test case for AerospikeStore.
@@ -85,11 +90,14 @@ public class TestAerospikeStore extends DataStoreTestBase {
   }
 
   @Test
-  @Ignore("Functionality is to be implemented in the next iteration")
   @Override
   public void testQuery() throws Exception {
-    //done
-    //ToDo: clear the data before executing
+    // Clearing the test data in the database
+    Query<String, WebPage> query;
+    WebPageDataCreator.createWebPageData(webPageStore);
+    query = webPageStore.newQuery();
+    webPageStore.deleteByQuery(query);
+
     super.testQuery();
   }
 
@@ -115,9 +123,14 @@ public class TestAerospikeStore extends DataStoreTestBase {
   }
 
   @Test
-  @Ignore("Functionality is to be implemented in the next iteration as this incurs query execution")
   @Override
   public void testDelete() throws Exception {
+    // Clearing the test data in the database
+    Query<String, WebPage> query;
+    WebPageDataCreator.createWebPageData(webPageStore);
+    query = webPageStore.newQuery();
+    webPageStore.deleteByQuery(query);
+
     super.testDelete();
   }
 

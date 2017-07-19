@@ -211,9 +211,27 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
             .delete(aerospikeParameters.getAerospikeMapping().getWritePolicy(), recordKey);
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @param query matching records to this query will be deleted
+   * @return the number of deleted records
+   */
   @Override
   public long deleteByQuery(Query<K, T> query) {
-    return 0;
+    Result<K, T> result = query.execute();
+    int deleteCount = 0;
+    try {
+      while(result.next()) {
+        if(aerospikeClient.delete(null,getAerospikeKey(result.getKey()))){
+          deleteCount++;
+        }
+      }
+      return deleteCount;
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      return -1;
+    }
   }
 
   /**
