@@ -30,7 +30,7 @@
   </class>
 
   <class name="org.apache.gora.examples.generated.WebPage" keyClass="java.lang.String"
-         table="WebPage" namespace = "test">
+         set="WebPage" namespace = "test">
     <field name="url" bin="url"/>
     <field name="content" bin="content"/>
     <field name="parsedContent" bin="parsedContent"/>

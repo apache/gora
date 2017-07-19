@@ -30,9 +30,14 @@ import com.aerospike.client.Bin;
 import com.aerospike.client.Record;
 import com.aerospike.client.AerospikeClient;
 import com.aerospike.client.policy.ClientPolicy;
+import com.aerospike.client.query.RecordSet;
+import com.aerospike.client.query.Statement;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.util.Utf8;
+import org.apache.gora.aerospike.query.AerospikeQuery;
+import org.apache.gora.aerospike.query.AerospikeQueryResult;
+import org.apache.gora.aerospike.query.AerospikeResultRecord;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.impl.DirtyListWrapper;
 import org.apache.gora.persistency.impl.DirtyMapWrapper;
@@ -86,7 +91,11 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
     policy.writePolicyDefault = aerospikeParameters.getAerospikeMapping().getWritePolicy();
     policy.readPolicyDefault = aerospikeParameters.getAerospikeMapping().getReadPolicy();
 
-    aerospikeClient = new AerospikeClient(aerospikeParameters.getHost(),
+    // 'SendKey' property is enabled by default as the key is needed in query execution
+    policy.readPolicyDefault.sendKey = true;
+    policy.writePolicyDefault.sendKey = true;
+
+    aerospikeClient = new AerospikeClient(policy, aerospikeParameters.getHost(),
             aerospikeParameters.getPort());
     aerospikeParameters.setServerSpecificParameters(aerospikeClient);
     aerospikeParameters.validateServerBinConfiguration(persistentClass.getFields());
@@ -207,14 +216,83 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
     return 0;
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @param query the query to execute.
+   * @return the query result
+   */
   @Override
   public Result<K, T> execute(Query<K, T> query) {
-    return null;
+
+    List<AerospikeResultRecord> resultRecords = new ArrayList<>();
+    String namespace = aerospikeParameters.getAerospikeMapping().getNamespace();
+    String set = aerospikeParameters.getAerospikeMapping().getSet();
+
+    // Query execution without any keys
+    if (query.getStartKey() == null && query.getEndKey() == null){
+
+      try (RecordSet recordSet = aerospikeClient.query(null, getStatement(namespace, set))) {
+        while (recordSet.next()) {
+          AerospikeResultRecord aerospikeRecord = new AerospikeResultRecord(recordSet.getKey(),
+                  recordSet.getRecord());
+          resultRecords.add(aerospikeRecord);
+        }
+      }
+    }
+
+    // Query execution for single key
+    else if (query.getKey()!= null) {
+      Key key = getAerospikeKey(query.getKey());
+      Record record = aerospikeClient.get(null, key);
+      if(record != null){
+        resultRecords.add(new AerospikeResultRecord(key, record));
+      }
+    }
+
+    // Query execution for key ranges
+    // ToDo: Implement for other scenarios
+    else if (query.getStartKey() != null && query.getEndKey() != null) {
+//      Key startKey = null, endKey = null;
+//      if (query.getStartKey() != null) {
+//        startKey = getAerospikeKey(query.getStartKey());
+//      }
+//      if (query.getEndKey() != null) {
+//        endKey = getAerospikeKey(query.getEndKey());
+//      }
+
+//      boolean isSpecifiedRange = false;
+//      try (RecordSet recordSet = aerospikeClient.query(null, getStatement(namespace, set))) {
+//        while (recordSet.next()) {
+//          Key key = recordSet.getKey();
+//          Record record = recordSet.getRecord();
+//
+//          if(key.userKey == getAerospikeKey(query.getStartKey()).userKey){
+//            isSpecifiedRange = true;
+//          }
+//          if(key.userKey == getAerospikeKey(query.getEndKey()).userKey){
+//            isSpecifiedRange = false;
+//          }
+//
+//          if(isSpecifiedRange){
+//            AerospikeResultRecord aerospikeRecord = new AerospikeResultRecord(key,record);
+//            resultRecords.add(aerospikeRecord);
+//          }
+//
+//        }
+      }
+
+    return new AerospikeQueryResult<>(this, query, resultRecords, getFieldsToQuery(null));
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @return the new query corresponding to aerospike
+   */
   @Override
   public Query<K, T> newQuery() {
-    return null;
+    return new AerospikeQuery<>(this);
   }
 
   @Override
@@ -226,6 +304,19 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
   public void flush() {
   }
 
+  /**
+   * Method to create a statement
+   *
+   * @param namespace the namespace
+   * @param set       the set
+   * @return the statement
+   */
+  private Statement getStatement(String namespace, String set){
+    Statement stmt = new Statement();
+    stmt.setNamespace(namespace);
+    stmt.setSetName(set);
+    return stmt;
+  }
   /**
    * Method to close aerospike client connections to database server nodes
    */
@@ -309,7 +400,7 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
    * @param fields fields
    * @return persistent object created
    */
-  private T createPersistentInstance(Record record, String[] fields) {
+  public T createPersistentInstance(Record record, String[] fields) {
 
     T persistent = newPersistent();
     for (String field : fields) {

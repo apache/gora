@@ -88,6 +88,8 @@ public class TestAerospikeStore extends DataStoreTestBase {
   @Ignore("Functionality is to be implemented in the next iteration")
   @Override
   public void testQuery() throws Exception {
+    //done
+    //ToDo: clear the data before executing
     super.testQuery();
   }
 
@@ -110,27 +112,6 @@ public class TestAerospikeStore extends DataStoreTestBase {
   @Override
   public void testQueryKeyRange() throws Exception {
     super.testQueryKeyRange();
-  }
-
-  @Test
-  @Ignore("Functionality is to be implemented in the next iteration")
-  @Override
-  public void testQueryWebPageSingleKey() throws Exception {
-    super.testQueryWebPageSingleKey();
-  }
-
-  @Test
-  @Ignore("Functionality is to be implemented in the next iteration")
-  @Override
-  public void testQueryWebPageSingleKeyDefaultFields() throws Exception {
-    super.testQueryWebPageSingleKeyDefaultFields();
-  }
-
-  @Test
-  @Ignore("Functionality is to be implemented in the next iteration")
-  @Override
-  public void testQueryWebPageQueryEmptyResults() throws Exception {
-    super.testQueryWebPageQueryEmptyResults();
   }
 
   @Test
