@@ -76,20 +76,6 @@ public class TestAerospikeStore extends DataStoreTestBase {
   }
 
   @Test
-  @Ignore("Functionality is to be implemented in the next iteration")
-  @Override
-  public void testUpdate() throws Exception {
-    super.testUpdate();
-  }
-
-  @Test
-  @Ignore("Functionality is to be implemented in the next iteration")
-  @Override
-  public void testEmptyUpdate() throws Exception {
-    super.testEmptyUpdate();
-  }
-
-  @Test
   @Override
   public void testQuery() throws Exception {
     // Clearing the test data in the database

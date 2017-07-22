@@ -177,7 +177,14 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
     Key recordKey = getAerospikeKey(key);
 
     List<Field> fields = persistent.getSchema().getFields();
+
+    if (aerospikeClient.exists(null, recordKey)) {
+      this.delete(key);
+    }
     for (int i = 0; i < fields.size(); i++) {
+      if (!persistent.isDirty(i)) {
+        continue;
+      }
       Object persistentValue = persistent.get(i);
       if (persistentValue != null) {
         String mappingBinName = aerospikeParameters.getAerospikeMapping().getBinMapping()
@@ -269,7 +276,7 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
     }
 
     // Query execution for key ranges
-    // ToDo: Implement for other scenarios
+    // ToDo: Implement Query execution for key ranges
     else if (query.getStartKey() != null && query.getEndKey() != null) {
 //      Key startKey = null, endKey = null;
 //      if (query.getStartKey() != null) {
@@ -335,6 +342,7 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
     stmt.setSetName(set);
     return stmt;
   }
+
   /**
    * Method to close aerospike client connections to database server nodes
    */
@@ -424,6 +432,7 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
     for (String field : fields) {
       setPersistentField(field, record, persistent);
     }
+    persistent.setDirty();
     return persistent;
   }
 
