@@ -46,7 +46,7 @@ public class CassandraMappingBuilder<K, T extends Persistent> {
    */
   @SuppressWarnings("all")
   public CassandraMapping readMapping(String filename) throws IOException {
-    CassandraMapping map = new CassandraMapping();
+    CassandraMapping cassandraMapping = new CassandraMapping();
     Class keyClass = dataStore.getKeyClass();
     Class persistentClass = dataStore. getPersistentClass();
     try {
@@ -66,14 +66,16 @@ public class CassandraMappingBuilder<K, T extends Persistent> {
 
           classMatched = true;
           String tableName = classElement.getAttributeValue("table");
-          map.setCoreName(tableName);
+          cassandraMapping.setCoreName(tableName);
+          cassandraMapping.setKeyClass(dataStore.getKeyClass());
+          cassandraMapping.setPersistentClass(dataStore.getPersistentClass());
 
           List classAttributes = classElement.getAttributes();
           for (Object anAttributeList : classAttributes) {
             Attribute attribute = (Attribute) anAttributeList;
             String attributeName = attribute.getName();
             String attributeValue = attribute.getValue();
-            map.addProperty(attributeName, attributeValue);
+            cassandraMapping.addProperty(attributeName, attributeValue);
           }
 
           List<Element> fields = classElement.getChildren("field");
@@ -83,7 +85,7 @@ public class CassandraMappingBuilder<K, T extends Persistent> {
 
             List fieldAttributes = field.getAttributes();
             processAttributes(fieldAttributes, cassandraField);
-            map.addCassandraField(cassandraField);
+            cassandraMapping.addCassandraField(cassandraField);
           }
           break;
         }
@@ -96,7 +98,7 @@ public class CassandraMappingBuilder<K, T extends Persistent> {
         LOG.error("Check that 'keyClass' and 'name' parameters in {} no mapping has been initialized for {} class mapping", filename, persistentClass);
       }
 
-      String keyspaceName = map.getProperty("keyspace");
+      String keyspaceName = cassandraMapping.getProperty("keyspace");
       if (keyspaceName != null) {
         KeySpace keyspace;
         for (Element keyspaceElement : keyspaces) {
@@ -135,12 +137,15 @@ public class CassandraMappingBuilder<K, T extends Persistent> {
                 }
                 break;
             }
-            map.setKeySpace(keyspace);
+            cassandraMapping.setKeySpace(keyspace);
             break;
           }
 
         }
 
+      }
+      else {
+        throw new RuntimeException("KeySpace couldn't be able to found in the  cassandra mapping. Please configure the cassandra mapping correctly.");
       }
 
       for (Element key : keys) {
@@ -172,7 +177,7 @@ public class CassandraMappingBuilder<K, T extends Persistent> {
           }
 
           //process cluster keys
-          List<Element> clusterKeyFields = clusterKeys.getChildren("field");
+          List<Element> clusterKeyFields = clusterKeys.getChildren("key");
           for (Element clusterKeyField : clusterKeyFields) {
             ClusterKeyField keyField = new ClusterKeyField();
             List fieldAttributes = clusterKeyField.getAttributes();
@@ -181,32 +186,25 @@ public class CassandraMappingBuilder<K, T extends Persistent> {
               String attributeName = attribute.getName();
               String attributeValue = attribute.getValue();
               switch (attributeName) {
-                case "name":
-                  keyField.setFieldName(attributeValue);
-                  break;
                 case "column":
                   keyField.setColumnName(attributeValue);
-                  break;
-                case "type":
-                  keyField.setType(attributeValue.replace("(","<").replace(")",">"));
                   break;
                 case "order":
                   keyField.setOrder(ClusterKeyField.Order.valueOf(attributeValue.toUpperCase(Locale.ENGLISH)));
                   break;
                 default:
-                  keyField.addProperty(attributeName, attributeValue);
-                  break;
+                  throw new RuntimeException("");
               }
             }
             cassandraKey.addClusterKeyField(keyField);
           }
-          map.setCassandraKey(cassandraKey);
+          cassandraMapping.setCassandraKey(cassandraKey);
         }
       }
     } catch (Exception ex) {
       throw new IOException(ex);
     }
-    return map;
+    return cassandraMapping;
   }
 
   private void processAttributes(List<Element> attributes, Field fieldKey) {

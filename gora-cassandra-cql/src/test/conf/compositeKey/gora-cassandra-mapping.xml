@@ -55,23 +55,30 @@
         <placementStrategy name="SimpleStrategy" replication_factor="1"/>
     </keyspace>
 
-    <class name="org.apache.gora.examples.generated.Employee" keyClass="org.apache.gora.examples.generated.WebPage" keyspace="EmployeeSpace"
-           table="Employee"  compactStorage="true" id="31323131">
-        <field name="name" column="name" type="text" ttl="10"/>
-        <field name="dateOfBirth" column="dob" type="timestamp" ttl="10"/>
+    <class name="org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord" keyClass="org.apache.gora.cassandra.example.generated.avroSerialization.CassandraKey" keyspace="EmployeeSpace"
+           table="CassandraRecord" allowFiltering="true"  id="5a1c395e-b41f-11e5-9f22-ba0be0483c18">
+        <field name="dataString" column="name" type="text"/>
+        <field name="dataInt" column="age" type="int"/>
+        <field name="dataLong" column="salary" type="bigint"/>
+        <field name="dataDouble" column="testDouble" type="double"/>
+        <field name="dataBytes" column="quotes" type="blob"/>
+        <field name="arrayInt" column="listInt" type="list(int)"/>
+        <field name="arrayString" column="listString" type="list(text)"/>
+        <field name="arrayLong" column="listLong" type="list(bigint)"/>
+        <field name="arrayDouble" column="listDouble" type="list(double)"/>
+        <field name="mapInt" column="mapInt" type="map(text,int)"/>
+        <field name="mapString" column="mapString" type="map(text,text)"/>
+        <field name="mapLong" column="mapLong" type="map(text,bigint)"/>
+        <field name="mapDouble" column="mapDouble" type="map(text,double)"/>
     </class>
 
-    <cassandraKey name="org.apache.gora.examples.generated.WebPage">
+    <cassandraKey name="org.apache.gora.cassandra.example.generated.avroSerialization.CassandraKey">
         <partitionKey>
-            <compositeKey>
-                <field name="city" column="city" type="text"/>
-                <field name="country" column="country" type="text"/>
-            </compositeKey>
-            <field name="employerId" column="empID" type="int"/>
-            <field name="departmentId" column="deptID" type="int"/>
+                <field name="url" column="urlData" type="text"/>
+                <field name="timestamp" column="timestampData" type="bigint"/>
         </partitionKey>
         <clusterKey>
-            <field name="joinDate" column="joinDate" type="timestamp" order="desc"/>
+            <key column="timestampData" order="desc"/>
         </clusterKey>
     </cassandraKey>
 

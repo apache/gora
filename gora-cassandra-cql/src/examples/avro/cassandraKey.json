@@ -1,0 +1,21 @@
+{
+  "type": "record",
+  "name": "CassandraKey",
+  "default": null,
+  "namespace": "org.apache.gora.cassandra.example.generated.avroSerialization",
+  "fields": [
+    {
+      "name": "url",
+      "type": [
+        "null",
+        "string"
+      ],
+      "default": null
+    },
+    {
+      "name": "timestamp",
+      "type": "long",
+      "default": 0
+    }
+  ]
+}

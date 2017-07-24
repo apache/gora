@@ -35,9 +35,17 @@ public class CassandraMapping {
 
   private Map<String, String> tableProperties;
 
+  private Class keyClass;
+
+  private Class persistentClass;
+
   private KeySpace keySpace;
 
   private List<Field> fieldList;
+
+  private List<Field> inlinedDefinedPartitionKeys;
+
+  private static final String PRIMARY_KEY = "primarykey";
 
   private String coreName;
 
@@ -53,9 +61,9 @@ public class CassandraMapping {
     return fieldList;
   }
 
-  public Field getField(String field) {
+  public Field getFieldFromFieldName(String fieldName) {
     for (Field field1 : fieldList) {
-      if (field1.getFieldName().equals(field)) {
+      if (field1.getFieldName().equals(fieldName)) {
         return field1;
       }
     }
@@ -75,11 +83,12 @@ public class CassandraMapping {
     return cassandraKey;
   }
 
-  public void setCassandraKey(CassandraKey cassandraKey) {
+  void setCassandraKey(CassandraKey cassandraKey) {
     this.cassandraKey = cassandraKey;
+    this.fieldList.addAll(cassandraKey.getFieldList());
   }
 
-  public CassandraMapping() {
+  CassandraMapping() {
     this.fieldList = new ArrayList<>();
     this.tableProperties = new HashMap<>();
   }
@@ -102,5 +111,55 @@ public class CassandraMapping {
 
   public String getProperty(String key) {
     return this.tableProperties.get(key);
+  }
+
+  public Field getDefaultCassandraKey() {
+    Field field = new Field();
+    field.setFieldName("defaultId");
+    field.setColumnName("defaultId");
+    field.setType("text");
+    return field;
+  }
+
+  public boolean isPartitionKeyDefined() {
+    if (cassandraKey == null) {
+      for (Field field : fieldList) {
+        if (Boolean.parseBoolean(field.getProperty(PRIMARY_KEY))) {
+          return true;
+        }
+      }
+      return false;
+    }
+    return true;
+  }
+
+  public Class getKeyClass() {
+    return keyClass;
+  }
+
+  public void setKeyClass(Class keyClass) {
+    this.keyClass = keyClass;
+  }
+
+  public Class getPersistentClass() {
+    return persistentClass;
+  }
+
+  public void setPersistentClass(Class persistentClass) {
+    this.persistentClass = persistentClass;
+  }
+
+  public List<Field> getInlinedDefinedPartitionKeys() {
+    if(inlinedDefinedPartitionKeys != null) {
+      return inlinedDefinedPartitionKeys;
+    } else {
+      inlinedDefinedPartitionKeys = new ArrayList<>();
+      for (Field field : fieldList) {
+        if (Boolean.parseBoolean(field.getProperty(PRIMARY_KEY))) {
+          inlinedDefinedPartitionKeys.add(field);
+        }
+      }
+      return inlinedDefinedPartitionKeys;
+    }
   }
 }

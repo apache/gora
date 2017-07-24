@@ -20,7 +20,21 @@ package org.apache.gora.cassandra.bean;
 /**
  * This class represents Cassandra Clustering Key.
  */
-public class ClusterKeyField extends Field {
+public class ClusterKeyField {
+
+  public String getColumnName() {
+    return columnName;
+  }
+
+  public void setColumnName(String columnName) {
+    this.columnName = columnName;
+  }
+
+  private String columnName;
+
+  public ClusterKeyField() {
+
+  }
 
   public enum Order {
     DESC,

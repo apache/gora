@@ -90,7 +90,7 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
       mapping = mappingBuilder.readMapping(mappingFile);
       CassandraClient cassandraClient = new CassandraClient();
       cassandraClient.initialize(properties, mapping);
-      cassandraSerializer = CassandraSerializer.getSerializer(cassandraClient, properties.getProperty(CassandraStoreParameters.CASSANDRA_SERIALIZATION_TYPE), keyClass, persistentClass, mapping);
+      cassandraSerializer = CassandraSerializer.getSerializer(cassandraClient, properties.getProperty(CassandraStoreParameters.CASSANDRA_SERIALIZATION_TYPE), this, mapping);
     } catch (Exception e) {
       throw new RuntimeException("Error while initializing Cassandra store: " + e.getMessage(), e);
     }

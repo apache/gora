@@ -42,7 +42,7 @@ import java.util.List;
  */
 class NativeSerializer<K, T extends CassandraNativePersistent> extends CassandraSerializer {
 
-  private static final Logger LOG = LoggerFactory.getLogger(CassandraNativePersistent.class);
+  private static final Logger LOG = LoggerFactory.getLogger(NativeSerializer.class);
 
   private Mapper<T> mapper;
 
@@ -72,9 +72,11 @@ class NativeSerializer<K, T extends CassandraNativePersistent> extends Cassandra
 
   @Override
   public Persistent get(Object key, String[] fields) {
-    List<Object> objectArrayList = new ArrayList<>();
-    String cqlQuery = CassandraQueryFactory.getObjectWithFieldsQuery(mapping, fields, key, objectArrayList);
-    ResultSet results = client.getSession().execute(cqlQuery, objectArrayList.toArray());
+    if(fields == null) {
+      fields = getFields();
+    }
+    String cqlQuery = CassandraQueryFactory.getSelectObjectWithFieldsQuery(mapping, fields);
+    ResultSet results = client.getSession().execute(cqlQuery, key);
     Result<T> objects = mapper.map(results);
     List<T> objectList = objects.all();
     if (objectList != null) {
@@ -86,24 +88,9 @@ class NativeSerializer<K, T extends CassandraNativePersistent> extends Cassandra
   }
 
   @Override
-  public long deleteByQuery(Query query) {
-    List<Object> objectArrayList = new ArrayList<>();
-    String cqlQuery = CassandraQueryFactory.getDeleteByQuery(mapping, query, objectArrayList);
-    ResultSet results;
-    if (objectArrayList.size() == 0) {
-      results = client.getSession().execute(cqlQuery);
-    } else {
-      results = client.getSession().execute(cqlQuery, objectArrayList.toArray());
-    }
-    LOG.debug("Delete by Query was applied : " + results.wasApplied());
-    LOG.info("Delete By Query method doesn't return the deleted element count.");
-    return 0;
-  }
-
-  @Override
   public org.apache.gora.query.Result execute(DataStore dataStore, Query query) {
     List<Object> objectArrayList = new ArrayList<>();
-    CassandraResultSet<K, T> cassandraResult = new CassandraResultSet<K, T>(dataStore, query);
+    CassandraResultSet<K, T> cassandraResult = new CassandraResultSet<>(dataStore, query);
     String cqlQuery = CassandraQueryFactory.getExecuteQuery(mapping, query, objectArrayList);
     ResultSet results;
     if (objectArrayList.size() == 0) {
@@ -113,11 +100,14 @@ class NativeSerializer<K, T extends CassandraNativePersistent> extends Cassandra
     }
     Result<T> objects = mapper.map(results);
     Iterator iterator = objects.iterator();
+    long count = 0;
     while (iterator.hasNext()) {
       T result = (T) iterator.next();
       K key = getKey(result);
       cassandraResult.addResultElement(key, result);
+      count ++ ;
     }
+    cassandraResult.setLimit(count);
     return cassandraResult;
   }
 
@@ -126,19 +116,6 @@ class NativeSerializer<K, T extends CassandraNativePersistent> extends Cassandra
     this.createSchema();
     MappingManager mappingManager = new MappingManager(cassandraClient.getSession());
     mapper = mappingManager.mapper(persistentClass);
-  }
-
-  @Override
-  public boolean updateByQuery(Query query) {
-    List<Object> objectArrayList = new ArrayList<>();
-    String cqlQuery = CassandraQueryFactory.getUpdateByQuery(mapping, query, objectArrayList);
-    ResultSet results;
-    if (objectArrayList.size() == 0) {
-      results = client.getSession().execute(cqlQuery);
-    } else {
-      results = client.getSession().execute(cqlQuery, objectArrayList.toArray());
-    }
-    return results.wasApplied();
   }
 
   private K getKey(T object) {

@@ -81,7 +81,7 @@ public class TestCassandraStoreWithNativeSerialization {
    * In this test case, put and get behavior of the data store are testing.
    */
   @Test
-  public void testSimplePutandGet() {
+  public void testSimplePutAndGet() {
     UUID id = UUID.randomUUID();
     User user1 = new User(id, "madhawa", Date.from(Instant.now()));
     // storing data;
@@ -96,7 +96,7 @@ public class TestCassandraStoreWithNativeSerialization {
    * In this test case, put and delete behavior of the data store are testing.
    */
   @Test
-  public void testSimplePutDeleteandGet() {
+  public void testSimplePutDeleteAndGet() {
     UUID id = UUID.randomUUID();
     User user1 = new User(id, "kasun", Date.from(Instant.now()));
     // storing data;

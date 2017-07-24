@@ -31,28 +31,33 @@ public class CassandraKey{
 
   private List<PartitionKeyField> partitionKeyFields;
 
+  private List<Field> fieldList;
 
   public CassandraKey(String name) {
     this.name = name;
+    this.fieldList = new ArrayList<>();
+    this.partitionKeyFields = new ArrayList<>();
   }
 
   public String getName() {
-    return name;
+    return this.name;
   }
 
   public List<ClusterKeyField> getClusterKeyFields() {
-    return clusterKeyFields;
+    return this.clusterKeyFields;
   }
 
   public List<PartitionKeyField> getPartitionKeyFields() {
-    return partitionKeyFields;
+    return this.partitionKeyFields;
   }
 
   public void addPartitionKeyField(PartitionKeyField partitionKeyField) {
-    if(this.partitionKeyFields == null) {
-      this.partitionKeyFields = new ArrayList<>();
-    }
     this.partitionKeyFields.add(partitionKeyField);
+    if(partitionKeyField.isComposite()) {
+      this.fieldList.addAll(partitionKeyField.getFields());
+    } else {
+      this.fieldList.add(partitionKeyField);
+    }
   }
 
   public void addClusterKeyField(ClusterKeyField clusterKeyField) {
@@ -60,6 +65,10 @@ public class CassandraKey{
       this.clusterKeyFields = new ArrayList<>();
     }
     this.clusterKeyFields.add(clusterKeyField);
+  }
+
+  public List<Field> getFieldList() {
+    return this.fieldList;
   }
 
 }

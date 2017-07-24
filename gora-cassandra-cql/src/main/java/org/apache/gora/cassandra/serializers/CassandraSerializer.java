@@ -18,7 +18,9 @@
 package org.apache.gora.cassandra.serializers;
 
 import com.datastax.driver.core.KeyspaceMetadata;
+import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.TableMetadata;
+import org.apache.gora.cassandra.bean.Field;
 import org.apache.gora.cassandra.store.CassandraClient;
 import org.apache.gora.cassandra.store.CassandraMapping;
 import org.apache.gora.cassandra.store.CassandraStore;
@@ -29,6 +31,8 @@ import org.apache.gora.store.DataStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -90,25 +94,32 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
    *
    * @param cc              Cassandra Client
    * @param type            Serialization type
-   * @param keyClass        key class
-   * @param persistentClass persistent class
+   * @param dataStore        Cassandra DataStore
    * @param mapping         Cassandra Mapping
    * @param <K>             key class
    * @param <T>             persistent class
    * @return Serializer
    */
-  public static <K, T> CassandraSerializer getSerializer(CassandraClient cc, String type, final Class<K> keyClass, final Class<T> persistentClass, CassandraMapping mapping) {
+  public static <K, T extends Persistent> CassandraSerializer getSerializer(CassandraClient cc, String type, final DataStore<K,T> dataStore, CassandraMapping mapping) {
     CassandraStore.SerializerType serType = type.isEmpty() ? CassandraStore.SerializerType.NATIVE : CassandraStore.SerializerType.valueOf(type.toUpperCase(Locale.ENGLISH));
     CassandraSerializer serializer;
     switch (serType) {
       case AVRO:
-        serializer = new AvroSerializer(cc, keyClass, persistentClass, mapping);
+        serializer = new AvroSerializer(cc, dataStore, mapping);
         break;
       case NATIVE:
       default:
-        serializer = new NativeSerializer(cc, keyClass, persistentClass, mapping);
+        serializer = new NativeSerializer(cc, dataStore.getKeyClass(), dataStore.getPersistentClass(), mapping);
     }
     return serializer;
+  }
+
+  protected String[] getFields() {
+    List<String> fields = new ArrayList<>();
+    for (Field field : mapping.getFieldList()) {
+      fields.add(field.getFieldName());
+    }
+    return fields.toArray(new String[0]);
   }
 
   public abstract void put(K key, T value);
@@ -121,8 +132,30 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
 
   public abstract Result<K, T> execute(DataStore<K, T> dataStore, Query<K, T> query);
 
-  public abstract long deleteByQuery(Query<K, T> query);
+  public boolean updateByQuery(Query query) {
+    List<Object> objectArrayList = new ArrayList<>();
+    String cqlQuery = CassandraQueryFactory.getUpdateByQuery(mapping, query, objectArrayList);
+    ResultSet results;
+    if (objectArrayList.size() == 0) {
+      results = client.getSession().execute(cqlQuery);
+    } else {
+      results = client.getSession().execute(cqlQuery, objectArrayList.toArray());
+    }
+    return results.wasApplied();
+  }
 
-  public abstract boolean updateByQuery(Query<K, T> query);
+  public long deleteByQuery(Query query) {
+    List<Object> objectArrayList = new ArrayList<>();
+    String cqlQuery = CassandraQueryFactory.getDeleteByQuery(mapping, query, objectArrayList);
+    ResultSet results;
+    if (objectArrayList.size() == 0) {
+      results = client.getSession().execute(cqlQuery);
+    } else {
+      results = client.getSession().execute(cqlQuery, objectArrayList.toArray());
+    }
+    LOG.debug("Delete by Query was applied : " + results.wasApplied());
+    LOG.info("Delete By Query method doesn't return the deleted element count.");
+    return 0;
+  }
 
 }

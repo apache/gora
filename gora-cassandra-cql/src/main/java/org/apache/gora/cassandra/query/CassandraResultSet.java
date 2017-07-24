@@ -79,4 +79,8 @@ public class CassandraResultSet<K, T extends Persistent> extends ResultBase<K, T
     this.persistentObject.add(token);
     this.size++;
   }
+
+  public void setLimit(long limit) {
+    this.limit = limit;
+  }
 }

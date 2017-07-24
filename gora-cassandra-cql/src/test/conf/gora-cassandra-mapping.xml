@@ -62,7 +62,7 @@
         </placementStrategy>
     </keyspace>
 
-    <class name="org.apache.gora.examples.generated.Employee1" keyClass="java.lang.String" keyspace="EmployeeSpace"
+    <class name="org.apache.gora.examples.generated.Employee" keyClass="java.lang.String" keyspace="EmployeeSpace"
            table="Employee" compactStorage="true" id="31323131">
         <field name="lname" column="name" type="text" ttl="10" static="true"/>
         <field name="fname" column="name" type="text" ttl="10"/>
