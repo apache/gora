@@ -255,7 +255,7 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
     String set = aerospikeParameters.getAerospikeMapping().getSet();
 
     // Query execution without any keys
-    if (query.getStartKey() == null && query.getEndKey() == null){
+    if (query.getStartKey() == null && query.getEndKey() == null) {
 
       try (RecordSet recordSet = aerospikeClient.query(null, getStatement(namespace, set))) {
         while (recordSet.next()) {
@@ -277,36 +277,29 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
 
     // Query execution for key ranges
     // ToDo: Implement Query execution for key ranges
-    else if (query.getStartKey() != null && query.getEndKey() != null) {
-//      Key startKey = null, endKey = null;
-//      if (query.getStartKey() != null) {
-//        startKey = getAerospikeKey(query.getStartKey());
-//      }
-//      if (query.getEndKey() != null) {
-//        endKey = getAerospikeKey(query.getEndKey());
-//      }
-
-//      boolean isSpecifiedRange = false;
+//    else if (query.getStartKey() != null && query.getEndKey() != null) {
+//
+//      // the key range filtering at the gora-module, which is not a better solution
+//      String lowerBound  = query.getStartKey().toString();
+//      String upperBound  = query.getEndKey().toString();
+//
 //      try (RecordSet recordSet = aerospikeClient.query(null, getStatement(namespace, set))) {
 //        while (recordSet.next()) {
 //          Key key = recordSet.getKey();
 //          Record record = recordSet.getRecord();
 //
-//          if(key.userKey == getAerospikeKey(query.getStartKey()).userKey){
-//            isSpecifiedRange = true;
-//          }
-//          if(key.userKey == getAerospikeKey(query.getEndKey()).userKey){
-//            isSpecifiedRange = false;
-//          }
+//          String input = key.userKey.toString();
+//          boolean isSpecifiedRange =  input.compareToIgnoreCase(lowerBound) >= 0 && input
+//                  .compareToIgnoreCase(upperBound) <= 0;
 //
-//          if(isSpecifiedRange){
-//            AerospikeResultRecord aerospikeRecord = new AerospikeResultRecord(key,record);
+//          if (isSpecifiedRange) {
+//            AerospikeResultRecord aerospikeRecord = new AerospikeResultRecord(key, record);
 //            resultRecords.add(aerospikeRecord);
 //          }
 //
 //        }
-      }
-
+//      }
+//    }
     return new AerospikeQueryResult<>(this, query, resultRecords, getFieldsToQuery(null));
   }
 
@@ -320,6 +313,9 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
     return new AerospikeQuery<>(this);
   }
 
+  /**
+   * The functionality is not supported as query key ranges are not supported
+   */
   @Override
   public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query) throws IOException {
     return null;

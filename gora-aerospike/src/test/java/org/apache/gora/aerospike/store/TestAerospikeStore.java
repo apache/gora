@@ -23,11 +23,14 @@ import org.apache.gora.examples.WebPageDataCreator;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.query.Query;
 import org.apache.gora.store.DataStoreTestBase;
+import org.apache.gora.store.DataStoreTestUtil;
+import org.apache.gora.util.AvroUtils;
 import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.testcontainers.containers.GenericContainer;
 
+import static org.apache.gora.examples.WebPageDataCreator.SORTED_URLS;
 import static org.apache.gora.examples.WebPageDataCreator.URLS;
 
 /**
@@ -88,21 +91,21 @@ public class TestAerospikeStore extends DataStoreTestBase {
   }
 
   @Test
-  @Ignore("Functionality is to be implemented in the next iteration")
+  @Ignore("Query key ranges based on primary key is not supported via the java client")
   @Override
   public void testQueryStartKey() throws Exception {
     super.testQueryStartKey();
   }
 
   @Test
-  @Ignore("Functionality is to be implemented in the next iteration")
+  @Ignore("Query key ranges based on primary key is not supported via the java client")
   @Override
   public void testQueryEndKey() throws Exception {
     super.testQueryEndKey();
   }
 
   @Test
-  @Ignore("Functionality is to be implemented in the next iteration")
+  @Ignore("Query key ranges based on primary key is not supported via the java client")
   @Override
   public void testQueryKeyRange() throws Exception {
     super.testQueryKeyRange();
@@ -121,17 +124,34 @@ public class TestAerospikeStore extends DataStoreTestBase {
   }
 
   @Test
-  @Ignore("Functionality is to be implemented in the next iteration")
   @Override
   public void testDeleteByQuery() throws Exception {
-    super.testDeleteByQuery();
-  }
 
-  @Test
-  @Ignore("Functionality is to be implemented in the next iteration")
-  @Override
-  public void testDeleteByQueryFields() throws Exception {
-    super.testDeleteByQueryFields();
+    // Can not use the super method as they query key ranges are not supported
+    Query<String, WebPage> query;
+    //test 1 - delete all
+    WebPageDataCreator.createWebPageData(webPageStore);
+
+    query = webPageStore.newQuery();
+
+    DataStoreTestUtil.assertNumResults(webPageStore.newQuery(), URLS.length);
+    webPageStore.deleteByQuery(query);
+    webPageStore.flush();
+    DataStoreTestUtil.assertEmptyResults(webPageStore.newQuery());
+
+
+    //test 2 - delete all
+    WebPageDataCreator.createWebPageData(webPageStore);
+
+    query = webPageStore.newQuery();
+    query.setFields(AvroUtils.getSchemaFieldNames(WebPage.SCHEMA$));
+
+    DataStoreTestUtil.assertNumResults(webPageStore.newQuery(), URLS.length);
+    webPageStore.deleteByQuery(query);
+    webPageStore.flush();
+    DataStoreTestUtil.assertEmptyResults(webPageStore.newQuery());
+
+    webPageStore.truncateSchema();
   }
 
   @Test
@@ -139,5 +159,12 @@ public class TestAerospikeStore extends DataStoreTestBase {
   @Override
   public void testGetPartitions() throws Exception {
     super.testGetPartitions();
+  }
+
+  @Test
+  @Ignore("Not supported as query key ranges are not supported")
+  @Override
+  public void testDeleteByQueryFields() throws Exception {
+    super.testDeleteByQueryFields();
   }
 }
