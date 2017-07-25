@@ -73,7 +73,7 @@ public class AerospikeQueryResult<K, T extends Persistent> extends ResultBase<K,
     if (offset < 0 || offset > (resultRecords.size() - 1)) {
       return false;
     }
-    key = (K) resultRecords.get((int) this.offset).getKey().userKey;
+    key = (K) resultRecords.get((int) this.offset).getKey().userKey.getObject();
     persistent = (T) getDataStore()
             .createPersistentInstance(resultRecords.get((int) this.offset).getRecord(), fields);
     return true;
