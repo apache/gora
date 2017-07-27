@@ -3,6 +3,7 @@
   "name": "CassandraKey",
   "default": null,
   "namespace": "org.apache.gora.cassandra.example.generated.avroSerialization",
+  "doc": "This Object is created to used as Cassandra Key to test cassandra data store, Cassandra Key can be used to define partition keys, clustering keys.",
   "fields": [
     {
       "name": "url",

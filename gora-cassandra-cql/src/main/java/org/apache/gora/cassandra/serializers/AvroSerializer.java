@@ -264,9 +264,8 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
     }
     Iterator<Row> iterator = results.iterator();
     ColumnDefinitions definitions = results.getColumnDefinitions();
-    T obj = null;
-    K keyObject = null;
-    long count = 0;
+    T obj;
+    K keyObject;
     while (iterator.hasNext()) {
       Row row = iterator.next();
       obj = cassandraDataStore.newPersistent();
@@ -274,9 +273,7 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
       populateValuesToPersistent(row, definitions, obj);
       populateValuesToPersistent(row, definitions, (PersistentBase) keyObject);
       cassandraResult.addResultElement(keyObject, obj);
-      count ++;
     }
-    cassandraResult.setLimit(count);
     return cassandraResult;
   }
 

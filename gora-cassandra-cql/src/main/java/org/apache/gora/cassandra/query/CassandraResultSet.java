@@ -44,6 +44,20 @@ public class CassandraResultSet<K, T extends Persistent> extends ResultBase<K, T
 
   private int position = 0;
 
+  /**
+   *
+   * @param dataStore
+   * @param query
+   */
+  public CassandraResultSet(DataStore<K, T> dataStore, Query<K, T> query) {
+    super(dataStore, query);
+  }
+
+  /**
+   *{@inheritDoc}
+   * @return
+   * @throws IOException
+   */
   @Override
   protected boolean nextInner() throws IOException {
     if(offset < size) {
@@ -55,32 +69,52 @@ public class CassandraResultSet<K, T extends Persistent> extends ResultBase<K, T
     return false;
   }
 
-  public CassandraResultSet(DataStore<K, T> dataStore, Query<K, T> query) {
-    super(dataStore, query);
-  }
-
+  /**
+   *{@inheritDoc}
+   * @return
+   * @throws IOException
+   * @throws InterruptedException
+   */
   @Override
   public float getProgress() throws IOException, InterruptedException {
     return ((float)position)/size;
   }
 
+  /**
+   *{@inheritDoc}
+   * @return
+   */
   @Override
   public T get() {
     return super.get();
   }
 
+  /**
+   * {@inheritDoc}
+   * @return
+   */
   @Override
   public K getKey() {
     return super.getKey();
   }
 
+  /**
+   *
+   * @param key
+   * @param token
+   */
   public void addResultElement(K key, T token) {
     this.persistentKey.add(key);
     this.persistentObject.add(token);
     this.size++;
   }
 
-  public void setLimit(long limit) {
-    this.limit = limit;
+  @Override
+  /**
+   * Returns whether the limit for the query is reached.
+   * @return true if result limit is reached
+   */
+  protected boolean isLimitReached() {
+    return (limit > 0 && offset >= limit) || (offset >= size);
   }
 }

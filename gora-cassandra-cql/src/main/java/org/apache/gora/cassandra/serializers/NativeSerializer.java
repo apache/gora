@@ -100,14 +100,11 @@ class NativeSerializer<K, T extends CassandraNativePersistent> extends Cassandra
     }
     Result<T> objects = mapper.map(results);
     Iterator iterator = objects.iterator();
-    long count = 0;
     while (iterator.hasNext()) {
       T result = (T) iterator.next();
       K key = getKey(result);
       cassandraResult.addResultElement(key, result);
-      count ++ ;
     }
-    cassandraResult.setLimit(count);
     return cassandraResult;
   }
 

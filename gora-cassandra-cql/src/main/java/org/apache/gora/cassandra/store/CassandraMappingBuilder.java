@@ -21,7 +21,7 @@ import java.util.Locale;
  * This Class reads the Cassandra Mapping file and create tha Cassandra Mapping object.
  * {@link org.apache.gora.cassandra.store.CassandraMapping}
  */
-public class CassandraMappingBuilder<K, T extends Persistent> {
+class CassandraMappingBuilder<K, T extends Persistent> {
 
   private static final Logger LOG = LoggerFactory.getLogger(CassandraMappingBuilder.class);
 
@@ -33,7 +33,7 @@ public class CassandraMappingBuilder<K, T extends Persistent> {
    *
    * @param store Cassandra Store
    */
-  public CassandraMappingBuilder(final CassandraStore<K, T> store) {
+  CassandraMappingBuilder(final CassandraStore<K, T> store) {
     this.dataStore = store;
   }
 
@@ -45,10 +45,10 @@ public class CassandraMappingBuilder<K, T extends Persistent> {
    * @throws IOException
    */
   @SuppressWarnings("all")
-  public CassandraMapping readMapping(String filename) throws IOException {
+  CassandraMapping readMapping(String filename) throws IOException {
     CassandraMapping cassandraMapping = new CassandraMapping();
     Class keyClass = dataStore.getKeyClass();
-    Class persistentClass = dataStore. getPersistentClass();
+    Class persistentClass = dataStore.getPersistentClass();
     try {
       SAXBuilder builder = new SAXBuilder();
       Document doc = builder.build(getClass().getClassLoader().getResourceAsStream(filename));
@@ -95,7 +95,7 @@ public class CassandraMappingBuilder<K, T extends Persistent> {
                 + " {} in mapping file.", classes.indexOf(classElement));
       }
       if (!classMatched) {
-        LOG.error("Check that 'keyClass' and 'name' parameters in {} no mapping has been initialized for {} class mapping", filename, persistentClass);
+        throw new RuntimeException("Check that 'keyClass' and 'name' parameters in " + filename + " no mapping has been initialized for " + persistentClass + "class mapping");
       }
 
       String keyspaceName = cassandraMapping.getProperty("keyspace");
@@ -117,7 +117,7 @@ public class CassandraMappingBuilder<K, T extends Persistent> {
                   keyspace.setDurableWritesEnabled(Boolean.parseBoolean(attributeValue));
                   break;
                 default:
-                  keyspace.addProperty(attributeName, attributeValue);
+                  LOG.warn("{} attribute is Unsupported or Invalid, in {} Cassandra KeySpace. Please configure the cassandra mapping correctly.", new Object[]{attributeName, keyspaceName});
                   break;
               }
             }
@@ -125,15 +125,14 @@ public class CassandraMappingBuilder<K, T extends Persistent> {
             switch (KeySpace.PlacementStrategy.valueOf(placementStrategy.getAttributeValue("name"))) {
               case SimpleStrategy:
                 keyspace.setPlacementStrategy(KeySpace.PlacementStrategy.SimpleStrategy);
-                keyspace.setReplicationFactor(Integer.parseInt(placementStrategy.getAttributeValue("replication_factor")));
+                keyspace.setReplicationFactor(getReplicationFactor(placementStrategy));
                 break;
               case NetworkTopologyStrategy:
                 List<Element> dataCenters = placementStrategy.getChildren("datacenter");
                 keyspace.setPlacementStrategy(KeySpace.PlacementStrategy.NetworkTopologyStrategy);
                 for (Element dataCenter : dataCenters) {
                   String dataCenterName = dataCenter.getAttributeValue("name");
-                  Integer dataCenterReplicationFactor = Integer.valueOf(dataCenter.getAttributeValue("replication_factor"));
-                  keyspace.addDataCenter(dataCenterName, dataCenterReplicationFactor);
+                  keyspace.addDataCenter(dataCenterName, getReplicationFactor(dataCenter));
                 }
                 break;
             }
@@ -143,9 +142,8 @@ public class CassandraMappingBuilder<K, T extends Persistent> {
 
         }
 
-      }
-      else {
-        throw new RuntimeException("KeySpace couldn't be able to found in the  cassandra mapping. Please configure the cassandra mapping correctly.");
+      } else {
+        throw new RuntimeException("Couldn't find KeySpace in the Cassandra mapping. Please configure the cassandra mapping correctly.");
       }
 
       for (Element key : keys) {
@@ -193,7 +191,8 @@ public class CassandraMappingBuilder<K, T extends Persistent> {
                   keyField.setOrder(ClusterKeyField.Order.valueOf(attributeValue.toUpperCase(Locale.ENGLISH)));
                   break;
                 default:
-                  throw new RuntimeException("");
+                  LOG.warn("{} attribute is Unsupported or Invalid, in {} Cassandra Key. Please configure the cassandra mapping correctly.", new Object[]{attributeName, keyClass});
+                  break;
               }
             }
             cassandraKey.addClusterKeyField(keyField);
@@ -220,12 +219,21 @@ public class CassandraMappingBuilder<K, T extends Persistent> {
           fieldKey.setColumnName(attributeValue);
           break;
         case "type":
-          fieldKey.setType(attributeValue.replace("(","<").replace(")",">"));
+          fieldKey.setType(attributeValue.replace("(", "<").replace(")", ">"));
           break;
         default:
           fieldKey.addProperty(attributeName, attributeValue);
           break;
       }
+    }
+  }
+
+  private int getReplicationFactor(Element element) {
+    String value  = element.getAttributeValue("replication_factor");
+    if(value == null) {
+      return 1;
+    } else {
+      return Integer.parseInt(value);
     }
   }
 

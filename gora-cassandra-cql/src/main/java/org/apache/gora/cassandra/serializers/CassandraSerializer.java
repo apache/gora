@@ -90,7 +90,7 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
   }
 
   /**
-   * This method returns the Cassandra Serializer according the Casssandra serializer property.
+   * This method returns the Cassandra Serializer according the Cassandra serializer property.
    *
    * @param cc              Cassandra Client
    * @param type            Serialization type

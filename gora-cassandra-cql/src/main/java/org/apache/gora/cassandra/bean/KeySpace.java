@@ -18,7 +18,6 @@
 package org.apache.gora.cassandra.bean;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,8 +33,6 @@ public class KeySpace {
   private String name;
 
   private PlacementStrategy placementStrategy;
-
-  private Map<String, String> properties;
 
   private boolean durableWritesEnabled;
 
@@ -67,29 +64,15 @@ public class KeySpace {
     this.dataCenters.put(key, value);
   }
 
-  public KeySpace() {
-    this.properties = new HashMap<>();
-  }
-
   public void setPlacementStrategy(PlacementStrategy placementStrategy) {
     this.placementStrategy = placementStrategy;
-    if(placementStrategy.equals(PlacementStrategy.NetworkTopologyStrategy) && this.dataCenters == null) {
+    if (placementStrategy.equals(PlacementStrategy.NetworkTopologyStrategy) && this.dataCenters == null) {
       this.dataCenters = new HashMap<>();
     }
   }
 
   public void setReplicationFactor(int replicationFactor) {
     this.replicationFactor = replicationFactor;
-  }
-
-  private List<String> tables;
-
-  public void addProperty(String key, String value) {
-    this.properties.put(key, value);
-  }
-
-  public String getProperty(String key) {
-    return this.properties.get(key);
   }
 
   public void setName(String name) {

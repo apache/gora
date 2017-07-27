@@ -32,9 +32,9 @@ import java.util.Map;
  */
 public class CassandraQuery<K, T extends Persistent> extends QueryWSBase<K, T> {
 
-  protected Filter<K, T> filter;
-  protected boolean localFilterEnabled = true;
-  protected Map<String, Object> updateFields = new HashMap<>();
+  private Filter<K, T> filter;
+  private boolean localFilterEnabled = true;
+  private Map<String, Object> updateFields = new HashMap<>();
 
   public CassandraQuery(DataStore<K, T> dataStore) {
     super(dataStore);

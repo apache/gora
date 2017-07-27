@@ -1,3 +1,21 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.gora.cassandra.serializers;
 
 import org.apache.avro.Schema;
@@ -23,7 +41,7 @@ import java.util.Map;
 /**
  * This class is Utils class for Avro serialization.
  */
-public class AvroCassandraUtils {
+class AvroCassandraUtils {
 
   /**
    * Default schema index with value "0" used when AVRO Union data types are stored.
@@ -71,7 +89,7 @@ public class AvroCassandraUtils {
    * @param fieldSchema the associated field schema
    * @param type        the field type
    * @param fieldValue  the field value.
-   * @return
+   * @return field value
    */
   static Object getFieldValueFromAvroBean(Schema fieldSchema, Schema.Type type, Object fieldValue) {
     switch (type) {
@@ -136,8 +154,8 @@ public class AvroCassandraUtils {
    * If no data type can be inferred then we return a default value
    * of position 0.
    *
-   * @param pValue
-   * @param pUnionSchema
+   * @param pValue Object
+   * @param pUnionSchema avro Schema
    * @return the unionSchemaPosition.
    */
   private static int getUnionSchema(Object pValue, Schema pUnionSchema) {

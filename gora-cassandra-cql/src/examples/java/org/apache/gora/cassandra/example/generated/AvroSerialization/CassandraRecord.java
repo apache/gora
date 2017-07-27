@@ -15,11 +15,12 @@
  *See the License for the specific language governing permissions and
  *limitations under the License.
  */
-package org.apache.gora.cassandra.example.generated.avroSerialization;  
+package org.apache.gora.cassandra.example.generated.AvroSerialization;  
 
+/** This object created to used as Persistent Object to test cassandra data store */
 public class CassandraRecord extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"CassandraRecord\",\"namespace\":\"org.apache.gora.cassandra.example.generated.avroSerialization\",\"fields\":[{\"name\":\"dataString\",\"type\":\"string\",\"default\":\"\"},{\"name\":\"dataInt\",\"type\":\"int\",\"default\":0},{\"name\":\"dataLong\",\"type\":[\"null\",\"long\"],\"default\":null},{\"name\":\"dataDouble\",\"type\":[\"null\",\"double\"],\"default\":null},{\"name\":\"dataBytes\",\"type\":[\"null\",\"bytes\"],\"default\":null},{\"name\":\"arrayInt\",\"type\":{\"type\":\"array\",\"items\":\"int\"},\"default\":null},{\"name\":\"arrayString\",\"type\":{\"type\":\"array\",\"items\":\"string\"},\"default\":null},{\"name\":\"arrayLong\",\"type\":{\"type\":\"array\",\"items\":\"long\"},\"default\":null},{\"name\":\"arrayDouble\",\"type\":{\"type\":\"array\",\"items\":\"double\"},\"default\":null},{\"name\":\"mapInt\",\"type\":{\"type\":\"map\",\"values\":\"int\"},\"default\":{}},{\"name\":\"mapString\",\"type\":{\"type\":\"map\",\"values\":\"string\"},\"default\":{}},{\"name\":\"mapLong\",\"type\":{\"type\":\"map\",\"values\":\"long\"},\"default\":{}},{\"name\":\"mapDouble\",\"type\":{\"type\":\"map\",\"values\":\"double\"},\"default\":{}}],\"default\":null}");
-  private static final long serialVersionUID = 5865822911454498901L;
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"CassandraRecord\",\"namespace\":\"org.apache.gora.cassandra.example.generated.AvroSerialization\",\"doc\":\"This object created to used as Persistent Object to test cassandra data store\",\"fields\":[{\"name\":\"dataString\",\"type\":\"string\",\"default\":\"\"},{\"name\":\"dataInt\",\"type\":\"int\",\"default\":0},{\"name\":\"dataLong\",\"type\":[\"null\",\"long\"],\"default\":null},{\"name\":\"dataDouble\",\"type\":[\"null\",\"double\"],\"default\":null},{\"name\":\"dataBytes\",\"type\":[\"null\",\"bytes\"],\"default\":null},{\"name\":\"arrayInt\",\"type\":{\"type\":\"array\",\"items\":\"int\"},\"default\":null},{\"name\":\"arrayString\",\"type\":{\"type\":\"array\",\"items\":\"string\"},\"default\":null},{\"name\":\"arrayLong\",\"type\":{\"type\":\"array\",\"items\":\"long\"},\"default\":null},{\"name\":\"arrayDouble\",\"type\":{\"type\":\"array\",\"items\":\"double\"},\"default\":null},{\"name\":\"mapInt\",\"type\":{\"type\":\"map\",\"values\":\"int\"},\"default\":{}},{\"name\":\"mapString\",\"type\":{\"type\":\"map\",\"values\":\"string\"},\"default\":{}},{\"name\":\"mapLong\",\"type\":{\"type\":\"map\",\"values\":\"long\"},\"default\":{}},{\"name\":\"mapDouble\",\"type\":{\"type\":\"map\",\"values\":\"double\"},\"default\":{}}],\"default\":null}");
+  private static final long serialVersionUID = -4030705451859358186L;
   /** Enum containing all data bean's fields. */
   public static enum Field {
     DATA_STRING(0, "dataString"),
@@ -464,18 +465,18 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   }
 
   /** Creates a new CassandraRecord RecordBuilder */
-  public static org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder newBuilder() {
-    return new org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder();
+  public static org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder newBuilder() {
+    return new org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder();
   }
   
   /** Creates a new CassandraRecord RecordBuilder by copying an existing Builder */
-  public static org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder newBuilder(org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder other) {
-    return new org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder(other);
+  public static org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder newBuilder(org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder other) {
+    return new org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder(other);
   }
   
   /** Creates a new CassandraRecord RecordBuilder by copying an existing CassandraRecord instance */
-  public static org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder newBuilder(org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord other) {
-    return new org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder(other);
+  public static org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder newBuilder(org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord other) {
+    return new org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder(other);
   }
   
   private static java.nio.ByteBuffer deepCopyToReadOnlyBuffer(
@@ -523,17 +524,17 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /** Creates a new Builder */
     private Builder() {
-      super(org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.SCHEMA$);
+      super(org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.SCHEMA$);
     }
     
     /** Creates a Builder by copying an existing Builder */
-    private Builder(org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder other) {
+    private Builder(org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder other) {
       super(other);
     }
     
     /** Creates a Builder by copying an existing CassandraRecord instance */
-    private Builder(org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord other) {
-            super(org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.SCHEMA$);
+    private Builder(org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord other) {
+            super(org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.SCHEMA$);
       if (isValidValue(fields()[0], other.dataString)) {
         this.dataString = (java.lang.CharSequence) data().deepCopy(fields()[0].schema(), other.dataString);
         fieldSetFlags()[0] = true;
@@ -594,7 +595,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
     }
     
     /** Sets the value of the 'dataString' field */
-    public org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder setDataString(java.lang.CharSequence value) {
+    public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder setDataString(java.lang.CharSequence value) {
       validate(fields()[0], value);
       this.dataString = value;
       fieldSetFlags()[0] = true;
@@ -607,7 +608,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
     }
     
     /** Clears the value of the 'dataString' field */
-    public org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder clearDataString() {
+    public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder clearDataString() {
       dataString = null;
       fieldSetFlags()[0] = false;
       return this;
@@ -619,7 +620,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
     }
     
     /** Sets the value of the 'dataInt' field */
-    public org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder setDataInt(int value) {
+    public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder setDataInt(int value) {
       validate(fields()[1], value);
       this.dataInt = value;
       fieldSetFlags()[1] = true;
@@ -632,7 +633,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
     }
     
     /** Clears the value of the 'dataInt' field */
-    public org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder clearDataInt() {
+    public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder clearDataInt() {
       fieldSetFlags()[1] = false;
       return this;
     }
@@ -643,7 +644,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
     }
     
     /** Sets the value of the 'dataLong' field */
-    public org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder setDataLong(java.lang.Long value) {
+    public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder setDataLong(java.lang.Long value) {
       validate(fields()[2], value);
       this.dataLong = value;
       fieldSetFlags()[2] = true;
@@ -656,7 +657,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
     }
     
     /** Clears the value of the 'dataLong' field */
-    public org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder clearDataLong() {
+    public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder clearDataLong() {
       dataLong = null;
       fieldSetFlags()[2] = false;
       return this;
@@ -668,7 +669,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
     }
     
     /** Sets the value of the 'dataDouble' field */
-    public org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder setDataDouble(java.lang.Double value) {
+    public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder setDataDouble(java.lang.Double value) {
       validate(fields()[3], value);
       this.dataDouble = value;
       fieldSetFlags()[3] = true;
@@ -681,7 +682,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
     }
     
     /** Clears the value of the 'dataDouble' field */
-    public org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder clearDataDouble() {
+    public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder clearDataDouble() {
       dataDouble = null;
       fieldSetFlags()[3] = false;
       return this;
@@ -693,7 +694,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
     }
     
     /** Sets the value of the 'dataBytes' field */
-    public org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder setDataBytes(java.nio.ByteBuffer value) {
+    public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder setDataBytes(java.nio.ByteBuffer value) {
       validate(fields()[4], value);
       this.dataBytes = value;
       fieldSetFlags()[4] = true;
@@ -706,7 +707,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
     }
     
     /** Clears the value of the 'dataBytes' field */
-    public org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder clearDataBytes() {
+    public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder clearDataBytes() {
       dataBytes = null;
       fieldSetFlags()[4] = false;
       return this;
@@ -718,7 +719,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
     }
     
     /** Sets the value of the 'arrayInt' field */
-    public org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder setArrayInt(java.util.List<java.lang.Integer> value) {
+    public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder setArrayInt(java.util.List<java.lang.Integer> value) {
       validate(fields()[5], value);
       this.arrayInt = value;
       fieldSetFlags()[5] = true;
@@ -731,7 +732,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
     }
     
     /** Clears the value of the 'arrayInt' field */
-    public org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder clearArrayInt() {
+    public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder clearArrayInt() {
       arrayInt = null;
       fieldSetFlags()[5] = false;
       return this;
@@ -743,7 +744,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
     }
     
     /** Sets the value of the 'arrayString' field */
-    public org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder setArrayString(java.util.List<java.lang.CharSequence> value) {
+    public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder setArrayString(java.util.List<java.lang.CharSequence> value) {
       validate(fields()[6], value);
       this.arrayString = value;
       fieldSetFlags()[6] = true;
@@ -756,7 +757,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
     }
     
     /** Clears the value of the 'arrayString' field */
-    public org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder clearArrayString() {
+    public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder clearArrayString() {
       arrayString = null;
       fieldSetFlags()[6] = false;
       return this;
@@ -768,7 +769,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
     }
     
     /** Sets the value of the 'arrayLong' field */
-    public org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder setArrayLong(java.util.List<java.lang.Long> value) {
+    public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder setArrayLong(java.util.List<java.lang.Long> value) {
       validate(fields()[7], value);
       this.arrayLong = value;
       fieldSetFlags()[7] = true;
@@ -781,7 +782,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
     }
     
     /** Clears the value of the 'arrayLong' field */
-    public org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder clearArrayLong() {
+    public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder clearArrayLong() {
       arrayLong = null;
       fieldSetFlags()[7] = false;
       return this;
@@ -793,7 +794,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
     }
     
     /** Sets the value of the 'arrayDouble' field */
-    public org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder setArrayDouble(java.util.List<java.lang.Double> value) {
+    public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder setArrayDouble(java.util.List<java.lang.Double> value) {
       validate(fields()[8], value);
       this.arrayDouble = value;
       fieldSetFlags()[8] = true;
@@ -806,7 +807,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
     }
     
     /** Clears the value of the 'arrayDouble' field */
-    public org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder clearArrayDouble() {
+    public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder clearArrayDouble() {
       arrayDouble = null;
       fieldSetFlags()[8] = false;
       return this;
@@ -818,7 +819,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
     }
     
     /** Sets the value of the 'mapInt' field */
-    public org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder setMapInt(java.util.Map<java.lang.CharSequence,java.lang.Integer> value) {
+    public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder setMapInt(java.util.Map<java.lang.CharSequence,java.lang.Integer> value) {
       validate(fields()[9], value);
       this.mapInt = value;
       fieldSetFlags()[9] = true;
@@ -831,7 +832,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
     }
     
     /** Clears the value of the 'mapInt' field */
-    public org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder clearMapInt() {
+    public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder clearMapInt() {
       mapInt = null;
       fieldSetFlags()[9] = false;
       return this;
@@ -843,7 +844,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
     }
     
     /** Sets the value of the 'mapString' field */
-    public org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder setMapString(java.util.Map<java.lang.CharSequence,java.lang.CharSequence> value) {
+    public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder setMapString(java.util.Map<java.lang.CharSequence,java.lang.CharSequence> value) {
       validate(fields()[10], value);
       this.mapString = value;
       fieldSetFlags()[10] = true;
@@ -856,7 +857,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
     }
     
     /** Clears the value of the 'mapString' field */
-    public org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder clearMapString() {
+    public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder clearMapString() {
       mapString = null;
       fieldSetFlags()[10] = false;
       return this;
@@ -868,7 +869,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
     }
     
     /** Sets the value of the 'mapLong' field */
-    public org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder setMapLong(java.util.Map<java.lang.CharSequence,java.lang.Long> value) {
+    public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder setMapLong(java.util.Map<java.lang.CharSequence,java.lang.Long> value) {
       validate(fields()[11], value);
       this.mapLong = value;
       fieldSetFlags()[11] = true;
@@ -881,7 +882,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
     }
     
     /** Clears the value of the 'mapLong' field */
-    public org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder clearMapLong() {
+    public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder clearMapLong() {
       mapLong = null;
       fieldSetFlags()[11] = false;
       return this;
@@ -893,7 +894,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
     }
     
     /** Sets the value of the 'mapDouble' field */
-    public org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder setMapDouble(java.util.Map<java.lang.CharSequence,java.lang.Double> value) {
+    public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder setMapDouble(java.util.Map<java.lang.CharSequence,java.lang.Double> value) {
       validate(fields()[12], value);
       this.mapDouble = value;
       fieldSetFlags()[12] = true;
@@ -906,7 +907,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
     }
     
     /** Clears the value of the 'mapDouble' field */
-    public org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord.Builder clearMapDouble() {
+    public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder clearMapDouble() {
       mapDouble = null;
       fieldSetFlags()[12] = false;
       return this;

@@ -15,11 +15,12 @@
  *See the License for the specific language governing permissions and
  *limitations under the License.
  */
-package org.apache.gora.cassandra.example.generated.avroSerialization;  
+package org.apache.gora.cassandra.example.generated.AvroSerialization;  
 
+/** This Object is created to used as Cassandra Key to test cassandra data store, Cassandra Key can be used to define partition keys, clustering keys.  */
 public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"CassandraKey\",\"namespace\":\"org.apache.gora.cassandra.example.generated.avroSerialization\",\"fields\":[{\"name\":\"url\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"timestamp\",\"type\":\"long\",\"default\":0}],\"default\":null}");
-  private static final long serialVersionUID = -2302778495178225103L;
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"CassandraKey\",\"namespace\":\"org.apache.gora.cassandra.example.generated.AvroSerialization\",\"doc\":\"This Object is created to used as Cassandra Key to test cassandra data store, Cassandra Key can be used to define partition keys, clustering keys. \",\"fields\":[{\"name\":\"url\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"timestamp\",\"type\":\"long\",\"default\":0}],\"default\":null}");
+  private static final long serialVersionUID = -4231222814786458061L;
   /** Enum containing all data bean's fields. */
   public static enum Field {
     URL(0, "url"),
@@ -145,18 +146,18 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
   }
 
   /** Creates a new CassandraKey RecordBuilder */
-  public static org.apache.gora.cassandra.example.generated.avroSerialization.CassandraKey.Builder newBuilder() {
-    return new org.apache.gora.cassandra.example.generated.avroSerialization.CassandraKey.Builder();
+  public static org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey.Builder newBuilder() {
+    return new org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey.Builder();
   }
   
   /** Creates a new CassandraKey RecordBuilder by copying an existing Builder */
-  public static org.apache.gora.cassandra.example.generated.avroSerialization.CassandraKey.Builder newBuilder(org.apache.gora.cassandra.example.generated.avroSerialization.CassandraKey.Builder other) {
-    return new org.apache.gora.cassandra.example.generated.avroSerialization.CassandraKey.Builder(other);
+  public static org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey.Builder newBuilder(org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey.Builder other) {
+    return new org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey.Builder(other);
   }
   
   /** Creates a new CassandraKey RecordBuilder by copying an existing CassandraKey instance */
-  public static org.apache.gora.cassandra.example.generated.avroSerialization.CassandraKey.Builder newBuilder(org.apache.gora.cassandra.example.generated.avroSerialization.CassandraKey other) {
-    return new org.apache.gora.cassandra.example.generated.avroSerialization.CassandraKey.Builder(other);
+  public static org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey.Builder newBuilder(org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey other) {
+    return new org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey.Builder(other);
   }
   
   private static java.nio.ByteBuffer deepCopyToReadOnlyBuffer(
@@ -193,17 +194,17 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
 
     /** Creates a new Builder */
     private Builder() {
-      super(org.apache.gora.cassandra.example.generated.avroSerialization.CassandraKey.SCHEMA$);
+      super(org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey.SCHEMA$);
     }
     
     /** Creates a Builder by copying an existing Builder */
-    private Builder(org.apache.gora.cassandra.example.generated.avroSerialization.CassandraKey.Builder other) {
+    private Builder(org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey.Builder other) {
       super(other);
     }
     
     /** Creates a Builder by copying an existing CassandraKey instance */
-    private Builder(org.apache.gora.cassandra.example.generated.avroSerialization.CassandraKey other) {
-            super(org.apache.gora.cassandra.example.generated.avroSerialization.CassandraKey.SCHEMA$);
+    private Builder(org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey other) {
+            super(org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey.SCHEMA$);
       if (isValidValue(fields()[0], other.url)) {
         this.url = (java.lang.CharSequence) data().deepCopy(fields()[0].schema(), other.url);
         fieldSetFlags()[0] = true;
@@ -220,7 +221,7 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
     }
     
     /** Sets the value of the 'url' field */
-    public org.apache.gora.cassandra.example.generated.avroSerialization.CassandraKey.Builder setUrl(java.lang.CharSequence value) {
+    public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey.Builder setUrl(java.lang.CharSequence value) {
       validate(fields()[0], value);
       this.url = value;
       fieldSetFlags()[0] = true;
@@ -233,7 +234,7 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
     }
     
     /** Clears the value of the 'url' field */
-    public org.apache.gora.cassandra.example.generated.avroSerialization.CassandraKey.Builder clearUrl() {
+    public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey.Builder clearUrl() {
       url = null;
       fieldSetFlags()[0] = false;
       return this;
@@ -245,7 +246,7 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
     }
     
     /** Sets the value of the 'timestamp' field */
-    public org.apache.gora.cassandra.example.generated.avroSerialization.CassandraKey.Builder setTimestamp(long value) {
+    public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey.Builder setTimestamp(long value) {
       validate(fields()[1], value);
       this.timestamp = value;
       fieldSetFlags()[1] = true;
@@ -258,7 +259,7 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
     }
     
     /** Clears the value of the 'timestamp' field */
-    public org.apache.gora.cassandra.example.generated.avroSerialization.CassandraKey.Builder clearTimestamp() {
+    public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey.Builder clearTimestamp() {
       fieldSetFlags()[1] = false;
       return this;
     }

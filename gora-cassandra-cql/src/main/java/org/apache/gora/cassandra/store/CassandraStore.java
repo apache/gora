@@ -216,6 +216,12 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
     return (Result<K, T>) cassandraSerializer.execute(this, query);
   }
 
+  /**
+   * This method is used to update multiple objects in the table.
+   *
+   * @param query Query
+   * @return isQuery applied or not
+   */
   public boolean updateByQuery(Query<K, T> query) {
     return cassandraSerializer.updateByQuery(query);
   }

@@ -19,8 +19,8 @@ package org.apache.gora.cassandra.store;
 
 import org.apache.avro.util.Utf8;
 import org.apache.gora.cassandra.GoraCassandraTestDriver;
-import org.apache.gora.cassandra.example.generated.avroSerialization.CassandraKey;
-import org.apache.gora.cassandra.example.generated.avroSerialization.CassandraRecord;
+import org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey;
+import org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.store.DataStore;
@@ -84,6 +84,9 @@ public class TestCassandraStoreWithCassandraKey {
     Assert.assertTrue(cassandraRecordDataStore.schemaExists());
   }
 
+  /**
+   * In this test case, get, put and delete methods behaviour of the data store is testing.
+   */
   @Test
   public void testSimplePutGet() {
     cassandraRecordDataStore.createSchema();
@@ -107,6 +110,10 @@ public class TestCassandraStoreWithCassandraKey {
     Assert.assertNull(cassandraRecordDataStore.get(key));
   }
 
+  /**
+   * In this test case, execute and deleteByQuery methods behaviour of the data store is testing.
+   * @throws Exception
+   */
   @Test
   public void testExecuteQuery() throws Exception {
     Query query = cassandraRecordDataStore.newQuery();
@@ -151,7 +158,10 @@ public class TestCassandraStoreWithCassandraKey {
     cassandraRecordDataStore.put(key, record);
     result = query.execute();
     Assert.assertTrue(result.next());
+  }
 
+  @Test
+  public void testExecuteQueryWithRange() throws Exception {
     // test Range with Query
     cassandraRecordDataStore.truncateSchema();
     //insert data
@@ -190,7 +200,7 @@ public class TestCassandraStoreWithCassandraKey {
     Query rangeQuery = cassandraRecordDataStore.newQuery();
     rangeQuery.setStartKey(key2);
     rangeQuery.setEndKey(key2);
-    result = rangeQuery.execute();
+    Result result = rangeQuery.execute();
     int i = 0;
     while (result.next()) {
       i++;

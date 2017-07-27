@@ -18,13 +18,7 @@
   -->
 
 <!--
-   The value of 'host' attribute of keyspace tag should match exactly what is in
-   gora.properties file. Essentially this means that if you are using port number, you should
-   use it every where regardless of whether it is the default port or not.
-   At runtime Gora will otherwise try to connect to localhost
-   https://issues.apache.org/jira/browse/GORA-269
-
-   The values of 'replication_factor' and 'placement_strategy' attribute of keyspace tag
+   The values of 'replication_factor' and 'placementStrategy' attribute of keyspace tag
    only apply if gora create the kyespace. they have no effect if this is being used against 
    an existing keyspace. the default value for 'replication_factor' is '1'
    

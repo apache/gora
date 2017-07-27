@@ -48,7 +48,7 @@ class CassandraQueryFactory {
    * This method returns the CQL query to create key space.
    * refer : http://docs.datastax.com/en/cql/3.1/cql/cql_reference/create_keyspace_r.html
    *
-   * @param mapping Cassandra Mapping
+   * @param mapping Cassandra Mapping {@link CassandraMapping}
    * @return CQL Query
    */
   static String getCreateKeySpaceQuery(CassandraMapping mapping) {
@@ -87,7 +87,7 @@ class CassandraQueryFactory {
    * Trick : To have a consistency of the order of the columns, first we append partition keys, second cluster keys and finally other columns.
    * It's very much needed to follow the same order in other CRUD operations as well.
    *
-   * @param mapping Cassandra mapping
+   * @param mapping Cassandra mapping {@link CassandraMapping}
    * @return CQL Query
    */
   static String getCreateTableQuery(CassandraMapping mapping) {
@@ -193,7 +193,7 @@ class CassandraQueryFactory {
    * This method returns the CQL query to drop table.
    * refer : http://docs.datastax.com/en/cql/3.1/cql/cql_reference/drop_table_r.html
    *
-   * @param mapping Cassandra Mapping
+   * @param mapping Cassandra Mapping {@link CassandraMapping}
    * @return CQL query
    */
   static String getDropTableQuery(CassandraMapping mapping) {
@@ -204,7 +204,7 @@ class CassandraQueryFactory {
    * This method returns the CQL query to drop key space.
    * refer : http://docs.datastax.com/en/cql/3.1/cql/cql_reference/drop_keyspace_r.html
    *
-   * @param mapping Cassandra Mapping
+   * @param mapping Cassandra Mapping {@link CassandraMapping}
    * @return CQL query
    */
   static String getDropKeySpaceQuery(CassandraMapping mapping) {
@@ -215,7 +215,7 @@ class CassandraQueryFactory {
    * This method returns the CQL query to truncate (removes all the data) in the table.
    * refer : http://docs.datastax.com/en/cql/3.1/cql/cql_reference/truncate_r.html
    *
-   * @param mapping Cassandra Mapping
+   * @param mapping Cassandra Mapping {@link CassandraMapping}
    * @return CQL query
    */
   static String getTruncateTableQuery(CassandraMapping mapping) {
@@ -223,9 +223,12 @@ class CassandraQueryFactory {
   }
 
   /**
+   * This method return the CQL query to insert data in to the table.
    * refer : http://docs.datastax.com/en/cql/3.1/cql/cql_reference/insert_r.html
    *
-   * @return
+   * @param mapping Cassandra Mapping {@link CassandraMapping}
+   * @param fields  available fields
+   * @return CQL Query
    */
   static String getInsertDataQuery(CassandraMapping mapping, List<String> fields) {
     String[] columnNames = getColumnNames(mapping, fields);
@@ -235,10 +238,12 @@ class CassandraQueryFactory {
   }
 
   /**
+   * This method return the CQL query to delete a persistent in the table.
+   * refer : http://docs.datastax.com/en/cql/3.3/cql/cql_reference/cqlDelete.html
    *
-   * @param mapping
-   * @param fields
-   * @return
+   * @param mapping Cassandra Mapping {@link CassandraMapping}
+   * @param fields  filed list to be deleted
+   * @return CQL Query
    */
   static String getDeleteDataQuery(CassandraMapping mapping, List<String> fields) {
     String[] columnNames = getColumnNames(mapping, fields);
@@ -258,9 +263,17 @@ class CassandraQueryFactory {
     return query.getQueryString();
   }
 
+  /**
+   * This method returns the CQL Select query to retrieve data from the table.
+   * refer: http://docs.datastax.com/en/cql/3.3/cql/cql_reference/cqlSelect.html
+   *
+   * @param mapping   Cassandra Mapping {@link CassandraMapping}
+   * @param keyFields key fields
+   * @return CQL Query
+   */
   static String getSelectObjectQuery(CassandraMapping mapping, List<String> keyFields) {
     Select select = QueryBuilder.select().from(mapping.getKeySpace().getName(), mapping.getCoreName());
-    if(Boolean.parseBoolean(mapping.getProperty("allowFiltering"))) {
+    if (Boolean.parseBoolean(mapping.getProperty("allowFiltering"))) {
       select.allowFiltering();
     }
     String[] columnNames = getColumnNames(mapping, keyFields);
@@ -277,9 +290,19 @@ class CassandraQueryFactory {
     return query.getQueryString();
   }
 
+  /**
+   * This method returns CQL Select query to retrieve data from the table with given fields.
+   * This method is used for Avro Serialization
+   * refer: http://docs.datastax.com/en/cql/3.3/cql/cql_reference/cqlSelect.html
+   *
+   * @param mapping   Cassandra Mapping {@link CassandraMapping}
+   * @param fields    Given fields to retrieve
+   * @param keyFields key fields
+   * @return CQL Query
+   */
   static String getSelectObjectWithFieldsQuery(CassandraMapping mapping, String[] fields, List<String> keyFields) {
     Select select = QueryBuilder.select(getColumnNames(mapping, Arrays.asList(fields))).from(mapping.getKeySpace().getName(), mapping.getCoreName());
-    if(Boolean.parseBoolean(mapping.getProperty("allowFiltering"))) {
+    if (Boolean.parseBoolean(mapping.getProperty("allowFiltering"))) {
       select.allowFiltering();
     }
     String[] columnNames = getColumnNames(mapping, keyFields);
@@ -296,11 +319,20 @@ class CassandraQueryFactory {
     return query.getQueryString();
   }
 
+  /**
+   * This method returns CQL Select query to retrieve data from the table with given fields.
+   * This method is used for Native Serialization
+   * refer: http://docs.datastax.com/en/cql/3.3/cql/cql_reference/cqlSelect.html
+   *
+   * @param mapping Cassandra Mapping {@link CassandraMapping}
+   * @param fields  Given fields to retrieve
+   * @return CQL Query
+   */
   static String getSelectObjectWithFieldsQuery(CassandraMapping mapping, String[] fields) {
     String cqlQuery = null;
     String[] columnNames = getColumnNames(mapping, Arrays.asList(fields));
     Select select = QueryBuilder.select(columnNames).from(mapping.getKeySpace().getName(), mapping.getCoreName());
-    if(Boolean.parseBoolean(mapping.getProperty("allowFiltering"))) {
+    if (Boolean.parseBoolean(mapping.getProperty("allowFiltering"))) {
       select.allowFiltering();
     }
     CassandraKey cKey = mapping.getCassandraKey();
@@ -329,6 +361,14 @@ class CassandraQueryFactory {
   }
 
 
+  /**
+   * This method returns CQL Query for execute method. This CQL contains a Select Query to retrieve data from the table
+   *
+   * @param mapping        Cassandra Mapping {@link CassandraMapping}
+   * @param cassandraQuery Query {@link CassandraQuery}
+   * @param objects        object list
+   * @return CQL Query
+   */
   static String getExecuteQuery(CassandraMapping mapping, Query cassandraQuery, List<Object> objects) {
     String[] fields = cassandraQuery.getFields();
     fields = fields != null ? fields : mapping.getFieldNames();
@@ -341,7 +381,7 @@ class CassandraQueryFactory {
     if (limit > 0) {
       select = select.limit((int) limit);
     }
-    if(Boolean.parseBoolean(mapping.getProperty("allowFiltering"))) {
+    if (Boolean.parseBoolean(mapping.getProperty("allowFiltering"))) {
       select.allowFiltering();
     }
     Select.Where query = null;
@@ -451,6 +491,15 @@ class CassandraQueryFactory {
     return null;
   }
 
+  /**
+   * This method returns CQL Qeury for DeleteByQuery method.
+   * refer: http://docs.datastax.com/en/cql/3.3/cql/cql_reference/cqlDelete.html
+   *
+   * @param mapping        Cassandra Mapping {@link CassandraMapping}
+   * @param cassandraQuery Cassandra Query {@link CassandraQuery}
+   * @param objects        field values
+   * @return CQL Query
+   */
   static String getDeleteByQuery(CassandraMapping mapping, Query cassandraQuery, List<Object> objects) {
     String[] columns = null;
     if (!Arrays.equals(cassandraQuery.getFields(), mapping.getFieldNames())) {
@@ -546,6 +595,15 @@ class CassandraQueryFactory {
     return query.getQueryString();
   }
 
+  /**
+   * This method returns the CQL Query for UpdateByQuery method
+   * refer : http://docs.datastax.com/en/cql/3.3/cql/cql_reference/cqlUpdate.html
+   *
+   * @param mapping        Cassandra mapping {@link CassandraMapping}
+   * @param cassandraQuery Cassandra Query {@link CassandraQuery}
+   * @param objects        field Objects list
+   * @return CQL Query
+   */
   static String getUpdateByQuery(CassandraMapping mapping, Query cassandraQuery, List<Object> objects) {
     Update update = QueryBuilder.update(mapping.getKeySpace().getName(), mapping.getCoreName());
     Update.Assignments updateAssignments = null;
