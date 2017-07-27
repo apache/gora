@@ -30,7 +30,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.testcontainers.containers.GenericContainer;
 
-import static org.apache.gora.examples.WebPageDataCreator.SORTED_URLS;
+import java.time.Duration;
+
 import static org.apache.gora.examples.WebPageDataCreator.URLS;
 
 /**
@@ -41,7 +42,9 @@ public class TestAerospikeStore extends DataStoreTestBase {
   private static final String DOCKER_CONTAINER_NAME = "aerospike/aerospike-server:latest";
 
   @ClassRule
-  public static GenericContainer aerospikeContainer = new GenericContainer(DOCKER_CONTAINER_NAME);
+  public static GenericContainer aerospikeContainer = new GenericContainer(DOCKER_CONTAINER_NAME)
+          .withExposedPorts(3000).waitingFor(new AerospikeStartupLogWaitStrategy())
+          .withStartupTimeout(Duration.ofSeconds(240));
 
   static {
     setTestDriver(new GoraAerospikeTestDriver(aerospikeContainer));

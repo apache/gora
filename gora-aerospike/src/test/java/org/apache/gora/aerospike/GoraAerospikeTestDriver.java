@@ -46,10 +46,6 @@ public class GoraAerospikeTestDriver extends GoraTestDriver {
 
   @Override
   public void setUpClass() throws Exception {
-
-    // Wait for the aerospike server to be started in the container
-    Thread.sleep(5000);
-
     properties.setProperty("gora.aerospikestore.server.ip", "localhost");
     properties.setProperty("gora.aerospikestore.server.port",
             aerospikeContainer.getMappedPort(3000).toString());
@@ -57,6 +53,7 @@ public class GoraAerospikeTestDriver extends GoraTestDriver {
 
   @Override
   public void tearDownClass() throws Exception {
+    aerospikeContainer.stop();
   }
 
   /**
