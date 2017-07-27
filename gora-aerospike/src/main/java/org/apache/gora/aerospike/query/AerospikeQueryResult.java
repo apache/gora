@@ -17,8 +17,6 @@
  */
 package org.apache.gora.aerospike.query;
 
-import com.aerospike.client.Record;
-import com.aerospike.client.query.RecordSet;
 import org.apache.gora.aerospike.store.AerospikeStore;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.query.Query;
@@ -26,7 +24,6 @@ import org.apache.gora.query.impl.ResultBase;
 import org.apache.gora.store.DataStore;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -46,10 +43,20 @@ public class AerospikeQueryResult<K, T extends Persistent> extends ResultBase<K,
     this.fields = fields;
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @return a float value representing progress of the job
+   * @throws IOException          if there is an error obtaining progress
+   * @throws InterruptedException if progress stalls or is interrupted
+   */
   @Override
   public float getProgress() throws IOException, InterruptedException {
-    //ToDo: to be implemented
-    return 0;
+    if (resultRecords != null && resultRecords.size() > 0) {
+      return (float) offset / (float) resultRecords.size();
+    } else {
+      return 0;
+    }
   }
 
   /**
