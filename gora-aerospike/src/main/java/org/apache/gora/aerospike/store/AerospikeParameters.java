@@ -25,6 +25,9 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Field;
 import java.util.Properties;
 
+/**
+ * Class to represent the Aerospike specific parameters
+ */
 public class AerospikeParameters {
   private String host;
 

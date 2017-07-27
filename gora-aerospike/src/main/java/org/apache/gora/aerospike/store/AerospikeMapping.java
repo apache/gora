@@ -22,6 +22,9 @@ import com.aerospike.client.policy.WritePolicy;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Class to represent the Aerospike Mapping
+ */
 public class AerospikeMapping {
   private String namespace;
 

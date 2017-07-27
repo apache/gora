@@ -35,6 +35,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.HashMap;
 
+/**
+ * Class to represent the Aerospike mapping builder
+ */
 public class AerospikeMappingBuilder {
 
   private static final Logger LOG = LoggerFactory.getLogger(AerospikeMappingBuilder.class);

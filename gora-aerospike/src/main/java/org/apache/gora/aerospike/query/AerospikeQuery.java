@@ -29,5 +29,4 @@ public class AerospikeQuery<K, T extends PersistentBase> extends QueryBase<K, T>
   public AerospikeQuery(DataStore<K, T> dataStore) {
     super(dataStore);
   }
-
 }

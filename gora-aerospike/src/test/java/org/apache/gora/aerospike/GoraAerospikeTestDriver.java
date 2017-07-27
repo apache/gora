@@ -30,11 +30,13 @@ import java.util.Properties;
 
 /**
  * Helper class for third part tests using gora-aerospike backend.
+ *
  * @see GoraTestDriver
  */
 public class GoraAerospikeTestDriver extends GoraTestDriver {
 
   private final GenericContainer aerospikeContainer;
+
   private final Properties properties = DataStoreFactory.createProps();
 
   public GoraAerospikeTestDriver(GenericContainer aerospikeContainer) {
@@ -49,7 +51,8 @@ public class GoraAerospikeTestDriver extends GoraTestDriver {
     Thread.sleep(5000);
 
     properties.setProperty("gora.aerospikestore.server.ip", "localhost");
-    properties.setProperty("gora.aerospikestore.server.port", aerospikeContainer.getMappedPort(3000).toString());
+    properties.setProperty("gora.aerospikestore.server.port",
+            aerospikeContainer.getMappedPort(3000).toString());
   }
 
   @Override
@@ -59,18 +62,18 @@ public class GoraAerospikeTestDriver extends GoraTestDriver {
   /**
    * Instantiate a new {@link DataStore}. Uses 'null' schema.
    *
-   * @param keyClass The key class.
+   * @param keyClass        The key class.
    * @param persistentClass The value class.
    * @return A new store instance.
    * @throws GoraException If an error occur in creating the data store
    */
   @Override
-  public <K, T extends Persistent> DataStore<K, T> createDataStore(Class<K> keyClass, Class<T> persistentClass)
-          throws GoraException {
+  public <K, T extends Persistent> DataStore<K, T> createDataStore(Class<K> keyClass,
+          Class<T> persistentClass) throws GoraException {
 
     final DataStore<K, T> dataStore = DataStoreFactory
-            .createDataStore((Class<? extends DataStore<K, T>>) dataStoreClass, keyClass, persistentClass, conf,
-                    properties);
+            .createDataStore((Class<? extends DataStore<K, T>>) dataStoreClass, keyClass,
+                    persistentClass, conf, properties);
     dataStores.add(dataStore);
     log.info("Datastore for {} was added.", persistentClass);
     return dataStore;

@@ -139,7 +139,6 @@ public class TestAerospikeStore extends DataStoreTestBase {
     webPageStore.flush();
     DataStoreTestUtil.assertEmptyResults(webPageStore.newQuery());
 
-
     //test 2 - delete all
     WebPageDataCreator.createWebPageData(webPageStore);
 

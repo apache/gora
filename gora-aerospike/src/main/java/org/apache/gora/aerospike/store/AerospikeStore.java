@@ -229,8 +229,8 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
     Result<K, T> result = query.execute();
     int deleteCount = 0;
     try {
-      while(result.next()) {
-        if(aerospikeClient.delete(null,getAerospikeKey(result.getKey()))){
+      while (result.next()) {
+        if (aerospikeClient.delete(null, getAerospikeKey(result.getKey()))) {
           deleteCount++;
         }
       }
@@ -267,39 +267,39 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
     }
 
     // Query execution for single key
-    else if (query.getKey()!= null) {
+    else if (query.getKey() != null) {
       Key key = getAerospikeKey(query.getKey());
       Record record = aerospikeClient.get(null, key);
-      if(record != null){
+      if (record != null) {
         resultRecords.add(new AerospikeResultRecord(key, record));
       }
     }
 
     // Query execution for key ranges
     // ToDo: Implement Query execution for key ranges
-//    else if (query.getStartKey() != null && query.getEndKey() != null) {
-//
-//      // the key range filtering at the gora-module, which is not a better solution
-//      String lowerBound  = query.getStartKey().toString();
-//      String upperBound  = query.getEndKey().toString();
-//
-//      try (RecordSet recordSet = aerospikeClient.query(null, getStatement(namespace, set))) {
-//        while (recordSet.next()) {
-//          Key key = recordSet.getKey();
-//          Record record = recordSet.getRecord();
-//
-//          String input = key.userKey.toString();
-//          boolean isSpecifiedRange =  input.compareToIgnoreCase(lowerBound) >= 0 && input
-//                  .compareToIgnoreCase(upperBound) <= 0;
-//
-//          if (isSpecifiedRange) {
-//            AerospikeResultRecord aerospikeRecord = new AerospikeResultRecord(key, record);
-//            resultRecords.add(aerospikeRecord);
-//          }
-//
-//        }
-//      }
-//    }
+    //    else if (query.getStartKey() != null && query.getEndKey() != null) {
+    //
+    //      // the key range filtering at the gora side, which is not a better solution
+    //      String lowerBound  = query.getStartKey().toString();
+    //      String upperBound  = query.getEndKey().toString();
+    //
+    //      try (RecordSet recordSet = aerospikeClient.query(null, getStatement(namespace, set))) {
+    //        while (recordSet.next()) {
+    //          Key key = recordSet.getKey();
+    //          Record record = recordSet.getRecord();
+    //
+    //          String input = key.userKey.toString();
+    //          boolean isSpecifiedRange =  input.compareToIgnoreCase(lowerBound) >= 0 && input
+    //                  .compareToIgnoreCase(upperBound) <= 0;
+    //
+    //          if (isSpecifiedRange) {
+    //            AerospikeResultRecord aerospikeRecord = new AerospikeResultRecord(key, record);
+    //            resultRecords.add(aerospikeRecord);
+    //          }
+    //
+    //        }
+    //      }
+    //    }
     return new AerospikeQueryResult<>(this, query, resultRecords, getFieldsToQuery(null));
   }
 
@@ -326,13 +326,13 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
   }
 
   /**
-   * Method to create a statement
+   * Method to create a Aerospike specific statement
    *
    * @param namespace the namespace
    * @param set       the set
    * @return the statement
    */
-  private Statement getStatement(String namespace, String set){
+  private Statement getStatement(String namespace, String set) {
     Statement stmt = new Statement();
     stmt.setNamespace(namespace);
     stmt.setSetName(set);
@@ -354,7 +354,7 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
    * @param key persistent key
    * @return aerospike key for the record
    */
-  public Key getAerospikeKey(K key) {
+  private Key getAerospikeKey(K key) {
     Value keyValue;
     if (keyClass.getSimpleName().equalsIgnoreCase("string")) {
       keyValue = Value.get(key.toString());

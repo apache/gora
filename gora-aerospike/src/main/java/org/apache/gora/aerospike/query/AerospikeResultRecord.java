@@ -21,11 +21,12 @@ import com.aerospike.client.Key;
 import com.aerospike.client.Record;
 
 /**
- * Class to hold Aerospike result records
+ * Class to represent Aerospike result records
  */
 public class AerospikeResultRecord {
 
   private Key key;
+
   private Record record;
 
   public AerospikeResultRecord(Key key, Record record) {
