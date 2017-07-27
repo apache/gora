@@ -762,7 +762,7 @@
     <restlet.version>2.3.1</restlet.version>
 
     <spark.version>1.4.1</spark.version>
-    <aerospike.version>3.3.2</aerospike.version>
+    <aerospike.version>4.0.6</aerospike.version>
     <!-- Misc Dependencies -->
     <guava.version>13.0</guava.version>
     <commons-lang.version>2.6</commons-lang.version>

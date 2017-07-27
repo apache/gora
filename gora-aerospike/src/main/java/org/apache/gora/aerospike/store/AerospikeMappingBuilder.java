@@ -96,12 +96,8 @@ public class AerospikeMappingBuilder {
               writePolicy.sendKey = getKeyUsagePolicy(
                       policyElement.getAttributeValue("key").toUpperCase(Locale.getDefault()));
             }
-            if (policyElement.getAttributeValue("retry") != null) {
-              writePolicy.retryOnTimeout = getRetryOnTimeoutPolicy(
-                      policyElement.getAttributeValue("retry").toUpperCase(Locale.getDefault()));
-            }
             if (policyElement.getAttributeValue("timeout") != null) {
-              writePolicy.timeout = getTimeoutValue(policyElement.getAttributeValue("timeout"));
+              writePolicy.timeoutDelay = getTimeoutValue(policyElement.getAttributeValue("timeout"));
             }
             aerospikeMapping.setWritePolicy(writePolicy);
           } else if (policy.equals("read")) {
@@ -111,7 +107,7 @@ public class AerospikeMappingBuilder {
                       policyElement.getAttributeValue("key").toUpperCase(Locale.getDefault()));
             }
             if (policyElement.getAttributeValue("timeout") != null) {
-              readPolicy.timeout = getTimeoutValue(policyElement.getAttributeValue("timeout"));
+              readPolicy.timeoutDelay = getTimeoutValue(policyElement.getAttributeValue("timeout"));
             }
             aerospikeMapping.setReadPolicy(readPolicy);
           }
@@ -262,34 +258,6 @@ public class AerospikeMappingBuilder {
       }
     }
     return sendKey;
-  }
-
-  /**
-   * Returns the corresponding retry on timeout policy from the user specified retry policy name
-   *
-   * @param retry retry policy name
-   * @return corresponding retry on timeout policy
-   */
-  private boolean getRetryOnTimeoutPolicy(String retry) {
-
-    if (retry == null) {
-      return false;
-    }
-
-    boolean retryOnTimeout;
-    switch (retry) {
-      case "NONE":
-        retryOnTimeout = false;
-        break;
-      case "ONCE":
-        retryOnTimeout = true;
-        break;
-      default: {
-        LOG.warn("Invalid key retry policy provided, using the default retry policy");
-        retryOnTimeout = false;
-      }
-    }
-    return retryOnTimeout;
   }
 
   /**
