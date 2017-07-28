@@ -70,6 +70,15 @@ public class CassandraMapping {
     return null;
   }
 
+  public Field getFieldFromColumnName(String columnName) {
+    for (Field field1 : fieldList) {
+      if (field1.getColumnName().equals(columnName)) {
+        return field1;
+      }
+    }
+    return null;
+  }
+
   public String[] getFieldNames() {
     List<String> fieldNames = new ArrayList<>(fieldList.size());
     for (Field field : fieldList) {

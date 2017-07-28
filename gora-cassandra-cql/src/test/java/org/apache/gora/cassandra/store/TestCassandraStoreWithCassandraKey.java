@@ -21,9 +21,9 @@ import org.apache.avro.util.Utf8;
 import org.apache.gora.cassandra.GoraCassandraTestDriver;
 import org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey;
 import org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord;
+import org.apache.gora.cassandra.query.CassandraQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
-import org.apache.gora.store.DataStore;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -39,7 +39,7 @@ import java.util.Properties;
  */
 public class TestCassandraStoreWithCassandraKey {
   private static GoraCassandraTestDriver testDriver = new GoraCassandraTestDriver();
-  private static DataStore<CassandraKey, CassandraRecord> cassandraRecordDataStore;
+  private static CassandraStore<CassandraKey, CassandraRecord> cassandraRecordDataStore;
   private static Properties parameter;
 
   @BeforeClass
@@ -47,7 +47,7 @@ public class TestCassandraStoreWithCassandraKey {
     setProperties();
     testDriver.setParameters(parameter);
     testDriver.setUpClass();
-    cassandraRecordDataStore = testDriver.createDataStore(CassandraKey.class, CassandraRecord.class);
+    cassandraRecordDataStore =(CassandraStore<CassandraKey, CassandraRecord> )testDriver.createDataStore(CassandraKey.class, CassandraRecord.class);
   }
 
   private static void setProperties() {
@@ -116,13 +116,13 @@ public class TestCassandraStoreWithCassandraKey {
    */
   @Test
   public void testExecuteQuery() throws Exception {
-    Query query = cassandraRecordDataStore.newQuery();
+    Query<CassandraKey, CassandraRecord> query = cassandraRecordDataStore.newQuery();
     cassandraRecordDataStore.truncateSchema();
     CassandraKey key = new CassandraKey();
     key.setTimestamp(2027L);
     key.setUrl("www.apache.org");
     query.setKey(key);
-    Result result = query.execute();
+    Result<CassandraKey, CassandraRecord> result = query.execute();
     Assert.assertFalse(result.next());
     CassandraRecord record = new CassandraRecord();
     record.setDataLong(719411002L);
@@ -141,7 +141,7 @@ public class TestCassandraStoreWithCassandraKey {
     result = query.execute();
     Assert.assertTrue(result.next());
     // verify data
-    retrievedRecord = (CassandraRecord) result.get();
+    retrievedRecord = result.get();
     Assert.assertEquals(record.getDataInt(), retrievedRecord.getDataInt());
     Assert.assertEquals(record.getDataString(), retrievedRecord.getDataString());
     Assert.assertEquals(record.getDataLong(), retrievedRecord.getDataLong());
@@ -152,7 +152,7 @@ public class TestCassandraStoreWithCassandraKey {
     result = query.execute();
     Assert.assertFalse(result.next());
     // test empty query
-    Query emptyQuery = cassandraRecordDataStore.newQuery();
+    Query<CassandraKey, CassandraRecord> emptyQuery = cassandraRecordDataStore.newQuery();
     result = emptyQuery.execute();
     Assert.assertFalse(result.next());
     cassandraRecordDataStore.put(key, record);
@@ -197,10 +197,10 @@ public class TestCassandraStoreWithCassandraKey {
     cassandraRecordDataStore.put(key2,record2);
     cassandraRecordDataStore.put(key3,record3);
     cassandraRecordDataStore.put(key4,record4);
-    Query rangeQuery = cassandraRecordDataStore.newQuery();
+    Query<CassandraKey, CassandraRecord> rangeQuery = cassandraRecordDataStore.newQuery();
     rangeQuery.setStartKey(key2);
     rangeQuery.setEndKey(key2);
-    Result result = rangeQuery.execute();
+    Result<CassandraKey, CassandraRecord> result = rangeQuery.execute();
     int i = 0;
     while (result.next()) {
       i++;
@@ -217,4 +217,47 @@ public class TestCassandraStoreWithCassandraKey {
     Assert.assertEquals(2,i);
   }
 
+  @Test
+  public void testUpdateByQuery() {
+    cassandraRecordDataStore.truncateSchema();
+    //insert data
+    CassandraRecord record1 = new CassandraRecord();
+    CassandraRecord record2 = new CassandraRecord();
+    CassandraRecord record3 = new CassandraRecord();
+    CassandraRecord record4 = new CassandraRecord();
+    record1.setDataLong(719411002L);
+    record1.setDataString(new Utf8("Madawa"));
+    record1.setDataInt(100);
+    record2.setDataLong(712778588L);
+    record2.setDataString(new Utf8("Kasun"));
+    record2.setDataInt(101);
+    record3.setDataLong(716069539L);
+    record3.setDataString(new Utf8("Charith"));
+    record3.setDataInt(102);
+    record4.setDataLong(112956051L);
+    record4.setDataString(new Utf8("Bhanuka"));
+    record4.setDataInt(103);
+    CassandraKey key1 = new CassandraKey();
+    key1.setTimestamp(200L);
+    key1.setUrl("www.apache.org");
+    CassandraKey key2 = new CassandraKey();
+    key2.setTimestamp(205L);
+    key2.setUrl("www.apache.org");
+    CassandraKey key3 = new CassandraKey();
+    key3.setTimestamp(210L);
+    key3.setUrl("www.apache.org");
+    CassandraKey key4 = new CassandraKey();
+    key4.setTimestamp(215L);
+    key4.setUrl("www.apache.org");
+    cassandraRecordDataStore.put(key1,record1);
+    cassandraRecordDataStore.put(key2,record2);
+    cassandraRecordDataStore.put(key3,record3);
+    cassandraRecordDataStore.put(key4,record4);
+    CassandraQuery<CassandraKey, CassandraRecord> query = new CassandraQuery<>(cassandraRecordDataStore);
+    query.setKey(key1);
+    query.addUpdateField("dataString", new Utf8("test123"));
+    cassandraRecordDataStore.updateByQuery(query);
+   CassandraRecord result = cassandraRecordDataStore.get(key1);
+    Assert.assertEquals(new Utf8("test123"), result.getDataString());
+  }
 }

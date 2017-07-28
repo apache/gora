@@ -20,11 +20,13 @@ import com.datastax.driver.core.querybuilder.Delete;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
 import com.datastax.driver.core.querybuilder.Update;
+import org.apache.avro.Schema;
 import org.apache.gora.cassandra.bean.CassandraKey;
 import org.apache.gora.cassandra.bean.ClusterKeyField;
 import org.apache.gora.cassandra.bean.Field;
 import org.apache.gora.cassandra.bean.KeySpace;
 import org.apache.gora.cassandra.bean.PartitionKeyField;
+import org.apache.gora.cassandra.persistent.CassandraNativePersistent;
 import org.apache.gora.cassandra.query.CassandraQuery;
 import org.apache.gora.cassandra.store.CassandraMapping;
 import org.apache.gora.query.Query;
@@ -609,9 +611,26 @@ class CassandraQueryFactory {
     Update.Assignments updateAssignments = null;
     if (cassandraQuery instanceof CassandraQuery) {
       String[] columnNames = getColumnNames(mapping, Arrays.asList(cassandraQuery.getFields()));
-      for (String column : columnNames) {
-        updateAssignments = update.with(QueryBuilder.set(column, "?"));
-        objects.add(((CassandraQuery) cassandraQuery).getUpdateFieldValue(column));
+      if(CassandraNativePersistent.class.isAssignableFrom(mapping.getPersistentClass())) {
+        for (String column : columnNames) {
+          updateAssignments = update.with(QueryBuilder.set(column, "?"));
+          objects.add(((CassandraQuery) cassandraQuery).getUpdateFieldValue(mapping.getFieldFromColumnName(column).getFieldName()));
+        }
+      } else {
+        for (String column : columnNames) {
+          updateAssignments = update.with(QueryBuilder.set(column, "?"));
+          String field = mapping.getFieldFromColumnName(column).getFieldName();
+          Object value = ((CassandraQuery) cassandraQuery).getUpdateFieldValue(field);
+          try {
+            Schema schema = (Schema) mapping.getPersistentClass().getField("SCHEMA$").get(null);
+            Schema schemaField = schema.getField(field).schema();
+            objects.add(AvroCassandraUtils.getFieldValueFromAvroBean(schemaField, schemaField.getType(), value));
+          } catch (IllegalAccessException | NoSuchFieldException e) {
+            throw new RuntimeException("SCHEMA$ field can't accessible, Please recompile the Avro schema with goracompiler.");
+          } catch (NullPointerException e) {
+            throw new RuntimeException(field + " field couldn't find in the class " + mapping.getPersistentClass() + ".");
+          }
+        }
       }
     }
     String primaryKey = null;

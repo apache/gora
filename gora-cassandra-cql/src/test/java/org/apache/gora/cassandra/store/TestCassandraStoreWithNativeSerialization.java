@@ -46,7 +46,7 @@ import java.util.UUID;
  */
 public class TestCassandraStoreWithNativeSerialization {
   private static GoraCassandraTestDriver testDriver = new GoraCassandraTestDriver();
-  private static DataStore<UUID, User> userDataStore;
+  private static CassandraStore<UUID, User> userDataStore;
   private static Properties parameter;
 
   @BeforeClass
@@ -54,7 +54,7 @@ public class TestCassandraStoreWithNativeSerialization {
     setProperties();
     testDriver.setParameters(parameter);
     testDriver.setUpClass();
-    userDataStore = testDriver.createDataStore(UUID.class, User.class);
+    userDataStore = (CassandraStore<UUID, User>) testDriver.createDataStore(UUID.class, User.class);
   }
 
   private static void setProperties() {
@@ -180,7 +180,7 @@ public class TestCassandraStoreWithNativeSerialization {
     Query<UUID, User> query1 = userDataStore.newQuery();
     Result<UUID, User> result1 = userDataStore.execute(query1);
     int i = 0;
-    Assert.assertEquals(result1.getProgress(),0.0,0.0);
+    Assert.assertEquals(result1.getProgress(), 0.0, 0.0);
     while (result1.next()) {
       // check objects values
       Assert.assertEquals(result1.get().getName(), users.get(result1.getKey()).getName());
@@ -188,7 +188,7 @@ public class TestCassandraStoreWithNativeSerialization {
       Assert.assertEquals(result1.get().getUserId(), users.get(result1.getKey()).getUserId());
       i++;
     }
-    Assert.assertEquals(result1.getProgress(),1.0,0.0);
+    Assert.assertEquals(result1.getProgress(), 1.0, 0.0);
     Assert.assertEquals(3, i);
 
     // Check limit query
@@ -244,7 +244,7 @@ public class TestCassandraStoreWithNativeSerialization {
     userDataStore.deleteByQuery(query2);
     User partialDeletedUser = userDataStore.get(id2);
     Assert.assertNull(partialDeletedUser.getName());
-    Assert.assertEquals(partialDeletedUser.getDateOfBirth(),user2.getDateOfBirth());
+    Assert.assertEquals(partialDeletedUser.getDateOfBirth(), user2.getDateOfBirth());
   }
 
   /**
@@ -260,46 +260,46 @@ public class TestCassandraStoreWithNativeSerialization {
     User user2 = new User(id2, "user2", Date.from(Instant.now()));
     userDataStore.put(id2, user2);
     Query<UUID, User> query1 = userDataStore.newQuery();
-    if(query1 instanceof CassandraQuery) {
+    if (query1 instanceof CassandraQuery) {
       ((CassandraQuery) query1).addUpdateField("name", "madhawa");
     }
     query1.setKey(id1);
-    if(userDataStore instanceof CassandraStore) {
-      ((CassandraStore) userDataStore).updateByQuery(query1);
+    if (userDataStore instanceof CassandraStore) {
+      userDataStore.updateByQuery(query1);
     }
     User user = userDataStore.get(id1);
-    Assert.assertEquals(user.getName(),"madhawa");
+    Assert.assertEquals(user.getName(), "madhawa");
   }
 
   @Test
   public void testComplexTypes() throws GoraException {
     DataStore<String, ComplexTypes> documentDataStore = testDriver.createDataStore(String.class, ComplexTypes.class);
     ComplexTypes document = new ComplexTypes("document1");
-    document.setIntArrayDataType(new int[]{1,2,3});
-    document.setStringArrayDataType(new String[] {"madhawa", "kasun", "gunasekara", "pannipitiya", "srilanka"});
-    document.setListDataType(new ArrayList<>(Arrays.asList("gora","nutch","tika","opennlp", "olingo")));
+    document.setIntArrayDataType(new int[]{1, 2, 3});
+    document.setStringArrayDataType(new String[]{"madhawa", "kasun", "gunasekara", "pannipitiya", "srilanka"});
+    document.setListDataType(new ArrayList<>(Arrays.asList("gora", "nutch", "tika", "opennlp", "olingo")));
     document.setSetDataType(new HashSet<>(Arrays.asList("important", "keeper")));
-    HashMap<String,String> map = new HashMap<>();
-    map.put("LK","Colombo");
+    HashMap<String, String> map = new HashMap<>();
+    map.put("LK", "Colombo");
     document.setMapDataType(map);
     documentDataStore.put("document1", document);
     ComplexTypes retrievedDocuemnt = documentDataStore.get("document1");
     // verify list data
-    for(int i=0; i<document.getListDataType().size(); i++) {
+    for (int i = 0; i < document.getListDataType().size(); i++) {
       Assert.assertEquals(document.getListDataType().get(i), retrievedDocuemnt.getListDataType().get(i));
     }
     // verify set data
-    for(int i=0; i<document.getSetDataType().size(); i++) {
+    for (int i = 0; i < document.getSetDataType().size(); i++) {
       Assert.assertTrue(Arrays.equals(document.getSetDataType().toArray(), retrievedDocuemnt.getSetDataType().toArray()));
     }
     // verify array data
-    for(int i=0; i<document.getIntArrayDataType().length; i++) {
+    for (int i = 0; i < document.getIntArrayDataType().length; i++) {
       Assert.assertTrue(Arrays.equals(document.getIntArrayDataType(), retrievedDocuemnt.getIntArrayDataType()));
     }
-    for(int i=0; i<document.getStringArrayDataType().length; i++) {
+    for (int i = 0; i < document.getStringArrayDataType().length; i++) {
       Assert.assertTrue(Arrays.equals(document.getStringArrayDataType(), retrievedDocuemnt.getStringArrayDataType()));
     }
     // verify map data
-    Assert.assertEquals(map.get("LK"),retrievedDocuemnt.getMapDataType().get("LK"));
+    Assert.assertEquals(map.get("LK"), retrievedDocuemnt.getMapDataType().get("LK"));
   }
 }
