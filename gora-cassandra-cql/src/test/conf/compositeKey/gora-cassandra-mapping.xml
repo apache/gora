@@ -19,11 +19,13 @@
 
 <gora-otd>
     <keyspace name="EmployeeSpace" durableWrite="false">
-        <placementStrategy name="SimpleStrategy" />
+        <placementStrategy name="SimpleStrategy"/>
     </keyspace>
 
-    <class name="org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord" keyClass="org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey" keyspace="EmployeeSpace"
-           table="CassandraRecord" allowFiltering="true"  id="5a1c395e-b41f-11e5-9f22-ba0be0483c18">
+    <class name="org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord"
+           keyClass="org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey"
+           keyspace="EmployeeSpace"
+           table="CassandraRecord" allowFiltering="true" id="5a1c395e-b41f-11e5-9f22-ba0be0483c18">
         <field name="dataString" column="name" type="text"/>
         <field name="dataInt" column="age" type="int"/>
         <field name="dataLong" column="salary" type="bigint"/>
@@ -41,8 +43,8 @@
 
     <cassandraKey name="org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey">
         <partitionKey>
-                <field name="url" column="urlData" type="text"/>
-                <field name="timestamp" column="timestampData" type="bigint"/>
+            <field name="url" column="urlData" type="text"/>
+            <field name="timestamp" column="timestampData" type="bigint"/>
         </partitionKey>
         <clusterKey>
             <key column="timestampData" order="desc"/>

@@ -28,13 +28,13 @@ public class CassandraStoreParameters {
    */
   public static final String CASSANDRA_SERVERS = "gora.cassandrastore.cassandraServers";
   /**
-   *Property pointing to the Cassandra keyspace.
+   * Property pointing to the Cassandra keyspace.
    * string
    */
   public static final String KEYSPACE = "gora.cassandrastore.keyspace";
   /**
-   *  Property pointing to the port to use to connect to the Cassandra hosts.
-   *  integer
+   * Property pointing to the port to use to connect to the Cassandra hosts.
+   * integer
    */
   public static final String PORT = "gora.cassandrastore.port";
 
@@ -97,7 +97,7 @@ public class CassandraStoreParameters {
    * Property pointing to set local host new connection threshold.
    * integer
    */
-  public static final String LOCAL_NEW_CONNECTION_THRESHOLD= "gora.cassandrastore.localNewConnectionThreshold";
+  public static final String LOCAL_NEW_CONNECTION_THRESHOLD = "gora.cassandrastore.localNewConnectionThreshold";
   /**
    * Property pointing to set remote host new connection threshold.
    * integer

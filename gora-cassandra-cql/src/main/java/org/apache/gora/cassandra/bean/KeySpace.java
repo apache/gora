@@ -25,35 +25,45 @@ import java.util.Map;
  */
 public class KeySpace {
 
-  public enum PlacementStrategy {
-    SimpleStrategy,
-    NetworkTopologyStrategy,
-  }
-
   private String name;
-
   private PlacementStrategy placementStrategy;
-
   private boolean durableWritesEnabled;
-
   private int replicationFactor;
-
   private Map<String, Integer> dataCenters;
 
   public String getName() {
     return name;
   }
 
+  public void setName(String name) {
+    this.name = name;
+  }
+
   public boolean isDurableWritesEnabled() {
     return durableWritesEnabled;
+  }
+
+  public void setDurableWritesEnabled(boolean durableWritesEnabled) {
+    this.durableWritesEnabled = durableWritesEnabled;
   }
 
   public PlacementStrategy getPlacementStrategy() {
     return placementStrategy;
   }
 
+  public void setPlacementStrategy(PlacementStrategy placementStrategy) {
+    this.placementStrategy = placementStrategy;
+    if (placementStrategy.equals(PlacementStrategy.NetworkTopologyStrategy) && this.dataCenters == null) {
+      this.dataCenters = new HashMap<>();
+    }
+  }
+
   public int getReplicationFactor() {
     return replicationFactor;
+  }
+
+  public void setReplicationFactor(int replicationFactor) {
+    this.replicationFactor = replicationFactor;
   }
 
   public Map<String, Integer> getDataCenters() {
@@ -64,22 +74,8 @@ public class KeySpace {
     this.dataCenters.put(key, value);
   }
 
-  public void setPlacementStrategy(PlacementStrategy placementStrategy) {
-    this.placementStrategy = placementStrategy;
-    if (placementStrategy.equals(PlacementStrategy.NetworkTopologyStrategy) && this.dataCenters == null) {
-      this.dataCenters = new HashMap<>();
-    }
-  }
-
-  public void setReplicationFactor(int replicationFactor) {
-    this.replicationFactor = replicationFactor;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public void setDurableWritesEnabled(boolean durableWritesEnabled) {
-    this.durableWritesEnabled = durableWritesEnabled;
+  public enum PlacementStrategy {
+    SimpleStrategy,
+    NetworkTopologyStrategy,
   }
 }

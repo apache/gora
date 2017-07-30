@@ -17,54 +17,29 @@
   ~  limitations under the License.
   -->
 
-<!--
-   The values of 'replication_factor' and 'placementStrategy' attribute of keyspace tag
-   only apply if gora create the kyespace. they have no effect if this is being used against 
-   an existing keyspace. the default value for 'replication_factor' is '1'
-   
-   The value of 'placement_strategy' should be a fully qualifed class name that is known to
-   the cassansra cluster, not the application or gora. As of this writing, the classes that ship
-   with cassandra are:
-   'org.apache.cassandra.locator.SimpleStrategy'
-   'org.apache.cassandra.locator.NetworkTopologyStrategy'
-   gora cassandra would use SimpleStrategy by default if no value for this attribute is specified
-   
-   The default value of 'gc_grace_seconds' is '0' which is ONLY VIABLE FOR SINGLE NODE
-   CLUSTER. you should update this value according to your cluster configuration. 
-   https://wiki.apache.org/cassandra/StorageConfiguration
-
-   The value of 'ttl' (time to live) attribute of field tag should most likely always
-   be zero unless you want Cassandra to create Tombstones and delete portions of your
-   data once this period expires. Any positive value is read and bound to the number
-   of seconds after which the value for that field will disappear. The default value of ttl
-   is '0'
-
-   More information on gora-cassandra configuration and mapping's can be found
-   at http://gora.apache.org/current/gora-cassandra.html
--->
-
-
 <gora-otd>
     <keyspace name="nativeTestKeySpace" durableWrite="false">
         <placementStrategy name="SimpleStrategy" replication_factor="1"/>
     </keyspace>
 
-    <class name="org.apache.gora.cassandra.example.generated.nativeSerialization.User" keyClass="java.util.UUID" keyspace="nativeTestKeySpace"
-           table="users" >
+    <class name="org.apache.gora.cassandra.example.generated.nativeSerialization.User" keyClass="java.util.UUID"
+           keyspace="nativeTestKeySpace"
+           table="users">
         <field name="userId" column="user_id" type="uuid" primarykey="true"/>
-        <field name="name" column="name" type="text" />
-        <field name="dateOfBirth" column="dob" type="timestamp" />
+        <field name="name" column="name" type="text"/>
+        <field name="dateOfBirth" column="dob" type="timestamp"/>
     </class>
 
-    <class name="org.apache.gora.cassandra.example.generated.nativeSerialization.ComplexTypes" keyClass="java.lang.String" keyspace="nativeTestKeySpace"
-           table="documents" >
+    <class name="org.apache.gora.cassandra.example.generated.nativeSerialization.ComplexTypes"
+           keyClass="java.lang.String" keyspace="nativeTestKeySpace"
+           table="documents">
         <field name="id" column="id" type="text" primarykey="true"/>
         <field name="listDataType" column="listDataType" type="list(text)"/>
         <field name="listUUIDDataType" column="listUUIDDataType" type="list(uuid)"/>
-        <field name="mapDataType" column="mapDataType" type="map(text,text)" />
-        <field name="stringArrayDataType" column="stringArrayDataType" type="list(text)" />
-        <field name="intArrayDataType" column="intArrayDataType" type="list(int)" />
-        <field name="setDataType" column="setDataType" type="set(text)" />
+        <field name="mapDataType" column="mapDataType" type="map(text,text)"/>
+        <field name="stringArrayDataType" column="stringArrayDataType" type="list(text)"/>
+        <field name="intArrayDataType" column="intArrayDataType" type="list(int)"/>
+        <field name="setDataType" column="setDataType" type="set(text)"/>
     </class>
 
 </gora-otd>

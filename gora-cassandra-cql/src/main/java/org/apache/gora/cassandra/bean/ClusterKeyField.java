@@ -22,6 +22,13 @@ package org.apache.gora.cassandra.bean;
  */
 public class ClusterKeyField {
 
+  private String columnName;
+  private Order order;
+
+  public ClusterKeyField() {
+
+  }
+
   public String getColumnName() {
     return columnName;
   }
@@ -30,25 +37,17 @@ public class ClusterKeyField {
     this.columnName = columnName;
   }
 
-  private String columnName;
-
-  public ClusterKeyField() {
-
-  }
-
-  public enum Order {
-    DESC,
-    ASC,
-  }
-
-  private Order order;
-
   public Order getOrder() {
     return order;
   }
 
   public void setOrder(Order order) {
     this.order = order;
+  }
+
+  public enum Order {
+    DESC,
+    ASC,
   }
 
 

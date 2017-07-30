@@ -17,12 +17,10 @@
 
 /**
  * @author lewismc
- *
  */
 
 package org.apache.gora.cassandra;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.apache.cassandra.io.util.FileUtils;
 import org.apache.cassandra.service.CassandraDaemon;
 import org.apache.gora.GoraTestDriver;
@@ -36,26 +34,21 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.Properties;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 // Logging imports
 
 /**
- * Helper class for third party tests using gora-cassandra backend. 
+ * Helper class for third party tests using gora-cassandra backend.
+ *
  * @see GoraTestDriver for test specifics.
  * This driver is the base for all test cases that require an embedded Cassandra
  * server. In this case we draw on Hector's @see EmbeddedServerHelper.
  * It starts (setUp) and stops (tearDown) embedded Cassandra server.
- *
  */
 
 public class GoraCassandraTestDriver extends GoraTestDriver {
   private static Logger log = LoggerFactory.getLogger(GoraCassandraTestDriver.class);
-  
+
   private static String baseDirectory = "target/test";
 
   private CassandraDaemon cassandraDaemon;
@@ -64,101 +57,16 @@ public class GoraCassandraTestDriver extends GoraTestDriver {
 
   private Properties properties;
 
-  public void setParameters(Properties parameters) {
-    this.properties = parameters;
-  }
-
-  @Override
-  public <K, T extends Persistent> DataStore<K, T> createDataStore(Class<K> keyClass, Class<T> persistentClass) throws GoraException {
-    return DataStoreFactory.createDataStore(CassandraStore.class, keyClass, persistentClass , conf, properties, null);
-  }
-
-  /**
-   * @return temporary base directory of running cassandra instance
-   */
-  public String getBaseDirectory() {
-    return baseDirectory;
-  }
-
   public GoraCassandraTestDriver() {
     super(CassandraStore.class);
   }
-	
-  /**
-   * Starts embedded Cassandra server.
-   *
-   * @throws Exception
-   * 	if an error occurs
-   */
-  @Override
-  public void setUpClass(){
-    log.info("Starting embedded Cassandra Server...");
-    try {
-      cleanupDirectoriesFailover();
-      FileUtils.createDirectory(baseDirectory);
-      System.setProperty("log4j.configuration", "log4j-server.properties");
-      System.setProperty("cassandra.config", "cassandra.yaml");
-      
-      cassandraDaemon = new CassandraDaemon();
-      cassandraDaemon.completeSetup();
-      cassandraDaemon.applyConfig();
-      cassandraDaemon.init(null);
-      cassandraThread = new Thread(new Runnable() {
-
-        public void run() {
-          try {
-            cassandraDaemon.start();
-          } catch (Exception e) {
-            log.error("Embedded casandra server run failed!", e);
-          }
-        }
-      });
-	
-      cassandraThread.setDaemon(true);
-      cassandraThread.start();
-    } catch (Exception e) {
-      log.error("Embedded casandra server start failed!", e);
-
-      // cleanup
-      tearDownClass();
-    }
-  }
-
-
-  /**
-   * Stops embedded Cassandra server.
-   *
-   * @throws Exception
-   * 	if an error occurs
-   */
-  @Override
-  public void tearDownClass(){
-    log.info("Shutting down Embedded Cassandra server...");
-    if (cassandraThread != null) {
-      cassandraDaemon.stop();
-      cassandraDaemon.destroy();
-//      cassandraThread.interrupt();
-//      cassandraThread = null;
-    }
-/*    Thread cleanupThread = new Thread(() -> {
-      try {
-        Thread.sleep(5000);
-        cleanupDirectoriesFailover();
-      } catch (Exception e) {
-        log.error("Embedded casandra server run failed!", e);
-      }
-    });
-    cleanupThread.setDaemon(true);
-    cleanupThread.start();*/
-
-  }  
 
   /**
    * Cleans up cassandra's temporary base directory.
-   *
+   * <p>
    * In case o failure waits for 250 msecs and then tries it again, 3 times totally.
    */
-  public static void cleanupDirectoriesFailover() {
+  private static void cleanupDirectoriesFailover() {
     int tries = 3;
     while (tries-- > 0) {
       try {
@@ -178,13 +86,81 @@ public class GoraCassandraTestDriver extends GoraTestDriver {
   /**
    * Cleans up cassandra's temporary base directory.
    *
-   * @throws Exception
-   * 	if an error occurs
+   * @throws Exception if an error occurs
    */
   private static void cleanupDirectories() throws Exception {
     File dirFile = new File(baseDirectory);
     if (dirFile.exists()) {
       FileUtils.deleteRecursive(dirFile);
     }
+  }
+
+  public void setParameters(Properties parameters) {
+    this.properties = parameters;
+  }
+
+  @Override
+  public <K, T extends Persistent> DataStore<K, T> createDataStore(Class<K> keyClass, Class<T> persistentClass) throws GoraException {
+    return DataStoreFactory.createDataStore(CassandraStore.class, keyClass, persistentClass, conf, properties, null);
+  }
+
+  /**
+   * @return temporary base directory of running cassandra instance
+   */
+  public String getBaseDirectory() {
+    return baseDirectory;
+  }
+
+  /**
+   * Starts embedded Cassandra server.
+   *
+   * @throws Exception if an error occurs
+   */
+  @Override
+  public void setUpClass() {
+/*    log.info("Starting embedded Cassandra Server...");
+    try {
+      cleanupDirectoriesFailover();
+      FileUtils.createDirectory(baseDirectory);
+      System.setProperty("log4j.configuration", "log4j-server.properties");
+      System.setProperty("cassandra.config", "cassandra.yaml");
+
+      cassandraDaemon = new CassandraDaemon();
+      cassandraDaemon.completeSetup();
+      cassandraDaemon.applyConfig();
+      cassandraDaemon.init(null);
+      cassandraThread = new Thread(new Runnable() {
+
+        public void run() {
+          try {
+            cassandraDaemon.start();
+          } catch (Exception e) {
+            log.error("Embedded casandra server run failed!", e);
+          }
+        }
+      });
+
+      cassandraThread.setDaemon(true);
+      cassandraThread.start();
+    } catch (Exception e) {
+      log.error("Embedded casandra server start failed!", e);
+
+      // cleanup
+      tearDownClass();
+    }*/
+  }
+
+  /**
+   * Stops embedded Cassandra server.
+   *
+   * @throws Exception if an error occurs
+   */
+  @Override
+  public void tearDownClass() {
+    log.info("Shutting down Embedded Cassandra server...");
+ /*   if (cassandraThread != null) {
+      cassandraDaemon.stop();
+      cassandraDaemon.destroy();
+    }*/
   }
 }

@@ -67,14 +67,14 @@ public class TestCassandraStoreWithNativeSerialization {
     parameter.setProperty("gora.cassandrastore.mapping.file", "nativeSerialization/gora-cassandra-mapping.xml");
   }
 
-  @After
-  public void tearDown() throws Exception {
-    testDriver.tearDown();
-  }
-
   @AfterClass
   public static void tearDownClass() throws Exception {
     testDriver.tearDownClass();
+  }
+
+  @After
+  public void tearDown() throws Exception {
+    testDriver.tearDown();
   }
 
   /**

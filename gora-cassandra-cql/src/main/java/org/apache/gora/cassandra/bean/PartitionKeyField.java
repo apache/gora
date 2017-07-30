@@ -35,7 +35,7 @@ public class PartitionKeyField extends Field {
 
   public void setComposite(boolean composite) {
     isComposite = composite;
-    if(isComposite && fields == null) {
+    if (isComposite && fields == null) {
       fields = new ArrayList<>();
     }
   }

@@ -24,6 +24,7 @@ import org.apache.avro.util.Utf8;
 import org.apache.gora.cassandra.bean.CassandraKey;
 import org.apache.gora.cassandra.bean.Field;
 import org.apache.gora.cassandra.store.CassandraMapping;
+import org.apache.gora.hbase.util.HBaseByteInterface;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.impl.DirtyListWrapper;
 import org.apache.gora.persistency.impl.DirtyMapWrapper;
@@ -31,6 +32,7 @@ import org.apache.gora.persistency.impl.PersistentBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,32 +54,26 @@ class AvroCassandraUtils {
 
   static void processKeys(CassandraMapping cassandraMapping, Object key, List<String> keys, List<Object> values) {
     CassandraKey cassandraKey = cassandraMapping.getCassandraKey();
-    if (cassandraMapping.isPartitionKeyDefined()) {
-      if (cassandraKey != null) {
-        if (key instanceof PersistentBase) {
-          PersistentBase keyBase = (PersistentBase) key;
-          for (Schema.Field field : keyBase.getSchema().getFields()) {
-            if (cassandraMapping.getFieldFromFieldName(field.name()) != null) {
-              keys.add(field.name());
-              Object value = keyBase.get(field.pos());
-              value = getFieldValueFromAvroBean(field.schema(), field.schema().getType(), value);
-              values.add(value);
-            } else {
-              LOG.debug("Ignoring field {}, Since field couldn't find in the {} mapping", new Object[]{field.name(), cassandraMapping.getPersistentClass()});
-            }
+    if (cassandraKey != null) {
+      if (key instanceof PersistentBase) {
+        PersistentBase keyBase = (PersistentBase) key;
+        for (Schema.Field field : keyBase.getSchema().getFields()) {
+          Field mappedField = cassandraKey.getFieldFromFieldName(field.name());
+          if (mappedField != null) {
+            keys.add(field.name());
+            Object value = keyBase.get(field.pos());
+            value = getFieldValueFromAvroBean(field.schema(), field.schema().getType(), value, mappedField);
+            values.add(value);
+          } else {
+            LOG.debug("Ignoring field {}, Since field couldn't find in the {} mapping", new Object[]{field.name(), cassandraMapping.getPersistentClass()});
           }
-        } else {
-          LOG.error("Key bean isn't extended by {} .", new Object[]{cassandraMapping.getKeyClass(), PersistentBase.class});
         }
       } else {
-        for (Field field : cassandraMapping.getInlinedDefinedPartitionKeys()) {
-          keys.add(field.getFieldName());
-          values.add(key);
-        }
+        LOG.error("Key bean isn't extended by {} .", new Object[]{cassandraMapping.getKeyClass(), PersistentBase.class});
       }
     } else {
-      keys.add(cassandraMapping.getDefaultCassandraKey().getFieldName());
-      values.add(key.toString());
+      keys.add(cassandraMapping.getInlinedDefinedPartitionKey().getFieldName());
+      values.add(key);
     }
   }
 
@@ -91,21 +87,33 @@ class AvroCassandraUtils {
    * @param fieldValue  the field value.
    * @return field value
    */
-  static Object getFieldValueFromAvroBean(Schema fieldSchema, Schema.Type type, Object fieldValue) {
+  static Object getFieldValueFromAvroBean(Schema fieldSchema, Schema.Type type, Object fieldValue, Field field) {
     switch (type) {
+      // Record can be persist with two ways, udt and bytes
       case RECORD:
         PersistentBase persistent = (PersistentBase) fieldValue;
-        PersistentBase newRecord = (PersistentBase) SpecificData.get().newRecord(persistent, persistent.getSchema());
-        for (Schema.Field member : fieldSchema.getFields()) {
-          if (member.pos() == 0 || !persistent.isDirty()) {
-            continue;
+        if (field.getType().contains("frozen")) {
+          PersistentBase newRecord = (PersistentBase) SpecificData.get().newRecord(persistent, persistent.getSchema());
+          for (Schema.Field member : fieldSchema.getFields()) {
+            if (member.pos() == 0 || !persistent.isDirty()) {
+              continue;
+            }
+            Schema memberSchema = member.schema();
+            Schema.Type memberType = memberSchema.getType();
+            Object memberValue = persistent.get(member.pos());
+            newRecord.put(member.pos(), getFieldValueFromAvroBean(memberSchema, memberType, memberValue, field));
           }
-          Schema memberSchema = member.schema();
-          Schema.Type memberType = memberSchema.getType();
-          Object memberValue = persistent.get(member.pos());
-          newRecord.put(member.pos(), getFieldValueFromAvroBean(memberSchema, memberType, memberValue));
+          fieldValue = newRecord;
+        } else if (field.getType().contains("blob")) {
+          try {
+            byte[] serializedBytes = HBaseByteInterface.toBytes(fieldValue, fieldSchema);
+            fieldValue = ByteBuffer.wrap(serializedBytes);
+          } catch (IOException e) {
+            LOG.error("Error occurred when serializing {} field. {}", new Object[]{field.getFieldName(), e.getMessage()});
+          }
+        } else {
+          throw new RuntimeException("");
         }
-        fieldValue = newRecord;
         break;
       case MAP:
         Schema valueSchema = fieldSchema.getValueType();
@@ -114,7 +122,7 @@ class AvroCassandraUtils {
         for (Map.Entry<CharSequence, ?> e : ((Map<CharSequence, ?>) fieldValue).entrySet()) {
           String mapKey = e.getKey().toString();
           Object mapValue = e.getValue();
-          mapValue = getFieldValueFromAvroBean(valueSchema, valuetype, mapValue);
+          mapValue = getFieldValueFromAvroBean(valueSchema, valuetype, mapValue, field);
           map.put(mapKey, mapValue);
         }
         fieldValue = map;
@@ -124,7 +132,7 @@ class AvroCassandraUtils {
         valuetype = valueSchema.getType();
         ArrayList<Object> list = new ArrayList<>();
         for (Object item : (Collection<?>) fieldValue) {
-          Object value = getFieldValueFromAvroBean(valueSchema, valuetype, item);
+          Object value = getFieldValueFromAvroBean(valueSchema, valuetype, item, field);
           list.add(value);
         }
         fieldValue = list;
@@ -136,7 +144,7 @@ class AvroCassandraUtils {
           int schemaPos = getUnionSchema(fieldValue, fieldSchema);
           Schema unionSchema = fieldSchema.getTypes().get(schemaPos);
           Schema.Type unionType = unionSchema.getType();
-          fieldValue = getFieldValueFromAvroBean(unionSchema, unionType, fieldValue);
+          fieldValue = getFieldValueFromAvroBean(unionSchema, unionType, fieldValue, field);
         }
         break;
       case STRING:
@@ -154,7 +162,7 @@ class AvroCassandraUtils {
    * If no data type can be inferred then we return a default value
    * of position 0.
    *
-   * @param pValue Object
+   * @param pValue       Object
    * @param pUnionSchema avro Schema
    * @return the unionSchemaPosition.
    */
@@ -183,34 +191,32 @@ class AvroCassandraUtils {
         return unionSchemaPos;
       else if (pValue instanceof Persistent && schemaType.equals(Schema.Type.RECORD))
         return unionSchemaPos;
+      else if (pValue != null && ByteBuffer.class.isAssignableFrom(pValue.getClass()) && schemaType.equals(Schema.Type.STRING))
+        return unionSchemaPos;
+      else if (pValue != null && ByteBuffer.class.isAssignableFrom(pValue.getClass()) && schemaType.equals(Schema.Type.INT))
+        return unionSchemaPos;
+      else if (pValue != null && ByteBuffer.class.isAssignableFrom(pValue.getClass()) && schemaType.equals(Schema.Type.LONG))
+        return unionSchemaPos;
+      else if (pValue != null && ByteBuffer.class.isAssignableFrom(pValue.getClass()) && schemaType.equals(Schema.Type.DOUBLE))
+        return unionSchemaPos;
+      else if (pValue != null && ByteBuffer.class.isAssignableFrom(pValue.getClass()) && schemaType.equals(Schema.Type.FLOAT))
+        return unionSchemaPos;
+      else if (pValue != null && ByteBuffer.class.isAssignableFrom(pValue.getClass()) && schemaType.equals(Schema.Type.BOOLEAN))
+        return unionSchemaPos;
+      else if (pValue != null && ByteBuffer.class.isAssignableFrom(pValue.getClass()) && schemaType.equals(Schema.Type.MAP))
+        return unionSchemaPos;
+      else if (pValue != null && ByteBuffer.class.isAssignableFrom(pValue.getClass()) && schemaType.equals(Schema.Type.ARRAY))
+        return unionSchemaPos;
+      else if (pValue != null && ByteBuffer.class.isAssignableFrom(pValue.getClass()) && schemaType.equals(Schema.Type.ENUM))
+        return unionSchemaPos;
+      else if (pValue != null && ByteBuffer.class.isAssignableFrom(pValue.getClass()) && schemaType.equals(Schema.Type.FIXED))
+        return unionSchemaPos;
+      else if (pValue != null && ByteBuffer.class.isAssignableFrom(pValue.getClass()) && schemaType.equals(Schema.Type.RECORD))
+        return unionSchemaPos;
       unionSchemaPos++;
     }
     // if we weren't able to determine which data type it is, then we return the default
     return DEFAULT_UNION_SCHEMA;
-  }
-
-  static String encodeFieldKey(final String key) {
-    if (key == null) {
-      return null;
-    }
-    return key.replace(".", "\u00B7")
-            .replace(":", "\u00FF")
-            .replace(";", "\u00FE")
-            .replace(" ", "\u00FD")
-            .replace("%", "\u00FC")
-            .replace("=", "\u00FB");
-  }
-
-  static String decodeFieldKey(final String key) {
-    if (key == null) {
-      return null;
-    }
-    return key.replace("\u00B7", ".")
-            .replace("\u00FF", ":")
-            .replace("\u00FE", ";")
-            .replace("\u00FD", " ")
-            .replace("\u00FC", "%")
-            .replace("\u00FB", "=");
   }
 
   static Object getAvroFieldValue(Object value, Schema schema) {
@@ -219,38 +225,50 @@ class AvroCassandraUtils {
 
       case MAP:
         Map<String, Object> rawMap = (Map<String, Object>) value;
-        Map<Utf8, Object> deserializableMap = new HashMap<>();
+        Map<Utf8, Object> utf8ObjectHashMap = new HashMap<>();
         if (rawMap == null) {
-          result = new DirtyMapWrapper(deserializableMap);
+          result = new DirtyMapWrapper(utf8ObjectHashMap);
           break;
         }
         for (Map.Entry<?, ?> e : rawMap.entrySet()) {
           Schema innerSchema = schema.getValueType();
           Object obj = getAvroFieldValue(e.getValue(), innerSchema);
           if (e.getKey().getClass().getSimpleName().equalsIgnoreCase("Utf8")) {
-            deserializableMap.put((Utf8) e.getKey(), obj);
+            utf8ObjectHashMap.put((Utf8) e.getKey(), obj);
           } else {
-            deserializableMap.put(new Utf8((String) e.getKey()), obj);
+            utf8ObjectHashMap.put(new Utf8((String) e.getKey()), obj);
           }
         }
-        result = new DirtyMapWrapper<>(deserializableMap);
+        result = new DirtyMapWrapper<>(utf8ObjectHashMap);
         break;
 
       case ARRAY:
         List<Object> rawList = (List<Object>) value;
-        List<Object> deserializableList = new ArrayList<>();
+        List<Object> objectArrayList = new ArrayList<>();
         if (rawList == null) {
-          return new DirtyListWrapper(deserializableList);
+          return new DirtyListWrapper(objectArrayList);
         }
         for (Object item : rawList) {
           Object obj = getAvroFieldValue(item, schema.getElementType());
-          deserializableList.add(obj);
+          objectArrayList.add(obj);
         }
-        result = new DirtyListWrapper<>(deserializableList);
+        result = new DirtyListWrapper<>(objectArrayList);
         break;
 
       case RECORD:
-        result = (PersistentBase) value;
+        if (value != null && ByteBuffer.class.isAssignableFrom(value.getClass())) {
+          ByteBuffer buffer = (ByteBuffer) value;
+          byte[] arr = new byte[buffer.remaining()];
+          buffer.get(arr);
+          try {
+            result = (PersistentBase) HBaseByteInterface.fromBytes(schema, arr);
+          } catch (IOException e) {
+            LOG.error("");
+            result = null;
+          }
+        } else {
+          result = (PersistentBase) value;
+        }
         break;
 
       case UNION:

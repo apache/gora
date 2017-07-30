@@ -36,8 +36,8 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This class is used create Cassandra Queries.
@@ -97,29 +97,17 @@ class CassandraQueryFactory {
     stringBuffer.append("CREATE TABLE IF NOT EXISTS ").append(mapping.getKeySpace().getName()).append(".").append(mapping.getCoreName()).append(" (");
     boolean isCommaNeeded = false;
     CassandraKey cassandraKey = mapping.getCassandraKey();
-    // appending Cassandra key columns into db schema
-    for (Field field : mapping.getFieldList()) {
-      if (isCommaNeeded) {
-        stringBuffer.append(", ");
-      }
-      stringBuffer.append(field.getColumnName()).append(" ").append(field.getType());
-      boolean isStaticColumn = Boolean.parseBoolean(field.getProperty("static"));
-      boolean isPrimaryKey = Boolean.parseBoolean(field.getProperty("primarykey"));
-      if (isStaticColumn) {
-        stringBuffer.append(" STATIC");
-      }
-      if (isPrimaryKey) {
-        stringBuffer.append("  PRIMARY KEY ");
-      }
-      isCommaNeeded = true;
-    }
+    // appending Cassandra Persistent columns into db schema
+    processFieldsForCreateTableQuery(mapping.getFieldList(), isCommaNeeded, stringBuffer);
 
     if (cassandraKey != null) {
-      List<PartitionKeyField> pkey = cassandraKey.getPartitionKeyFields();
-      if (pkey != null) {
+      isCommaNeeded = true;
+      processFieldsForCreateTableQuery(cassandraKey.getFieldList(), isCommaNeeded, stringBuffer);
+      List<PartitionKeyField> partitionKeys = cassandraKey.getPartitionKeyFields();
+      if (partitionKeys != null) {
         stringBuffer.append(", PRIMARY KEY (");
         boolean isCommaNeededToApply = false;
-        for (PartitionKeyField keyField : pkey) {
+        for (PartitionKeyField keyField : partitionKeys) {
           if (isCommaNeededToApply) {
             stringBuffer.append(",");
           }
@@ -140,11 +128,6 @@ class CassandraQueryFactory {
           isCommaNeededToApply = true;
         }
         stringBuffer.append(")");
-      }
-    } else {
-      if (!stringBuffer.toString().toLowerCase(Locale.ENGLISH).contains("primary key")) {
-        Field field = mapping.getDefaultCassandraKey();
-        stringBuffer.append(", ").append(field.getFieldName()).append(" ").append(field.getType()).append("  PRIMARY KEY ");
       }
     }
 
@@ -191,6 +174,24 @@ class CassandraQueryFactory {
     return stringBuffer.toString();
   }
 
+  private static void processFieldsForCreateTableQuery(List<Field> fields, boolean isCommaNeeded, StringBuilder stringBuilder) {
+    for (Field field : fields) {
+      if (isCommaNeeded) {
+        stringBuilder.append(", ");
+      }
+      stringBuilder.append(field.getColumnName()).append(" ").append(field.getType());
+      boolean isStaticColumn = Boolean.parseBoolean(field.getProperty("static"));
+      boolean isPrimaryKey = Boolean.parseBoolean(field.getProperty("primarykey"));
+      if (isStaticColumn) {
+        stringBuilder.append(" STATIC");
+      }
+      if (isPrimaryKey) {
+        stringBuilder.append("  PRIMARY KEY ");
+      }
+      isCommaNeeded = true;
+    }
+  }
+
   /**
    * This method returns the CQL query to drop table.
    * refer : http://docs.datastax.com/en/cql/3.1/cql/cql_reference/drop_table_r.html
@@ -221,7 +222,7 @@ class CassandraQueryFactory {
    * @return CQL query
    */
   static String getTruncateTableQuery(CassandraMapping mapping) {
-    return "TRUNCATE TABLE " + mapping.getKeySpace().getName() + "." + mapping.getCoreName();
+    return QueryBuilder.truncate(mapping.getKeySpace().getName(), mapping.getCoreName()).getQueryString();
   }
 
   /**
@@ -371,9 +372,7 @@ class CassandraQueryFactory {
    * @param objects        object list
    * @return CQL Query
    */
-  static String getExecuteQuery(CassandraMapping mapping, Query cassandraQuery, List<Object> objects) {
-    String[] fields = cassandraQuery.getFields();
-    fields = fields != null ? fields : mapping.getFieldNames();
+  static String getExecuteQuery(CassandraMapping mapping, Query cassandraQuery, List<Object> objects, String[] fields) {
     Object startKey = cassandraQuery.getStartKey();
     Object endKey = cassandraQuery.getEndKey();
     Object key = cassandraQuery.getKey();
@@ -470,14 +469,17 @@ class CassandraQueryFactory {
     ArrayList<String> columnNames = new ArrayList<>();
     for (String field : fields) {
       Field fieldBean = mapping.getFieldFromFieldName(field);
+      CassandraKey cassandraKey = mapping.getCassandraKey();
+      Field keyBean = null;
+      if (cassandraKey != null) {
+        keyBean = cassandraKey.getFieldFromFieldName(field);
+      }
       if (fieldBean != null) {
         columnNames.add(fieldBean.getColumnName());
+      } else if (keyBean != null) {
+        columnNames.add(keyBean.getColumnName());
       } else {
-        if (mapping.getDefaultCassandraKey().getFieldName().equals(field)) {
-          columnNames.add(field);
-        } else {
-          LOG.warn("{} field is ignored, couldn't find relavant field in the persistent mapping", field);
-        }
+        LOG.warn("{} field is ignored, couldn't find relevant field in the persistent mapping", field);
       }
     }
     return columnNames.toArray(new String[0]);
@@ -504,7 +506,7 @@ class CassandraQueryFactory {
    */
   static String getDeleteByQuery(CassandraMapping mapping, Query cassandraQuery, List<Object> objects) {
     String[] columns = null;
-    if (!Arrays.equals(cassandraQuery.getFields(), mapping.getFieldNames())) {
+    if (cassandraQuery.getFields() != null) {
       columns = getColumnNames(mapping, Arrays.asList(cassandraQuery.getFields()));
     }
     Object startKey = cassandraQuery.getStartKey();
@@ -549,17 +551,17 @@ class CassandraQueryFactory {
           String[] columnKeys = getColumnNames(mapping, cassandraKeys);
           for (int i = 0; i < cassandraKeys.size(); i++) {
             if (isWhereNeeded) {
-              query = delete.where(QueryBuilder.gte(columnKeys[i], "?"));
+              query = delete.where(QueryBuilder.gte(QueryBuilder.token(columnKeys[i]), QueryBuilder.token("?")));
               objects.add(cassandraValues.get(i));
               isWhereNeeded = false;
             } else {
-              query = query.and(QueryBuilder.gte(columnKeys[i], "?"));
+              query = query.and(QueryBuilder.gte(QueryBuilder.token(columnKeys[i]), QueryBuilder.token("?")));
               objects.add(cassandraValues.get(i));
             }
           }
         } else {
           primaryKey = getPKey(mapping.getFieldList());
-          query = delete.where(QueryBuilder.gte(primaryKey, "?"));
+          query = delete.where(QueryBuilder.gte(QueryBuilder.token(primaryKey), QueryBuilder.token("?")));
           objects.add(startKey);
           isWhereNeeded = false;
         }
@@ -572,20 +574,20 @@ class CassandraQueryFactory {
           String[] columnKeys = getColumnNames(mapping, cassandraKeys);
           for (int i = 0; i < cassandraKeys.size(); i++) {
             if (isWhereNeeded) {
-              query = delete.where(QueryBuilder.lte(columnKeys[i], "?"));
+              query = delete.where(QueryBuilder.lte(QueryBuilder.token(columnKeys[i]), QueryBuilder.token("?")));
               objects.add(cassandraValues.get(i));
               isWhereNeeded = false;
             } else {
-              query = query.and(QueryBuilder.lte(columnKeys[i], "?"));
+              query = query.and(QueryBuilder.lte(QueryBuilder.token(columnKeys[i]), QueryBuilder.token("?")));
               objects.add(cassandraValues.get(i));
             }
           }
         } else {
           primaryKey = primaryKey != null ? primaryKey : getPKey(mapping.getFieldList());
           if (isWhereNeeded) {
-            query = delete.where(QueryBuilder.lte(primaryKey, "?"));
+            query = delete.where(QueryBuilder.lte(QueryBuilder.token(primaryKey), QueryBuilder.token("?")));
           } else {
-            query = query.and(QueryBuilder.lte(primaryKey, "?"));
+            query = query.and(QueryBuilder.lte(QueryBuilder.token(primaryKey), QueryBuilder.token("?")));
           }
           objects.add(endKey);
         }
@@ -611,7 +613,7 @@ class CassandraQueryFactory {
     Update.Assignments updateAssignments = null;
     if (cassandraQuery instanceof CassandraQuery) {
       String[] columnNames = getColumnNames(mapping, Arrays.asList(cassandraQuery.getFields()));
-      if(CassandraNativePersistent.class.isAssignableFrom(mapping.getPersistentClass())) {
+      if (CassandraNativePersistent.class.isAssignableFrom(mapping.getPersistentClass())) {
         for (String column : columnNames) {
           updateAssignments = update.with(QueryBuilder.set(column, "?"));
           objects.add(((CassandraQuery) cassandraQuery).getUpdateFieldValue(mapping.getFieldFromColumnName(column).getFieldName()));
@@ -619,12 +621,12 @@ class CassandraQueryFactory {
       } else {
         for (String column : columnNames) {
           updateAssignments = update.with(QueryBuilder.set(column, "?"));
-          String field = mapping.getFieldFromColumnName(column).getFieldName();
-          Object value = ((CassandraQuery) cassandraQuery).getUpdateFieldValue(field);
+          Field field = mapping.getFieldFromColumnName(column);
+          Object value = ((CassandraQuery) cassandraQuery).getUpdateFieldValue(field.getFieldName());
           try {
             Schema schema = (Schema) mapping.getPersistentClass().getField("SCHEMA$").get(null);
-            Schema schemaField = schema.getField(field).schema();
-            objects.add(AvroCassandraUtils.getFieldValueFromAvroBean(schemaField, schemaField.getType(), value));
+            Schema schemaField = schema.getField(field.getFieldName()).schema();
+            objects.add(AvroCassandraUtils.getFieldValueFromAvroBean(schemaField, schemaField.getType(), value, field));
           } catch (IllegalAccessException | NoSuchFieldException e) {
             throw new RuntimeException("SCHEMA$ field can't accessible, Please recompile the Avro schema with goracompiler.");
           } catch (NullPointerException e) {
@@ -715,6 +717,113 @@ class CassandraQueryFactory {
       return updateAssignments.getQueryString();
     }
     return query.getQueryString();
+  }
+
+  /**
+   * This method returns create Type CQL query to create user define types.
+   * refer : http://docs.datastax.com/en/cql/3.1/cql/cql_reference/cqlRefcreateType.html
+   *
+   * @param fieldSchema avroSchema {@link Schema}
+   * @param mapping Cassandra mapping {@link CassandraMapping}
+   * @return CQL Query
+   */
+  static String getCreateUDTType(Schema fieldSchema, CassandraMapping mapping, Set<String> udtQueryStack) {
+    StringBuilder stringBuffer = new StringBuilder();
+    if (fieldSchema.getType().equals(Schema.Type.UNION)) {
+      for (Schema fieldTypeSchema : fieldSchema.getTypes()) {
+        if (fieldTypeSchema.getType().equals(Schema.Type.RECORD)) {
+          fieldSchema = fieldTypeSchema;
+          break;
+        }
+      }
+    }
+    stringBuffer.append("CREATE TYPE IF NOT EXISTS ").append(mapping.getKeySpace().getName()).append(".").append(fieldSchema.getName()).append(" (");
+    processRecord(fieldSchema, stringBuffer, mapping, udtQueryStack);
+    stringBuffer.append(")");
+    return stringBuffer.toString();
+  }
+
+  private static void processRecord(Schema recordSchema, StringBuilder stringBuilder, CassandraMapping mapping, Set<String> udtQueryStack) {
+    boolean isCommaNeeded = false;
+    for (Schema.Field field : recordSchema.getFields()) {
+      if (isCommaNeeded) {
+        stringBuilder.append(", ");
+      }
+      String fieldName = field.name();
+      stringBuilder.append(fieldName).append(" ");
+      try {
+        populateFieldsToQuery(field.schema(), stringBuilder, mapping, udtQueryStack);
+        isCommaNeeded = true;
+      } catch (Exception e) {
+        int i = stringBuilder.indexOf(fieldName);
+        if (i != -1) {
+          stringBuilder.delete(i, i + fieldName.length());
+          isCommaNeeded = false;
+        }
+      }
+    }
+  }
+
+  private static void populateFieldsToQuery(Schema schema, StringBuilder builder, CassandraMapping mapping, Set<String> udtQueryStack) throws Exception {
+    switch (schema.getType()) {
+      case INT:
+        builder.append("int");
+        break;
+      case MAP:
+        builder.append("map<text,");
+        populateFieldsToQuery(schema.getValueType(), builder, mapping, udtQueryStack);
+        builder.append(">");
+        break;
+      case ARRAY:
+        builder.append("list<");
+        populateFieldsToQuery(schema.getElementType(), builder, mapping, udtQueryStack);
+        builder.append(">");
+        break;
+      case LONG:
+        builder.append("bigint");
+        break;
+      case FLOAT:
+        builder.append("float");
+        break;
+      case DOUBLE:
+        builder.append("double");
+        break;
+      case BOOLEAN:
+        builder.append("boolean");
+        break;
+      case BYTES:
+        builder.append("blob");
+        break;
+      case RECORD:
+        builder.append("frozen<").append(schema.getName()).append(">");
+        String query = getCreateUDTType(schema, mapping, udtQueryStack);
+        udtQueryStack.add(query);
+        break;
+      case STRING:
+      case FIXED:
+      case ENUM:
+        builder.append("text");
+        break;
+      case UNION:
+        for (Schema unionElementSchema : schema.getTypes()) {
+          if (unionElementSchema.getType().equals(Schema.Type.RECORD)) {
+            String recordName = unionElementSchema.getName();
+            if (!builder.toString().contains(recordName)) {
+              builder.append("frozen<").append(recordName).append(">");
+              query = getCreateUDTType(unionElementSchema, mapping, udtQueryStack);
+              udtQueryStack.add(query);
+            } else {
+              LOG.warn("Same Field Type can't be mapped recursively. This is not supported with Cassandra UDT types, Please use byte dataType for recursive mapping.");
+              throw new Exception("Same Field Type has mapped recursively");
+            }
+            break;
+          } else if (!unionElementSchema.getType().equals(Schema.Type.NULL)) {
+            populateFieldsToQuery(unionElementSchema, builder, mapping, udtQueryStack);
+            break;
+          }
+        }
+        break;
+    }
   }
 
 }

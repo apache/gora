@@ -47,7 +47,7 @@ public class TestCassandraStoreWithCassandraKey {
     setProperties();
     testDriver.setParameters(parameter);
     testDriver.setUpClass();
-    cassandraRecordDataStore =(CassandraStore<CassandraKey, CassandraRecord> )testDriver.createDataStore(CassandraKey.class, CassandraRecord.class);
+    cassandraRecordDataStore = (CassandraStore<CassandraKey, CassandraRecord>) testDriver.createDataStore(CassandraKey.class, CassandraRecord.class);
   }
 
   private static void setProperties() {
@@ -60,16 +60,15 @@ public class TestCassandraStoreWithCassandraKey {
     parameter.setProperty("gora.cassandrastore.mapping.file", "compositeKey/gora-cassandra-mapping.xml");
   }
 
-  @After
-  public void tearDown() throws Exception {
-    testDriver.tearDown();
-  }
-
   @AfterClass
   public static void tearDownClass() throws Exception {
     testDriver.tearDownClass();
   }
 
+  @After
+  public void tearDown() throws Exception {
+    testDriver.tearDown();
+  }
 
   /**
    * In this test case, schema exists method behavior of the data store is testing.
@@ -112,6 +111,7 @@ public class TestCassandraStoreWithCassandraKey {
 
   /**
    * In this test case, execute and deleteByQuery methods behaviour of the data store is testing.
+   *
    * @throws Exception
    */
   @Test
@@ -193,10 +193,10 @@ public class TestCassandraStoreWithCassandraKey {
     CassandraKey key4 = new CassandraKey();
     key4.setTimestamp(215L);
     key4.setUrl("www.apache.org");
-    cassandraRecordDataStore.put(key1,record1);
-    cassandraRecordDataStore.put(key2,record2);
-    cassandraRecordDataStore.put(key3,record3);
-    cassandraRecordDataStore.put(key4,record4);
+    cassandraRecordDataStore.put(key1, record1);
+    cassandraRecordDataStore.put(key2, record2);
+    cassandraRecordDataStore.put(key3, record3);
+    cassandraRecordDataStore.put(key4, record4);
     Query<CassandraKey, CassandraRecord> rangeQuery = cassandraRecordDataStore.newQuery();
     rangeQuery.setStartKey(key2);
     rangeQuery.setEndKey(key2);
@@ -205,7 +205,7 @@ public class TestCassandraStoreWithCassandraKey {
     while (result.next()) {
       i++;
     }
-    Assert.assertEquals(1,i);
+    Assert.assertEquals(1, i);
 
     rangeQuery.setStartKey(key2);
     rangeQuery.setEndKey(key3);
@@ -214,7 +214,7 @@ public class TestCassandraStoreWithCassandraKey {
     while (result.next()) {
       i++;
     }
-    Assert.assertEquals(2,i);
+    Assert.assertEquals(2, i);
   }
 
   @Test
@@ -249,15 +249,15 @@ public class TestCassandraStoreWithCassandraKey {
     CassandraKey key4 = new CassandraKey();
     key4.setTimestamp(215L);
     key4.setUrl("www.apache.org");
-    cassandraRecordDataStore.put(key1,record1);
-    cassandraRecordDataStore.put(key2,record2);
-    cassandraRecordDataStore.put(key3,record3);
-    cassandraRecordDataStore.put(key4,record4);
+    cassandraRecordDataStore.put(key1, record1);
+    cassandraRecordDataStore.put(key2, record2);
+    cassandraRecordDataStore.put(key3, record3);
+    cassandraRecordDataStore.put(key4, record4);
     CassandraQuery<CassandraKey, CassandraRecord> query = new CassandraQuery<>(cassandraRecordDataStore);
     query.setKey(key1);
     query.addUpdateField("dataString", new Utf8("test123"));
     cassandraRecordDataStore.updateByQuery(query);
-   CassandraRecord result = cassandraRecordDataStore.get(key1);
+    CassandraRecord result = cassandraRecordDataStore.get(key1);
     Assert.assertEquals(new Utf8("test123"), result.getDataString());
   }
 }

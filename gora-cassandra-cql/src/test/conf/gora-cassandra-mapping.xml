@@ -71,7 +71,8 @@
         <field name="id" column="srilankan" type="uuid" ttl="10"/>
     </class>
 
-    <class name="org.apache.gora.examples.generated.Employee" keyClass="org.apache.gora.examples.generated.WebPage" keyspace="WebPage"
+    <class name="org.apache.gora.examples.generated.Employee" keyClass="org.apache.gora.examples.generated.WebPage"
+           keyspace="WebPage"
            compactStorage="true" id="31323131">
         <field name="lname" column="name" type="text" ttl="10" primarykey="true"/>
         <field name="fname" column="name" type="text" ttl="10"/>

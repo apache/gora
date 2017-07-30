@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * This Class represents the Cassandra Key.
  */
-public class CassandraKey{
+public class CassandraKey {
 
   private String name;
 
@@ -53,7 +53,7 @@ public class CassandraKey{
 
   public void addPartitionKeyField(PartitionKeyField partitionKeyField) {
     this.partitionKeyFields.add(partitionKeyField);
-    if(partitionKeyField.isComposite()) {
+    if (partitionKeyField.isComposite()) {
       this.fieldList.addAll(partitionKeyField.getFields());
     } else {
       this.fieldList.add(partitionKeyField);
@@ -61,10 +61,28 @@ public class CassandraKey{
   }
 
   public void addClusterKeyField(ClusterKeyField clusterKeyField) {
-    if(this.clusterKeyFields == null) {
+    if (this.clusterKeyFields == null) {
       this.clusterKeyFields = new ArrayList<>();
     }
     this.clusterKeyFields.add(clusterKeyField);
+  }
+
+  public String[] getFieldNames() {
+    List<String> fieldNames = new ArrayList<>(fieldList.size());
+    for (Field field : fieldList) {
+      fieldNames.add(field.getFieldName());
+    }
+    String[] fieldNameArray = new String[fieldNames.size()];
+    return fieldNames.toArray(fieldNameArray);
+  }
+
+  public Field getFieldFromFieldName(String fieldName) {
+    for (Field field1 : fieldList) {
+      if (field1.getFieldName().equalsIgnoreCase(fieldName)) {
+        return field1;
+      }
+    }
+    return null;
   }
 
   public List<Field> getFieldList() {

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,16 +19,13 @@
 package org.apache.gora.cassandra.query;
 
 import org.apache.gora.persistency.Persistent;
-import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.ResultBase;
 import org.apache.gora.store.DataStore;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * CassandraResult specific implementation of the {@link org.apache.gora.query.Result}
@@ -45,7 +42,6 @@ public class CassandraResultSet<K, T extends Persistent> extends ResultBase<K, T
   private int position = 0;
 
   /**
-   *
    * @param dataStore
    * @param query
    */
@@ -54,34 +50,37 @@ public class CassandraResultSet<K, T extends Persistent> extends ResultBase<K, T
   }
 
   /**
-   *{@inheritDoc}
+   * {@inheritDoc}
+   *
    * @return
    * @throws IOException
    */
   @Override
   protected boolean nextInner() throws IOException {
-    if(offset < size) {
+    if (offset < size) {
       persistent = persistentObject.get(position);
       key = persistentKey.get(position);
-      position ++;
+      position++;
       return true;
     }
     return false;
   }
 
   /**
-   *{@inheritDoc}
+   * {@inheritDoc}
+   *
    * @return
    * @throws IOException
    * @throws InterruptedException
    */
   @Override
   public float getProgress() throws IOException, InterruptedException {
-    return ((float)position)/size;
+    return ((float) position) / size;
   }
 
   /**
-   *{@inheritDoc}
+   * {@inheritDoc}
+   *
    * @return
    */
   @Override
@@ -91,6 +90,7 @@ public class CassandraResultSet<K, T extends Persistent> extends ResultBase<K, T
 
   /**
    * {@inheritDoc}
+   *
    * @return
    */
   @Override
@@ -99,7 +99,6 @@ public class CassandraResultSet<K, T extends Persistent> extends ResultBase<K, T
   }
 
   /**
-   *
    * @param key
    * @param token
    */

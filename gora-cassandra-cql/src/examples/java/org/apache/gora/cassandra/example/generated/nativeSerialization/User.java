@@ -20,7 +20,6 @@ package org.apache.gora.cassandra.example.generated.nativeSerialization;
 import com.datastax.driver.mapping.annotations.Column;
 import com.datastax.driver.mapping.annotations.PartitionKey;
 import com.datastax.driver.mapping.annotations.Table;
-import com.datastax.driver.mapping.annotations.Transient;
 import org.apache.gora.cassandra.persistent.CassandraNativePersistent;
 
 import java.util.Date;
@@ -53,27 +52,27 @@ public class User extends CassandraNativePersistent {
     this.dateOfBirth = dateOfBirth;
   }
 
-  public void setUserId(UUID userId) {
-    this.userId = userId;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public void setDateOfBirth(Date dateOfBirth) {
-    this.dateOfBirth = dateOfBirth;
-  }
-
   public UUID getUserId() {
     return userId;
+  }
+
+  public void setUserId(UUID userId) {
+    this.userId = userId;
   }
 
   public String getName() {
     return name;
   }
 
+  public void setName(String name) {
+    this.name = name;
+  }
+
   public Date getDateOfBirth() {
     return dateOfBirth;
+  }
+
+  public void setDateOfBirth(Date dateOfBirth) {
+    this.dateOfBirth = dateOfBirth;
   }
 }

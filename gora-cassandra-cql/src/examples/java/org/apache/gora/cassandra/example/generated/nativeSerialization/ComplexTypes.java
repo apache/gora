@@ -36,17 +36,19 @@ public class ComplexTypes extends CassandraNativePersistent {
   @Column
   private List<UUID> listUUIDDataType;
 
+  public ComplexTypes(String id) {
+    this.id = id;
+  }
+
+  public ComplexTypes() {
+  }
+
   public List<UUID> getListUUIDDataType() {
     return listUUIDDataType;
   }
 
   public void setListUUIDDataType(List<UUID> listUUIDDataType) {
     this.listUUIDDataType = listUUIDDataType;
-  }
-
-
-  public ComplexTypes(String id) {
-    this.id = id;
   }
 
   public List<String> getListDataType() {
@@ -63,9 +65,6 @@ public class ComplexTypes extends CassandraNativePersistent {
 
   public void setMapDataType(Map<String, String> mapDataType) {
     this.mapDataType = mapDataType;
-  }
-
-  public ComplexTypes() {
   }
 
   public String[] getStringArrayDataType() {

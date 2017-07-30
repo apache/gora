@@ -22,6 +22,8 @@ import com.datastax.driver.core.DataType;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import org.apache.avro.Schema;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.gora.cassandra.bean.CassandraKey;
 import org.apache.gora.cassandra.bean.Field;
 import org.apache.gora.cassandra.query.CassandraResultSet;
 import org.apache.gora.cassandra.store.CassandraClient;
@@ -50,7 +52,7 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
   private DataStore<K, T> cassandraDataStore;
 
   AvroSerializer(CassandraClient cassandraClient, DataStore<K, T> dataStore, CassandraMapping mapping) {
-    super(cassandraClient, dataStore.getKeyClass(), dataStore.getKeyClass(), mapping);
+    super(cassandraClient, dataStore.getKeyClass(), dataStore.getPersistentClass(), mapping);
     this.cassandraDataStore = dataStore;
   }
 
@@ -70,7 +72,7 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
     if (iterator.hasNext()) {
       obj = cassandraDataStore.newPersistent();
       Row row = iterator.next();
-      populateValuesToPersistent(row, definitions, obj);
+      populateValuesToPersistent(row, definitions, obj, fields);
     }
     return obj;
   }
@@ -85,13 +87,14 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
         AvroCassandraUtils.processKeys(mapping, key, fields, values);
         for (Schema.Field f : persistentBase.getSchema().getFields()) {
           String fieldName = f.name();
-          if (mapping.getFieldFromFieldName(fieldName) == null) {
+          Field field = mapping.getFieldFromFieldName(fieldName);
+          if (field == null) {
             LOG.debug("Ignoring {} adding field, {} field can't find in {} mapping", new Object[]{fieldName, fieldName, persistentClass});
             continue;
           }
-          if (persistent.isDirty(f.pos()) || mapping.getInlinedDefinedPartitionKeys().contains(mapping.getFieldFromFieldName(fieldName))) {
+          if (persistent.isDirty(f.pos()) || mapping.getInlinedDefinedPartitionKey().equals(mapping.getFieldFromFieldName(fieldName))) {
             Object value = persistentBase.get(f.pos());
-            value = AvroCassandraUtils.getFieldValueFromAvroBean(f.schema(), f.schema().getType(), value);
+            value = AvroCassandraUtils.getFieldValueFromAvroBean(f.schema(), f.schema().getType(), value, field);
             values.add(value);
             fields.add(fieldName);
           }
@@ -120,7 +123,7 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
     if (iterator.hasNext()) {
       obj = cassandraDataStore.newPersistent();
       Row row = iterator.next();
-      populateValuesToPersistent(row, definitions, obj);
+      populateValuesToPersistent(row, definitions, obj, mapping.getFieldNames());
     }
     return obj;
   }
@@ -128,103 +131,128 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
   /**
    * This method wraps result set data in to DataEntry and creates a list of DataEntry.
    **/
-  private void populateValuesToPersistent(Row row, ColumnDefinitions columnDefinitions, PersistentBase base) {
-
+  private void populateValuesToPersistent(Row row, ColumnDefinitions columnDefinitions, PersistentBase base, String[] fields) {
     Object paramValue;
-    for (Schema.Field avrofield : base.getSchema().getFields()) {
-
-      Field field = mapping.getFieldFromFieldName(avrofield.name());
+    for (String fieldName : fields) {
+      Schema.Field avroField = base.getSchema().getField(fieldName);
+      Field field = mapping.getFieldFromFieldName(fieldName);
       //to ignore unspecified fields in the mapping
-      if (field == null) {
+      if (field == null || avroField == null) {
         continue;
       }
-      Schema fieldSchema = avrofield.schema();
+      Schema fieldSchema = avroField.schema();
       String columnName = field.getColumnName();
-      DataType columnType = columnDefinitions.getType(columnName);
-
-      switch (columnType.getName()) {
-        case ASCII:
-          paramValue = row.getString(columnName);
-          break;
-        case BIGINT:
-          paramValue = row.isNull(columnName) ? null : row.getLong(columnName);
-          break;
-        case BLOB:
-          paramValue = row.isNull(columnName) ? null : row.getBytes(columnName);
-          break;
-        case BOOLEAN:
-          paramValue = row.isNull(columnName) ? null : row.getBool(columnName);
-          break;
-        case COUNTER:
-          paramValue = row.isNull(columnName) ? null : row.getLong(columnName);
-          break;
-        case DECIMAL:
-          paramValue = row.isNull(columnName) ? null : row.getDecimal(columnName);
-          break;
-        case DOUBLE:
-          paramValue = row.isNull(columnName) ? null : row.getDouble(columnName);
-          break;
-        case FLOAT:
-          paramValue = row.isNull(columnName) ? null : row.getFloat(columnName);
-          break;
-        case INET:
-          paramValue = row.isNull(columnName) ? null : row.getInet(columnName).toString();
-          break;
-        case INT:
-          paramValue = row.isNull(columnName) ? null : row.getInt(columnName);
-          break;
-        case TEXT:
-          paramValue = row.getString(columnName);
-          break;
-        case TIMESTAMP:
-          paramValue = row.isNull(columnName) ? null : row.getDate(columnName);
-          break;
-        case UUID:
-          paramValue = row.isNull(columnName) ? null : row.getUUID(columnName);
-          break;
-        case VARCHAR:
-          paramValue = row.getString(columnName);
-          break;
-        case VARINT:
-          paramValue = row.isNull(columnName) ? null : row.getVarint(columnName);
-          break;
-        case TIMEUUID:
-          paramValue = row.isNull(columnName) ? null : row.getUUID(columnName);
-          break;
-        case LIST:
-          String dataType = field.getType();
-          dataType = dataType.substring(dataType.indexOf("<") + 1, dataType.indexOf(">"));
-          paramValue = row.isNull(columnName) ? null : row.getList(columnName, getRelevantClassForCassandraDataType(dataType));
-          break;
-        case SET:
-          dataType = field.getType();
-          dataType = dataType.substring(dataType.indexOf("<") + 1, dataType.indexOf(">"));
-          paramValue = row.isNull(columnName) ? null : row.getList(columnName, getRelevantClassForCassandraDataType(dataType));
-          break;
-        case MAP:
-          dataType = field.getType();
-          dataType = dataType.substring(dataType.indexOf("<") + 1, dataType.indexOf(">"));
-          dataType = dataType.split(",")[1];
-          // Avro supports only String for keys
-          paramValue = row.isNull(columnName) ? null : row.getMap(columnName, String.class, getRelevantClassForCassandraDataType(dataType));
-          break;
-        case UDT:
-          paramValue = row.isNull(columnName) ? null : row.getUDTValue(columnName).toString();
-          break;
-        case TUPLE:
-          paramValue = row.isNull(columnName) ? null : row.getTupleValue(columnName).toString();
-          break;
-        case CUSTOM:
-          paramValue = row.isNull(columnName) ? null : row.getBytes(columnName);
-          break;
-        default:
-          paramValue = row.getString(columnName);
-          break;
-      }
+      paramValue = getValue(row, columnDefinitions, columnName);
       Object value = AvroCassandraUtils.getAvroFieldValue(paramValue, fieldSchema);
-      base.put(avrofield.pos(), value);
+      base.put(avroField.pos(), value);
     }
   }
+
+  private Object getValue(Row row, ColumnDefinitions columnDefinitions, String columnName) {
+    Object paramValue;
+    Field field = mapping.getFieldFromColumnName(columnName);
+    DataType columnType = columnDefinitions.getType(columnName);
+    switch (columnType.getName()) {
+      case ASCII:
+        paramValue = row.getString(columnName);
+        break;
+      case BIGINT:
+        paramValue = row.isNull(columnName) ? null : row.getLong(columnName);
+        break;
+      case BLOB:
+        paramValue = row.isNull(columnName) ? null : row.getBytes(columnName);
+        break;
+      case BOOLEAN:
+        paramValue = row.isNull(columnName) ? null : row.getBool(columnName);
+        break;
+      case COUNTER:
+        paramValue = row.isNull(columnName) ? null : row.getLong(columnName);
+        break;
+      case DECIMAL:
+        paramValue = row.isNull(columnName) ? null : row.getDecimal(columnName);
+        break;
+      case DOUBLE:
+        paramValue = row.isNull(columnName) ? null : row.getDouble(columnName);
+        break;
+      case FLOAT:
+        paramValue = row.isNull(columnName) ? null : row.getFloat(columnName);
+        break;
+      case INET:
+        paramValue = row.isNull(columnName) ? null : row.getInet(columnName).toString();
+        break;
+      case INT:
+        paramValue = row.isNull(columnName) ? null : row.getInt(columnName);
+        break;
+      case TEXT:
+        paramValue = row.getString(columnName);
+        break;
+      case TIMESTAMP:
+        paramValue = row.isNull(columnName) ? null : row.getDate(columnName);
+        break;
+      case UUID:
+        paramValue = row.isNull(columnName) ? null : row.getUUID(columnName);
+        break;
+      case VARCHAR:
+        paramValue = row.getString(columnName);
+        break;
+      case VARINT:
+        paramValue = row.isNull(columnName) ? null : row.getVarint(columnName);
+        break;
+      case TIMEUUID:
+        paramValue = row.isNull(columnName) ? null : row.getUUID(columnName);
+        break;
+      case LIST:
+        String dataType = field.getType();
+        dataType = dataType.substring(dataType.indexOf("<") + 1, dataType.indexOf(">"));
+        paramValue = row.isNull(columnName) ? null : row.getList(columnName, getRelevantClassForCassandraDataType(dataType));
+        break;
+      case SET:
+        dataType = field.getType();
+        dataType = dataType.substring(dataType.indexOf("<") + 1, dataType.indexOf(">"));
+        paramValue = row.isNull(columnName) ? null : row.getList(columnName, getRelevantClassForCassandraDataType(dataType));
+        break;
+      case MAP:
+        dataType = field.getType();
+        dataType = dataType.substring(dataType.indexOf("<") + 1, dataType.indexOf(">"));
+        dataType = dataType.split(",")[1];
+        // Avro supports only String for keys
+        paramValue = row.isNull(columnName) ? null : row.getMap(columnName, String.class, getRelevantClassForCassandraDataType(dataType));
+        break;
+      case UDT:
+        paramValue = row.isNull(columnName) ? null : row.getUDTValue(columnName);
+        break;
+      case TUPLE:
+        paramValue = row.isNull(columnName) ? null : row.getTupleValue(columnName).toString();
+        break;
+      case CUSTOM:
+        paramValue = row.isNull(columnName) ? null : row.getBytes(columnName);
+        break;
+      default:
+        paramValue = row.getString(columnName);
+        break;
+    }
+    return paramValue;
+  }
+
+/*  public Collection<Object> getFieldValues(Object o) {
+    UDTValue udtValue = (UDTValue) o;
+    UserType type = udtValue.getType();
+
+    Collection<Object> values = new ArrayList<Object>(type.size());
+
+ *//*   for (UserType.Field field : type) {
+      udtValue.
+      ByteBuffer bytes = udtValue.getBytesUnsafe(field.getName());
+      DataType value = field.getType();
+      for(DataType type1 : value.getTypeArguments()) {
+        type1.
+      }
+      values.add(value);
+    }*//*
+
+    return values;
+  }*/
+
 
   private Class getRelevantClassForCassandraDataType(String dataType) {
     switch (dataType) {
@@ -254,8 +282,14 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
   @Override
   public Result execute(DataStore dataStore, Query query) {
     List<Object> objectArrayList = new ArrayList<>();
+    String[] fields = query.getFields();
+    if (fields != null) {
+      fields = (String[]) ArrayUtils.addAll(fields, mapping.getAllKeys());
+    } else {
+      fields = mapping.getAllFieldsIncludingKeys();
+    }
     CassandraResultSet<K, T> cassandraResult = new CassandraResultSet<>(dataStore, query);
-    String cqlQuery = CassandraQueryFactory.getExecuteQuery(mapping, query, objectArrayList);
+    String cqlQuery = CassandraQueryFactory.getExecuteQuery(mapping, query, objectArrayList, fields);
     ResultSet results;
     if (objectArrayList.size() == 0) {
       results = client.getSession().execute(cqlQuery);
@@ -266,12 +300,18 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
     ColumnDefinitions definitions = results.getColumnDefinitions();
     T obj;
     K keyObject;
+    CassandraKey cassandraKey = mapping.getCassandraKey();
     while (iterator.hasNext()) {
       Row row = iterator.next();
       obj = cassandraDataStore.newPersistent();
       keyObject = cassandraDataStore.newKey();
-      populateValuesToPersistent(row, definitions, obj);
-      populateValuesToPersistent(row, definitions, (PersistentBase) keyObject);
+      populateValuesToPersistent(row, definitions, obj, fields);
+      if (cassandraKey != null) {
+        populateValuesToPersistent(row, definitions, (PersistentBase) keyObject, cassandraKey.getFieldNames());
+      } else {
+        Field key = mapping.getInlinedDefinedPartitionKey();
+        keyObject = (K) getValue(row, definitions, key.getColumnName());
+      }
       cassandraResult.addResultElement(keyObject, obj);
     }
     return cassandraResult;

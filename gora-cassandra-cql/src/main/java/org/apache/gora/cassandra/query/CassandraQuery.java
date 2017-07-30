@@ -70,7 +70,7 @@ public class CassandraQuery<K, T extends Persistent> extends QueryWSBase<K, T> {
 
   @Override
   public String[] getFields() {
-    if(updateFields.size() == 0) {
+    if (updateFields.size() == 0) {
       return super.getFields();
     } else {
       String[] updateFieldsArray = new String[updateFields.size()];

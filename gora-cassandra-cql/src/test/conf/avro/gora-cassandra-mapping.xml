@@ -19,26 +19,32 @@
 
 <gora-otd>
 
-  <keyspace name="avroKeySpace" durableWrite="false">
-    <placementStrategy name="SimpleStrategy" replication_factor="1"/>
-  </keyspace>
-  
-  <class name="org.apache.gora.examples.generated.WebPage" keyClass="java.lang.String" table="WebPage" keyspace="avroKeySpace">
-    <field name="url" column="url" type="ascii" />
-    <field name="content" column="content" type="blob"/>
-    <field name="parsedContent" column="parsedContent" type="list(ascii)"/>
-    <field name="outlinks" column="outlinks" type="map(text,text)"/>
-    <field name="headers" column="headers" type="map(text,text)"/>
-    <field name="byteData" column="byteData" type="map(text,blob)"/>
-    <field name="stringData" column="stringData" type="map(text,ascii)"/>
-  </class>
+    <keyspace name="avroKeySpace" durableWrite="false">
+        <placementStrategy name="SimpleStrategy" replication_factor="1"/>
+    </keyspace>
 
-  <class name="org.apache.gora.examples.generated.Employee" keyClass="java.lang.String" keyspace="avroKeySpace"
-         table="Employee" compactStorage="true" >
-    <field name="name" column="name" type="text"/>
-    <field name="dateOfBirth" column="dob" type="bigint" />
-    <field name="ssn" column="ssn" type="text" />
-    <field name="salary" column="salary" type="int" />
-   </class>
+    <class name="org.apache.gora.examples.generated.WebPage" keyClass="java.lang.String" table="WebPage"
+           allowFiltering="true"
+           keyspace="avroKeySpace">
+        <field name="url" column="url" type="ascii"/>
+        <field name="content" column="content" type="blob"/>
+        <field name="parsedContent" column="parsedContent" type="list(ascii)"/>
+        <field name="outlinks" column="outlinks" type="map(text,text)"/>
+        <field name="headers" column="headers" type="map(text,text)"/>
+        <field name="byteData" column="byteData" type="map(text,blob)"/>
+        <field name="metadata" column="metadata" type="blob"/>
+        <field name="stringData" column="stringData" type="map(text,ascii)"/>
+    </class>
+
+    <class name="org.apache.gora.examples.generated.Employee" keyClass="java.lang.String" keyspace="avroKeySpace"
+           allowFiltering="true"
+           table="Employee" compactStorage="true">
+        <field name="name" column="name" type="text"/>
+        <field name="dateOfBirth" column="dob" type="bigint"/>
+        <field name="ssn" column="ssn" type="text"/>
+        <field name="salary" column="salary" type="int"/>
+        <field name="boss" column="boss" type="blob"/>
+        <field name="webpage" column="webpage" type="blob"/>
+    </class>
 
 </gora-otd>

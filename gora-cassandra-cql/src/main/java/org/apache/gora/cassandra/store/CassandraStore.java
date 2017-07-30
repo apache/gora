@@ -17,11 +17,13 @@
 
 package org.apache.gora.cassandra.store;
 
+import org.apache.avro.data.RecordBuilder;
 import org.apache.gora.cassandra.persistent.CassandraNativePersistent;
 import org.apache.gora.cassandra.query.CassandraQuery;
 import org.apache.gora.cassandra.serializers.CassandraSerializer;
 import org.apache.gora.persistency.BeanFactory;
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
@@ -58,16 +60,6 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   private CassandraSerializer cassandraSerializer;
 
-  public enum SerializerType {
-    AVRO("AVRO"), NATIVE("NATIVE");
-    String val;
-
-    SerializerType(String v) {
-      this.val = v;
-    }
-  }
-
-
   public CassandraStore() {
     super();
   }
@@ -96,6 +88,12 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
     }
   }
 
+  @SuppressWarnings("all")
+  @Override
+  public Class<T> getPersistentClass() {
+    return (Class<T>) this.persistentClass;
+  }
+
   /**
    * {@inheritDoc}
    * <p>
@@ -108,12 +106,6 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
   @Override
   public void setPersistentClass(Class<T> persistentClass) {
     this.persistentClass = persistentClass;
-  }
-
-  @SuppressWarnings("all")
-  @Override
-  public Class<T> getPersistentClass() {
-    return (Class<T>) this.persistentClass;
   }
 
   @Override
@@ -148,7 +140,6 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
       if (beanFactory != null) {
         return beanFactory.newKey();
       } else {
-        LOG.warn("beanFactory is hasn't been initialized. It's recommended to initialize beanFactory.");
         return keyClass.newInstance();
       }
     } catch (Exception ex) {
@@ -162,8 +153,10 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
     try {
       if (beanFactory != null) {
         return this.beanFactory.newPersistent();
+      } else if (PersistentBase.class.isAssignableFrom(persistentClass)) {
+        RecordBuilder builder = (RecordBuilder) persistentClass.getMethod("newBuilder").invoke(null);
+        return (T) RecordBuilder.class.getMethod("build").invoke(builder);
       } else {
-        LOG.warn("beanFactory is hasn't been initialized. It's recommended to initialize beanFactory.");
         return persistentClass.newInstance();
       }
     } catch (Exception ex) {
@@ -171,14 +164,15 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
     }
   }
 
-  @Override
-  public void setBeanFactory(BeanFactory<K, T> beanFactory) {
-    this.beanFactory = beanFactory;
-  }
 
   @Override
   public BeanFactory<K, T> getBeanFactory() {
     return this.beanFactory;
+  }
+
+  @Override
+  public void setBeanFactory(BeanFactory<K, T> beanFactory) {
+    this.beanFactory = beanFactory;
   }
 
   @Override
@@ -229,7 +223,6 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
   @Override
   public Query<K, T> newQuery() {
     Query<K, T> query = new CassandraQuery(this);
-    query.setFields(mapping.getFieldNames());
     return query;
   }
 
@@ -260,6 +253,15 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
   @Override
   public boolean schemaExists() {
     return cassandraSerializer.schemaExists();
+  }
+
+  public enum SerializerType {
+    AVRO("AVRO"), NATIVE("NATIVE");
+    String val;
+
+    SerializerType(String v) {
+      this.val = v;
+    }
   }
 
 }

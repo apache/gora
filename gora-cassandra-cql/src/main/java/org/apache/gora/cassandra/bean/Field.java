@@ -30,19 +30,10 @@ public class Field {
   private String columnName;
 
   private String type;
+  private Map<String, String> properties;
 
   public Field() {
     properties = new HashMap<>(2);
-  }
-
-  private Map<String, String> properties;
-
-  public void setFieldName(String fieldName) {
-    this.fieldName = fieldName;
-  }
-
-  public void setColumnName(String columnName) {
-    this.columnName = columnName;
   }
 
   public void addProperty(String key, String value) {
@@ -53,8 +44,16 @@ public class Field {
     return fieldName;
   }
 
+  public void setFieldName(String fieldName) {
+    this.fieldName = fieldName;
+  }
+
   public String getColumnName() {
     return columnName;
+  }
+
+  public void setColumnName(String columnName) {
+    this.columnName = columnName;
   }
 
   public String getType() {

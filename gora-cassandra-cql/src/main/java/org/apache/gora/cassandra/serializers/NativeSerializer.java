@@ -21,6 +21,7 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.mapping.Mapper;
 import com.datastax.driver.mapping.MappingManager;
 import com.datastax.driver.mapping.Result;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.gora.cassandra.bean.Field;
 import org.apache.gora.cassandra.persistent.CassandraNativePersistent;
 import org.apache.gora.cassandra.query.CassandraResultSet;
@@ -46,16 +47,23 @@ class NativeSerializer<K, T extends CassandraNativePersistent> extends Cassandra
 
   private Mapper<T> mapper;
 
+  NativeSerializer(CassandraClient cassandraClient, Class<K> keyClass, Class<T> persistentClass, CassandraMapping mapping) {
+    super(cassandraClient, keyClass, persistentClass, mapping);
+    this.createSchema();
+    MappingManager mappingManager = new MappingManager(cassandraClient.getSession());
+    mapper = mappingManager.mapper(persistentClass);
+  }
+
   @Override
   public void put(Object key, Persistent value) {
-    LOG.debug("Object is saved with key : {} and value : {}",key,value);
+    LOG.debug("Object is saved with key : {} and value : {}", key, value);
     mapper.save((T) value);
   }
 
   @Override
   public T get(Object key) {
     T object = mapper.get(key);
-    if(object != null) {
+    if (object != null) {
       LOG.debug("Object is found for key : {}", key);
     } else {
       LOG.debug("Object is not found for key : {}", key);
@@ -72,7 +80,7 @@ class NativeSerializer<K, T extends CassandraNativePersistent> extends Cassandra
 
   @Override
   public Persistent get(Object key, String[] fields) {
-    if(fields == null) {
+    if (fields == null) {
       fields = getFields();
     }
     String cqlQuery = CassandraQueryFactory.getSelectObjectWithFieldsQuery(mapping, fields);
@@ -83,15 +91,21 @@ class NativeSerializer<K, T extends CassandraNativePersistent> extends Cassandra
       LOG.debug("Object is found for key : {}", key);
       return objectList.get(0);
     }
-    LOG.debug("Object is not found for key : {}" , key);
+    LOG.debug("Object is not found for key : {}", key);
     return null;
   }
 
   @Override
   public org.apache.gora.query.Result execute(DataStore dataStore, Query query) {
     List<Object> objectArrayList = new ArrayList<>();
+    String[] fields = query.getFields();
+    if (fields != null) {
+      fields = (String[]) ArrayUtils.addAll(fields, mapping.getAllKeys());
+    } else {
+      fields = mapping.getAllFieldsIncludingKeys();
+    }
     CassandraResultSet<K, T> cassandraResult = new CassandraResultSet<>(dataStore, query);
-    String cqlQuery = CassandraQueryFactory.getExecuteQuery(mapping, query, objectArrayList);
+    String cqlQuery = CassandraQueryFactory.getExecuteQuery(mapping, query, objectArrayList, fields);
     ResultSet results;
     if (objectArrayList.size() == 0) {
       results = client.getSession().execute(cqlQuery);
@@ -106,13 +120,6 @@ class NativeSerializer<K, T extends CassandraNativePersistent> extends Cassandra
       cassandraResult.addResultElement(key, result);
     }
     return cassandraResult;
-  }
-
-  NativeSerializer(CassandraClient cassandraClient, Class<K> keyClass, Class<T> persistentClass, CassandraMapping mapping) {
-    super(cassandraClient, keyClass, persistentClass, mapping);
-    this.createSchema();
-    MappingManager mappingManager = new MappingManager(cassandraClient.getSession());
-    mapper = mappingManager.mapper(persistentClass);
   }
 
   private K getKey(T object) {

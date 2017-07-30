@@ -31,58 +31,120 @@ import java.util.Map;
  */
 public class CassandraMapping {
 
-  private CassandraKey cassandraKey;
-
-  private Map<String, String> tableProperties;
-
-  private Class keyClass;
-
-  private Class persistentClass;
-
-  private KeySpace keySpace;
-
-  private List<Field> fieldList;
-
-  private List<Field> inlinedDefinedPartitionKeys;
-
   private static final String PRIMARY_KEY = "primarykey";
-
+  private CassandraKey cassandraKey;
+  private Map<String, String> tableProperties;
+  private Class keyClass;
+  private Class persistentClass;
+  private KeySpace keySpace;
+  private List<Field> fieldList;
+  private Field inlinedDefinedPartitionKey;
   private String coreName;
 
+  /**
+   * Constructor of the class
+   */
+  CassandraMapping() {
+    this.fieldList = new ArrayList<>();
+    this.tableProperties = new HashMap<>();
+  }
+
+  /**
+   * This method returns the KeySpace in the mapping file,
+   * @return Key space {@link KeySpace}
+   */
   public KeySpace getKeySpace() {
     return keySpace;
   }
 
-  public void setKeySpace(KeySpace keySpace) {
+  /**
+   * This method set the KeySpace in the Cassandra mapping.
+   * @param keySpace Key space {@link KeySpace}
+   */
+  void setKeySpace(KeySpace keySpace) {
     this.keySpace = keySpace;
   }
 
+  /**
+   * Thi method returns only the fields which belongs only for the Persistent Object.
+   * @return List of Fields
+   */
   public List<Field> getFieldList() {
     return fieldList;
   }
 
+  /**
+   * This method returns the Persistent Object's Field from the mapping, according to the FieldName.
+   * @param fieldName Field Name
+   * @return Field {@link Field}
+   */
   public Field getFieldFromFieldName(String fieldName) {
     for (Field field1 : fieldList) {
-      if (field1.getFieldName().equals(fieldName)) {
+      if (field1.getFieldName().equalsIgnoreCase(fieldName)) {
         return field1;
       }
     }
     return null;
   }
 
+  /**
+   * This method returns the Persistent Object's Field from the mapping, according to the ColumnName.
+   * @param columnName Column Name
+   * @return Field {@link Field}
+   */
   public Field getFieldFromColumnName(String columnName) {
     for (Field field1 : fieldList) {
-      if (field1.getColumnName().equals(columnName)) {
+      if (field1.getColumnName().equalsIgnoreCase(columnName)) {
         return field1;
       }
     }
     return null;
   }
 
+  /**
+   * This method returns the Field Names
+   * @return array of Field Names
+   */
   public String[] getFieldNames() {
     List<String> fieldNames = new ArrayList<>(fieldList.size());
     for (Field field : fieldList) {
       fieldNames.add(field.getFieldName());
+    }
+    String[] fieldNameArray = new String[fieldNames.size()];
+    return fieldNames.toArray(fieldNameArray);
+  }
+
+  /**
+   * This method returns
+   * @return
+   */
+  public String[] getAllFieldsIncludingKeys() {
+    List<String> fieldNames = new ArrayList<>(fieldList.size());
+    for (Field field : fieldList) {
+      fieldNames.add(field.getFieldName());
+    }
+    if (cassandraKey != null) {
+      for (Field field : cassandraKey.getFieldList()) {
+        fieldNames.add(field.getFieldName());
+      }
+    }
+    String[] fieldNameArray = new String[fieldNames.size()];
+    return fieldNames.toArray(fieldNameArray);
+  }
+
+  /**
+   *
+   * @return
+   */
+  public String[] getAllKeys() {
+    List<String> fieldNames = new ArrayList<>();
+    Field keyField = getInlinedDefinedPartitionKey();
+    if (cassandraKey != null) {
+      for (Field field : cassandraKey.getFieldList()) {
+        fieldNames.add(field.getFieldName());
+      }
+    } else {
+      fieldNames.add(keyField.getFieldName());
     }
     String[] fieldNameArray = new String[fieldNames.size()];
     return fieldNames.toArray(fieldNameArray);
@@ -94,52 +156,35 @@ public class CassandraMapping {
 
   void setCassandraKey(CassandraKey cassandraKey) {
     this.cassandraKey = cassandraKey;
-    this.fieldList.addAll(cassandraKey.getFieldList());
-  }
-
-  CassandraMapping() {
-    this.fieldList = new ArrayList<>();
-    this.tableProperties = new HashMap<>();
-  }
-
-  public void setCoreName(String coreName) {
-    this.coreName = coreName;
   }
 
   public String getCoreName() {
     return coreName;
   }
 
-  public void addCassandraField(Field field) {
+  void setCoreName(String coreName) {
+    this.coreName = coreName;
+  }
+
+  void addCassandraField(Field field) {
     this.fieldList.add(field);
   }
 
-  public void addProperty(String key, String value) {
-        this.tableProperties.put(key,value);
+  void addProperty(String key, String value) {
+    this.tableProperties.put(key, value);
   }
 
   public String getProperty(String key) {
     return this.tableProperties.get(key);
   }
 
-  public Field getDefaultCassandraKey() {
+  private Field getDefaultCassandraKey() {
     Field field = new Field();
     field.setFieldName("defaultId");
     field.setColumnName("defaultId");
-    field.setType("text");
+    field.setType("varchar");
+    field.addProperty("primarykey", "true");
     return field;
-  }
-
-  public boolean isPartitionKeyDefined() {
-    if (cassandraKey == null) {
-      for (Field field : fieldList) {
-        if (Boolean.parseBoolean(field.getProperty(PRIMARY_KEY))) {
-          return true;
-        }
-      }
-      return false;
-    }
-    return true;
   }
 
   public Class getKeyClass() {
@@ -154,21 +199,38 @@ public class CassandraMapping {
     return persistentClass;
   }
 
-  public void setPersistentClass(Class persistentClass) {
+  void setPersistentClass(Class persistentClass) {
     this.persistentClass = persistentClass;
   }
 
-  public List<Field> getInlinedDefinedPartitionKeys() {
-    if(inlinedDefinedPartitionKeys != null) {
-      return inlinedDefinedPartitionKeys;
+  /**
+   * This method return the Inlined defined Partition Key,
+   * If there isn't any inlined define partition keys,
+   * this method returns default predefined partition key "defaultId".
+   *
+   * @return Partition Key {@link Field}
+   */
+  public Field getInlinedDefinedPartitionKey() {
+    if (inlinedDefinedPartitionKey != null) {
+      return inlinedDefinedPartitionKey;
     } else {
-      inlinedDefinedPartitionKeys = new ArrayList<>();
       for (Field field : fieldList) {
         if (Boolean.parseBoolean(field.getProperty(PRIMARY_KEY))) {
-          inlinedDefinedPartitionKeys.add(field);
+          inlinedDefinedPartitionKey = field;
+          break;
         }
       }
-      return inlinedDefinedPartitionKeys;
+      if (inlinedDefinedPartitionKey == null) {
+        return getDefaultCassandraKey();
+      }
+      return inlinedDefinedPartitionKey;
+    }
+  }
+
+  void finalized() {
+    Field field = getInlinedDefinedPartitionKey();
+    if (!fieldList.contains(field) && cassandraKey == null) {
+      fieldList.add(field);
     }
   }
 }

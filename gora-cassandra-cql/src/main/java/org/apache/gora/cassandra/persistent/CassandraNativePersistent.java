@@ -21,7 +21,6 @@ import com.datastax.driver.mapping.annotations.Transient;
 import org.apache.avro.Schema;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.Tombstone;
-import org.apache.gora.persistency.impl.PersistentBase;
 
 import java.util.List;
 
@@ -61,12 +60,6 @@ public abstract class CassandraNativePersistent implements Persistent {
 
   @Transient
   @Override
-  public void setDirty(String field) {
-
-  }
-
-  @Transient
-  @Override
   public void clearDirty(int fieldIndex) {
 
   }
@@ -99,6 +92,12 @@ public abstract class CassandraNativePersistent implements Persistent {
   @Override
   public boolean isDirty() {
     return false;
+  }
+
+  @Transient
+  @Override
+  public void setDirty(String field) {
+
   }
 
   @Transient

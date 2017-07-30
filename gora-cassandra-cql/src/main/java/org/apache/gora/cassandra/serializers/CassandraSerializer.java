@@ -20,6 +20,7 @@ package org.apache.gora.cassandra.serializers;
 import com.datastax.driver.core.KeyspaceMetadata;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.TableMetadata;
+import org.apache.avro.Schema;
 import org.apache.gora.cassandra.bean.Field;
 import org.apache.gora.cassandra.store.CassandraClient;
 import org.apache.gora.cassandra.store.CassandraMapping;
@@ -32,22 +33,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 /**
  * This is the abstract Cassandra Serializer class.
  */
 public abstract class CassandraSerializer<K, T extends Persistent> {
-  CassandraClient client;
-
+  private static final Logger LOG = LoggerFactory.getLogger(CassandraStore.class);
   protected Class<K> keyClass;
 
   protected Class<T> persistentClass;
 
   protected CassandraMapping mapping;
-
-  private static final Logger LOG = LoggerFactory.getLogger(CassandraStore.class);
+  CassandraClient client;
 
   CassandraSerializer(CassandraClient cc, Class<K> keyClass, Class<T> persistantClass, CassandraMapping mapping) {
     this.keyClass = keyClass;
@@ -56,9 +57,35 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
     this.mapping = mapping;
   }
 
+  /**
+   * This method returns the Cassandra Serializer according the Cassandra serializer property.
+   *
+   * @param cc        Cassandra Client
+   * @param type      Serialization type
+   * @param dataStore Cassandra DataStore
+   * @param mapping   Cassandra Mapping
+   * @param <K>       key class
+   * @param <T>       persistent class
+   * @return Serializer
+   */
+  public static <K, T extends Persistent> CassandraSerializer getSerializer(CassandraClient cc, String type, final DataStore<K, T> dataStore, CassandraMapping mapping) {
+    CassandraStore.SerializerType serType = type.isEmpty() ? CassandraStore.SerializerType.NATIVE : CassandraStore.SerializerType.valueOf(type.toUpperCase(Locale.ENGLISH));
+    CassandraSerializer serializer;
+    switch (serType) {
+      case AVRO:
+        serializer = new AvroSerializer(cc, dataStore, mapping);
+        break;
+      case NATIVE:
+      default:
+        serializer = new NativeSerializer(cc, dataStore.getKeyClass(), dataStore.getPersistentClass(), mapping);
+    }
+    return serializer;
+  }
+
   public void createSchema() {
     LOG.debug("creating Cassandra keyspace {}", mapping.getKeySpace().getName());
     this.client.getSession().execute(CassandraQueryFactory.getCreateKeySpaceQuery(mapping));
+    processUDTSchemas(); //TODO complete functionality
     LOG.debug("creating Cassandra column family / table {}", mapping.getCoreName());
     this.client.getSession().execute(CassandraQueryFactory.getCreateTableQuery(mapping));
   }
@@ -89,29 +116,30 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
     }
   }
 
-  /**
-   * This method returns the Cassandra Serializer according the Cassandra serializer property.
-   *
-   * @param cc              Cassandra Client
-   * @param type            Serialization type
-   * @param dataStore        Cassandra DataStore
-   * @param mapping         Cassandra Mapping
-   * @param <K>             key class
-   * @param <T>             persistent class
-   * @return Serializer
-   */
-  public static <K, T extends Persistent> CassandraSerializer getSerializer(CassandraClient cc, String type, final DataStore<K,T> dataStore, CassandraMapping mapping) {
-    CassandraStore.SerializerType serType = type.isEmpty() ? CassandraStore.SerializerType.NATIVE : CassandraStore.SerializerType.valueOf(type.toUpperCase(Locale.ENGLISH));
-    CassandraSerializer serializer;
-    switch (serType) {
-      case AVRO:
-        serializer = new AvroSerializer(cc, dataStore, mapping);
-        break;
-      case NATIVE:
-      default:
-        serializer = new NativeSerializer(cc, dataStore.getKeyClass(), dataStore.getPersistentClass(), mapping);
+  private void processUDTSchemas() {
+    Set<String> schemaStack = new LinkedHashSet<>();
+    for (Field field : mapping.getFieldList()) {
+      if (field.getType().contains("frozen")) {
+        try {
+          Schema schema = (Schema) mapping.getPersistentClass().getField("SCHEMA$").get(null);
+          Schema schemaField = schema.getField(field.getFieldName()).schema();
+          String cqlQuery = CassandraQueryFactory.getCreateUDTType(schemaField, mapping, schemaStack);
+          schemaStack.add(cqlQuery);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+          throw new RuntimeException("SCHEMA$ field can't accessible, Please recompile the Avro schema with goracompiler.");
+        } catch (NullPointerException e) {
+          throw new RuntimeException(field + " field couldn't find in the class " + mapping.getPersistentClass() + ".");
+        }
+      }
     }
-    return serializer;
+    createUserDefineTypes(schemaStack);
+
+  }
+
+  private void createUserDefineTypes(Set<String> queries) {
+    for (String cqlQuery : queries) {
+      this.client.getSession().execute(cqlQuery);
+    }
   }
 
   protected String[] getFields() {
@@ -146,14 +174,22 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
 
   public long deleteByQuery(Query query) {
     List<Object> objectArrayList = new ArrayList<>();
-    String cqlQuery = CassandraQueryFactory.getDeleteByQuery(mapping, query, objectArrayList);
-    ResultSet results;
-    if (objectArrayList.size() == 0) {
-      results = client.getSession().execute(cqlQuery);
+    if (query.getKey() == null && query.getEndKey() == null && query.getStartKey() == null) {
+      if (query.getFields() == null) {
+        client.getSession().execute(CassandraQueryFactory.getTruncateTableQuery(mapping));
+      } else {
+        LOG.error("Delete by Query is not supported for the Queries which didn't specify Query keys with fields.");
+      }
     } else {
-      results = client.getSession().execute(cqlQuery, objectArrayList.toArray());
+      String cqlQuery = CassandraQueryFactory.getDeleteByQuery(mapping, query, objectArrayList);
+      ResultSet results;
+      if (objectArrayList.size() == 0) {
+        results = client.getSession().execute(cqlQuery);
+      } else {
+        results = client.getSession().execute(cqlQuery, objectArrayList.toArray());
+      }
+      LOG.debug("Delete by Query was applied : " + results.wasApplied());
     }
-    LOG.debug("Delete by Query was applied : " + results.wasApplied());
     LOG.info("Delete By Query method doesn't return the deleted element count.");
     return 0;
   }
