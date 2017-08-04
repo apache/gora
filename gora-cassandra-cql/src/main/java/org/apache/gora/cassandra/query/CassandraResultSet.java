@@ -99,8 +99,10 @@ public class CassandraResultSet<K, T extends Persistent> extends ResultBase<K, T
   }
 
   /**
-   * @param key
-   * @param token
+   * This method adds Result Element into result lists, So when user retrieves values from the Result these objects will be passed.
+   *
+   * @param key   key
+   * @param token persistent Object
    */
   public void addResultElement(K key, T token) {
     this.persistentKey.add(key);

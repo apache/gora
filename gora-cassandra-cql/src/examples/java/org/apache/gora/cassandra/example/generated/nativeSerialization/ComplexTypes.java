@@ -3,7 +3,10 @@ package org.apache.gora.cassandra.example.generated.nativeSerialization;
 import com.datastax.driver.mapping.annotations.Column;
 import com.datastax.driver.mapping.annotations.PartitionKey;
 import com.datastax.driver.mapping.annotations.Table;
-import org.apache.gora.cassandra.persistent.CassandraNativePersistent;
+import com.datastax.driver.mapping.annotations.Transient;
+import org.apache.avro.Schema;
+import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.Tombstone;
 
 import java.util.List;
 import java.util.Map;
@@ -18,7 +21,7 @@ import java.util.UUID;
         writeConsistency = "QUORUM",
         caseSensitiveKeyspace = false,
         caseSensitiveTable = true)
-public class ComplexTypes extends CassandraNativePersistent {
+public class ComplexTypes implements Persistent {
 
   @Column
   private List<String> listDataType;
@@ -97,5 +100,83 @@ public class ComplexTypes extends CassandraNativePersistent {
 
   public void setId(String id) {
     this.id = id;
+  }
+
+  @Transient
+  @Override
+  public void clear() {
+
+  }
+
+  @Transient
+  @Override
+  public boolean isDirty(int fieldIndex) {
+    return false;
+  }
+
+  @Transient
+  @Override
+  public boolean isDirty(String field) {
+    return false;
+  }
+
+  @Transient
+  @Override
+  public void setDirty() {
+
+  }
+
+  @Transient
+  @Override
+  public void setDirty(int fieldIndex) {
+
+  }
+
+  @Transient
+  @Override
+  public void clearDirty(int fieldIndex) {
+
+  }
+
+  @Transient
+  @Override
+  public void clearDirty(String field) {
+
+  }
+
+  @Transient
+  @Override
+  public Tombstone getTombstone() {
+    return null;
+  }
+
+  @Transient
+  @Override
+  public List<Schema.Field> getUnmanagedFields() {
+    return null;
+  }
+
+  @Transient
+  @Override
+  public Persistent newInstance() {
+    return new ComplexTypes();
+  }
+
+  @Transient
+  @Override
+  public boolean isDirty() {
+    return false;
+  }
+
+  @Transient
+  @Override
+  public void setDirty(String field) {
+
+  }
+
+  @Transient
+  @Override
+  public void clearDirty() {
+
   }
 }

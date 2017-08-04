@@ -19,7 +19,6 @@
 package org.apache.gora.cassandra.serializers;
 
 import org.apache.avro.Schema;
-import org.apache.avro.specific.SpecificData;
 import org.apache.avro.util.Utf8;
 import org.apache.gora.cassandra.bean.CassandraKey;
 import org.apache.gora.cassandra.bean.Field;
@@ -91,20 +90,7 @@ class AvroCassandraUtils {
     switch (type) {
       // Record can be persist with two ways, udt and bytes
       case RECORD:
-        PersistentBase persistent = (PersistentBase) fieldValue;
-        if (field.getType().contains("frozen")) {
-          PersistentBase newRecord = (PersistentBase) SpecificData.get().newRecord(persistent, persistent.getSchema());
-          for (Schema.Field member : fieldSchema.getFields()) {
-            if (member.pos() == 0 || !persistent.isDirty()) {
-              continue;
-            }
-            Schema memberSchema = member.schema();
-            Schema.Type memberType = memberSchema.getType();
-            Object memberValue = persistent.get(member.pos());
-            newRecord.put(member.pos(), getFieldValueFromAvroBean(memberSchema, memberType, memberValue, field));
-          }
-          fieldValue = newRecord;
-        } else if (field.getType().contains("blob")) {
+        if (field.getType().contains("blob")) {
           try {
             byte[] serializedBytes = HBaseByteInterface.toBytes(fieldValue, fieldSchema);
             fieldValue = ByteBuffer.wrap(serializedBytes);
@@ -112,13 +98,13 @@ class AvroCassandraUtils {
             LOG.error("Error occurred when serializing {} field. {}", new Object[]{field.getFieldName(), e.getMessage()});
           }
         } else {
-          throw new RuntimeException("");
+          throw new RuntimeException("Unsupported Data Type for Record, Currently Supported Data Types are blob and UDT for Records");
         }
         break;
       case MAP:
         Schema valueSchema = fieldSchema.getValueType();
         Schema.Type valuetype = valueSchema.getType();
-        HashMap<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
         for (Map.Entry<CharSequence, ?> e : ((Map<CharSequence, ?>) fieldValue).entrySet()) {
           String mapKey = e.getKey().toString();
           Object mapValue = e.getValue();

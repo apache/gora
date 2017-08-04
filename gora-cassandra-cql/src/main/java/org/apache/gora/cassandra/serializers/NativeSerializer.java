@@ -21,9 +21,9 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.mapping.Mapper;
 import com.datastax.driver.mapping.MappingManager;
 import com.datastax.driver.mapping.Result;
+import org.apache.avro.Schema;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.gora.cassandra.bean.Field;
-import org.apache.gora.cassandra.persistent.CassandraNativePersistent;
 import org.apache.gora.cassandra.query.CassandraResultSet;
 import org.apache.gora.cassandra.store.CassandraClient;
 import org.apache.gora.cassandra.store.CassandraMapping;
@@ -41,14 +41,14 @@ import java.util.List;
 /**
  * This Class contains the operation relates to Native Serialization.
  */
-class NativeSerializer<K, T extends CassandraNativePersistent> extends CassandraSerializer {
+class NativeSerializer<K, T extends Persistent> extends CassandraSerializer {
 
   private static final Logger LOG = LoggerFactory.getLogger(NativeSerializer.class);
 
   private Mapper<T> mapper;
 
-  NativeSerializer(CassandraClient cassandraClient, Class<K> keyClass, Class<T> persistentClass, CassandraMapping mapping) {
-    super(cassandraClient, keyClass, persistentClass, mapping);
+  NativeSerializer(CassandraClient cassandraClient, Class<K> keyClass, Class<T> persistentClass, CassandraMapping mapping, Schema schema) {
+      super(cassandraClient, keyClass, persistentClass, mapping, schema);
     this.createSchema();
     MappingManager mappingManager = new MappingManager(cassandraClient.getSession());
     mapper = mappingManager.mapper(persistentClass);
@@ -131,7 +131,7 @@ class NativeSerializer<K, T extends CassandraNativePersistent> extends Cassandra
         break;
       }
     }
-    K key = null;
+    K key;
     Method keyMethod = null;
     try {
       for (Method method : this.persistentClass.getMethods()) {

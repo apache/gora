@@ -30,6 +30,7 @@ public class Field {
   private String columnName;
 
   private String type;
+
   private Map<String, String> properties;
 
   public Field() {

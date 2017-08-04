@@ -32,6 +32,9 @@ import org.junit.Test;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -259,5 +262,70 @@ public class TestCassandraStoreWithCassandraKey {
     cassandraRecordDataStore.updateByQuery(query);
     CassandraRecord result = cassandraRecordDataStore.get(key1);
     Assert.assertEquals(new Utf8("test123"), result.getDataString());
+  }
+
+
+  @Test
+  public void testDataTypes() {
+    cassandraRecordDataStore.truncateSchema();
+    CassandraRecord record = new CassandraRecord();
+    record.setDataLong(719411002L);
+    record.setDataString(new Utf8("M.K.H. Gunasekara"));
+    record.setDataInt(144);
+    record.setDataBytes(ByteBuffer.wrap("No 144, Gunasekara Mawatha, Mattumgala, Ragama".getBytes(Charset.defaultCharset())));
+    record.setDataDouble(3.14159d);
+    ArrayList<Double> doubles = new ArrayList<>();
+    doubles.add(2.1D);
+    doubles.add(3.14D);
+    record.setArrayDouble(doubles);
+    ArrayList<Integer> integers = new ArrayList<>();
+    integers.add(2);
+    integers.add(3);
+    record.setArrayInt(integers);
+    ArrayList<Long> longs = new ArrayList<>();
+    longs.add(2L);
+    longs.add(3L);
+    record.setArrayLong(longs);
+    ArrayList<CharSequence> strings = new ArrayList<>();
+    strings.add(new Utf8("Hello World"));
+    strings.add(new Utf8("Srilanka"));
+    record.setArrayString(strings);
+    HashMap<CharSequence, Double > map = new HashMap<>();
+    map.put(new Utf8("Life"), 7.3D);
+    record.setMapDouble(map);
+    CassandraKey key = new CassandraKey();
+    key.setTimestamp(2027L);
+    key.setUrl("www.apache.org");
+    cassandraRecordDataStore.put(key, record);
+    CassandraRecord retrievedRecord = cassandraRecordDataStore.get(key);
+    Assert.assertEquals(record.getDataInt(), retrievedRecord.getDataInt());
+    Assert.assertEquals(record.getDataString(), retrievedRecord.getDataString());
+    Assert.assertEquals(record.getDataLong(), retrievedRecord.getDataLong());
+    Assert.assertEquals(record.getDataBytes(), retrievedRecord.getDataBytes());
+    Assert.assertEquals(record.getDataDouble(), retrievedRecord.getDataDouble());
+    int i =0;
+    for(Double obj : retrievedRecord.getArrayDouble()) {
+      Assert.assertEquals(doubles.get(i), obj);
+      i++;
+    }
+    i = 0;
+    for(Integer obj : retrievedRecord.getArrayInt()) {
+      Assert.assertEquals(integers.get(i), obj);
+      i++;
+    }
+    i = 0;
+    for(Long obj : retrievedRecord.getArrayLong()) {
+      Assert.assertEquals(longs.get(i), obj);
+      i++;
+    }
+    i = 0;
+    for(CharSequence obj : retrievedRecord.getArrayString()) {
+      Assert.assertEquals(strings.get(i), obj);
+      i++;
+    }
+
+    for(Map.Entry entry : map.entrySet()) {
+      Assert.assertEquals(entry.getValue(), retrievedRecord.getMapDouble().get(entry.getKey()));
+    }
   }
 }

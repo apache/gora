@@ -17,11 +17,15 @@
 
 package org.apache.gora.cassandra.serializers;
 
+import com.datastax.driver.core.AbstractGettableData;
 import com.datastax.driver.core.ColumnDefinitions;
 import com.datastax.driver.core.DataType;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
+import com.datastax.driver.core.UDTValue;
+import com.datastax.driver.core.UserType;
 import org.apache.avro.Schema;
+import org.apache.avro.specific.SpecificData;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.gora.cassandra.bean.CassandraKey;
 import org.apache.gora.cassandra.bean.Field;
@@ -36,10 +40,16 @@ import org.apache.gora.store.DataStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * This class contains the operations relates to Avro Serialization.
@@ -51,8 +61,8 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
 
   private DataStore<K, T> cassandraDataStore;
 
-  AvroSerializer(CassandraClient cassandraClient, DataStore<K, T> dataStore, CassandraMapping mapping) {
-    super(cassandraClient, dataStore.getKeyClass(), dataStore.getPersistentClass(), mapping);
+  AvroSerializer(CassandraClient cassandraClient, DataStore<K, T> dataStore, CassandraMapping mapping, Schema schema) {
+    super(cassandraClient, dataStore.getKeyClass(), dataStore.getPersistentClass(), mapping, schema);
     this.cassandraDataStore = dataStore;
   }
 
@@ -71,7 +81,7 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
     T obj = null;
     if (iterator.hasNext()) {
       obj = cassandraDataStore.newPersistent();
-      Row row = iterator.next();
+      AbstractGettableData row = (AbstractGettableData) iterator.next();
       populateValuesToPersistent(row, definitions, obj, fields);
     }
     return obj;
@@ -94,7 +104,35 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
           }
           if (persistent.isDirty(f.pos()) || mapping.getInlinedDefinedPartitionKey().equals(mapping.getFieldFromFieldName(fieldName))) {
             Object value = persistentBase.get(f.pos());
-            value = AvroCassandraUtils.getFieldValueFromAvroBean(f.schema(), f.schema().getType(), value, field);
+            String fieldType = field.getType();
+            if (fieldType.contains("frozen")) {
+              fieldType = fieldType.substring(fieldType.indexOf("<") + 1, fieldType.indexOf(">"));
+              UserType userType = client.getSession().getCluster().getMetadata().getKeyspace(mapping.getKeySpace().getName()).getUserType(fieldType);
+              UDTValue udtValue = userType.newValue();
+              Schema udtSchema = f.schema();
+              if (udtSchema.getType().equals(Schema.Type.UNION)) {
+                for (Schema schema : udtSchema.getTypes()) {
+                  if (schema.getType().equals(Schema.Type.RECORD)) {
+                    udtSchema = schema;
+                    break;
+                  }
+                }
+              }
+              PersistentBase udtObjectBase = (PersistentBase) value;
+              for (Schema.Field udtField : udtSchema.getFields()) {
+                Object udtFieldValue = AvroCassandraUtils.getFieldValueFromAvroBean(udtField.schema(), udtField.schema().getType(), udtObjectBase.get(udtField.name()), field);
+                if (udtField.schema().getType().equals(Schema.Type.MAP)) {
+                  udtValue.setMap(udtField.name(), (Map) udtFieldValue);
+                } else if (udtField.schema().getType().equals(Schema.Type.ARRAY)) {
+                  udtValue.setList(udtField.name(), (List) udtFieldValue);
+                } else {
+                  udtValue.set(udtField.name(), udtFieldValue, (Class) udtFieldValue.getClass());
+                }
+              }
+              value = udtValue;
+            } else {
+              value = AvroCassandraUtils.getFieldValueFromAvroBean(f.schema(), f.schema().getType(), value, field);
+            }
             values.add(value);
             fields.add(fieldName);
           }
@@ -122,7 +160,7 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
     T obj = null;
     if (iterator.hasNext()) {
       obj = cassandraDataStore.newPersistent();
-      Row row = iterator.next();
+      AbstractGettableData row = (AbstractGettableData) iterator.next();
       populateValuesToPersistent(row, definitions, obj, mapping.getFieldNames());
     }
     return obj;
@@ -131,7 +169,7 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
   /**
    * This method wraps result set data in to DataEntry and creates a list of DataEntry.
    **/
-  private void populateValuesToPersistent(Row row, ColumnDefinitions columnDefinitions, PersistentBase base, String[] fields) {
+  private void populateValuesToPersistent(AbstractGettableData row, ColumnDefinitions columnDefinitions, PersistentBase base, String[] fields) {
     Object paramValue;
     for (String fieldName : fields) {
       Schema.Field avroField = base.getSchema().getField(fieldName);
@@ -142,16 +180,15 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
       }
       Schema fieldSchema = avroField.schema();
       String columnName = field.getColumnName();
-      paramValue = getValue(row, columnDefinitions, columnName);
+      paramValue = getValue(row, columnDefinitions.getType(columnName), columnName, fieldSchema);
       Object value = AvroCassandraUtils.getAvroFieldValue(paramValue, fieldSchema);
       base.put(avroField.pos(), value);
     }
   }
 
-  private Object getValue(Row row, ColumnDefinitions columnDefinitions, String columnName) {
+  private Object getValue(AbstractGettableData row, DataType columnType, String columnName, Schema schema) {
     Object paramValue;
-    Field field = mapping.getFieldFromColumnName(columnName);
-    DataType columnType = columnDefinitions.getType(columnName);
+    String dataType;
     switch (columnType.getName()) {
       case ASCII:
         paramValue = row.getString(columnName);
@@ -202,24 +239,33 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
         paramValue = row.isNull(columnName) ? null : row.getUUID(columnName);
         break;
       case LIST:
-        String dataType = field.getType();
-        dataType = dataType.substring(dataType.indexOf("<") + 1, dataType.indexOf(">"));
+        dataType = columnType.getTypeArguments().get(0).toString();
         paramValue = row.isNull(columnName) ? null : row.getList(columnName, getRelevantClassForCassandraDataType(dataType));
         break;
       case SET:
-        dataType = field.getType();
-        dataType = dataType.substring(dataType.indexOf("<") + 1, dataType.indexOf(">"));
+        dataType = columnType.getTypeArguments().get(0).toString();
         paramValue = row.isNull(columnName) ? null : row.getList(columnName, getRelevantClassForCassandraDataType(dataType));
         break;
       case MAP:
-        dataType = field.getType();
-        dataType = dataType.substring(dataType.indexOf("<") + 1, dataType.indexOf(">"));
-        dataType = dataType.split(",")[1];
+        dataType = columnType.getTypeArguments().get(1).toString();
         // Avro supports only String for keys
         paramValue = row.isNull(columnName) ? null : row.getMap(columnName, String.class, getRelevantClassForCassandraDataType(dataType));
         break;
       case UDT:
         paramValue = row.isNull(columnName) ? null : row.getUDTValue(columnName);
+        if (paramValue != null) {
+          try {
+            PersistentBase udtObject = (PersistentBase) SpecificData.newInstance(Class.forName(schema.getFullName()), schema);
+            for (Schema.Field f : udtObject.getSchema().getFields()) {
+              DataType dType = ((UDTValue) paramValue).getType().getFieldType(f.name());
+              Object fieldValue = getValue((UDTValue) paramValue, dType, f.name(), f.schema());
+              udtObject.put(f.pos(), fieldValue);
+            }
+            paramValue = udtObject;
+          } catch (ClassNotFoundException e) {
+            throw new RuntimeException("Error occurred while populating data to " + schema.getFullName() + " : " + e.getMessage());
+          }
+        }
         break;
       case TUPLE:
         paramValue = row.isNull(columnName) ? null : row.getTupleValue(columnName).toString();
@@ -234,35 +280,35 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
     return paramValue;
   }
 
-/*  public Collection<Object> getFieldValues(Object o) {
-    UDTValue udtValue = (UDTValue) o;
-    UserType type = udtValue.getType();
-
-    Collection<Object> values = new ArrayList<Object>(type.size());
-
- *//*   for (UserType.Field field : type) {
-      udtValue.
-      ByteBuffer bytes = udtValue.getBytesUnsafe(field.getName());
-      DataType value = field.getType();
-      for(DataType type1 : value.getTypeArguments()) {
-        type1.
-      }
-      values.add(value);
-    }*//*
-
-    return values;
-  }*/
-
-
   private Class getRelevantClassForCassandraDataType(String dataType) {
     switch (dataType) {
-      //// TODO: 7/25/17 support all the datatypes 
       case "ascii":
       case "text":
       case "varchar":
         return String.class;
       case "blob":
         return ByteBuffer.class;
+      case "int":
+        return Integer.class;
+      case "double":
+        return Double.class;
+      case "bigint":
+      case "counter":
+        return Long.class;
+      case "decimal":
+        return BigDecimal.class;
+      case "float":
+        return Float.class;
+      case "boolean":
+        return Boolean.class;
+      case "inet":
+        return InetAddress.class;
+      case "varint":
+        return BigInteger.class;
+      case "uuid":
+        return UUID.class;
+      case "timestamp":
+        return Date.class;
       default:
         throw new RuntimeException("Invalid Cassandra DataType");
     }
@@ -302,7 +348,7 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
     K keyObject;
     CassandraKey cassandraKey = mapping.getCassandraKey();
     while (iterator.hasNext()) {
-      Row row = iterator.next();
+      AbstractGettableData row = (AbstractGettableData) iterator.next();
       obj = cassandraDataStore.newPersistent();
       keyObject = cassandraDataStore.newKey();
       populateValuesToPersistent(row, definitions, obj, fields);
@@ -310,7 +356,7 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
         populateValuesToPersistent(row, definitions, (PersistentBase) keyObject, cassandraKey.getFieldNames());
       } else {
         Field key = mapping.getInlinedDefinedPartitionKey();
-        keyObject = (K) getValue(row, definitions, key.getColumnName());
+        keyObject = (K) getValue(row, definitions.getType(key.getColumnName()), key.getColumnName(), null);
       }
       cassandraResult.addResultElement(keyObject, obj);
     }

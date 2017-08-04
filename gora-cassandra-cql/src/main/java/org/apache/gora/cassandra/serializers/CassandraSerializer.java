@@ -26,6 +26,7 @@ import org.apache.gora.cassandra.store.CassandraClient;
 import org.apache.gora.cassandra.store.CassandraMapping;
 import org.apache.gora.cassandra.store.CassandraStore;
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.store.DataStore;
@@ -33,10 +34,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
+import java.util.Map;
 
 /**
  * This is the abstract Cassandra Serializer class.
@@ -47,14 +48,23 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
 
   protected Class<T> persistentClass;
 
+  private Map<String, String> userDefineTypeMaps;
+
   protected CassandraMapping mapping;
+  private Schema persistentSchema;
   CassandraClient client;
 
-  CassandraSerializer(CassandraClient cc, Class<K> keyClass, Class<T> persistantClass, CassandraMapping mapping) {
+  CassandraSerializer(CassandraClient cc, Class<K> keyClass, Class<T> persistantClass, CassandraMapping mapping, Schema schema) {
     this.keyClass = keyClass;
     this.persistentClass = persistantClass;
     this.client = cc;
     this.mapping = mapping;
+    persistentSchema = schema;
+    try {
+      analyzePersistent();
+    } catch (Exception e) {
+      throw new RuntimeException("Error occurred while analyzing the persistent class, :" + e.getMessage());
+    }
   }
 
   /**
@@ -68,24 +78,59 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
    * @param <T>       persistent class
    * @return Serializer
    */
-  public static <K, T extends Persistent> CassandraSerializer getSerializer(CassandraClient cc, String type, final DataStore<K, T> dataStore, CassandraMapping mapping) {
+  public static <K, T extends Persistent> CassandraSerializer getSerializer(CassandraClient cc, String type, final DataStore<K, T> dataStore, CassandraMapping mapping, Schema schema) {
     CassandraStore.SerializerType serType = type.isEmpty() ? CassandraStore.SerializerType.NATIVE : CassandraStore.SerializerType.valueOf(type.toUpperCase(Locale.ENGLISH));
     CassandraSerializer serializer;
     switch (serType) {
       case AVRO:
-        serializer = new AvroSerializer(cc, dataStore, mapping);
+        serializer = new AvroSerializer(cc, dataStore, mapping, schema);
         break;
       case NATIVE:
       default:
-        serializer = new NativeSerializer(cc, dataStore.getKeyClass(), dataStore.getPersistentClass(), mapping);
+        serializer = new NativeSerializer(cc, dataStore.getKeyClass(), dataStore.getPersistentClass(), mapping, schema);
     }
     return serializer;
   }
 
+  private void analyzePersistent() throws Exception {
+    userDefineTypeMaps = new HashMap<>();
+    for (Field field : mapping.getFieldList()) {
+      String fieldType = field.getType();
+      if (fieldType.contains("frozen")) {
+        String udtType = fieldType.substring(fieldType.indexOf("<") + 1, fieldType.indexOf(">"));
+        if (this instanceof AvroSerializer) {
+          if (PersistentBase.class.isAssignableFrom(persistentClass)) {
+            Schema fieldSchema = persistentSchema.getField(field.getFieldName()).schema();
+            if (fieldSchema.getType().equals(Schema.Type.UNION)) {
+              for (Schema currentSchema : fieldSchema.getTypes()) {
+                if (currentSchema.getType().equals(Schema.Type.RECORD)) {
+                  fieldSchema = currentSchema;
+                  break;
+                }
+              }
+            }
+            String createQuery = CassandraQueryFactory.getCreateUDTTypeForAvro(mapping, udtType, fieldSchema);
+            userDefineTypeMaps.put(udtType, createQuery);
+          } else {
+            throw new RuntimeException("Unsupported Class for User Define Types, Please use PersistentBase class. field : " + udtType);
+          }
+        } else {
+          String createQuery = CassandraQueryFactory.getCreateUDTTypeForNative(mapping, persistentClass, udtType, field.getFieldName());
+          userDefineTypeMaps.put(udtType, createQuery);
+        }
+      }
+    }
+
+  }
+
+
   public void createSchema() {
     LOG.debug("creating Cassandra keyspace {}", mapping.getKeySpace().getName());
     this.client.getSession().execute(CassandraQueryFactory.getCreateKeySpaceQuery(mapping));
-    processUDTSchemas(); //TODO complete functionality
+    for (Map.Entry udtType : userDefineTypeMaps.entrySet()) {
+      LOG.debug("creating Cassandra User Define Type {}", udtType.getKey());
+      this.client.getSession().execute((String) udtType.getValue());
+    }
     LOG.debug("creating Cassandra column family / table {}", mapping.getCoreName());
     this.client.getSession().execute(CassandraQueryFactory.getCreateTableQuery(mapping));
   }
@@ -116,32 +161,6 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
     }
   }
 
-  private void processUDTSchemas() {
-    Set<String> schemaStack = new LinkedHashSet<>();
-    for (Field field : mapping.getFieldList()) {
-      if (field.getType().contains("frozen")) {
-        try {
-          Schema schema = (Schema) mapping.getPersistentClass().getField("SCHEMA$").get(null);
-          Schema schemaField = schema.getField(field.getFieldName()).schema();
-          String cqlQuery = CassandraQueryFactory.getCreateUDTType(schemaField, mapping, schemaStack);
-          schemaStack.add(cqlQuery);
-        } catch (IllegalAccessException | NoSuchFieldException e) {
-          throw new RuntimeException("SCHEMA$ field can't accessible, Please recompile the Avro schema with goracompiler.");
-        } catch (NullPointerException e) {
-          throw new RuntimeException(field + " field couldn't find in the class " + mapping.getPersistentClass() + ".");
-        }
-      }
-    }
-    createUserDefineTypes(schemaStack);
-
-  }
-
-  private void createUserDefineTypes(Set<String> queries) {
-    for (String cqlQuery : queries) {
-      this.client.getSession().execute(cqlQuery);
-    }
-  }
-
   protected String[] getFields() {
     List<String> fields = new ArrayList<>();
     for (Field field : mapping.getFieldList()) {
@@ -162,7 +181,7 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
 
   public boolean updateByQuery(Query query) {
     List<Object> objectArrayList = new ArrayList<>();
-    String cqlQuery = CassandraQueryFactory.getUpdateByQuery(mapping, query, objectArrayList);
+    String cqlQuery = CassandraQueryFactory.getUpdateByQuery(mapping, query, objectArrayList, persistentSchema);
     ResultSet results;
     if (objectArrayList.size() == 0) {
       results = client.getSession().execute(cqlQuery);

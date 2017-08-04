@@ -242,6 +242,9 @@ class CassandraMappingBuilder<K, T extends Persistent> {
             attributeValue = attributeValue.replace("udt(", "frozen(");
           }
           fieldKey.setType(attributeValue.replace("(", "<").replace(")", ">"));
+          if (fieldKey.getType().equalsIgnoreCase("udt")) {
+            throw new RuntimeException("Invalid udt type, Please enter dataType for udt with a unique name for particular user define data type, like udt(metadata).");
+          }
           break;
         default:
           fieldKey.addProperty(attributeName, attributeValue);

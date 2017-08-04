@@ -51,6 +51,7 @@ public class CassandraMapping {
 
   /**
    * This method returns the KeySpace in the mapping file,
+   *
    * @return Key space {@link KeySpace}
    */
   public KeySpace getKeySpace() {
@@ -59,6 +60,7 @@ public class CassandraMapping {
 
   /**
    * This method set the KeySpace in the Cassandra mapping.
+   *
    * @param keySpace Key space {@link KeySpace}
    */
   void setKeySpace(KeySpace keySpace) {
@@ -67,6 +69,7 @@ public class CassandraMapping {
 
   /**
    * Thi method returns only the fields which belongs only for the Persistent Object.
+   *
    * @return List of Fields
    */
   public List<Field> getFieldList() {
@@ -75,6 +78,7 @@ public class CassandraMapping {
 
   /**
    * This method returns the Persistent Object's Field from the mapping, according to the FieldName.
+   *
    * @param fieldName Field Name
    * @return Field {@link Field}
    */
@@ -89,6 +93,7 @@ public class CassandraMapping {
 
   /**
    * This method returns the Persistent Object's Field from the mapping, according to the ColumnName.
+   *
    * @param columnName Column Name
    * @return Field {@link Field}
    */
@@ -103,6 +108,7 @@ public class CassandraMapping {
 
   /**
    * This method returns the Field Names
+   *
    * @return array of Field Names
    */
   public String[] getFieldNames() {
@@ -116,6 +122,7 @@ public class CassandraMapping {
 
   /**
    * This method returns
+   *
    * @return
    */
   public String[] getAllFieldsIncludingKeys() {
@@ -133,7 +140,6 @@ public class CassandraMapping {
   }
 
   /**
-   *
    * @return
    */
   public String[] getAllKeys() {

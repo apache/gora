@@ -17,12 +17,12 @@
 
 package org.apache.gora.cassandra.store;
 
-import org.apache.avro.data.RecordBuilder;
-import org.apache.gora.cassandra.persistent.CassandraNativePersistent;
+import org.apache.avro.Schema;
 import org.apache.gora.cassandra.query.CassandraQuery;
 import org.apache.gora.cassandra.serializers.CassandraSerializer;
 import org.apache.gora.persistency.BeanFactory;
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.BeanFactoryImpl;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
@@ -54,14 +54,21 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   private Class<K> keyClass;
 
+  private Schema persistentSchema;
+
   private Class<T> persistentClass;
 
   private CassandraMapping mapping;
 
   private CassandraSerializer cassandraSerializer;
+  private String serializationType;
 
   public CassandraStore() {
     super();
+  }
+
+  public String getSerializationType() {
+    return serializationType;
   }
 
   /**
@@ -77,12 +84,21 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
     try {
       this.keyClass = keyClass;
       this.persistentClass = persistentClass;
+      if (this.beanFactory == null) {
+        this.beanFactory = new BeanFactoryImpl<>(keyClass, persistentClass);
+      }
+      if (PersistentBase.class.isAssignableFrom(persistentClass)) {
+        persistentSchema = ((PersistentBase) this.beanFactory.getCachedPersistent()).getSchema();
+      } else {
+        persistentSchema = null;
+      }
       String mappingFile = DataStoreFactory.getMappingFile(properties, this, DEFAULT_MAPPING_FILE);
+      serializationType = properties.getProperty(CassandraStoreParameters.CASSANDRA_SERIALIZATION_TYPE);
       CassandraMappingBuilder mappingBuilder = new CassandraMappingBuilder(this);
       mapping = mappingBuilder.readMapping(mappingFile);
       CassandraClient cassandraClient = new CassandraClient();
       cassandraClient.initialize(properties, mapping);
-      cassandraSerializer = CassandraSerializer.getSerializer(cassandraClient, properties.getProperty(CassandraStoreParameters.CASSANDRA_SERIALIZATION_TYPE), this, mapping);
+      cassandraSerializer = CassandraSerializer.getSerializer(cassandraClient, serializationType, this, mapping, persistentSchema);
     } catch (Exception e) {
       throw new RuntimeException("Error while initializing Cassandra store: " + e.getMessage(), e);
     }
@@ -100,7 +116,6 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
    * This is a setter method to set the class of persistent objects.
    *
    * @param persistentClass class of persistent objects
-   *                        {@link CassandraNativePersistent}
    *                        {@link  org.apache.gora.persistency.Persistent}
    */
   @Override
@@ -153,9 +168,6 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
     try {
       if (beanFactory != null) {
         return this.beanFactory.newPersistent();
-      } else if (PersistentBase.class.isAssignableFrom(persistentClass)) {
-        RecordBuilder builder = (RecordBuilder) persistentClass.getMethod("newBuilder").invoke(null);
-        return (T) RecordBuilder.class.getMethod("build").invoke(builder);
       } else {
         return persistentClass.newInstance();
       }
