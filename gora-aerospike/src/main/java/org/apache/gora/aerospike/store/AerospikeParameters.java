@@ -33,7 +33,7 @@ public class AerospikeParameters {
 
   private int port;
 
-  private String user;
+  private String username;
 
   private String password;
 
@@ -45,6 +45,10 @@ public class AerospikeParameters {
   private static final String AS_SERVER_IP = "gora.aerospikestore.server.ip";
 
   private static final String AS_SERVER_PORT = "gora.aerospikestore.server.port";
+
+  private static final String AS_SERVER_USERNAME = "gora.aerospikestore.server.username";
+
+  private static final String AS_SERVER_PASSWORD = "gora.aerospikestore.server.password";
 
   // Default property values
   private static final String DEFAULT_SERVER_IP = "localhost";
@@ -63,6 +67,8 @@ public class AerospikeParameters {
     this.aerospikeMapping = aerospikeMapping;
     this.host = properties.getProperty(AS_SERVER_IP, DEFAULT_SERVER_IP);
     this.port = Integer.parseInt(properties.getProperty(AS_SERVER_PORT, DEFAULT_SERVER_PORT));
+    this.username = properties.getProperty(AS_SERVER_USERNAME, null);
+    this.password = properties.getProperty(AS_SERVER_PASSWORD, null);
   }
 
   public String getHost() {
@@ -81,12 +87,12 @@ public class AerospikeParameters {
     this.port = port;
   }
 
-  public String getUser() {
-    return user;
+  public String getUsername() {
+    return username;
   }
 
-  public void setUser(String user) {
-    this.user = user;
+  public void setUsername(String username) {
+    this.username = username;
   }
 
   public String getPassword() {

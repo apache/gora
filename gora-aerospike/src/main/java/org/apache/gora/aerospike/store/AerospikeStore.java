@@ -95,6 +95,14 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
     policy.readPolicyDefault.sendKey = true;
     policy.writePolicyDefault.sendKey = true;
 
+    // Set the credentials for servers with restricted access
+    if (aerospikeParameters.getUsername() != null) {
+      policy.user = aerospikeParameters.getUsername();
+    }
+    if (aerospikeParameters.getPassword() != null) {
+      policy.password = aerospikeParameters.getPassword();
+    }
+
     aerospikeClient = new AerospikeClient(policy, aerospikeParameters.getHost(),
             aerospikeParameters.getPort());
     aerospikeParameters.setServerSpecificParameters(aerospikeClient);
