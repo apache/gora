@@ -21,8 +21,8 @@
 -->
 <gora-otd>
 
-  <policy name="write" gen="IGNORE" exists="CREATE" key="DIGEST" retry="ONCE" timeout="1000"/>
-  <policy name="read" key="DIGEST" timeout="1000"/>
+  <policy name="write" gen="NONE" recordExists="UPDATE" commitLevel="COMMIT_ALL" durableDelete="false"/>
+  <policy name="read" priority="DEFAULT" consistencyLevel="CONSISTENCY_ONE" replica="SEQUENCE" maxRetries="2"/>
 
   <class name="org.apache.gora.tutorial.log.generated.Pageview" keyClass="java.lang.Long" set="AccessLog" namespace = "test">
     <field name="url" bin="url"/>
