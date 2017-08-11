@@ -18,22 +18,15 @@
 
 package org.apache.gora.cassandra.store;
 
-import org.apache.avro.util.Utf8;
 import org.apache.gora.cassandra.GoraCassandraTestDriver;
 import org.apache.gora.cassandra.example.generated.nativeSerialization.Customer;
 import org.apache.gora.cassandra.example.generated.nativeSerialization.Document;
-import org.apache.gora.examples.generated.Metadata;
-import org.apache.gora.examples.generated.WebPage;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Map;
 import java.util.Properties;
 
 public class TestNativeSerializationWithUDT {
@@ -84,8 +77,8 @@ public class TestNativeSerializationWithUDT {
     document.setCustomer(customer);
     documentCassandraStore.put("yawamu.com", document);
     Document retrievedDocument = documentCassandraStore.get("yawamu.com");
-    Assert.assertEquals(customer.getId(),retrievedDocument.getCustomer().getId());
-    Assert.assertEquals(customer.getName(),retrievedDocument.getCustomer().getName());
+    Assert.assertEquals(customer.getId(), retrievedDocument.getCustomer().getId());
+    Assert.assertEquals(customer.getName(), retrievedDocument.getCustomer().getName());
   }
 
 }

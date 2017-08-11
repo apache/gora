@@ -38,6 +38,10 @@
  * Testing class for all standard gora-cassandra functionality.
  * We extend DataStoreTestBase enabling us to run the entire base test
  * suite for Gora.
+ * <p>
+ * Testing class for all standard gora-cassandra functionality.
+ * We extend DataStoreTestBase enabling us to run the entire base test
+ * suite for Gora.
  */
 
 /**

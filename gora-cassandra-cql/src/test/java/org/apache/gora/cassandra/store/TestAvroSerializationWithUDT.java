@@ -82,9 +82,9 @@ public class TestAvroSerializationWithUDT {
     webpage.setMetadata(metadata);
     webPageCassandraStore.put("yawamu.com", webpage);
     WebPage retrievedWebPage = webPageCassandraStore.get("yawamu.com");
-    Assert.assertEquals(webpage.getMetadata().getVersion(),retrievedWebPage.getMetadata().getVersion());
-    for(Map.Entry entry : webpage.getMetadata().getData().entrySet()) {
-      Assert.assertEquals(entry.getValue(),retrievedWebPage.getMetadata().getData().get(entry.getKey()));
+    Assert.assertEquals(webpage.getMetadata().getVersion(), retrievedWebPage.getMetadata().getVersion());
+    for (Map.Entry entry : webpage.getMetadata().getData().entrySet()) {
+      Assert.assertEquals(entry.getValue(), retrievedWebPage.getMetadata().getData().get(entry.getKey()));
     }
   }
 

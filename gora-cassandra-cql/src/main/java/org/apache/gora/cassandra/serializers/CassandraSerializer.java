@@ -47,12 +47,10 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
   protected Class<K> keyClass;
 
   protected Class<T> persistentClass;
-
-  private Map<String, String> userDefineTypeMaps;
-
   protected CassandraMapping mapping;
-  private Schema persistentSchema;
   CassandraClient client;
+  private Map<String, String> userDefineTypeMaps;
+  private Schema persistentSchema;
 
   CassandraSerializer(CassandraClient cc, Class<K> keyClass, Class<T> persistantClass, CassandraMapping mapping, Schema schema) {
     this.keyClass = keyClass;
@@ -120,7 +118,6 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
         }
       }
     }
-
   }
 
 

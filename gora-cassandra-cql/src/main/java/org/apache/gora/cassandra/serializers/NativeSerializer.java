@@ -48,7 +48,7 @@ class NativeSerializer<K, T extends Persistent> extends CassandraSerializer {
   private Mapper<T> mapper;
 
   NativeSerializer(CassandraClient cassandraClient, Class<K> keyClass, Class<T> persistentClass, CassandraMapping mapping, Schema schema) {
-      super(cassandraClient, keyClass, persistentClass, mapping, schema);
+    super(cassandraClient, keyClass, persistentClass, mapping, schema);
     this.createSchema();
     MappingManager mappingManager = new MappingManager(cassandraClient.getSession());
     mapper = mappingManager.mapper(persistentClass);

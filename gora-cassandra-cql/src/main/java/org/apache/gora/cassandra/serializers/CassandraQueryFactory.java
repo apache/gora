@@ -78,7 +78,6 @@ class CassandraQueryFactory {
         stringBuffer.append(" }");
         break;
     }
-
     if (keySpace.isDurableWritesEnabled()) {
       stringBuffer.append(" AND DURABLE_WRITES = ").append(keySpace.isDurableWritesEnabled());
     }
@@ -727,7 +726,7 @@ class CassandraQueryFactory {
           if (isCommaNeeded) {
             stringBuffer.append(", ");
           }
-          if(!fieldAnnotation.name().isEmpty()) {
+          if (!fieldAnnotation.name().isEmpty()) {
             stringBuffer.append(fieldAnnotation.name()).append(" ");
           } else {
             stringBuffer.append(udtField.getName()).append(" ");
@@ -766,7 +765,7 @@ class CassandraQueryFactory {
       dataType = "int";
     } else if (s.equals("double") || s.equals("java.lang.Double")) {
       dataType = "double";
-    }  else if (s.equals("float") || s.equals("java.lang.Float")) {
+    } else if (s.equals("float") || s.equals("java.lang.Float")) {
       dataType = "float";
     } else if (s.equals("boolean") || s.equals("java.lang.Boolean")) {
       dataType = "boolean";
@@ -774,15 +773,15 @@ class CassandraQueryFactory {
       dataType = "uuid";
     } else if (s.equals("java.lang.Long")) {
       dataType = "bigint";
-    }else if (s.equals("java.math.BigDecimal")) {
+    } else if (s.equals("java.math.BigDecimal")) {
       dataType = "decimal";
-    }else if (s.equals("java.net.InetAddress")) {
+    } else if (s.equals("java.net.InetAddress")) {
       dataType = "inet";
-    }else if (s.equals("java.math.BigInteger")) {
+    } else if (s.equals("java.math.BigInteger")) {
       dataType = "varint";
     } else if (s.equals("java.nio.ByteBuffer")) {
       dataType = "blob";
-    }else if (s.contains("Map")) {
+    } else if (s.contains("Map")) {
       ParameterizedType mapType;
       if (field != null) {
         mapType = (ParameterizedType) field.getGenericType();
@@ -791,7 +790,7 @@ class CassandraQueryFactory {
       }
       Type value1 = mapType.getActualTypeArguments()[0];
       Type value2 = mapType.getActualTypeArguments()[1];
-      dataType = "map<" +dataType(null, value1) + "," + dataType(null, value2) + ">";
+      dataType = "map<" + dataType(null, value1) + "," + dataType(null, value2) + ">";
     } else if (s.contains("List")) {
       ParameterizedType listType;
       if (field != null) {

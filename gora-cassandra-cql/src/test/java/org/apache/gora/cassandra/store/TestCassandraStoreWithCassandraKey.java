@@ -290,7 +290,7 @@ public class TestCassandraStoreWithCassandraKey {
     strings.add(new Utf8("Hello World"));
     strings.add(new Utf8("Srilanka"));
     record.setArrayString(strings);
-    HashMap<CharSequence, Double > map = new HashMap<>();
+    HashMap<CharSequence, Double> map = new HashMap<>();
     map.put(new Utf8("Life"), 7.3D);
     record.setMapDouble(map);
     CassandraKey key = new CassandraKey();
@@ -303,28 +303,28 @@ public class TestCassandraStoreWithCassandraKey {
     Assert.assertEquals(record.getDataLong(), retrievedRecord.getDataLong());
     Assert.assertEquals(record.getDataBytes(), retrievedRecord.getDataBytes());
     Assert.assertEquals(record.getDataDouble(), retrievedRecord.getDataDouble());
-    int i =0;
-    for(Double obj : retrievedRecord.getArrayDouble()) {
+    int i = 0;
+    for (Double obj : retrievedRecord.getArrayDouble()) {
       Assert.assertEquals(doubles.get(i), obj);
       i++;
     }
     i = 0;
-    for(Integer obj : retrievedRecord.getArrayInt()) {
+    for (Integer obj : retrievedRecord.getArrayInt()) {
       Assert.assertEquals(integers.get(i), obj);
       i++;
     }
     i = 0;
-    for(Long obj : retrievedRecord.getArrayLong()) {
+    for (Long obj : retrievedRecord.getArrayLong()) {
       Assert.assertEquals(longs.get(i), obj);
       i++;
     }
     i = 0;
-    for(CharSequence obj : retrievedRecord.getArrayString()) {
+    for (CharSequence obj : retrievedRecord.getArrayString()) {
       Assert.assertEquals(strings.get(i), obj);
       i++;
     }
 
-    for(Map.Entry entry : map.entrySet()) {
+    for (Map.Entry entry : map.entrySet()) {
       Assert.assertEquals(entry.getValue(), retrievedRecord.getMapDouble().get(entry.getKey()));
     }
   }

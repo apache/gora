@@ -46,8 +46,28 @@ public class CassandraMappingBuilder<K, T extends Persistent> {
 
   private CassandraStore dataStore;
 
+  public CassandraMappingBuilder() {
+  }
+
   /**
+   * Constructor for builder to create the mapper.
    *
+   * @param store Cassandra Store
+   */
+  CassandraMappingBuilder(final CassandraStore<K, T> store) {
+    this.dataStore = store;
+  }
+
+  private static int getReplicationFactor(Element element) {
+    String value = element.getAttributeValue("replication_factor");
+    if (value == null) {
+      return 1;
+    } else {
+      return Integer.parseInt(value);
+    }
+  }
+
+  /**
    * @param fileName mapping fileName
    * @return All the Cassandra Mappings in the mapping file
    * @throws Exception
@@ -85,19 +105,6 @@ public class CassandraMappingBuilder<K, T extends Persistent> {
       mapping.finalized();
     }
     return mappings;
-  }
-
-
-  public CassandraMappingBuilder() {
-  }
-
-  /**
-   * Constructor for builder to create the mapper.
-   *
-   * @param store Cassandra Store
-   */
-  CassandraMappingBuilder(final CassandraStore<K, T> store) {
-    this.dataStore = store;
   }
 
   /**
@@ -153,19 +160,17 @@ public class CassandraMappingBuilder<K, T extends Persistent> {
     } else {
       throw new RuntimeException("Couldn't find KeySpace in the Cassandra mapping. Please configure the cassandra mapping correctly.");
     }
-
     for (Element key : keys) {
       if (keyClass.getName().equals(key.getAttributeValue("name"))) {
         processCassandraKeys(cassandraMapping, key, keyClass.getName());
         break;
       }
     }
-
     cassandraMapping.finalized();
     return cassandraMapping;
   }
 
-  private void  processClass(CassandraMapping cassandraMapping, Element classElement) {
+  private void processClass(CassandraMapping cassandraMapping, Element classElement) {
     String tableName = classElement.getAttributeValue("table");
     cassandraMapping.setCoreName(tableName);
 
@@ -187,7 +192,6 @@ public class CassandraMappingBuilder<K, T extends Persistent> {
       cassandraMapping.addCassandraField(cassandraField);
     }
   }
-
 
   private void processKeySpace(CassandraMapping cassandraMapping, Element keyspaceElement, String keyspaceName) {
     KeySpace keyspace = new KeySpace();
@@ -307,14 +311,4 @@ public class CassandraMappingBuilder<K, T extends Persistent> {
       }
     }
   }
-
-  private static int getReplicationFactor(Element element) {
-    String value = element.getAttributeValue("replication_factor");
-    if (value == null) {
-      return 1;
-    } else {
-      return Integer.parseInt(value);
-    }
-  }
-
 }

@@ -80,6 +80,16 @@ public class GoraCassandraNativeCompiler {
     return mappings;
   }
 
+  /**
+   * Returns the string received with the first letter in uppercase
+   *
+   * @param name to be converted
+   * @return camelCase String
+   */
+  static String cap(String name) {
+    return name.substring(0, 1).toUpperCase(Locale.getDefault())
+            + name.substring(1, name.length());
+  }
 
   /**
    * Method in charge of compiling a specific table using a key schema and a set
@@ -120,7 +130,6 @@ public class GoraCassandraNativeCompiler {
     }
   }
 
-
   /**
    * Sets the necessary imports for the generated java class to work
    *
@@ -150,7 +159,6 @@ public class GoraCassandraNativeCompiler {
     line(0, "import com.datastax.driver.mapping.annotations.Transient;");
   }
 
-
   /**
    * Starts the java generated class file
    *
@@ -171,7 +179,7 @@ public class GoraCassandraNativeCompiler {
   /**
    * Creates default methods inherited from upper classes
    *
-   * @param pIden   of spaces used for indentation
+   * @param pIden     of spaces used for indentation
    * @param className class Name
    * @throws IOException
    */
@@ -216,7 +224,6 @@ public class GoraCassandraNativeCompiler {
     line(pIden, "@Override");
     line(pIden, "public Persistent newInstance() { return new " + className + "(); }");
   }
-
 
   private void processFields(Field field) throws IOException {
     String fieldName = field.getFieldName();
@@ -295,7 +302,6 @@ public class GoraCassandraNativeCompiler {
     throw new RuntimeException("Invalid Cassandra DataType");
   }
 
-
   /**
    * Writes a line within the output stream
    *
@@ -309,16 +315,5 @@ public class GoraCassandraNativeCompiler {
     }
     out.append(text);
     out.append("\n");
-  }
-
-  /**
-   * Returns the string received with the first letter in uppercase
-   *
-   * @param name to be converted
-   * @return camelCase String
-   */
-  static String cap(String name) {
-    return name.substring(0, 1).toUpperCase(Locale.getDefault())
-            + name.substring(1, name.length());
   }
 }
