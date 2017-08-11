@@ -30,7 +30,9 @@ import org.jdom.input.SAXBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -38,12 +40,56 @@ import java.util.Locale;
  * This Class reads the Cassandra Mapping file and create tha Cassandra Mapping object.
  * {@link org.apache.gora.cassandra.store.CassandraMapping}
  */
-class CassandraMappingBuilder<K, T extends Persistent> {
+public class CassandraMappingBuilder<K, T extends Persistent> {
 
   private static final Logger LOG = LoggerFactory.getLogger(CassandraMappingBuilder.class);
 
   private CassandraStore dataStore;
 
+  /**
+   *
+   * @param fileName mapping fileName
+   * @return All the Cassandra Mappings in the mapping file
+   * @throws Exception
+   */
+  @SuppressWarnings("all")
+  public List<CassandraMapping> readMappingFile(File fileName) throws Exception {
+    List<CassandraMapping> mappings = new ArrayList<>();
+    SAXBuilder builder = new SAXBuilder();
+    Document doc = builder.build(fileName);
+
+    List<Element> keyspaces = doc.getRootElement().getChildren("keyspace");
+    List<Element> classes = doc.getRootElement().getChildren("class");
+    List<Element> keys = doc.getRootElement().getChildren("cassandraKey");
+    for (Element classElement : classes) {
+      CassandraMapping mapping = new CassandraMapping();
+      processClass(mapping, classElement);
+      mappings.add(mapping);
+    }
+
+    for (CassandraMapping mapping : mappings) {
+      for (Element keySpace : keyspaces) {
+        String keySpaceName = keySpace.getAttributeValue("name");
+        if (keySpaceName.equals(mapping.getProperty("keyspace"))) {
+          processKeySpace(mapping, keySpace, keySpaceName);
+          break;
+        }
+      }
+
+      for (Element cassandraKey : keys) {
+        String cassandraKeyName = cassandraKey.getAttributeValue("name");
+        if (mapping.getProperty("keyClass").equals(cassandraKeyName)) {
+          processCassandraKeys(mapping, cassandraKey, cassandraKeyName);
+        }
+      }
+      mapping.finalized();
+    }
+    return mappings;
+  }
+
+
+  public CassandraMappingBuilder() {
+  }
 
   /**
    * Constructor for builder to create the mapper.
@@ -62,166 +108,175 @@ class CassandraMappingBuilder<K, T extends Persistent> {
    * @throws IOException
    */
   @SuppressWarnings("all")
-  CassandraMapping readMapping(String filename) throws IOException {
+  CassandraMapping readMapping(String filename) throws Exception {
     CassandraMapping cassandraMapping = new CassandraMapping();
     Class keyClass = dataStore.getKeyClass();
     Class persistentClass = dataStore.getPersistentClass();
-    try {
-      SAXBuilder builder = new SAXBuilder();
-      Document doc = builder.build(getClass().getClassLoader().getResourceAsStream(filename));
+    SAXBuilder builder = new SAXBuilder();
+    Document doc = builder.build(getClass().getClassLoader().getResourceAsStream(filename));
 
-      List<Element> keyspaces = doc.getRootElement().getChildren("keyspace");
-      List<Element> classes = doc.getRootElement().getChildren("class");
-      List<Element> keys = doc.getRootElement().getChildren("cassandraKey");
+    List<Element> keyspaces = doc.getRootElement().getChildren("keyspace");
+    List<Element> classes = doc.getRootElement().getChildren("class");
+    List<Element> keys = doc.getRootElement().getChildren("cassandraKey");
 
-      boolean classMatched = false;
-      for (Element classElement : classes) {
-        if (classElement.getAttributeValue("keyClass").equals(
-                keyClass.getCanonicalName())
-                && classElement.getAttributeValue("name").equals(
-                persistentClass.getCanonicalName())) {
+    boolean classMatched = false;
+    for (Element classElement : classes) {
+      if (classElement.getAttributeValue("keyClass").equals(
+              keyClass.getCanonicalName())
+              && classElement.getAttributeValue("name").equals(
+              persistentClass.getCanonicalName())) {
 
-          classMatched = true;
-          String tableName = classElement.getAttributeValue("table");
-          cassandraMapping.setCoreName(tableName);
-          cassandraMapping.setKeyClass(dataStore.getKeyClass());
-          cassandraMapping.setPersistentClass(dataStore.getPersistentClass());
+        classMatched = true;
+        processClass(cassandraMapping, classElement);
+        cassandraMapping.setKeyClass(dataStore.getKeyClass());
+        cassandraMapping.setPersistentClass(dataStore.getPersistentClass());
+        break;
+      }
+      LOG.warn("Check that 'keyClass' and 'name' parameters in gora-solr-mapping.xml "
+              + "match with intended values. A mapping mismatch has been found therefore "
+              + "no mapping has been initialized for class mapping at position "
+              + " {} in mapping file.", classes.indexOf(classElement));
+    }
+    if (!classMatched) {
+      throw new RuntimeException("Check that 'keyClass' and 'name' parameters in " + filename + " no mapping has been initialized for " + persistentClass + "class mapping");
+    }
 
-          List classAttributes = classElement.getAttributes();
-          for (Object anAttributeList : classAttributes) {
-            Attribute attribute = (Attribute) anAttributeList;
-            String attributeName = attribute.getName();
-            String attributeValue = attribute.getValue();
-            cassandraMapping.addProperty(attributeName, attributeValue);
-          }
-
-          List<Element> fields = classElement.getChildren("field");
-
-          for (Element field : fields) {
-            Field cassandraField = new Field();
-
-            List fieldAttributes = field.getAttributes();
-            processAttributes(fieldAttributes, cassandraField);
-            cassandraMapping.addCassandraField(cassandraField);
-          }
+    String keyspaceName = cassandraMapping.getProperty("keyspace");
+    if (keyspaceName != null) {
+      KeySpace keyspace;
+      for (Element keyspaceElement : keyspaces) {
+        if (keyspaceName.equals(keyspaceElement.getAttributeValue("name"))) {
+          processKeySpace(cassandraMapping, keyspaceElement, keyspaceName);
           break;
         }
-        LOG.warn("Check that 'keyClass' and 'name' parameters in gora-solr-mapping.xml "
-                + "match with intended values. A mapping mismatch has been found therefore "
-                + "no mapping has been initialized for class mapping at position "
-                + " {} in mapping file.", classes.indexOf(classElement));
       }
-      if (!classMatched) {
-        throw new RuntimeException("Check that 'keyClass' and 'name' parameters in " + filename + " no mapping has been initialized for " + persistentClass + "class mapping");
-      }
-
-      String keyspaceName = cassandraMapping.getProperty("keyspace");
-      if (keyspaceName != null) {
-        KeySpace keyspace;
-        for (Element keyspaceElement : keyspaces) {
-          if (keyspaceName.equals(keyspaceElement.getAttributeValue("name"))) {
-            keyspace = new KeySpace();
-            List fieldAttributes = keyspaceElement.getAttributes();
-            for (Object attributeObject : fieldAttributes) {
-              Attribute attribute = (Attribute) attributeObject;
-              String attributeName = attribute.getName();
-              String attributeValue = attribute.getValue();
-              switch (attributeName) {
-                case "name":
-                  keyspace.setName(attributeValue);
-                  break;
-                case "durableWrite":
-                  keyspace.setDurableWritesEnabled(Boolean.parseBoolean(attributeValue));
-                  break;
-                default:
-                  LOG.warn("{} attribute is Unsupported or Invalid, in {} Cassandra KeySpace. Please configure the cassandra mapping correctly.", new Object[]{attributeName, keyspaceName});
-                  break;
-              }
-            }
-            Element placementStrategy = keyspaceElement.getChild("placementStrategy");
-            switch (KeySpace.PlacementStrategy.valueOf(placementStrategy.getAttributeValue("name"))) {
-              case SimpleStrategy:
-                keyspace.setPlacementStrategy(KeySpace.PlacementStrategy.SimpleStrategy);
-                keyspace.setReplicationFactor(getReplicationFactor(placementStrategy));
-                break;
-              case NetworkTopologyStrategy:
-                List<Element> dataCenters = placementStrategy.getChildren("datacenter");
-                keyspace.setPlacementStrategy(KeySpace.PlacementStrategy.NetworkTopologyStrategy);
-                for (Element dataCenter : dataCenters) {
-                  String dataCenterName = dataCenter.getAttributeValue("name");
-                  keyspace.addDataCenter(dataCenterName, getReplicationFactor(dataCenter));
-                }
-                break;
-            }
-            cassandraMapping.setKeySpace(keyspace);
-            break;
-          }
-
-        }
-
-      } else {
-        throw new RuntimeException("Couldn't find KeySpace in the Cassandra mapping. Please configure the cassandra mapping correctly.");
-      }
-
-      for (Element key : keys) {
-        if (keyClass.getName().equals(key.getAttributeValue("name"))) {
-          CassandraKey cassandraKey = new CassandraKey(keyClass.getName());
-          Element partitionKeys = key.getChild("partitionKey");
-          Element clusterKeys = key.getChild("clusterKey");
-          List<Element> partitionKeyFields = partitionKeys.getChildren("field");
-          List<Element> partitionCompositeKeyFields = partitionKeys.getChildren("compositeKey");
-          // process non composite partition keys
-          for (Element partitionKeyField : partitionKeyFields) {
-            PartitionKeyField fieldKey = new PartitionKeyField();
-            List fieldAttributes = partitionKeyField.getAttributes();
-            processAttributes(fieldAttributes, fieldKey);
-            cassandraKey.addPartitionKeyField(fieldKey);
-          }
-          // process composite partitions keys
-          for (Element partitionCompositeKeyField : partitionCompositeKeyFields) {
-            PartitionKeyField compositeFieldKey = new PartitionKeyField();
-            compositeFieldKey.setComposite(true);
-            List<Element> compositeKeyFields = partitionCompositeKeyField.getChildren("field");
-            for (Element partitionKeyField : compositeKeyFields) {
-              PartitionKeyField fieldKey = new PartitionKeyField();
-              List fieldAttributes = partitionKeyField.getAttributes();
-              processAttributes(fieldAttributes, fieldKey);
-              compositeFieldKey.addField(fieldKey);
-            }
-            cassandraKey.addPartitionKeyField(compositeFieldKey);
-          }
-
-          //process cluster keys
-          List<Element> clusterKeyFields = clusterKeys.getChildren("key");
-          for (Element clusterKeyField : clusterKeyFields) {
-            ClusterKeyField keyField = new ClusterKeyField();
-            List fieldAttributes = clusterKeyField.getAttributes();
-            for (Object anAttributeList : fieldAttributes) {
-              Attribute attribute = (Attribute) anAttributeList;
-              String attributeName = attribute.getName();
-              String attributeValue = attribute.getValue();
-              switch (attributeName) {
-                case "column":
-                  keyField.setColumnName(attributeValue);
-                  break;
-                case "order":
-                  keyField.setOrder(ClusterKeyField.Order.valueOf(attributeValue.toUpperCase(Locale.ENGLISH)));
-                  break;
-                default:
-                  LOG.warn("{} attribute is Unsupported or Invalid, in {} Cassandra Key. Please configure the cassandra mapping correctly.", new Object[]{attributeName, keyClass});
-                  break;
-              }
-            }
-            cassandraKey.addClusterKeyField(keyField);
-          }
-          cassandraMapping.setCassandraKey(cassandraKey);
-        }
-      }
-    } catch (Exception ex) {
-      throw new IOException(ex);
+    } else {
+      throw new RuntimeException("Couldn't find KeySpace in the Cassandra mapping. Please configure the cassandra mapping correctly.");
     }
+
+    for (Element key : keys) {
+      if (keyClass.getName().equals(key.getAttributeValue("name"))) {
+        processCassandraKeys(cassandraMapping, key, keyClass.getName());
+        break;
+      }
+    }
+
     cassandraMapping.finalized();
     return cassandraMapping;
+  }
+
+  private void  processClass(CassandraMapping cassandraMapping, Element classElement) {
+    String tableName = classElement.getAttributeValue("table");
+    cassandraMapping.setCoreName(tableName);
+
+    List classAttributes = classElement.getAttributes();
+    for (Object anAttributeList : classAttributes) {
+      Attribute attribute = (Attribute) anAttributeList;
+      String attributeName = attribute.getName();
+      String attributeValue = attribute.getValue();
+      cassandraMapping.addProperty(attributeName, attributeValue);
+    }
+
+    List<Element> fields = classElement.getChildren("field");
+
+    for (Element field : fields) {
+      Field cassandraField = new Field();
+
+      List fieldAttributes = field.getAttributes();
+      processAttributes(fieldAttributes, cassandraField);
+      cassandraMapping.addCassandraField(cassandraField);
+    }
+  }
+
+
+  private void processKeySpace(CassandraMapping cassandraMapping, Element keyspaceElement, String keyspaceName) {
+    KeySpace keyspace = new KeySpace();
+    List fieldAttributes = keyspaceElement.getAttributes();
+    for (Object attributeObject : fieldAttributes) {
+      Attribute attribute = (Attribute) attributeObject;
+      String attributeName = attribute.getName();
+      String attributeValue = attribute.getValue();
+      switch (attributeName) {
+        case "name":
+          keyspace.setName(attributeValue);
+          break;
+        case "durableWrite":
+          keyspace.setDurableWritesEnabled(Boolean.parseBoolean(attributeValue));
+          break;
+        default:
+          LOG.warn("{} attribute is Unsupported or Invalid, in {} Cassandra KeySpace. Please configure the cassandra mapping correctly.", new Object[]{attributeName, keyspaceName});
+          break;
+      }
+    }
+    Element placementStrategy = keyspaceElement.getChild("placementStrategy");
+    switch (KeySpace.PlacementStrategy.valueOf(placementStrategy.getAttributeValue("name"))) {
+      case SimpleStrategy:
+        keyspace.setPlacementStrategy(KeySpace.PlacementStrategy.SimpleStrategy);
+        keyspace.setReplicationFactor(getReplicationFactor(placementStrategy));
+        break;
+      case NetworkTopologyStrategy:
+        List<Element> dataCenters = placementStrategy.getChildren("datacenter");
+        keyspace.setPlacementStrategy(KeySpace.PlacementStrategy.NetworkTopologyStrategy);
+        for (Element dataCenter : dataCenters) {
+          String dataCenterName = dataCenter.getAttributeValue("name");
+          keyspace.addDataCenter(dataCenterName, getReplicationFactor(dataCenter));
+        }
+        break;
+    }
+    cassandraMapping.setKeySpace(keyspace);
+  }
+
+  private void processCassandraKeys(CassandraMapping cassandraMapping, Element key, String keyName) {
+    CassandraKey cassandraKey = new CassandraKey(keyName);
+    Element partitionKeys = key.getChild("partitionKey");
+    Element clusterKeys = key.getChild("clusterKey");
+    List<Element> partitionKeyFields = partitionKeys.getChildren("field");
+    List<Element> partitionCompositeKeyFields = partitionKeys.getChildren("compositeKey");
+    // process non composite partition keys
+    for (Element partitionKeyField : partitionKeyFields) {
+      PartitionKeyField fieldKey = new PartitionKeyField();
+      List fieldAttributes = partitionKeyField.getAttributes();
+      processAttributes(fieldAttributes, fieldKey);
+      cassandraKey.addPartitionKeyField(fieldKey);
+    }
+    // process composite partitions keys
+    for (Element partitionCompositeKeyField : partitionCompositeKeyFields) {
+      PartitionKeyField compositeFieldKey = new PartitionKeyField();
+      compositeFieldKey.setComposite(true);
+      List<Element> compositeKeyFields = partitionCompositeKeyField.getChildren("field");
+      for (Element partitionKeyField : compositeKeyFields) {
+        PartitionKeyField fieldKey = new PartitionKeyField();
+        List fieldAttributes = partitionKeyField.getAttributes();
+        processAttributes(fieldAttributes, fieldKey);
+        compositeFieldKey.addField(fieldKey);
+      }
+      cassandraKey.addPartitionKeyField(compositeFieldKey);
+    }
+
+    //process cluster keys
+    List<Element> clusterKeyFields = clusterKeys.getChildren("key");
+    for (Element clusterKeyField : clusterKeyFields) {
+      ClusterKeyField keyField = new ClusterKeyField();
+      List fieldAttributes = clusterKeyField.getAttributes();
+      for (Object anAttributeList : fieldAttributes) {
+        Attribute attribute = (Attribute) anAttributeList;
+        String attributeName = attribute.getName();
+        String attributeValue = attribute.getValue();
+        switch (attributeName) {
+          case "column":
+            keyField.setColumnName(attributeValue);
+            break;
+          case "order":
+            keyField.setOrder(ClusterKeyField.Order.valueOf(attributeValue.toUpperCase(Locale.ENGLISH)));
+            break;
+          default:
+            LOG.warn("{} attribute is Unsupported or Invalid, in {} Cassandra Key. Please configure the cassandra mapping correctly.", new Object[]{attributeName, keyName});
+            break;
+        }
+      }
+      cassandraKey.addClusterKeyField(keyField);
+    }
+    cassandraMapping.setCassandraKey(cassandraKey);
   }
 
   private void processAttributes(List<Element> attributes, Field fieldKey) {
@@ -253,7 +308,7 @@ class CassandraMappingBuilder<K, T extends Persistent> {
     }
   }
 
-  private int getReplicationFactor(Element element) {
+  private static int getReplicationFactor(Element element) {
     String value = element.getAttributeValue("replication_factor");
     if (value == null) {
       return 1;

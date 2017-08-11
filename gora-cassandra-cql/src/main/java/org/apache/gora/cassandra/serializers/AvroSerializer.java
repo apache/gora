@@ -240,16 +240,16 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
         break;
       case LIST:
         dataType = columnType.getTypeArguments().get(0).toString();
-        paramValue = row.isNull(columnName) ? null : row.getList(columnName, getRelevantClassForCassandraDataType(dataType));
+        paramValue = row.isNull(columnName) ? null : row.getList(columnName, AvroCassandraUtils.getRelevantClassForCassandraDataType(dataType));
         break;
       case SET:
         dataType = columnType.getTypeArguments().get(0).toString();
-        paramValue = row.isNull(columnName) ? null : row.getList(columnName, getRelevantClassForCassandraDataType(dataType));
+        paramValue = row.isNull(columnName) ? null : row.getList(columnName, AvroCassandraUtils.getRelevantClassForCassandraDataType(dataType));
         break;
       case MAP:
         dataType = columnType.getTypeArguments().get(1).toString();
         // Avro supports only String for keys
-        paramValue = row.isNull(columnName) ? null : row.getMap(columnName, String.class, getRelevantClassForCassandraDataType(dataType));
+        paramValue = row.isNull(columnName) ? null : row.getMap(columnName, String.class, AvroCassandraUtils.getRelevantClassForCassandraDataType(dataType));
         break;
       case UDT:
         paramValue = row.isNull(columnName) ? null : row.getUDTValue(columnName);
@@ -280,39 +280,6 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
     return paramValue;
   }
 
-  private Class getRelevantClassForCassandraDataType(String dataType) {
-    switch (dataType) {
-      case "ascii":
-      case "text":
-      case "varchar":
-        return String.class;
-      case "blob":
-        return ByteBuffer.class;
-      case "int":
-        return Integer.class;
-      case "double":
-        return Double.class;
-      case "bigint":
-      case "counter":
-        return Long.class;
-      case "decimal":
-        return BigDecimal.class;
-      case "float":
-        return Float.class;
-      case "boolean":
-        return Boolean.class;
-      case "inet":
-        return InetAddress.class;
-      case "varint":
-        return BigInteger.class;
-      case "uuid":
-        return UUID.class;
-      case "timestamp":
-        return Date.class;
-      default:
-        throw new RuntimeException("Invalid Cassandra DataType");
-    }
-  }
 
   @Override
   public boolean delete(Object key) {

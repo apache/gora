@@ -32,12 +32,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * This class is Utils class for Avro serialization.
@@ -291,6 +296,40 @@ class AvroCassandraUtils {
         result = value;
     }
     return result;
+  }
+
+  static Class getRelevantClassForCassandraDataType(String dataType) {
+    switch (dataType) {
+      case "ascii":
+      case "text":
+      case "varchar":
+        return String.class;
+      case "blob":
+        return ByteBuffer.class;
+      case "int":
+        return Integer.class;
+      case "double":
+        return Double.class;
+      case "bigint":
+      case "counter":
+        return Long.class;
+      case "decimal":
+        return BigDecimal.class;
+      case "float":
+        return Float.class;
+      case "boolean":
+        return Boolean.class;
+      case "inet":
+        return InetAddress.class;
+      case "varint":
+        return BigInteger.class;
+      case "uuid":
+        return UUID.class;
+      case "timestamp":
+        return Date.class;
+      default:
+        throw new RuntimeException("Invalid Cassandra DataType");
+    }
   }
 
 }

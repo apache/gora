@@ -106,6 +106,18 @@
                     <argLine>-Xmx1024m -XX:MaxPermSize=512m</argLine>
                 </configuration>
             </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <mainClass>org.apache.gora.cassandra.compiler.GoraCassandraNativeCompiler</mainClass>
+                                <packageName>org.apache.gora.cassandra.compiler</packageName>
+                            </manifest>
+                        </archive>
+                    </configuration>
+                </plugin>
         </plugins>
     </build>
 
