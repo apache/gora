@@ -34,6 +34,14 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * This class generate Java classes for Cassandra Native Serialization.
+ * <p>
+ * Generate specific Java classes for defined Gora cassandra mapping.
+ * Different from the @see org.apache.gora.compiler.GoraCompiler,
+ * which uses an .avsc or .json schema definition, this compiler
+ * expects an XML mapping file as input.
+ */
 public class GoraCassandraNativeCompiler {
 
   private static final Logger log = LoggerFactory.getLogger(GoraCassandraNativeCompiler.class);
