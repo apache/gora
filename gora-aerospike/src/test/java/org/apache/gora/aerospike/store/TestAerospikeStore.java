@@ -61,27 +61,6 @@ public class TestAerospikeStore extends DataStoreTestBase {
   }
 
   @Test
-  @Ignore("Explicit schema creation related functionality is not supported in Aerospike")
-  @Override
-  public void testTruncateSchema() throws Exception {
-    super.testTruncateSchema();
-  }
-
-  @Test
-  @Ignore("Explicit schema creation related functionality is not supported in Aerospike")
-  @Override
-  public void testDeleteSchema() throws Exception {
-    super.testDeleteSchema();
-  }
-
-  @Test
-  @Ignore("Explicit schema creation related functionality is not supported in Aerospike")
-  @Override
-  public void testSchemaExists() throws Exception {
-    super.testSchemaExists();
-  }
-
-  @Test
   @Override
   public void testQuery() throws Exception {
     // Clearing the test data in the database
@@ -91,27 +70,6 @@ public class TestAerospikeStore extends DataStoreTestBase {
     webPageStore.deleteByQuery(query);
 
     super.testQuery();
-  }
-
-  @Test
-  @Ignore("Query key ranges based on primary key is not supported via the java client")
-  @Override
-  public void testQueryStartKey() throws Exception {
-    super.testQueryStartKey();
-  }
-
-  @Test
-  @Ignore("Query key ranges based on primary key is not supported via the java client")
-  @Override
-  public void testQueryEndKey() throws Exception {
-    super.testQueryEndKey();
-  }
-
-  @Test
-  @Ignore("Query key ranges based on primary key is not supported via the java client")
-  @Override
-  public void testQueryKeyRange() throws Exception {
-    super.testQueryKeyRange();
   }
 
   @Test
@@ -156,11 +114,48 @@ public class TestAerospikeStore extends DataStoreTestBase {
     webPageStore.truncateSchema();
   }
 
+  // Unsupported functionality due to the limitations in Aerospike java client
+
   @Test
-  @Ignore("Functionality is to be implemented in the next iteration")
+  @Ignore("Explicit schema creation related functionality is not supported in Aerospike")
   @Override
-  public void testGetPartitions() throws Exception {
-    super.testGetPartitions();
+  public void testTruncateSchema() throws Exception {
+    super.testTruncateSchema();
+  }
+
+  @Test
+  @Ignore("Explicit schema creation related functionality is not supported in Aerospike")
+  @Override
+  public void testDeleteSchema() throws Exception {
+    super.testDeleteSchema();
+  }
+
+  @Test
+  @Ignore("Explicit schema creation related functionality is not supported in Aerospike")
+  @Override
+  public void testSchemaExists() throws Exception {
+    super.testSchemaExists();
+  }
+
+  @Test
+  @Ignore("Query key ranges based on primary key is not supported via the java client")
+  @Override
+  public void testQueryStartKey() throws Exception {
+    super.testQueryStartKey();
+  }
+
+  @Test
+  @Ignore("Query key ranges based on primary key is not supported via the java client")
+  @Override
+  public void testQueryEndKey() throws Exception {
+    super.testQueryEndKey();
+  }
+
+  @Test
+  @Ignore("Query key ranges based on primary key is not supported via the java client")
+  @Override
+  public void testQueryKeyRange() throws Exception {
+    super.testQueryKeyRange();
   }
 
   @Test

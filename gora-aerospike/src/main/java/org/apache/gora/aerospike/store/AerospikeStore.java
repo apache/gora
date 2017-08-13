@@ -45,6 +45,7 @@ import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
+import org.apache.gora.query.impl.PartitionQueryImpl;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.AvroUtils;
 import org.slf4j.Logger;
@@ -322,11 +323,21 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
   }
 
   /**
-   * The functionality is not supported as query key ranges are not supported
+   * {@inheritDoc}
+   * As the Aerospike does not support query key ranges as at the moment, only the single partition
+   * is retrieved with this method.
+   *
+   * @param query the query to execute.
+   * @return the list of partitions, one partion at the list as at the moment
    */
   @Override
   public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query) throws IOException {
-    return null;
+    List<PartitionQuery<K, T>> partitions = new ArrayList<>();
+    PartitionQueryImpl<K, T> partitionQuery = new PartitionQueryImpl<>(
+            query);
+    partitionQuery.setConf(getConf());
+    partitions.add(partitionQuery);
+    return partitions;
   }
 
   @Override
