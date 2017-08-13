@@ -17,13 +17,11 @@
 
 package org.apache.gora.cassandra.store;
 
-import org.apache.avro.Schema;
 import org.apache.gora.cassandra.query.CassandraQuery;
 import org.apache.gora.cassandra.serializers.CassandraSerializer;
 import org.apache.gora.persistency.BeanFactory;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.impl.BeanFactoryImpl;
-import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
@@ -59,14 +57,9 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
   private CassandraMapping mapping;
 
   private CassandraSerializer cassandraSerializer;
-  private String serializationType;
 
   public CassandraStore() {
     super();
-  }
-
-  public String getSerializationType() {
-    return serializationType;
   }
 
   /**
@@ -80,17 +73,12 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) {
     LOG.debug("Initializing Cassandra store");
-    Schema persistentSchema;
+    String serializationType;
     try {
       this.keyClass = keyClass;
       this.persistentClass = persistentClass;
       if (this.beanFactory == null) {
         this.beanFactory = new BeanFactoryImpl<>(keyClass, persistentClass);
-      }
-      if (PersistentBase.class.isAssignableFrom(persistentClass)) {
-        persistentSchema = ((PersistentBase) this.beanFactory.getCachedPersistent()).getSchema();
-      } else {
-        persistentSchema = null;
       }
       String mappingFile = DataStoreFactory.getMappingFile(properties, this, DEFAULT_MAPPING_FILE);
       serializationType = properties.getProperty(CassandraStoreParameters.CASSANDRA_SERIALIZATION_TYPE);
@@ -98,7 +86,7 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
       mapping = mappingBuilder.readMapping(mappingFile);
       CassandraClient cassandraClient = new CassandraClient();
       cassandraClient.initialize(properties, mapping);
-      cassandraSerializer = CassandraSerializer.getSerializer(cassandraClient, serializationType, this, mapping, persistentSchema);
+      cassandraSerializer = CassandraSerializer.getSerializer(cassandraClient, serializationType, this, mapping);
     } catch (Exception e) {
       throw new RuntimeException("Error while initializing Cassandra store: " + e.getMessage(), e);
     }

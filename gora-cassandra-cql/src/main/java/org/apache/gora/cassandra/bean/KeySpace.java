@@ -26,9 +26,13 @@ import java.util.Map;
 public class KeySpace {
 
   private String name;
+
   private PlacementStrategy placementStrategy;
+
   private boolean durableWritesEnabled;
+
   private int replicationFactor;
+
   private Map<String, Integer> dataCenters;
 
   public String getName() {

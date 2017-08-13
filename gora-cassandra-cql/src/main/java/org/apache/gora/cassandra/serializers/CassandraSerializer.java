@@ -20,7 +20,6 @@ package org.apache.gora.cassandra.serializers;
 import com.datastax.driver.core.KeyspaceMetadata;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.TableMetadata;
-import org.apache.avro.Schema;
 import org.apache.gora.cassandra.bean.Field;
 import org.apache.gora.cassandra.store.CassandraClient;
 import org.apache.gora.cassandra.store.CassandraMapping;
@@ -41,12 +40,17 @@ import java.util.Map;
  * This is the abstract Cassandra Serializer class.
  */
 public abstract class CassandraSerializer<K, T extends Persistent> {
+
   private static final Logger LOG = LoggerFactory.getLogger(CassandraStore.class);
+
   protected Class<K> keyClass;
 
   protected Class<T> persistentClass;
+
   protected CassandraMapping mapping;
+
   protected CassandraClient client;
+
   protected Map<String, String> userDefineTypeMaps;
 
   CassandraSerializer(CassandraClient cc, Class<K> keyClass, Class<T> persistantClass, CassandraMapping mapping) {
@@ -67,12 +71,12 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
    * @param <T>       persistent class
    * @return Serializer
    */
-  public static <K, T extends Persistent> CassandraSerializer getSerializer(CassandraClient cc, String type, final DataStore<K, T> dataStore, CassandraMapping mapping, Schema schema) {
+  public static <K, T extends Persistent> CassandraSerializer getSerializer(CassandraClient cc, String type, final DataStore<K, T> dataStore, CassandraMapping mapping) {
     CassandraStore.SerializerType serType = type.isEmpty() ? CassandraStore.SerializerType.NATIVE : CassandraStore.SerializerType.valueOf(type.toUpperCase(Locale.ENGLISH));
     CassandraSerializer serializer;
     switch (serType) {
       case AVRO:
-        serializer = new AvroSerializer(cc, dataStore, mapping, schema);
+        serializer = new AvroSerializer(cc, dataStore, mapping);
         break;
       case NATIVE:
       default:

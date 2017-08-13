@@ -29,5 +29,4 @@
         <field name="customer" column="customer" type="udt(customer)"/>
     </class>
 
-
 </gora-otd>

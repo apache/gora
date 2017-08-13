@@ -58,10 +58,14 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
 
   private Schema persistentSchema;
 
-  AvroSerializer(CassandraClient cassandraClient, DataStore<K, T> dataStore, CassandraMapping mapping, Schema schema) {
+  AvroSerializer(CassandraClient cassandraClient, DataStore<K, T> dataStore, CassandraMapping mapping) {
     super(cassandraClient, dataStore.getKeyClass(), dataStore.getPersistentClass(), mapping);
+    if (PersistentBase.class.isAssignableFrom(dataStore.getPersistentClass())) {
+      persistentSchema = ((PersistentBase) dataStore.getBeanFactory().getCachedPersistent()).getSchema();
+    } else {
+      persistentSchema = null;
+    }
     this.cassandraDataStore = dataStore;
-    persistentSchema = schema;
     try {
       analyzePersistent();
     } catch (Exception e) {

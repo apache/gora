@@ -23,6 +23,7 @@ package org.apache.gora.cassandra.bean;
 public class ClusterKeyField {
 
   private String columnName;
+
   private Order order;
 
   public ClusterKeyField() {
