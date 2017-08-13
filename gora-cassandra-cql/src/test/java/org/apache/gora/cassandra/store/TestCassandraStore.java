@@ -3,8 +3,8 @@
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
  * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
+ * to you under the Apache License, Version 2.0 (the"
+ * License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
@@ -14,41 +14,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * <p>
- * Testing class for all standard gora-cassandra functionality.
- * We extend DataStoreTestBase enabling us to run the entire base test
- * suite for Gora.
- * <p>
- * Testing class for all standard gora-cassandra functionality.
- * We extend DataStoreTestBase enabling us to run the entire base test
- * suite for Gora.
- * <p>
- * Testing class for all standard gora-cassandra functionality.
- * We extend DataStoreTestBase enabling us to run the entire base test
- * suite for Gora.
- * <p>
- * Testing class for all standard gora-cassandra functionality.
- * We extend DataStoreTestBase enabling us to run the entire base test
- * suite for Gora.
- * <p>
- * Testing class for all standard gora-cassandra functionality.
- * We extend DataStoreTestBase enabling us to run the entire base test
- * suite for Gora.
- * <p>
- * Testing class for all standard gora-cassandra functionality.
- * We extend DataStoreTestBase enabling us to run the entire base test
- * suite for Gora.
- * <p>
- * Testing class for all standard gora-cassandra functionality.
- * We extend DataStoreTestBase enabling us to run the entire base test
- * suite for Gora.
  */
 
-/**
- * Testing class for all standard gora-cassandra functionality.
- * We extend DataStoreTestBase enabling us to run the entire base test
- * suite for Gora. 
- */
 package org.apache.gora.cassandra.store;
 
 import org.apache.gora.cassandra.GoraCassandraTestDriver;
@@ -76,7 +43,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 /**
- * Test for CassandraStore.
+ *
+ * Testing class for all standard gora-cassandra functionality.
+ * We extend DataStoreTestBase enabling us to run the entire base test
+ * suite for Gora.
+ *
+ * Test Avro Serialization for CassandraStore.
  */
 public class TestCassandraStore extends DataStoreTestBase {
   private static final Logger LOG = LoggerFactory.getLogger(TestCassandraStore.class);

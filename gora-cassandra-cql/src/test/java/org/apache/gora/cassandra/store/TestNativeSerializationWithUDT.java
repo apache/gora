@@ -29,6 +29,9 @@ import org.junit.Test;
 
 import java.util.Properties;
 
+/**
+ * This class contains the tests cases to test the behaviour of Native Serialization with UDT dataType.
+ */
 public class TestNativeSerializationWithUDT {
 
   private static GoraCassandraTestDriver testDriver = new GoraCassandraTestDriver();

@@ -42,8 +42,9 @@ public class CassandraResultSet<K, T extends Persistent> extends ResultBase<K, T
   private int position = 0;
 
   /**
-   * @param dataStore
-   * @param query
+   * Constructor of the Cassandra Result
+   * @param dataStore Cassandra Data Store
+   * @param query Cassandra Query
    */
   public CassandraResultSet(DataStore<K, T> dataStore, Query<K, T> query) {
     super(dataStore, query);

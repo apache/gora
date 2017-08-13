@@ -254,7 +254,7 @@ class AvroCassandraUtils {
           try {
             result = (PersistentBase) HBaseByteInterface.fromBytes(schema, arr);
           } catch (IOException e) {
-            LOG.error("");
+            LOG.error("Error occurred while deserialize the Record. :" + e.getMessage());
             result = null;
           }
         } else {

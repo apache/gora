@@ -35,8 +35,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.Properties;
 
-// Logging imports
-
 /**
  * Helper class for third party tests using gora-cassandra backend.
  *
@@ -45,7 +43,6 @@ import java.util.Properties;
  * server. In this case we draw on Hector's @see EmbeddedServerHelper.
  * It starts (setUp) and stops (tearDown) embedded Cassandra server.
  */
-
 public class GoraCassandraTestDriver extends GoraTestDriver {
   private static Logger log = LoggerFactory.getLogger(GoraCassandraTestDriver.class);
 

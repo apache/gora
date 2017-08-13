@@ -64,7 +64,7 @@ public class GoraCassandraNativeCompiler {
   }
 
   /**
-   * Generates Java classes for a schema.
+   * Generates Java classes for a mapping.
    */
   private static void compileSchema(File src, File dest) throws Exception {
     log.info("Compiling {} to {}", src, dest);

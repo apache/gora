@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -55,11 +56,75 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
 
   private DataStore<K, T> cassandraDataStore;
 
+  private Schema persistentSchema;
+
   AvroSerializer(CassandraClient cassandraClient, DataStore<K, T> dataStore, CassandraMapping mapping, Schema schema) {
-    super(cassandraClient, dataStore.getKeyClass(), dataStore.getPersistentClass(), mapping, schema);
+    super(cassandraClient, dataStore.getKeyClass(), dataStore.getPersistentClass(), mapping);
     this.cassandraDataStore = dataStore;
+    persistentSchema = schema;
+    try {
+      analyzePersistent();
+    } catch (Exception e) {
+      throw new RuntimeException("Error occurred while analyzing the persistent class, :" + e.getMessage());
+    }
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @throws Exception
+   */
+  protected void analyzePersistent() throws Exception {
+    userDefineTypeMaps = new HashMap<>();
+    for (Field field : mapping.getFieldList()) {
+      String fieldType = field.getType();
+      if (fieldType.contains("frozen")) {
+        String udtType = fieldType.substring(fieldType.indexOf("<") + 1, fieldType.indexOf(">"));
+        if (PersistentBase.class.isAssignableFrom(persistentClass)) {
+          Schema fieldSchema = persistentSchema.getField(field.getFieldName()).schema();
+          if (fieldSchema.getType().equals(Schema.Type.UNION)) {
+            for (Schema currentSchema : fieldSchema.getTypes()) {
+              if (currentSchema.getType().equals(Schema.Type.RECORD)) {
+                fieldSchema = currentSchema;
+                break;
+              }
+            }
+          }
+          String createQuery = CassandraQueryFactory.getCreateUDTTypeForAvro(mapping, udtType, fieldSchema);
+          userDefineTypeMaps.put(udtType, createQuery);
+        } else {
+          throw new RuntimeException("Unsupported Class for User Define Types, Please use PersistentBase class. field : " + udtType);
+        }
+      }
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @param query
+   * @return
+   */
+  @Override
+  public boolean updateByQuery(Query query) {
+    List<Object> objectArrayList = new ArrayList<>();
+    String cqlQuery = CassandraQueryFactory.getUpdateByQueryForAvro(mapping, query, objectArrayList, persistentSchema);
+    ResultSet results;
+    if (objectArrayList.size() == 0) {
+      results = client.getSession().execute(cqlQuery);
+    } else {
+      results = client.getSession().execute(cqlQuery, objectArrayList.toArray());
+    }
+    return results.wasApplied();
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @param key
+   * @param fields
+   * @return
+   */
   @Override
   public Persistent get(Object key, String[] fields) {
     if (fields == null) {
@@ -81,6 +146,12 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
     return obj;
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @param key
+   * @param persistent
+   */
   @Override
   public void put(Object key, Persistent persistent) {
     if (persistent instanceof PersistentBase) {
@@ -142,6 +213,12 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @param key
+   * @return
+   */
   @Override
   public Persistent get(Object key) {
     ArrayList<String> cassandraKeys = new ArrayList<>();
@@ -274,7 +351,12 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
     return paramValue;
   }
 
-
+  /**
+   * {@inheritDoc}
+   *
+   * @param key
+   * @return
+   */
   @Override
   public boolean delete(Object key) {
     ArrayList<String> cassandraKeys = new ArrayList<>();
@@ -285,7 +367,13 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
     return resultSet.wasApplied();
   }
 
-
+  /**
+   * {@inheritDoc}
+   *
+   * @param dataStore
+   * @param query
+   * @return
+   */
   @Override
   public Result execute(DataStore dataStore, Query query) {
     List<Object> objectArrayList = new ArrayList<>();

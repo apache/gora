@@ -21,7 +21,6 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.mapping.Mapper;
 import com.datastax.driver.mapping.MappingManager;
 import com.datastax.driver.mapping.Result;
-import org.apache.avro.Schema;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.gora.cassandra.bean.Field;
 import org.apache.gora.cassandra.query.CassandraResultSet;
@@ -35,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -47,19 +47,34 @@ class NativeSerializer<K, T extends Persistent> extends CassandraSerializer {
 
   private Mapper<T> mapper;
 
-  NativeSerializer(CassandraClient cassandraClient, Class<K> keyClass, Class<T> persistentClass, CassandraMapping mapping, Schema schema) {
-    super(cassandraClient, keyClass, persistentClass, mapping, schema);
+  NativeSerializer(CassandraClient cassandraClient, Class<K> keyClass, Class<T> persistentClass, CassandraMapping mapping) {
+    super(cassandraClient, keyClass, persistentClass, mapping);
+    try {
+      analyzePersistent();
+    } catch (Exception e) {
+      throw new RuntimeException("Error occurred while analyzing the persistent class, :" + e.getMessage());
+    }
     this.createSchema();
     MappingManager mappingManager = new MappingManager(cassandraClient.getSession());
     mapper = mappingManager.mapper(persistentClass);
   }
 
+  /**
+   * {@inheritDoc}
+   * @param key
+   * @param value
+   */
   @Override
   public void put(Object key, Persistent value) {
     LOG.debug("Object is saved with key : {} and value : {}", key, value);
     mapper.save((T) value);
   }
 
+  /**
+   * {@inheritDoc}
+   * @param key
+   * @return
+   */
   @Override
   public T get(Object key) {
     T object = mapper.get(key);
@@ -71,6 +86,11 @@ class NativeSerializer<K, T extends Persistent> extends CassandraSerializer {
     return object;
   }
 
+  /**
+   * {@inheritDoc}
+   * @param key
+   * @return
+   */
   @Override
   public boolean delete(Object key) {
     LOG.debug("Object is deleted for key : {}", key);
@@ -78,6 +98,12 @@ class NativeSerializer<K, T extends Persistent> extends CassandraSerializer {
     return true;
   }
 
+  /**
+   * {@inheritDoc}
+   * @param key
+   * @param fields
+   * @return
+   */
   @Override
   public Persistent get(Object key, String[] fields) {
     if (fields == null) {
@@ -95,6 +121,47 @@ class NativeSerializer<K, T extends Persistent> extends CassandraSerializer {
     return null;
   }
 
+  /**
+   * {@inheritDoc}
+   * @throws Exception
+   */
+  @Override
+  protected void analyzePersistent() throws Exception {
+    userDefineTypeMaps = new HashMap<>();
+    for (Field field : mapping.getFieldList()) {
+      String fieldType = field.getType();
+      if (fieldType.contains("frozen")) {
+        String udtType = fieldType.substring(fieldType.indexOf("<") + 1, fieldType.indexOf(">"));
+        String createQuery = CassandraQueryFactory.getCreateUDTTypeForNative(mapping, persistentClass, udtType, field.getFieldName());
+        userDefineTypeMaps.put(udtType, createQuery);
+      }
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   * @param query
+   * @return
+   */
+  @Override
+  public boolean updateByQuery(Query query) {
+    List<Object> objectArrayList = new ArrayList<>();
+    String cqlQuery = CassandraQueryFactory.getUpdateByQueryForNative(mapping, query, objectArrayList);
+    ResultSet results;
+    if (objectArrayList.size() == 0) {
+      results = client.getSession().execute(cqlQuery);
+    } else {
+      results = client.getSession().execute(cqlQuery, objectArrayList.toArray());
+    }
+    return results.wasApplied();
+  }
+
+  /**
+   * {@inheritDoc}
+   * @param dataStore
+   * @param query
+   * @return
+   */
   @Override
   public org.apache.gora.query.Result execute(DataStore dataStore, Query query) {
     List<Object> objectArrayList = new ArrayList<>();

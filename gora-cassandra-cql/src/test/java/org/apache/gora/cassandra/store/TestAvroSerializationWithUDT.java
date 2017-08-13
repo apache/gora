@@ -34,6 +34,9 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Properties;
 
+/**
+ *This class contains tests cases to test the behaviour of Avro Serialization with UDT dataType.
+ */
 public class TestAvroSerializationWithUDT {
 
   private static GoraCassandraTestDriver testDriver = new GoraCassandraTestDriver();

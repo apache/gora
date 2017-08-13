@@ -68,9 +68,10 @@ public class CassandraClient {
 
   private static final Logger LOG = LoggerFactory.getLogger(CassandraClient.class);
 
-
   private Cluster cluster;
+
   private Session session;
+
   private CassandraMapping mapping;
 
   public Session getSession() {
@@ -257,7 +258,6 @@ public class CassandraClient {
     }
     return builder;
   }
-
 
   private Cluster.Builder populateLoadBalancingProp(Properties properties, Cluster.Builder builder) {
     String loadBalancingProp = properties.getProperty(CassandraStoreParameters.LOAD_BALANCING_POLICY);
@@ -484,7 +484,6 @@ public class CassandraClient {
     return builder.withSocketOptions(options);
   }
 
-
   private List<String> readCustomCodec(Properties properties) throws JDOMException, IOException {
     String filename = properties.getProperty(CassandraStoreParameters.CUSTOM_CODEC_FILE);
     if (filename != null) {
@@ -499,7 +498,6 @@ public class CassandraClient {
     }
     return null;
   }
-
 
   public void close() {
     this.session.close();

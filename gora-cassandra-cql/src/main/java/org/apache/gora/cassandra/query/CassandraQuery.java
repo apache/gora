@@ -40,34 +40,61 @@ public class CassandraQuery<K, T extends Persistent> extends QueryWSBase<K, T> {
     super(dataStore);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public Filter<K, T> getFilter() {
     return filter;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void setFilter(Filter<K, T> filter) {
     this.filter = filter;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean isLocalFilterEnabled() {
     return localFilterEnabled;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void setLocalFilterEnabled(boolean enable) {
     localFilterEnabled = enable;
   }
 
+  /**
+   * This method adds Update field with the relevant Value
+   *
+   * @param field    field Name
+   * @param newValue New Value of the field
+   */
   public void addUpdateField(String field, Object newValue) {
     updateFields.put(field, newValue);
   }
 
+  /**
+   * This method returns the updated field value of the particular field.
+   *
+   * @param key Field Name
+   * @return Object value
+   */
   public Object getUpdateFieldValue(String key) {
     return updateFields.get(key);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public String[] getFields() {
     if (updateFields.size() == 0) {

@@ -54,8 +54,6 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   private Class<K> keyClass;
 
-  private Schema persistentSchema;
-
   private Class<T> persistentClass;
 
   private CassandraMapping mapping;
@@ -79,8 +77,10 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
    * @param persistentClass persistent class
    * @param properties      properties
    */
+  @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) {
     LOG.debug("Initializing Cassandra store");
+    Schema persistentSchema;
     try {
       this.keyClass = keyClass;
       this.persistentClass = persistentClass;
@@ -104,6 +104,11 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
     }
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @return
+   */
   @SuppressWarnings("all")
   @Override
   public Class<T> getPersistentClass() {
@@ -123,32 +128,58 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
     this.persistentClass = persistentClass;
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @return
+   */
   @Override
   public String getSchemaName() {
     return mapping.getCoreName();
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void createSchema() {
     cassandraSerializer.createSchema();
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void deleteSchema() {
     cassandraSerializer.deleteSchema();
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @return
+   */
   @SuppressWarnings("all")
   @Override
   public Class<K> getKeyClass() {
     return this.keyClass;
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @param keyClass the class of keys
+   */
   @Override
   public void setKeyClass(Class<K> keyClass) {
     this.keyClass = keyClass;
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @return
+   */
   @Override
   public K newKey() {
     try {
@@ -162,6 +193,11 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
     }
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @return
+   */
   @SuppressWarnings("all")
   @Override
   public T newPersistent() {
@@ -176,47 +212,96 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
     }
   }
 
-
+  /**
+   * {@inheritDoc}
+   *
+   * @return
+   */
   @Override
   public BeanFactory<K, T> getBeanFactory() {
     return this.beanFactory;
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @param beanFactory the BeanFactory to use
+   */
   @Override
   public void setBeanFactory(BeanFactory<K, T> beanFactory) {
     this.beanFactory = beanFactory;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void close() {
     this.cassandraSerializer.close();
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @param key the key of the object
+   * @return
+   */
   @Override
   public T get(K key) {
     return (T) cassandraSerializer.get(key);
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @param key    the key of the object
+   * @param fields the fields required in the object. Pass null, to retrieve all fields
+   * @return
+   */
   @Override
   public T get(K key, String[] fields) {
     return (T) cassandraSerializer.get(key, fields);
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @param key key value
+   * @param obj object value
+   */
   @Override
   public void put(K key, T obj) {
     cassandraSerializer.put(key, obj);
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @param key the key of the object
+   * @return
+   */
   @Override
   public boolean delete(K key) {
     return cassandraSerializer.delete(key);
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @param query matching records to this query will be deleted
+   * @return
+   */
   @Override
   public long deleteByQuery(Query<K, T> query) {
     return cassandraSerializer.deleteByQuery(query);
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @param query the query to execute.
+   * @return
+   */
   @Override
   public Result<K, T> execute(Query<K, T> query) {
     return (Result<K, T>) cassandraSerializer.execute(this, query);
@@ -232,12 +317,24 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
     return cassandraSerializer.updateByQuery(query);
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @return
+   */
   @Override
   public Query<K, T> newQuery() {
     Query<K, T> query = new CassandraQuery(this);
     return query;
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @param query cassandra Query
+   * @return
+   * @throws IOException
+   */
   @Override
   public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query) throws IOException {
     List<PartitionQuery<K, T>> partitions = new ArrayList<>();
@@ -247,21 +344,38 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
     return partitions;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void flush() {
     // ignore since caching has been disabled
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @param obj
+   * @return
+   */
   @Override
   public boolean equals(Object obj) {
     return super.equals(obj);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void truncateSchema() {
     cassandraSerializer.truncateSchema();
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @return
+   */
   @Override
   public boolean schemaExists() {
     return cassandraSerializer.schemaExists();

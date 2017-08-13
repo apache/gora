@@ -121,9 +121,9 @@ public class CassandraMapping {
   }
 
   /**
-   * This method returns
+   * This method returns partition keys
    *
-   * @return
+   * @return partitionKeys
    */
   public String[] getAllFieldsIncludingKeys() {
     List<String> fieldNames = new ArrayList<>(fieldList.size());
@@ -140,7 +140,8 @@ public class CassandraMapping {
   }
 
   /**
-   * @return
+   * This method return all the fields which involves with partition keys, Including composite Keys
+   * @return field Names
    */
   public String[] getAllKeys() {
     List<String> fieldNames = new ArrayList<>();

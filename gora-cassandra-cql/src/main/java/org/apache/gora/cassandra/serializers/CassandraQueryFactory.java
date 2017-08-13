@@ -604,17 +604,11 @@ class CassandraQueryFactory {
    * @param objects        field Objects list
    * @return CQL Query
    */
-  static String getUpdateByQuery(CassandraMapping mapping, Query cassandraQuery, List<Object> objects, Schema schema) {
+  static String getUpdateByQueryForAvro(CassandraMapping mapping, Query cassandraQuery, List<Object> objects, Schema schema) {
     Update update = QueryBuilder.update(mapping.getKeySpace().getName(), mapping.getCoreName());
     Update.Assignments updateAssignments = null;
     if (cassandraQuery instanceof CassandraQuery) {
       String[] columnNames = getColumnNames(mapping, Arrays.asList(cassandraQuery.getFields()));
-      if (((CassandraStore) cassandraQuery.getDataStore()).getSerializationType().equalsIgnoreCase("NATIVE")) {
-        for (String column : columnNames) {
-          updateAssignments = update.with(QueryBuilder.set(column, "?"));
-          objects.add(((CassandraQuery) cassandraQuery).getUpdateFieldValue(mapping.getFieldFromColumnName(column).getFieldName()));
-        }
-      } else {
         for (String column : columnNames) {
           updateAssignments = update.with(QueryBuilder.set(column, "?"));
           Field field = mapping.getFieldFromColumnName(column);
@@ -626,13 +620,37 @@ class CassandraQueryFactory {
             throw new RuntimeException(field + " field couldn't find in the class " + mapping.getPersistentClass() + ".");
           }
         }
-      }
     } else {
       throw new RuntimeException("Please use Cassandra Query object to invoke, UpdateByQuery method.");
     }
-
     return processQuery(cassandraQuery, updateAssignments, mapping, objects);
   }
+
+
+  /**
+   * This method returns the CQL Query for UpdateByQuery method
+   * refer : http://docs.datastax.com/en/cql/3.3/cql/cql_reference/cqlUpdate.html
+   *
+   * @param mapping        Cassandra mapping {@link CassandraMapping}
+   * @param cassandraQuery Cassandra Query {@link CassandraQuery}
+   * @param objects        field Objects list
+   * @return CQL Query
+   */
+  static String getUpdateByQueryForNative(CassandraMapping mapping, Query cassandraQuery, List<Object> objects) {
+    Update update = QueryBuilder.update(mapping.getKeySpace().getName(), mapping.getCoreName());
+    Update.Assignments updateAssignments = null;
+    if (cassandraQuery instanceof CassandraQuery) {
+      String[] columnNames = getColumnNames(mapping, Arrays.asList(cassandraQuery.getFields()));
+        for (String column : columnNames) {
+          updateAssignments = update.with(QueryBuilder.set(column, "?"));
+          objects.add(((CassandraQuery) cassandraQuery).getUpdateFieldValue(mapping.getFieldFromColumnName(column).getFieldName()));
+        }
+    } else {
+      throw new RuntimeException("Please use Cassandra Query object to invoke, UpdateByQuery method.");
+    }
+    return processQuery(cassandraQuery, updateAssignments, mapping, objects);
+  }
+
 
   private static void populateFieldsToQuery(Schema schema, StringBuilder builder) throws Exception {
     switch (schema.getType()) {
