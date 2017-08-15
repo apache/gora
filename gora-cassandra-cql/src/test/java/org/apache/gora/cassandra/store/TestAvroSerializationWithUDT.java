@@ -58,6 +58,8 @@ public class TestAvroSerializationWithUDT {
     parameter.setProperty(CassandraStoreParameters.CASSANDRA_SERIALIZATION_TYPE, "avro");
     parameter.setProperty(CassandraStoreParameters.PROTOCOL_VERSION, "3");
     parameter.setProperty(CassandraStoreParameters.CLUSTER_NAME, "Test Cluster");
+    parameter.setProperty(CassandraStoreParameters.READ_CONSISTENCY_LEVEL,"ONE");
+    parameter.setProperty(CassandraStoreParameters.WRITE_CONSISTENCY_LEVEL,"ONE");
     parameter.setProperty("gora.cassandrastore.mapping.file", "avroUDT/gora-cassandra-mapping.xml");
   }
 

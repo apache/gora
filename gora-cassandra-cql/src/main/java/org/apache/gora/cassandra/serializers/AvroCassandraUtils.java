@@ -192,16 +192,6 @@ class AvroCassandraUtils {
         return unionSchemaPos;
       else if (pValue != null && ByteBuffer.class.isAssignableFrom(pValue.getClass()) && schemaType.equals(Schema.Type.FLOAT))
         return unionSchemaPos;
-      else if (pValue != null && ByteBuffer.class.isAssignableFrom(pValue.getClass()) && schemaType.equals(Schema.Type.BOOLEAN))
-        return unionSchemaPos;
-      else if (pValue != null && ByteBuffer.class.isAssignableFrom(pValue.getClass()) && schemaType.equals(Schema.Type.MAP))
-        return unionSchemaPos;
-      else if (pValue != null && ByteBuffer.class.isAssignableFrom(pValue.getClass()) && schemaType.equals(Schema.Type.ARRAY))
-        return unionSchemaPos;
-      else if (pValue != null && ByteBuffer.class.isAssignableFrom(pValue.getClass()) && schemaType.equals(Schema.Type.ENUM))
-        return unionSchemaPos;
-      else if (pValue != null && ByteBuffer.class.isAssignableFrom(pValue.getClass()) && schemaType.equals(Schema.Type.FIXED))
-        return unionSchemaPos;
       else if (pValue != null && ByteBuffer.class.isAssignableFrom(pValue.getClass()) && schemaType.equals(Schema.Type.RECORD))
         return unionSchemaPos;
       unionSchemaPos++;
@@ -283,13 +273,43 @@ class AvroCassandraUtils {
       case STRING:
         if (value instanceof org.apache.avro.util.Utf8) {
           result = value;
+        } else if (ByteBuffer.class.isAssignableFrom(value.getClass())) {
+          result = new Utf8(((ByteBuffer) value).array());
         } else {
           result = new Utf8((String) value);
         }
         break;
 
       case INT:
-        result = value;
+        if (ByteBuffer.class.isAssignableFrom(value.getClass())) {
+          result = ((ByteBuffer) value).getInt();
+        } else {
+          result = value;
+        }
+        break;
+
+      case FLOAT:
+        if (ByteBuffer.class.isAssignableFrom(value.getClass())) {
+          result = ((ByteBuffer) value).getFloat();
+        } else {
+          result = value;
+        }
+        break;
+
+      case DOUBLE:
+        if (ByteBuffer.class.isAssignableFrom(value.getClass())) {
+          result = ((ByteBuffer) value).getDouble();
+        } else {
+          result = value;
+        }
+        break;
+
+      case LONG:
+        if (ByteBuffer.class.isAssignableFrom(value.getClass())) {
+          result = ((ByteBuffer) value).getLong();
+        } else {
+          result = value;
+        }
         break;
 
       default:

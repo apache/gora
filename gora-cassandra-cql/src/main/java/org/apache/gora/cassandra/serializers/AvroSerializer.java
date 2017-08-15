@@ -19,9 +19,11 @@ package org.apache.gora.cassandra.serializers;
 
 import com.datastax.driver.core.AbstractGettableData;
 import com.datastax.driver.core.ColumnDefinitions;
+import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.driver.core.DataType;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
+import com.datastax.driver.core.SimpleStatement;
 import com.datastax.driver.core.UDTValue;
 import com.datastax.driver.core.UserType;
 import org.apache.avro.Schema;
@@ -114,11 +116,16 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
     List<Object> objectArrayList = new ArrayList<>();
     String cqlQuery = CassandraQueryFactory.getUpdateByQueryForAvro(mapping, query, objectArrayList, persistentSchema);
     ResultSet results;
+    SimpleStatement statement;
     if (objectArrayList.size() == 0) {
-      results = client.getSession().execute(cqlQuery);
+      statement = new SimpleStatement(cqlQuery);
     } else {
-      results = client.getSession().execute(cqlQuery, objectArrayList.toArray());
+      statement = new SimpleStatement(cqlQuery, objectArrayList.toArray());
     }
+    if (writeConsistencyLevel != null) {
+      statement.setConsistencyLevel(ConsistencyLevel.valueOf(writeConsistencyLevel));
+    }
+    results = client.getSession().execute(statement);
     return results.wasApplied();
   }
 
@@ -138,7 +145,11 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
     ArrayList<Object> cassandraValues = new ArrayList<>();
     AvroCassandraUtils.processKeys(mapping, key, cassandraKeys, cassandraValues);
     String cqlQuery = CassandraQueryFactory.getSelectObjectWithFieldsQuery(mapping, fields, cassandraKeys);
-    ResultSet resultSet = this.client.getSession().execute(cqlQuery, cassandraValues.toArray());
+    SimpleStatement statement = new SimpleStatement(cqlQuery, cassandraValues.toArray());
+    if (readConsistencyLevel != null) {
+      statement.setConsistencyLevel(ConsistencyLevel.valueOf(readConsistencyLevel));
+    }
+    ResultSet resultSet = this.client.getSession().execute(statement);
     Iterator<Row> iterator = resultSet.iterator();
     ColumnDefinitions definitions = resultSet.getColumnDefinitions();
     T obj = null;
@@ -207,7 +218,11 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
           }
         }
         String cqlQuery = CassandraQueryFactory.getInsertDataQuery(mapping, fields);
-        client.getSession().execute(cqlQuery, values.toArray());
+        SimpleStatement statement = new SimpleStatement(cqlQuery, values.toArray());
+        if (writeConsistencyLevel != null) {
+          statement.setConsistencyLevel(ConsistencyLevel.valueOf(writeConsistencyLevel));
+        }
+        client.getSession().execute(statement);
       } else {
         LOG.info("Ignored putting persistent bean {} in the store as it is neither "
                 + "new, neither dirty.", new Object[]{persistent});
@@ -229,7 +244,11 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
     ArrayList<Object> cassandraValues = new ArrayList<>();
     AvroCassandraUtils.processKeys(mapping, key, cassandraKeys, cassandraValues);
     String cqlQuery = CassandraQueryFactory.getSelectObjectQuery(mapping, cassandraKeys);
-    ResultSet resultSet = this.client.getSession().execute(cqlQuery, cassandraValues.toArray());
+    SimpleStatement statement = new SimpleStatement(cqlQuery, cassandraValues.toArray());
+    if (readConsistencyLevel != null) {
+      statement.setConsistencyLevel(ConsistencyLevel.valueOf(readConsistencyLevel));
+    }
+    ResultSet resultSet = client.getSession().execute(statement);
     Iterator<Row> iterator = resultSet.iterator();
     ColumnDefinitions definitions = resultSet.getColumnDefinitions();
     T obj = null;
@@ -367,7 +386,11 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
     ArrayList<Object> cassandraValues = new ArrayList<>();
     AvroCassandraUtils.processKeys(mapping, key, cassandraKeys, cassandraValues);
     String cqlQuery = CassandraQueryFactory.getDeleteDataQuery(mapping, cassandraKeys);
-    ResultSet resultSet = this.client.getSession().execute(cqlQuery, cassandraValues.toArray());
+    SimpleStatement statement = new SimpleStatement(cqlQuery, cassandraValues.toArray());
+    if (writeConsistencyLevel != null) {
+      statement.setConsistencyLevel(ConsistencyLevel.valueOf(writeConsistencyLevel));
+    }
+    ResultSet resultSet = client.getSession().execute(statement);
     return resultSet.wasApplied();
   }
 
@@ -390,11 +413,16 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
     CassandraResultSet<K, T> cassandraResult = new CassandraResultSet<>(dataStore, query);
     String cqlQuery = CassandraQueryFactory.getExecuteQuery(mapping, query, objectArrayList, fields);
     ResultSet results;
+    SimpleStatement statement;
     if (objectArrayList.size() == 0) {
-      results = client.getSession().execute(cqlQuery);
+      statement = new SimpleStatement(cqlQuery);
     } else {
-      results = client.getSession().execute(cqlQuery, objectArrayList.toArray());
+      statement = new SimpleStatement(cqlQuery, objectArrayList.toArray());
     }
+    if (readConsistencyLevel != null) {
+      statement.setConsistencyLevel(ConsistencyLevel.valueOf(readConsistencyLevel));
+    }
+    results = client.getSession().execute(statement);
     Iterator<Row> iterator = results.iterator();
     ColumnDefinitions definitions = results.getColumnDefinitions();
     T obj;

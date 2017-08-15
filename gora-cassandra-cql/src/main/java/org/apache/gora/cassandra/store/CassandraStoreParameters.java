@@ -224,4 +224,14 @@ public class CassandraStoreParameters {
    * string
    */
   public static final String CUSTOM_CODEC_FILE = "gora.cassandrastore.custom.codec.file";
+  /**
+   * Property pointing to set consistency level for read queries
+   * "ALL", "ANY", "EACH_QUORUM", "LOCAL_ONE", "LOCAL_QUORUM", "LOCAL_SERIAL", "ONE", "QUORUM", "SERIAL", "THREE", "TWO"
+   */
+  public static final String READ_CONSISTENCY_LEVEL = "gora.cassandrastore.read.consistencyLevel";
+  /**
+   * Property pointing to set consistency level for write queries
+   * "ALL", "ANY", "EACH_QUORUM", "LOCAL_ONE", "LOCAL_QUORUM", "LOCAL_SERIAL", "ONE", "QUORUM", "SERIAL", "THREE", "TWO"
+   */
+  public static final String WRITE_CONSISTENCY_LEVEL = "gora.cassandrastore.write.consistencyLevel";
 }

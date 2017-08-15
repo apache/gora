@@ -17,7 +17,9 @@
 
 package org.apache.gora.cassandra.serializers;
 
+import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.SimpleStatement;
 import com.datastax.driver.mapping.Mapper;
 import com.datastax.driver.mapping.MappingManager;
 import com.datastax.driver.mapping.Result;
@@ -57,10 +59,18 @@ class NativeSerializer<K, T extends Persistent> extends CassandraSerializer {
     this.createSchema();
     MappingManager mappingManager = new MappingManager(cassandraClient.getSession());
     mapper = mappingManager.mapper(persistentClass);
+    if (cassandraClient.getWriteConsistencyLevel() != null) {
+      mapper.setDefaultDeleteOptions(Mapper.Option.consistencyLevel(ConsistencyLevel.valueOf(cassandraClient.getWriteConsistencyLevel())));
+      mapper.setDefaultSaveOptions(Mapper.Option.consistencyLevel(ConsistencyLevel.valueOf(cassandraClient.getWriteConsistencyLevel())));
+    }
+    if (cassandraClient.getReadConsistencyLevel() != null) {
+      mapper.setDefaultGetOptions(Mapper.Option.consistencyLevel(ConsistencyLevel.valueOf(cassandraClient.getReadConsistencyLevel())));
+    }
   }
 
   /**
    * {@inheritDoc}
+   *
    * @param key
    * @param value
    */
@@ -72,6 +82,7 @@ class NativeSerializer<K, T extends Persistent> extends CassandraSerializer {
 
   /**
    * {@inheritDoc}
+   *
    * @param key
    * @return
    */
@@ -88,6 +99,7 @@ class NativeSerializer<K, T extends Persistent> extends CassandraSerializer {
 
   /**
    * {@inheritDoc}
+   *
    * @param key
    * @return
    */
@@ -100,6 +112,7 @@ class NativeSerializer<K, T extends Persistent> extends CassandraSerializer {
 
   /**
    * {@inheritDoc}
+   *
    * @param key
    * @param fields
    * @return
@@ -110,7 +123,11 @@ class NativeSerializer<K, T extends Persistent> extends CassandraSerializer {
       fields = getFields();
     }
     String cqlQuery = CassandraQueryFactory.getSelectObjectWithFieldsQuery(mapping, fields);
-    ResultSet results = client.getSession().execute(cqlQuery, key);
+    SimpleStatement statement = new SimpleStatement(cqlQuery, key);
+    if (readConsistencyLevel != null) {
+      statement.setConsistencyLevel(ConsistencyLevel.valueOf(readConsistencyLevel));
+    }
+    ResultSet results = client.getSession().execute(statement);
     Result<T> objects = mapper.map(results);
     List<T> objectList = objects.all();
     if (objectList != null) {
@@ -123,6 +140,7 @@ class NativeSerializer<K, T extends Persistent> extends CassandraSerializer {
 
   /**
    * {@inheritDoc}
+   *
    * @throws Exception
    */
   @Override
@@ -140,6 +158,7 @@ class NativeSerializer<K, T extends Persistent> extends CassandraSerializer {
 
   /**
    * {@inheritDoc}
+   *
    * @param query
    * @return
    */
@@ -148,16 +167,22 @@ class NativeSerializer<K, T extends Persistent> extends CassandraSerializer {
     List<Object> objectArrayList = new ArrayList<>();
     String cqlQuery = CassandraQueryFactory.getUpdateByQueryForNative(mapping, query, objectArrayList);
     ResultSet results;
+    SimpleStatement statement;
     if (objectArrayList.size() == 0) {
-      results = client.getSession().execute(cqlQuery);
+      statement = new SimpleStatement(cqlQuery);
     } else {
-      results = client.getSession().execute(cqlQuery, objectArrayList.toArray());
+      statement = new SimpleStatement(cqlQuery, objectArrayList.toArray());
     }
+    if (writeConsistencyLevel != null) {
+      statement.setConsistencyLevel(ConsistencyLevel.valueOf(writeConsistencyLevel));
+    }
+    results = client.getSession().execute(statement);
     return results.wasApplied();
   }
 
   /**
    * {@inheritDoc}
+   *
    * @param dataStore
    * @param query
    * @return

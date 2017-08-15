@@ -17,8 +17,10 @@
 
 package org.apache.gora.cassandra.serializers;
 
+import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.driver.core.KeyspaceMetadata;
 import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.SimpleStatement;
 import com.datastax.driver.core.TableMetadata;
 import org.apache.gora.cassandra.bean.Field;
 import org.apache.gora.cassandra.store.CassandraClient;
@@ -51,6 +53,10 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
 
   protected CassandraClient client;
 
+  protected String readConsistencyLevel;
+
+  protected String writeConsistencyLevel;
+
   protected Map<String, String> userDefineTypeMaps;
 
   CassandraSerializer(CassandraClient cc, Class<K> keyClass, Class<T> persistantClass, CassandraMapping mapping) {
@@ -58,6 +64,8 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
     this.persistentClass = persistantClass;
     this.client = cc;
     this.mapping = mapping;
+    this.readConsistencyLevel = client.getReadConsistencyLevel();
+    this.writeConsistencyLevel = client.getWriteConsistencyLevel();
   }
 
   /**
@@ -199,11 +207,16 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
     } else {
       String cqlQuery = CassandraQueryFactory.getDeleteByQuery(mapping, query, objectArrayList);
       ResultSet results;
+      SimpleStatement statement;
       if (objectArrayList.size() == 0) {
-        results = client.getSession().execute(cqlQuery);
+        statement = new SimpleStatement(cqlQuery);
       } else {
-        results = client.getSession().execute(cqlQuery, objectArrayList.toArray());
+        statement = new SimpleStatement(cqlQuery, objectArrayList.toArray());
       }
+      if (writeConsistencyLevel != null) {
+        statement.setConsistencyLevel(ConsistencyLevel.valueOf(writeConsistencyLevel));
+      }
+      results = client.getSession().execute(statement);
       LOG.debug("Delete by Query was applied : " + results.wasApplied());
     }
     LOG.info("Delete By Query method doesn't return the deleted element count.");

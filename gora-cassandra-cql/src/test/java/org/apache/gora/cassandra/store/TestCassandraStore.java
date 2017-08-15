@@ -68,6 +68,8 @@ public class TestCassandraStore extends DataStoreTestBase {
     properties.setProperty(CassandraStoreParameters.CASSANDRA_SERIALIZATION_TYPE, "avro");
     properties.setProperty(CassandraStoreParameters.PROTOCOL_VERSION, "3");
     properties.setProperty(CassandraStoreParameters.CLUSTER_NAME, "Test Cluster");
+    properties.setProperty(CassandraStoreParameters.READ_CONSISTENCY_LEVEL,"ONE");
+    properties.setProperty(CassandraStoreParameters.WRITE_CONSISTENCY_LEVEL,"ONE");
     properties.setProperty("gora.cassandrastore.mapping.file", "avro/gora-cassandra-mapping.xml");
   }
 

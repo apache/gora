@@ -74,6 +74,10 @@ public class CassandraClient {
 
   private CassandraMapping mapping;
 
+  private String readConsistencyLevel;
+
+  private String writeConsistencyLevel;
+
   public Session getSession() {
     return session;
   }
@@ -91,6 +95,8 @@ public class CassandraClient {
     if (codecs != null) {
       registerCustomCodecs(codecs);
     }
+    readConsistencyLevel = properties.getProperty(CassandraStoreParameters.READ_CONSISTENCY_LEVEL);
+    writeConsistencyLevel = properties.getProperty(CassandraStoreParameters.WRITE_CONSISTENCY_LEVEL);
     registerOptionalCodecs();
     this.session = this.cluster.connect();
   }
@@ -498,6 +504,23 @@ public class CassandraClient {
     }
     return null;
   }
+
+  /**
+   * This method returns configured read consistency level.
+   * @return read Consistency level
+   */
+  public String getReadConsistencyLevel() {
+    return readConsistencyLevel;
+  }
+
+  /**
+   * This method returns configured write consistency level.
+   * @return write Consistency level
+   */
+  public String getWriteConsistencyLevel() {
+    return writeConsistencyLevel;
+  }
+
 
   public void close() {
     this.session.close();
