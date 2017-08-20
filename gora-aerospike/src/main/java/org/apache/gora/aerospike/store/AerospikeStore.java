@@ -187,9 +187,16 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
 
     List<Field> fields = persistent.getSchema().getFields();
 
-    if (aerospikeClient.exists(null, recordKey)) {
-      this.delete(key);
+    // Delete the record, if the record exists and a field has been removed
+    for (int i = 0; i < fields.size(); i++) {
+      if (persistent.isDirty(i)) {
+        Object persistentValue = persistent.get(i);
+        if (persistentValue == null && aerospikeClient.exists(null, recordKey)) {
+          this.delete(key);
+        }
+      }
     }
+
     for (int i = 0; i < fields.size(); i++) {
       if (!persistent.isDirty(i)) {
         continue;
@@ -447,7 +454,6 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
     for (String field : fields) {
       setPersistentField(field, record, persistent);
     }
-    persistent.setDirty();
     return persistent;
   }
 
@@ -475,6 +481,7 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
 
     persistent.put(fieldName,
             getDeserializedObject(binValue, binDataType, fieldMap.get(fieldName).schema()));
+    persistent.setDirty(fieldMap.get(fieldName).pos());
   }
 
   /**
