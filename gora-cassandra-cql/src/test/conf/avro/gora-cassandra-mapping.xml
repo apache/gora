@@ -20,7 +20,7 @@
 <gora-otd>
 
     <keyspace name="avroKeySpace" durableWrite="false">
-        <placementStrategy name="SimpleStrategy" replication_factor="1"/>
+        <placementStrategy name="SimpleStrategy" replicationFactor="1"/>
     </keyspace>
 
     <class name="org.apache.gora.examples.generated.WebPage" keyClass="java.lang.String" table="WebPage"

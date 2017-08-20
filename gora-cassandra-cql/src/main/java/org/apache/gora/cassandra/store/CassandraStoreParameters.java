@@ -216,7 +216,7 @@ public class CassandraStoreParameters {
   public static final String ALLOW_REMOTE_DCS_FOR_LOCAL_CONSISTENCY_LEVEL = "gora.cassandrastore.allowRemoteDCsForLocalConsistencyLevel";
   /**
    * Property pointing to use Native Cassandra Native Serialization.
-   * boolean
+   * avro/ native
    */
   public static final String CASSANDRA_SERIALIZATION_TYPE = "gora.cassandrastore.cassandraSerializationType";
   /**

@@ -19,7 +19,7 @@
 
 <gora-otd>
     <keyspace name="nativeTestKeySpace" durableWrite="false">
-        <placementStrategy name="SimpleStrategy" replication_factor="1"/>
+        <placementStrategy name="SimpleStrategy" replicationFactor="1"/>
     </keyspace>
 
     <class name="org.apache.gora.cassandra.example.generated.nativeSerialization.User" keyClass="java.util.UUID"

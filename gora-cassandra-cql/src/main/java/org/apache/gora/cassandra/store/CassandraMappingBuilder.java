@@ -59,7 +59,10 @@ public class CassandraMappingBuilder<K, T extends Persistent> {
   }
 
   private static int getReplicationFactor(Element element) {
-    String value = element.getAttributeValue("replication_factor");
+    if (element == null) {
+      return 1;
+    }
+    String value = element.getAttributeValue("replicationFactor");
     if (value == null) {
       return 1;
     } else {
@@ -213,19 +216,24 @@ public class CassandraMappingBuilder<K, T extends Persistent> {
       }
     }
     Element placementStrategy = keyspaceElement.getChild("placementStrategy");
-    switch (KeySpace.PlacementStrategy.valueOf(placementStrategy.getAttributeValue("name"))) {
-      case SimpleStrategy:
-        keyspace.setPlacementStrategy(KeySpace.PlacementStrategy.SimpleStrategy);
-        keyspace.setReplicationFactor(getReplicationFactor(placementStrategy));
-        break;
-      case NetworkTopologyStrategy:
-        List<Element> dataCenters = placementStrategy.getChildren("datacenter");
-        keyspace.setPlacementStrategy(KeySpace.PlacementStrategy.NetworkTopologyStrategy);
-        for (Element dataCenter : dataCenters) {
-          String dataCenterName = dataCenter.getAttributeValue("name");
-          keyspace.addDataCenter(dataCenterName, getReplicationFactor(dataCenter));
-        }
-        break;
+    if (placementStrategy != null) {
+      switch (KeySpace.PlacementStrategy.valueOf(placementStrategy.getAttributeValue("name"))) {
+        case SimpleStrategy:
+          keyspace.setPlacementStrategy(KeySpace.PlacementStrategy.SimpleStrategy);
+          keyspace.setReplicationFactor(getReplicationFactor(placementStrategy));
+          break;
+        case NetworkTopologyStrategy:
+          List<Element> dataCenters = placementStrategy.getChildren("datacenter");
+          keyspace.setPlacementStrategy(KeySpace.PlacementStrategy.NetworkTopologyStrategy);
+          for (Element dataCenter : dataCenters) {
+            String dataCenterName = dataCenter.getAttributeValue("name");
+            keyspace.addDataCenter(dataCenterName, getReplicationFactor(dataCenter));
+          }
+          break;
+      }
+    } else {
+      keyspace.setPlacementStrategy(KeySpace.PlacementStrategy.SimpleStrategy);
+      keyspace.setReplicationFactor(1);
     }
     cassandraMapping.setKeySpace(keyspace);
   }
