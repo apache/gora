@@ -454,6 +454,7 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
     for (String field : fields) {
       setPersistentField(field, record, persistent);
     }
+    persistent.clearDirty();
     return persistent;
   }
 
@@ -481,7 +482,6 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
 
     persistent.put(fieldName,
             getDeserializedObject(binValue, binDataType, fieldMap.get(fieldName).schema()));
-    persistent.setDirty(fieldMap.get(fieldName).pos());
   }
 
   /**
