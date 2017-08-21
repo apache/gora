@@ -187,37 +187,30 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
 
     List<Field> fields = persistent.getSchema().getFields();
 
-    // Delete the record, if the record exists and a field has been removed
-    for (int i = 0; i < fields.size(); i++) {
-      if (persistent.isDirty(i)) {
-        Object persistentValue = persistent.get(i);
-        if (persistentValue == null && aerospikeClient.exists(null, recordKey)) {
-          this.delete(key);
-        }
-      }
-    }
-
     for (int i = 0; i < fields.size(); i++) {
       if (!persistent.isDirty(i)) {
         continue;
       }
       Object persistentValue = persistent.get(i);
-      if (persistentValue != null) {
-        String mappingBinName = aerospikeParameters.getAerospikeMapping().getBinMapping()
-                .get(fields.get(i).name());
-        if (mappingBinName == null) {
-          LOG.error(
-                  "Aerospike mapping for field {}#{} not found. Wrong gora-aerospike-mapping.xml?",
-                  persistent.getClass().getName(), fields.get(i).name());
-          throw new RuntimeException(
-                  "Aerospike mapping for field [" + persistent.getClass().getName() + "#" + fields
-                          .get(i).name() + "] not found. Wrong gora-aerospike-mapping.xml?");
-        }
-        Bin bin = new Bin(mappingBinName,
-                getSerializableValue(persistentValue, fields.get(i).schema()));
-        aerospikeClient
-                .put(aerospikeParameters.getAerospikeMapping().getWritePolicy(), recordKey, bin);
+
+      String mappingBinName = aerospikeParameters.getAerospikeMapping().getBinMapping()
+              .get(fields.get(i).name());
+      if (mappingBinName == null) {
+        LOG.error("Aerospike mapping for field {}#{} not found. Wrong gora-aerospike-mapping.xml?",
+                persistent.getClass().getName(), fields.get(i).name());
+        throw new RuntimeException(
+                "Aerospike mapping for field [" + persistent.getClass().getName() + "#" + fields
+                        .get(i).name() + "] not found. Wrong gora-aerospike-mapping.xml?");
       }
+      Bin bin;
+      if (persistentValue != null) {
+        bin = new Bin(mappingBinName,
+                getSerializableValue(persistentValue, fields.get(i).schema()));
+      } else {
+        bin = Bin.asNull(mappingBinName);
+      }
+      aerospikeClient
+              .put(aerospikeParameters.getAerospikeMapping().getWritePolicy(), recordKey, bin);
     }
   }
 
