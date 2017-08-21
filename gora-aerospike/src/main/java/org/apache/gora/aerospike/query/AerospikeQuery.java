@@ -26,6 +26,9 @@ import org.apache.gora.store.DataStore;
  * Aerospike specific implementation of the {@link Query} interface.
  */
 public class AerospikeQuery<K, T extends PersistentBase> extends QueryBase<K, T> {
+  public AerospikeQuery() {
+       super(null);
+  }
   public AerospikeQuery(DataStore<K, T> dataStore) {
     super(dataStore);
   }

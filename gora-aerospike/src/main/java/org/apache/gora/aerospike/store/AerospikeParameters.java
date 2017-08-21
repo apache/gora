@@ -19,6 +19,7 @@ package org.apache.gora.aerospike.store;
 import com.aerospike.client.AerospikeClient;
 import com.aerospike.client.Info;
 import com.aerospike.client.cluster.Node;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +51,8 @@ public class AerospikeParameters {
 
   private static final String AS_SERVER_PASSWORD = "gora.aerospikestore.server.password";
 
+  private static final String AS_PROP_OVERRIDING = "gora.aerospikestore.override.hadoop.configuration";
+
   // Default property values
   private static final String DEFAULT_SERVER_IP = "localhost";
 
@@ -63,12 +66,19 @@ public class AerospikeParameters {
    * @param aerospikeMapping aerospike mapping initialized from the mapping file
    * @param properties       property details
    */
-  public AerospikeParameters(AerospikeMapping aerospikeMapping, Properties properties) {
+  public AerospikeParameters(AerospikeMapping aerospikeMapping, Properties properties, Configuration conf) {
     this.aerospikeMapping = aerospikeMapping;
     this.host = properties.getProperty(AS_SERVER_IP, DEFAULT_SERVER_IP);
     this.port = Integer.parseInt(properties.getProperty(AS_SERVER_PORT, DEFAULT_SERVER_PORT));
     this.username = properties.getProperty(AS_SERVER_USERNAME, null);
     this.password = properties.getProperty(AS_SERVER_PASSWORD, null);
+    String overrideHadoop = properties.getProperty(AS_PROP_OVERRIDING);
+    if (!Boolean.parseBoolean(overrideHadoop)) {
+      this.host = conf.get(AS_SERVER_IP, DEFAULT_SERVER_IP);
+      this.port = Integer.parseInt(conf.get(AS_SERVER_PORT, DEFAULT_SERVER_PORT));
+      this.username = conf.get(AS_SERVER_USERNAME, null);
+      this.password = conf.get(AS_SERVER_PASSWORD, null);
+    }
   }
 
   public String getHost() {

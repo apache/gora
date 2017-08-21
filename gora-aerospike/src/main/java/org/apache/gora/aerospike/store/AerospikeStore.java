@@ -87,7 +87,7 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
             .readMappingFile(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE), keyClass,
                     persistentClass);
     aerospikeParameters = new AerospikeParameters(aerospikeMappingBuilder.getAerospikeMapping(),
-            properties);
+            properties, getConf());
     ClientPolicy policy = new ClientPolicy();
     policy.writePolicyDefault = aerospikeParameters.getAerospikeMapping().getWritePolicy();
     policy.readPolicyDefault = aerospikeParameters.getAerospikeMapping().getReadPolicy();

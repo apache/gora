@@ -37,8 +37,6 @@ public class GoraAerospikeTestDriver extends GoraTestDriver {
 
   private final GenericContainer aerospikeContainer;
 
-  private final Properties properties = DataStoreFactory.createProps();
-
   public GoraAerospikeTestDriver(GenericContainer aerospikeContainer) {
     super(AerospikeStore.class);
     this.aerospikeContainer = aerospikeContainer;
@@ -47,9 +45,8 @@ public class GoraAerospikeTestDriver extends GoraTestDriver {
   @Override
   public void setUpClass() throws Exception {
     log.info("Setting up Aerospike test driver");
-    properties.setProperty("gora.aerospikestore.server.ip", "localhost");
-    properties.setProperty("gora.aerospikestore.server.port",
-            aerospikeContainer.getMappedPort(3000).toString());
+    conf.set("gora.aerospikestore.server.ip", "localhost");
+    conf.set("gora.aerospikestore.server.port", aerospikeContainer.getMappedPort(3000).toString());
   }
 
   @Override
@@ -71,7 +68,7 @@ public class GoraAerospikeTestDriver extends GoraTestDriver {
 
     final DataStore<K, T> dataStore = DataStoreFactory
             .createDataStore((Class<? extends DataStore<K, T>>) dataStoreClass, keyClass,
-                    persistentClass, conf, properties);
+                    persistentClass, conf);
     dataStores.add(dataStore);
     log.info("Datastore for {} was added.", persistentClass);
     return dataStore;
