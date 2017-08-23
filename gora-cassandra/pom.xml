@@ -26,7 +26,7 @@
         <version>0.8-SNAPSHOT</version>
         <relativePath>../</relativePath>
     </parent>
-    <artifactId>gora-cassandra-cql</artifactId>
+    <artifactId>gora-cassandra</artifactId>
     <packaging>bundle</packaging>
 
     <name>Apache Gora :: Cassandra - CQL</name>
