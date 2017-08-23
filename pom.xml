@@ -752,7 +752,6 @@
     <!-- Cassandra Dependencies -->
     <cassandra-driver.version>3.3.0</cassandra-driver.version>
     <cassandra.version>3.11.0</cassandra.version>
-    <hector.version>1.1-4</hector.version>
     <!-- Solr Dependencies -->
     <lucene-solr.version>6.5.1</lucene-solr.version>
     <solr-solrj.version>6.5.1</solr-solrj.version>
@@ -1094,18 +1093,6 @@
         <groupId>org.apache.cassandra</groupId>
         <artifactId>cassandra-thrift</artifactId>
         <version>${cassandra.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.hectorclient</groupId>
-        <artifactId>hector-core</artifactId>
-        <version>${hector.version}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.apache.cassandra</groupId>
-            <artifactId>cassandra-all</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
 
       <dependency>
