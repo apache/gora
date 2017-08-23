@@ -2,7 +2,7 @@
   "type": "record",
   "name": "CassandraRecord",
   "default": null,
-  "namespace": "org.apache.gora.cassandra.example.generated.avroSerialization",
+  "namespace": "org.apache.gora.cassandra.example.generated.AvroSerialization",
   "doc": "This object created to used as Persistent Object to test cassandra data store",
   "fields": [
     {

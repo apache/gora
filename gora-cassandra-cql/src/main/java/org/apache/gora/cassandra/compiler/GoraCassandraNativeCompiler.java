@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.gora.cassandra.compiler;
 
 import org.apache.commons.io.FilenameUtils;

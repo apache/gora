@@ -127,33 +127,28 @@
             <groupId>org.apache.gora</groupId>
             <artifactId>gora-core</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.apache.gora</groupId>
             <artifactId>gora-core</artifactId>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
-
         <!-- Cassandra Driver Dependencies -->
         <dependency>
             <groupId>com.datastax.cassandra</groupId>
             <artifactId>cassandra-driver-core</artifactId>
             <version>${cassandra-driver.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.datastax.cassandra</groupId>
             <artifactId>cassandra-driver-mapping</artifactId>
             <version>${cassandra-driver.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.datastax.cassandra</groupId>
             <artifactId>cassandra-driver-extras</artifactId>
             <version>${cassandra-driver.version}</version>
         </dependency>
-
         <!-- Cassandra Dependencies -->
         <dependency>
             <groupId>org.apache.cassandra</groupId>
@@ -178,29 +173,24 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
         <dependency>
             <groupId>org.apache.gora</groupId>
             <artifactId>gora-hbase</artifactId>
         </dependency>
-
         <!-- Misc Dependencies -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>${guava.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.jdom</groupId>
             <artifactId>jdom</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.apache.avro</groupId>
             <artifactId>avro</artifactId>
         </dependency>
-
         <!-- Logging Dependencies -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -216,18 +206,14 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
         <!-- Testing Dependencies -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-minicluster</artifactId>
         </dependency>
-
     </dependencies>
-
 </project>
