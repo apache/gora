@@ -72,7 +72,7 @@ public class CassandraMappingBuilder<K, T extends Persistent> {
   /**
    * @param fileName mapping fileName
    * @return All the Cassandra Mappings in the mapping file
-   * @throws Exception
+   * @throws Exception exception
    */
   @SuppressWarnings("all")
   public List<CassandraMapping> readMappingFile(File fileName) throws Exception {

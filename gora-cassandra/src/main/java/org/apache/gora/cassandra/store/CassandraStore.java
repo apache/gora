@@ -93,8 +93,6 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   /**
    * {@inheritDoc}
-   *
-   * @return
    */
   @SuppressWarnings("all")
   @Override
@@ -117,8 +115,6 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   /**
    * {@inheritDoc}
-   *
-   * @return
    */
   @Override
   public String getSchemaName() {
@@ -143,8 +139,6 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   /**
    * {@inheritDoc}
-   *
-   * @return
    */
   @SuppressWarnings("all")
   @Override
@@ -154,8 +148,6 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   /**
    * {@inheritDoc}
-   *
-   * @param keyClass the class of keys
    */
   @Override
   public void setKeyClass(Class<K> keyClass) {
@@ -164,8 +156,6 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   /**
    * {@inheritDoc}
-   *
-   * @return
    */
   @Override
   public K newKey() {
@@ -182,8 +172,6 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   /**
    * {@inheritDoc}
-   *
-   * @return
    */
   @SuppressWarnings("all")
   @Override
@@ -201,8 +189,6 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   /**
    * {@inheritDoc}
-   *
-   * @return
    */
   @Override
   public BeanFactory<K, T> getBeanFactory() {
@@ -211,8 +197,6 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   /**
    * {@inheritDoc}
-   *
-   * @param beanFactory the BeanFactory to use
    */
   @Override
   public void setBeanFactory(BeanFactory<K, T> beanFactory) {
@@ -229,9 +213,6 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   /**
    * {@inheritDoc}
-   *
-   * @param key the key of the object
-   * @return
    */
   @Override
   public T get(K key) {
@@ -240,10 +221,6 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   /**
    * {@inheritDoc}
-   *
-   * @param key    the key of the object
-   * @param fields the fields required in the object. Pass null, to retrieve all fields
-   * @return
    */
   @Override
   public T get(K key, String[] fields) {
@@ -252,9 +229,6 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   /**
    * {@inheritDoc}
-   *
-   * @param key key value
-   * @param obj object value
    */
   @Override
   public void put(K key, T obj) {
@@ -263,9 +237,6 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   /**
    * {@inheritDoc}
-   *
-   * @param key the key of the object
-   * @return
    */
   @Override
   public boolean delete(K key) {
@@ -274,9 +245,6 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   /**
    * {@inheritDoc}
-   *
-   * @param query matching records to this query will be deleted
-   * @return
    */
   @Override
   public long deleteByQuery(Query<K, T> query) {
@@ -285,9 +253,6 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   /**
    * {@inheritDoc}
-   *
-   * @param query the query to execute.
-   * @return
    */
   @Override
   public Result<K, T> execute(Query<K, T> query) {
@@ -306,8 +271,6 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   /**
    * {@inheritDoc}
-   *
-   * @return
    */
   @Override
   public Query<K, T> newQuery() {
@@ -317,10 +280,6 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   /**
    * {@inheritDoc}
-   *
-   * @param query cassandra Query
-   * @return
-   * @throws IOException
    */
   @Override
   public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query) throws IOException {
@@ -341,9 +300,6 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   /**
    * {@inheritDoc}
-   *
-   * @param obj
-   * @return
    */
   @Override
   public boolean equals(Object obj) {
@@ -360,8 +316,6 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
 
   /**
    * {@inheritDoc}
-   *
-   * @return
    */
   @Override
   public boolean schemaExists() {

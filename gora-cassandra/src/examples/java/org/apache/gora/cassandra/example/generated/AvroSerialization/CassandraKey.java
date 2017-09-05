@@ -39,6 +39,8 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
 
   /**
    * Creates a new CassandraKey RecordBuilder
+   *
+   * @return builder
    */
   public static org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey.Builder newBuilder() {
     return new org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey.Builder();
@@ -46,6 +48,9 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
 
   /**
    * Creates a new CassandraKey RecordBuilder by copying an existing Builder
+   *
+   * @param other existing builder
+   * @return builder
    */
   public static org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey.Builder newBuilder(org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey.Builder other) {
     return new org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey.Builder(other);
@@ -53,6 +58,9 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
 
   /**
    * Creates a new CassandraKey RecordBuilder by copying an existing CassandraKey instance
+   *
+   * @param other existing Cassandra Key instance
+   * @return builder
    */
   public static org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey.Builder newBuilder(org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey other) {
     return new org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey.Builder(other);
@@ -123,6 +131,8 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
 
   /**
    * Gets the value of the 'url' field.
+   *
+   * @return url
    */
   public java.lang.CharSequence getUrl() {
     return url;
@@ -141,7 +151,7 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
   /**
    * Checks the dirty status of the 'url' field. A field is dirty if it represents a change that has not yet been written to the database.
    *
-   * @param value the value to set.
+   * @return isUrlDirty
    */
   public boolean isUrlDirty() {
     return isDirty(0);
@@ -149,6 +159,8 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
 
   /**
    * Gets the value of the 'timestamp' field.
+   *
+   * @return timestamp
    */
   public java.lang.Long getTimestamp() {
     return timestamp;
@@ -167,7 +179,7 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
   /**
    * Checks the dirty status of the 'timestamp' field. A field is dirty if it represents a change that has not yet been written to the database.
    *
-   * @param value the value to set.
+   * @return isTimestampDirty
    */
   public boolean isTimestampDirty() {
     return isDirty(1);
@@ -308,6 +320,8 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
 
     /**
      * Gets the value of the 'url' field
+     *
+     * @return url
      */
     public java.lang.CharSequence getUrl() {
       return url;
@@ -315,6 +329,9 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
 
     /**
      * Sets the value of the 'url' field
+     *
+     * @param value url
+     * @return builder
      */
     public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey.Builder setUrl(java.lang.CharSequence value) {
       validate(fields()[0], value);
@@ -325,6 +342,8 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
 
     /**
      * Checks whether the 'url' field has been set
+     *
+     * @return hasUrl
      */
     public boolean hasUrl() {
       return fieldSetFlags()[0];
@@ -332,6 +351,8 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
 
     /**
      * Clears the value of the 'url' field
+     *
+     * @return builder
      */
     public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey.Builder clearUrl() {
       url = null;
@@ -341,6 +362,8 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
 
     /**
      * Gets the value of the 'timestamp' field
+     *
+     * @return timestamp
      */
     public java.lang.Long getTimestamp() {
       return timestamp;
@@ -348,6 +371,9 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
 
     /**
      * Sets the value of the 'timestamp' field
+     *
+     * @param value timestamp
+     * @return builder
      */
     public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey.Builder setTimestamp(long value) {
       validate(fields()[1], value);
@@ -358,6 +384,8 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
 
     /**
      * Checks whether the 'timestamp' field has been set
+     *
+     * @return hasTimestamp
      */
     public boolean hasTimestamp() {
       return fieldSetFlags()[1];
@@ -365,6 +393,8 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
 
     /**
      * Clears the value of the 'timestamp' field
+     *
+     * @return builder
      */
     public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraKey.Builder clearTimestamp() {
       fieldSetFlags()[1] = false;
@@ -407,8 +437,6 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
 
     /**
      * Checks the dirty status of the 'url' field. A field is dirty if it represents a change that has not yet been written to the database.
-     *
-     * @param value the value to set.
      */
     public boolean isUrlDirty() {
       throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -432,8 +460,6 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
 
     /**
      * Checks the dirty status of the 'timestamp' field. A field is dirty if it represents a change that has not yet been written to the database.
-     *
-     * @param value the value to set.
      */
     public boolean isTimestampDirty() {
       throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");

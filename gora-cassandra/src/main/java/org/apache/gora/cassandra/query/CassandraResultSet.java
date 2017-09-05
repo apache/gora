@@ -51,9 +51,6 @@ public class CassandraResultSet<K, T extends Persistent> extends ResultBase<K, T
 
   /**
    * {@inheritDoc}
-   *
-   * @return
-   * @throws IOException
    */
   @Override
   protected boolean nextInner() throws IOException {
@@ -68,10 +65,6 @@ public class CassandraResultSet<K, T extends Persistent> extends ResultBase<K, T
 
   /**
    * {@inheritDoc}
-   *
-   * @return
-   * @throws IOException
-   * @throws InterruptedException
    */
   @Override
   public float getProgress() throws IOException, InterruptedException {
@@ -80,8 +73,6 @@ public class CassandraResultSet<K, T extends Persistent> extends ResultBase<K, T
 
   /**
    * {@inheritDoc}
-   *
-   * @return
    */
   @Override
   public T get() {
@@ -90,8 +81,6 @@ public class CassandraResultSet<K, T extends Persistent> extends ResultBase<K, T
 
   /**
    * {@inheritDoc}
-   *
-   * @return
    */
   @Override
   public K getKey() {

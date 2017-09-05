@@ -61,6 +61,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
   /**
    * Creates a new CassandraRecord RecordBuilder
+   *
+   * @return builder
    */
   public static org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder newBuilder() {
     return new org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder();
@@ -68,6 +70,9 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
   /**
    * Creates a new CassandraRecord RecordBuilder by copying an existing Builder
+   *
+   * @param other existing builder
+   * @return builder
    */
   public static org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder newBuilder(org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder other) {
     return new org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder(other);
@@ -75,6 +80,9 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
   /**
    * Creates a new CassandraRecord RecordBuilder by copying an existing CassandraRecord instance
+   *
+   * @param other existing CassandraRecord instance
+   * @return builder
    */
   public static org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder newBuilder(org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord other) {
     return new org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder(other);
@@ -200,6 +208,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
   /**
    * Gets the value of the 'dataString' field.
+   *
+   * @return dataString
    */
   public java.lang.CharSequence getDataString() {
     return dataString;
@@ -218,7 +228,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   /**
    * Checks the dirty status of the 'dataString' field. A field is dirty if it represents a change that has not yet been written to the database.
    *
-   * @param value the value to set.
+   * @return isDataStringDirty
    */
   public boolean isDataStringDirty() {
     return isDirty(0);
@@ -226,6 +236,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
   /**
    * Gets the value of the 'dataInt' field.
+   *
+   * @return dataInt
    */
   public java.lang.Integer getDataInt() {
     return dataInt;
@@ -244,7 +256,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   /**
    * Checks the dirty status of the 'dataInt' field. A field is dirty if it represents a change that has not yet been written to the database.
    *
-   * @param value the value to set.
+   * @return isDataIntDirty
    */
   public boolean isDataIntDirty() {
     return isDirty(1);
@@ -252,6 +264,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
   /**
    * Gets the value of the 'dataLong' field.
+   *
+   * @return dataLong
    */
   public java.lang.Long getDataLong() {
     return dataLong;
@@ -270,7 +284,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   /**
    * Checks the dirty status of the 'dataLong' field. A field is dirty if it represents a change that has not yet been written to the database.
    *
-   * @param value the value to set.
+   * @return  isDataLongDirty.
    */
   public boolean isDataLongDirty() {
     return isDirty(2);
@@ -278,6 +292,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
   /**
    * Gets the value of the 'dataDouble' field.
+   *
+   * @return dataDouble.
    */
   public java.lang.Double getDataDouble() {
     return dataDouble;
@@ -296,7 +312,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   /**
    * Checks the dirty status of the 'dataDouble' field. A field is dirty if it represents a change that has not yet been written to the database.
    *
-   * @param value the value to set.
+   * @return  isDataDoubleDirty.
    */
   public boolean isDataDoubleDirty() {
     return isDirty(3);
@@ -304,6 +320,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
   /**
    * Gets the value of the 'dataBytes' field.
+   *
+   * @return dataBytes.
    */
   public java.nio.ByteBuffer getDataBytes() {
     return dataBytes;
@@ -322,7 +340,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   /**
    * Checks the dirty status of the 'dataBytes' field. A field is dirty if it represents a change that has not yet been written to the database.
    *
-   * @param value the value to set.
+   * @return  isDataBytesDirty.
    */
   public boolean isDataBytesDirty() {
     return isDirty(4);
@@ -330,6 +348,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
   /**
    * Gets the value of the 'arrayInt' field.
+   *
+   * @return arrayInt.
    */
   public java.util.List<java.lang.Integer> getArrayInt() {
     return arrayInt;
@@ -348,7 +368,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   /**
    * Checks the dirty status of the 'arrayInt' field. A field is dirty if it represents a change that has not yet been written to the database.
    *
-   * @param value the value to set.
+   * @return  isArrayIntDirty.
    */
   public boolean isArrayIntDirty() {
     return isDirty(5);
@@ -356,6 +376,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
   /**
    * Gets the value of the 'arrayString' field.
+   *
+   * @return arrayString.
    */
   public java.util.List<java.lang.CharSequence> getArrayString() {
     return arrayString;
@@ -374,7 +396,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   /**
    * Checks the dirty status of the 'arrayString' field. A field is dirty if it represents a change that has not yet been written to the database.
    *
-   * @param value the value to set.
+   * @return  isArrayStringDirty.
    */
   public boolean isArrayStringDirty() {
     return isDirty(6);
@@ -382,6 +404,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
   /**
    * Gets the value of the 'arrayLong' field.
+   *
+   * @return arrayLong.
    */
   public java.util.List<java.lang.Long> getArrayLong() {
     return arrayLong;
@@ -400,7 +424,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   /**
    * Checks the dirty status of the 'arrayLong' field. A field is dirty if it represents a change that has not yet been written to the database.
    *
-   * @param value the value to set.
+   * @return  isArrayLongDirty.
    */
   public boolean isArrayLongDirty() {
     return isDirty(7);
@@ -408,6 +432,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
   /**
    * Gets the value of the 'arrayDouble' field.
+   *
+   * @return arrayDouble.
    */
   public java.util.List<java.lang.Double> getArrayDouble() {
     return arrayDouble;
@@ -426,7 +452,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   /**
    * Checks the dirty status of the 'arrayDouble' field. A field is dirty if it represents a change that has not yet been written to the database.
    *
-   * @param value the value to set.
+   * @return  isArrayDoubleDirty.
    */
   public boolean isArrayDoubleDirty() {
     return isDirty(8);
@@ -434,6 +460,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
   /**
    * Gets the value of the 'mapInt' field.
+   *
+   * @return mapInt.
    */
   public java.util.Map<java.lang.CharSequence, java.lang.Integer> getMapInt() {
     return mapInt;
@@ -452,7 +480,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   /**
    * Checks the dirty status of the 'mapInt' field. A field is dirty if it represents a change that has not yet been written to the database.
    *
-   * @param value the value to set.
+   * @return  isMapIntDirty.
    */
   public boolean isMapIntDirty() {
     return isDirty(9);
@@ -460,6 +488,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
   /**
    * Gets the value of the 'mapString' field.
+   *
+   * @return mapString.
    */
   public java.util.Map<java.lang.CharSequence, java.lang.CharSequence> getMapString() {
     return mapString;
@@ -478,7 +508,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   /**
    * Checks the dirty status of the 'mapString' field. A field is dirty if it represents a change that has not yet been written to the database.
    *
-   * @param value the value to set.
+   * @return  isMapStringDirty.
    */
   public boolean isMapStringDirty() {
     return isDirty(10);
@@ -486,6 +516,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
   /**
    * Gets the value of the 'mapLong' field.
+   *
+   * @return mapLong.
    */
   public java.util.Map<java.lang.CharSequence, java.lang.Long> getMapLong() {
     return mapLong;
@@ -504,7 +536,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   /**
    * Checks the dirty status of the 'mapLong' field. A field is dirty if it represents a change that has not yet been written to the database.
    *
-   * @param value the value to set.
+   * @return  isMapLongDirty.
    */
   public boolean isMapLongDirty() {
     return isDirty(11);
@@ -512,6 +544,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
   /**
    * Gets the value of the 'mapDouble' field.
+   *
+   * @return mapDouble.
    */
   public java.util.Map<java.lang.CharSequence, java.lang.Double> getMapDouble() {
     return mapDouble;
@@ -530,7 +564,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   /**
    * Checks the dirty status of the 'mapDouble' field. A field is dirty if it represents a change that has not yet been written to the database.
    *
-   * @param value the value to set.
+   * @return  isMapDoubleDirty.
    */
   public boolean isMapDoubleDirty() {
     return isDirty(12);
@@ -737,6 +771,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Gets the value of the 'dataString' field
+     *
+     * @return dataString.
      */
     public java.lang.CharSequence getDataString() {
       return dataString;
@@ -744,6 +780,9 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Sets the value of the 'dataString' field
+     *
+     * @param value string value to set
+     * @return builder.
      */
     public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder setDataString(java.lang.CharSequence value) {
       validate(fields()[0], value);
@@ -754,6 +793,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Checks whether the 'dataString' field has been set
+     *
+     * @return hasDataString.
      */
     public boolean hasDataString() {
       return fieldSetFlags()[0];
@@ -761,6 +802,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Clears the value of the 'dataString' field
+     *
+     * @return builder.
      */
     public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder clearDataString() {
       dataString = null;
@@ -770,6 +813,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Gets the value of the 'dataInt' field
+     *
+     * @return dataInt.
      */
     public java.lang.Integer getDataInt() {
       return dataInt;
@@ -777,6 +822,9 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Sets the value of the 'dataInt' field
+     *
+     * @param value int value to set
+     * @return builder.
      */
     public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder setDataInt(int value) {
       validate(fields()[1], value);
@@ -787,6 +835,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Checks whether the 'dataInt' field has been set
+     *
+     * @return hasDataInt.
      */
     public boolean hasDataInt() {
       return fieldSetFlags()[1];
@@ -794,6 +844,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Clears the value of the 'dataInt' field
+     *
+     * @return builder.
      */
     public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder clearDataInt() {
       fieldSetFlags()[1] = false;
@@ -802,6 +854,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Gets the value of the 'dataLong' field
+     *
+     * @return dataLong.
      */
     public java.lang.Long getDataLong() {
       return dataLong;
@@ -809,6 +863,9 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Sets the value of the 'dataLong' field
+     *
+     * @param value long value to set
+     * @return builder.
      */
     public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder setDataLong(java.lang.Long value) {
       validate(fields()[2], value);
@@ -819,6 +876,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Checks whether the 'dataLong' field has been set
+     *
+     * @return hasDataLong.
      */
     public boolean hasDataLong() {
       return fieldSetFlags()[2];
@@ -826,6 +885,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Clears the value of the 'dataLong' field
+     *
+     * @return builder.
      */
     public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder clearDataLong() {
       dataLong = null;
@@ -835,6 +896,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Gets the value of the 'dataDouble' field
+     *
+     * @return dataDouble.
      */
     public java.lang.Double getDataDouble() {
       return dataDouble;
@@ -842,6 +905,9 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Sets the value of the 'dataDouble' field
+     *
+     * @param  value double value to set
+     * @return builder.
      */
     public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder setDataDouble(java.lang.Double value) {
       validate(fields()[3], value);
@@ -852,6 +918,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Checks whether the 'dataDouble' field has been set
+     *
+     * @return hasDataDouble.
      */
     public boolean hasDataDouble() {
       return fieldSetFlags()[3];
@@ -859,6 +927,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Clears the value of the 'dataDouble' field
+     *
+     * @return builder.
      */
     public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder clearDataDouble() {
       dataDouble = null;
@@ -868,6 +938,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Gets the value of the 'dataBytes' field
+     *
+     * @return dataBytes.
      */
     public java.nio.ByteBuffer getDataBytes() {
       return dataBytes;
@@ -875,6 +947,9 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Sets the value of the 'dataBytes' field
+     *
+     * @param value ByteBuffer to set
+     * @return builder
      */
     public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder setDataBytes(java.nio.ByteBuffer value) {
       validate(fields()[4], value);
@@ -885,6 +960,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Checks whether the 'dataBytes' field has been set
+     *
+     * @return hasDataBytes.
      */
     public boolean hasDataBytes() {
       return fieldSetFlags()[4];
@@ -892,6 +969,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Clears the value of the 'dataBytes' field
+     *
+     * @return builder.
      */
     public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder clearDataBytes() {
       dataBytes = null;
@@ -901,6 +980,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Gets the value of the 'arrayInt' field
+     *
+     * @return arrayInt.
      */
     public java.util.List<java.lang.Integer> getArrayInt() {
       return arrayInt;
@@ -908,6 +989,9 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Sets the value of the 'arrayInt' field
+     *
+     * @param value Integer List to set
+     * @return builder.
      */
     public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder setArrayInt(java.util.List<java.lang.Integer> value) {
       validate(fields()[5], value);
@@ -918,6 +1002,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Checks whether the 'arrayInt' field has been set
+     *
+     * @return hasArrayInt.
      */
     public boolean hasArrayInt() {
       return fieldSetFlags()[5];
@@ -925,6 +1011,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Clears the value of the 'arrayInt' field
+     *
+     * @return builder.
      */
     public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder clearArrayInt() {
       arrayInt = null;
@@ -934,6 +1022,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Gets the value of the 'arrayString' field
+     *
+     * @return arrayString.
      */
     public java.util.List<java.lang.CharSequence> getArrayString() {
       return arrayString;
@@ -941,6 +1031,9 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Sets the value of the 'arrayString' field
+     *
+     * @param value CharSequence List to set
+     * @return builder.
      */
     public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder setArrayString(java.util.List<java.lang.CharSequence> value) {
       validate(fields()[6], value);
@@ -951,6 +1044,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Checks whether the 'arrayString' field has been set
+     *
+     * @return hasArrayString.
      */
     public boolean hasArrayString() {
       return fieldSetFlags()[6];
@@ -958,6 +1053,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Clears the value of the 'arrayString' field
+     *
+     * @return builder.
      */
     public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder clearArrayString() {
       arrayString = null;
@@ -967,6 +1064,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Gets the value of the 'arrayLong' field
+     *
+     * @return arrayLong.
      */
     public java.util.List<java.lang.Long> getArrayLong() {
       return arrayLong;
@@ -974,6 +1073,9 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Sets the value of the 'arrayLong' field
+     *
+     * @param value Long List to set
+     * @return builder.
      */
     public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder setArrayLong(java.util.List<java.lang.Long> value) {
       validate(fields()[7], value);
@@ -984,6 +1086,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Checks whether the 'arrayLong' field has been set
+     *
+     * @return hasArrayLong.
      */
     public boolean hasArrayLong() {
       return fieldSetFlags()[7];
@@ -991,6 +1095,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Clears the value of the 'arrayLong' field
+     *
+     * @return builder.
      */
     public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder clearArrayLong() {
       arrayLong = null;
@@ -1000,6 +1106,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Gets the value of the 'arrayDouble' field
+     *
+     * @return arrayDouble.
      */
     public java.util.List<java.lang.Double> getArrayDouble() {
       return arrayDouble;
@@ -1007,6 +1115,9 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Sets the value of the 'arrayDouble' field
+     *
+     * @param value Double List to set
+     * @return builder.
      */
     public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder setArrayDouble(java.util.List<java.lang.Double> value) {
       validate(fields()[8], value);
@@ -1017,6 +1128,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Checks whether the 'arrayDouble' field has been set
+     *
+     * @return hasArrayDouble.
      */
     public boolean hasArrayDouble() {
       return fieldSetFlags()[8];
@@ -1024,6 +1137,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Clears the value of the 'arrayDouble' field
+     *
+     * @return builder.
      */
     public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder clearArrayDouble() {
       arrayDouble = null;
@@ -1033,6 +1148,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Gets the value of the 'mapInt' field
+     *
+     * @return mapInt.
      */
     public java.util.Map<java.lang.CharSequence, java.lang.Integer> getMapInt() {
       return mapInt;
@@ -1040,6 +1157,9 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Sets the value of the 'mapInt' field
+     *
+     * @param value Map to set
+     * @return builder.
      */
     public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder setMapInt(java.util.Map<java.lang.CharSequence, java.lang.Integer> value) {
       validate(fields()[9], value);
@@ -1050,6 +1170,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Checks whether the 'mapInt' field has been set
+     *
+     * @return hasMapInt.
      */
     public boolean hasMapInt() {
       return fieldSetFlags()[9];
@@ -1057,6 +1179,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Clears the value of the 'mapInt' field
+     *
+     * @return builder.
      */
     public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder clearMapInt() {
       mapInt = null;
@@ -1066,6 +1190,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Gets the value of the 'mapString' field
+     *
+     * @return mapString.
      */
     public java.util.Map<java.lang.CharSequence, java.lang.CharSequence> getMapString() {
       return mapString;
@@ -1073,6 +1199,9 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Sets the value of the 'mapString' field
+     *
+     * @param value Map to Set
+     * @return builder
      */
     public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder setMapString(java.util.Map<java.lang.CharSequence, java.lang.CharSequence> value) {
       validate(fields()[10], value);
@@ -1083,6 +1212,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Checks whether the 'mapString' field has been set
+     *
+     * @return hasMapString.
      */
     public boolean hasMapString() {
       return fieldSetFlags()[10];
@@ -1090,6 +1221,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Clears the value of the 'mapString' field
+     *
+     * @return builder.
      */
     public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder clearMapString() {
       mapString = null;
@@ -1099,6 +1232,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Gets the value of the 'mapLong' field
+     *
+     * @return mapLong.
      */
     public java.util.Map<java.lang.CharSequence, java.lang.Long> getMapLong() {
       return mapLong;
@@ -1106,6 +1241,9 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Sets the value of the 'mapLong' field
+     *
+     * @param value Map to set
+     * @return builder
      */
     public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder setMapLong(java.util.Map<java.lang.CharSequence, java.lang.Long> value) {
       validate(fields()[11], value);
@@ -1116,6 +1254,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Checks whether the 'mapLong' field has been set
+     *
+     * @return hasMapLong.
      */
     public boolean hasMapLong() {
       return fieldSetFlags()[11];
@@ -1123,6 +1263,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Clears the value of the 'mapLong' field
+     *
+     * @return builder.
      */
     public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder clearMapLong() {
       mapLong = null;
@@ -1132,6 +1274,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Gets the value of the 'mapDouble' field
+     *
+     * @return mapDouble.
      */
     public java.util.Map<java.lang.CharSequence, java.lang.Double> getMapDouble() {
       return mapDouble;
@@ -1139,6 +1283,9 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Sets the value of the 'mapDouble' field
+     *
+     * @param value Map to Set
+     * @return builder.
      */
     public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder setMapDouble(java.util.Map<java.lang.CharSequence, java.lang.Double> value) {
       validate(fields()[12], value);
@@ -1149,6 +1296,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Checks whether the 'mapDouble' field has been set
+     *
+     * @return hasMapDouble.
      */
     public boolean hasMapDouble() {
       return fieldSetFlags()[12];
@@ -1156,6 +1305,8 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Clears the value of the 'mapDouble' field
+     *
+     * @return builder.
      */
     public org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRecord.Builder clearMapDouble() {
       mapDouble = null;
@@ -1210,8 +1361,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Checks the dirty status of the 'dataString' field. A field is dirty if it represents a change that has not yet been written to the database.
-     *
-     * @param value the value to set.
      */
     public boolean isDataStringDirty() {
       throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -1235,8 +1384,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Checks the dirty status of the 'dataInt' field. A field is dirty if it represents a change that has not yet been written to the database.
-     *
-     * @param value the value to set.
      */
     public boolean isDataIntDirty() {
       throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -1260,8 +1407,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Checks the dirty status of the 'dataLong' field. A field is dirty if it represents a change that has not yet been written to the database.
-     *
-     * @param value the value to set.
      */
     public boolean isDataLongDirty() {
       throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -1285,8 +1430,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Checks the dirty status of the 'dataDouble' field. A field is dirty if it represents a change that has not yet been written to the database.
-     *
-     * @param value the value to set.
      */
     public boolean isDataDoubleDirty() {
       throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -1310,8 +1453,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Checks the dirty status of the 'dataBytes' field. A field is dirty if it represents a change that has not yet been written to the database.
-     *
-     * @param value the value to set.
      */
     public boolean isDataBytesDirty() {
       throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -1335,8 +1476,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Checks the dirty status of the 'arrayInt' field. A field is dirty if it represents a change that has not yet been written to the database.
-     *
-     * @param value the value to set.
      */
     public boolean isArrayIntDirty() {
       throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -1360,8 +1499,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Checks the dirty status of the 'arrayString' field. A field is dirty if it represents a change that has not yet been written to the database.
-     *
-     * @param value the value to set.
      */
     public boolean isArrayStringDirty() {
       throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -1385,8 +1522,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Checks the dirty status of the 'arrayLong' field. A field is dirty if it represents a change that has not yet been written to the database.
-     *
-     * @param value the value to set.
      */
     public boolean isArrayLongDirty() {
       throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -1410,8 +1545,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Checks the dirty status of the 'arrayDouble' field. A field is dirty if it represents a change that has not yet been written to the database.
-     *
-     * @param value the value to set.
      */
     public boolean isArrayDoubleDirty() {
       throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -1435,8 +1568,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Checks the dirty status of the 'mapInt' field. A field is dirty if it represents a change that has not yet been written to the database.
-     *
-     * @param value the value to set.
      */
     public boolean isMapIntDirty() {
       throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -1460,8 +1591,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Checks the dirty status of the 'mapString' field. A field is dirty if it represents a change that has not yet been written to the database.
-     *
-     * @param value the value to set.
      */
     public boolean isMapStringDirty() {
       throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -1485,8 +1614,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Checks the dirty status of the 'mapLong' field. A field is dirty if it represents a change that has not yet been written to the database.
-     *
-     * @param value the value to set.
      */
     public boolean isMapLongDirty() {
       throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -1510,13 +1637,10 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 
     /**
      * Checks the dirty status of the 'mapDouble' field. A field is dirty if it represents a change that has not yet been written to the database.
-     *
-     * @param value the value to set.
      */
     public boolean isMapDoubleDirty() {
       throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
     }
-
 
   }
 

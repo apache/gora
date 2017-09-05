@@ -95,7 +95,7 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
   /**
    * In this method persistent class been analyzed to find inner records with UDT type, this method should call in every Cassandra serialization Constructor.
    *
-   * @throws Exception
+   * @throws Exception exception
    */
   protected abstract void analyzePersistent() throws Exception;
 
