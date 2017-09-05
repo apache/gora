@@ -147,8 +147,8 @@ public interface DataStore<K, T extends Persistent> {
    * be replaced. See also the note on 
    * <a href="#visibility">visibility</a>.
    *
-   * @param key
-   * @param obj
+   * @param key the key of the object
+   * @param obj the {@link Persistent} object
    */
   void put(K key, T obj);
 
@@ -187,9 +187,9 @@ public interface DataStore<K, T extends Persistent> {
    * is null, then the data store returns the partitions for the default query
    * (returning every object)
    *
-   * @param query
+   * @param query the {@link Query} to partition
    * @return a List of PartitionQuery's
-   * @throws IOException 
+   * @throws IOException if there is an error generating partitions
    */
   List<PartitionQuery<K, T>> getPartitions(Query<K, T> query) throws IOException;
 

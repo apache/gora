@@ -26,10 +26,10 @@ import org.apache.gora.util.ReflectionUtils;
 
 /**
  * A default implementation of the {@link BeanFactory} interface. Constructs
- * the keys using by reflection, {@link Persistent} objects by calling
+ * the keys by using reflection, {@link Persistent} objects by calling
  *
- * @param <K>
- * @param <T>
+ * @param <K> a key
+ * @param <T> a {@link Persistent} object
  */
 public class BeanFactoryImpl<K, T extends Persistent> implements BeanFactory<K, T> {
 
@@ -54,8 +54,8 @@ public class BeanFactoryImpl<K, T extends Persistent> implements BeanFactory<K, 
   /**
    * Default constructor for this class.
    *
-   * @param keyClass
-   * @param persistentClass
+   * @param keyClass class of the keys
+   * @param persistentClass class of the [{@link Persistent} objects to be stored
    */
   public BeanFactoryImpl(Class<K> keyClass, Class<T> persistentClass) {
     this.keyClass = keyClass;

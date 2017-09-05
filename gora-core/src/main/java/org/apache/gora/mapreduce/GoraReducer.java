@@ -37,10 +37,10 @@ public class GoraReducer<K1, V1, K2, V2 extends Persistent>
    * @param persistentClass output value class
    * @param reducerClass    the reducer class extending GoraReducer
    * @param reuseObjects    whether to reuse objects in serialization
-   * @param <K1>
-   * @param <V1>
-   * @param <K2>
-   * @param <V2>
+   * @param <K1> Reduce input key class
+   * @param <V1> Reduce input value class
+   * @param <K2> Reduce output key class
+   * @param <V2> Reduce output value class
    */
   public static <K1, V1, K2, V2 extends Persistent>
   void initReducerJob(
@@ -62,10 +62,10 @@ public class GoraReducer<K1, V1, K2, V2 extends Persistent>
    * @param job          the job to set the properties for
    * @param dataStore    the datastore as the output
    * @param reducerClass the reducer class extending GoraReducer* @param reducerClass
-   * @param <K1>
-   * @param <V1>
-   * @param <K2>
-   * @param <V2>
+   * @param <K1> Reduce input key class
+   * @param <V1> Reduce input value class
+   * @param <K2> Reduce output key class
+   * @param <V2> Reduce output value class
    */
   public static <K1, V1, K2, V2 extends Persistent>
   void initReducerJob(
@@ -83,10 +83,10 @@ public class GoraReducer<K1, V1, K2, V2 extends Persistent>
    * @param dataStore    the datastore as the output
    * @param reducerClass the reducer class extending GoraReducer
    * @param reuseObjects whether to reuse objects in serialization
-   * @param <K1>
-   * @param <V1>
-   * @param <K2>
-   * @param <V2>
+   * @param <K1> Reduce input key class
+   * @param <V1> Reduce input value class
+   * @param <K2> Reduce output key class
+   * @param <V2> Reduce output value class
    */
   public static <K1, V1, K2, V2 extends Persistent>
   void initReducerJob(

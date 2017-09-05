@@ -32,9 +32,6 @@ import java.util.List;
 
 /**
  * A filter that checks for a single field in the persistent.
- * 
- * @param <K>
- * @param <T>
  */
 public class SingleFieldValueFilter<K, T extends PersistentBase> implements Filter<K, T>{
 

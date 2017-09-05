@@ -46,11 +46,11 @@ public class GoraMapper<K1, V1 extends Persistent, K2, V2> extends Mapper<K1, V1
    * @param mapperClass      the mapper class extending GoraMapper
    * @param partitionerClass optional partitioner class
    * @param reuseObjects     whether to reuse objects in serialization
-   * @param <K1>
-   * @param <V1>
-   * @param <K2>
-   * @param <V2>
-   * @throws IOException
+   * @param <K1> Map input key class
+   * @param <V1> Map input value class
+   * @param <K2> Map output key class
+   * @param <V2> Map output value class
+   * @throws IOException if there is an error initializing the Map job
    */
   @SuppressWarnings("rawtypes")
   public static <K1, V1 extends Persistent, K2, V2> void initMapperJob(
@@ -90,11 +90,11 @@ public class GoraMapper<K1, V1 extends Persistent, K2, V2> extends Mapper<K1, V1
    * @param outValueClass  Map output value class
    * @param mapperClass    the mapper class extending GoraMapper
    * @param reuseObjects   whether to reuse objects in serialization
-   * @param <K1>
-   * @param <V1>
-   * @param <K2>
-   * @param <V2>
-   * @throws IOException
+   * @param <K1> Map input key class
+   * @param <V1> Map input value class
+   * @param <K2> Map output key class
+   * @param <V2> Map output value class
+   * @throws IOException if there is an error initializing the Map job
    */
   @SuppressWarnings("rawtypes")
   public static <K1, V1 extends Persistent, K2, V2> void initMapperJob(
@@ -120,11 +120,11 @@ public class GoraMapper<K1, V1 extends Persistent, K2, V2> extends Mapper<K1, V1
    * @param mapperClass      the mapper class extending GoraMapper
    * @param partitionerClass optional partitioner class
    * @param reuseObjects     whether to reuse objects in serialization
-   * @param <K1>
-   * @param <V1>
-   * @param <K2>
-   * @param <V2>
-   * @throws IOException
+   * @param <K1> Map input key class
+   * @param <V1> Map input value class
+   * @param <K2> Map output key class
+   * @param <V2> Map output value class
+   * @throws IOException if there is an error initializing the Map job
    */
   @SuppressWarnings("rawtypes")
   public static <K1, V1 extends Persistent, K2, V2> void initMapperJob(
@@ -156,11 +156,11 @@ public class GoraMapper<K1, V1 extends Persistent, K2, V2> extends Mapper<K1, V1
    * @param outValueClass Map output value class
    * @param mapperClass   the mapper class extending GoraMapper
    * @param reuseObjects  whether to reuse objects in serialization
-   * @param <K1>
-   * @param <V1>
-   * @param <K2>
-   * @param <V2>
-   * @throws IOException
+   * @param <K1> Map input key class
+   * @param <V1> Map input value class
+   * @param <K2> Map output key class
+   * @param <V2> Map output value class
+   * @throws IOException if there is an error initializing the Map job
    */
   @SuppressWarnings({ "rawtypes" })
   public static <K1, V1 extends Persistent, K2, V2> void initMapperJob(
@@ -183,11 +183,11 @@ public class GoraMapper<K1, V1 extends Persistent, K2, V2> extends Mapper<K1, V1
    * @param outValueClass Map output value class
    * @param mapperClass   the mapper class extending GoraMapper
    * @param reuseObjects  whether to reuse objects in serialization
-   * @param <K1>
-   * @param <V1>
-   * @param <K2>
-   * @param <V2>
-   * @throws IOException
+   * @param <K1> Map input key class
+   * @param <V1> Map input value class
+   * @param <K2> Map output key class
+   * @param <V2> Map output value class
+   * @throws IOException if there is an error initializing the Map job
    */
   @SuppressWarnings({ "rawtypes" })
   public static <K1, V1 extends Persistent, K2, V2> void initMapperJob(
