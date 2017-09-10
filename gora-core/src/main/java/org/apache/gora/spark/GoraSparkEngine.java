@@ -100,10 +100,8 @@ public class GoraSparkEngine<K, V extends Persistent> {
    * Creates a job and sets the output parameters for the conf that Spark will use
    *
    * @param dataStore the datastore as the output
-   * @param <K>
-   * @param <V>
-   * @return
-   * @throws IOException
+   * @return a populated output {@link org.apache.hadoop.conf.Configuration} 
+   * @throws IOException if there is an error creating the configuration
    */
     public <K, V extends Persistent> Configuration generateOutputConf(DataStore<K, V> dataStore)
        throws IOException {
@@ -121,9 +119,7 @@ public class GoraSparkEngine<K, V extends Persistent> {
    *
    * @param job the job to set the properties for
    * @param dataStore the datastore as the output
-   * @param <K>
-   * @param <V>
-   * @return
+   * @return a populated output {@link org.apache.hadoop.conf.Configuration} 
    */
     public <K, V extends Persistent> Configuration generateOutputConf(Job job,
         DataStore<K, V> dataStore) {
@@ -138,9 +134,7 @@ public class GoraSparkEngine<K, V extends Persistent> {
    * @param dataStoreClass  the datastore class
    * @param keyClass        output key class
    * @param persistentClass output value class
-   * @param <K>
-   * @param <V>
-   * @return
+   * @return a populated output {@link org.apache.hadoop.conf.Configuration} 
    */
     @SuppressWarnings("rawtypes")
     public <K, V extends Persistent> Configuration generateOutputConf(Job job,

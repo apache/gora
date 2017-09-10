@@ -727,12 +727,12 @@
     <!-- module>gora-lucene</module -->
     <module>gora-dynamodb</module>
     <module>gora-couchdb</module>
-    <!--module>gora-sql</module -->
     <module>gora-maven-plugin</module>
     <module>gora-mongodb</module>
     <module>gora-solr</module>
     <module>gora-tutorial</module>
     <module>sources-dist</module>
+    <module>gora-aerospike</module>
   </modules>
 
   <properties>
@@ -750,8 +750,8 @@
     <!-- Amazon Dependencies -->
     <amazon.version>1.10.55</amazon.version>
     <!-- Cassandra Dependencies -->
-    <cassandra.version>2.0.2</cassandra.version>
-    <hector.version>1.1-4</hector.version>
+    <cassandra-driver.version>3.3.0</cassandra-driver.version>
+    <cassandra.version>3.11.0</cassandra.version>
     <!-- Solr Dependencies -->
     <lucene-solr.version>6.5.1</lucene-solr.version>
     <solr-solrj.version>6.5.1</solr-solrj.version>
@@ -762,6 +762,7 @@
     <restlet.version>2.3.1</restlet.version>
 
     <spark.version>1.4.1</spark.version>
+    <aerospike.version>4.0.6</aerospike.version>
     <!-- Misc Dependencies -->
     <guava.version>13.0</guava.version>
     <commons-lang.version>2.6</commons-lang.version>
@@ -783,6 +784,7 @@
 
     <!-- Testing Dependencies -->
     <junit.version>4.10</junit.version>
+    <test.container.version>1.4.2</test.container.version>
 
     <!-- Maven Plugin Dependencies -->
     <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
@@ -791,7 +793,7 @@
     <maven-jar-plugin.version>2.3.2</maven-jar-plugin.version>
     <maven-dependency-plugin.version>2.9</maven-dependency-plugin.version>
     <build-helper-maven-plugin.version>1.7</build-helper-maven-plugin.version>
-    <maven-surfire-plugin.version>2.12</maven-surfire-plugin.version>
+    <maven-surfire-plugin.version>2.20</maven-surfire-plugin.version>
     <maven-release-plugin.version>2.5</maven-release-plugin.version>
     <maven-bundle-plugin.version>2.5.3</maven-bundle-plugin.version>
     <maven-source-plugin.version>2.1.2</maven-source-plugin.version>
@@ -844,36 +846,12 @@
 
       <dependency>
         <groupId>org.apache.gora</groupId>
-        <artifactId>gora-solr</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.gora</groupId>
-        <artifactId>gora-solr</artifactId>
-        <version>${project.version}</version>
-        <classifier>tests</classifier>
-      </dependency>
-
-      <dependency>
-        <groupId>org.apache.gora</groupId>
         <artifactId>gora-cassandra</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.gora</groupId>
         <artifactId>gora-cassandra</artifactId>
-        <version>${project.version}</version>
-        <type>test-jar</type>
-      </dependency>
-
-      <dependency>
-        <groupId>org.apache.gora</groupId>
-        <artifactId>gora-sql</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.gora</groupId>
-        <artifactId>gora-sql</artifactId>
         <version>${project.version}</version>
         <type>test-jar</type>
       </dependency>
@@ -934,6 +912,17 @@
       <dependency>
         <groupId>org.apache.gora</groupId>
         <artifactId>gora-dynamodb</artifactId>
+        <version>${project.version}</version>
+        <type>test-jar</type>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-aerospike</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-aerospike</artifactId>
         <version>${project.version}</version>
         <type>test-jar</type>
       </dependency>
@@ -1084,18 +1073,6 @@
         <groupId>org.apache.cassandra</groupId>
         <artifactId>cassandra-thrift</artifactId>
         <version>${cassandra.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.hectorclient</groupId>
-        <artifactId>hector-core</artifactId>
-        <version>${hector.version}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.apache.cassandra</groupId>
-            <artifactId>cassandra-all</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
 
       <dependency>
@@ -1559,6 +1536,12 @@
         <groupId>org.codehaus.sonar</groupId>
         <artifactId>sonar-maven-plugin</artifactId>
         <version>4.4</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>testcontainers</artifactId>
+        <version>${test.container.version}</version>
       </dependency>
 
     </dependencies>

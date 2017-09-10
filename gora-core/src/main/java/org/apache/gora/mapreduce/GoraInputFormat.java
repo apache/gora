@@ -131,9 +131,9 @@ public class GoraInputFormat<K, T extends PersistentBase>
    * @param job          the job to set the properties for
    * @param query        the query to get the inputs from
    * @param reuseObjects whether to reuse objects in serialization
-   * @param <K1>
-   * @param <V1>
-   * @throws IOException
+   * @param <K1> key class for {@link org.apache.gora.query.Query}
+   * @param <V1> object value key class for {@link org.apache.gora.query.Query}
+   * @throws IOException if there is an error configuring the input parameters for the job
    */
   public static <K1, V1 extends Persistent> void setInput(Job job
       , Query<K1,V1> query, boolean reuseObjects)
@@ -155,9 +155,9 @@ public class GoraInputFormat<K, T extends PersistentBase>
    * @param inKeyClass     Map input key class
    * @param inValueClass   Map input value class
    * @param reuseObjects   whether to reuse objects in serialization
-   * @param <K1>
-   * @param <V1>
-   * @throws IOException
+   * @param <K1> key class for {@link org.apache.gora.query.Query}
+   * @param <V1> object value key class for {@link org.apache.gora.query.Query}
+   * @throws IOException if there is an error configuring the input parameters for the job
    */
   public static <K1, V1 extends Persistent> void setInput(
       Job job, 

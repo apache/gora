@@ -32,9 +32,6 @@ import java.util.List;
  * {@link FilterList} enables us to utilize conditional operands
  * for advanced filtering within the construction and
  * execution of Gora queries.
- *
- * @param <K>
- * @param <T>
  */
 public class FilterList<K, T extends PersistentBase> implements Filter<K, T> {
   /** set operator */

@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  * Base implementations for {@link FileBackedDataStore} methods.
  */
 public abstract class FileBackedDataStoreBase<K, T extends PersistentBase>
-  extends DataStoreBase<K, T> implements FileBackedDataStore<K, T> {
+extends DataStoreBase<K, T> implements FileBackedDataStore<K, T> {
 
   protected long inputSize; //input size in bytes
 
@@ -59,12 +59,12 @@ public abstract class FileBackedDataStoreBase<K, T extends PersistentBase>
 
   protected InputStream inputStream;
   protected OutputStream outputStream;
-  
+
   public static final Logger LOG = LoggerFactory.getLogger(AvroStore.class);
 
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
-      Properties properties) {
+          Properties properties) {
     super.initialize(keyClass, persistentClass, properties);
     if(properties != null) {
       if(this.inputPath == null) {
@@ -77,37 +77,37 @@ public abstract class FileBackedDataStoreBase<K, T extends PersistentBase>
   }
 
   @Override
-public void setInputPath(String inputPath) {
+  public void setInputPath(String inputPath) {
     this.inputPath = inputPath;
   }
 
   @Override
-public void setOutputPath(String outputPath) {
+  public void setOutputPath(String outputPath) {
     this.outputPath = outputPath;
   }
 
   @Override
-public String getInputPath() {
+  public String getInputPath() {
     return inputPath;
   }
 
   @Override
-public String getOutputPath() {
+  public String getOutputPath() {
     return outputPath;
   }
 
   @Override
-public void setInputStream(InputStream inputStream) {
+  public void setInputStream(InputStream inputStream) {
     this.inputStream = inputStream;
   }
 
   @Override
-public void setOutputStream(OutputStream outputStream) {
+  public void setOutputStream(OutputStream outputStream) {
     this.outputStream = outputStream;
   }
 
   @Override
-public InputStream getInputStream() {
+  public InputStream getInputStream() {
     return inputStream;
   }
 
@@ -116,10 +116,11 @@ public InputStream getInputStream() {
     return outputStream;
   }
 
-  /** Opens an InputStream for the input Hadoop path
-   *
-   * @return
-   * @throws IOException
+  /** 
+   * Opens an InputStream for the input Hadoop path
+   * @return an open {@link java.io.InputStream}
+   * @throws IOException if there is an error obtaining the FileSystem or/from 
+   * the path
    */
   protected InputStream createInputStream() throws IOException {
     //TODO: if input path is a directory, use smt like MultiInputStream to
@@ -130,9 +131,9 @@ public InputStream getInputStream() {
     return fs.open(path);
   }
 
-  /** Opens an OutputStream for the output Hadoop path
-   *
-   * @return
+  /** 
+   * Opens an OutputStream for the output Hadoop path
+   * @return an open {@link java.io.OutputStream}
    */
   protected OutputStream createOutputStream() {
     OutputStream conf = null;
@@ -171,7 +172,7 @@ public InputStream getInputStream() {
     try{
       splits = GoraMapReduceUtils.getSplits(getConf(), inputPath);
       queries = new ArrayList<>(splits.size());
-  
+
       for(InputSplit split : splits) {
         queries.add(new FileSplitPartitionQuery<>(query, (FileSplit) split));
       }
@@ -200,22 +201,22 @@ public InputStream getInputStream() {
    * Executes a normal Query reading the whole data. #execute() calls this function
    * for non-PartitionQuery's.
    *
-   * @param query
-   * @return
-   * @throws IOException
+   * @param query the {@link org.apache.gora.query.Query} to execute
+   * @return a {@link org.apache.gora.query.Result}
+   * @throws IOException if there is an error during query exeuction
    */
   protected abstract Result<K,T> executeQuery(Query<K,T> query)
-    throws IOException;
+          throws IOException;
 
   /**
    * Executes a PartitialQuery, reading the data between start and end.
    *
-   * @param query
-   * @return
-   * @throws IOException
+   * @param query the {@link org.apache.gora.query.impl.FileSplitPartitionQuery} to execute
+   * @return a {@link org.apache.gora.query.Result}
+   * @throws IOException if there is an error during query exeuction
    */
   protected abstract Result<K,T> executePartial(FileSplitPartitionQuery<K,T> query)
-    throws IOException;
+          throws IOException;
 
   @Override
   public void flush() {
@@ -234,7 +235,7 @@ public InputStream getInputStream() {
   @Override
   public void deleteSchema() {
     throw new OperationNotSupportedException("delete schema is not supported for " +
-    		"file backed data stores");
+            "file backed data stores");
   }
 
   @Override
@@ -272,9 +273,9 @@ public InputStream getInputStream() {
 
   @Override
   public void close() {
-      IOUtils.closeStream(inputStream);
-      IOUtils.closeStream(outputStream);
-      inputStream = null;
-      outputStream = null;
+    IOUtils.closeStream(inputStream);
+    IOUtils.closeStream(outputStream);
+    inputStream = null;
+    outputStream = null;
   }
 }

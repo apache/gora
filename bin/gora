@@ -45,6 +45,7 @@ if [ $# = 0 ]; then
   echo "where COMMAND is one of:"
   echo "  goracompiler               Run Compiler"
   echo "  specificcompiler           Run Avro Specific Compiler"
+  echo "  cassandranativecompiler    Run Gora Cassandra Native Compiler"
   echo "  dynamocompiler             Run Gora DynamoDB Compiler"
   echo "  goracirackspace            Run the GoraCI Rackspace orchestration setup"
   echo "  goracichef                 Run the GoraCI Chef software provisioning setup"
@@ -121,6 +122,10 @@ elif [ "$COMMAND" = "specificcompiler" ] ; then
   MODULE=gora-core
   CLASSPATH=$CLASSPATH:$GORA_HOME/$MODULE/target/classes/
   CLASS=org.apache.avro.specific.SpecificCompiler
+elif [ "$COMMAND" = "cassandranativecompiler" ] ; then
+  MODULE=gora-cassandra-cql
+  CLASSPATH=$CLASSPATH:$GORA_HOME/$MODULE/target/classes/
+  CLASS=org.apache.gora.cassandra.compiler.GoraCassandraNativeCompiler
 elif [ "$COMMAND" = "dynamocompiler" ] ; then
   MODULE=gora-dynamodb
   CLASSPATH=$CLASSPATH:$GORA_HOME/$MODULE/target/classes/

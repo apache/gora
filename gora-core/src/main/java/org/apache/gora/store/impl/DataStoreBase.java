@@ -53,9 +53,9 @@ import org.slf4j.LoggerFactory;
 /**
  * A Base class for Avro persistent {@link DataStore}s.
  */
-public abstract class DataStoreBase<K, T extends PersistentBase>
+public abstract class DataStoreBase<K, T extends PersistentBase> 
     implements DataStore<K, T>, Configurable, Writable, Closeable {
-	
+
   protected BeanFactory<K, T> beanFactory;
 
   protected Class<K> keyClass;
@@ -76,7 +76,7 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
   protected SpecificDatumReader<T> datumReader;
 
   protected SpecificDatumWriter<T> datumWriter;
-  
+
   public static final Logger LOG = LoggerFactory.getLogger(AvroStore.class);
 
   public DataStoreBase() {
@@ -84,7 +84,7 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
 
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
-      Properties properties) {
+          Properties properties) {
     setKeyClass(keyClass);
     setPersistentClass(persistentClass);
     if (this.beanFactory == null) {
@@ -157,11 +157,11 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
   }
 
   /**
-   * Checks whether the fields argument is null, and if so
-   * returns all the fields of the Persistent object, else returns the
+   * Check whether the fields argument is null, if it is not,
+   * return all the fields of the Persistent object, else return the
    * argument.
    *
-   * @param fields
+   * @param fields a string array of fields to query against
    * @return String array
    */
   protected String[] getFieldsToQuery(String[] fields) {
@@ -170,10 +170,10 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
     }
     return getFields();
   }
-  
+
   protected String[] getFields() {
     List<Field> schemaFields = beanFactory.getCachedPersistent().getSchema().getFields();
-    
+
     List<Field> list = new ArrayList<>();
     for (Field field : schemaFields) {
       if (!Persistent.DIRTY_BYTES_FIELD_NAME.equalsIgnoreCase(field.name())) {
@@ -181,12 +181,12 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
       }
     }
     schemaFields = list;
-    
+
     String[] fieldNames = new String[schemaFields.size()];
     for(int i = 0; i<fieldNames.length; i++ ){
       fieldNames[i] = schemaFields.get(i).name();
     }
-    
+
     return fieldNames;
   }
 
@@ -266,7 +266,7 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
     if (confSchemaName != null) {
       return confSchemaName;
     }
-    
+
     String schemaName = DataStoreFactory.getDefaultSchemaName(properties, this);
     if(schemaName != null) {
       return schemaName;

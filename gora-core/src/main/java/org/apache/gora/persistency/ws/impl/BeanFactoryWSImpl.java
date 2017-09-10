@@ -31,8 +31,8 @@ import org.slf4j.LoggerFactory;
  * A default implementation of the {@link BeanFactory} interface. Constructs 
  * the keys using by reflection, {@link Persistent} objects by calling
  *
- * @param <K>
- * @param <T>
+ * @param <K> a key
+ * @param <T> a {@link Persistent} object
  */
 public class BeanFactoryWSImpl<K, T extends Persistent> implements BeanFactory<K, T> {
 
@@ -71,8 +71,8 @@ public class BeanFactoryWSImpl<K, T extends Persistent> implements BeanFactory<K
   /**
    * Constructor
    *
-   * @param keyClass
-   * @param persistentClass
+   * @param keyClass class of the key to be used
+   * @param persistentClass class of the {@link Persistent} objects to be stored
    */
   public BeanFactoryWSImpl(Class<K> keyClass, Class<T> persistentClass) {
     this.keyClass = keyClass;
@@ -92,7 +92,6 @@ public class BeanFactoryWSImpl<K, T extends Persistent> implements BeanFactory<K
   }
   
   @Override
-  @SuppressWarnings("unchecked")
   /**
    * Creates a new key
    */

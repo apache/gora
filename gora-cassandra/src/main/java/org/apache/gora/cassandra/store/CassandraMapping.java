@@ -1,329 +1,242 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+/*
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
-
 package org.apache.gora.cassandra.store;
+
+import org.apache.gora.cassandra.bean.CassandraKey;
+import org.apache.gora.cassandra.bean.Field;
+import org.apache.gora.cassandra.bean.KeySpace;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import me.prettyprint.cassandra.model.BasicColumnFamilyDefinition;
-import me.prettyprint.cassandra.service.ThriftCfDef;
-import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
-import me.prettyprint.hector.api.ddl.ColumnType;
-import me.prettyprint.hector.api.ddl.ComparatorType;
-
-import org.jdom.Element;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
- * Mapping definitions for CouchDB.
+ * This class represents the Cassandra Mapping.
  */
 public class CassandraMapping {
-  
-  public static final Logger LOG = LoggerFactory.getLogger(CassandraMapping.class);
-  
-  private static final String NAME_ATTRIBUTE = "name";
-  private static final String COLUMN_ATTRIBUTE = "qualifier";
-  private static final String FAMILY_ATTRIBUTE = "family";
-  private static final String SUPER_ATTRIBUTE = "type";
-  private static final String CLUSTER_ATTRIBUTE = "cluster";
-  private static final String HOST_ATTRIBUTE = "host";
 
-  private static final String GCGRACE_SECONDS_ATTRIBUTE = "gc_grace_seconds";
-  private static final String COLUMNS_TTL_ATTRIBUTE = "ttl";
-  private static final String REPLICATION_FACTOR_ATTRIBUTE = "replication_factor"; 	
-  private static final String REPLICATION_STRATEGY_ATTRIBUTE = "placement_strategy";
-  
-  public static final String DEFAULT_REPLICATION_FACTOR = "1";		 
-  public static final String DEFAULT_REPLICATION_STRATEGY = "org.apache.cassandra.locator.SimpleStrategy";
-  public static final String DEFAULT_COLUMNS_TTL = "0";
-  public static final String DEFAULT_GCGRACE_SECONDS = "0";
-
-  private String hostName;
-  private String clusterName;
-  private String keyspaceName;
-  private String keyspaceStrategy;
-  private int 	 keyspaceRF;
-  
-  
-  /**
-   * List of the super column families.
-   */
-  private List<String> superFamilies = new ArrayList<>();
+  private static final String PRIMARY_KEY = "primarykey";
+  private CassandraKey cassandraKey;
+  private Map<String, String> tableProperties;
+  private Class keyClass;
+  private Class persistentClass;
+  private KeySpace keySpace;
+  private List<Field> fieldList;
+  private Field inlinedDefinedPartitionKey;
+  private String coreName;
 
   /**
-   * Look up the column family associated to the Avro field.
+   * Constructor of the class
    */
-  private Map<String, String> familyMap = new HashMap<>();
-  
-  /**
-   * Look up the column associated to the Avro field.
-   */
-  private Map<String, String> columnMap = new HashMap<>();
-
-  /**
-   * Helps storing attributes defined for each field.
-   */
-  private Map<String, String> columnAttrMap = new HashMap<>();
-  
-  /**
-   * Look up the column family from its name.
-   */
-  private Map<String, BasicColumnFamilyDefinition> columnFamilyDefinitions = 
-		  new HashMap<>();
-
-  
-  /**
-   * Simply gets the Cassandra host name.
-   * @return hostName
-   */
-  public String getHostName() {
-    return this.hostName;
-  }
-  
-  /**
-   * Simply gets the Cassandra cluster (the machines (nodes) 
-   * in a logical Cassandra instance) name.
-   * Clusters can contain multiple keyspaces. 
-   * @return clusterName
-   */
-  public String getClusterName() {
-    return this.clusterName;
+  CassandraMapping() {
+    this.fieldList = new ArrayList<>();
+    this.tableProperties = new HashMap<>();
   }
 
   /**
-   * Simply gets the Cassandra namespace for ColumnFamilies, typically one per application
-   * @return
+   * This method returns the KeySpace in the mapping file,
+   *
+   * @return Key space {@link KeySpace}
    */
-  public String getKeyspaceName() {
-    return this.keyspaceName;
-  }
-  
-  /**
-   * gets the replication strategy
-   * @return string class name to be used for strategy
-   */
-  public String getKeyspaceReplicationStrategy() {
-	return this.keyspaceStrategy;
-  }
-  
-  /**
-   * gets the replication factor
-   * @return int replication factor
-   */
-  public int getKeyspaceReplicationFactor() {
-	return this.keyspaceRF;
+  public KeySpace getKeySpace() {
+    return keySpace;
   }
 
   /**
-   * Primary class for loading Cassandra configuration from the 'MAPPING_FILE'.
-   * It should be noted that should the "qualifier" attribute and its associated
-   * value be absent from class field definition, it will automatically be set to 
-   * the field name value.
-   * 
+   * This method set the KeySpace in the Cassandra mapping.
+   *
+   * @param keySpace Key space {@link KeySpace}
    */
-  @SuppressWarnings("unchecked")
-  public CassandraMapping(Element keyspace, Element mapping) {
-    if (keyspace == null) {
-      LOG.error("Keyspace element should not be null!");
-      return;
-    } else {
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Located Cassandra Keyspace");
+  void setKeySpace(KeySpace keySpace) {
+    this.keySpace = keySpace;
+  }
+
+  /**
+   * Thi method returns only the fields which belongs only for the Persistent Object.
+   *
+   * @return List of Fields
+   */
+  public List<Field> getFieldList() {
+    return fieldList;
+  }
+
+  /**
+   * This method returns the Persistent Object's Field from the mapping, according to the FieldName.
+   *
+   * @param fieldName Field Name
+   * @return Field {@link Field}
+   */
+  public Field getFieldFromFieldName(String fieldName) {
+    for (Field field1 : fieldList) {
+      if (field1.getFieldName().equalsIgnoreCase(fieldName)) {
+        return field1;
       }
     }
-    this.keyspaceName = keyspace.getAttributeValue(NAME_ATTRIBUTE);
-    if (this.keyspaceName == null) {
-      LOG.error("Error locating Cassandra Keyspace name attribute!");
-    } else {
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Located Cassandra Keyspace name: '" + keyspaceName + "'");
+    return null;
+  }
+
+  /**
+   * This method returns the Persistent Object's Field from the mapping, according to the ColumnName.
+   *
+   * @param columnName Column Name
+   * @return Field {@link Field}
+   */
+  public Field getFieldFromColumnName(String columnName) {
+    for (Field field1 : fieldList) {
+      if (field1.getColumnName().equalsIgnoreCase(columnName)) {
+        return field1;
       }
     }
-    this.clusterName = keyspace.getAttributeValue(CLUSTER_ATTRIBUTE);
-    if (this.clusterName == null) {
-    	LOG.error("Error locating Cassandra Keyspace cluster attribute!");
-    } else {
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Located Cassandra Keyspace cluster: '" + clusterName + "'");
+    return null;
+  }
+
+  /**
+   * This method returns the Field Names
+   *
+   * @return array of Field Names
+   */
+  public String[] getFieldNames() {
+    List<String> fieldNames = new ArrayList<>(fieldList.size());
+    for (Field field : fieldList) {
+      fieldNames.add(field.getFieldName());
+    }
+    String[] fieldNameArray = new String[fieldNames.size()];
+    return fieldNames.toArray(fieldNameArray);
+  }
+
+  /**
+   * This method returns partition keys
+   *
+   * @return partitionKeys
+   */
+  public String[] getAllFieldsIncludingKeys() {
+    List<String> fieldNames = new ArrayList<>(fieldList.size());
+    for (Field field : fieldList) {
+      fieldNames.add(field.getFieldName());
+    }
+    if (cassandraKey != null) {
+      for (Field field : cassandraKey.getFieldList()) {
+        fieldNames.add(field.getFieldName());
       }
     }
-    this.hostName = keyspace.getAttributeValue(HOST_ATTRIBUTE);
-    if (this.hostName == null) {
-    	LOG.error("Error locating Cassandra Keyspace host attribute!");
+    String[] fieldNameArray = new String[fieldNames.size()];
+    return fieldNames.toArray(fieldNameArray);
+  }
+
+  /**
+   * This method return all the fields which involves with partition keys, Including composite Keys
+   * @return field Names
+   */
+  public String[] getAllKeys() {
+    List<String> fieldNames = new ArrayList<>();
+    Field keyField = getInlinedDefinedPartitionKey();
+    if (cassandraKey != null) {
+      for (Field field : cassandraKey.getFieldList()) {
+        fieldNames.add(field.getFieldName());
+      }
     } else {
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Located Cassandra Keyspace host: '" + hostName + "'");
-      }  
+      fieldNames.add(keyField.getFieldName());
     }
-    
-    // setting replication strategy
-    this.keyspaceStrategy = keyspace.getAttributeValue( REPLICATION_STRATEGY_ATTRIBUTE );
-    if( null == this.keyspaceStrategy ) {
-    	this.keyspaceStrategy = DEFAULT_REPLICATION_STRATEGY;
-    }
-	if( LOG.isDebugEnabled() ) {
-		LOG.debug( "setting Keyspace replication strategy to " + this.keyspaceStrategy );
-	}
+    String[] fieldNameArray = new String[fieldNames.size()];
+    return fieldNames.toArray(fieldNameArray);
+  }
 
-	// setting replication factor
-	String tmp = keyspace.getAttributeValue( REPLICATION_FACTOR_ATTRIBUTE );	
-	if( null == tmp ) {
-		tmp = DEFAULT_REPLICATION_FACTOR;
-	}
-	this.keyspaceRF = Integer.parseInt( tmp );
-	if( LOG.isDebugEnabled() ) {
-		LOG.debug( "setting Keyspace replication factor to " + this.keyspaceRF );
-	}
+  public CassandraKey getCassandraKey() {
+    return cassandraKey;
+  }
 
-    
-    // load column family definitions
-    List<Element> elements = keyspace.getChildren();
-    for (Element element: elements) {
-      BasicColumnFamilyDefinition cfDef = new BasicColumnFamilyDefinition();
-      
-      String familyName = element.getAttributeValue(NAME_ATTRIBUTE);
-      if (familyName == null) {
-      	LOG.error("Error locating column family name attribute!");
-      	continue;
-      } else {
-        if (LOG.isDebugEnabled()) {
-          LOG.debug("Located column family: '" + familyName + "'" );
+  void setCassandraKey(CassandraKey cassandraKey) {
+    this.cassandraKey = cassandraKey;
+  }
+
+  public String getCoreName() {
+    return coreName;
+  }
+
+  void setCoreName(String coreName) {
+    this.coreName = coreName;
+  }
+
+  void addCassandraField(Field field) {
+    this.fieldList.add(field);
+  }
+
+  void addProperty(String key, String value) {
+    this.tableProperties.put(key, value);
+  }
+
+  public String getProperty(String key) {
+    return this.tableProperties.get(key);
+  }
+
+  private Field getDefaultCassandraKey() {
+    Field field = new Field();
+    field.setFieldName("defaultId");
+    field.setColumnName("defaultId");
+    field.setType("varchar");
+    field.addProperty("primarykey", "true");
+    return field;
+  }
+
+  public Class getKeyClass() {
+    return keyClass;
+  }
+
+  public void setKeyClass(Class keyClass) {
+    this.keyClass = keyClass;
+  }
+
+  public Class getPersistentClass() {
+    return persistentClass;
+  }
+
+  void setPersistentClass(Class persistentClass) {
+    this.persistentClass = persistentClass;
+  }
+
+  /**
+   * This method return the Inlined defined Partition Key,
+   * If there isn't any inlined define partition keys,
+   * this method returns default predefined partition key "defaultId".
+   *
+   * @return Partition Key {@link Field}
+   */
+  public Field getInlinedDefinedPartitionKey() {
+    if (inlinedDefinedPartitionKey != null) {
+      return inlinedDefinedPartitionKey;
+    } else {
+      for (Field field : fieldList) {
+        if (Boolean.parseBoolean(field.getProperty(PRIMARY_KEY))) {
+          inlinedDefinedPartitionKey = field;
+          break;
         }
       }
-      String gcgrace_scs = element.getAttributeValue(GCGRACE_SECONDS_ATTRIBUTE);
-      if (gcgrace_scs == null) {
-        LOG.warn("Error locating gc_grace_seconds attribute for '" + familyName + "' column family");
-        LOG.warn("Using gc_grace_seconds default value which is: " + DEFAULT_GCGRACE_SECONDS 
-        		+ " and is viable ONLY FOR A SINGLE NODE CLUSTER");
-        LOG.warn("please update the gora-cassandra-mapping.xml file to avoid seeing this warning");
-      } else {
-        if (LOG.isDebugEnabled()) {
-        LOG.debug("Located gc_grace_seconds: '" + gcgrace_scs + "'" );
-        }
+      if (inlinedDefinedPartitionKey == null) {
+        return getDefaultCassandraKey();
       }
-
-      String superAttribute = element.getAttributeValue(SUPER_ATTRIBUTE);
-      if (superAttribute != null) {
-        if (LOG.isDebugEnabled()) {
-          LOG.debug("Located super column family");
-        }
-        this.superFamilies.add(familyName);
-        if (LOG.isDebugEnabled()) {
-          LOG.debug("Added super column family: '" + familyName + "'");
-        }
-        cfDef.setColumnType(ColumnType.SUPER);
-        cfDef.setSubComparatorType(ComparatorType.BYTESTYPE);
-      }
-
-      cfDef.setKeyspaceName(this.keyspaceName);
-      cfDef.setName(familyName);
-      cfDef.setComparatorType(ComparatorType.BYTESTYPE);
-      cfDef.setDefaultValidationClass(ComparatorType.BYTESTYPE.getClassName());
-
-      cfDef.setGcGraceSeconds(Integer.parseInt( gcgrace_scs!=null?gcgrace_scs:DEFAULT_GCGRACE_SECONDS));
-      this.columnFamilyDefinitions.put(familyName, cfDef);
-
-    }
-    
-    // load column definitions    
-    elements = mapping.getChildren();
-    for (Element element: elements) {
-      String fieldName = element.getAttributeValue(NAME_ATTRIBUTE);
-      String familyName = element.getAttributeValue(FAMILY_ATTRIBUTE);
-      String columnName = element.getAttributeValue(COLUMN_ATTRIBUTE);
-      String ttlValue = element.getAttributeValue(COLUMNS_TTL_ATTRIBUTE);
-      if (fieldName == null) {
-       LOG.error("Field name is not declared.");
-        continue;
-      }
-      if (familyName == null) {
-        LOG.error("Family name is not declared for \"" + fieldName + "\" field.");
-        continue;
-      }
-      if (columnName == null) {
-        LOG.warn("Column name (qualifier) is not declared for \"" + fieldName + "\" field.");
-        columnName = fieldName;
-      }
-      if (ttlValue == null) {
-        LOG.warn("TTL value is not defined for \"" + fieldName + "\" field. \n Using default value: " + DEFAULT_COLUMNS_TTL);
-      }
-
-      BasicColumnFamilyDefinition columnFamilyDefinition = this.columnFamilyDefinitions.get(familyName);
-      if (columnFamilyDefinition == null) {
-        LOG.warn("Family " + familyName + " was not declared in the keyspace.");
-      }
-
-      this.familyMap.put(fieldName, familyName);
-      this.columnMap.put(fieldName, columnName);
-      // TODO we should find a way of storing more values into this map
-      this.columnAttrMap.put(columnName, ttlValue!=null?ttlValue:DEFAULT_COLUMNS_TTL);
+      return inlinedDefinedPartitionKey;
     }
   }
 
-  /**
-   * Add new column to the CassandraMapping using the the below parameters
-   * @param pFamilyName the column family name
-   * @param pFieldName the Avro field from the Schema
-   * @param pColumnName the column name within the column family.
-   */
-  public void addColumn(String pFamilyName, String pFieldName, String pColumnName){
-    this.familyMap.put(pFieldName, pFamilyName);
-    this.columnMap.put(pFieldName, pColumnName);
-  }
-
-  public String getFamily(String name) {
-    return this.familyMap.get(name);
-  }
-
-  public String getColumn(String name) {
-    return this.columnMap.get(name);
-  }
-
-  public Map<String,String> getFamilyMap(){
-    return this.familyMap;
-  }
-
-  public Map<String, String> getColumnsAttribs(){
-    return this.columnAttrMap;
-  }
-
-  /**
-   * Read family super attribute.
-   * @param family the family name
-   * @return true is the family is a super column family
-   */
-  public boolean isSuper(String family) {
-    return this.superFamilies.indexOf(family) != -1;
-  }
-
-  public List<ColumnFamilyDefinition> getColumnFamilyDefinitions() {
-    List<ColumnFamilyDefinition> list = new ArrayList<>();
-    for (String key: this.columnFamilyDefinitions.keySet()) {
-      ColumnFamilyDefinition columnFamilyDefinition = this.columnFamilyDefinitions.get(key);
-      ThriftCfDef thriftCfDef = new ThriftCfDef(columnFamilyDefinition);
-      list.add(thriftCfDef);
+  void finalized() {
+    Field field = getInlinedDefinedPartitionKey();
+    if (!fieldList.contains(field) && cassandraKey == null) {
+      fieldList.add(field);
     }
-    
-    return list;
   }
-
 }

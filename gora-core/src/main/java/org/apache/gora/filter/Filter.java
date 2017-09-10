@@ -24,17 +24,14 @@ import org.apache.hadoop.io.Writable;
  * Defines filtering (possibly including modification) of rows. By default
  * all filtering is done client side. (In generic Gora classes). Datastore
  * implementations can decide if they install remote filters, when possible.
- *
- * @param <K>
- * @param <T>
  */
 public interface Filter<K, T extends Persistent> extends Writable{
 
   /**
    * Filter the key and persistent. Modification is possible.
    *
-   * @param key
-   * @param persistent
+   * @param key the key to use in the filter
+   * @param persistent the {@link Persistent} object to filter on
    * @return <code>true</code> if the row is filtered out (excluded),
    * <code>false</code> otherwise.
    */
