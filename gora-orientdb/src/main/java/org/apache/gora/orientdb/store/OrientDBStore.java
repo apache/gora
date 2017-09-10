@@ -70,6 +70,7 @@ import javax.xml.bind.DatatypeConverter;
 import static com.github.raymanrt.orientqb.query.Projection.projection;
 
 /**
+ * {@inheritDoc}
  * {@link org.apache.gora.orientdb.store.OrientDBStore} is the primary class
  * responsible for facilitating GORA CRUD operations on OrientDB documents.
  */
@@ -86,6 +87,7 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
   private ReentrantLock flushLock = new ReentrantLock();
 
   /**
+   * {@inheritDoc}
    * Initialize the OrientDB dataStore by {@link Properties} parameters.
    *
    * @param keyClass key class type for dataStore.
@@ -129,20 +131,26 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public String getSchemaName(final String mappingSchemaName,
                               final Class<?> persistentClass) {
     return super.getSchemaName(mappingSchemaName, persistentClass);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public String getSchemaName() {
     return orientDBMapping.getDocumentClass();
   }
 
   /**
-   * Create a new class of OrientDB documents if necessary. Enforce specified schema over the document class.
-   *
+   * {@inheritDoc}
+   * Create a new class of OrientDB documents if necessary. Enforce specified schema over the document class.   *
    */
   @Override
   public void createSchema() {
@@ -168,8 +176,8 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
   }
 
   /**
+   * {@inheritDoc}
    * Deletes enforced schema over OrientDB Document class.
-   *
    */
   @Override
   public void deleteSchema() {
@@ -183,8 +191,8 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
   }
 
   /**
+   * {@inheritDoc}
    * Check whether there exist a schema enforced over OrientDB document class.
-   *
    */
   @Override
   public boolean schemaExists() {
@@ -198,6 +206,9 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public T get(K key, String[] fields) {
     String[] dbFields = getFieldsToQuery(fields);
@@ -227,6 +238,9 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void put(K key, T val) {
     if (val.isDirty()) {
@@ -238,6 +252,8 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
       ODatabaseDocumentTx selectTx = connectionPool.acquire();
       selectTx.activateOnCurrentThread();
       try {
+        // TODO : further optimize for queries to separate cases update / insert == get rid of select all query
+        // TODO : for update
         List<ODocument> result = selectTx.command(dataStoreQuery.getOrientDBQuery())
                 .execute(dataStoreQuery.getParams());
         if (result.size() == 1) {
@@ -258,6 +274,9 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public boolean delete(K key) {
     Delete delete = new Delete();
@@ -280,6 +299,9 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public long deleteByQuery(Query<K, T> query) {
     Delete delete = new Delete();
@@ -344,6 +366,9 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public Result<K, T> execute(Query<K, T> query) {
     String[] fields = getFieldsToQuery(query.getFields());
@@ -366,6 +391,9 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public Query<K, T> newQuery() {
     OrientDBQuery<K, T> query = new OrientDBQuery<K, T>(this);
@@ -373,6 +401,9 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
     return new OrientDBQuery<K, T>(this);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query) throws IOException {
     // TODO : Improve code on OrientDB clusters
@@ -385,8 +416,8 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
   }
 
   /**
+   * {@inheritDoc}
    * Flushes locally cached to content in memory to remote OrientDB server.
-   *
    */
   @Override
   public void flush() {
@@ -405,8 +436,8 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
   }
 
   /**
+   * {@inheritDoc}
    * Releases resources which have been used dataStore. Eg:- OrientDB Client connection pool.
-   *
    */
   @Override
   public void close() {

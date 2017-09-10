@@ -72,6 +72,9 @@ public class OrientDBQuery<K, T extends PersistentBase> extends QueryBase<K, T> 
    * Convert Gora query to Orient DB specific query which underline API understands.
    * And maintain it s state encapsulated to Gora implementation of the {@link org.apache.gora.query.Query}.
    *
+   * @param orientDBMapping OrientDB mapping file.
+   * @param fields OrientDB query fields.
+   * @param schemaFields AVRO schema fields for persistent bean.
    * @return a {@link OSQLSynchQuery} query executable over Orient DB.
    */
   public OSQLSynchQuery<ODocument> populateOrientDBQuery(final OrientDBMapping orientDBMapping,

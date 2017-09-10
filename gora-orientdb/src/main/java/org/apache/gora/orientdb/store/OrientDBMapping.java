@@ -112,7 +112,7 @@ public class OrientDBMapping {
   }
 
   /**
-   * Returns all fields in AVRO {@link org.apache.hadoop.io.serializer.avro.Record} record.
+   * Returns all fields in AVRO {@link SpecificRecord} record.
    *
    * @return array of fields in string.
    */

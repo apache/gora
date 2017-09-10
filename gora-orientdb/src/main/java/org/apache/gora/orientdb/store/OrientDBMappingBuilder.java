@@ -57,6 +57,8 @@ public class OrientDBMappingBuilder<K, T extends PersistentBase> {
   /**
    * Build OrientDB dataStore mapping from gora-orientdb-mapping.xml given from class path
    * or file system location.
+   *
+   * @return mapping file {@link OrientDBMapping}
    */
   public OrientDBMapping build() {
     if (mapping.getDocumentClass() == null)

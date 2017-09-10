@@ -138,6 +138,7 @@ public class OrientDBStoreParameters {
   /**
    * Extraction OrientDB dataStore properties from {@link Properties} gora.properties file.
    *
+   * @param properties gora.properties properties related to datastore client.
    * @return OrientDB client properties encapsulated inside instance of {@link OrientDBStoreParameters}
    */
   public static OrientDBStoreParameters load(Properties properties) {
