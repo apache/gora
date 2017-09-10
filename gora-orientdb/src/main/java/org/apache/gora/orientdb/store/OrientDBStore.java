@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.TimeZone;
 import java.util.Locale;
 
@@ -80,7 +82,8 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
   private OrientDBMapping orientDBMapping;
   private OServerAdmin remoteServerAdmin;
   private OPartitionedDatabasePool connectionPool;
-  private List<ODocument> docBatch = new ArrayList<>();
+  private List<ODocument> docBatch = Collections.synchronizedList(new ArrayList<>());
+  private ReentrantLock flushLock = new ReentrantLock();
 
   /**
    * Initialize the OrientDB dataStore by {@link Properties} parameters.
@@ -248,8 +251,10 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
         selectTx.close();
       }
     } else {
-      LOG.info("Ignored putting persistent bean {} in the store as it is neither "
-              + "new, neither dirty.", new Object[]{val});
+      if (LOG.isDebugEnabled()) {
+        LOG.info("Ignored putting persistent bean {} in the store as it is neither "
+                + "new, neither dirty.", new Object[]{val});
+      }
     }
   }
 
@@ -388,12 +393,14 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
     ODatabaseDocumentTx updateTx = connectionPool.acquire();
     updateTx.activateOnCurrentThread();
     try {
+      flushLock.lock();
       for (ODocument document : docBatch) {
         updateTx.save(document);
       }
     } finally {
       updateTx.close();
       docBatch.clear();
+      flushLock.unlock();
     }
   }
 
