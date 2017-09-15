@@ -1,6 +1,56 @@
  CHANGES.txt
  ===========
 
+# Apache Gora 0.8 Release - 15/09/17 (dd/mm/yyyy)
+Release report - https://s.apache.org/3YdY
+
+Bug
+
+    [GORA-209] - Specify query timeout for Hector usage in gora-cassandra
+    [GORA-269] - Add parameter for setting port used in the Cassandra Module
+    [GORA-310] - testDeleteByQueryFields is not sutiable for Solr DataStore
+    [GORA-311] - Gora Solr deleteByQuery method is not suitable for testDeleteByQueryFields
+    [GORA-327] - Upgrade to Cassandra 2.0.7
+    [GORA-394] - Erroneous 'Error: KeyClass in gora-hbase-mapping is not the same as the one in the databean.' log when reading HBase mapping
+    [GORA-395] - NPE occurs in o.a.g.cassandra.query.CassandraResult when accessing cc (=null) and setting the unionField (title)
+    [GORA-399] - Gora-Cassandra should handle Strings inside Union types as CharSequences
+    [GORA-416] - Error when populating data into Cassandra super column - InvalidRequestException(why:supercolumn parameter is not optional for super CF sc
+    [GORA-510] - Conform Query.setEndKey to inclusive query for HBaseStore
+    [GORA-511] - Eclipse shows the error 'The type package-info is already defined'
+    [GORA-522] - Fix the issue in PUT method of Aerospike
+    [GORA-525] - Fix java-doc issues in Cassandra Datastore
+
+Improvement
+
+    [GORA-107] - Fully annotate Javadoc's for methods in org.apache.gora.cassandra.store.*
+    [GORA-205] - Dedup CassandraMapping and CassandraMappingManager
+    [GORA-214] - use batched Mutations available in Hector Mutator
+    [GORA-215] - expose Hector's CassandraHostConfigurator possibilities
+    [GORA-255] - Remove deprecated methods from DataStoreTestBase
+    [GORA-267] - Cassandra composite primary key support
+    [GORA-299] - o.a.g.cassandra.CassandraStore#newQuery() should not use query.setFields(getFieldsToQuery(null));
+    [GORA-324] - Port work done on old GoraCompiler to new GoraCompiler
+    [GORA-497] - Migrate CassandraThrift to CQL
+    [GORA-509] - Upgrade solr module into solr 6
+    [GORA-512] - Fail at the time of error logging if KeyClass in gora-hbase-mapping is not the same as the one in the data bean
+    [GORA-515] - Update the Aerospike client
+    [GORA-518] - Upgrade the supported policies to the new client in Aerospike Store
+    [GORA-520] - Add support to get partitions in Aerospike module
+    [GORA-523] - Add map reduce based test cases to aerospike module
+
+New Feature
+
+    [GORA-502] - Implement Aerospike Datastore
+    [GORA-513] - Implement OrientDB Datastore.
+    [GORA-519] - Add support to access authenticated servers in Aerospike
+
+Task
+
+    [GORA-308] - deleteByQuery() method is not implemented in CassandraStore
+    [GORA-516] - Document Aerospike Datastore at Apache Gora site.
+    [GORA-517] - Upgrade Mongodb Java Driver to version 3.5.0
+    [GORA-521] - Document Cassandra Datastore at Apache Gora site.
+
 # Apache Gora 0.7 Release - 16/03/17 (dd/mm/yyyy)
 Release report - https://s.apache.org/YrmC
 
