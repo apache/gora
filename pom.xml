@@ -723,6 +723,8 @@
     <module>gora-hbase</module>
     <module>gora-infinispan</module>
     <module>gora-jcache</module>
+    <module>gora-orientdb</module>
+    <!-- module>gora-lucene</module -->
     <module>gora-dynamodb</module>
     <module>gora-couchdb</module>
     <module>gora-maven-plugin</module>
@@ -775,6 +777,10 @@
     <!-- JCache Dependencies -->
     <jsr107.api.version>1.0.0</jsr107.api.version>
     <hazelcast.version>3.6.4</hazelcast.version>
+
+    <!-- OrientDB Dependencies -->
+    <orientdb.version>2.2.22</orientdb.version>
+    <orientqb.version>0.2.0</orientqb.version>
 
     <!-- Testing Dependencies -->
     <junit.version>4.10</junit.version>
@@ -1480,6 +1486,37 @@
         <groupId>javax.cache</groupId>
         <artifactId>cache-api</artifactId>
         <version>${jsr107.api.version}</version>
+      </dependency>
+
+      <!-- OrientDB Dependencies -->
+      <dependency>
+        <groupId>com.orientechnologies</groupId>
+        <artifactId>orientdb-client</artifactId>
+        <version>${orientdb.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.orientechnologies</groupId>
+        <artifactId>orientdb-server</artifactId>
+        <version>${orientdb.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.orientechnologies</groupId>
+        <artifactId>orientdb-core</artifactId>
+        <version>${orientdb.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.orientechnologies</groupId>
+        <artifactId>orientdb-graphdb</artifactId>
+        <version>${orientdb.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.github.raymanrt</groupId>
+        <artifactId>orientqb</artifactId>
+        <version>${orientqb.version}</version>
       </dependency>
 
       <!-- Testing Dependencies -->
