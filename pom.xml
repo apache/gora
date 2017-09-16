@@ -159,6 +159,15 @@
       </roles>
     </developer>
     <developer>
+      <id>nishadi</id>
+      <name>Nishadi Kirielle</name>
+      <email>nishadi [at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
       <id>djkevincr</id>
       <name>Kevin Ratnasekera</name>
       <email>djkevincr [at] apache [dot] org</email>
