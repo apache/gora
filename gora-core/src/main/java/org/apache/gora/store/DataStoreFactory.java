@@ -441,7 +441,7 @@ public class DataStoreFactory{
     return mappingFilename;
   }
 
-  private static String getDefaultDataStore(Properties properties) {
+  public static String getDefaultDataStore(Properties properties) {
     return getProperty(properties, GORA_DEFAULT_DATASTORE_KEY);
   }
 

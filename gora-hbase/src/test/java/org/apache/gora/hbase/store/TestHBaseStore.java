@@ -18,29 +18,41 @@
 
 package org.apache.gora.hbase.store;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.avro.util.Utf8;
 import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.hbase.GoraHBaseTestDriver;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
+import org.apache.gora.store.DataStoreMetadataFactory;
 import org.apache.gora.store.DataStoreTestBase;
+import org.apache.gora.store.impl.DataStoreMetadataAnalyzer;
+import org.apache.gora.util.GoraException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.*;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
+import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.HBaseAdmin;
+import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.util.Arrays;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * Test case for HBaseStore.
@@ -245,6 +257,44 @@ public class TestHBaseStore extends DataStoreTestBase {
     assertEquals(1000, ((HBaseStore<String,Employee>)this.employeeStore).getScannerCaching()) ;
   }
 
+  @Test
+  public void assertMetadataAnalyzer() throws GoraException {
+      String analyzerName = this.getTestDriver().getDataStoreClass().getCanonicalName() + "MetadataAnalyzer" ;
+      DataStoreMetadataAnalyzer metadataAnalyzer = DataStoreMetadataFactory.createAnalyzer(analyzerName, this.conf) ;
+      assertEquals("HBASE", metadataAnalyzer.getType()) ;
+
+      // Expectations
+      List<String> expectedTables = new ArrayList<String>() ;
+      expectedTables.add("Employee");
+      expectedTables.add("WebPage");
+      
+      List<String> expectedEmployeeFamilies = new ArrayList<String>();
+      expectedEmployeeFamilies.add("info");
+
+      List<String> expectedWebPageFamilies = new ArrayList<String>();
+      expectedWebPageFamilies.add("byteData");
+      expectedWebPageFamilies.add("common");
+      expectedWebPageFamilies.add("content");
+      expectedWebPageFamilies.add("headers");
+      expectedWebPageFamilies.add("outlinks");
+      expectedWebPageFamilies.add("parsedContent");
+      expectedWebPageFamilies.add("stringData");
+      
+      Map<String, List<String>> expectedFamilies = new HashMap<>();
+      expectedFamilies.put("Employee", expectedEmployeeFamilies);
+      expectedFamilies.put("WebPage", expectedWebPageFamilies);
+      
+      // Tests
+      List<String> tables = metadataAnalyzer.getTablesNames() ;
+      assertEquals(expectedTables, tables) ;
+      
+      for (String tableName: tables) {
+          Object tableInfo = metadataAnalyzer.getTableInfo(tableName);
+          assertTrue("fieldsInfo expected to be class HBaseTableMetadata", tableInfo instanceof HBaseTableMetadata);
+          assertEquals(expectedFamilies.get(tableName), ((HBaseTableMetadata)tableInfo).getColumnFamilies());
+      }
+  }
+  
   @Ignore("We need to skip this test since gora considers endRow inclusive, while its exclusive for HBase.")
   @Override
   public void testQueryEndKey() throws IOException {
