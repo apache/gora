@@ -64,7 +64,7 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
     if (PersistentBase.class.isAssignableFrom(dataStore.getPersistentClass())) {
       persistentSchema = ((PersistentBase) dataStore.getBeanFactory().getCachedPersistent()).getSchema();
     } else {
-      persistentSchema = null;
+      throw new RuntimeException("Unsupported persistent class, couldn't able to find the Avro schema.");
     }
     this.cassandraDataStore = dataStore;
     try {
