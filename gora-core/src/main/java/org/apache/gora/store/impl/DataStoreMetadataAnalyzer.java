@@ -17,6 +17,7 @@
  */
 package org.apache.gora.store.impl;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.apache.gora.util.GoraException;
@@ -71,6 +72,8 @@ public abstract class DataStoreMetadataAnalyzer implements Configurable {
    * @return A specific subclass depending on the backend type
    */
   public abstract Object getTableInfo(String tableName) throws GoraException ;
+  
+  public abstract void close() throws IOException ;
   
   @Override
   public void setConf(Configuration conf) {
