@@ -258,7 +258,7 @@ public class TestHBaseStore extends DataStoreTestBase {
   }
 
   @Test
-  public void assertMetadataAnalyzer() throws GoraException {
+  public void assertMetadataAnalyzer() throws GoraException, ClassNotFoundException {
       String analyzerName = this.getTestDriver().getDataStoreClass().getCanonicalName() + "MetadataAnalyzer" ;
       DataStoreMetadataAnalyzer metadataAnalyzer = DataStoreMetadataFactory.createAnalyzer(analyzerName, this.conf) ;
       assertEquals("HBASE", metadataAnalyzer.getType()) ;
