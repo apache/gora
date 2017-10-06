@@ -177,6 +177,15 @@
       </roles>
     </developer>
     <developer>
+      <id>madhawa</id>
+      <name>Madhawa Kasun Gunasekara</name>
+      <email>madhawa [at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
       <id>lewismc</id>
       <name>Lewis John McGibbney</name>
       <email>lewismc [at] apache [dot] org</email>
