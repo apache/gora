@@ -22,6 +22,8 @@ import java.util.List;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
 * Objects that are persisted by Gora implements this interface.
 */
@@ -65,6 +67,7 @@ public interface Persistent extends Dirtyable, Cloneable {
 * @param fieldIndex
 * the offset of the field in the object
 */
+  @JsonIgnore
   void setDirty(int fieldIndex);
 
   /**
@@ -73,6 +76,7 @@ public interface Persistent extends Dirtyable, Cloneable {
 * @param field
 * the name of the field
 */
+  @JsonIgnore
   void setDirty(String field);
 
   /**
