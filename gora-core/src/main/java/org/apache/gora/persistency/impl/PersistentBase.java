@@ -77,8 +77,6 @@ public abstract class PersistentBase extends SpecificRecordBase implements
   }
 
   private void clearDirynessIfFieldIsDirtyable(int fieldIndex) {
-    if (fieldIndex == 0)
-      return;
     Object value = get(fieldIndex);
     if (value instanceof Dirtyable) {
       ((Dirtyable) value).clearDirty();
@@ -119,8 +117,6 @@ public abstract class PersistentBase extends SpecificRecordBase implements
   }
 
   private boolean checkIfMutableFieldAndDirty(Field field) {
-    if (field.pos() == 0)
-      return false;
     switch (field.schema().getType()) {
     case RECORD:
     case MAP:
