@@ -22,6 +22,8 @@ import java.lang.reflect.Constructor;
 
 import org.apache.gora.persistency.BeanFactory;
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.util.ClassLoadingUtils;
+import org.apache.gora.util.GoraException;
 import org.apache.gora.util.ReflectionUtils;
 
 /**
@@ -74,11 +76,24 @@ public class BeanFactoryImpl<K, T extends Persistent> implements BeanFactory<K, 
     isKeyPersistent = Persistent.class.isAssignableFrom(keyClass);
   }
   
+  /**
+   * Constructor with the persistent class by name (namespace.name).
+   *
+   * @param keyClass
+   * @param persistentClassName - namespace.ClassName of the persistent entities
+   * @throws ClassNotFoundException - If the persistent class name does not exist 
+   */
+  @SuppressWarnings({ "unchecked" })
+  public BeanFactoryImpl(Class<K> keyClass, String persistentClassName) throws ClassNotFoundException {
+    this(keyClass, (Class<T>) ClassLoadingUtils.loadClass(persistentClassName)) ;
+  }
+  
   @Override
   public K newKey() throws Exception {
     return keyClass.newInstance();
   }
  
+  @SuppressWarnings("unchecked")
   @Override
   public T newPersistent() {
     return (T) persistent.newInstance();
