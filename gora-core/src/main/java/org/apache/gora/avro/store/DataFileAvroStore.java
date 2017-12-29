@@ -22,7 +22,7 @@ import java.io.IOException;
 
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.DataFileWriter;
-import org.apache.gora.avro.mapreduce.FsInput;
+import org.apache.avro.mapred.FsInput;
 import org.apache.gora.avro.query.DataFileAvroResult;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
