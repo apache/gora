@@ -159,7 +159,7 @@ public abstract class PersistentBase extends SpecificRecordBase implements
     ByteBuffer dirtyBytes = getDirtyBytes();
     assert (dirtyBytes.position() == 0);
     for (int i = 0; i < dirtyBytes.limit(); i++) {
-      dirtyBytes.put(i, (byte) -128);
+      dirtyBytes.put(i, (byte) -1);
     }
   }
 
