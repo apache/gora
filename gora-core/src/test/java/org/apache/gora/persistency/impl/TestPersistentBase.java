@@ -153,4 +153,20 @@ public class TestPersistentBase {
     
     assertEquals(employee, Employee.newBuilder(employee).build());
   }
+  
+  /**
+   * Test that #setDirty() sets all the shallow fields dirty.
+   * GORA-421
+   */
+  @Test
+  public void testSetDirty() {
+    WebPage page = WebPage.newBuilder().build();
+    assertEquals("Expected the new Persistent instance to not be dirty.", false, page.isDirty()) ;
+    page.setDirty();
+    
+    // Assert each field is dirty
+    for (Field field : page.getSchema().getFields()) {
+      assertEquals("The field " + field.name() + " is not dirty.", true, page.isDirty(field.name()));
+    }
+  }
 }
