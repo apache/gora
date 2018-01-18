@@ -28,6 +28,7 @@ import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreTestBase;
+import org.apache.gora.util.GoraException;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -158,7 +159,7 @@ public abstract class TestMongoStore extends DataStoreTestBase {
     r.close();
   }
 
-  private void addWebPage() {
+  private void addWebPage() throws GoraException {
     String key = String.valueOf(keySequence++);
     WebPage p1 = webPageStore.newPersistent();
     p1.setUrl(new Utf8(key));

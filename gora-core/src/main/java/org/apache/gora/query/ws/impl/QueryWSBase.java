@@ -26,6 +26,7 @@ import org.apache.gora.persistency.Persistent;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.store.DataStore;
+import org.apache.gora.util.GoraException;
 
 /**
  * Base class for Query implementations.
@@ -86,7 +87,7 @@ public abstract class QueryWSBase<K, T extends Persistent> implements Query<K,T>
   /**
    * Executes the query
    */
-  public Result<K,T> execute() {
+  public Result<K,T> execute() throws GoraException {
     //compile();
     return dataStore.execute(this);
   }

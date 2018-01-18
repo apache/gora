@@ -16,6 +16,11 @@
  */
 package org.apache.gora.cassandra.store;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+
 import org.apache.gora.cassandra.query.CassandraQuery;
 import org.apache.gora.cassandra.serializers.CassandraSerializer;
 import org.apache.gora.persistency.BeanFactory;
@@ -27,13 +32,9 @@ import org.apache.gora.query.Result;
 import org.apache.gora.query.ws.impl.PartitionWSQueryImpl;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
+import org.apache.gora.util.GoraException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
 
 /**
  * Implementation of Cassandra Store.
@@ -70,7 +71,7 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
    * @param properties      properties
    */
   @Override
-  public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) {
+  public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) throws GoraException {
     LOG.debug("Initializing Cassandra store");
     String serializationType;
     try {
@@ -86,8 +87,11 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
       CassandraClient cassandraClient = new CassandraClient();
       cassandraClient.initialize(properties, mapping);
       cassandraSerializer = CassandraSerializer.getSerializer(cassandraClient, serializationType, this, mapping);
+    } catch (GoraException e) {
+      throw e;
     } catch (Exception e) {
-      throw new RuntimeException("Error while initializing Cassandra store: " + e.getMessage(), e);
+      LOG.error(e.getMessage(), e);
+      throw new GoraException("Error while initializing Cassandra store: " + e.getMessage(), e);
     }
   }
 
@@ -125,7 +129,7 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
    * {@inheritDoc}
    */
   @Override
-  public void createSchema() {
+  public void createSchema() throws GoraException {
     cassandraSerializer.createSchema();
   }
 
@@ -133,7 +137,7 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
    * {@inheritDoc}
    */
   @Override
-  public void deleteSchema() {
+  public void deleteSchema() throws GoraException {
     cassandraSerializer.deleteSchema();
   }
 
@@ -158,15 +162,16 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
    * {@inheritDoc}
    */
   @Override
-  public K newKey() {
+  public K newKey() throws GoraException {
     try {
       if (beanFactory != null) {
         return beanFactory.newKey();
       } else {
         return keyClass.newInstance();
       }
-    } catch (Exception ex) {
-      throw new RuntimeException("Error while instantiating a key: " + ex.getMessage(), ex);
+    } catch (Exception e) {
+      LOG.error("Error while instantiating a key: " + e.getMessage(), e);
+      throw new GoraException("Error while instantiating a key: " + e.getMessage(), e);
     }
   }
 
@@ -175,15 +180,16 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
    */
   @SuppressWarnings("all")
   @Override
-  public T newPersistent() {
+  public T newPersistent() throws GoraException {
     try {
       if (beanFactory != null) {
         return this.beanFactory.newPersistent();
       } else {
         return persistentClass.newInstance();
       }
-    } catch (Exception ex) {
-      throw new RuntimeException("Error while instantiating a persistent: " + ex.getMessage(), ex);
+    } catch (Exception e) {
+      LOG.error("Error while instantiating a persistent: " + e.getMessage(), e);
+      throw new GoraException("Error while instantiating a key: " + e.getMessage(), e);
     }
   }
 
@@ -215,7 +221,7 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
    * {@inheritDoc}
    */
   @Override
-  public T get(K key) {
+  public T get(K key) throws GoraException {
     return (T) cassandraSerializer.get(key);
   }
 
@@ -223,7 +229,7 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
    * {@inheritDoc}
    */
   @Override
-  public T get(K key, String[] fields) {
+  public T get(K key, String[] fields) throws GoraException {
     return (T) cassandraSerializer.get(key, fields);
   }
 
@@ -231,7 +237,7 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
    * {@inheritDoc}
    */
   @Override
-  public void put(K key, T obj) {
+  public void put(K key, T obj) throws GoraException {
     cassandraSerializer.put(key, obj);
   }
 
@@ -239,7 +245,7 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
    * {@inheritDoc}
    */
   @Override
-  public boolean delete(K key) {
+  public boolean delete(K key) throws GoraException {
     return cassandraSerializer.delete(key);
   }
 
@@ -247,7 +253,7 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
    * {@inheritDoc}
    */
   @Override
-  public long deleteByQuery(Query<K, T> query) {
+  public long deleteByQuery(Query<K, T> query) throws GoraException {
     return cassandraSerializer.deleteByQuery(query);
   }
 
@@ -255,8 +261,13 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
    * {@inheritDoc}
    */
   @Override
-  public Result<K, T> execute(Query<K, T> query) {
-    return (Result<K, T>) cassandraSerializer.execute(this, query);
+  public Result<K, T> execute(Query<K, T> query) throws GoraException {
+    try {
+        return (Result<K, T>) cassandraSerializer.execute(this, query);
+    } catch (Exception e) {
+        this.LOG.error(e.getMessage(), e);
+        throw new GoraException(e);
+    }
   }
 
   /**
@@ -282,19 +293,24 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
    * {@inheritDoc}
    */
   @Override
-  public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query) throws IOException {
-    List<PartitionQuery<K, T>> partitions = new ArrayList<>();
-    PartitionWSQueryImpl<K, T> pqi = new PartitionWSQueryImpl<>(query);
-    pqi.setDataStore(this);
-    partitions.add(pqi);
-    return partitions;
+  public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query) throws GoraException {
+    try {
+      List<PartitionQuery<K, T>> partitions = new ArrayList<>();
+      PartitionWSQueryImpl<K, T> pqi = new PartitionWSQueryImpl<>(query);
+      pqi.setDataStore(this);
+      partitions.add(pqi);
+      return partitions;
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
+    }
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public void flush() {
+  public void flush() throws GoraException {
     // ignore since caching has been disabled
   }
 
@@ -310,7 +326,7 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
    * {@inheritDoc}
    */
   @Override
-  public void truncateSchema() {
+  public void truncateSchema() throws GoraException {
     cassandraSerializer.truncateSchema();
   }
 
@@ -318,7 +334,7 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
    * {@inheritDoc}
    */
   @Override
-  public boolean schemaExists() {
+  public boolean schemaExists() throws GoraException{
     return cassandraSerializer.schemaExists();
   }
 

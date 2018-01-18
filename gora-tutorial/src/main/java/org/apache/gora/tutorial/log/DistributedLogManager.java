@@ -18,16 +18,6 @@
 
 package org.apache.gora.tutorial.log;
 
-import org.apache.avro.util.Utf8;
-import org.apache.gora.query.Query;
-import org.apache.gora.query.Result;
-import org.apache.gora.store.DataStore;
-import org.apache.gora.store.DataStoreFactory;
-import org.apache.gora.tutorial.log.generated.Pageview;
-import org.apache.hadoop.conf.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -39,6 +29,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.StringTokenizer;
+
+import org.apache.avro.util.Utf8;
+import org.apache.gora.query.Query;
+import org.apache.gora.query.Result;
+import org.apache.gora.store.DataStore;
+import org.apache.gora.store.DataStoreFactory;
+import org.apache.gora.tutorial.log.generated.Pageview;
+import org.apache.gora.util.GoraException;
+import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -399,7 +400,7 @@ public class DistributedLogManager {
     }
   }
 
-  private void deleteSchema() {
+  private void deleteSchema() throws GoraException {
     cacheStore.deleteSchema();
     log.info("Deleted schema on dataStore");
   }

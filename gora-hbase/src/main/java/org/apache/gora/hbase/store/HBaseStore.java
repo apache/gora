@@ -34,6 +34,8 @@ import java.util.NavigableMap;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.naming.ConfigurationException;
+
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
@@ -52,6 +54,7 @@ import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.PartitionQueryImpl;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.impl.DataStoreBase;
+import org.apache.gora.util.GoraException;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -72,8 +75,6 @@ import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.naming.ConfigurationException;
 
 /**
  * DataStore for HBase. Thread safe.
@@ -123,19 +124,20 @@ implements Configurable {
    */
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
-      Properties properties) {
-    try {
+      Properties properties) throws GoraException {
       super.initialize(keyClass, persistentClass, properties);
 
+    try {
       this.conf = HBaseConfiguration.create(getConf());
       admin = ConnectionFactory.createConnection(getConf()).getAdmin();
       mapping = readMapping(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE));
       filterUtil = new HBaseFilterUtil<>(this.conf);
     } catch (FileNotFoundException ex) {
       LOG.error("{}  is not found, please check the file.", DEFAULT_MAPPING_FILE);
-      throw new RuntimeException(ex);
+      throw new GoraException(ex);
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
 
     // Set scanner caching option
@@ -144,8 +146,8 @@ implements Configurable {
           Integer.valueOf(DataStoreFactory.findProperty(this.properties, this,
               SCANNER_CACHING_PROPERTIES_KEY,
               String.valueOf(SCANNER_CACHING_PROPERTIES_DEFAULT)))) ;
-    }catch(Exception e){
-      LOG.error("Can not load {} from gora.properties. Setting to default value: {}.", SCANNER_CACHING_PROPERTIES_KEY, SCANNER_CACHING_PROPERTIES_DEFAULT);
+    }catch(NumberFormatException e){
+      LOG.info("Can not load {} from gora.properties. Setting to default value: {}.", SCANNER_CACHING_PROPERTIES_KEY, SCANNER_CACHING_PROPERTIES_DEFAULT);
       this.setScannerCaching(SCANNER_CACHING_PROPERTIES_DEFAULT) ; // Default value if something is wrong
     }
 
@@ -155,8 +157,9 @@ implements Configurable {
     try{
       boolean autoflush = this.conf.getBoolean("hbase.client.autoflush.default", false);
       table = new HBaseTableConnection(getConf(), getSchemaName(), autoflush);
-    } catch(IOException ex2){
-      LOG.error(ex2.getMessage(), ex2);
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
     closeHBaseAdmin();
   }
@@ -172,7 +175,7 @@ implements Configurable {
   }
 
   @Override
-  public void createSchema() {
+  public void createSchema() throws GoraException {
     try{
       if(schemaExists()) {
         return;
@@ -180,47 +183,55 @@ implements Configurable {
       HTableDescriptor tableDesc = mapping.getTable();
   
       admin.createTable(tableDesc);
-    } catch(IOException ex2){
-      LOG.error(ex2.getMessage(), ex2);
+    } catch (GoraException e) {
+      throw e;
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
     closeHBaseAdmin();
   }
 
   @Override
-  public void deleteSchema() {
+  public void deleteSchema() throws GoraException {
     try{
       if(!schemaExists()) {
         return;
       }
       admin.disableTable(mapping.getTable().getTableName());
       admin.deleteTable(mapping.getTable().getTableName());
-    } catch(IOException ex2){
-      LOG.error(ex2.getMessage(), ex2);
+    } catch (GoraException e) {
+      throw e;
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
     closeHBaseAdmin();
   }
 
   @Override
-  public boolean schemaExists() {
+  public boolean schemaExists() throws GoraException {
     try{
       return admin.tableExists(mapping.getTable().getTableName());
-    } catch(IOException ex2){
-      LOG.error(ex2.getMessage(), ex2);
-      return false;
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
   }
 
   @Override
-  public T get(K key, String[] fields) {
+  public T get(K key, String[] fields) throws GoraException {
     try{
       fields = getFieldsToQuery(fields);
       Get get = new Get(toBytes(key));
       addFields(get, fields);
       Result result = table.get(get);
       return newInstance(result, fields);
-    } catch(IOException ex2){
-      LOG.error(ex2.getMessage(), ex2);
-      return null;
+    } catch (GoraException e) {
+      throw e;
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
   }
 
@@ -237,7 +248,7 @@ implements Configurable {
    *          Record to be persisted in HBase
    */
   @Override
-  public void put(K key, T persistent) {
+  public void put(K key, T persistent) throws GoraException {
     try {
       Schema schema = persistent.getSchema();
       byte[] keyRaw = toBytes(key);
@@ -255,9 +266,11 @@ implements Configurable {
         Object o = persistent.get(i);
         HBaseColumn hcol = mapping.getColumn(field.name());
         if (hcol == null) {
-          throw new RuntimeException("HBase mapping for field ["
+          String errorMsg = "HBase mapping for field ["
               + persistent.getClass().getName() + "#" + field.name()
-              + "] not found. Wrong gora-hbase-mapping.xml?");
+              + "] not found. Wrong gora-hbase-mapping.xml?";
+          LOG.error(errorMsg);
+          throw new GoraException(errorMsg);
         }
         addPutsAndDeletes(put, delete, o, field.schema().getType(),
             field.schema(), hcol, hcol.getQualifier());
@@ -265,14 +278,15 @@ implements Configurable {
 
       if (delete.size() > 0) {
         table.delete(delete);
-//        table.delete(delete);
-//        table.delete(delete); // HBase sometimes does not delete arbitrarily
       }
       if (put.size() > 0) {
         table.put(put);
       }
-    } catch (IOException ex2) {
-      LOG.error(ex2.getMessage(), ex2);
+    } catch (GoraException e) {
+      throw e;
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
   }
 
@@ -282,10 +296,8 @@ implements Configurable {
     case UNION:
       if (isNullable(schema) && o == null) {
         if (qualifier == null) {
-//          delete.deleteFamily(hcol.getFamily());
           delete.addFamily(hcol.getFamily());
         } else {
-//          delete.deleteColumn(hcol.getFamily(), qualifier);
           delete.addColumns(hcol.getFamily(), qualifier);
         }
       } else {
@@ -305,10 +317,8 @@ implements Configurable {
       // if it's a map that has been modified, then the content should be replaced by the new one
       // This is because we don't know if the content has changed or not.
       if (qualifier == null) {
-        //delete.deleteFamily(hcol.getFamily());
         delete.addFamily(hcol.getFamily());
       } else {
-        //delete.deleteColumn(hcol.getFamily(), qualifier);
         delete.addColumns(hcol.getFamily(), qualifier);
       }
       @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -352,20 +362,20 @@ implements Configurable {
    * @return always true
    */
   @Override
-  public boolean delete(K key) {
+  public boolean delete(K key) throws GoraException {
     try{
       table.delete(new Delete(toBytes(key)));
       //HBase does not return success information and executing a get for
       //success is a bit costly
       return true;
-    } catch(IOException ex2){
-      LOG.error(ex2.getMessage(), ex2);
-      return false;
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
   }
 
   @Override
-  public long deleteByQuery(Query<K, T> query) {
+  public long deleteByQuery(Query<K, T> query) throws GoraException {
     try {
       String[] fields = getFieldsToQuery(query.getFields());
       //find whether all fields are queried, which means that complete
@@ -384,18 +394,21 @@ implements Configurable {
       }
       table.delete(deletes);
       return deletes.size();
-    } catch (Exception ex) {
-      LOG.error(ex.getMessage(), ex);
-      return -1;
+    } catch (GoraException e) {
+      throw e;
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
   }
 
   @Override
-  public void flush() {
+  public void flush() throws GoraException {
     try{
       table.flushCommits();
-    }catch(IOException ex){
-      LOG.error(ex.getMessage(), ex);
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
   }
 
@@ -457,7 +470,7 @@ implements Configurable {
   }
 
   @Override
-  public org.apache.gora.query.Result<K, T> execute(Query<K, T> query){
+  public org.apache.gora.query.Result<K, T> execute(Query<K, T> query) throws GoraException {
     try{
       //check if query.fields is null
       query.setFields(getFieldsToQuery(query.getFields()));
@@ -479,7 +492,7 @@ implements Configurable {
       }
     }catch(IOException ex){
       LOG.error(ex.getMessage(), ex);
-      return null;
+      throw new GoraException(ex) ;
     }
   }
 

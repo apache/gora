@@ -30,7 +30,7 @@ import java.util.Properties;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.specific.SpecificDatumReader;
-import org.apache.avro.specific.SpecificDatumWriter; 
+import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.gora.avro.store.AvroStore;
 import org.apache.gora.persistency.BeanFactory;
@@ -41,10 +41,11 @@ import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.util.AvroUtils;
 import org.apache.gora.util.ClassLoadingUtils;
+import org.apache.gora.util.GoraException;
 import org.apache.gora.util.StringUtils;
 import org.apache.gora.util.WritableUtils;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configurable;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.slf4j.Logger;
@@ -84,7 +85,7 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
 
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
-          Properties properties) {
+          Properties properties) throws GoraException {
     setKeyClass(keyClass);
     setPersistentClass(persistentClass);
     if (this.beanFactory == null) {
@@ -122,22 +123,22 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
   }
 
   @Override
-  public K newKey() {
+  public K newKey() throws GoraException {
     try {
       return beanFactory.newKey();
-    } catch (Exception ex) {
-      LOG.error(ex.getMessage(), ex);
-      return null;
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
   }
 
   @Override
-  public T newPersistent() {
+  public T newPersistent() throws GoraException {
     try {
       return beanFactory.newPersistent();
-    } catch (Exception ex) {
-      LOG.error(ex.getMessage(), ex);
-      return null;
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
   }
 
@@ -152,7 +153,7 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
   }
 
   @Override
-  public T get(K key) {
+  public T get(K key) throws GoraException {
     return get(key, getFieldsToQuery(null));
   }
 
@@ -208,25 +209,22 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
   }
 
   @SuppressWarnings("unchecked")
-  public void readFields(DataInput in) {
-    try {
+  public void readFields(DataInput in) throws IOException {
+    try {  
       Class<K> keyClass = (Class<K>) ClassLoadingUtils.loadClass(Text.readString(in));
       Class<T> persistentClass = (Class<T>)ClassLoadingUtils.loadClass(Text.readString(in));
       Properties props = WritableUtils.readProperties(in);
       initialize(keyClass, persistentClass, props);
-    } catch (ClassNotFoundException | IOException ex) {
-      LOG.error(ex.getMessage(), ex);
+    } catch (ClassNotFoundException e) {
+      LOG.error("ClassNotFoundException", e);
+      throw new IOException(e);
     }
   }
 
-  public void write(DataOutput out) {
-    try {
+  public void write(DataOutput out) throws IOException {
       Text.writeString(out, getKeyClass().getCanonicalName());
       Text.writeString(out, getPersistentClass().getCanonicalName());
       WritableUtils.writeProperties(out, properties);
-    } catch (IOException e) {
-      LOG.error(e.getMessage(), e);
-    }
   }
 
   @Override
@@ -244,7 +242,7 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
 
   @Override
   /** Default implementation deletes and recreates the schema*/
-  public void truncateSchema() {
+  public void truncateSchema() throws GoraException {
     deleteSchema();
     createSchema();
   }

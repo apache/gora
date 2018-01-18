@@ -22,6 +22,7 @@ import org.apache.avro.util.Utf8;
 import org.apache.gora.cassandra.GoraCassandraTestDriver;
 import org.apache.gora.examples.generated.Metadata;
 import org.apache.gora.examples.generated.WebPage;
+import org.apache.gora.util.GoraException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -75,9 +76,10 @@ public class TestAvroSerializationWithUDT {
 
   /**
    * This is for testGetNested() with UDT dataType with avro serialization
+   * @throws GoraException 
    */
   @Test
-  public void testSimplePutAndGEt() {
+  public void testSimplePutAndGEt() throws GoraException {
     webPageCassandraStore.createSchema();
     WebPage webpage = WebPage.newBuilder().build();
     webpage.setUrl(new Utf8("url.."));

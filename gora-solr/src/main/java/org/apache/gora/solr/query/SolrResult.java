@@ -27,6 +27,7 @@ import org.apache.gora.query.impl.PartitionQueryImpl;
 import org.apache.gora.query.impl.ResultBase;
 import org.apache.gora.solr.store.SolrStore;
 import org.apache.gora.store.DataStore;
+import org.apache.gora.util.GoraException;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -34,6 +35,8 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.ModifiableSolrParams;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * SolrResult specific implementation of the {@link org.apache.gora.query.Result}
@@ -41,6 +44,8 @@ import org.apache.solr.common.params.ModifiableSolrParams;
  */
 public class SolrResult<K, T extends PersistentBase> extends ResultBase<K, T> {
 
+  private static final Logger LOG = LoggerFactory.getLogger(SolrResult.class);
+  
   SolrDocumentList list = null;
   SolrStore<K, T> store;
   String[] fields;
@@ -55,7 +60,7 @@ public class SolrResult<K, T extends PersistentBase> extends ResultBase<K, T> {
    * @param resultsSize  The number of rows to be returned
    */
   public SolrResult(DataStore<K, T> dataStore, Query<K, T> query,
-      SolrClient server, int resultsSize) throws IOException {
+      SolrClient server, int resultsSize) throws GoraException {
     super(dataStore, query);
     store = (SolrStore<K, T>)dataStore;
     ModifiableSolrParams params = new ModifiableSolrParams();
@@ -82,8 +87,9 @@ public class SolrResult<K, T extends PersistentBase> extends ResultBase<K, T> {
     try {
       QueryResponse rsp = server.query(params);
       list = rsp.getResults();
-    } catch (SolrServerException e) {
-      throw new IOException(e);
+    } catch (SolrServerException | IOException e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
   }
 

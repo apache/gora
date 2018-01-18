@@ -16,12 +16,12 @@
  */
 package org.apache.gora.cassandra.serializers;
 
-import com.datastax.driver.core.ConsistencyLevel;
-import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.SimpleStatement;
-import com.datastax.driver.mapping.Mapper;
-import com.datastax.driver.mapping.MappingManager;
-import com.datastax.driver.mapping.Result;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.gora.cassandra.bean.Field;
 import org.apache.gora.cassandra.query.CassandraResultSet;
@@ -30,14 +30,16 @@ import org.apache.gora.cassandra.store.CassandraMapping;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.query.Query;
 import org.apache.gora.store.DataStore;
+import org.apache.gora.util.GoraException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import com.datastax.driver.core.ConsistencyLevel;
+import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.SimpleStatement;
+import com.datastax.driver.mapping.Mapper;
+import com.datastax.driver.mapping.MappingManager;
+import com.datastax.driver.mapping.Result;
 
 /**
  * This Class contains the operation relates to Native Serialization.
@@ -48,12 +50,13 @@ class NativeSerializer<K, T extends Persistent> extends CassandraSerializer {
 
   private Mapper<T> mapper;
 
-  NativeSerializer(CassandraClient cassandraClient, Class<K> keyClass, Class<T> persistentClass, CassandraMapping mapping) {
+  NativeSerializer(CassandraClient cassandraClient, Class<K> keyClass, Class<T> persistentClass, CassandraMapping mapping) throws GoraException {
     super(cassandraClient, keyClass, persistentClass, mapping);
     try {
       analyzePersistent();
     } catch (Exception e) {
-      throw new RuntimeException("Error occurred while analyzing the persistent class, :" + e.getMessage());
+      LOG.error(e.getMessage(), e);
+      throw new GoraException("Error occurred while analyzing the persistent class, :" + e.getMessage(), e);
     }
     this.createSchema();
     MappingManager mappingManager = new MappingManager(cassandraClient.getSession());
@@ -74,26 +77,14 @@ class NativeSerializer<K, T extends Persistent> extends CassandraSerializer {
    * @param value
    */
   @Override
-  public void put(Object key, Persistent value) {
-    LOG.debug("Object is saved with key : {} and value : {}", key, value);
-    mapper.save((T) value);
-  }
-
-  /**
-   * {@inheritDoc}
-   *
-   * @param key
-   * @return
-   */
-  @Override
-  public T get(Object key) {
-    T object = mapper.get(key);
-    if (object != null) {
-      LOG.debug("Object is found for key : {}", key);
-    } else {
-      LOG.debug("Object is not found for key : {}", key);
+  public void put(Object key, Persistent value) throws GoraException {
+    try {
+      LOG.debug("Object is saved with key : {} and value : {}", key, value);
+      mapper.save((T) value);
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
-    return object;
   }
 
   /**
@@ -103,10 +94,37 @@ class NativeSerializer<K, T extends Persistent> extends CassandraSerializer {
    * @return
    */
   @Override
-  public boolean delete(Object key) {
+  public T get(Object key) throws GoraException {
+    try {
+      T object = mapper.get(key);
+      if (object != null) {
+        LOG.debug("Object is found for key : {}", key);
+      } else {
+        LOG.debug("Object is not found for key : {}", key);
+      }      
+      return object;
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @param key
+   * @return
+   */
+  @Override
+  public boolean delete(Object key) throws GoraException {
     LOG.debug("Object is deleted for key : {}", key);
-    mapper.delete(key);
-    return true;
+    try {
+      mapper.delete(key);
+      return true;
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
+    }
   }
 
   /**
@@ -187,30 +205,35 @@ class NativeSerializer<K, T extends Persistent> extends CassandraSerializer {
    * @return
    */
   @Override
-  public org.apache.gora.query.Result execute(DataStore dataStore, Query query) {
-    List<Object> objectArrayList = new ArrayList<>();
-    String[] fields = query.getFields();
-    if (fields != null) {
-      fields = (String[]) ArrayUtils.addAll(fields, mapping.getAllKeys());
-    } else {
-      fields = mapping.getAllFieldsIncludingKeys();
+  public org.apache.gora.query.Result execute(DataStore dataStore, Query query) throws GoraException {
+    try {
+      List<Object> objectArrayList = new ArrayList<>();
+      String[] fields = query.getFields();
+      if (fields != null) {
+        fields = (String[]) ArrayUtils.addAll(fields, mapping.getAllKeys());
+      } else {
+        fields = mapping.getAllFieldsIncludingKeys();
+      }
+      CassandraResultSet<K, T> cassandraResult = new CassandraResultSet<>(dataStore, query);
+      String cqlQuery = CassandraQueryFactory.getExecuteQuery(mapping, query, objectArrayList, fields);
+      ResultSet results;
+      if (objectArrayList.size() == 0) {
+        results = client.getSession().execute(cqlQuery);
+      } else {
+        results = client.getSession().execute(cqlQuery, objectArrayList.toArray());
+      }
+      Result<T> objects = mapper.map(results);
+      Iterator iterator = objects.iterator();
+      while (iterator.hasNext()) {
+        T result = (T) iterator.next();
+        K key = getKey(result);
+        cassandraResult.addResultElement(key, result);
+      }
+      return cassandraResult;
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
-    CassandraResultSet<K, T> cassandraResult = new CassandraResultSet<>(dataStore, query);
-    String cqlQuery = CassandraQueryFactory.getExecuteQuery(mapping, query, objectArrayList, fields);
-    ResultSet results;
-    if (objectArrayList.size() == 0) {
-      results = client.getSession().execute(cqlQuery);
-    } else {
-      results = client.getSession().execute(cqlQuery, objectArrayList.toArray());
-    }
-    Result<T> objects = mapper.map(results);
-    Iterator iterator = objects.iterator();
-    while (iterator.hasNext()) {
-      T result = (T) iterator.next();
-      K key = getKey(result);
-      cassandraResult.addResultElement(key, result);
-    }
-    return cassandraResult;
   }
 
   private K getKey(T object) {

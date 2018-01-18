@@ -56,6 +56,7 @@ import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.util.AvroUtils;
 import org.apache.gora.util.ByteUtils;
+import org.apache.gora.util.GoraException;
 import org.apache.gora.util.StringUtils;
 
 import org.slf4j.Logger;
@@ -1170,7 +1171,7 @@ public class DataStoreTestUtil {
     store.close();
   }
   
-  public static void testPutMixedMapTypes(DataStore<String, WebPage> store) {
+  public static void testPutMixedMapTypes(DataStore<String, WebPage> store) throws GoraException {
     WebPage webpage = createWebPage();
     webpage.getByteData().put(new Utf8("byteData"), ByteBuffer.wrap(ByteUtils.toBytes("hello map")));
     webpage.getStringData().put(new Utf8("stringData"), "hello map");

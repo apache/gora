@@ -16,11 +16,11 @@
  */
 package org.apache.gora.cassandra.serializers;
 
-import com.datastax.driver.core.ConsistencyLevel;
-import com.datastax.driver.core.KeyspaceMetadata;
-import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.SimpleStatement;
-import com.datastax.driver.core.TableMetadata;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
 import org.apache.gora.cassandra.bean.Field;
 import org.apache.gora.cassandra.store.CassandraClient;
 import org.apache.gora.cassandra.store.CassandraMapping;
@@ -29,13 +29,15 @@ import org.apache.gora.persistency.Persistent;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.store.DataStore;
+import org.apache.gora.util.GoraException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import com.datastax.driver.core.ConsistencyLevel;
+import com.datastax.driver.core.KeyspaceMetadata;
+import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.SimpleStatement;
+import com.datastax.driver.core.TableMetadata;
 
 /**
  * This is the abstract Cassandra Serializer class.
@@ -77,8 +79,9 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
    * @param <K>       key class
    * @param <T>       persistent class
    * @return Serializer
+   * @throws GoraException 
    */
-  public static <K, T extends Persistent> CassandraSerializer getSerializer(CassandraClient cc, String type, final DataStore<K, T> dataStore, CassandraMapping mapping) {
+  public static <K, T extends Persistent> CassandraSerializer getSerializer(CassandraClient cc, String type, final DataStore<K, T> dataStore, CassandraMapping mapping) throws GoraException {
     CassandraStore.SerializerType serType = type == null || type.isEmpty() ? CassandraStore.SerializerType.NATIVE : CassandraStore.SerializerType.valueOf(type.toUpperCase(Locale.ENGLISH));
     CassandraSerializer serializer;
     switch (serType) {
@@ -100,40 +103,60 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
   protected abstract void analyzePersistent() throws Exception;
 
 
-  public void createSchema() {
-    LOG.debug("creating Cassandra keyspace {}", mapping.getKeySpace().getName());
-    this.client.getSession().execute(CassandraQueryFactory.getCreateKeySpaceQuery(mapping));
-    for (Map.Entry udtType : userDefineTypeMaps.entrySet()) {
-      LOG.debug("creating Cassandra User Define Type {}", udtType.getKey());
-      this.client.getSession().execute((String) udtType.getValue());
+  public void createSchema() throws GoraException {
+    try {
+      LOG.debug("creating Cassandra keyspace {}", mapping.getKeySpace().getName());
+      this.client.getSession().execute(CassandraQueryFactory.getCreateKeySpaceQuery(mapping));
+      for (Map.Entry udtType : userDefineTypeMaps.entrySet()) {
+        LOG.debug("creating Cassandra User Define Type {}", udtType.getKey());
+        this.client.getSession().execute((String) udtType.getValue());
+      }
+      LOG.debug("creating Cassandra column family / table {}", mapping.getCoreName());
+      this.client.getSession().execute(CassandraQueryFactory.getCreateTableQuery(mapping));
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
-    LOG.debug("creating Cassandra column family / table {}", mapping.getCoreName());
-    this.client.getSession().execute(CassandraQueryFactory.getCreateTableQuery(mapping));
   }
 
-  public void deleteSchema() {
-    LOG.debug("dropping Cassandra table {}", mapping.getCoreName());
-    this.client.getSession().execute(CassandraQueryFactory.getDropTableQuery(mapping));
-    LOG.debug("dropping Cassandra keyspace {}", mapping.getKeySpace().getName());
-    this.client.getSession().execute(CassandraQueryFactory.getDropKeySpaceQuery(mapping));
+  public void deleteSchema() throws GoraException {
+    try {
+      LOG.debug("dropping Cassandra table {}", mapping.getCoreName());
+      this.client.getSession().execute(CassandraQueryFactory.getDropTableQuery(mapping));
+      LOG.debug("dropping Cassandra keyspace {}", mapping.getKeySpace().getName());
+      this.client.getSession().execute(CassandraQueryFactory.getDropKeySpaceQuery(mapping));
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
+    }
   }
 
   public void close() {
     this.client.close();
   }
 
-  public void truncateSchema() {
-    LOG.debug("truncating Cassandra table {}", mapping.getCoreName());
-    this.client.getSession().execute(CassandraQueryFactory.getTruncateTableQuery(mapping));
+  public void truncateSchema() throws GoraException {
+    try {
+      LOG.debug("truncating Cassandra table {}", mapping.getCoreName());
+      this.client.getSession().execute(CassandraQueryFactory.getTruncateTableQuery(mapping));
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
+    }
   }
 
-  public boolean schemaExists() {
-    KeyspaceMetadata keyspace = this.client.getCluster().getMetadata().getKeyspace(mapping.getKeySpace().getName());
-    if (keyspace != null) {
-      TableMetadata table = keyspace.getTable(mapping.getCoreName());
-      return table != null;
-    } else {
-      return false;
+  public boolean schemaExists() throws GoraException {
+    try {
+      KeyspaceMetadata keyspace = this.client.getCluster().getMetadata().getKeyspace(mapping.getKeySpace().getName());
+      if (keyspace != null) {
+        TableMetadata table = keyspace.getTable(mapping.getCoreName());
+        return table != null;
+      } else {
+        return false;
+      }
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
   }
 
@@ -151,7 +174,7 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
    * @param key   key value
    * @param value persistent value
    */
-  public abstract void put(K key, T value);
+  public abstract void put(K key, T value) throws GoraException;
 
   /**
    * Retrieves the persistent value according to the key
@@ -159,7 +182,7 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
    * @param key key value
    * @return persistent value
    */
-  public abstract T get(K key);
+  public abstract T get(K key) throws GoraException;
 
   /**
    * Deletes persistent value according to the key
@@ -167,7 +190,7 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
    * @param key key value
    * @return isDeleted
    */
-  public abstract boolean delete(K key);
+  public abstract boolean delete(K key) throws GoraException;
 
   /**
    * Retrieves the persistent value according to the key and fields
@@ -176,7 +199,7 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
    * @param fields fields
    * @return persistent value
    */
-  public abstract T get(K key, String[] fields);
+  public abstract T get(K key, String[] fields) throws GoraException;
 
   /**
    * Executes the given query and returns the results.
@@ -185,7 +208,7 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
    * @param query     Cassandra Query
    * @return Cassandra Result
    */
-  public abstract Result<K, T> execute(DataStore<K, T> dataStore, Query<K, T> query);
+  public abstract Result<K, T> execute(DataStore<K, T> dataStore, Query<K, T> query) throws GoraException ;
 
   /**
    * Update the persistent objects
@@ -195,31 +218,36 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
    */
   public abstract boolean updateByQuery(Query query);
 
-  public long deleteByQuery(Query query) {
-    List<Object> objectArrayList = new ArrayList<>();
-    if (query.getKey() == null && query.getEndKey() == null && query.getStartKey() == null) {
-      if (query.getFields() == null) {
-        client.getSession().execute(CassandraQueryFactory.getTruncateTableQuery(mapping));
+  public long deleteByQuery(Query query) throws GoraException {
+    try {
+      List<Object> objectArrayList = new ArrayList<>();
+      if (query.getKey() == null && query.getEndKey() == null && query.getStartKey() == null) {
+        if (query.getFields() == null) {
+          client.getSession().execute(CassandraQueryFactory.getTruncateTableQuery(mapping));
+        } else {
+          LOG.error("Delete by Query is not supported for the Queries which didn't specify Query keys with fields.");
+        }
       } else {
-        LOG.error("Delete by Query is not supported for the Queries which didn't specify Query keys with fields.");
+        String cqlQuery = CassandraQueryFactory.getDeleteByQuery(mapping, query, objectArrayList);
+        ResultSet results;
+        SimpleStatement statement;
+        if (objectArrayList.size() == 0) {
+          statement = new SimpleStatement(cqlQuery);
+        } else {
+          statement = new SimpleStatement(cqlQuery, objectArrayList.toArray());
+        }
+        if (writeConsistencyLevel != null) {
+          statement.setConsistencyLevel(ConsistencyLevel.valueOf(writeConsistencyLevel));
+        }
+        results = client.getSession().execute(statement);
+        LOG.debug("Delete by Query was applied : " + results.wasApplied());
       }
-    } else {
-      String cqlQuery = CassandraQueryFactory.getDeleteByQuery(mapping, query, objectArrayList);
-      ResultSet results;
-      SimpleStatement statement;
-      if (objectArrayList.size() == 0) {
-        statement = new SimpleStatement(cqlQuery);
-      } else {
-        statement = new SimpleStatement(cqlQuery, objectArrayList.toArray());
-      }
-      if (writeConsistencyLevel != null) {
-        statement.setConsistencyLevel(ConsistencyLevel.valueOf(writeConsistencyLevel));
-      }
-      results = client.getSession().execute(statement);
-      LOG.debug("Delete by Query was applied : " + results.wasApplied());
+      LOG.info("Delete By Query method doesn't return the deleted element count.");
+      return 0;
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
-    LOG.info("Delete By Query method doesn't return the deleted element count.");
-    return 0;
   }
 
 }

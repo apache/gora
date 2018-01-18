@@ -32,6 +32,7 @@ import org.apache.gora.query.Result;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.ClassLoadingUtils;
+import org.apache.gora.util.GoraException;
 import org.apache.gora.util.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configurable; 
@@ -69,7 +70,7 @@ public abstract class QueryBase<K, T extends PersistentBase>
   }
 
   @Override
-  public Result<K,T> execute() {
+  public Result<K,T> execute() throws GoraException {
     return dataStore.execute(this);
   }
 

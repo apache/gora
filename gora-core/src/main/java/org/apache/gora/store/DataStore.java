@@ -26,6 +26,7 @@ import org.apache.gora.persistency.Persistent;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
+import org.apache.gora.util.GoraException;
 
 /**
  * DataStore handles actual object persistence. Objects can be persisted,
@@ -52,7 +53,7 @@ public interface DataStore<K, T extends Persistent> {
    * @param persistentClass the class of the persistent objects
    * @param properties extra metadata
    */
-  void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties);
+  void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) throws GoraException;
 
   /**
    * Sets the class of the keys
@@ -90,26 +91,26 @@ public interface DataStore<K, T extends Persistent> {
    * or the underlying data model does not support
    * or need this operation, the operation is ignored.
    */
-  void createSchema();
+  void createSchema() throws GoraException;
 
   /**
    * Deletes the underlying schema or table (or similar) in the datastore
    * that holds the objects. This also deletes all the data associated with
    * the schema.
    */
-  void deleteSchema();
+  void deleteSchema() throws GoraException;
 
   /**
    * Deletes all the data associated with the schema, but keeps the
    * schema (table or similar) intact.
    */
-  void truncateSchema();
+  void truncateSchema() throws GoraException;
 
   /**
    * Returns whether the schema that holds the data exists in the datastore.
    * @return whether schema exists
    */
-  boolean schemaExists();
+  boolean schemaExists() throws GoraException;
 
   /**
    * Returns a new instance of the key object. If the object cannot be instantiated 
@@ -118,20 +119,20 @@ public interface DataStore<K, T extends Persistent> {
    * make sure that the key class has a no-arg constructor.   
    * @return a new instance of the key object.
    */
-  K newKey();
+  K newKey() throws GoraException;
 
   /**
    * Returns a new instance of the managed persistent object.
    * @return a new instance of the managed persistent object.
    */
-  T newPersistent();
+  T newPersistent() throws GoraException;
 
   /**
    * Returns the object corresponding to the given key fetching all the fields.
    * @param key the key of the object
    * @return the Object corresponding to the key or null if it cannot be found
    */
-  T get(K key);
+  T get(K key) throws GoraException;
 
   /**
    * Returns the object corresponding to the given key.
@@ -139,7 +140,7 @@ public interface DataStore<K, T extends Persistent> {
    * @param fields the fields required in the object. Pass null, to retrieve all fields
    * @return the Object corresponding to the key or null if it cannot be found
    */
-  T get(K key, String[] fields);
+  T get(K key, String[] fields) throws GoraException;
 
   /**
    * Inserts the persistent object with the given key. If an 
@@ -150,14 +151,14 @@ public interface DataStore<K, T extends Persistent> {
    * @param key the key of the object
    * @param obj the {@link Persistent} object
    */
-  void put(K key, T obj);
+  void put(K key, T obj) throws GoraException;
 
   /**
    * Deletes the object with the given key
    * @param key the key of the object
    * @return whether the object was successfully deleted
    */
-  boolean delete(K key);
+  boolean delete(K key) throws GoraException;
 
   /**
    * Deletes all the objects matching the query.
@@ -165,14 +166,14 @@ public interface DataStore<K, T extends Persistent> {
    * @param query matching records to this query will be deleted
    * @return number of deleted records
    */
-  long deleteByQuery(Query<K, T> query);
+  long deleteByQuery(Query<K, T> query) throws GoraException;
 
   /**
    * Executes the given query and returns the results.
    * @param query the query to execute.
    * @return the results as a {@link Result} object.
    */
-  Result<K, T> execute(Query<K, T> query);
+  Result<K, T> execute(Query<K, T> query) throws GoraException;
 
   /**
    * Constructs and returns a new Query.
@@ -199,7 +200,7 @@ public interface DataStore<K, T extends Persistent> {
    * until this moment.
    * See also the note on <a href="#visibility">visibility</a>.
    */
-  void flush();
+  void flush() throws GoraException;
 
   /**
    * Sets the {@link BeanFactory} to use by the DataStore.

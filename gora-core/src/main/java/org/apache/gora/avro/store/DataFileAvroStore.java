@@ -28,6 +28,7 @@ import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.query.impl.FileSplitPartitionQuery;
+import org.apache.gora.util.GoraException;
 import org.apache.gora.util.OperationNotSupportedException;
 import org.apache.hadoop.fs.Path;
 
@@ -49,17 +50,18 @@ public class DataFileAvroStore<K, T extends PersistentBase> extends AvroStore<K,
   private DataFileWriter<T> writer;
   
   @Override
-  public T get(K key, String[] fields) {
+  public T get(K key, String[] fields) throws GoraException {
     throw new OperationNotSupportedException(
         "Avro DataFile's does not support indexed retrieval");
   }
 
   @Override
-  public void put(K key, T obj) {
+  public void put(K key, T obj) throws GoraException {
     try{
       getWriter().append(obj);
-    } catch(IOException ex){
-      LOG.error(ex.getMessage(), ex);
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
   }
 
@@ -72,27 +74,17 @@ public class DataFileAvroStore<K, T extends PersistentBase> extends AvroStore<K,
   }
   
   @Override
-  protected Result<K, T> executeQuery(Query<K, T> query) {
-    try{
+  protected Result<K, T> executeQuery(Query<K, T> query) throws IOException {
       return new DataFileAvroResult<>(this, query
           , createReader(createFsInput()));
-    } catch(IOException ex){
-      LOG.error(ex.getMessage(), ex);
-      return null;
-    }
   }
  
   @Override
-  protected Result<K,T> executePartial(FileSplitPartitionQuery<K,T> query) {
-    try{
+  protected Result<K,T> executePartial(FileSplitPartitionQuery<K,T> query) throws IOException {
       FsInput fsInput = createFsInput();
       DataFileReader<T> reader = createReader(fsInput);
       return new DataFileAvroResult<>(this, query, reader, fsInput
           , query.getStart(), query.getLength());
-    } catch(IOException ex){
-      LOG.error(ex.getMessage(), ex);
-      return null;
-    }
   }
   
   private DataFileReader<T> createReader(FsInput fsInput) throws IOException {
@@ -105,14 +97,17 @@ public class DataFileAvroStore<K, T extends PersistentBase> extends AvroStore<K,
   }
   
   @Override
-  public void flush() {
+  public void flush() throws GoraException {
     try{
       super.flush();
       if(writer != null) {
         writer.flush();
       }
-    } catch(IOException ex){
-      LOG.error(ex.getMessage(), ex);
+    } catch (GoraException e) {
+      throw e;
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
   }
   

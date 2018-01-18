@@ -24,10 +24,13 @@ import java.util.List;
 
 import org.apache.gora.mock.persistency.MockPersistent;
 import org.apache.gora.mock.query.MockQuery;
+import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.query.impl.PartitionQueryImpl;
+import org.apache.gora.query.impl.ResultBase;
+import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.GoraException;
@@ -88,8 +91,8 @@ public class MockDataStore extends DataStoreBase<String, MockPersistent> {
   }
 
   @Override
-  public Result<String, MockPersistent> execute(Query<String, MockPersistent> query) {
-    return null;
+  public Result<String, MockPersistent> execute(Query<String, MockPersistent> query) throws GoraException {
+    return new MockResult<String, MockPersistent>(this, query);
   }
 
   @Override
@@ -140,5 +143,28 @@ public class MockDataStore extends DataStoreBase<String, MockPersistent> {
 
   @Override
   public void setPersistentClass(Class<MockPersistent> persistentClass) {
+  }
+  
+  public static class MockResult<K, T extends PersistentBase> extends ResultBase<K, T> {
+    
+    public MockResult(DataStore<K, T> dataStore, Query<K, T> query) {
+      super(dataStore, query);
+    }
+    
+    @Override
+    public void close() throws IOException { }
+
+    @Override
+    public float getProgress() throws IOException {
+      return 0;
+    }
+
+    @Override
+    protected void clear() {  } //do not clear the object in the store
+
+    @Override
+    public boolean nextInner() throws IOException {
+      return false ;
+    }
   }
 }

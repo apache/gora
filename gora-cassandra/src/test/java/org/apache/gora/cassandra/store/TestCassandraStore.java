@@ -25,6 +25,7 @@ import org.apache.gora.query.Query;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreTestBase;
 import org.apache.gora.store.DataStoreTestUtil;
+import org.apache.gora.util.GoraException;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -83,7 +84,7 @@ public class TestCassandraStore extends DataStoreTestBase {
   public void testGetPartitions() throws IOException {
   }
 
-  private void preConfiguration() {
+  private void preConfiguration() throws GoraException {
     if (webPageStore.schemaExists()) {
       webPageStore.truncateSchema();
     } else {
