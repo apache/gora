@@ -97,6 +97,7 @@ public interface DataStore<K, T extends Persistent> {
    * Deletes the underlying schema or table (or similar) in the datastore
    * that holds the objects. This also deletes all the data associated with
    * the schema.
+   * If the schema does not exists, this operation is ignored.
    */
   void deleteSchema() throws GoraException;
 

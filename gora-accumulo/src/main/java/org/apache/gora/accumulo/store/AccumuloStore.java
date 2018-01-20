@@ -497,7 +497,9 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         batchWriter.close();
       batchWriter = null;
       conn.tableOperations().delete(mapping.tableName);
-    } catch (AccumuloException | AccumuloSecurityException | TableNotFoundException e) {
+    } catch (TableNotFoundException e) {
+      // Ignore. Delete a non existant schema is a success
+    } catch (AccumuloException | AccumuloSecurityException e) {
       LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
