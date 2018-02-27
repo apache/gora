@@ -64,6 +64,7 @@ import org.apache.gora.query.impl.PartitionQueryImpl;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.AvroUtils;
 import org.apache.gora.util.ClassLoadingUtils;
+import org.apache.gora.util.GoraException;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -95,7 +96,7 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
    * @param properties OrientDB dataStore properties EG:- OrientDB client credentials.
    */
   @Override
-  public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) {
+  public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) throws GoraException {
     super.initialize(keyClass, persistentClass, properties);
     try {
       orientDbStoreParams = OrientDBStoreParameters.load(properties);
@@ -153,14 +154,13 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
    * Create a new class of OrientDB documents if necessary. Enforce specified schema over the document class.   *
    */
   @Override
-  public void createSchema() {
+  public void createSchema() throws GoraException {
     if (schemaExists()) {
       return;
     }
 
-    ODatabaseDocumentTx schemaTx = connectionPool.acquire();
-    schemaTx.activateOnCurrentThread();
-    try {
+    try (ODatabaseDocumentTx schemaTx = connectionPool.acquire()) {
+      schemaTx.activateOnCurrentThread();
 
       OClass documentClass = schemaTx.getMetadata().getSchema().createClass(orientDBMapping.getDocumentClass());
       documentClass.createProperty("_id",
@@ -170,8 +170,9 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
                 OType.valueOf(orientDBMapping.getDocumentFieldType(docField).name()));
       }
       schemaTx.getMetadata().getSchema().reload();
-    } finally {
-      schemaTx.close();
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
   }
 
@@ -180,13 +181,13 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
    * Deletes enforced schema over OrientDB Document class.
    */
   @Override
-  public void deleteSchema() {
-    ODatabaseDocumentTx schemaTx = connectionPool.acquire();
-    schemaTx.activateOnCurrentThread();
-    try {
+  public void deleteSchema() throws GoraException {
+    try (ODatabaseDocumentTx schemaTx = connectionPool.acquire()) {
+      schemaTx.activateOnCurrentThread();
       schemaTx.getMetadata().getSchema().dropClass(orientDBMapping.getDocumentClass());
-    } finally {
-      schemaTx.close();
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
   }
 
@@ -195,14 +196,14 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
    * Check whether there exist a schema enforced over OrientDB document class.
    */
   @Override
-  public boolean schemaExists() {
-    ODatabaseDocumentTx schemaTx = connectionPool.acquire();
-    schemaTx.activateOnCurrentThread();
-    try {
+  public boolean schemaExists() throws GoraException {
+    try (ODatabaseDocumentTx schemaTx = connectionPool.acquire()) {
+      schemaTx.activateOnCurrentThread();
       return schemaTx.getMetadata().getSchema()
               .existsClass(orientDBMapping.getDocumentClass());
-    } finally {
-      schemaTx.close();
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
   }
 
@@ -210,7 +211,7 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
    * {@inheritDoc}
    */
   @Override
-  public T get(K key, String[] fields) {
+  public T get(K key, String[] fields) throws GoraException {
     String[] dbFields = getFieldsToQuery(fields);
     com.github.raymanrt.orientqb.query.Query selectQuery = new com.github.raymanrt.orientqb.query.Query();
     for (String k : dbFields) {
@@ -224,17 +225,18 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("key", key);
     OSQLSynchQuery<ODocument> query = new OSQLSynchQuery<ODocument>(selectQuery.toString());
-    ODatabaseDocumentTx selectTx = connectionPool.acquire();
-    selectTx.activateOnCurrentThread();
-    try {
+    
+    try (ODatabaseDocumentTx selectTx = connectionPool.acquire()) {
+      selectTx.activateOnCurrentThread();
       List<ODocument> result = selectTx.command(query).execute(params);
       if (result.size() == 1) {
         return convertOrientDocToAvroBean(result.get(0), dbFields);
       } else {
         return null;
       }
-    } finally {
-      selectTx.close();
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
   }
 
@@ -242,16 +244,15 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
    * {@inheritDoc}
    */
   @Override
-  public void put(K key, T val) {
+  public void put(K key, T val) throws GoraException {
     if (val.isDirty()) {
       OrientDBQuery<K, T> dataStoreQuery = new OrientDBQuery<>(this);
       dataStoreQuery.setStartKey(key);
       dataStoreQuery.setEndKey(key);
       dataStoreQuery.populateOrientDBQuery(orientDBMapping, getFieldsToQuery(null), getFields());
 
-      ODatabaseDocumentTx selectTx = connectionPool.acquire();
-      selectTx.activateOnCurrentThread();
-      try {
+      try (ODatabaseDocumentTx selectTx = connectionPool.acquire()) {
+        selectTx.activateOnCurrentThread();
         // TODO : further optimize for queries to separate cases update / insert == get rid of select all query
         // TODO : for update
         List<ODocument> result = selectTx.command(dataStoreQuery.getOrientDBQuery())
@@ -263,8 +264,9 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
           ODocument document = convertAvroBeanToOrientDoc(key, val);
           docBatch.add(document);
         }
-      } finally {
-        selectTx.close();
+      } catch (Exception e) {
+        LOG.error(e.getMessage(), e);
+        throw new GoraException(e);
       }
     } else {
       if (LOG.isDebugEnabled()) {
@@ -278,24 +280,24 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
    * {@inheritDoc}
    */
   @Override
-  public boolean delete(K key) {
+  public boolean delete(K key) throws GoraException {
     Delete delete = new Delete();
     delete.from(orientDBMapping.getDocumentClass())
             .where(projection("_id").eq(Parameter.parameter("key")));
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("key", key);
     OCommandSQL query = new OCommandSQL(delete.toString().replace("DELETE", "DELETE FROM"));
-    ODatabaseDocumentTx deleteTx = connectionPool.acquire();
-    deleteTx.activateOnCurrentThread();
-    try {
+    try (ODatabaseDocumentTx deleteTx = connectionPool.acquire()) {
+      deleteTx.activateOnCurrentThread();
       int deleteCount = deleteTx.command(query).execute(params);
       if (deleteCount == 1) {
         return true;
       } else {
         return false;
       }
-    } finally {
-      deleteTx.close();
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
   }
 
@@ -303,7 +305,7 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
    * {@inheritDoc}
    */
   @Override
-  public long deleteByQuery(Query<K, T> query) {
+  public long deleteByQuery(Query<K, T> query) throws GoraException {
     Delete delete = new Delete();
     delete.from(orientDBMapping.getDocumentClass());
     Map<String, Object> params = new HashMap<String, Object>();
@@ -318,9 +320,8 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
       }
 
       OCommandSQL dbQuery = new OCommandSQL(delete.toString().replace("DELETE", "DELETE FROM"));
-      ODatabaseDocumentTx deleteTx = connectionPool.acquire();
-      deleteTx.activateOnCurrentThread();
-      try {
+      try (ODatabaseDocumentTx deleteTx = connectionPool.acquire()) {
+        deleteTx.activateOnCurrentThread();
         int deleteCount;
         if (params.isEmpty()) {
           deleteCount = deleteTx.command(dbQuery).execute();
@@ -332,8 +333,9 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
         } else {
           return 0;
         }
-      } finally {
-        deleteTx.close();
+      } catch (Exception e) {
+        LOG.error(e.getMessage(), e);
+        throw new GoraException(e);
       }
     } else {
 
@@ -342,9 +344,8 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
       dataStoreQuery.setEndKey(query.getEndKey());
       dataStoreQuery.populateOrientDBQuery(orientDBMapping, getFieldsToQuery(null), getFields());
 
-      ODatabaseDocumentTx selectTx = connectionPool.acquire();
-      selectTx.activateOnCurrentThread();
-      try {
+      try (ODatabaseDocumentTx selectTx = connectionPool.acquire()) {
+        selectTx.activateOnCurrentThread();
         List<ODocument> result = selectTx.command(dataStoreQuery.getOrientDBQuery())
                 .execute(dataStoreQuery.getParams());
         if (result != null && result.isEmpty()) {
@@ -360,8 +361,9 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
           }
           return result.size();
         }
-      } finally {
-        selectTx.close();
+      } catch (Exception e) {
+        LOG.error(e.getMessage(), e);
+        throw new GoraException(e);
       }
     }
   }
@@ -370,7 +372,7 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
    * {@inheritDoc}
    */
   @Override
-  public Result<K, T> execute(Query<K, T> query) {
+  public Result<K, T> execute(Query<K, T> query) throws GoraException {
     String[] fields = getFieldsToQuery(query.getFields());
     OrientDBQuery dataStoreQuery;
     if (query instanceof OrientDBQuery) {
@@ -379,15 +381,15 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
       dataStoreQuery = (OrientDBQuery) ((PartitionQueryImpl<K, T>) query).getBaseQuery();
     }
     dataStoreQuery.populateOrientDBQuery(orientDBMapping, fields, getFields());
-    ODatabaseDocumentTx selectTx = connectionPool.acquire();
-    selectTx.activateOnCurrentThread();
-    try {
+    try (ODatabaseDocumentTx selectTx = connectionPool.acquire()) {
+      selectTx.activateOnCurrentThread();
       OConcurrentResultSet<ODocument> result = selectTx.command(dataStoreQuery.getOrientDBQuery())
               .execute(dataStoreQuery.getParams());
       result.setLimit((int) query.getLimit());
       return new OrientDBResult<K, T>(this, query, result);
-    } finally {
-      selectTx.close();
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
   }
 
@@ -420,16 +422,17 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
    * Flushes locally cached to content in memory to remote OrientDB server.
    */
   @Override
-  public void flush() {
-    ODatabaseDocumentTx updateTx = connectionPool.acquire();
-    updateTx.activateOnCurrentThread();
-    try {
+  public void flush() throws GoraException {
+    try (ODatabaseDocumentTx updateTx = connectionPool.acquire()) {
+      updateTx.activateOnCurrentThread();
       flushLock.lock();
       for (ODocument document : docBatch) {
         updateTx.save(document);
       }
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     } finally {
-      updateTx.close();
       docBatch.clear();
       flushLock.unlock();
     }
@@ -455,7 +458,7 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
     return connectionPool;
   }
 
-  public T convertOrientDocToAvroBean(final ODocument obj, final String[] fields) {
+  public T convertOrientDocToAvroBean(final ODocument obj, final String[] fields) throws GoraException {
     T persistent = newPersistent();
     String[] dbFields = getFieldsToQuery(fields);
     for (String f : dbFields) {
@@ -480,7 +483,7 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
                                             final OrientDBMapping.DocumentFieldType storeType,
                                             final Schema.Field field,
                                             final String docf,
-                                            final ODocument obj) {
+                                            final ODocument obj) throws GoraException {
     Object result = null;
     switch (fieldSchema.getType()) {
       case MAP:
@@ -543,7 +546,7 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
                                            final Schema fieldSchema,
                                            final ODocument doc,
                                            final Schema.Field f,
-                                           final OrientDBMapping.DocumentFieldType storeType) {
+                                           final OrientDBMapping.DocumentFieldType storeType) throws GoraException {
     if (storeType == OrientDBMapping.DocumentFieldType.EMBEDDEDSET) {
       OTrackedSet<Object> set = doc.field(docf);
       List<Object> rlist = new ArrayList<>();
@@ -605,7 +608,7 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
 
   private Object convertDocFieldToAvroMap(final String docf, final Schema fieldSchema,
                                           final ODocument doc, final Schema.Field f,
-                                          final OrientDBMapping.DocumentFieldType storeType) {
+                                          final OrientDBMapping.DocumentFieldType storeType) throws GoraException {
     if (storeType == OrientDBMapping.DocumentFieldType.EMBEDDEDMAP) {
       OTrackedMap<Object> map = doc.field(docf);
       Map<Utf8, Object> rmap = new HashMap<>();
@@ -682,13 +685,14 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
   }
 
   private Object convertAvroBeanToOrientDoc(final Schema fieldSchema,
-                                            final ODocument doc) {
+                                            final ODocument doc) throws GoraException {
     Object result;
     Class<?> clazz = null;
     try {
       clazz = ClassLoadingUtils.loadClass(fieldSchema.getFullName());
-    } catch (ClassNotFoundException e) {
-      //Ignore
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
     PersistentBase record = (PersistentBase) new BeanFactoryImpl(keyClass, clazz).newPersistent();
     for (Schema.Field recField : fieldSchema.getFields()) {
@@ -727,7 +731,7 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
                                             final OrientDBMapping.DocumentFieldType storeType,
                                             final Schema.Field field,
                                             final String docf,
-                                            final ODocument doc) {
+                                            final ODocument doc) throws GoraException {
     Object result;
     Schema.Type type0 = fieldSchema.getTypes().get(0).getType();
     Schema.Type type1 = fieldSchema.getTypes().get(1).getType();
@@ -746,7 +750,7 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
 
       result = convertDocFieldToAvroField(innerSchema, storeType, field, docf, doc);
     } else {
-      throw new IllegalStateException("OrientDBStore only supports Union of two types field.");
+      throw new GoraException("OrientDBStore only supports Union of two types field.");
     }
     return result;
   }

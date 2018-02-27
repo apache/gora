@@ -38,6 +38,7 @@ import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.store.DataStore;
+import org.apache.gora.util.GoraException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,18 +60,18 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
 
   private Schema persistentSchema;
 
-  AvroSerializer(CassandraClient cassandraClient, DataStore<K, T> dataStore, CassandraMapping mapping) {
+  AvroSerializer(CassandraClient cassandraClient, DataStore<K, T> dataStore, CassandraMapping mapping) throws GoraException {
     super(cassandraClient, dataStore.getKeyClass(), dataStore.getPersistentClass(), mapping);
     if (PersistentBase.class.isAssignableFrom(dataStore.getPersistentClass())) {
       persistentSchema = ((PersistentBase) dataStore.getBeanFactory().getCachedPersistent()).getSchema();
     } else {
-      throw new RuntimeException("Unsupported persistent class, couldn't able to find the Avro schema.");
+      throw new GoraException("Unsupported persistent class, couldn't able to find the Avro schema.");
     }
     this.cassandraDataStore = dataStore;
     try {
       analyzePersistent();
     } catch (Exception e) {
-      throw new RuntimeException("Error occurred while analyzing the persistent class, :" + e.getMessage());
+      throw new GoraException("Error occurred while analyzing the persistent class, :" + e.getMessage());
     }
   }
 
@@ -136,28 +137,35 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
    * @return
    */
   @Override
-  public Persistent get(Object key, String[] fields) {
-    if (fields == null) {
-      fields = getFields();
+  public Persistent get(Object key, String[] fields) throws GoraException {
+    try {
+      if (fields == null) {
+        fields = getFields();
+      }
+      ArrayList<String> cassandraKeys = new ArrayList<>();
+      ArrayList<Object> cassandraValues = new ArrayList<>();
+      AvroCassandraUtils.processKeys(mapping, key, cassandraKeys, cassandraValues);
+      String cqlQuery = CassandraQueryFactory.getSelectObjectWithFieldsQuery(mapping, fields, cassandraKeys);
+      SimpleStatement statement = new SimpleStatement(cqlQuery, cassandraValues.toArray());
+      if (readConsistencyLevel != null) {
+        statement.setConsistencyLevel(ConsistencyLevel.valueOf(readConsistencyLevel));
+      }
+      ResultSet resultSet = this.client.getSession().execute(statement);
+      Iterator<Row> iterator = resultSet.iterator();
+      ColumnDefinitions definitions = resultSet.getColumnDefinitions();
+      T obj = null;
+      if (iterator.hasNext()) {
+        obj = cassandraDataStore.newPersistent();
+        AbstractGettableData row = (AbstractGettableData) iterator.next();
+        populateValuesToPersistent(row, definitions, obj, fields);
+      }
+      return obj;
+    } catch (GoraException e) {
+      throw e;
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
-    ArrayList<String> cassandraKeys = new ArrayList<>();
-    ArrayList<Object> cassandraValues = new ArrayList<>();
-    AvroCassandraUtils.processKeys(mapping, key, cassandraKeys, cassandraValues);
-    String cqlQuery = CassandraQueryFactory.getSelectObjectWithFieldsQuery(mapping, fields, cassandraKeys);
-    SimpleStatement statement = new SimpleStatement(cqlQuery, cassandraValues.toArray());
-    if (readConsistencyLevel != null) {
-      statement.setConsistencyLevel(ConsistencyLevel.valueOf(readConsistencyLevel));
-    }
-    ResultSet resultSet = this.client.getSession().execute(statement);
-    Iterator<Row> iterator = resultSet.iterator();
-    ColumnDefinitions definitions = resultSet.getColumnDefinitions();
-    T obj = null;
-    if (iterator.hasNext()) {
-      obj = cassandraDataStore.newPersistent();
-      AbstractGettableData row = (AbstractGettableData) iterator.next();
-      populateValuesToPersistent(row, definitions, obj, fields);
-    }
-    return obj;
   }
 
   /**
@@ -167,67 +175,72 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
    * @param persistent
    */
   @Override
-  public void put(Object key, Persistent persistent) {
-    if (persistent instanceof PersistentBase) {
-      if (persistent.isDirty()) {
-        PersistentBase persistentBase = (PersistentBase) persistent;
-        ArrayList<String> fields = new ArrayList<>();
-        ArrayList<Object> values = new ArrayList<>();
-        AvroCassandraUtils.processKeys(mapping, key, fields, values);
-        for (Schema.Field f : persistentBase.getSchema().getFields()) {
-          String fieldName = f.name();
-          Field field = mapping.getFieldFromFieldName(fieldName);
-          if (field == null) {
-            LOG.debug("Ignoring {} adding field, {} field can't find in {} mapping", new Object[]{fieldName, fieldName, persistentClass});
-            continue;
-          }
-          if (persistent.isDirty(f.pos()) || mapping.getInlinedDefinedPartitionKey().equals(mapping.getFieldFromFieldName(fieldName))) {
-            Object value = persistentBase.get(f.pos());
-            String fieldType = field.getType();
-            if (fieldType.contains("frozen")) {
-              fieldType = fieldType.substring(fieldType.indexOf("<") + 1, fieldType.indexOf(">"));
-              UserType userType = client.getSession().getCluster().getMetadata().getKeyspace(mapping.getKeySpace().getName()).getUserType(fieldType);
-              UDTValue udtValue = userType.newValue();
-              Schema udtSchema = f.schema();
-              if (udtSchema.getType().equals(Schema.Type.UNION)) {
-                for (Schema schema : udtSchema.getTypes()) {
-                  if (schema.getType().equals(Schema.Type.RECORD)) {
-                    udtSchema = schema;
-                    break;
+  public void put(Object key, Persistent persistent) throws GoraException {
+    try {
+      if (persistent instanceof PersistentBase) {
+        if (persistent.isDirty()) {
+          PersistentBase persistentBase = (PersistentBase) persistent;
+          ArrayList<String> fields = new ArrayList<>();
+          ArrayList<Object> values = new ArrayList<>();
+          AvroCassandraUtils.processKeys(mapping, key, fields, values);
+          for (Schema.Field f : persistentBase.getSchema().getFields()) {
+            String fieldName = f.name();
+            Field field = mapping.getFieldFromFieldName(fieldName);
+            if (field == null) {
+              LOG.debug("Ignoring {} adding field, {} field can't find in {} mapping", new Object[]{fieldName, fieldName, persistentClass});
+              continue;
+            }
+            if (persistent.isDirty(f.pos()) || mapping.getInlinedDefinedPartitionKey().equals(mapping.getFieldFromFieldName(fieldName))) {
+              Object value = persistentBase.get(f.pos());
+              String fieldType = field.getType();
+              if (fieldType.contains("frozen")) {
+                fieldType = fieldType.substring(fieldType.indexOf("<") + 1, fieldType.indexOf(">"));
+                UserType userType = client.getSession().getCluster().getMetadata().getKeyspace(mapping.getKeySpace().getName()).getUserType(fieldType);
+                UDTValue udtValue = userType.newValue();
+                Schema udtSchema = f.schema();
+                if (udtSchema.getType().equals(Schema.Type.UNION)) {
+                  for (Schema schema : udtSchema.getTypes()) {
+                    if (schema.getType().equals(Schema.Type.RECORD)) {
+                      udtSchema = schema;
+                      break;
+                    }
                   }
                 }
-              }
-              PersistentBase udtObjectBase = (PersistentBase) value;
-              for (Schema.Field udtField : udtSchema.getFields()) {
-                Object udtFieldValue = AvroCassandraUtils.getFieldValueFromAvroBean(udtField.schema(), udtField.schema().getType(), udtObjectBase.get(udtField.name()), field);
-                if (udtField.schema().getType().equals(Schema.Type.MAP)) {
-                  udtValue.setMap(udtField.name(), (Map) udtFieldValue);
-                } else if (udtField.schema().getType().equals(Schema.Type.ARRAY)) {
-                  udtValue.setList(udtField.name(), (List) udtFieldValue);
-                } else {
-                  udtValue.set(udtField.name(), udtFieldValue, (Class) udtFieldValue.getClass());
+                PersistentBase udtObjectBase = (PersistentBase) value;
+                for (Schema.Field udtField : udtSchema.getFields()) {
+                  Object udtFieldValue = AvroCassandraUtils.getFieldValueFromAvroBean(udtField.schema(), udtField.schema().getType(), udtObjectBase.get(udtField.name()), field);
+                  if (udtField.schema().getType().equals(Schema.Type.MAP)) {
+                    udtValue.setMap(udtField.name(), (Map) udtFieldValue);
+                  } else if (udtField.schema().getType().equals(Schema.Type.ARRAY)) {
+                    udtValue.setList(udtField.name(), (List) udtFieldValue);
+                  } else {
+                    udtValue.set(udtField.name(), udtFieldValue, (Class) udtFieldValue.getClass());
+                  }
                 }
+                value = udtValue;
+              } else {
+                value = AvroCassandraUtils.getFieldValueFromAvroBean(f.schema(), f.schema().getType(), value, field);
               }
-              value = udtValue;
-            } else {
-              value = AvroCassandraUtils.getFieldValueFromAvroBean(f.schema(), f.schema().getType(), value, field);
+              values.add(value);
+              fields.add(fieldName);
             }
-            values.add(value);
-            fields.add(fieldName);
           }
+          String cqlQuery = CassandraQueryFactory.getInsertDataQuery(mapping, fields);
+          SimpleStatement statement = new SimpleStatement(cqlQuery, values.toArray());
+          if (writeConsistencyLevel != null) {
+            statement.setConsistencyLevel(ConsistencyLevel.valueOf(writeConsistencyLevel));
+          }
+          client.getSession().execute(statement);
+        } else {
+          LOG.info("Ignored putting persistent bean {} in the store as it is neither "
+                  + "new, neither dirty.", new Object[]{persistent});
         }
-        String cqlQuery = CassandraQueryFactory.getInsertDataQuery(mapping, fields);
-        SimpleStatement statement = new SimpleStatement(cqlQuery, values.toArray());
-        if (writeConsistencyLevel != null) {
-          statement.setConsistencyLevel(ConsistencyLevel.valueOf(writeConsistencyLevel));
-        }
-        client.getSession().execute(statement);
       } else {
-        LOG.info("Ignored putting persistent bean {} in the store as it is neither "
-                + "new, neither dirty.", new Object[]{persistent});
+        LOG.error("{} Persistent bean isn't extended by {} .", new Object[]{this.persistentClass, PersistentBase.class});
       }
-    } else {
-      LOG.error("{} Persistent bean isn't extended by {} .", new Object[]{this.persistentClass, PersistentBase.class});
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
   }
 
@@ -238,25 +251,30 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
    * @return
    */
   @Override
-  public Persistent get(Object key) {
-    ArrayList<String> cassandraKeys = new ArrayList<>();
-    ArrayList<Object> cassandraValues = new ArrayList<>();
-    AvroCassandraUtils.processKeys(mapping, key, cassandraKeys, cassandraValues);
-    String cqlQuery = CassandraQueryFactory.getSelectObjectQuery(mapping, cassandraKeys);
-    SimpleStatement statement = new SimpleStatement(cqlQuery, cassandraValues.toArray());
-    if (readConsistencyLevel != null) {
-      statement.setConsistencyLevel(ConsistencyLevel.valueOf(readConsistencyLevel));
+  public Persistent get(Object key) throws GoraException {
+    try {
+      ArrayList<String> cassandraKeys = new ArrayList<>();
+      ArrayList<Object> cassandraValues = new ArrayList<>();
+      AvroCassandraUtils.processKeys(mapping, key, cassandraKeys, cassandraValues);
+      String cqlQuery = CassandraQueryFactory.getSelectObjectQuery(mapping, cassandraKeys);
+      SimpleStatement statement = new SimpleStatement(cqlQuery, cassandraValues.toArray());
+      if (readConsistencyLevel != null) {
+        statement.setConsistencyLevel(ConsistencyLevel.valueOf(readConsistencyLevel));
+      }
+      ResultSet resultSet = client.getSession().execute(statement);
+      Iterator<Row> iterator = resultSet.iterator();
+      ColumnDefinitions definitions = resultSet.getColumnDefinitions();
+      T obj = null;
+      if (iterator.hasNext()) {
+        obj = cassandraDataStore.newPersistent();
+        AbstractGettableData row = (AbstractGettableData) iterator.next();
+        populateValuesToPersistent(row, definitions, obj, mapping.getFieldNames());
+      }
+      return obj;
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
-    ResultSet resultSet = client.getSession().execute(statement);
-    Iterator<Row> iterator = resultSet.iterator();
-    ColumnDefinitions definitions = resultSet.getColumnDefinitions();
-    T obj = null;
-    if (iterator.hasNext()) {
-      obj = cassandraDataStore.newPersistent();
-      AbstractGettableData row = (AbstractGettableData) iterator.next();
-      populateValuesToPersistent(row, definitions, obj, mapping.getFieldNames());
-    }
-    return obj;
   }
 
   /**
@@ -380,17 +398,22 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
    * @return
    */
   @Override
-  public boolean delete(Object key) {
+  public boolean delete(Object key) throws GoraException {
     ArrayList<String> cassandraKeys = new ArrayList<>();
     ArrayList<Object> cassandraValues = new ArrayList<>();
-    AvroCassandraUtils.processKeys(mapping, key, cassandraKeys, cassandraValues);
-    String cqlQuery = CassandraQueryFactory.getDeleteDataQuery(mapping, cassandraKeys);
-    SimpleStatement statement = new SimpleStatement(cqlQuery, cassandraValues.toArray());
-    if (writeConsistencyLevel != null) {
-      statement.setConsistencyLevel(ConsistencyLevel.valueOf(writeConsistencyLevel));
+    try {
+      AvroCassandraUtils.processKeys(mapping, key, cassandraKeys, cassandraValues);
+      String cqlQuery = CassandraQueryFactory.getDeleteDataQuery(mapping, cassandraKeys);
+      SimpleStatement statement = new SimpleStatement(cqlQuery, cassandraValues.toArray());
+      if (writeConsistencyLevel != null) {
+        statement.setConsistencyLevel(ConsistencyLevel.valueOf(writeConsistencyLevel));
+      }
+      ResultSet resultSet = client.getSession().execute(statement);
+      return resultSet.wasApplied();
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
-    ResultSet resultSet = client.getSession().execute(statement);
-    return resultSet.wasApplied();
   }
 
   /**
@@ -401,46 +424,51 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
    * @return
    */
   @Override
-  public Result execute(DataStore dataStore, Query query) {
-    List<Object> objectArrayList = new ArrayList<>();
-    String[] fields = query.getFields();
-    if (fields != null) {
-      fields = (String[]) ArrayUtils.addAll(fields, mapping.getAllKeys());
-    } else {
-      fields = mapping.getAllFieldsIncludingKeys();
-    }
-    CassandraResultSet<K, T> cassandraResult = new CassandraResultSet<>(dataStore, query);
-    String cqlQuery = CassandraQueryFactory.getExecuteQuery(mapping, query, objectArrayList, fields);
-    ResultSet results;
-    SimpleStatement statement;
-    if (objectArrayList.size() == 0) {
-      statement = new SimpleStatement(cqlQuery);
-    } else {
-      statement = new SimpleStatement(cqlQuery, objectArrayList.toArray());
-    }
-    if (readConsistencyLevel != null) {
-      statement.setConsistencyLevel(ConsistencyLevel.valueOf(readConsistencyLevel));
-    }
-    results = client.getSession().execute(statement);
-    Iterator<Row> iterator = results.iterator();
-    ColumnDefinitions definitions = results.getColumnDefinitions();
-    T obj;
-    K keyObject;
-    CassandraKey cassandraKey = mapping.getCassandraKey();
-    while (iterator.hasNext()) {
-      AbstractGettableData row = (AbstractGettableData) iterator.next();
-      obj = cassandraDataStore.newPersistent();
-      keyObject = cassandraDataStore.newKey();
-      populateValuesToPersistent(row, definitions, obj, fields);
-      if (cassandraKey != null) {
-        populateValuesToPersistent(row, definitions, (PersistentBase) keyObject, cassandraKey.getFieldNames());
+  public Result execute(DataStore dataStore, Query query) throws GoraException {
+    try {
+      List<Object> objectArrayList = new ArrayList<>();
+      String[] fields = query.getFields();
+      if (fields != null) {
+        fields = (String[]) ArrayUtils.addAll(fields, mapping.getAllKeys());
       } else {
-        Field key = mapping.getInlinedDefinedPartitionKey();
-        keyObject = (K) getValue(row, definitions.getType(key.getColumnName()), key.getColumnName(), null);
+        fields = mapping.getAllFieldsIncludingKeys();
       }
-      cassandraResult.addResultElement(keyObject, obj);
+      CassandraResultSet<K, T> cassandraResult = new CassandraResultSet<>(dataStore, query);
+      String cqlQuery = CassandraQueryFactory.getExecuteQuery(mapping, query, objectArrayList, fields);
+      ResultSet results;
+      SimpleStatement statement;
+      if (objectArrayList.size() == 0) {
+        statement = new SimpleStatement(cqlQuery);
+      } else {
+        statement = new SimpleStatement(cqlQuery, objectArrayList.toArray());
+      }
+      if (readConsistencyLevel != null) {
+        statement.setConsistencyLevel(ConsistencyLevel.valueOf(readConsistencyLevel));
+      }
+      results = client.getSession().execute(statement);
+      Iterator<Row> iterator = results.iterator();
+      ColumnDefinitions definitions = results.getColumnDefinitions();
+      T obj;
+      K keyObject;
+      CassandraKey cassandraKey = mapping.getCassandraKey();
+      while (iterator.hasNext()) {
+        AbstractGettableData row = (AbstractGettableData) iterator.next();
+        obj = cassandraDataStore.newPersistent();
+        keyObject = cassandraDataStore.newKey();
+        populateValuesToPersistent(row, definitions, obj, fields);
+        if (cassandraKey != null) {
+          populateValuesToPersistent(row, definitions, (PersistentBase) keyObject, cassandraKey.getFieldNames());
+        } else {
+          Field key = mapping.getInlinedDefinedPartitionKey();
+          keyObject = (K) getValue(row, definitions.getType(key.getColumnName()), key.getColumnName(), null);
+        }
+        cassandraResult.addResultElement(keyObject, obj);
+      }
+      return cassandraResult;
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
-    return cassandraResult;
   }
 
 }

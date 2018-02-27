@@ -23,6 +23,7 @@ import java.util.Properties;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
+import org.apache.gora.util.GoraException;
 import org.apache.gora.util.StringUtils;
 
 /**
@@ -72,7 +73,7 @@ implements DataStore<K, T>{
    */
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
-      Properties properties) {
+      Properties properties) throws GoraException {
     setKeyClass(keyClass);
     setPersistentClass(persistentClass);
     autoCreateSchema = DataStoreFactory.getAutoCreateSchema(properties, this);
@@ -155,7 +156,7 @@ implements DataStore<K, T>{
 
   @Override
   /** Default implementation deletes and recreates the schema*/
-  public void truncateSchema() {
+  public void truncateSchema() throws GoraException {
     deleteSchema();
     createSchema();
   }

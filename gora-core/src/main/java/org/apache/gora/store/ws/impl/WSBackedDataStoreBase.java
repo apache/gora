@@ -25,8 +25,8 @@ import org.apache.gora.persistency.Persistent;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.store.WebServiceBackedDataStore;
+import org.apache.gora.util.GoraException;
 import org.apache.gora.util.OperationNotSupportedException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +44,7 @@ public abstract class WSBackedDataStoreBase<K, T extends Persistent>
    * @throws IOException
    */
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
-      Properties properties) {
+      Properties properties) throws GoraException {
     super.initialize(keyClass, persistentClass, properties);
   }
 
@@ -52,12 +52,12 @@ public abstract class WSBackedDataStoreBase<K, T extends Persistent>
   /**
    * Executes a query inside a web service backed data store
    */
-  public Result<K, T> execute(Query<K, T> query) {
+  public Result<K, T> execute(Query<K, T> query) throws GoraException {
     try {
       return executeQuery(query);
     } catch (IOException e) {
       LOG.error(e.getMessage());
-      throw new RuntimeException(e);
+      throw new GoraException(e);
     }
   }
 
@@ -72,21 +72,21 @@ public abstract class WSBackedDataStoreBase<K, T extends Persistent>
   /**
    * Flushes objects into the data store
    */
-  public void flush() {
+  public void flush() throws GoraException {
   }
 
   @Override
   /**
    * Creates schema into the data store
    */
-  public void createSchema() {
+  public void createSchema() throws GoraException {
   }
 
   @Override
   /**
    * Deletes schema from the data store
    */
-  public void deleteSchema() {
+  public void deleteSchema() throws GoraException {
     throw new OperationNotSupportedException("delete schema is not supported for " +
       "file backed data stores");
   }
@@ -95,7 +95,7 @@ public abstract class WSBackedDataStoreBase<K, T extends Persistent>
   /**
    * Verifies if a schema exists
    */
-  public boolean schemaExists() {
+  public boolean schemaExists() throws GoraException {
     return true;
   }
 

@@ -36,7 +36,7 @@ import org.apache.gora.query.Result;
 import org.apache.gora.query.impl.FileSplitPartitionQuery;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.FileBackedDataStore;
-import org.apache.gora.util.OperationNotSupportedException;
+import org.apache.gora.util.GoraException;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
@@ -64,7 +64,7 @@ extends DataStoreBase<K, T> implements FileBackedDataStore<K, T> {
 
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
-          Properties properties) {
+          Properties properties) throws GoraException {
     super.initialize(keyClass, persistentClass, properties);
     if(properties != null) {
       if(this.inputPath == null) {
@@ -166,24 +166,20 @@ extends DataStoreBase<K, T> implements FileBackedDataStore<K, T> {
   }
 
   @Override
-  public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query){
+  public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query) throws IOException {
     List<InputSplit> splits = null;
     List<PartitionQuery<K, T>> queries = null;
-    try{
-      splits = GoraMapReduceUtils.getSplits(getConf(), inputPath);
-      queries = new ArrayList<>(splits.size());
+    splits = GoraMapReduceUtils.getSplits(getConf(), inputPath);
+    queries = new ArrayList<>(splits.size());
 
-      for(InputSplit split : splits) {
-        queries.add(new FileSplitPartitionQuery<>(query, (FileSplit) split));
-      }
-    }catch(IOException ex){
-      LOG.error(ex.getMessage(), ex);
+    for(InputSplit split : splits) {
+      queries.add(new FileSplitPartitionQuery<>(query, (FileSplit) split));
     }
     return queries;
   }
 
   @Override
-  public Result<K, T> execute(Query<K, T> query) {
+  public Result<K, T> execute(Query<K, T> query) throws GoraException {
     Result<K, T> results = null;
     try{
       if(query instanceof FileSplitPartitionQuery) {
@@ -191,8 +187,11 @@ extends DataStoreBase<K, T> implements FileBackedDataStore<K, T> {
       } else {
         results = executeQuery(query);
       }
-    }catch(IOException ex){
-      LOG.error(ex.getMessage(), ex);
+    } catch (GoraException e) {
+      throw e;
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
     return results;
   }
@@ -219,46 +218,43 @@ extends DataStoreBase<K, T> implements FileBackedDataStore<K, T> {
           throws IOException;
 
   @Override
-  public void flush() {
+  public void flush() throws GoraException {
     try{
       if(outputStream != null)
         outputStream.flush();
-    }catch(IOException ex){
-      LOG.error(ex.getMessage(), ex);
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
   }
 
   @Override
-  public void createSchema() {
+  public void createSchema() throws GoraException {
   }
 
   @Override
-  public void deleteSchema() {
-    throw new OperationNotSupportedException("delete schema is not supported for " +
+  public void deleteSchema() throws GoraException {
+    throw new GoraException("delete schema is not supported for " +
             "file backed data stores");
   }
 
   @Override
-  public boolean schemaExists() {
+  public boolean schemaExists() throws GoraException {
     return true;
   }
 
   @Override
-  public void write(DataOutput out) {
-    try{
+  public void write(DataOutput out) throws IOException {
       super.write(out);
       org.apache.gora.util.IOUtils.writeNullFieldsInfo(out, inputPath, outputPath);
       if(inputPath != null)
         Text.writeString(out, inputPath);
       if(outputPath != null)
         Text.writeString(out, outputPath);
-    }catch(IOException ex){
-      LOG.error(ex.getMessage(), ex);
-    }
   }
 
   @Override
-  public void readFields(DataInput in) {
+  public void readFields(DataInput in) throws IOException {
     try{
       super.readFields(in);
       boolean[] nullFields = org.apache.gora.util.IOUtils.readNullFieldsInfo(in);

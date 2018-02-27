@@ -17,16 +17,18 @@
 
 package org.apache.gora.jcache.store;
 
-import org.apache.gora.persistency.impl.PersistentBase;
-import org.apache.gora.store.DataStore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Collection;
+import java.util.Iterator;
 
 import javax.cache.Cache;
 import javax.cache.integration.CacheWriter;
 import javax.cache.integration.CacheWriterException;
-import java.util.Collection;
-import java.util.Iterator;
+
+import org.apache.gora.persistency.impl.PersistentBase;
+import org.apache.gora.store.DataStore;
+import org.apache.gora.util.GoraException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link org.apache.gora.jcache.store.JCacheCacheWriter} is the primary class
@@ -44,8 +46,12 @@ public class JCacheCacheWriter<K, T extends PersistentBase> implements CacheWrit
   @Override
   public void write(Cache.Entry<? extends K,
           ? extends T> entry) throws CacheWriterException {
-    dataStore.put(entry.getKey(), entry.getValue());
-    LOG.info("Written data bean to persistent datastore on key {}.", entry.getKey().toString());
+    try {
+      dataStore.put(entry.getKey(), entry.getValue());
+      LOG.info("Written data bean to persistent datastore on key {}.", entry.getKey().toString());
+    } catch (GoraException e) {
+      throw new CacheWriterException(e);
+    }
   }
 
   @Override
@@ -60,8 +66,12 @@ public class JCacheCacheWriter<K, T extends PersistentBase> implements CacheWrit
 
   @Override
   public void delete(Object key) throws CacheWriterException {
-    dataStore.delete((K) key);
-    LOG.info("Deleted data bean from persistent datastore on key {}.", key.toString());
+    try {
+      dataStore.delete((K) key);
+      LOG.info("Deleted data bean from persistent datastore on key {}.", key.toString());
+    } catch (GoraException e) {
+      throw new CacheWriterException(e);
+    }
   }
 
   @Override

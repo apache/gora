@@ -18,20 +18,12 @@ package org.apache.gora.aerospike.store;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.Properties;
 
-import com.aerospike.client.Key;
-import com.aerospike.client.Value;
-import com.aerospike.client.Bin;
-import com.aerospike.client.Record;
-import com.aerospike.client.AerospikeClient;
-import com.aerospike.client.policy.ClientPolicy;
-import com.aerospike.client.query.RecordSet;
-import com.aerospike.client.query.Statement;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.util.Utf8;
@@ -48,8 +40,19 @@ import org.apache.gora.query.Result;
 import org.apache.gora.query.impl.PartitionQueryImpl;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.AvroUtils;
+import org.apache.gora.util.GoraException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.aerospike.client.AerospikeClient;
+import com.aerospike.client.AerospikeException;
+import com.aerospike.client.Bin;
+import com.aerospike.client.Key;
+import com.aerospike.client.Record;
+import com.aerospike.client.Value;
+import com.aerospike.client.policy.ClientPolicy;
+import com.aerospike.client.query.RecordSet;
+import com.aerospike.client.query.Statement;
 
 /**
  * Implementation of a Aerospike data store to be used by gora.
@@ -79,36 +82,41 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
    * @param properties      properties
    */
   @Override
-  public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) {
+  public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) throws GoraException {
     super.initialize(keyClass, persistentClass, properties);
 
-    AerospikeMappingBuilder aerospikeMappingBuilder = new AerospikeMappingBuilder();
-    aerospikeMappingBuilder
-            .readMappingFile(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE), keyClass,
-                    persistentClass);
-    aerospikeParameters = new AerospikeParameters(aerospikeMappingBuilder.getAerospikeMapping(),
-            properties, getConf());
-    ClientPolicy policy = new ClientPolicy();
-    policy.writePolicyDefault = aerospikeParameters.getAerospikeMapping().getWritePolicy();
-    policy.readPolicyDefault = aerospikeParameters.getAerospikeMapping().getReadPolicy();
-
-    // 'SendKey' property is enabled by default as the key is needed in query execution
-    policy.readPolicyDefault.sendKey = true;
-    policy.writePolicyDefault.sendKey = true;
-
-    // Set the credentials for servers with restricted access
-    if (aerospikeParameters.getUsername() != null) {
-      policy.user = aerospikeParameters.getUsername();
+    try {
+      AerospikeMappingBuilder aerospikeMappingBuilder = new AerospikeMappingBuilder();
+      aerospikeMappingBuilder
+              .readMappingFile(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE), keyClass,
+                      persistentClass);
+      aerospikeParameters = new AerospikeParameters(aerospikeMappingBuilder.getAerospikeMapping(),
+              properties, getConf());
+      ClientPolicy policy = new ClientPolicy();
+      policy.writePolicyDefault = aerospikeParameters.getAerospikeMapping().getWritePolicy();
+      policy.readPolicyDefault = aerospikeParameters.getAerospikeMapping().getReadPolicy();
+  
+      // 'SendKey' property is enabled by default as the key is needed in query execution
+      policy.readPolicyDefault.sendKey = true;
+      policy.writePolicyDefault.sendKey = true;
+  
+      // Set the credentials for servers with restricted access
+      if (aerospikeParameters.getUsername() != null) {
+        policy.user = aerospikeParameters.getUsername();
+      }
+      if (aerospikeParameters.getPassword() != null) {
+        policy.password = aerospikeParameters.getPassword();
+      }
+  
+      aerospikeClient = new AerospikeClient(policy, aerospikeParameters.getHost(),
+              aerospikeParameters.getPort());
+      aerospikeParameters.setServerSpecificParameters(aerospikeClient);
+      aerospikeParameters.validateServerBinConfiguration(persistentClass.getFields());
+      LOG.info("Aerospike Gora datastore initialized successfully.");
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
-    if (aerospikeParameters.getPassword() != null) {
-      policy.password = aerospikeParameters.getPassword();
-    }
-
-    aerospikeClient = new AerospikeClient(policy, aerospikeParameters.getHost(),
-            aerospikeParameters.getPort());
-    aerospikeParameters.setServerSpecificParameters(aerospikeClient);
-    aerospikeParameters.validateServerBinConfiguration(persistentClass.getFields());
-    LOG.info("Aerospike Gora datastore initialized successfully.");
   }
 
   /**
@@ -129,7 +137,7 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
    * the fly. Thus, schema creation functionality is unavailable in gora-aerospike module.
    */
   @Override
-  public void createSchema() {
+  public void createSchema() throws GoraException {
   }
 
   /**
@@ -138,7 +146,7 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
    * the fly. Thus, schema deletion functionality is unavailable in gora-aerospike module.
    */
   @Override
-  public void deleteSchema() {
+  public void deleteSchema() throws GoraException {
   }
 
   /**
@@ -147,7 +155,7 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
    * the fly. Thus, schema exists functionality is unavailable in gora-aerospike module.
    */
   @Override
-  public boolean schemaExists() {
+  public boolean schemaExists() throws GoraException {
     return true;
   }
 
@@ -159,17 +167,25 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
    * @return the Object corresponding to the key or null if it cannot be found
    */
   @Override
-  public T get(K key, String[] fields) {
+  public T get(K key, String[] fields) throws GoraException {
 
-    Key recordKey = getAerospikeKey(key);
-    fields = getFieldsToQuery(fields);
-
-    Record record = aerospikeClient
-            .get(aerospikeParameters.getAerospikeMapping().getReadPolicy(), recordKey, fields);
-    if (record == null) {
-      return null;
+    try {
+      Key recordKey = getAerospikeKey(key);
+      fields = getFieldsToQuery(fields);
+  
+      Record record = aerospikeClient
+              .get(aerospikeParameters.getAerospikeMapping().getReadPolicy(), recordKey, fields);
+      
+      if (record == null) {
+        return null;
+      }
+      return createPersistentInstance(record, fields);
+    } catch (GoraException e) {
+      throw e;
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
-    return createPersistentInstance(record, fields);
   }
 
   /**
@@ -181,36 +197,41 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
    * @param persistent object to be persisted
    */
   @Override
-  public void put(K key, T persistent) {
+  public void put(K key, T persistent) throws GoraException {
 
-    Key recordKey = getAerospikeKey(key);
-
-    List<Field> fields = persistent.getSchema().getFields();
-
-    for (int i = 0; i < fields.size(); i++) {
-      if (!persistent.isDirty(i)) {
-        continue;
+    try {
+      Key recordKey = getAerospikeKey(key);
+  
+      List<Field> fields = persistent.getSchema().getFields();
+  
+      for (int i = 0; i < fields.size(); i++) {
+        if (!persistent.isDirty(i)) {
+          continue;
+        }
+        Object persistentValue = persistent.get(i);
+  
+        String mappingBinName = aerospikeParameters.getAerospikeMapping().getBinMapping()
+                .get(fields.get(i).name());
+        if (mappingBinName == null) {
+          LOG.error("Aerospike mapping for field {}#{} not found. Wrong gora-aerospike-mapping.xml?",
+                  persistent.getClass().getName(), fields.get(i).name());
+          throw new RuntimeException(
+                  "Aerospike mapping for field [" + persistent.getClass().getName() + "#" + fields
+                          .get(i).name() + "] not found. Wrong gora-aerospike-mapping.xml?");
+        }
+        Bin bin;
+        if (persistentValue != null) {
+          bin = new Bin(mappingBinName,
+                  getSerializableValue(persistentValue, fields.get(i).schema()));
+        } else {
+          bin = Bin.asNull(mappingBinName);
+        }
+        aerospikeClient
+                .put(aerospikeParameters.getAerospikeMapping().getWritePolicy(), recordKey, bin);
       }
-      Object persistentValue = persistent.get(i);
-
-      String mappingBinName = aerospikeParameters.getAerospikeMapping().getBinMapping()
-              .get(fields.get(i).name());
-      if (mappingBinName == null) {
-        LOG.error("Aerospike mapping for field {}#{} not found. Wrong gora-aerospike-mapping.xml?",
-                persistent.getClass().getName(), fields.get(i).name());
-        throw new RuntimeException(
-                "Aerospike mapping for field [" + persistent.getClass().getName() + "#" + fields
-                        .get(i).name() + "] not found. Wrong gora-aerospike-mapping.xml?");
-      }
-      Bin bin;
-      if (persistentValue != null) {
-        bin = new Bin(mappingBinName,
-                getSerializableValue(persistentValue, fields.get(i).schema()));
-      } else {
-        bin = Bin.asNull(mappingBinName);
-      }
-      aerospikeClient
-              .put(aerospikeParameters.getAerospikeMapping().getWritePolicy(), recordKey, bin);
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
   }
 
@@ -221,10 +242,15 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
    * @return whether the object was successfully deleted
    */
   @Override
-  public boolean delete(K key) {
-    Key recordKey = getAerospikeKey(key);
-    return aerospikeClient
-            .delete(aerospikeParameters.getAerospikeMapping().getWritePolicy(), recordKey);
+  public boolean delete(K key) throws GoraException {
+    try {
+      Key recordKey = getAerospikeKey(key);
+      return aerospikeClient
+              .delete(aerospikeParameters.getAerospikeMapping().getWritePolicy(), recordKey);
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
+    }
   }
 
   /**
@@ -234,10 +260,10 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
    * @return the number of deleted records
    */
   @Override
-  public long deleteByQuery(Query<K, T> query) {
-    Result<K, T> result = query.execute();
+  public long deleteByQuery(Query<K, T> query) throws GoraException {
     int deleteCount = 0;
     try {
+      Result<K, T> result = query.execute();
       while (result.next()) {
         if (aerospikeClient.delete(null, getAerospikeKey(result.getKey()))) {
           deleteCount++;
@@ -246,7 +272,7 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
       return deleteCount;
     } catch (Exception e) {
       LOG.error(e.getMessage(), e);
-      return -1;
+      throw new GoraException(e);
     }
   }
 
@@ -257,59 +283,64 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
    * @return the query result
    */
   @Override
-  public Result<K, T> execute(Query<K, T> query) {
+  public Result<K, T> execute(Query<K, T> query) throws GoraException {
 
     List<AerospikeResultRecord> resultRecords = new ArrayList<>();
     String namespace = aerospikeParameters.getAerospikeMapping().getNamespace();
     String set = aerospikeParameters.getAerospikeMapping().getSet();
 
-    // Query execution without any keys
-    if (query.getStartKey() == null && query.getEndKey() == null) {
-
-      try (RecordSet recordSet = aerospikeClient.query(null, getStatement(namespace, set))) {
-        while (recordSet.next()) {
-          AerospikeResultRecord aerospikeRecord = new AerospikeResultRecord(recordSet.getKey(),
-                  recordSet.getRecord());
-          resultRecords.add(aerospikeRecord);
+    try {
+      // Query execution without any keys
+      if (query.getStartKey() == null && query.getEndKey() == null) {
+  
+        try (RecordSet recordSet = aerospikeClient.query(null, getStatement(namespace, set))) {
+          while (recordSet.next()) {
+            AerospikeResultRecord aerospikeRecord = new AerospikeResultRecord(recordSet.getKey(),
+                    recordSet.getRecord());
+            resultRecords.add(aerospikeRecord);
+          }
         }
       }
-    }
-
-    // Query execution for single key
-    else if (query.getKey() != null) {
-      Key key = getAerospikeKey(query.getKey());
-      Record record = aerospikeClient.get(null, key);
-      if (record != null) {
-        resultRecords.add(new AerospikeResultRecord(key, record));
+  
+      // Query execution for single key
+      else if (query.getKey() != null) {
+        Key key = getAerospikeKey(query.getKey());
+        Record record = aerospikeClient.get(null, key);
+        if (record != null) {
+          resultRecords.add(new AerospikeResultRecord(key, record));
+        }
       }
+  
+      // Query execution for key ranges
+      // ToDo: Implement Query execution for key ranges
+      //    else if (query.getStartKey() != null && query.getEndKey() != null) {
+      //
+      //      // the key range filtering at the gora side, which is not a better solution
+      //      String lowerBound  = query.getStartKey().toString();
+      //      String upperBound  = query.getEndKey().toString();
+      //
+      //      try (RecordSet recordSet = aerospikeClient.query(null, getStatement(namespace, set))) {
+      //        while (recordSet.next()) {
+      //          Key key = recordSet.getKey();
+      //          Record record = recordSet.getRecord();
+      //
+      //          String input = key.userKey.toString();
+      //          boolean isSpecifiedRange =  input.compareToIgnoreCase(lowerBound) >= 0 && input
+      //                  .compareToIgnoreCase(upperBound) <= 0;
+      //
+      //          if (isSpecifiedRange) {
+      //            AerospikeResultRecord aerospikeRecord = new AerospikeResultRecord(key, record);
+      //            resultRecords.add(aerospikeRecord);
+      //          }
+      //
+      //        }
+      //      }
+      //    }
+      return new AerospikeQueryResult<>(this, query, resultRecords, getFieldsToQuery(null));
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e) ;
     }
-
-    // Query execution for key ranges
-    // ToDo: Implement Query execution for key ranges
-    //    else if (query.getStartKey() != null && query.getEndKey() != null) {
-    //
-    //      // the key range filtering at the gora side, which is not a better solution
-    //      String lowerBound  = query.getStartKey().toString();
-    //      String upperBound  = query.getEndKey().toString();
-    //
-    //      try (RecordSet recordSet = aerospikeClient.query(null, getStatement(namespace, set))) {
-    //        while (recordSet.next()) {
-    //          Key key = recordSet.getKey();
-    //          Record record = recordSet.getRecord();
-    //
-    //          String input = key.userKey.toString();
-    //          boolean isSpecifiedRange =  input.compareToIgnoreCase(lowerBound) >= 0 && input
-    //                  .compareToIgnoreCase(upperBound) <= 0;
-    //
-    //          if (isSpecifiedRange) {
-    //            AerospikeResultRecord aerospikeRecord = new AerospikeResultRecord(key, record);
-    //            resultRecords.add(aerospikeRecord);
-    //          }
-    //
-    //        }
-    //      }
-    //    }
-    return new AerospikeQueryResult<>(this, query, resultRecords, getFieldsToQuery(null));
   }
 
   /**
@@ -341,7 +372,7 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
   }
 
   @Override
-  public void flush() {
+  public void flush() throws GoraException {
   }
 
   /**
@@ -440,8 +471,9 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
    * @param record record retrieved from database
    * @param fields fields
    * @return persistent object created
+   * @throws GoraException 
    */
-  public T createPersistentInstance(Record record, String[] fields) {
+  public T createPersistentInstance(Record record, String[] fields) throws GoraException {
 
     T persistent = newPersistent();
     for (String field : fields) {

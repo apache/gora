@@ -19,6 +19,7 @@ package org.apache.gora.infinispan;
 
 import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.store.DataStore;
+import org.apache.gora.util.GoraException;
 
 import java.util.Random;
 
@@ -39,7 +40,7 @@ public class Utils {
     return employee;
   }
 
-  public static <T extends CharSequence> void populateEmployeeStore(DataStore<T, Employee> dataStore, int n) {
+  public static <T extends CharSequence> void populateEmployeeStore(DataStore<T, Employee> dataStore, int n) throws GoraException {
     for(int i=0; i<n; i++) {
       Employee e = createEmployee(i);
       dataStore.put((T)e.getSsn(),e);

@@ -17,7 +17,12 @@
  */
 package org.apache.gora.infinispan.store;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
 import org.apache.gora.persistency.impl.PersistentBase;
+import org.apache.gora.util.GoraException;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.infinispan.avro.client.Marshaller;
@@ -30,10 +35,6 @@ import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
 import org.infinispan.commons.api.BasicCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
 
 /*
  * @author Pierre Sutra, Valerio Schiavoni
@@ -93,22 +94,28 @@ public class InfinispanClient<K, T extends PersistentBase> implements Configurab
     return cacheExists;
   }
 
-  public synchronized void createSchema() {
+  public synchronized void createSchema() throws GoraException {
     try {
       Support.registerSchema(cacheManager, persistentClass.newInstance().getSchema());
-    } catch (InstantiationException | IllegalAccessException e) {
-      throw new RuntimeException(e);
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
   }
 
-  public void createCache() {
+  public void createCache() throws GoraException {
     createSchema();
     cacheExists = true;
   }
 
-  public void dropCache() {
-    cache.clear();
-    cacheExists = false;
+  public void dropCache() throws GoraException {
+    try {
+      cache.clear();
+      cacheExists = false;
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
+    }
   }
 
   public void deleteByKey(K key) {

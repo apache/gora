@@ -79,9 +79,10 @@ public class TestCassandraStoreWithNativeSerialization {
 
   /**
    * In this test case, put and get behavior of the data store are testing.
+   * @throws GoraException 
    */
   @Test
-  public void testSimplePutAndGet() {
+  public void testSimplePutAndGet() throws GoraException {
     UUID id = UUID.randomUUID();
     User user1 = new User(id, "madhawa", Date.from(Instant.now()));
     // storing data;
@@ -94,9 +95,10 @@ public class TestCassandraStoreWithNativeSerialization {
 
   /**
    * In this test case, put and delete behavior of the data store are testing.
+   * @throws GoraException 
    */
   @Test
-  public void testSimplePutDeleteAndGet() {
+  public void testSimplePutDeleteAndGet() throws GoraException {
     UUID id = UUID.randomUUID();
     User user1 = new User(id, "kasun", Date.from(Instant.now()));
     // storing data;
@@ -114,9 +116,10 @@ public class TestCassandraStoreWithNativeSerialization {
 
   /**
    * In this test case, schema exists method behavior of the data store is testing.
+   * @throws GoraException 
    */
   @Test()
-  public void testSchemaExists() {
+  public void testSchemaExists() throws GoraException {
     userDataStore.deleteSchema();
     Assert.assertFalse(userDataStore.schemaExists());
     userDataStore.createSchema();
@@ -125,9 +128,10 @@ public class TestCassandraStoreWithNativeSerialization {
 
   /**
    * In this test case, schema exists method behavior of the data store is testing.
+   * @throws GoraException 
    */
   @Test
-  public void testTruncateSchema() {
+  public void testTruncateSchema() throws GoraException {
     if (!userDataStore.schemaExists()) {
       userDataStore.createSchema();
     }
@@ -144,9 +148,10 @@ public class TestCassandraStoreWithNativeSerialization {
 
   /**
    * In this test case, get with fields method behavior of the data store is testing.
+   * @throws GoraException 
    */
   @Test
-  public void testGetWithFields() {
+  public void testGetWithFields() throws GoraException {
     UUID id = UUID.randomUUID();
     User user1 = new User(id, "Madhawa Kasun Gunasekara", Date.from(Instant.now()));
     userDataStore.put(id, user1);
@@ -249,9 +254,10 @@ public class TestCassandraStoreWithNativeSerialization {
 
   /**
    * In this test case, update by quert method behavior of the data store is testing.
+   * @throws GoraException 
    */
   @Test
-  public void testUpdateByQuery() {
+  public void testUpdateByQuery() throws GoraException {
     userDataStore.truncateSchema();
     UUID id1 = UUID.randomUUID();
     User user1 = new User(id1, "user1", Date.from(Instant.now()));

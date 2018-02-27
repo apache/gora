@@ -22,7 +22,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.NavigableMap;
+import java.util.NavigableSet;
 import java.util.Properties;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -144,7 +147,7 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
   }
 
   @Override
-  public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) {
+  public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) throws GoraException {
     super.initialize(keyClass, persistentClass, properties);
     CachingProvider cachingProvider = Caching.getCachingProvider
             (properties.getProperty(GORA_DEFAULT_JCACHE_PROVIDER_KEY));
@@ -156,6 +159,7 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
               new Configuration());
     } catch (GoraException ex) {
       LOG.error("Couldn't initialize persistent DataStore.", ex);
+      throw ex;
     }
     if (properties.getProperty(GORA_DEFAULT_JCACHE_PROVIDER_KEY)
             .contains(HAZELCAST_SERVER_CACHE_PROVIDER_IDENTIFIER)) {
@@ -168,6 +172,7 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
         hazelcastInstance = HazelcastClient.newHazelcastClient(config);
       } catch (IOException ex) {
         LOG.error("Couldn't locate the client side cache provider configuration.", ex);
+        throw new GoraException (ex);
       }
     }
     Properties providerProperties = new Properties();
@@ -273,61 +278,100 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
   }
 
   @Override
-  public void createSchema() {
-    if (manager.getCache(super.getPersistentClass().getSimpleName(), keyClass, persistentClass) == null) {
-      cacheEntryList.clear();
-      cache = manager.createCache(persistentClass.getSimpleName(),
-              cacheConfig).unwrap(ICache.class);
+  public void createSchema() throws GoraException {
+    try {
+      if (manager.getCache(super.getPersistentClass().getSimpleName(), keyClass, persistentClass) == null) {
+        cacheEntryList.clear();
+        cache = manager.createCache(persistentClass.getSimpleName(),
+                cacheConfig).unwrap(ICache.class);
+      }
+      cache.registerCacheEntryListener(new MutableCacheEntryListenerConfiguration<>(
+              JCacheCacheFactoryBuilder
+                      .factoryOfEntryListener(new JCacheCacheEntryListener<K, T>(cacheEntryList)),
+              null, true, true));
+      persistentDataStore.createSchema();
+      LOG.info("Created schema on persistent store and initialized cache for persistent bean {}."
+              , super.getPersistentClass().getSimpleName());
+    } catch (GoraException e) {
+      throw e;
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
-    cache.registerCacheEntryListener(new MutableCacheEntryListenerConfiguration<>(
-            JCacheCacheFactoryBuilder
-                    .factoryOfEntryListener(new JCacheCacheEntryListener<K, T>(cacheEntryList)),
-            null, true, true));
-    persistentDataStore.createSchema();
-    LOG.info("Created schema on persistent store and initialized cache for persistent bean {}."
-            , super.getPersistentClass().getSimpleName());
   }
 
   @Override
-  public void deleteSchema() {
-    cache.removeAll();
-    manager.destroyCache(super.getPersistentClass().getSimpleName());
-    persistentDataStore.deleteSchema();
-    LOG.info("Deleted schema on persistent store and destroyed cache for persistent bean {}."
-            , super.getPersistentClass().getSimpleName());
-  }
-
-  @Override
-  public boolean schemaExists() {
-    return (manager.getCache(super.getPersistentClass().getSimpleName(), keyClass, persistentClass) != null);
-  }
-
-  @Override
-  public T get(K key, String[] fields) {
-    T persitent = (T) cache.get(key);
-    if (persitent == null) {
-      return null;
+  public void deleteSchema() throws GoraException {
+    try {
+      cache.removeAll();
+      manager.destroyCache(super.getPersistentClass().getSimpleName());
+      persistentDataStore.deleteSchema();
+      LOG.info("Deleted schema on persistent store and destroyed cache for persistent bean {}."
+              , super.getPersistentClass().getSimpleName());
+    } catch (GoraException e) {
+      throw e;
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
-    return getPersistent(persitent, fields);
   }
 
   @Override
-  public T get(K key) {
-    return cache.get(key);
+  public boolean schemaExists() throws GoraException {
+    try {
+      return (manager.getCache(super.getPersistentClass().getSimpleName(), keyClass, persistentClass) != null);
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
+    }
   }
 
   @Override
-  public void put(K key, T val) {
-    cache.put(key, val);
+  public T get(K key, String[] fields) throws GoraException {
+    try {
+      T persitent = (T) cache.get(key);
+      if (persitent == null) {
+        return null;
+      }
+      return getPersistent(persitent, fields);
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
+    }
   }
 
   @Override
-  public boolean delete(K key) {
-    return cache.remove(key);
+  public T get(K key) throws GoraException {
+    try {
+      return cache.get(key);
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
+    }
   }
 
   @Override
-  public long deleteByQuery(Query<K, T> query) {
+  public void put(K key, T val) throws GoraException {
+    try {
+      cache.put(key, val);
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
+    }
+  }
+
+  @Override
+  public boolean delete(K key) throws GoraException {
+    try {
+      return cache.remove(key);
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
+    }
+  }
+
+  @Override
+  public long deleteByQuery(Query<K, T> query) throws GoraException {
     try {
       long deletedRows = 0;
       Result<K, T> result = query.execute();
@@ -355,14 +399,16 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
       }
       LOG.info("JCache Gora datastore deleled {} rows from Persistent datastore.", deletedRows);
       return deletedRows;
+    } catch (GoraException e) {
+      throw e;
     } catch (Exception e) {
-      LOG.error("Exception occurred while deleting entries from JCache Gora datastore. Hence returning 0.", e);
-      return 0;
-    }
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
+    }    
   }
 
   @Override
-  public Result<K, T> execute(Query<K, T> query) {
+  public Result<K, T> execute(Query<K, T> query) throws GoraException {
     K startKey = query.getStartKey();
     K endKey = query.getEndKey();
     if (startKey == null) {
@@ -376,13 +422,20 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
       }
     }
     query.setFields(getFieldsToQuery(query.getFields()));
-    ConcurrentSkipListSet<K> cacheEntrySubList = null;
-    try {
-      cacheEntrySubList = (ConcurrentSkipListSet<K>) cacheEntryList.subSet(startKey, true, endKey, true);
-    } catch (NullPointerException npe) {
-      LOG.error("NPE occurred while executing the query for JCacheStore. Hence returning empty entry set.", npe);
-      return new JCacheResult<>(this, query, new ConcurrentSkipListSet<K>());
+    
+    NavigableSet<K> cacheEntrySubList = null;
+    if (startKey != null && endKey != null) {
+      try {
+        cacheEntrySubList =  cacheEntryList.subSet(startKey, true, endKey, true);
+      } catch (Exception e) {
+        LOG.error(e.getMessage(), e);
+        throw new GoraException(e);
+      }
+    } else {
+      // Empty
+      cacheEntrySubList = Collections.emptyNavigableSet() ;
     }
+    
     return new JCacheResult<>(this, query, cacheEntrySubList);
   }
 
@@ -413,23 +466,33 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
         partition.setConf(this.getConf());
         partitions.add(partition);
       }
-    } catch (java.lang.Exception ex) {
+    } catch (IOException ex) {
+      throw ex;
+    } catch (Exception ex) {
       LOG.error("Exception occurred while partitioning the query based on Hazelcast partitions.", ex);
-      return null;
+      throw new IOException(ex.getMessage(), ex) ;
     }
     LOG.info("Query is partitioned to {} number of partitions.", partitions.size());
     return partitions;
   }
 
   @Override
-  public void flush() {
+  public void flush() throws GoraException {
     persistentDataStore.flush();
     LOG.info("JCache Gora datastore flushed successfully.");
   }
 
   @Override
   public void close() {
-    flush();
+    try{
+      flush();
+    } catch (GoraException e) {
+      LOG.error(e.getMessage(), e);
+      if (e.getCause() != null) {
+        LOG.error(e.getCause().getMessage());
+      }
+      // At this point, the exception is ignored...
+    }
     cacheEntryList.clear();
     if (!cache.isDestroyed() && !manager.isClosed()) {
       cache.close();

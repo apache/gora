@@ -24,6 +24,7 @@ import org.apache.gora.cassandra.example.generated.AvroSerialization.CassandraRe
 import org.apache.gora.cassandra.query.CassandraQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
+import org.apache.gora.util.GoraException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -75,9 +76,10 @@ public class TestCassandraStoreWithCassandraKey {
 
   /**
    * In this test case, schema exists method behavior of the data store is testing.
+   * @throws GoraException 
    */
   @Test
-  public void testSchemaRelatedBehaviour() {
+  public void testSchemaRelatedBehaviour() throws GoraException {
     cassandraRecordDataStore.createSchema();
     Assert.assertTrue(cassandraRecordDataStore.schemaExists());
     cassandraRecordDataStore.deleteSchema();
@@ -88,9 +90,10 @@ public class TestCassandraStoreWithCassandraKey {
 
   /**
    * In this test case, get, put and delete methods behaviour of the data store is testing.
+   * @throws GoraException 
    */
   @Test
-  public void testSimplePutGet() {
+  public void testSimplePutGet() throws GoraException {
     cassandraRecordDataStore.createSchema();
     CassandraRecord record = new CassandraRecord();
     record.setDataLong(719411002L);
@@ -221,7 +224,7 @@ public class TestCassandraStoreWithCassandraKey {
   }
 
   @Test
-  public void testUpdateByQuery() {
+  public void testUpdateByQuery() throws GoraException {
     cassandraRecordDataStore.truncateSchema();
     //insert data
     CassandraRecord record1 = new CassandraRecord();
@@ -266,7 +269,7 @@ public class TestCassandraStoreWithCassandraKey {
 
 
   @Test
-  public void testDataTypes() {
+  public void testDataTypes() throws GoraException {
     cassandraRecordDataStore.truncateSchema();
     CassandraRecord record = new CassandraRecord();
     record.setDataLong(719411002L);

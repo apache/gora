@@ -21,6 +21,7 @@ package org.apache.gora.query;
 import org.apache.gora.filter.Filter;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.store.DataStore;
+import org.apache.gora.util.GoraException;
 
 /**
  * A query to a data store to retrieve objects. Queries are constructed by 
@@ -46,7 +47,7 @@ public interface Query<K, T extends Persistent> {
    * Executes the Query on the DataStore and returns the results.
    * @return the {@link Result} for the query.
    */
-  Result<K, T> execute();
+  Result<K, T> execute() throws GoraException;
   
 //  /**
 //   * Compiles the query for performance and error checking. This 

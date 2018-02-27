@@ -39,10 +39,10 @@ import org.apache.gora.query.Result;
 import org.apache.gora.query.impl.FileSplitPartitionQuery;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.impl.FileBackedDataStoreBase;
+import org.apache.gora.util.GoraException;
 import org.apache.gora.util.OperationNotSupportedException;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +78,7 @@ extends FileBackedDataStoreBase<K, T> implements Configurable {
 
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
-          Properties properties) {
+          Properties properties) throws GoraException {
     super.initialize(keyClass, persistentClass, properties);
 
     if(properties != null && this.codecType == null) {
@@ -123,12 +123,12 @@ extends FileBackedDataStoreBase<K, T> implements Configurable {
   }
 
   @Override
-  public boolean delete(K key) {
+  public boolean delete(K key) throws GoraException {
     throw new OperationNotSupportedException("delete is not supported for AvroStore");
   }
 
   @Override
-  public long deleteByQuery(Query<K, T> query) {
+  public long deleteByQuery(Query<K, T> query) throws GoraException {
     throw new OperationNotSupportedException("delete is not supported for AvroStore");
   }
 
@@ -152,18 +152,19 @@ extends FileBackedDataStoreBase<K, T> implements Configurable {
   }
 
   @Override
-  public void flush() {
+  public void flush() throws GoraException {
     try{
       super.flush();
       if(encoder != null)
         encoder.flush();
-    }catch(IOException ex){
-      LOG.error(ex.getMessage(), ex);
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
   }
 
   @Override
-  public T get(K key, String[] fields) {
+  public T get(K key, String[] fields) throws GoraException {
     throw new OperationNotSupportedException();
   }
 
@@ -173,11 +174,12 @@ extends FileBackedDataStoreBase<K, T> implements Configurable {
   }
 
   @Override
-  public void put(K key, T obj) {
+  public void put(K key, T obj) throws GoraException {
     try{
       getDatumWriter().write(obj, getEncoder());
-    }catch(IOException ex){
-      LOG.error(ex.getMessage(), ex);
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
   }
 
@@ -246,12 +248,12 @@ extends FileBackedDataStoreBase<K, T> implements Configurable {
   }
 
   @Override
-  public void write(DataOutput out) {
+  public void write(DataOutput out) throws IOException {
     super.write(out);
   }
 
   @Override
-  public void readFields(DataInput in) {
+  public void readFields(DataInput in) throws IOException {
     super.readFields(in);
   }
 

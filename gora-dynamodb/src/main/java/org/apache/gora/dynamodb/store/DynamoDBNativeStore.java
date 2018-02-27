@@ -65,16 +65,17 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
    */
   @Override
   @SuppressWarnings("unchecked")
-  public long deleteByQuery(Query<K, T> query) {
+  public long deleteByQuery(Query<K, T> query) throws GoraException {
     // TODO verify whether or not we are deleting a whole row
     // String[] fields = getFieldsToQuery(query.getFields());
     // find whether all fields are queried, which means that complete
     // rows will be deleted
     // boolean isAllFields = Arrays.equals(fields
     // , getBeanFactory().getCachedPersistent().getFields());
-    Result<K, T> result = execute(query);
-    ArrayList<T> deletes = new ArrayList<T>();
+    ArrayList<T> deletes = null ;
     try {
+      Result<K, T> result = execute(query);
+      deletes = new ArrayList<T>();
       while (result.next()) {
         T resultObj = result.get();
         deletes.add(resultObj);
@@ -87,18 +88,11 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
         dKey.setRangeKey(getRangeKeyFromObj(resultObj));
         delete((K) dKey);
       }
-    } catch (IllegalArgumentException e) {
-      LOG.error("Illegal argument detected", e.getMessage());
-      throw new IllegalArgumentException(e);
-    } catch (IllegalAccessException e) {
-      LOG.error("Illegal access detected", e.getMessage());
-      throw new IllegalAccessError(e.getMessage());
-    } catch (InvocationTargetException e) {
-      LOG.error(e.getMessage());
-      throw new RuntimeException(e);
+    } catch (GoraException e) {
+      throw e ; // If it is a GoraException we assume it is already logged
     } catch (Exception e) {
-      LOG.error(e.getMessage());
-      throw new RuntimeException(e);
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
     return deletes.size();
   }
@@ -108,22 +102,27 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
    * received one
    */
   @Override
-  public Result<K, T> execute(Query<K, T> query) {
-    DynamoDBQuery<K, T> dynamoDBQuery = buildDynamoDBQuery(query);
-    DynamoDBMapper mapper = new DynamoDBMapper(
-        dynamoDBStoreHandler.getDynamoDbClient());
-    List<T> objList = null;
-    if (DynamoDBQuery.getType().equals(DynamoDBQuery.RANGE_QUERY))
-      objList = mapper.scan(persistentClass,
-          (DynamoDBScanExpression) dynamoDBQuery.getQueryExpression());
-    if (DynamoDBQuery.getType().equals(DynamoDBQuery.SCAN_QUERY))
-      objList = mapper.scan(persistentClass,
-          (DynamoDBScanExpression) dynamoDBQuery.getQueryExpression());
-    return new DynamoDBResult<K, T>(this, query, objList);
+  public Result<K, T> execute(Query<K, T> query) throws GoraException {
+    try {
+      DynamoDBQuery<K, T> dynamoDBQuery = buildDynamoDBQuery(query);
+      DynamoDBMapper mapper = new DynamoDBMapper(
+          dynamoDBStoreHandler.getDynamoDbClient());
+      List<T> objList = null;
+      if (DynamoDBQuery.getType().equals(DynamoDBQuery.RANGE_QUERY))
+        objList = mapper.scan(persistentClass,
+            (DynamoDBScanExpression) dynamoDBQuery.getQueryExpression());
+      if (DynamoDBQuery.getType().equals(DynamoDBQuery.SCAN_QUERY))
+        objList = mapper.scan(persistentClass,
+            (DynamoDBScanExpression) dynamoDBQuery.getQueryExpression());
+      return new DynamoDBResult<K, T>(this, query, objList);
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
+    }
   }
 
   @Override
-  public T get(K key, String[] fields) {
+  public T get(K key, String[] fields) throws GoraException {
     /*
      * DynamoDBQuery<K,T> query = new DynamoDBQuery<K,T>();
      * query.setDataStore(this); //query.setKeyRange(key, key);
@@ -139,7 +138,7 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
    * Gets the object with the specific key
    * @throws IOException
    */
-  public T get(K key) {
+  public T get(K key) throws GoraException {
     T object = null;
     try {
       Object rangeKey;
@@ -152,23 +151,18 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
           object = mapper.load(persistentClass, hashKey, rangeKey);
         else
           object = mapper.load(persistentClass, hashKey);
-      } else
+        return object;
+        
+      } else {
         throw new GoraException("Error while retrieving keys from object: "
             + key.toString());
-    } catch (IllegalArgumentException e) {
-      LOG.error("Illegal argument detected", e.getMessage());
-      throw new IllegalArgumentException(e);
-    } catch (IllegalAccessException e) {
-      LOG.error("Illegal access detected", e.getMessage());
-      throw new IllegalAccessError(e.getMessage());
-    } catch (InvocationTargetException e) {
-      LOG.error(e.getMessage());
-      throw new RuntimeException(e);
-    } catch (GoraException ge) {
-      LOG.error(ge.getMessage());
-      LOG.error(ge.getStackTrace().toString());
+      }
+    } catch (GoraException e) {
+      throw e;
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
-    return object;
   }
 
   /**
@@ -186,7 +180,7 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
    * @return
    */
   @Override
-  public K newKey() {
+  public K newKey() throws GoraException {
     // TODO Auto-generated method stub
     return null;
   }
@@ -197,16 +191,16 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
    * @return
    */
   @Override
-  public T newPersistent() {
+  public T newPersistent() throws GoraException {
     T obj = null;
     try {
       obj = persistentClass.newInstance();
     } catch (InstantiationException e) {
-      LOG.error("Error instantiating " + persistentClass.getCanonicalName());
-      throw new InstantiationError(e.getMessage());
+      LOG.error("Error instantiating " + persistentClass.getCanonicalName(), e);
+      throw new GoraException(e);
     } catch (IllegalAccessException e) {
-      LOG.error("Error instantiating " + persistentClass.getCanonicalName());
-      throw new IllegalAccessError(e.getMessage());
+      LOG.error("Error instantiating " + persistentClass.getCanonicalName(),e );
+      throw new GoraException(e);
     }
     return obj;
   }
@@ -218,7 +212,7 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
    * @param obj
    */
   @Override
-  public void put(K key, T obj) {
+  public void put(K key, T obj) throws GoraException {
     try {
       Object hashKey = getHashKey(key, obj);
       Object rangeKey = getRangeKey(key, obj);
@@ -233,12 +227,9 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
         mapper.save(obj);
       } else
         throw new GoraException("No HashKey found in Key nor in Object.");
-    } catch (NullPointerException npe) {
-      LOG.error("Error while putting an item. " + npe.toString());
-      throw new NullArgumentException(npe.getMessage());
     } catch (Exception e) {
-      LOG.error("Error while putting an item. " + obj.toString());
-      throw new RuntimeException(e);
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
   }
 
@@ -249,7 +240,7 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
    * @return true for a successful process
    */
   @Override
-  public boolean delete(K key) {
+  public boolean delete(K key) throws GoraException {
     try {
       T object = null;
       Object rangeKey = null, hashKey = null;
@@ -283,9 +274,8 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
       mapper.delete(object);
       return true;
     } catch (Exception e) {
-      LOG.error("Error while deleting value with key " + key.toString());
-      LOG.error(e.getMessage());
-      return false;
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
   }
 
@@ -295,7 +285,7 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
    * reading the mapping file
    */
   public void initialize(Class<K> keyClass, Class<T> pPersistentClass,
-      Properties properties) {
+      Properties properties) throws GoraException {
     super.initialize(keyClass, pPersistentClass, properties);
     setWsProvider(WS_PROVIDER);
     if (autoCreateSchema) {
@@ -334,7 +324,7 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
 
   @Override
   public void flush() {
-    LOG.warn("DynamoDBNativeStore puts and gets directly into the datastore");
+    LOG.info("DynamoDBNativeStore puts and gets directly into the datastore");
   }
 
   @Override
@@ -357,30 +347,35 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
   }
 
   @Override
-  public void createSchema() {
+  public void createSchema() throws GoraException {
     LOG.info("Creating Native DynamoDB Schemas.");
     if (dynamoDBStoreHandler.getDynamoDbMapping().getTables().isEmpty()) {
-      throw new IllegalStateException("There are not tables defined.");
+      throw new GoraException("There are not tables defined.");
     }
-    if (dynamoDBStoreHandler.getPreferredSchema() == null) {
-      LOG.debug("Creating schemas.");
-      // read the mapping object
-      for (String tableName : dynamoDBStoreHandler.getDynamoDbMapping()
-          .getTables().keySet())
+    try {
+      if (dynamoDBStoreHandler.getPreferredSchema() == null) {
+        LOG.debug("Creating schemas.");
+        // read the mapping object
+        for (String tableName : dynamoDBStoreHandler.getDynamoDbMapping()
+            .getTables().keySet())
+          DynamoDBUtils.executeCreateTableRequest(
+              dynamoDBStoreHandler.getDynamoDbClient(), tableName,
+              dynamoDBStoreHandler.getTableKeySchema(tableName),
+              dynamoDBStoreHandler.getTableAttributes(tableName),
+              dynamoDBStoreHandler.getTableProvisionedThroughput(tableName));
+        LOG.debug("tables created successfully.");
+      } else {
+        String tableName = dynamoDBStoreHandler.getPreferredSchema();
+        LOG.debug("Creating schema " + tableName);
         DynamoDBUtils.executeCreateTableRequest(
             dynamoDBStoreHandler.getDynamoDbClient(), tableName,
             dynamoDBStoreHandler.getTableKeySchema(tableName),
             dynamoDBStoreHandler.getTableAttributes(tableName),
             dynamoDBStoreHandler.getTableProvisionedThroughput(tableName));
-      LOG.debug("tables created successfully.");
-    } else {
-      String tableName = dynamoDBStoreHandler.getPreferredSchema();
-      LOG.debug("Creating schema " + tableName);
-      DynamoDBUtils.executeCreateTableRequest(
-          dynamoDBStoreHandler.getDynamoDbClient(), tableName,
-          dynamoDBStoreHandler.getTableKeySchema(tableName),
-          dynamoDBStoreHandler.getTableAttributes(tableName),
-          dynamoDBStoreHandler.getTableProvisionedThroughput(tableName));
+      }
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
   }
 
@@ -397,7 +392,7 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
   }
 
   @Override
-  public void deleteSchema() {
+  public void deleteSchema() throws GoraException {
     // TODO Auto-generated method stub
 
   }
@@ -408,7 +403,7 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
   }
 
   @Override
-  public boolean schemaExists() {
+  public boolean schemaExists() throws GoraException {
     return this.dynamoDBStoreHandler.schemaExists();
   }
 

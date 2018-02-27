@@ -21,6 +21,7 @@ package org.apache.gora.cassandra.store;
 import org.apache.gora.cassandra.GoraCassandraTestDriver;
 import org.apache.gora.cassandra.example.generated.nativeSerialization.Customer;
 import org.apache.gora.cassandra.example.generated.nativeSerialization.Document;
+import org.apache.gora.util.GoraException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -68,9 +69,10 @@ public class TestNativeSerializationWithUDT {
 
   /**
    * This is for testGetNested() with UDT dataType with native serialization.
+   * @throws GoraException 
    */
   @Test
-  public void testSimplePutAndGEt() {
+  public void testSimplePutAndGEt() throws GoraException {
     documentCassandraStore.createSchema();
     Document document = new Document();
     document.setDefaultId("yawamu.com");

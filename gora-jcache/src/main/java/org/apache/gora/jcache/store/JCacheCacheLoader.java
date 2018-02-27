@@ -17,15 +17,17 @@
 
 package org.apache.gora.jcache.store;
 
-import org.apache.gora.persistency.impl.PersistentBase;
-import org.apache.gora.store.DataStore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.cache.integration.CacheLoader;
 import javax.cache.integration.CacheLoaderException;
-import java.util.HashMap;
-import java.util.Map;
+
+import org.apache.gora.persistency.impl.PersistentBase;
+import org.apache.gora.store.DataStore;
+import org.apache.gora.util.GoraException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link org.apache.gora.jcache.store.JCacheCacheLoader} is the primary class
@@ -46,23 +48,27 @@ public class JCacheCacheLoader<K, T extends PersistentBase> implements CacheLoad
     try {
       persistent = dataStore.get(key);
       LOG.info("Loaded data bean from persistent datastore on key {}.", key.toString());
-    } catch (CacheLoaderException ex) {
-      throw ex;
+    } catch (GoraException ex) {
+      throw new CacheLoaderException(ex);
     }
     return persistent;
   }
 
   @Override
   public Map<K, T> loadAll(Iterable<? extends K> keys) throws CacheLoaderException {
-    Map<K, T> loaded = new HashMap<K, T>();
-    for (K key : keys) {
-      T persistent = dataStore.get(key);
-      LOG.info("Loaded data bean from persistent datastore on key {}.", key.toString());
-      if (persistent != null) {
-        loaded.put(key, persistent);
+    try {
+      Map<K, T> loaded = new HashMap<K, T>();
+      for (K key : keys) {
+        T persistent = dataStore.get(key);
+        LOG.info("Loaded data bean from persistent datastore on key {}.", key.toString());
+        if (persistent != null) {
+          loaded.put(key, persistent);
+        }
       }
+      return loaded;
+    } catch (GoraException e) {
+      throw new CacheLoaderException(e);
     }
-    return loaded;
   }
 
 }

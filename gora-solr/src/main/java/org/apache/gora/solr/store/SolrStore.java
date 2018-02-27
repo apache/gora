@@ -17,11 +17,11 @@ package org.apache.gora.solr.store;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,6 +43,7 @@ import org.apache.gora.solr.query.SolrResult;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.AvroUtils;
+import org.apache.gora.util.GoraException;
 import org.apache.gora.util.IOUtils;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -201,7 +202,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
    */
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
-      Properties properties) {
+      Properties properties) throws GoraException {
     super.initialize(keyClass, persistentClass, properties);
     try {
       String mappingFile = DataStoreFactory.getMappingFile(properties, this,
@@ -209,6 +210,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       mapping = readMapping(mappingFile);
     } catch (IOException e) {
       LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
 
     SolrClientUrl = DataStoreFactory.findProperty(properties, this,
@@ -371,51 +373,49 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
   }
 
   @Override
-  public void createSchema() {
+  public void createSchema() throws GoraException {
     try {
       if (!schemaExists())
         CoreAdminRequest.createCore(mapping.getCoreName(),
             mapping.getCoreName(), adminServer, solrConfig, solrSchema);
     } catch (Exception e) {
       LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
   }
 
   @Override
   /** Default implementation deletes and recreates the schema*/
-  public void truncateSchema() {
+  public void truncateSchema() throws GoraException {
     try {
       server.deleteByQuery("*:*");
       server.commit();
     } catch (Exception e) {
-      // ignore?
       LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
   }
 
   @Override
-  public void deleteSchema() {
+  public void deleteSchema() throws GoraException {
     // XXX should this be only in truncateSchema ???
     try {
       server.deleteByQuery("*:*");
       server.commit();
-    } catch (Exception e) {
-      // ignore?
-      // LOG.error(e.getMessage(), e);
-    }
-    try {
+
       CoreAdminRequest.unloadCore(mapping.getCoreName(), adminServer);
     } catch (Exception e) {
       if (e.getMessage().contains("No such core")) {
         return; // it's ok, the core is not there
       } else {
         LOG.error(e.getMessage(), e);
+        throw new GoraException(e);
       }
     }
   }
 
   @Override
-  public boolean schemaExists() {
+  public boolean schemaExists() throws GoraException {
     boolean exists = false;
     try {
       CoreAdminResponse rsp = CoreAdminRequest.getStatus(mapping.getCoreName(),
@@ -423,6 +423,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       exists = rsp.getUptime(mapping.getCoreName()) != null;
     } catch (Exception e) {
       LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
     return exists;
   }
@@ -460,7 +461,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
   }
 
   @Override
-  public T get(K key, String[] fields) {
+  public T get(K key, String[] fields) throws GoraException {
     ModifiableSolrParams params = new ModifiableSolrParams();
     params.set(CommonParams.QT, "/get");
     params.set(CommonParams.FL, toDelimitedString(fields, ","));
@@ -474,8 +475,8 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       return newInstance((SolrDocument) o, fields);
     } catch (Exception e) {
       LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
-    return null;
   }
 
   public T newInstance(SolrDocument doc, String[] fields) throws IOException {
@@ -589,7 +590,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
   }
 
   @Override
-  public void put(K key, T persistent) {
+  public void put(K key, T persistent) throws GoraException {
     Schema schema = persistent.getSchema();
     if (!persistent.isDirty()) {
       // nothing to do
@@ -624,6 +625,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
         batch.clear();
       } catch (Exception e) {
         LOG.error(e.getMessage(), e);
+        throw new GoraException(e);
       }
     }
   }
@@ -727,7 +729,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
   }
 
   @Override
-  public boolean delete(K key) {
+  public boolean delete(K key) throws GoraException {
     String keyField = mapping.getPrimaryKey();
     try {
       UpdateResponse rsp = server.deleteByQuery(keyField + ":"
@@ -737,12 +739,12 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       return true;
     } catch (Exception e) {
       LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
-    return false;
   }
 
   @Override
-  public long deleteByQuery(Query<K, T> query) {
+  public long deleteByQuery(Query<K, T> query) throws GoraException {
     UpdateResponse rsp;
     try {
       /*
@@ -778,20 +780,18 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
         server.commit();
         LOG.info(rsp.toString());
       }
+    } catch (GoraException e) {
+      throw e;
     } catch (Exception e) {
       LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
     return 0;
   }
 
   @Override
-  public Result<K, T> execute(Query<K, T> query) {
-    try {
-      return new SolrResult<>(this, query, server, resultsSize);
-    } catch (IOException e) {
-      LOG.error(e.getMessage(), e);
-    }
-    return null;
+  public Result<K, T> execute(Query<K, T> query) throws GoraException{
+    return new SolrResult<>(this, query, server, resultsSize);
   }
 
   @Override
@@ -813,7 +813,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
   }
 
   @Override
-  public void flush() {
+  public void flush() throws GoraException {
     try {
       if (batch.size() > 0) {
         add(batch, commitWithin);
@@ -821,12 +821,18 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       }
     } catch (Exception e) {
       LOG.error(e.getMessage(), e);
+      throw new GoraException(e);
     }
   }
 
   @Override
   public void close() {
-    flush();
+    try {
+      flush();
+    } catch (Exception e) {
+      LOG.error(e.getMessage(), e);
+      // Ignore the exception. Just nothing more to do if does not got close
+    }
   }
 
   private void add(ArrayList<SolrInputDocument> batch, int commitWithin)

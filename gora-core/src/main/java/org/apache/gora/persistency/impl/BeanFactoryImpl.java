@@ -22,7 +22,10 @@ import java.lang.reflect.Constructor;
 
 import org.apache.gora.persistency.BeanFactory;
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.util.GoraException;
 import org.apache.gora.util.ReflectionUtils;
+
+import com.esotericsoftware.minlog.Log;
 
 /**
  * A default implementation of the {@link BeanFactory} interface. Constructs
@@ -57,7 +60,7 @@ public class BeanFactoryImpl<K, T extends Persistent> implements BeanFactory<K, 
    * @param keyClass class of the keys
    * @param persistentClass class of the [{@link Persistent} objects to be stored
    */
-  public BeanFactoryImpl(Class<K> keyClass, Class<T> persistentClass) {
+  public BeanFactoryImpl(Class<K> keyClass, Class<T> persistentClass) throws GoraException {
     this.keyClass = keyClass;
     this.persistentClass = persistentClass;
     
@@ -68,7 +71,8 @@ public class BeanFactoryImpl<K, T extends Persistent> implements BeanFactory<K, 
       }
       this.persistent = ReflectionUtils.newInstance(persistentClass);
     } catch (Exception ex) {
-      throw new RuntimeException(ex);
+      Log.error(ex.getMessage(), ex);
+      throw new GoraException(ex);
     }
     
     isKeyPersistent = Persistent.class.isAssignableFrom(keyClass);
