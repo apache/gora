@@ -71,7 +71,6 @@ public class BeanFactoryImpl<K, T extends Persistent> implements BeanFactory<K, 
       }
       this.persistent = ReflectionUtils.newInstance(persistentClass);
     } catch (Exception ex) {
-      Log.error(ex.getMessage(), ex);
       throw new GoraException(ex);
     }
     

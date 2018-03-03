@@ -56,7 +56,6 @@ public abstract class WSBackedDataStoreBase<K, T extends Persistent>
     try {
       return executeQuery(query);
     } catch (IOException e) {
-      LOG.error(e.getMessage());
       throw new GoraException(e);
     }
   }

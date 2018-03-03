@@ -114,7 +114,6 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
       aerospikeParameters.validateServerBinConfiguration(persistentClass.getFields());
       LOG.info("Aerospike Gora datastore initialized successfully.");
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -183,7 +182,6 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
     } catch (GoraException e) {
       throw e;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -230,7 +228,6 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
                 .put(aerospikeParameters.getAerospikeMapping().getWritePolicy(), recordKey, bin);
       }
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -248,7 +245,6 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
       return aerospikeClient
               .delete(aerospikeParameters.getAerospikeMapping().getWritePolicy(), recordKey);
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -271,7 +267,6 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
       }
       return deleteCount;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -338,7 +333,6 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
       //    }
       return new AerospikeQueryResult<>(this, query, resultRecords, getFieldsToQuery(null));
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e) ;
     }
   }

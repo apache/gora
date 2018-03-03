@@ -91,7 +91,6 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
     } catch (GoraException e) {
       throw e ; // If it is a GoraException we assume it is already logged
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
     return deletes.size();
@@ -116,7 +115,6 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
             (DynamoDBScanExpression) dynamoDBQuery.getQueryExpression());
       return new DynamoDBResult<K, T>(this, query, objList);
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -160,7 +158,6 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
     } catch (GoraException e) {
       throw e;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -228,7 +225,6 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
       } else
         throw new GoraException("No HashKey found in Key nor in Object.");
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -274,7 +270,6 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
       mapper.delete(object);
       return true;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -374,7 +369,6 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
             dynamoDBStoreHandler.getTableProvisionedThroughput(tableName));
       }
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }

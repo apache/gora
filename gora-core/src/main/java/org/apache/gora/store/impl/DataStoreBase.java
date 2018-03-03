@@ -127,7 +127,6 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
     try {
       return beanFactory.newKey();
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -137,7 +136,6 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
     try {
       return beanFactory.newPersistent();
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }

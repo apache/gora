@@ -143,8 +143,7 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
       db = new StdCouchDbConnector(mapping.getDatabaseName(), dbInstance, myObjectMapperFactory);
       db.createDatabaseIfNotExists();
     } catch (Exception e) {
-      LOG.error("Error while initializing CouchDB store: {}", new Object[] { e.getMessage() });
-      throw new GoraException(e);
+      throw new GoraException("Error while initializing CouchDB store", e);
     }
   }
 
@@ -183,7 +182,6 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
     } catch (GoraException e) {
       throw e;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -200,7 +198,6 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
     } catch (GoraException e) {
       throw e;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }     
   }
@@ -213,7 +210,6 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
     try {
       return dbInstance.checkIfDbExists(mapping.getDatabaseName());
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -236,7 +232,6 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
     } catch (GoraException e) {
       throw e;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -380,7 +375,6 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
       final Map<String, Object> referenceData = db.get(Map.class, keyString);
       return StringUtils.isNotEmpty(db.delete(keyString, referenceData.get("_rev").toString()));
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -424,7 +418,6 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
         }
         return db.purge(revisionsToPurge).getPurged().size();
       } catch (Exception e) {
-        LOG.error(e.getMessage(), e);
         throw new GoraException(e);
       }
     }
@@ -459,7 +452,6 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
       return couchDBResult;
 
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e) ;
     }
 
@@ -522,7 +514,7 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
     try {
       clazz = ClassLoadingUtils.loadClass(fieldSchema.getFullName());
     } catch (ClassNotFoundException e) {
-      LOG.debug(e.getMessage());
+      throw new GoraException(e) ;
     }
 
     final PersistentBase record = (PersistentBase) new BeanFactoryImpl(keyClass, clazz).newPersistent();
@@ -570,7 +562,7 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
       // Deserialize as if schema was ["type"]
       result = fromDBObject(innerSchema, field, docf, value);
     } else {
-      throw new IllegalStateException(
+      throw new GoraException(
           "CouchDBStore doesn't support 3 types union field yet. Please update your mapping");
     }
     return result;
@@ -671,7 +663,6 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
       bulkDocs.clear();
       db.flushBulkBuffer();
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
