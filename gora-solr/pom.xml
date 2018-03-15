@@ -30,6 +30,24 @@
   <packaging>bundle</packaging>
 
   <name>Apache Gora :: Solr</name>
+  <url>http://gora.apache.org</url>
+  <description>The Apache Gora open source framework provides an in-memory data model and 
+    persistence for big data. Gora supports persisting to column stores, key value stores, 
+    document stores and RDBMSs, and analyzing the data with extensive Apache Hadoop MapReduce 
+    support.</description>
+  <inceptionYear>2010</inceptionYear>
+  <organization>
+    <name>The Apache Software Foundation</name>
+    <url>http://apache.org</url>
+  </organization>
+  <issueManagement>
+    <system>JIRA</system>
+    <url>https://issues.apache.org/jira/browse/GORA</url>
+  </issueManagement>
+  <ciManagement>
+    <system>Jenkins</system>
+    <url>https://builds.apache.org/job/Gora-trunk/</url>
+  </ciManagement>
 
   <properties>
     <osgi.import>*</osgi.import>
@@ -279,42 +297,5 @@
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
-<!--     <dependency> -->
-<!--       <groupId>org.apache.solr</groupId> -->
-<!--       <artifactId>solr-test-framework</artifactId> -->
-<!--       <version>${lucene-solr-5.version}</version> -->
-<!--       <exclusions> -->
-<!--         <exclusion> -->
-<!--           <groupId>org.eclipse.jetty</groupId> -->
-<!--           <artifactId>jetty-servlet</artifactId> -->
-<!--         </exclusion> -->
-<!--       </exclusions> -->
-<!--       <scope>test</scope> -->
-<!--     </dependency> -->
-<!--     <dependency> -->
-<!--       <groupId>org.apache.lucene</groupId> -->
-<!--       <artifactId>lucene-test-framework</artifactId> -->
-<!--       <version>${lucene-solr-5.version}</version> -->
-<!--       <scope>test</scope> -->
-<!--     </dependency> -->
   </dependencies>
-
-  <url>http://gora.apache.org</url>
-  <description>The Apache Gora open source framework provides an in-memory data model and 
-    persistence for big data. Gora supports persisting to column stores, key value stores, 
-    document stores and RDBMSs, and analyzing the data with extensive Apache Hadoop MapReduce 
-    support.</description>
-  <inceptionYear>2010</inceptionYear>
-  <organization>
-    <name>The Apache Software Foundation</name>
-    <url>http://apache.org</url>
-  </organization>
-  <issueManagement>
-    <system>JIRA</system>
-    <url>https://issues.apache.org/jira/browse/GORA</url>
-  </issueManagement>
-  <ciManagement>
-    <system>Jenkins</system>
-    <url>https://builds.apache.org/job/Gora-trunk/</url>
-  </ciManagement>
 </project>

@@ -26,19 +26,21 @@
     <version>0.9-SNAPSHOT</version>
     <relativePath>../</relativePath>
   </parent>
-  <artifactId>gora-jcache</artifactId>
+  <artifactId>gora-lucene</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Apache Gora :: JCache</name>
+  <name>Apache Gora :: Lucene</name>
   <url>http://gora.apache.org</url>
-  <description>The Apache Gora open source framework provides an in-memory data model and
-    persistence for big data. Gora supports persisting to column stores, key value stores,
-    document stores and RDBMSs, and analyzing the data with extensive Apache Hadoop MapReduce
-    support.</description>
+  <description>
+    The Apache Gora open source framework provides an in-memory data model and 
+    persistence for big data. Gora supports persisting to column stores, key value stores, 
+    document stores and RDBMSs, and analyzing the data with extensive Apache Hadoop MapReduce 
+    support.
+  </description>
   <inceptionYear>2010</inceptionYear>
   <organization>
-    <name>The Apache Software Foundation</name>
-    <url>http://www.apache.org/</url>
+   	<name>The Apache Software Foundation</name>
+   	<url>http://www.apache.org/</url>
   </organization>
   <issueManagement>
     <system>JIRA</system>
@@ -51,89 +53,67 @@
 
   <properties>
     <osgi.import>*</osgi.import>
-    <osgi.export>org.apache.gora.jcache*;version="${project.version}";-noimport:=true</osgi.export>
+    <osgi.export>org.apache.gora.lucene*;version="${project.version}";-noimport:=true</osgi.export>
   </properties>
-
+  
   <build>
-    <directory>target</directory>
-    <outputDirectory>target/classes</outputDirectory>
-    <finalName>${project.artifactId}-${project.version}</finalName>
-    <testOutputDirectory>target/test-classes</testOutputDirectory>
-    <testSourceDirectory>src/test/java</testSourceDirectory>
-    <sourceDirectory>src/main/java</sourceDirectory>
     <testResources>
       <testResource>
-        <directory>${project.basedir}/src/test/resources</directory>
+        <directory>${project.basedir}/src/test/conf</directory>
         <includes>
           <include>**/*</include>
         </includes>
-        <!--targetPath>${project.basedir}/target/classes/</targetPath -->
       </testResource>
     </testResources>
-    <plugins>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>${build-helper-maven-plugin.version}</version>
-        <executions>
-          <execution>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>add-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>src/examples/java</source>
-              </sources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
   </build>
 
   <dependencies>
+  
     <!-- Gora Internal Dependencies -->
     <dependency>
       <groupId>org.apache.gora</groupId>
       <artifactId>gora-core</artifactId>
+      <exclusions>
+        <exclusion>
+          <artifactId>servlet-api</artifactId>
+          <groupId>org.mortbay.jetty</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>servlet-api-2.5</artifactId>
+          <groupId>org.mortbay.jetty</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jetty-util</artifactId>
+          <groupId>org.mortbay.jetty</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jetty</artifactId>
+          <groupId>org.mortbay.jetty</groupId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
-
+    
     <dependency>
       <groupId>org.apache.gora</groupId>
       <artifactId>gora-core</artifactId>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
-
+    
     <dependency>
-      <groupId>org.apache.avro</groupId>
-      <artifactId>avro</artifactId>
+      <groupId>org.jdom</groupId>
+      <artifactId>jdom</artifactId>
     </dependency>
-
-    <!-- Hadoop Dependencies -->
-    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-client</artifactId>
-    </dependency>
-
-    <!-- JCache Dependencies -->
-    <dependency>
-      <groupId>com.hazelcast</groupId>
-      <artifactId>hazelcast-all</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>javax.cache</groupId>
-      <artifactId>cache-api</artifactId>
-    </dependency>
-
+    
     <!-- Logging Dependencies -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
     </dependency>
-
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
@@ -144,20 +124,48 @@
         </exclusion>
       </exclusions>
     </dependency>
+    <!-- END of Logging Dependencies -->
 
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>${commons-io.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-core</artifactId>
+      <version>${lucene-solr.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-analyzers-common</artifactId>
+      <version>${lucene-solr.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-queries</artifactId>
+      <version>${lucene-solr.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
+  
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-client</artifactId>
+      <optional>true</optional>
+    </dependency>
+  
     <!-- Testing Dependencies -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
-
-    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-minicluster</artifactId>
-      <scope>test</scope>
-    </dependency>
-
+    
   </dependencies>
 
 </project>

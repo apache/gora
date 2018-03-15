@@ -18,8 +18,6 @@
 
 package org.apache.gora.avro.store;
 
-import java.io.DataInput;
-import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -50,8 +48,7 @@ import org.slf4j.LoggerFactory;
  * An adapter DataStore for binary-compatible Avro serializations.
  * AvroDataStore supports Binary and JSON serializations.
  */
-public class AvroStore<K, T extends PersistentBase>
-extends FileBackedDataStoreBase<K, T> implements Configurable {
+public class AvroStore<K, T extends PersistentBase> extends FileBackedDataStoreBase<K, T> implements Configurable {
 
   /** The property key specifying avro encoder/decoder type to use. Can take values
    * "BINARY" or "JSON". */
@@ -245,16 +242,6 @@ extends FileBackedDataStoreBase<K, T> implements Configurable {
       conf = new Configuration();
     }
     return conf;
-  }
-
-  @Override
-  public void write(DataOutput out) throws IOException {
-    super.write(out);
-  }
-
-  @Override
-  public void readFields(DataInput in) throws IOException {
-    super.readFields(in);
   }
 
   @Override
