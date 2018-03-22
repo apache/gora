@@ -107,4 +107,9 @@ public class CassandraResultSet<K, T extends Persistent> extends ResultBase<K, T
   protected boolean isLimitReached() {
     return (limit > 0 && offset >= limit) || (offset >= size);
   }
+
+    @Override
+    public int size() {
+        return size;
+    }
 }

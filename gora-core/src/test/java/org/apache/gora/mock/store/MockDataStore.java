@@ -166,5 +166,10 @@ public class MockDataStore extends DataStoreBase<String, MockPersistent> {
     public boolean nextInner() throws IOException {
       return false ;
     }
+
+        @Override
+        public int size() {
+            return 0;
+        }
   }
 }

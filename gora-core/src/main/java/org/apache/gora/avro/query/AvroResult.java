@@ -67,4 +67,9 @@ public class AvroResult<K, T extends PersistentBase> extends ResultBase<K, T> {
     
     return persistent != null;
   }  
+
+    @Override
+    public int size() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

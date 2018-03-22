@@ -87,4 +87,9 @@ public class CouchDBResult<K, T extends Persistent> extends ResultBase<K, T> {
   public List<Map> getResultData() {
     return result;
   }
+
+    @Override
+    public int size() {
+        return result.size();
+    }
 }

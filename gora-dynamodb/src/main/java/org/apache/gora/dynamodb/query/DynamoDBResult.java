@@ -84,4 +84,9 @@ public class DynamoDBResult<K, T extends Persistent> extends ResultWSBase<K, T> 
   public void close() throws IOException {
   }
 
+    @Override
+    public int size() {
+        return dynamoDBResultSet.size();
+    }
+
 }

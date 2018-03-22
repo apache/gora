@@ -81,5 +81,10 @@ public class DataFileAvroResult<K, T extends PersistentBase> extends ResultBase<
     persistent = reader.next(persistent);
     return true;
   }
+
+    @Override
+    public int size() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
   
 }

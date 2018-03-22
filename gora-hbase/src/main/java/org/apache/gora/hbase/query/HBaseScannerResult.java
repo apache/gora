@@ -66,5 +66,10 @@ public class HBaseScannerResult<K, T extends PersistentBase> extends HBaseResult
     //TODO: if limit is set, we know how far we have gone 
     return 0;
   }
+
+    @Override
+    public int size() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
   
 }

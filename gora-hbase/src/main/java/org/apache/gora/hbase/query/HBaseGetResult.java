@@ -61,4 +61,9 @@ public class HBaseGetResult<K, T extends PersistentBase> extends HBaseResult<K,T
   @Override
   public void close() throws IOException {
   }
+
+    @Override
+    public int size() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

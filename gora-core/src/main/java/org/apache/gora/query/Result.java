@@ -95,5 +95,10 @@ public interface Result<K, T extends Persistent> {
   float getProgress() throws IOException, InterruptedException;
 
   void close() throws IOException;
-  
+  /**
+   * Returns the number items the result has.
+   *
+   * @return the number of items
+   */
+  int size();
 }

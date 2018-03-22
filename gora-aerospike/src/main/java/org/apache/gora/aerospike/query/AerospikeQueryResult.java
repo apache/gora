@@ -85,4 +85,9 @@ public class AerospikeQueryResult<K, T extends Persistent> extends ResultBase<K,
             .createPersistentInstance(resultRecords.get((int) this.offset).getRecord(), fields);
     return true;
   }
+
+    @Override
+    public int size() {
+        return resultRecords.size();
+    }
 }

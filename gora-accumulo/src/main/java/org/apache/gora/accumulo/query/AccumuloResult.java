@@ -88,5 +88,10 @@ public class AccumuloResult<K,T extends PersistentBase> extends ResultBase<K,T> 
     
     return true;
   }
+
+    @Override
+    public int size() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
   
 }

@@ -100,4 +100,9 @@ public class OrientDBResult<K, T extends PersistentBase> extends ResultBase<K, T
     }
   }
 
+    @Override
+    public int size() {
+        return size;
+    }
+
 }
