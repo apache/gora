@@ -23,7 +23,6 @@ import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.PartitionQueryImpl;
 import org.apache.gora.query.impl.ResultBase;
-import org.apache.gora.store.DataStore;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.ScoreDoc;
@@ -35,7 +34,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-public class LuceneResult<K, T extends PersistentBase> extends ResultBase<K, T> {
+public class LuceneResult<K, T extends PersistentBase> 
+extends ResultBase<K, T> {
 
   private ScoreDoc[] scoreDocs = null;
   private final LuceneStore<K, T> store;
@@ -44,24 +44,25 @@ public class LuceneResult<K, T extends PersistentBase> extends ResultBase<K, T> 
   private final SearcherManager searcherManager;
   private IndexSearcher searcher;
 
-  public LuceneResult(DataStore<K, T> dataStore, Query<K, T> query,
-      SearcherManager sm) throws IOException {
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  public LuceneResult(LuceneStore<K, T> dataStore, Query<K, T> query,
+          SearcherManager sm) throws IOException {
     super(dataStore, query);
 
     searcherManager = sm;
-    store = (LuceneStore<K, T>)dataStore;
+    store = dataStore;
     if (query instanceof PartitionQueryImpl) {
-      query = ((PartitionQueryImpl<K, T>)query).getBaseQuery();
+      query = ((PartitionQueryImpl) query).getBaseQuery();
     }
     fields = query.getFields();
     if (fields != null) {
       HashSet<String> uniqFields = new HashSet<>(Arrays.asList(fields));
-      String keyFld = ((LuceneStore<K, T>)dataStore).getMapping().getPrimaryKey();
+      String keyFld = store.getMapping().getPrimaryKey();
       uniqFields.add(keyFld); // return also primary key
       query.setFields(fields);
     }
     else {
-      Collection<String> c = ((LuceneStore<K, T>)dataStore).getMapping().getLuceneFields();
+      Collection<String> c = store.getMapping().getLuceneFields();
       String[] a = {};
       fields = c.toArray(a);
       query.setFields(fields);
@@ -71,11 +72,11 @@ public class LuceneResult<K, T extends PersistentBase> extends ResultBase<K, T> 
     // (NB: TotalHitCountCollector uses an int internally)
     if (limit < 1L)
       limit = Integer.MAX_VALUE;
-    
+
     searcher = searcherManager.acquire();
-    scoreDocs = searcher.search(((LuceneQuery<K, T>)query).toLuceneQuery(), Ints.checkedCast(limit)).scoreDocs;
+    scoreDocs = searcher.search(((LuceneQuery<K, PersistentBase>) query).toLuceneQuery(), Ints.checkedCast(limit)).scoreDocs;
   }
-  
+
   public ScoreDoc[] getScoreDocs() {
     return scoreDocs;
   }
@@ -94,9 +95,9 @@ public class LuceneResult<K, T extends PersistentBase> extends ResultBase<K, T> 
       f.add(store.getMapping().getPrimaryKey());
     }
     else {
-      Collection<String> c = ((LuceneStore<K, T>)dataStore).getMapping().getLuceneFields();
+      Collection<String> c = store.getMapping().getLuceneFields();
       String[] a = {};
-      fields = c.toArray(a);      
+      fields = c.toArray(a);
     }
 
     Document doc = searcher.doc(scoreDocs[pos++].doc, f);
@@ -104,7 +105,7 @@ public class LuceneResult<K, T extends PersistentBase> extends ResultBase<K, T> 
     persistent = store.newInstance(doc, fields);
     return true;
   }
-  
+
   @Override
   public void close() throws IOException {
     scoreDocs = null;

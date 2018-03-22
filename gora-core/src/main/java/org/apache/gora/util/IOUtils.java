@@ -610,7 +610,7 @@ public class IOUtils {
     String className = conf.get(classKey);
     try {
       return (T) DefaultStringifier.load(conf, dataKey, ClassLoadingUtils.loadClass(className));
-    } catch (Exception ex) {
+    } catch (IOException | ClassNotFoundException ex) {
       throw new IOException(ex);
     }
   }

@@ -69,9 +69,10 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
-public class LuceneStore<K, T extends PersistentBase> extends FileBackedDataStoreBase<K, T> implements Configurable {
+public class LuceneStore<K, T extends PersistentBase> 
+extends FileBackedDataStoreBase<K, T> implements Configurable {
 
-  private static final Logger LOG = LoggerFactory.getLogger( LuceneStore.class );
+  private static final Logger LOG = LoggerFactory.getLogger(LuceneStore.class);
 
   private static final String DEFAULT_MAPPING_FILE = "gora-lucene-mapping.xml";
   private static final String LUCENE_VERSION_KEY = "gora.lucene.index.version";
@@ -84,19 +85,22 @@ public class LuceneStore<K, T extends PersistentBase> extends FileBackedDataStor
   private SearcherManager searcherManager;
 
   @Override
-  public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) {
+  public void initialize(Class<K> keyClass, Class<T> persistentClass,
+          Properties properties) throws GoraException {
     try {
       super.initialize(keyClass, persistentClass, properties);
-    } catch (GoraException e1) {
-      e1.printStackTrace();
+    } catch (GoraException ge) {
+      LOG.error(ge.getMessage(), ge);
+      throw new GoraException(ge);
     }
 
     String mappingFile = null;
     try {
       mappingFile = DataStoreFactory.getMappingFile(
-              properties, (DataStore<?, ?>) this, DEFAULT_MAPPING_FILE );
-    } catch (IOException e1) {
-      e1.printStackTrace();
+              properties, (DataStore<?, ?>) this, DEFAULT_MAPPING_FILE);
+    } catch (IOException ioe) {
+      LOG.error(ioe.getMessage(), ioe);
+      throw new GoraException(ioe);
     }
     String luceneVersion = properties.getProperty(
             LUCENE_VERSION_KEY, DEFAULT_LUCENE_VERSION);
@@ -108,8 +112,9 @@ public class LuceneStore<K, T extends PersistentBase> extends FileBackedDataStor
 
     try {
       mapping = readMapping(mappingFile);
-    } catch (IOException e1) {
-      e1.printStackTrace();
+    } catch (IOException ioe) {
+      LOG.error(ioe.getMessage(), ioe);
+      throw new GoraException(ioe);
     }
     try(Directory dir = FSDirectory.open(FileSystems.getDefault().getPath(outputPath))) {
 
@@ -435,9 +440,9 @@ public class LuceneStore<K, T extends PersistentBase> extends FileBackedDataStor
   @Override
   protected Result<K,T> executeQuery(Query<K,T> query) throws IOException {
     try {
-      return new LuceneResult<>( this, query, searcherManager );
-    } catch ( IOException e ) {
-      LOG.error(e.getMessage(), e );
+      return new LuceneResult<>(this, query, searcherManager);
+    } catch (IOException e) {
+      LOG.error(e.getMessage(), e);
     }
     return null;
   }

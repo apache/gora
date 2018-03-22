@@ -48,7 +48,8 @@ import org.slf4j.LoggerFactory;
  * An adapter DataStore for binary-compatible Avro serializations.
  * AvroDataStore supports Binary and JSON serializations.
  */
-public class AvroStore<K, T extends PersistentBase> extends FileBackedDataStoreBase<K, T> implements Configurable {
+public class AvroStore<K, T extends PersistentBase> 
+  extends FileBackedDataStoreBase<K, T> implements Configurable {
 
   /** The property key specifying avro encoder/decoder type to use. Can take values
    * "BINARY" or "JSON". */
@@ -59,7 +60,7 @@ public class AvroStore<K, T extends PersistentBase> extends FileBackedDataStoreB
   /**
    * The type of the avro Encoder/Decoder.
    */
-  public static enum CodecType {
+  public enum CodecType {
     /** Avro binary encoder */
     BINARY,
     /** Avro JSON encoder */
