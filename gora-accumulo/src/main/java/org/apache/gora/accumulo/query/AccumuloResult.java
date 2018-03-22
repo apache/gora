@@ -53,7 +53,9 @@ public class AccumuloResult<K,T extends PersistentBase> extends ResultBase<K,T> 
   public AccumuloResult(DataStore<K,T> dataStore, Query<K,T> query, Scanner scanner) {
     super(dataStore, query);
     
-    // TODO set batch size based on limit, and construct iterator later
+    if (this.limit>-1){
+        scanner.setBatchSize((int)this.limit);
+    }
     iterator = new RowIterator(scanner.iterator());
   }
 
@@ -62,8 +64,11 @@ public class AccumuloResult<K,T extends PersistentBase> extends ResultBase<K,T> 
    */
   @Override
   public float getProgress() throws IOException {
-    // TODO Auto-generated method stub
-    return 0;
+      if (this.limit!=-1){
+        return (float)this.offset/(float)this.limit;
+      }else{
+          return 0;
+      }
   }
   
   @Override
@@ -91,7 +96,7 @@ public class AccumuloResult<K,T extends PersistentBase> extends ResultBase<K,T> 
 
     @Override
     public int size() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return (int)this.limit;
     }
   
 }

@@ -48,8 +48,11 @@ public class AvroResult<K, T extends PersistentBase> extends ResultBase<K, T> {
 
   @Override
   public float getProgress() throws IOException {
-    //TODO: FIXME
-    return 0;
+      if (this.limit!=-1){
+        return (float)this.offset/(float)this.limit;
+      }else{
+          return 0;
+      }
   }
 
   @Override
@@ -70,6 +73,6 @@ public class AvroResult<K, T extends PersistentBase> extends ResultBase<K, T> {
 
     @Override
     public int size() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return (int)limit;
     }
 }

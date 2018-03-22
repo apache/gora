@@ -498,7 +498,7 @@ implements Configurable {
 
   public ResultScanner createScanner(Query<K, T> query) throws IOException {
     final Scan scan = new Scan();
-    
+    scan.setBatch((int)query.getLimit());
     scan.setCaching(this.getScannerCaching()) ; 
     
     if (query.getStartKey() != null) {
