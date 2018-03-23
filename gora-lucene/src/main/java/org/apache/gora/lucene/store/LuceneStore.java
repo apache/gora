@@ -66,6 +66,7 @@ import java.nio.file.FileSystems;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
 
@@ -116,7 +117,10 @@ extends FileBackedDataStoreBase<K, T> implements Configurable {
       LOG.error(ioe.getMessage(), ioe);
       throw new GoraException(ioe);
     }
-    try(Directory dir = FSDirectory.open(FileSystems.getDefault().getPath(outputPath))) {
+    String persistentClassObject = persistentClass.getCanonicalName();
+    String dataStoreOutputPath = outputPath + "_" + persistentClassObject
+            .substring(persistentClassObject.lastIndexOf('.') + 1).toLowerCase(Locale.getDefault());
+    try(Directory dir = FSDirectory.open(FileSystems.getDefault().getPath(dataStoreOutputPath))) {
 
       Analyzer analyzer = new StandardAnalyzer();
       IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
@@ -125,7 +129,7 @@ extends FileBackedDataStoreBase<K, T> implements Configurable {
       iwc.setRAMBufferSizeMB(Double.parseDouble(ramBuffer));
 
       writer = new IndexWriter(dir, iwc);
-      //do we definately want all past deletions to be applied.
+      //TODO do we definately want all past deletions to be applied.
       searcherManager = new SearcherManager(writer, true, true, new SearcherFactory());
     } catch (IOException e ) {
       LOG.error("Error opening {} with Lucene FSDirectory.", outputPath, e);
@@ -312,31 +316,31 @@ extends FileBackedDataStoreBase<K, T> implements Configurable {
       // This might be a buffer copy. Do we need to pad if the
       // fixed sized data is smaller than the type? Do we truncate
       // if the data is larger than the type?
-      LOG.error( "Fixed-sized fields are not supported yet" );
+      LOG.error("Fixed-sized fields are not supported yet");
       break;
       case BYTES:
-      p.put( pos, ByteBuffer.wrap( (byte[]) o ) );
+      p.put(pos, ByteBuffer.wrap((byte[]) o));
       break;
       case BOOLEAN:
-      p.put( pos, Boolean.parseBoolean((String)o) );
+      p.put(pos, Boolean.parseBoolean((String)o));
       break;
       case DOUBLE:
-      p.put( pos, Double.parseDouble((String)o) );
+      p.put(pos, Double.parseDouble((String)o));
       break;
       case FLOAT:
-      p.put( pos, Float.parseFloat((String)o) );
+      p.put(pos, Float.parseFloat((String)o));
       break;
       case INT:
-      p.put( pos, Integer.parseInt((String)o) );
+      p.put(pos, Integer.parseInt((String)o));
       break;
       case LONG:
-      p.put( pos, Long.parseLong((String)o) );
+      p.put(pos, Long.parseLong((String)o));
       break;
       case STRING:
-      p.put( pos, new Utf8( o.toString() ) );
+      p.put(pos, new Utf8( o.toString()));
       break;
       default:
-      LOG.error( "Unknown field type: {}", t );
+      LOG.error("Unknown field type: {}", t);
     }
   }
 
@@ -358,56 +362,56 @@ extends FileBackedDataStoreBase<K, T> implements Configurable {
 
     // populate the doc
     List<org.apache.avro.Schema.Field> fields = schema.getFields();
-    for ( org.apache.avro.Schema.Field field : fields ) {
-      if (!persistent.isDirty( field.name() )) {
+    for ( org.apache.avro.Schema.Field field : fields) {
+      if (!persistent.isDirty(field.name())) {
         continue;
       }
-      String sf = mapping.getLuceneField( field.name() );
+      String sf = mapping.getLuceneField(field.name());
       if ( sf == null ) {
         continue;
       }
       Schema fieldSchema = field.schema();
-      Object v = persistent.get( field.pos() );
-      if ( v == null ) {
+      Object o = persistent.get(field.pos());
+      if (o == null) {
         continue;
       }
-      switch ( fieldSchema.getType() ) {
-        case MAP:   //TODO: These should be handled better
+      switch (fieldSchema.getType()) {
+        case MAP: //TODO: These should be handled better
         case ARRAY:
         case RECORD:
         case UNION:
-        // For now we'll just store the bytes
-        byte[] data = new byte[0];
-        try {
-          data = IOUtils.serialize(datumWriter, (T) v);
-        } catch ( IOException e ) {
-          LOG.error( e.getMessage(), e );
-        }
-        doc.add(new StoredField(sf, data));
-        break;
+          // For now we'll just store the bytes
+          byte[] data = new byte[0];
+          try {
+            data = IOUtils.serialize(datumWriter, (T)o);
+          } catch (IOException e) {
+            LOG.error( e.getMessage(), e );
+          }
+          doc.add(new StoredField(sf, data));
+          break;
         case BYTES:
-        doc.add(new StoredField( sf, ( (ByteBuffer) v ).array() ));
-        break;
+          doc.add(new StoredField(sf, ((ByteBuffer) o).array()));
+          break;
         case ENUM:
         case STRING:
-        //TODO make this Text based on a mapping.xml attribute
-        doc.add( new StringField(sf, v.toString(), Store.YES));
-        break;
+          //TODO make this Text based on a mapping.xml attribute
+          doc.add( new StringField(sf, o.toString(), Store.YES));
+          break;
         case BOOLEAN:
-        doc.add(new StringField(sf, v.toString(), Store.YES));
-        break;
+          doc.add(new StringField(sf, o.toString(), Store.YES));
+          break;
         case DOUBLE:
-        doc.add(new StoredField(sf, (Double)v));
-        break;
+          doc.add(new StoredField(sf, (Double)o));
+          break;
         case FLOAT:
-        doc.add(new StoredField(sf, (Float)v));
-        break;
+          doc.add(new StoredField(sf, (Float)o));
+          break;
         case INT:
-        doc.add(new StoredField(sf, (Integer)v));
-        break;
+          doc.add(new StoredField(sf, (Integer)o));
+          break;
         case LONG:
-        doc.add(new StoredField(sf, (Long)v));
-        break;
+          doc.add(new StoredField(sf, (Long)o));
+          break;
         default:
         LOG.error( "Unknown field type: {}", fieldSchema.getType() );
       }
@@ -426,7 +430,7 @@ extends FileBackedDataStoreBase<K, T> implements Configurable {
       }
       searcherManager.maybeRefresh();
     } catch (IOException e) {
-      LOG.error("Error updating document: {}",e);
+      LOG.error("Error updating document: {}", e);
     }
 
   }

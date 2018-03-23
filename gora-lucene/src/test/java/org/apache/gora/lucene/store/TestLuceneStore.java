@@ -17,26 +17,17 @@
  */
 package org.apache.gora.lucene.store;
 
-import org.apache.gora.examples.generated.Employee;
-import org.apache.gora.examples.generated.WebPage;
-import org.apache.gora.store.DataStore;
-import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.DataStoreTestBase;
 import org.apache.gora.util.OperationNotSupportedException;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Properties;
-
 
 public class TestLuceneStore extends DataStoreTestBase {
 
-  @Rule
-  public final TemporaryFolder tmp = new TemporaryFolder();
+  static {
+    setTestDriver(new TestLuceneStoreDriver());
+  }
+
   
   @Before
   public void setUp() throws Exception {
