@@ -82,9 +82,9 @@ public class JCacheResult<K, T extends PersistentBase> extends ResultBase<K, T> 
     return true;
   }
 
-    @Override
-    public int size() {
-        return cacheKeySet.size();
-    }
+  @Override
+  public int size() {
+    return cacheKeySet.size();
+  }
 
 }

@@ -82,9 +82,9 @@ public class DataFileAvroResult<K, T extends PersistentBase> extends ResultBase<
     return true;
   }
 
-    @Override
-    public int size() {
-        return (int) (end - start);
-    }
+  @Override
+  public int size() {
+    return (int) (end - start);
+  }
   
 }

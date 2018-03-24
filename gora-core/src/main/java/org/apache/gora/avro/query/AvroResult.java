@@ -48,11 +48,11 @@ public class AvroResult<K, T extends PersistentBase> extends ResultBase<K, T> {
 
   @Override
   public float getProgress() throws IOException {
-      if (this.limit!=-1){
-        return (float)this.offset/(float)this.limit;
-      }else{
-          return 0;
-      }
+    if (this.limit != -1) {
+      return (float) this.offset / (float) this.limit;
+    } else {
+      return 0;
+    }
   }
 
   @Override
@@ -71,8 +71,8 @@ public class AvroResult<K, T extends PersistentBase> extends ResultBase<K, T> {
     return persistent != null;
   }  
 
-    @Override
-    public int size() {
-        return (int)limit;
-    }
+  @Override
+  public int size() {
+    return (int) limit;
+  }
 }

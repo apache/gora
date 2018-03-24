@@ -90,10 +90,10 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
       return true;
     }
 
-        @Override
-        public int size() {
-            return map.navigableKeySet().size();
-        }
+    @Override
+    public int size() {
+      return map.navigableKeySet().size();
+    }
   }
 
   // This map behaves like DB, has to be static and concurrent collection

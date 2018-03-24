@@ -86,8 +86,8 @@ public class AerospikeQueryResult<K, T extends Persistent> extends ResultBase<K,
     return true;
   }
 
-    @Override
-    public int size() {
-        return resultRecords.size();
-    }
+  @Override
+  public int size() {
+    return resultRecords.size();
+  }
 }

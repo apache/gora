@@ -108,8 +108,8 @@ public class CassandraResultSet<K, T extends Persistent> extends ResultBase<K, T
     return (limit > 0 && offset >= limit) || (offset >= size);
   }
 
-    @Override
-    public int size() {
-        return size;
-    }
+  @Override
+  public int size() {
+    return size;
+  }
 }

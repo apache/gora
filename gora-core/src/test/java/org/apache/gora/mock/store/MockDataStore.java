@@ -167,9 +167,9 @@ public class MockDataStore extends DataStoreBase<String, MockPersistent> {
       return false ;
     }
 
-        @Override
-        public int size() {
-            return 0;
-        }
+    @Override
+    public int size() {
+      return 0;
+    }
   }
 }

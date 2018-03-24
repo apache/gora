@@ -91,8 +91,8 @@ public class MongoDBResult<K, T extends PersistentBase> extends
     this.size = cursor.size();
   }
 
-    @Override
-    public int size() {
-        return size;
-    }
+  @Override
+  public int size() {
+    return size;
+  }
 }

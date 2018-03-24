@@ -88,8 +88,8 @@ public class CouchDBResult<K, T extends Persistent> extends ResultBase<K, T> {
     return result;
   }
 
-    @Override
-    public int size() {
-        return result.size();
-    }
+  @Override
+  public int size() {
+    return result.size();
+  }
 }

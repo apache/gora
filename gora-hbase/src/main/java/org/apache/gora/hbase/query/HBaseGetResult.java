@@ -62,8 +62,8 @@ public class HBaseGetResult<K, T extends PersistentBase> extends HBaseResult<K,T
   public void close() throws IOException {
   }
 
-    @Override
-    public int size() {
-        return result != null && !result.isEmpty() ? 1 : 0;
-    }
+  @Override
+  public int size() {
+    return result != null && !result.isEmpty() ? 1 : 0;
+  }
 }
