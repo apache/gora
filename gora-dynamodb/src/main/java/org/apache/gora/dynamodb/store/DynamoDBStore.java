@@ -139,7 +139,6 @@ public class DynamoDBStore<K, T extends Persistent> implements DataStore<K, T> {
         executeDeleteTableRequest(preferredSchema);
       }
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -216,7 +215,6 @@ public class DynamoDBStore<K, T extends Persistent> implements DataStore<K, T> {
     } catch (GoraException e) {
       throw e;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -281,7 +279,6 @@ public class DynamoDBStore<K, T extends Persistent> implements DataStore<K, T> {
       LOG.info("Finished verifying schemas.");
       return (success != null) ? true : false;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
