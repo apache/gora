@@ -25,8 +25,6 @@ import org.apache.gora.persistency.Persistent;
 import org.apache.gora.util.GoraException;
 import org.apache.gora.util.ReflectionUtils;
 
-import com.esotericsoftware.minlog.Log;
-
 /**
  * A default implementation of the {@link BeanFactory} interface. Constructs
  * the keys by using reflection, {@link Persistent} objects by calling
