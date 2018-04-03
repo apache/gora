@@ -39,25 +39,24 @@ import org.apache.gora.query.Result;
 import org.apache.gora.query.impl.FileSplitPartitionQuery;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.impl.FileBackedDataStoreBase;
+import org.apache.gora.util.GoraException;
 import org.apache.gora.util.OperationNotSupportedException;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * An adapter DataStore for binary-compatible Avro serializations.
  * AvroDataStore supports Binary and JSON serializations.
- * @param <T>
  */
 public class AvroStore<K, T extends PersistentBase>
-  extends FileBackedDataStoreBase<K, T> implements Configurable {
+extends FileBackedDataStoreBase<K, T> implements Configurable {
 
   /** The property key specifying avro encoder/decoder type to use. Can take values
    * "BINARY" or "JSON". */
   public static final String CODEC_TYPE_KEY = "codec.type";
-  
+
   public static final Logger LOG = LoggerFactory.getLogger(AvroStore.class);
 
   /**
@@ -79,16 +78,14 @@ public class AvroStore<K, T extends PersistentBase>
 
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
-      Properties properties) {
-      super.initialize(keyClass, persistentClass, properties);
-  
-      if(properties != null) {
-        if(this.codecType == null) {
-          String codecType = DataStoreFactory.findProperty(
+          Properties properties) throws GoraException {
+    super.initialize(keyClass, persistentClass, properties);
+
+    if(properties != null && this.codecType == null) {
+      String codecType = DataStoreFactory.findProperty(
               properties, this, CODEC_TYPE_KEY, "BINARY");
-          this.codecType = CodecType.valueOf(codecType);
-        }
-      }
+      this.codecType = CodecType.valueOf(codecType);
+    }
   }
 
   public void setCodecType(CodecType codecType) {
@@ -126,12 +123,12 @@ public class AvroStore<K, T extends PersistentBase>
   }
 
   @Override
-  public boolean delete(K key) {
+  public boolean delete(K key) throws GoraException {
     throw new OperationNotSupportedException("delete is not supported for AvroStore");
   }
 
   @Override
-  public long deleteByQuery(Query<K, T> query) {
+  public long deleteByQuery(Query<K, T> query) throws GoraException {
     throw new OperationNotSupportedException("delete is not supported for AvroStore");
   }
 
@@ -142,7 +139,7 @@ public class AvroStore<K, T extends PersistentBase>
   @Override
   protected Result<K,T> executeQuery(Query<K,T> query) throws IOException {
     return new AvroResult<>(this, (AvroQuery<K,T>)query,
-        getDatumReader(), getDecoder());
+            getDatumReader(), getDecoder());
   }
 
   /**
@@ -150,23 +147,23 @@ public class AvroStore<K, T extends PersistentBase>
    */
   @Override
   protected Result<K,T> executePartial(FileSplitPartitionQuery<K,T> query)
-  throws IOException {
+          throws IOException {
     throw new OperationNotSupportedException("Not yet implemented");
   }
 
   @Override
-  public void flush() {
+  public void flush() throws GoraException {
     try{
       super.flush();
       if(encoder != null)
         encoder.flush();
-    }catch(IOException ex){
-      LOG.error(ex.getMessage(), ex);
+    } catch (Exception e) {
+      throw new GoraException(e);
     }
   }
 
   @Override
-  public T get(K key, String[] fields) {
+  public T get(K key, String[] fields) throws GoraException {
     throw new OperationNotSupportedException();
   }
 
@@ -176,11 +173,11 @@ public class AvroStore<K, T extends PersistentBase>
   }
 
   @Override
-  public void put(K key, T obj) {
+  public void put(K key, T obj) throws GoraException {
     try{
       getDatumWriter().write(obj, getEncoder());
-    }catch(IOException ex){
-      LOG.error(ex.getMessage(), ex);
+    } catch (Exception e) {
+      throw new GoraException(e);
     }
   }
 
@@ -215,9 +212,9 @@ public class AvroStore<K, T extends PersistentBase>
   protected Encoder createEncoder() throws IOException {
     switch(codecType) {
       case BINARY:
-        return EncoderFactory.get().binaryEncoder(getOrCreateOutputStream(), null);
+      return EncoderFactory.get().binaryEncoder(getOrCreateOutputStream(), null);
       case JSON:
-        return EncoderFactory.get().jsonEncoder(schema, getOrCreateOutputStream());
+      return EncoderFactory.get().jsonEncoder(schema, getOrCreateOutputStream());
     }
     return null;
   }
@@ -225,9 +222,9 @@ public class AvroStore<K, T extends PersistentBase>
   protected Decoder createDecoder() throws IOException {
     switch(codecType) {
       case BINARY:
-        return DecoderFactory.get().binaryDecoder(getOrCreateInputStream(), null);
+      return DecoderFactory.get().binaryDecoder(getOrCreateInputStream(), null);
       case JSON:
-        return DecoderFactory.get().jsonDecoder(schema, getOrCreateInputStream());
+      return DecoderFactory.get().jsonDecoder(schema, getOrCreateInputStream());
     }
     return null;
   }
@@ -249,12 +246,12 @@ public class AvroStore<K, T extends PersistentBase>
   }
 
   @Override
-  public void write(DataOutput out) {
+  public void write(DataOutput out) throws IOException {
     super.write(out);
   }
 
   @Override
-  public void readFields(DataInput in) {
+  public void readFields(DataInput in) throws IOException {
     super.readFields(in);
   }
 

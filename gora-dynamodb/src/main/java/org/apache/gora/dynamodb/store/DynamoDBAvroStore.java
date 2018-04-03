@@ -29,6 +29,7 @@ import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.store.impl.DataStoreBase;
+import org.apache.gora.util.GoraException;
 
 public class DynamoDBAvroStore<K, T extends PersistentBase> extends
 DataStoreBase<K, T> implements IDynamoDB<K, T> {
@@ -62,7 +63,7 @@ DataStoreBase<K, T> implements IDynamoDB<K, T> {
   }
 
   @Override
-  public void createSchema() {
+  public void createSchema() throws GoraException {
     // TODO Auto-generated method stub
 
   }
@@ -80,13 +81,13 @@ DataStoreBase<K, T> implements IDynamoDB<K, T> {
   }
 
   @Override
-  public void deleteSchema() {
+  public void deleteSchema() throws GoraException {
     // TODO Auto-generated method stub
 
   }
 
   @Override
-  public Result<K, T> execute(Query<K, T> arg0) {
+  public Result<K, T> execute(Query<K, T> arg0) throws GoraException {
     // TODO Auto-generated method stub
     return null;
   }
@@ -98,7 +99,7 @@ DataStoreBase<K, T> implements IDynamoDB<K, T> {
   }
 
   @Override
-  public T get(K arg0, String[] arg1) {
+  public T get(K arg0, String[] arg1) throws GoraException {
     // TODO Auto-generated method stub
     return null;
   }
@@ -128,7 +129,7 @@ DataStoreBase<K, T> implements IDynamoDB<K, T> {
   }
 
   @Override
-  public boolean schemaExists() {
+  public boolean schemaExists() throws GoraException {
     // TODO Auto-generated method stub
     return false;
   }

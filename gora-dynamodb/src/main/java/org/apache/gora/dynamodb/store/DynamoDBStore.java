@@ -107,55 +107,59 @@ public class DynamoDBStore<K, T extends Persistent> implements DataStore<K, T> {
    * group of schemas defined within the mapping file
    */
   @Override
-  public void createSchema() {
+  public void createSchema() throws GoraException {
     dynamoDbStore.createSchema();
   }
 
   @Override
-  public boolean delete(K key) {
+  public boolean delete(K key) throws GoraException {
     return dynamoDbStore.delete(key);
   }
 
   @Override
-  public long deleteByQuery(Query<K, T> query) {
+  public long deleteByQuery(Query<K, T> query) throws GoraException {
     return dynamoDbStore.deleteByQuery(query);
   }
 
   @Override
-  public void deleteSchema() {
-    if (getDynamoDbMapping().getTables().isEmpty())
-      throw new IllegalStateException("There are not tables defined.");
-    if (preferredSchema == null) {
-      LOG.debug("Delete schemas");
+  public void deleteSchema() throws GoraException {
+    try {
       if (getDynamoDbMapping().getTables().isEmpty())
-        throw new IllegalStateException("There are not tables defined.");
-      // read the mapping object
-      for (String tableName : getDynamoDbMapping().getTables().keySet())
-        executeDeleteTableRequest(tableName);
-      LOG.debug("All schemas deleted successfully.");
-    } else {
-      LOG.debug("create schema " + preferredSchema);
-      executeDeleteTableRequest(preferredSchema);
+        return ; // Nothing to delete
+      if (preferredSchema == null) {
+        LOG.debug("Delete schemas");
+        if (getDynamoDbMapping().getTables().isEmpty())
+          throw new IllegalStateException("There are not tables defined.");
+        // read the mapping object
+        for (String tableName : getDynamoDbMapping().getTables().keySet())
+          executeDeleteTableRequest(tableName);
+        LOG.debug("All schemas deleted successfully.");
+      } else {
+        LOG.debug("create schema " + preferredSchema);
+        executeDeleteTableRequest(preferredSchema);
+      }
+    } catch (Exception e) {
+      throw new GoraException(e);
     }
   }
 
   @Override
-  public Result<K, T> execute(Query<K, T> query) {
+  public Result<K, T> execute(Query<K, T> query) throws GoraException {
     return dynamoDbStore.execute(query);
   }
 
   @Override
-  public void flush() {
+  public void flush() throws GoraException {
     dynamoDbStore.flush();
   }
 
   @Override
-  public T get(K key) {
+  public T get(K key) throws GoraException {
     return dynamoDbStore.get(key);
   }
 
   @Override
-  public T get(K key, String[] fields) {
+  public T get(K key, String[] fields) throws GoraException {
     return dynamoDbStore.get(key, fields);
   }
 
@@ -200,7 +204,7 @@ public class DynamoDBStore<K, T extends Persistent> implements DataStore<K, T> {
    */
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
-      Properties properties) {
+      Properties properties) throws GoraException {
     try {
       LOG.debug("Initializing DynamoDB store");
       setDynamoDBProperties(properties);
@@ -208,9 +212,10 @@ public class DynamoDBStore<K, T extends Persistent> implements DataStore<K, T> {
       dynamoDbStore = DynamoDBFactory.buildDynamoDBStore(getSerializationType());
       dynamoDbStore.setDynamoDBStoreHandler(this);
       dynamoDbStore.initialize(keyClass, persistentClass, properties);
+    } catch (GoraException e) {
+      throw e;
     } catch (Exception e) {
-      LOG.error("Error while initializing DynamoDB store", e.getMessage());
-      throw new RuntimeException(e);
+      throw new GoraException(e);
     }
   }
 
@@ -226,12 +231,12 @@ public class DynamoDBStore<K, T extends Persistent> implements DataStore<K, T> {
   }
 
   @Override
-  public K newKey() {
+  public K newKey() throws GoraException {
     return dynamoDbStore.newKey();
   }
 
   @Override
-  public T newPersistent() {
+  public T newPersistent() throws GoraException {
     return dynamoDbStore.newPersistent();
   }
 
@@ -241,7 +246,7 @@ public class DynamoDBStore<K, T extends Persistent> implements DataStore<K, T> {
   }
 
   @Override
-  public void put(K key, T value) {
+  public void put(K key, T value) throws GoraException {
     dynamoDbStore.put(key, value);
   }
 
@@ -251,27 +256,31 @@ public class DynamoDBStore<K, T extends Persistent> implements DataStore<K, T> {
    * @return
    */
   @Override
-  public boolean schemaExists() {
-    LOG.info("Verifying schemas.");
-    TableDescription success = null;
-    if (getDynamoDbMapping().getTables().isEmpty())
-      throw new IllegalStateException("There are not tables defined.");
-    if (getPreferredSchema() == null) {
-      LOG.debug("Verifying schemas");
+  public boolean schemaExists() throws GoraException {
+    try {
+      LOG.info("Verifying schemas.");
+      TableDescription success = null;
       if (getDynamoDbMapping().getTables().isEmpty())
         throw new IllegalStateException("There are not tables defined.");
-      // read the mapping object
-      for (String tableName : getDynamoDbMapping().getTables().keySet()) {
-        success = getTableSchema(tableName);
-        if (success == null)
-          return false;
+      if (getPreferredSchema() == null) {
+        LOG.debug("Verifying schemas");
+        if (getDynamoDbMapping().getTables().isEmpty())
+          throw new IllegalStateException("There are not tables defined.");
+        // read the mapping object
+        for (String tableName : getDynamoDbMapping().getTables().keySet()) {
+          success = getTableSchema(tableName);
+          if (success == null)
+            return false;
+        }
+      } else {
+        LOG.info("Verifying schema " + preferredSchema);
+        success = getTableSchema(preferredSchema);
       }
-    } else {
-      LOG.info("Verifying schema " + preferredSchema);
-      success = getTableSchema(preferredSchema);
+      LOG.info("Finished verifying schemas.");
+      return (success != null) ? true : false;
+    } catch (Exception e) {
+      throw new GoraException(e);
     }
-    LOG.info("Finished verifying schemas.");
-    return (success != null) ? true : false;
   }
 
   @Override
@@ -290,7 +299,7 @@ public class DynamoDBStore<K, T extends Persistent> implements DataStore<K, T> {
   }
 
   @Override
-  public void truncateSchema() {
+  public void truncateSchema() throws GoraException {
     // TODO Auto-generated method stub
   }
 

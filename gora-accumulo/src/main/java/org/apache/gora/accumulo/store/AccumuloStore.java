@@ -359,10 +359,11 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
    * @param properties
    */
   @Override
-  public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) {
-    try{
-      super.initialize(keyClass, persistentClass, properties);
+  public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) throws GoraException {
+    super.initialize(keyClass, persistentClass, properties);
 
+    try {
+      
       String mock = DataStoreFactory.findProperty(properties, this, MOCK_PROPERTY, null);
       String mappingFile = DataStoreFactory.getMappingFile(properties, this, DEFAULT_MAPPING_FILE);
       String user = DataStoreFactory.findProperty(properties, this, USERNAME_PROPERTY, null);
@@ -373,31 +374,25 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       if (mapping.encoder == null || "".equals(mapping.encoder)) {
         encoder = new BinaryEncoder();
       } else {
-        try {
           encoder = (Encoder) getClass().getClassLoader().loadClass(mapping.encoder).newInstance();
-        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-          throw new IOException(e);
-        }
       }
 
-      try {
-        AuthenticationToken token = new PasswordToken(password);
-        if (mock == null || !mock.equals("true")) {
-          String instance = DataStoreFactory.findProperty(properties, this, INSTANCE_NAME_PROPERTY, null);
-          String zookeepers = DataStoreFactory.findProperty(properties, this, ZOOKEEPERS_NAME_PROPERTY, null);
-          conn = new ZooKeeperInstance(instance, zookeepers).getConnector(user, token);
-        } else {
-          conn = new MockInstance().getConnector(user, token);
-        }
-        credentials = new Credentials(user, token);
-
-        if (autoCreateSchema && !schemaExists())
-          createSchema();
-      } catch (AccumuloException | AccumuloSecurityException e) {
-        throw new IOException(e);
+      AuthenticationToken token = new PasswordToken(password);
+      if (mock == null || !mock.equals("true")) {
+        String instance = DataStoreFactory.findProperty(properties, this, INSTANCE_NAME_PROPERTY, null);
+        String zookeepers = DataStoreFactory.findProperty(properties, this, ZOOKEEPERS_NAME_PROPERTY, null);
+        conn = new ZooKeeperInstance(instance, zookeepers).getConnector(user, token);
+      } else {
+        conn = new MockInstance().getConnector(user, token);
       }
-    } catch(IOException e){
-      LOG.error(e.getMessage(), e);
+      credentials = new Credentials(user, token);
+
+      if (autoCreateSchema && !schemaExists())
+        createSchema();
+      
+    } catch (IOException | InstantiationException | IllegalAccessException |
+             ClassNotFoundException | AccumuloException | AccumuloSecurityException e) {
+      throw new GoraException(e);
     }
   }
 
@@ -470,7 +465,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
   }
 
   @Override
-  public void createSchema() {
+  public void createSchema() throws GoraException {
     try {
       conn.tableOperations().create(mapping.tableName);
       Set<Entry<String,String>> es = mapping.tableConfig.entrySet();
@@ -478,28 +473,35 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         conn.tableOperations().setProperty(mapping.tableName, entry.getKey(), entry.getValue());
       }
 
-    } catch (AccumuloException | AccumuloSecurityException e) {
-      LOG.error(e.getMessage(), e);
     } catch (TableExistsException e) {
       LOG.debug(e.getMessage(), e);
+      // Assume this is not an error
+    } catch (AccumuloException | AccumuloSecurityException e) {
+      throw new GoraException(e);
     }
   }
 
   @Override
-  public void deleteSchema() {
+  public void deleteSchema() throws GoraException {
     try {
       if (batchWriter != null)
         batchWriter.close();
       batchWriter = null;
       conn.tableOperations().delete(mapping.tableName);
-    } catch (AccumuloException | AccumuloSecurityException | TableNotFoundException e) {
-      LOG.error(e.getMessage(), e);
+    } catch (TableNotFoundException e) {
+      // Ignore. Delete a non existant schema is a success
+    } catch (AccumuloException | AccumuloSecurityException e) {
+      throw new GoraException(e);
     }
   }
 
   @Override
-  public boolean schemaExists() {
-    return conn.tableOperations().exists(mapping.tableName);
+  public boolean schemaExists() throws GoraException {
+    try {
+      return conn.tableOperations().exists(mapping.tableName);
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
   }
 
   public ByteSequence populate(Iterator<Entry<Key,Value>> iter, T persistent) throws IOException {
@@ -639,7 +641,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
   }
 
   @Override
-  public T get(K key, String[] fields) {
+  public T get(K key, String[] fields) throws GoraException {
     try {
       // TODO make isolated scanner optional?
       Scanner scanner = new IsolatedScanner(conn.createScanner(mapping.tableName, Authorizations.EMPTY));
@@ -653,17 +655,13 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       if (row == null)
         return null;
       return persistent;
-    } catch (TableNotFoundException e) {
-      LOG.error(e.getMessage(), e);
-      return null;
-    } catch (IOException e) {
-      LOG.error(e.getMessage(), e);
-      return null;
+    } catch (Exception e) {
+      throw new GoraException(e);
     }
   }
 
   @Override
-  public void put(K key, T val) {
+  public void put(K key, T val) throws GoraException {
 
     try{
       Mutation m = new Mutation(new Text(toBytes(key)));
@@ -725,8 +723,10 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         } catch (MutationsRejectedException e) {
           LOG.error(e.getMessage(), e);
         }
-    } catch (IOException e) {
-      LOG.error(e.getMessage(), e);
+    } catch (GoraException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new GoraException(e);
     }
   }
 
@@ -758,7 +758,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
     return count;
   }
 
-  private int putArray(Mutation m, int count, Object o, Pair<Text, Text> col, String fieldName) {
+  private int putArray(Mutation m, int count, Object o, Pair<Text, Text> col, String fieldName) throws GoraException {
 
     // First of all we delete array field on accumulo store
     Text rowKey = new Text(m.getRow());
@@ -782,14 +782,14 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
   }
 
   @Override
-  public boolean delete(K key) {
+  public boolean delete(K key) throws GoraException {
     Query<K,T> q = newQuery();
     q.setKey(key);
     return deleteByQuery(q) > 0;
   }
 
   @Override
-  public long deleteByQuery(Query<K,T> query) {
+  public long deleteByQuery(Query<K,T> query) throws GoraException {
     try {
       Scanner scanner = createScanner(query);
       // add iterator that drops values on the server side
@@ -814,16 +814,8 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       }
 
       return count;
-    } catch (TableNotFoundException e) {
-      // TODO return 0?
-      LOG.error(e.getMessage(), e);
-      return 0;
-    } catch (MutationsRejectedException e) {
-      LOG.error(e.getMessage(), e);
-      return 0;
-    } catch (IOException e){
-      LOG.error(e.getMessage(), e);
-      return 0;
+    } catch (Exception e) {
+      throw new GoraException(e);
     }
   }
 
@@ -865,14 +857,12 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
    * Execute the query and return the result.
    */
   @Override
-  public Result<K,T> execute(Query<K,T> query) {
+  public Result<K,T> execute(Query<K,T> query) throws GoraException {
     try {
       Scanner scanner = createScanner(query);
       return new AccumuloResult<>(this, query, scanner);
     } catch (TableNotFoundException e) {
-      // TODO return empty result?
-      LOG.error(e.getMessage(), e);
-      return null;
+      throw new GoraException(e) ;
     }
   }
 
@@ -893,7 +883,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
   }
 
   @Override
-  public List<PartitionQuery<K,T>> getPartitions(Query<K,T> query) throws IOException {
+  public List<PartitionQuery<K,T>> getPartitions(Query<K,T> query) throws GoraException {
     try {
       TabletLocator tl;
       if (conn instanceof MockConnector)
@@ -962,8 +952,8 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       }
 
       return ret;
-    } catch (TableNotFoundException | AccumuloException | AccumuloSecurityException e) {
-      throw new IOException(e);
+    } catch (Exception e) {
+      throw new GoraException(e);
     }
 
   }
@@ -1020,13 +1010,13 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
   }
 
   @Override
-  public void flush() {
+  public void flush() throws GoraException {
     try {
       if (batchWriter != null) {
         batchWriter.flush();
       }
-    } catch (MutationsRejectedException e) {
-      LOG.error(e.getMessage(), e);
+    } catch (Exception e) {
+      throw new GoraException(e);
     }
   }
 

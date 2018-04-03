@@ -21,16 +21,16 @@ package org.apache.gora.persistency;
 /**
  * BeanFactory's enable contruction of keys and Persistent objects.
  *
- * @param <K>
- * @param <T>
+ * @param <K> a key
+ * @param <T> a {@link Persistent} object
  */
-public interface BeanFactory<K, T>{
+public interface BeanFactory<K, T> {
 
   /**
    * Constructs a new instance of the key class
    *
    * @return a new instance of the key class
-   * @throws Exception
+   * @throws Exception if unabe to create the key class
    */
   K newKey() throws Exception;
 

@@ -28,6 +28,7 @@ import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreTestBase;
+import org.apache.gora.util.GoraException;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -41,20 +42,6 @@ import static org.junit.Assert.assertNotNull;
 public abstract class TestMongoStore extends DataStoreTestBase {
 
   private int keySequence;
-
-  @Deprecated
-  @Override
-  protected DataStore<String, Employee> createEmployeeDataStore()
-          throws IOException {
-    throw new UnsupportedOperationException();
-  }
-
-  @Deprecated
-  @Override
-  protected DataStore<String, WebPage> createWebPageDataStore()
-          throws IOException {
-    throw new UnsupportedOperationException();
-  }
 
   @Before
   @Override
@@ -172,7 +159,7 @@ public abstract class TestMongoStore extends DataStoreTestBase {
     r.close();
   }
 
-  private void addWebPage() {
+  private void addWebPage() throws GoraException {
     String key = String.valueOf(keySequence++);
     WebPage p1 = webPageStore.newPersistent();
     p1.setUrl(new Utf8(key));

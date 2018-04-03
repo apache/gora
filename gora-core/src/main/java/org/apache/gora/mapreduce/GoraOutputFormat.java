@@ -99,8 +99,8 @@ public class GoraOutputFormat<K, T extends Persistent>
    * @param job          the job to set the properties for
    * @param dataStore    the datastore as the output
    * @param reuseObjects whether to reuse objects in serialization
-   * @param <K>
-   * @param <V>
+   * @param <K> key class for the {@link org.apache.gora.store.DataStore}
+   * @param <V> value class for the {@link org.apache.gora.store.DataStore}
    */
   public static <K, V extends Persistent> void setOutput(Job job,
       DataStore<K,V> dataStore, boolean reuseObjects) {
@@ -116,8 +116,8 @@ public class GoraOutputFormat<K, T extends Persistent>
    * @param keyClass        output key class
    * @param persistentClass output value class
    * @param reuseObjects    whether to reuse objects in serialization
-   * @param <K>
-   * @param <V>
+   * @param <K> key class for the {@link org.apache.gora.store.DataStore}
+   * @param <V> value class for the {@link org.apache.gora.store.DataStore}
    */
   @SuppressWarnings("rawtypes")
   public static <K, V extends Persistent> void setOutput(Job job,

@@ -17,14 +17,27 @@
  */
 package org.apache.gora.mongodb.store;
 
-import static com.mongodb.AuthenticationMechanism.*;
-import static org.apache.gora.mongodb.store.MongoMapping.DocumentFieldType;
+import static com.mongodb.AuthenticationMechanism.GSSAPI;
+import static com.mongodb.AuthenticationMechanism.MONGODB_CR;
+import static com.mongodb.AuthenticationMechanism.MONGODB_X509;
+import static com.mongodb.AuthenticationMechanism.PLAIN;
+import static com.mongodb.AuthenticationMechanism.SCRAM_SHA_1;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.bind.DatatypeConverter;
@@ -37,6 +50,7 @@ import org.apache.avro.util.Utf8;
 import org.apache.gora.mongodb.filters.MongoFilterUtil;
 import org.apache.gora.mongodb.query.MongoDBQuery;
 import org.apache.gora.mongodb.query.MongoDBResult;
+import org.apache.gora.mongodb.store.MongoMapping.DocumentFieldType;
 import org.apache.gora.mongodb.utils.BSONDecorator;
 import org.apache.gora.mongodb.utils.GoraDBEncoder;
 import org.apache.gora.persistency.impl.BeanFactoryImpl;
@@ -50,12 +64,27 @@ import org.apache.gora.query.impl.PartitionQueryImpl;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.AvroUtils;
 import org.apache.gora.util.ClassLoadingUtils;
+import org.apache.gora.util.GoraException;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Splitter;
-import com.mongodb.*;
+import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
+import com.mongodb.Bytes;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
+import com.mongodb.Mongo;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
+import com.mongodb.MongoCredential;
+import com.mongodb.ReadPreference;
+import com.mongodb.ServerAddress;
+import com.mongodb.WriteConcern;
+import com.mongodb.WriteResult;
 
 /**
  * Implementation of a MongoDB data store to be used by gora.
@@ -103,7 +132,7 @@ DataStoreBase<K, T> {
    * properties up and reading the mapping file.
    */
   public void initialize(final Class<K> keyClass,
-      final Class<T> pPersistentClass, final Properties properties) {
+      final Class<T> pPersistentClass, final Properties properties) throws GoraException {
     try {
       LOG.debug("Initializing MongoDB store");
       MongoStoreParameters parameters = MongoStoreParameters.load(properties, getConf());
@@ -125,10 +154,11 @@ DataStoreBase<K, T> {
 
       LOG.info("Initialized Mongo store for database {} of {}.", new Object[] {
           parameters.getDbname(), parameters.getServers() });
+    } catch (GoraException e) {
+      throw e;
     } catch (IOException e) {
-      LOG.error("Error while initializing MongoDB store: {}",
-          new Object[] { e.getMessage() });
-      throw new RuntimeException(e);
+      LOG.error("Error while initializing MongoDB store", e);
+      throw new GoraException(e);
     }
   }
 
@@ -242,58 +272,75 @@ DataStoreBase<K, T> {
    * Create a new collection in MongoDB if necessary.
    */
   @Override
-  public void createSchema() {
+  public void createSchema() throws GoraException {
     if (mongoClientDB == null)
-      throw new IllegalStateException(
+      throw new GoraException(
           "Impossible to create the schema as no database has been selected.");
     if (schemaExists()) {
       return;
     }
-
-    // If initialized create the collection
-    mongoClientColl = mongoClientDB.createCollection(
-        mapping.getCollectionName(), new BasicDBObject()); // send a DBObject to
-    // force creation
-    // otherwise creation is deferred
-    mongoClientColl.setDBEncoderFactory(GoraDBEncoder.FACTORY);
-
-    LOG.debug("Collection {} has been created for Mongo instance {}.",
-        new Object[] { mapping.getCollectionName(), mongoClientDB.getMongo() });
+    
+    try {
+      // If initialized create the collection
+      mongoClientColl = mongoClientDB.createCollection(
+          mapping.getCollectionName(), new BasicDBObject()); // send a DBObject to
+      // force creation
+      // otherwise creation is deferred
+      mongoClientColl.setDBEncoderFactory(GoraDBEncoder.FACTORY);
+  
+      LOG.debug("Collection {} has been created for Mongo instance {}.",
+          new Object[] { mapping.getCollectionName(), mongoClientDB.getMongo() });
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
   }
 
   /**
    * Drop the collection.
    */
   @Override
-  public void deleteSchema() {
+  public void deleteSchema() throws GoraException {
     if (mongoClientColl == null)
-      throw new IllegalStateException(
+      throw new GoraException(
           "Impossible to delete the schema as no schema is selected.");
-    // If initialized, simply drop the collection
-    mongoClientColl.drop();
-
-    LOG.debug(
-        "Collection {} has been dropped for Mongo instance {}.",
-        new Object[] { mongoClientColl.getFullName(), mongoClientDB.getMongo() });
+    
+    try {
+      // If initialized, simply drop the collection
+      mongoClientColl.drop();
+  
+      LOG.debug(
+          "Collection {} has been dropped for Mongo instance {}.",
+          new Object[] { mongoClientColl.getFullName(), mongoClientDB.getMongo() });
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
   }
 
   /**
    * Check if the collection already exists or should be created.
    */
   @Override
-  public boolean schemaExists() {
-    return mongoClientDB.collectionExists(mapping.getCollectionName());
+  public boolean schemaExists() throws GoraException {
+    try {
+      return mongoClientDB.collectionExists(mapping.getCollectionName());
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
   }
 
   /**
    * Ensure the data is synced to disk.
    */
   @Override
-  public void flush() {
-    for (MongoClient client : mapsOfClients.values()) {
-      client.fsync(false);
-      LOG.debug("Forced synced of database for Mongo instance {}.",
-          new Object[] { client });
+  public void flush() throws GoraException {
+    try {
+      for (MongoClient client : mapsOfClients.values()) {
+        client.fsync(false);
+        LOG.debug("Forced synced of database for Mongo instance {}.",
+            new Object[] { client });
+      }
+    } catch (Exception e) {
+      throw new GoraException(e);
     }
   }
 
@@ -313,21 +360,25 @@ DataStoreBase<K, T> {
    *          list of fields to be loaded from the database
    */
   @Override
-  public T get(final K key, final String[] fields) {
-    String[] dbFields = getFieldsToQuery(fields);
-    // Prepare the MongoDB query
-    BasicDBObject q = new BasicDBObject("_id", key);
-    BasicDBObject proj = new BasicDBObject();
-    for (String field : dbFields) {
-      String docf = mapping.getDocumentField(field);
-      if (docf != null) {
-        proj.put(docf, true);
+  public T get(final K key, final String[] fields) throws GoraException {
+    try {
+      String[] dbFields = getFieldsToQuery(fields);
+      // Prepare the MongoDB query
+      BasicDBObject q = new BasicDBObject("_id", key);
+      BasicDBObject proj = new BasicDBObject();
+      for (String field : dbFields) {
+        String docf = mapping.getDocumentField(field);
+        if (docf != null) {
+          proj.put(docf, true);
+        }
       }
+      // Execute the query
+      DBObject res = mongoClientColl.findOne(q, proj);
+      // Build the corresponding persistent
+      return newInstance(res, dbFields);
+    } catch (Exception e) {
+      throw new GoraException(e);
     }
-    // Execute the query
-    DBObject res = mongoClientColl.findOne(q, proj);
-    // Build the corresponding persistent
-    return newInstance(res, dbFields);
   }
 
   /**
@@ -339,13 +390,17 @@ DataStoreBase<K, T> {
    *          the object to be inserted
    */
   @Override
-  public void put(final K key, final T obj) {
-    // Save the object in the database
-    if (obj.isDirty()) {
-      performPut(key, obj);
-    } else {
-      LOG.info("Ignored putting object {} in the store as it is neither "
-          + "new, neither dirty.", new Object[] { obj });
+  public void put(final K key, final T obj) throws GoraException {
+    try {
+      // Save the object in the database
+      if (obj.isDirty()) {
+        performPut(key, obj);
+      } else {
+        LOG.info("Ignored putting object {} in the store as it is neither "
+            + "new, neither dirty.", new Object[] { obj });
+      }
+    } catch (Exception e) {
+      throw new GoraException(e);
     }
   }
 
@@ -385,54 +440,65 @@ DataStoreBase<K, T> {
   }
 
   @Override
-  public boolean delete(final K key) {
-    DBObject removeKey = new BasicDBObject("_id", key);
-    WriteResult writeResult = mongoClientColl.remove(removeKey);
-    return writeResult != null && writeResult.getN() > 0;
+  public boolean delete(final K key) throws GoraException {
+    try {
+      DBObject removeKey = new BasicDBObject("_id", key);
+      WriteResult writeResult = mongoClientColl.remove(removeKey);
+      return writeResult != null && writeResult.getN() > 0;
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
   }
 
   @Override
-  public long deleteByQuery(final Query<K, T> query) {
-    // Build the actual MongoDB query
-    DBObject q = MongoDBQuery.toDBQuery(query);
-    WriteResult writeResult = mongoClientColl.remove(q);
-    if (writeResult != null) {
-      return writeResult.getN();
+  public long deleteByQuery(final Query<K, T> query) throws GoraException {
+    try {
+      // Build the actual MongoDB query
+      DBObject q = MongoDBQuery.toDBQuery(query);
+      WriteResult writeResult = mongoClientColl.remove(q);
+      if (writeResult != null) {
+        return writeResult.getN();
+      }
+      return 0;
+    } catch (Exception e) {
+      throw new GoraException(e);
     }
-    return 0;
   }
 
   /**
    * Execute the query and return the result.
    */
   @Override
-  public Result<K, T> execute(final Query<K, T> query) {
-
-    String[] fields = getFieldsToQuery(query.getFields());
-    // Build the actual MongoDB query
-    DBObject q = MongoDBQuery.toDBQuery(query);
-    DBObject p = MongoDBQuery.toProjection(fields, mapping);
-
-    if (query.getFilter() != null) {
-      boolean succeeded = filterUtil.setFilter(q, query.getFilter(), this);
-      if (succeeded) {
-        // don't need local filter
-        query.setLocalFilterEnabled(false);
+  public Result<K, T> execute(final Query<K, T> query) throws GoraException {
+    try {
+      String[] fields = getFieldsToQuery(query.getFields());
+      // Build the actual MongoDB query
+      DBObject q = MongoDBQuery.toDBQuery(query);
+      DBObject p = MongoDBQuery.toProjection(fields, mapping);
+  
+      if (query.getFilter() != null) {
+        boolean succeeded = filterUtil.setFilter(q, query.getFilter(), this);
+        if (succeeded) {
+          // don't need local filter
+          query.setLocalFilterEnabled(false);
+        }
       }
+  
+      // Execute the query on the collection
+      DBCursor cursor = mongoClientColl.find(q, p);
+      if (query.getLimit() > 0)
+        cursor = cursor.limit((int) query.getLimit());
+      cursor.batchSize(100);
+      cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
+  
+      // Build the result
+      MongoDBResult<K, T> mongoResult = new MongoDBResult<>(this, query);
+      mongoResult.setCursor(cursor);
+  
+      return mongoResult;
+    } catch(Exception e) {
+      throw new GoraException(e);
     }
-
-    // Execute the query on the collection
-    DBCursor cursor = mongoClientColl.find(q, p);
-    if (query.getLimit() > 0)
-      cursor = cursor.limit((int) query.getLimit());
-    cursor.batchSize(100);
-    cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
-
-    // Build the result
-    MongoDBResult<K, T> mongoResult = new MongoDBResult<>(this, query);
-    mongoResult.setCursor(cursor);
-
-    return mongoResult;
   }
 
   /**
@@ -474,8 +540,9 @@ DataStoreBase<K, T> {
    *          the list of fields to be mapped to the persistence class instance
    * @return a persistence class instance which content was deserialized from
    *         the {@link DBObject}
+   * @throws GoraException 
    */
-  public T newInstance(final DBObject obj, final String[] fields) {
+  public T newInstance(final DBObject obj, final String[] fields) throws GoraException {
     if (obj == null)
       return null;
     BSONDecorator easybson = new BSONDecorator(obj);
@@ -507,7 +574,7 @@ DataStoreBase<K, T> {
 
   private Object fromDBObject(final Schema fieldSchema,
       final DocumentFieldType storeType, final Field field, final String docf,
-      final BSONDecorator easybson) {
+      final BSONDecorator easybson) throws GoraException {
     Object result = null;
     switch (fieldSchema.getType()) {
     case MAP:
@@ -565,7 +632,7 @@ DataStoreBase<K, T> {
 
   private Object fromMongoUnion(final Schema fieldSchema,
       final DocumentFieldType storeType, final Field field, final String docf,
-      final BSONDecorator easybson) {
+      final BSONDecorator easybson) throws GoraException {
     Object result;// schema [type0, type1]
     Type type0 = fieldSchema.getTypes().get(0).getType();
     Type type1 = fieldSchema.getTypes().get(1).getType();
@@ -589,7 +656,7 @@ DataStoreBase<K, T> {
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
   private Object fromMongoRecord(final Schema fieldSchema, final String docf,
-      final DBObject rec) {
+      final DBObject rec) throws GoraException {
     Object result;
     BSONDecorator innerBson = new BSONDecorator(rec);
     Class<?> clazz = null;
@@ -619,7 +686,7 @@ DataStoreBase<K, T> {
   }
 
   /* pp */ Object fromMongoList(final String docf, final Schema fieldSchema,
-      final BSONDecorator easybson, final Field f) {
+      final BSONDecorator easybson, final Field f) throws GoraException {
     List<Object> list = easybson.getDBList(docf);
     List<Object> rlist = new ArrayList<>();
     if (list == null) {
@@ -637,7 +704,7 @@ DataStoreBase<K, T> {
   }
 
   /* pp */ Object fromMongoMap(final String docf, final Schema fieldSchema,
-      final BSONDecorator easybson, final Field f) {
+      final BSONDecorator easybson, final Field f) throws GoraException {
     BasicDBObject map = easybson.getDBObject(docf);
     Map<Utf8, Object> rmap = new HashMap<>();
     if (map == null) {

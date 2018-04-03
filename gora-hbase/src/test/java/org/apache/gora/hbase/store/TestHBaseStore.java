@@ -43,16 +43,24 @@ import org.apache.gora.store.DataStoreTestBase;
 import org.apache.gora.store.impl.DataStoreMetadataAnalyzer;
 import org.apache.gora.util.GoraException;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.Connection;
-import org.apache.hadoop.hbase.client.ConnectionFactory;
-import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HBaseAdmin;
-import org.apache.hadoop.hbase.client.HTable;
-import org.apache.hadoop.hbase.client.Table;
+import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Test case for HBaseStore.
@@ -69,22 +77,6 @@ public class TestHBaseStore extends DataStoreTestBase {
   public void setUp() throws Exception {
     super.setUp();
     conf = getTestDriver().getConf();
-  }
-    
-  @SuppressWarnings("unchecked")
-  @Override
-  protected DataStore<String, Employee> createEmployeeDataStore()
-      throws IOException {
-    return DataStoreFactory.createDataStore(HBaseStore.class, String.class, 
-        Employee.class, conf);
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  protected DataStore<String, WebPage> createWebPageDataStore()
-      throws IOException {
-    return DataStoreFactory.createDataStore(HBaseStore.class, String.class, 
-        WebPage.class, conf);
   }
 
   public GoraHBaseTestDriver getTestDriver() {
@@ -295,22 +287,17 @@ public class TestHBaseStore extends DataStoreTestBase {
       }
   }
   
-  @Ignore("We need to skip this test since gora considers endRow inclusive, while its exclusive for HBase.")
-  @Override
-  public void testQueryEndKey() throws IOException {
-    //TODO: We should raise an issue for HBase to allow us to specify if the endRow will be inclusive or exclusive.
-  }
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
-  @Ignore("We need to skip this test since gora considers endRow inclusive, while its exclusive for HBase.")
-  @Override
-  public void testQueryKeyRange() throws IOException {
-     //TODO: We should raise an issue for HBase to allow us to specify if the endRow will be inclusive or exclusive.
-  }
+  @Test
+  public void assertConfigurationException() throws GoraException {
+    expectedException.expect(GoraException.class);
+    expectedException.expectMessage("Gora-hbase-mapping does not include the name and keyClass in the databean.");
 
-  @Ignore("We need to skip this test since gora considers endRow inclusive, while its exclusive for HBase.")
-  @Override
-  public void testDeleteByQuery() throws IOException {
-   //TODO: We should raise an issue for HBase to allow us to specify if the endRow will be inclusive or exclusive.
+    Configuration exceptionalConf = HBaseConfiguration.create(conf);
+    exceptionalConf.set("gora.hbase.mapping.file","gora-hbase-mapping-mismatch.xml");
+    DataStoreFactory.createDataStore(HBaseStore.class, String.class, WebPage.class, exceptionalConf);
   }
 
 }

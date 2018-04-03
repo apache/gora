@@ -32,7 +32,7 @@
   persistent: Save changes made via the API to this file
   sharedLib: path to a lib directory that will be shared across all cores
 -->
-<solr persistent="false">
+<solr>
   <!-- by default, this is 50 @ WARN
   <logging enabled="true">
         <watcher size="100" threshold="DEBUG" />
@@ -47,13 +47,23 @@
   All of the attributes in cores after defaultCoreName only apply when running in SolrCloud mode.
   You can read more about SolrCloud mode at http://wiki.apache.org/solr/SolrCloud
   -->
-  <cores adminPath="/admin/cores" host="${host:}" hostPort="${jetty.port:9876}" 
-      hostContext="${hostContext:solr}" zkClientTimeout="${zkClientTimeout:15000}">
-    <core name="collection1" instanceDir="collection1" />
-    <core name="Employee" instanceDir="Employee" />
-    <core name="WebPage" instanceDir="WebPage" />
-    <!--  shardHandlerFactory name="shardHandlerFactory" class="HttpShardHandlerFactory">
-      <str name="urlScheme">${urlScheme:}</str>
-    </shardHandlerFactory-->
-  </cores>
+  <solrcloud>
+
+    <str name="host">${host:}</str>
+    <int name="hostPort">${jetty.port:8983}</int>
+    <str name="hostContext">${hostContext:solr}</str>
+
+    <bool name="genericCoreNodeNames">${genericCoreNodeNames:true}</bool>
+
+    <int name="zkClientTimeout">${zkClientTimeout:30000}</int>
+    <int name="distribUpdateSoTimeout">${distribUpdateSoTimeout:600000}</int>
+    <int name="distribUpdateConnTimeout">${distribUpdateConnTimeout:60000}</int>
+
+  </solrcloud>
+
+  <shardHandlerFactory name="shardHandlerFactory"
+    class="HttpShardHandlerFactory">
+    <int name="socketTimeout">${socketTimeout:600000}</int>
+    <int name="connTimeout">${connTimeout:60000}</int>
+  </shardHandlerFactory>
 </solr>

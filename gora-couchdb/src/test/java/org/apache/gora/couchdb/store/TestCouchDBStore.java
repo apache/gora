@@ -25,6 +25,7 @@ import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.query.Query;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreTestBase;
+import org.apache.gora.util.GoraException;
 import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -62,20 +63,8 @@ public class TestCouchDBStore extends DataStoreTestBase {
     super.setUp();
   }
 
-  @SuppressWarnings("unchecked")
-  @Override
-  protected DataStore<String, Employee> createEmployeeDataStore() throws IOException {
-    throw new UnsupportedOperationException();
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  protected DataStore<String, WebPage> createWebPageDataStore() throws IOException {
-    throw new UnsupportedOperationException();
-  }
-
   @Test
-  public void testPutAndGet() {
+  public void testPutAndGet() throws GoraException {
     WebPage page = webPageStore.newPersistent();
 
     // Write webpage data

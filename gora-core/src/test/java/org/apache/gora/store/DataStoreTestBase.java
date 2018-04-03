@@ -45,13 +45,6 @@ public abstract class DataStoreTestBase {
   protected DataStore<String,Employee> employeeStore;
   protected DataStore<String,WebPage> webPageStore;
 
-  @Deprecated
-  protected abstract DataStore<String,Employee> createEmployeeDataStore() throws IOException;
-
-  @Deprecated
-  protected abstract DataStore<String,WebPage> createWebPageDataStore() throws IOException;
-
-
   /** junit annoyingly forces BeforeClass to be static, so this method
    * should be called from a static block
    */
@@ -92,12 +85,6 @@ public abstract class DataStoreTestBase {
       employeeStore = testDriver.createDataStore(String.class, Employee.class);
       webPageStore = testDriver.createDataStore(String.class, WebPage.class);
       testDriver.setUp();
-    } else {
-      employeeStore =  createEmployeeDataStore();
-      webPageStore = createWebPageDataStore();
-
-      employeeStore.truncateSchema();
-      webPageStore.truncateSchema();
     }
   }
 

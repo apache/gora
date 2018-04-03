@@ -26,12 +26,14 @@ import org.apache.gora.util.ClassLoadingUtils;
 import org.apache.gora.util.GoraException;
 import org.apache.gora.util.ReflectionUtils;
 
+import com.esotericsoftware.minlog.Log;
+
 /**
  * A default implementation of the {@link BeanFactory} interface. Constructs
- * the keys using by reflection, {@link Persistent} objects by calling
+ * the keys by using reflection, {@link Persistent} objects by calling
  *
- * @param <K>
- * @param <T>
+ * @param <K> a key
+ * @param <T> a {@link Persistent} object
  */
 public class BeanFactoryImpl<K, T extends Persistent> implements BeanFactory<K, T> {
 
@@ -56,10 +58,10 @@ public class BeanFactoryImpl<K, T extends Persistent> implements BeanFactory<K, 
   /**
    * Default constructor for this class.
    *
-   * @param keyClass
-   * @param persistentClass
+   * @param keyClass class of the keys
+   * @param persistentClass class of the [{@link Persistent} objects to be stored
    */
-  public BeanFactoryImpl(Class<K> keyClass, Class<T> persistentClass) {
+  public BeanFactoryImpl(Class<K> keyClass, Class<T> persistentClass) throws GoraException {
     this.keyClass = keyClass;
     this.persistentClass = persistentClass;
     
@@ -70,7 +72,7 @@ public class BeanFactoryImpl<K, T extends Persistent> implements BeanFactory<K, 
       }
       this.persistent = ReflectionUtils.newInstance(persistentClass);
     } catch (Exception ex) {
-      throw new RuntimeException(ex);
+      throw new GoraException(ex);
     }
     
     isKeyPersistent = Persistent.class.isAssignableFrom(keyClass);
@@ -93,7 +95,6 @@ public class BeanFactoryImpl<K, T extends Persistent> implements BeanFactory<K, 
     return keyClass.newInstance();
   }
  
-  @SuppressWarnings("unchecked")
   @Override
   public T newPersistent() {
     return (T) persistent.newInstance();

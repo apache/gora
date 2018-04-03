@@ -17,33 +17,29 @@
  */
 package org.apache.gora.memory.store;
 
-import java.io.IOException;
+import static org.apache.gora.examples.WebPageDataCreator.SORTED_URLS;
+import static org.apache.gora.examples.WebPageDataCreator.URLS;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 import org.apache.gora.examples.WebPageDataCreator;
-import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.persistency.BeanFactory;
 import org.apache.gora.persistency.impl.BeanFactoryImpl;
 import org.apache.gora.query.Query;
 import org.apache.gora.store.DataStore;
-import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.DataStoreTestBase;
 import org.apache.gora.store.DataStoreTestUtil;
+import org.apache.gora.util.GoraException;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.apache.gora.examples.WebPageDataCreator.SORTED_URLS;
-import static org.apache.gora.examples.WebPageDataCreator.URLS;
-import static org.apache.gora.examples.WebPageDataCreator.URL_INDEXES;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
 
 /**
  * Testing class for all standard gora-memory functionality.
@@ -58,25 +54,17 @@ public class MemStoreTest extends DataStoreTestBase {
 
   private Configuration conf;
 
+  static {
+    setTestDriver(new MemStoreTestDriver());
+  }
+
   @Before
   public void setUp() throws Exception {
     super.setUp();
   }
 
-  @SuppressWarnings("unchecked")
-  @Override
-  protected DataStore<String, Employee> createEmployeeDataStore() throws IOException {
-    return DataStoreFactory.getDataStore(MemStore.class, String.class, Employee.class, conf);
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  protected DataStore<String, WebPage> createWebPageDataStore() throws IOException {
-    return DataStoreFactory.getDataStore(MemStore.class, String.class, WebPage.class, conf);
-  }
-
   @Test
-  public void testGetMissingValue() {
+  public void testGetMissingValue() throws GoraException {
     DataStore<String, WebPage> store = new MemStore<>();
     WebPage nullWebPage = store.get("missing", new String[0]);
     assertNull(nullWebPage);

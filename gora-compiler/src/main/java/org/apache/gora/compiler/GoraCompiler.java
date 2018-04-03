@@ -19,6 +19,10 @@ package org.apache.gora.compiler;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -31,6 +35,7 @@ import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.SchemaNormalization;
 import org.apache.avro.compiler.specific.SpecificCompiler;
+import org.apache.gora.compiler.utils.LicenseHeaders;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 
@@ -59,7 +64,7 @@ public class GoraCompiler extends SpecificCompiler {
     GORA_HIDDEN_FIELD_NAMES.add(DIRTY_BYTES_FIELD_NAME);
   }
   
-  public static void compileSchema(File[] srcFiles, File dest)
+  public static void compileSchema(File[] srcFiles, File dest, LicenseHeaders licenseHeader)
       throws IOException {
     Schema.Parser parser = new Schema.Parser();
 
@@ -72,6 +77,13 @@ public class GoraCompiler extends SpecificCompiler {
       GoraCompiler compiler = new GoraCompiler(newSchema);
       compiler.setTemplateDir(DEFAULT_TEMPLATES_PATH);
       compiler.compileToDestination(src, dest);
+
+      //Adding the license to the compiled file
+      Path path = Paths.get(generateDestinationFileName(dest.toString(), newSchema));
+      String content = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
+      content = licenseHeader.getLicense() + content.substring(content.indexOf("package"));
+      Files.write(path, content.getBytes(StandardCharsets.UTF_8));
+
       LOG.info("Compiled into: {}", dest.getAbsolutePath());
     }
   }
@@ -311,4 +323,8 @@ public class GoraCompiler extends SpecificCompiler {
     return SchemaNormalization.parsingFingerprint64(schema);
   }
 
+  public static String generateDestinationFileName(String destDir, Schema schema) {
+    return destDir + File.separatorChar + schema.getNamespace().replace('.', File.separatorChar)
+            + File.separatorChar + schema.getName() + ".java";
+  }
 }

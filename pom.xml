@@ -28,7 +28,7 @@
   <groupId>org.apache.gora</groupId>
   <artifactId>gora</artifactId>
   <packaging>pom</packaging>
-  <version>0.7-goraexplorer-SNAPSHOT</version>
+  <version>0.9-goraexplorer-SNAPSHOT</version>
   <name>Apache Gora</name>
   <description>The Apache Gora open source framework provides an in-memory data model and 
     persistence for big data. Gora supports persisting to column stores, key value stores, 
@@ -81,6 +81,15 @@
       <id>alfonsonishikawa</id>
       <name>Alfonso Nishikawa</name>
       <email>alfonsonishikawa [at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>cguzel</id>
+      <name>Cihad Guzel</name>
+      <email>cguzel [at] apache [dot] org</email>
       <roles>
         <role>Committer</role>
         <role>PMC Member</role>
@@ -159,9 +168,27 @@
       </roles>
     </developer>
     <developer>
+      <id>nishadi</id>
+      <name>Nishadi Kirielle</name>
+      <email>nishadi [at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
       <id>djkevincr</id>
       <name>Kevin Ratnasekera</name>
       <email>djkevincr [at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>madhawa</id>
+      <name>Madhawa Kasun Gunasekara</name>
+      <email>madhawa [at] apache [dot] org</email>
       <roles>
         <role>Committer</role>
         <role>PMC Member</role>
@@ -415,7 +442,7 @@
             <mavenExecutorId>forked-path</mavenExecutorId>
             <useReleaseProfile>false</useReleaseProfile>
             <tagNameFormat>apache-gora-@{project.version}</tagNameFormat>
-            <arguments>-Papache-release,release,hadoop2</arguments>
+            <arguments>-Papache-release,release</arguments>
             <autoVersionSubmodules>true</autoVersionSubmodules>
           </configuration>
           <dependencies>
@@ -425,6 +452,58 @@
               <version>1.9</version>
             </dependency>
           </dependencies>
+        </plugin>
+        <!--This plugin's configuration is used to store Eclipse m2e settings 
+          only. It has no influence on the Maven build itself. -->
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <versionRange>[2.4,)</versionRange>
+                    <goals>
+                      <goal>copy-dependencies</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore />
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <versionRange>[1.7,)</versionRange>
+                    <goals>
+                      <goal>reserve-network-port</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore />
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>de.thetaphi</groupId>
+                    <artifactId>forbiddenapis</artifactId>
+                    <versionRange>2.0</versionRange>
+                    <goals>
+                      <goal>testCheck</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore />
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -439,6 +518,22 @@
             <!-- executable>{JAVA_HOME_1_7}/bin/javac</executable -->
             <fork>true</fork>
           </configuration>
+          <executions>
+            <!-- Eclipse do not support duplicated package-info.java, in both main and test. -->
+            <!-- https://stackoverflow.com/questions/11246223/eclipse-javadoc-the-type-package-info-is-already-defined/35101574#35101574 -->
+            <execution>
+              <id>default-testCompile</id>
+              <phase>test-compile</phase>
+              <configuration>
+                <testExcludes>
+                  <exclude>**/package-info.java</exclude>
+                </testExcludes>
+              </configuration>
+              <goals>
+                <goal>testCompile</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -676,16 +771,16 @@
     <module>gora-hbase</module>
     <module>gora-infinispan</module>
     <module>gora-jcache</module>
+    <module>gora-orientdb</module>
     <!-- module>gora-lucene</module -->
     <module>gora-dynamodb</module>
     <module>gora-couchdb</module>
-    <!--module>gora-sql</module -->
     <module>gora-maven-plugin</module>
     <module>gora-mongodb</module>
     <module>gora-solr</module>
-    <module>gora-solr-5</module>
     <module>gora-tutorial</module>
     <module>sources-dist</module>
+    <module>gora-aerospike</module>
   </modules>
 
   <properties>
@@ -697,26 +792,25 @@
     <!-- Hadoop Dependencies -->
     <hadoop-2.version>2.5.2</hadoop-2.version>
     <hadoop-2.test.version>2.5.2</hadoop-2.test.version>
-    <hbase.version>1.2.3</hbase.version>
-    <hbase.test.version>1.2.3</hbase.test.version>
+    <hbase.version>1.2.6</hbase.version>
+    <hbase.test.version>1.2.6</hbase.test.version>
     <cxf-rt-frontend-jaxrs.version>2.5.2</cxf-rt-frontend-jaxrs.version>
     <!-- Amazon Dependencies -->
     <amazon.version>1.10.55</amazon.version>
     <!-- Cassandra Dependencies -->
-    <cassandra.version>2.0.2</cassandra.version>
-    <hector.version>1.1-4</hector.version>
+    <cassandra-driver.version>3.3.0</cassandra-driver.version>
+    <cassandra.version>3.11.0</cassandra.version>
     <!-- Solr Dependencies -->
-    <lucene-solr.version>4.10.3</lucene-solr.version>
-    <solr-solrj.version>4.10.3</solr-solrj.version>
-    <lucene-solr-5.version>5.5.1</lucene-solr-5.version>
-    <solr-solrj-5.version>5.5.1</solr-solrj-5.version>
-    <jetty.version>8.1.8.v20121106</jetty.version>
-    <tika.version>1.7</tika.version>
-    <httpcomponents.version>4.3.1</httpcomponents.version>
-    <commons-io.version>2.4</commons-io.version>
+    <lucene-solr.version>6.5.1</lucene-solr.version>
+    <solr-solrj.version>6.5.1</solr-solrj.version>
+    <jetty.version>9.3.14.v20161028</jetty.version>
+    <tika.version>1.12</tika.version>
+    <httpcomponents.version>4.4.1</httpcomponents.version>
+    <commons-io.version>2.5</commons-io.version>
     <restlet.version>2.3.1</restlet.version>
 
-    <spark.version>1.4.1</spark.version>
+    <spark.version>2.2.1</spark.version>
+    <aerospike.version>4.0.6</aerospike.version>
     <!-- Misc Dependencies -->
     <guava.version>13.0</guava.version>
     <commons-lang.version>2.6</commons-lang.version>
@@ -732,8 +826,13 @@
     <jsr107.api.version>1.0.0</jsr107.api.version>
     <hazelcast.version>3.6.4</hazelcast.version>
 
+    <!-- OrientDB Dependencies -->
+    <orientdb.version>2.2.22</orientdb.version>
+    <orientqb.version>0.2.0</orientqb.version>
+
     <!-- Testing Dependencies -->
     <junit.version>4.10</junit.version>
+    <test.container.version>1.4.2</test.container.version>
 
     <!-- Maven Plugin Dependencies -->
     <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
@@ -742,7 +841,7 @@
     <maven-jar-plugin.version>2.3.2</maven-jar-plugin.version>
     <maven-dependency-plugin.version>2.9</maven-dependency-plugin.version>
     <build-helper-maven-plugin.version>1.7</build-helper-maven-plugin.version>
-    <maven-surfire-plugin.version>2.12</maven-surfire-plugin.version>
+    <maven-surfire-plugin.version>2.20</maven-surfire-plugin.version>
     <maven-release-plugin.version>2.5</maven-release-plugin.version>
     <maven-bundle-plugin.version>2.5.3</maven-bundle-plugin.version>
     <maven-source-plugin.version>2.1.2</maven-source-plugin.version>
@@ -807,18 +906,6 @@
 
       <dependency>
         <groupId>org.apache.gora</groupId>
-        <artifactId>gora-sql</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.gora</groupId>
-        <artifactId>gora-sql</artifactId>
-        <version>${project.version}</version>
-        <type>test-jar</type>
-      </dependency>
-
-      <dependency>
-        <groupId>org.apache.gora</groupId>
         <artifactId>gora-compiler</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -873,6 +960,17 @@
       <dependency>
         <groupId>org.apache.gora</groupId>
         <artifactId>gora-dynamodb</artifactId>
+        <version>${project.version}</version>
+        <type>test-jar</type>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-aerospike</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-aerospike</artifactId>
         <version>${project.version}</version>
         <type>test-jar</type>
       </dependency>
@@ -1023,18 +1121,6 @@
         <groupId>org.apache.cassandra</groupId>
         <artifactId>cassandra-thrift</artifactId>
         <version>${cassandra.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.hectorclient</groupId>
-        <artifactId>hector-core</artifactId>
-        <version>${hector.version}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.apache.cassandra</groupId>
-            <artifactId>cassandra-all</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
 
       <dependency>
@@ -1224,7 +1310,7 @@
       <dependency>
         <groupId>org.apache.zookeeper</groupId>
         <artifactId>zookeeper</artifactId>
-        <version>3.4.5</version>
+        <version>3.4.6</version>
       </dependency>
       <dependency>
         <groupId>org.carrot2</groupId>
@@ -1250,6 +1336,51 @@
       <dependency>
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-server</artifactId>
+        <version>${jetty.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-http</artifactId>
+        <version>${jetty.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-io</artifactId>
+        <version>${jetty.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-deploy</artifactId>
+        <version>${jetty.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-continuation</artifactId>
+        <version>${jetty.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-jmx</artifactId>
+        <version>${jetty.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-rewrite</artifactId>
+        <version>${jetty.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-security</artifactId>
+        <version>${jetty.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-servlets</artifactId>
+        <version>${jetty.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-xml</artifactId>
         <version>${jetty.version}</version>
       </dependency>
       <dependency>
@@ -1405,6 +1536,37 @@
         <version>${jsr107.api.version}</version>
       </dependency>
 
+      <!-- OrientDB Dependencies -->
+      <dependency>
+        <groupId>com.orientechnologies</groupId>
+        <artifactId>orientdb-client</artifactId>
+        <version>${orientdb.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.orientechnologies</groupId>
+        <artifactId>orientdb-server</artifactId>
+        <version>${orientdb.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.orientechnologies</groupId>
+        <artifactId>orientdb-core</artifactId>
+        <version>${orientdb.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.orientechnologies</groupId>
+        <artifactId>orientdb-graphdb</artifactId>
+        <version>${orientdb.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.github.raymanrt</groupId>
+        <artifactId>orientqb</artifactId>
+        <version>${orientqb.version}</version>
+      </dependency>
+
       <!-- Testing Dependencies -->
       <dependency>
         <groupId>org.apache.hadoop</groupId>
@@ -1422,6 +1584,12 @@
         <groupId>org.codehaus.sonar</groupId>
         <artifactId>sonar-maven-plugin</artifactId>
         <version>4.4</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>testcontainers</artifactId>
+        <version>${test.container.version}</version>
       </dependency>
 
     </dependencies>

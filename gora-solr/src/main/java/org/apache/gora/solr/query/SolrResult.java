@@ -27,23 +27,40 @@ import org.apache.gora.query.impl.PartitionQueryImpl;
 import org.apache.gora.query.impl.ResultBase;
 import org.apache.gora.solr.store.SolrStore;
 import org.apache.gora.store.DataStore;
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.gora.util.GoraException;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.ModifiableSolrParams;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * SolrResult specific implementation of the {@link org.apache.gora.query.Result}
+ * interface.
+ */
 public class SolrResult<K, T extends PersistentBase> extends ResultBase<K, T> {
 
+  private static final Logger LOG = LoggerFactory.getLogger(SolrResult.class);
+  
   SolrDocumentList list = null;
   SolrStore<K, T> store;
   String[] fields;
   int pos = 0;
 
+  /**
+   * Constructor for the result set
+   *
+   * @param dataStore Data store used
+   * @param query     Query used
+   * @param server    A client that talks directly to a Solr server
+   * @param resultsSize  The number of rows to be returned
+   */
   public SolrResult(DataStore<K, T> dataStore, Query<K, T> query,
-      SolrServer server, int resultsSize) throws IOException {
+      SolrClient server, int resultsSize) throws GoraException {
     super(dataStore, query);
     store = (SolrStore<K, T>)dataStore;
     ModifiableSolrParams params = new ModifiableSolrParams();
@@ -70,11 +87,14 @@ public class SolrResult<K, T extends PersistentBase> extends ResultBase<K, T> {
     try {
       QueryResponse rsp = server.query(params);
       list = rsp.getResults();
-    } catch (SolrServerException e) {
-      throw new IOException(e);
+    } catch (SolrServerException | IOException e) {
+      throw new GoraException(e);
     }
   }
 
+  /**
+   * Gets the next item
+   */
   @SuppressWarnings("unchecked")
   @Override
   protected boolean nextInner() throws IOException {
@@ -92,6 +112,9 @@ public class SolrResult<K, T extends PersistentBase> extends ResultBase<K, T> {
     if (list != null) list.clear();
   }
 
+  /**
+   * Gets the items reading progress
+   */
   @Override
   public float getProgress() throws IOException {
     if (list != null && list.size() > 0) {

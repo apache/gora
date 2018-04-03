@@ -1,658 +1,535 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+/*
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
-
 package org.apache.gora.cassandra.store;
 
-import static org.apache.gora.cassandra.store.CassandraStore.colFamConsLvl;
-import static org.apache.gora.cassandra.store.CassandraStore.readOpConsLvl;
-import static org.apache.gora.cassandra.store.CassandraStore.writeOpConsLvl;
-
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
-import me.prettyprint.cassandra.model.ConfigurableConsistencyLevel;
-import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
-import me.prettyprint.cassandra.serializers.IntegerSerializer;
-import me.prettyprint.cassandra.serializers.StringSerializer;
-import me.prettyprint.cassandra.service.CassandraHostConfigurator;
-import me.prettyprint.hector.api.Cluster;
-import me.prettyprint.hector.api.Keyspace;
-import me.prettyprint.hector.api.beans.OrderedRows;
-import me.prettyprint.hector.api.beans.OrderedSuperRows;
-import me.prettyprint.hector.api.beans.Row;
-import me.prettyprint.hector.api.beans.SuperRow;
-import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
-import me.prettyprint.hector.api.ddl.ComparatorType;
-import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
-import me.prettyprint.hector.api.factory.HFactory;
-import me.prettyprint.hector.api.mutation.Mutator;
-import me.prettyprint.hector.api.query.QueryResult;
-import me.prettyprint.hector.api.query.RangeSlicesQuery;
-import me.prettyprint.hector.api.query.RangeSuperSlicesQuery;
-import me.prettyprint.hector.api.HConsistencyLevel;
-import me.prettyprint.hector.api.Serializer;
-
-import org.apache.avro.Schema;
-import org.apache.avro.Schema.Type;
-import org.apache.avro.generic.GenericArray;
-import org.apache.gora.cassandra.query.CassandraQuery;
-import org.apache.gora.cassandra.serializers.GoraSerializerTypeInferer;
-import org.apache.gora.mapreduce.GoraRecordReader;
-import org.apache.gora.persistency.impl.PersistentBase;
-import org.apache.gora.query.Query;
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.ConsistencyLevel;
+import com.datastax.driver.core.DataType;
+import com.datastax.driver.core.HostDistance;
+import com.datastax.driver.core.PoolingOptions;
+import com.datastax.driver.core.ProtocolOptions;
+import com.datastax.driver.core.ProtocolVersion;
+import com.datastax.driver.core.QueryOptions;
+import com.datastax.driver.core.Session;
+import com.datastax.driver.core.SocketOptions;
+import com.datastax.driver.core.TypeCodec;
+import com.datastax.driver.core.policies.ConstantReconnectionPolicy;
+import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
+import com.datastax.driver.core.policies.DefaultRetryPolicy;
+import com.datastax.driver.core.policies.DowngradingConsistencyRetryPolicy;
+import com.datastax.driver.core.policies.ExponentialReconnectionPolicy;
+import com.datastax.driver.core.policies.FallthroughRetryPolicy;
+import com.datastax.driver.core.policies.LatencyAwarePolicy;
+import com.datastax.driver.core.policies.LoggingRetryPolicy;
+import com.datastax.driver.core.policies.RoundRobinPolicy;
+import com.datastax.driver.core.policies.TokenAwarePolicy;
+import com.datastax.driver.extras.codecs.arrays.DoubleArrayCodec;
+import com.datastax.driver.extras.codecs.arrays.FloatArrayCodec;
+import com.datastax.driver.extras.codecs.arrays.IntArrayCodec;
+import com.datastax.driver.extras.codecs.arrays.LongArrayCodec;
+import com.datastax.driver.extras.codecs.arrays.ObjectArrayCodec;
+import com.datastax.driver.extras.codecs.date.SimpleDateCodec;
+import com.datastax.driver.extras.codecs.date.SimpleTimestampCodec;
+import com.datastax.driver.extras.codecs.jdk8.OptionalCodec;
+import org.apache.gora.cassandra.bean.Field;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Properties;
+
 /**
- * CassandraClient is where all of the primary datastore functionality is 
- * executed. Typically CassandraClient is invoked by calling 
- * {@link org.apache.gora.cassandra.store.CassandraStore#initialize(Class, Class, Properties)}.
- * CassandraClient deals with Cassandra data model definition, mutation, 
- * and general/specific mappings.
- * {@link org.apache.gora.cassandra.store.CassandraStore#initialize} .
- *
- * @param <K>
- * @param <T>
+ * This class provides the Cassandra Client Connection.
+ * Initialize the Cassandra Connection according to the Properties.
  */
-public class CassandraClient<K, T extends PersistentBase> {
-  
-  /** The logging implementation */
-  public static final Logger LOG = LoggerFactory.getLogger(CassandraClient.class);
-  
+public class CassandraClient {
+
+  private static final Logger LOG = LoggerFactory.getLogger(CassandraClient.class);
+
   private Cluster cluster;
-  private Keyspace keyspace;
-  private Mutator<K> mutator;
-  private Class<K> keyClass;
-  private Class<T> persistentClass;
-  
-  /** Object which holds the XML mapping for Cassandra. */
-  private CassandraMapping cassandraMapping = null;
 
-  /** Hector client default column family consistency level. */
-  public static final String DEFAULT_HECTOR_CONSIS_LEVEL = "QUORUM";
-  
-  /** Cassandra serializer to be used for serializing Gora's keys. */
-  private Serializer<K> keySerializer;
+  private Session session;
 
-  /**
-   * Method to maintain backward compatibility with earlier versions.
-   * @param keyClass
-   * @param persistentClass
-   * @throws Exception
-   */
-  public void initialize(Class<K> keyClass, Class<T> persistentClass)
-    throws Exception {
-	initialize(keyClass, persistentClass, null);
+  private CassandraMapping mapping;
+
+  private String readConsistencyLevel;
+
+  private String writeConsistencyLevel;
+
+  public Session getSession() {
+    return session;
   }
 
-  /**
-   * Given our key, persistentClass from
-   * {@link org.apache.gora.cassandra.store.CassandraStore#initialize(Class, Class, Properties)}
-   * we make best efforts to dictate our data model.
-   * We make a quick check within {@link org.apache.gora.cassandra.store.CassandraClient#checkKeyspace() }
-   * to see if our keyspace has already been invented, this simple check prevents us from
-   * recreating the keyspace if it already exists.
-   * We then simple specify (based on the input keyclass) an appropriate serializer
-   * via {@link org.apache.gora.cassandra.serializers.GoraSerializerTypeInferer} before
-   * defining a mutator from and by which we can mutate this object.
-   *
-   * @param keyClass        the Key by which we wish o assign a record object
-   * @param persistentClass the generated {@link org.apache.gora.persistency.Persistent} bean representing the data.
-   * @param properties      key value pairs from gora.properties
-   * @throws Exception
-   */
-  public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) throws Exception {
-    this.keyClass = keyClass;
+  public Cluster getCluster() {
+    return cluster;
+  }
 
-    // get cassandra mapping with persistent class
-    this.persistentClass = persistentClass;
-    this.cassandraMapping = CassandraMappingManager.getManager().get(persistentClass);
-    Map<String, String> accessMap = null;
-    if (properties != null) {
-      String username = properties
-          .getProperty("gora.cassandrastore.username");
-      if (username != null) {
-        accessMap = new HashMap<>();
-        accessMap.put("username", username);
-        String password = properties
-            .getProperty("gora.cassandrastore.password");
-        if (password != null) {
-          accessMap.put("password", password);
-        }
-      }
+  void initialize(Properties properties, CassandraMapping mapping) throws Exception {
+    Cluster.Builder builder = Cluster.builder();
+    List<String> codecs = readCustomCodec(properties);
+    builder = populateSettings(builder, properties);
+    this.mapping = mapping;
+    this.cluster = builder.build();
+    if (codecs != null) {
+      registerCustomCodecs(codecs);
     }
-
-    this.cluster = HFactory.getOrCreateCluster(this.cassandraMapping.getClusterName(), 
-        new CassandraHostConfigurator(this.cassandraMapping.getHostName()), accessMap);
-    
-    // add keyspace to cluster
-    checkKeyspace();
-    
-    // Just create a Keyspace object on the client side, corresponding to an already 
-    // existing keyspace with already created column families.
-    this.keyspace = HFactory.createKeyspace(this.cassandraMapping.getKeyspaceName(), this.cluster);
-    
-    this.keySerializer = GoraSerializerTypeInferer.getSerializer(keyClass);
-    if (this.keySerializer == null)
-      LOG.error("Serializer for " + keyClass + " not found.");
-    this.mutator = HFactory.createMutator(this.keyspace, this.keySerializer);
+    readConsistencyLevel = properties.getProperty(CassandraStoreParameters.READ_CONSISTENCY_LEVEL);
+    writeConsistencyLevel = properties.getProperty(CassandraStoreParameters.WRITE_CONSISTENCY_LEVEL);
+    registerOptionalCodecs();
+    this.session = this.cluster.connect();
   }
 
-  /**
-   * Check if keyspace already exists.
-   *
-   * @return if keyspace already exists return true.
-   */
-  public boolean keyspaceExists() {
-    KeyspaceDefinition keyspaceDefinition = this.cluster.describeKeyspace(this.cassandraMapping.getKeyspaceName());
-    return (keyspaceDefinition != null);
-  }
+  private void registerOptionalCodecs() {
+    // Optional Codecs for natives
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.ascii()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.bigint()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.blob()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.cboolean()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.cdouble()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.cfloat()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.cint()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.counter()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.date()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.decimal()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.inet()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.smallInt()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.time()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.timestamp()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.timeUUID()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.tinyInt()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.varint()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.varchar()));
+    this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.uuid()));
+    // Optional Array Codecs
+    this.cluster.getConfiguration().getCodecRegistry().register(new IntArrayCodec());
+    this.cluster.getConfiguration().getCodecRegistry().register(new DoubleArrayCodec());
+    this.cluster.getConfiguration().getCodecRegistry().register(new FloatArrayCodec());
+    this.cluster.getConfiguration().getCodecRegistry().register(new LongArrayCodec());
+    this.cluster.getConfiguration().getCodecRegistry().register(new ObjectArrayCodec<>(
+            DataType.list(DataType.varchar()),
+            String[].class,
+            TypeCodec.varchar()));
+    // Optional Time Codecs
+    this.cluster.getConfiguration().getCodecRegistry().register(new SimpleDateCodec());
+    this.cluster.getConfiguration().getCodecRegistry().register(new SimpleTimestampCodec());
 
-  /**
-   * Check if keyspace already exists. If not, create it.
-   * In this method, we also utilize Hector's
-   * {@link me.prettyprint.cassandra.model.ConfigurableConsistencyLevel} logic.
-   * It is set by passing a
-   * {@link me.prettyprint.cassandra.model.ConfigurableConsistencyLevel} object right
-   * when the {@link me.prettyprint.hector.api.Keyspace} is created.
-   * If we cannot find a consistency level within <code>gora.properites</code>,
-   * then column family consistency level is set to QUORUM (by default) which permits
-   * consistency to wait for a quorum of replicas to respond regardless of data center.
-   * QUORUM is Hector Client's default setting and we respect that here as well.
-   *
-   * @see <a href="http://hector-client.github.io/hector/build/html/content/consistency_level.html">Consistency Level</a>
-   */
-  public void checkKeyspace() {
-    // "describe keyspace <keyspaceName>;" query
-    KeyspaceDefinition keyspaceDefinition = this.cluster.describeKeyspace(this.cassandraMapping.getKeyspaceName());
-    if (keyspaceDefinition == null) {
-      List<ColumnFamilyDefinition> columnFamilyDefinitions = this.cassandraMapping.getColumnFamilyDefinitions();
-
-      // GORA-197
-      for (ColumnFamilyDefinition cfDef : columnFamilyDefinitions) {
-        cfDef.setComparatorType(ComparatorType.BYTESTYPE);
-      }
-
-      keyspaceDefinition = HFactory.createKeyspaceDefinition(
-        this.cassandraMapping.getKeyspaceName(), 
-        this.cassandraMapping.getKeyspaceReplicationStrategy(),
-        this.cassandraMapping.getKeyspaceReplicationFactor(),
-        columnFamilyDefinitions
-      );
-      
-      this.cluster.addKeyspace(keyspaceDefinition, true);
-      
-      // GORA-167 Create a customized Consistency Level
-      ConfigurableConsistencyLevel ccl = new ConfigurableConsistencyLevel();
-      Map<String, HConsistencyLevel> clmap = getConsisLevelForColFams(columnFamilyDefinitions);
-      // Column family consistency levels
-      ccl.setReadCfConsistencyLevels(clmap);
-      ccl.setWriteCfConsistencyLevels(clmap);
-      // Operations consistency levels
-      String opConsisLvl = (readOpConsLvl!=null && !readOpConsLvl.isEmpty())?readOpConsLvl:DEFAULT_HECTOR_CONSIS_LEVEL;
-      ccl.setDefaultReadConsistencyLevel(HConsistencyLevel.valueOf(opConsisLvl));
-      LOG.debug("Hector read consistency configured to '" + opConsisLvl + "'.");
-      opConsisLvl = (writeOpConsLvl!=null && !writeOpConsLvl.isEmpty())?writeOpConsLvl:DEFAULT_HECTOR_CONSIS_LEVEL;
-      ccl.setDefaultWriteConsistencyLevel(HConsistencyLevel.valueOf(opConsisLvl));
-      LOG.debug("Hector write consistency configured to '" + opConsisLvl + "'.");
-
-      HFactory.createKeyspace("Keyspace", this.cluster, ccl);
-      keyspaceDefinition = null;
-    }
-    else {
-      List<ColumnFamilyDefinition> cfDefs = keyspaceDefinition.getCfDefs();
-      if (cfDefs == null || cfDefs.size() == 0) {
-        LOG.warn(keyspaceDefinition.getName() + " does not have any column family.");
-      }
-      else {
-        for (ColumnFamilyDefinition cfDef : cfDefs) {
-          ComparatorType comparatorType = cfDef.getComparatorType();
-          if (! comparatorType.equals(ComparatorType.BYTESTYPE)) {
-            // GORA-197
-            LOG.warn("The comparator type of " + cfDef.getName() + " column family is " + comparatorType.getTypeName()
-              + ", not BytesType. It may cause a fatal error on column validation later.");
-          }
-          else {
-            LOG.debug("The comparator type of " + cfDef.getName() + " column family is " 
-              + comparatorType.getTypeName() + ".");
-          }
-        }
+    for (Field field : this.mapping.getFieldList()) {
+      String columnType = field.getType().toLowerCase(Locale.ENGLISH);
+      //http://docs.datastax.com/en/cql/3.3/cql/cql_reference/cql_data_types_c.html
+      if (columnType.contains("list")) {
+        columnType = columnType.substring(columnType.indexOf("<") + 1, columnType.indexOf(">"));
+        this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.list(getTypeCodec(columnType))));
+      } else if (columnType.contains("set")) {
+        columnType = columnType.substring(columnType.indexOf("<") + 1, columnType.indexOf(">"));
+        this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.set(getTypeCodec(columnType))));
+      } else if (columnType.contains("map")) {
+        String[] columnTypes = columnType.substring(columnType.indexOf("<") + 1, columnType.indexOf(">")).split(",");
+        this.cluster.getConfiguration().getCodecRegistry().register(new OptionalCodec<>(TypeCodec.map(TypeCodec.set(getTypeCodec(columnTypes[0])), TypeCodec.set(getTypeCodec(columnTypes[1])))));
       }
     }
   }
 
-  /**
-   * Method in charge of setting the consistency level for defined column families.
-   * @param pColFams  Column families
-   * @return Map<String, HConsistencyLevel> with the mapping between colFams and consistency level.
-   */
-  private Map<String, HConsistencyLevel> getConsisLevelForColFams(List<ColumnFamilyDefinition> pColFams) {
-    Map<String, HConsistencyLevel> clMap = new HashMap<>();
-    // Get columnFamily consistency level.
-    String colFamConsisLvl = (colFamConsLvl != null && !colFamConsLvl.isEmpty())?colFamConsLvl:DEFAULT_HECTOR_CONSIS_LEVEL;
-    LOG.debug("ColumnFamily consistency level configured to '" + colFamConsisLvl + "'.");
-    // Define consistency for ColumnFamily "ColumnFamily"
-    for (ColumnFamilyDefinition colFamDef : pColFams)
-      clMap.put(colFamDef.getName(), HConsistencyLevel.valueOf(colFamConsisLvl));
-    return clMap;
-  }
-  
-  /**
-   * Drop keyspace.
-   */
-  public void dropKeyspace() {
-    this.cluster.dropKeyspace(this.cassandraMapping.getKeyspaceName());
-  }
-
-  /**
-   * Insert a field in a column.
-   * @param key the row key
-   * @param fieldName the field name
-   * @param value the field value.
-   */
-  public void addColumn(K key, String fieldName, Object value) {
-    if (value == null) {
-    	LOG.debug( "field:"+fieldName+", its value is null.");
-      return;
+  private TypeCodec getTypeCodec(String columnType) {
+    TypeCodec typeCodec;
+    switch (columnType) {
+      case "ascii":
+        typeCodec = TypeCodec.ascii();
+        break;
+      case "bigint":
+        typeCodec = TypeCodec.bigint();
+        break;
+      case "blob":
+        typeCodec = TypeCodec.blob();
+        break;
+      case "boolean":
+        typeCodec = TypeCodec.cboolean();
+        break;
+      case "counter":
+        typeCodec = TypeCodec.counter();
+        break;
+      case "date":
+        typeCodec = TypeCodec.date();
+        break;
+      case "decimal":
+        typeCodec = TypeCodec.decimal();
+        break;
+      case "double":
+        typeCodec = TypeCodec.cdouble();
+        break;
+      case "float":
+        typeCodec = TypeCodec.cfloat();
+        break;
+      case "inet":
+        typeCodec = TypeCodec.inet();
+        break;
+      case "int":
+        typeCodec = TypeCodec.cint();
+        break;
+      case "smallint":
+        typeCodec = TypeCodec.smallInt();
+        break;
+      case "time":
+        typeCodec = TypeCodec.time();
+        break;
+      case "timestamp":
+        typeCodec = TypeCodec.timestamp();
+        break;
+      case "timeuuid":
+        typeCodec = TypeCodec.timeUUID();
+        break;
+      case "tinyint":
+        typeCodec = TypeCodec.tinyInt();
+        break;
+      case "uuid":
+        typeCodec = TypeCodec.uuid();
+        break;
+      case "varint":
+        typeCodec = TypeCodec.varint();
+        break;
+      case "varchar":
+      case "text":
+        typeCodec = TypeCodec.varchar();
+        break;
+      default:
+        LOG.error("Unsupported Cassandra datatype: {} ", columnType);
+        throw new RuntimeException("Unsupported Cassandra datatype: " + columnType);
     }
+    return typeCodec;
+  }
 
-    ByteBuffer byteBuffer = toByteBuffer(value);
-    String columnFamily = this.cassandraMapping.getFamily(fieldName);
-    String columnName = this.cassandraMapping.getColumn(fieldName);
-    
-    if (columnName == null) {
-    	LOG.warn("Column name is null for field: " + fieldName );
-        return;
+  private Cluster.Builder populateSettings(Cluster.Builder builder, Properties properties) {
+    String serversParam = properties.getProperty(CassandraStoreParameters.CASSANDRA_SERVERS);
+    String[] servers = serversParam.split(",");
+    for (String server : servers) {
+      builder = builder.addContactPoint(server);
     }
-      
-    if( LOG.isDebugEnabled() ) LOG.debug( "fieldName: "+fieldName +" columnName: " + columnName );
-    
-    String ttlAttr = this.cassandraMapping.getColumnsAttribs().get(columnName);
-    
-    if ( null == ttlAttr ){
-    	ttlAttr = CassandraMapping.DEFAULT_COLUMNS_TTL;
-    	if( LOG.isDebugEnabled() ) LOG.debug( "ttl was not set for field: " + fieldName + ". Using " + ttlAttr );
-    } else {
-    	if( LOG.isDebugEnabled() ) LOG.debug( "ttl for field: " + fieldName + " is " + ttlAttr );
+    String portProp = properties.getProperty(CassandraStoreParameters.PORT);
+    if (portProp != null) {
+      builder = builder.withPort(Integer.parseInt(portProp));
     }
-
-    synchronized(mutator) {
-      HectorUtils.insertColumn(mutator, key, columnFamily, columnName, byteBuffer, ttlAttr);
+    String clusterNameProp = properties.getProperty(CassandraStoreParameters.CLUSTER_NAME);
+    if (clusterNameProp != null) {
+      builder = builder.withClusterName(clusterNameProp);
     }
-  }
-
-  /**
-   * Delete a row within the keyspace.
-   *
-   * @param key
-   * @param familyName
-   * @param columnName
-   */
-  public void deleteColumn(K key, String familyName, ByteBuffer columnName) {
-    synchronized(mutator) {
-      HectorUtils.deleteColumn(mutator, key, familyName, columnName);
+    String compressionProp = properties.getProperty(CassandraStoreParameters.COMPRESSION);
+    if (compressionProp != null) {
+      builder = builder.withCompression(ProtocolOptions.Compression.valueOf(compressionProp));
     }
-  }
-
-  /**
-   * Deletes an entry based on its key.
-   * @param key
-   */
-  public void deleteByKey(K key) {
-    Map<String, String> familyMap = this.cassandraMapping.getFamilyMap();
-    deleteColumn(key, familyMap.values().iterator().next(), null);
-  }
-
-  /**
-   * Insert a member in a super column. This is used for map and record Avro types.
-   * @param key the row key
-   * @param fieldName the field name
-   * @param columnName the column name (the member name, or the index of array)
-   * @param value the member value
-   */
-  public void addSubColumn(K key, String fieldName, ByteBuffer columnName, Object value) {
-    if (value == null) {
-      return;
+    builder = this.populateCredentials(properties, builder);
+    builder = this.populateLoadBalancingProp(properties, builder);
+    String enableJMXProp = properties.getProperty(CassandraStoreParameters.ENABLE_JMX_REPORTING);
+    if (!Boolean.parseBoolean(enableJMXProp)) {
+      builder = builder.withoutJMXReporting();
     }
-
-    ByteBuffer byteBuffer = toByteBuffer(value);
-    
-    String columnFamily = this.cassandraMapping.getFamily(fieldName);
-    String superColumnName = this.cassandraMapping.getColumn(fieldName);
-    String ttlAttr = this.cassandraMapping.getColumnsAttribs().get(superColumnName);
-    if ( null == ttlAttr ) {
-      ttlAttr = CassandraMapping.DEFAULT_COLUMNS_TTL;
-      if( LOG.isDebugEnabled() ) LOG.debug( "ttl was not set for field:" + fieldName + " .Using " + ttlAttr );
-    } else {
-      if( LOG.isDebugEnabled() ) LOG.debug( "ttl for field:" + fieldName + " is " + ttlAttr );
+    String enableMetricsProp = properties.getProperty(CassandraStoreParameters.ENABLE_METRICS);
+    if (!Boolean.parseBoolean(enableMetricsProp)) {
+      builder = builder.withoutMetrics();
     }
-
-    synchronized(mutator) {
-      HectorUtils.insertSubColumn(mutator, key, columnFamily, superColumnName, columnName, byteBuffer, ttlAttr);
+    builder = this.populatePoolingSettings(properties, builder);
+    String versionProp = properties.getProperty(CassandraStoreParameters.PROTOCOL_VERSION);
+    if (versionProp != null) {
+      builder = builder.withProtocolVersion(ProtocolVersion.fromInt(Integer.parseInt(versionProp)));
     }
-  }
-
-  /**
-   * Adds an subColumn inside the cassandraMapping file when a String is serialized
-   * @param key the row key
-   * @param fieldName the field name
-   * @param columnName the column name (the member name, or the index of array)
-   * @param value the member value
-   */
-  public void addSubColumn(K key, String fieldName, String columnName, Object value) {
-    addSubColumn(key, fieldName, StringSerializer.get().toByteBuffer(columnName), value);
-  }
-
-  /**
-   * Adds an subColumn inside the cassandraMapping file when an Integer is serialized
-   * @param key the row key
-   * @param fieldName the field name
-   * @param columnName the column name (the member name, or the index of array)
-   * @param value the member value
-   */
-  public void addSubColumn(K key, String fieldName, Integer columnName, Object value) {
-    addSubColumn(key, fieldName, IntegerSerializer.get().toByteBuffer(columnName), value);
-  }
-
-
-  /**
-   * Delete a member in a super column. This is used for map and record Avro types.
-   * @param key the row key
-   * @param fieldName the field name
-   * @param columnName the column name (the member name, or the index of array)
-   */
-  public void deleteSubColumn(K key, String fieldName, ByteBuffer columnName) {
-
-    String columnFamily = this.cassandraMapping.getFamily(fieldName);
-    String superColumnName = this.cassandraMapping.getColumn(fieldName);
-    
-    synchronized(mutator) {
-      HectorUtils.deleteSubColumn(mutator, key, columnFamily, superColumnName, columnName);
-    }
-  }
-
-  /**
-   * Deletes a subColumn 
-   * @param key
-   * @param fieldName
-   * @param columnName
-   */
-  public void deleteSubColumn(K key, String fieldName, String columnName) {
-    deleteSubColumn(key, fieldName, StringSerializer.get().toByteBuffer(columnName));
-  }
-
-  /**
-   * Deletes all subcolumns from a super column.
-   * @param key the row key.
-   * @param fieldName the field name.
-   */
-  public void deleteSubColumn(K key, String fieldName) {
-    String columnFamily = this.cassandraMapping.getFamily(fieldName);
-    String superColumnName = this.cassandraMapping.getColumn(fieldName);
-    synchronized(mutator) {
-      HectorUtils.deleteSubColumn(mutator, key, columnFamily, superColumnName, null);
-    }
-  }
-
-  public void deleteGenericArray(K key, String fieldName) {
-    //TODO Verify this. Everything that goes inside a genericArray will go inside a column so let's just delete that.
-    deleteColumn(key, cassandraMapping.getFamily(fieldName), toByteBuffer(fieldName));
-  }
-  
-  public void addGenericArray(K key, String fieldName, GenericArray<?> array) {
-    if (isSuper( cassandraMapping.getFamily(fieldName) )) {
-      int i= 0;
-      for (Object itemValue: array) {
-
-        // TODO: hack, do not store empty arrays
-        if (itemValue instanceof GenericArray<?>) {
-          if (((List<?>)itemValue).size() == 0) {
-            continue;
-          }
-        } else if (itemValue instanceof Map<?,?>) {
-          if (((Map<?, ?>)itemValue).size() == 0) {
-            continue;
-          }
-        }
-
-        addSubColumn(key, fieldName, i++, itemValue);
+    builder = this.populateQueryOptions(properties, builder);
+    builder = this.populateReconnectPolicy(properties, builder);
+    builder = this.populateRetrytPolicy(properties, builder);
+    builder = this.populateSocketOptions(properties, builder);
+    String enableSSLProp = properties.getProperty(CassandraStoreParameters.ENABLE_SSL);
+    if (enableSSLProp != null) {
+      if (Boolean.parseBoolean(enableSSLProp)) {
+        builder = builder.withSSL();
       }
     }
-    else {
-      addColumn(key, fieldName, array);
-    }
+    return builder;
   }
 
-  public void deleteStatefulHashMap(K key, String fieldName) {
-    if (isSuper( cassandraMapping.getFamily(fieldName) )) {
-      deleteSubColumn(key, fieldName);
-    } else {
-      deleteColumn(key, cassandraMapping.getFamily(fieldName), toByteBuffer(fieldName));
-    }
-  }
-
-  public void addStatefulHashMap(K key, String fieldName, Map<CharSequence,Object> map) {
-    if (isSuper( cassandraMapping.getFamily(fieldName) )) {
-      // as we don't know what has changed inside the map or If it's an empty map, then delete its content.
-      deleteSubColumn(key, fieldName);
-      // update if there is anything to update.
-      if (!map.isEmpty()) {
-        // If it's not empty, then update its content.
-        for (CharSequence mapKey: map.keySet()) {
-          // TODO: hack, do not store empty arrays
-          Object mapValue = map.get(mapKey);
-          if (mapValue instanceof GenericArray<?>) {
-            if (((List<?>)mapValue).size() == 0) {
-              continue;
+  private Cluster.Builder populateLoadBalancingProp(Properties properties, Cluster.Builder builder) {
+    String loadBalancingProp = properties.getProperty(CassandraStoreParameters.LOAD_BALANCING_POLICY);
+    if (loadBalancingProp != null) {
+      switch (loadBalancingProp) {
+        case "LatencyAwareRoundRobinPolicy":
+          builder = builder.withLoadBalancingPolicy(LatencyAwarePolicy.builder(new RoundRobinPolicy()).build());
+          break;
+        case "RoundRobinPolicy":
+          builder = builder.withLoadBalancingPolicy(new RoundRobinPolicy());
+          break;
+        case "DCAwareRoundRobinPolicy": {
+          String dataCenter = properties.getProperty(CassandraStoreParameters.DATA_CENTER);
+          boolean allowRemoteDCsForLocalConsistencyLevel = Boolean.parseBoolean(
+                  properties.getProperty(CassandraStoreParameters.ALLOW_REMOTE_DCS_FOR_LOCAL_CONSISTENCY_LEVEL));
+          if (dataCenter != null && !dataCenter.isEmpty()) {
+            if (allowRemoteDCsForLocalConsistencyLevel) {
+              builder = builder.withLoadBalancingPolicy(
+                      DCAwareRoundRobinPolicy.builder().withLocalDc(dataCenter)
+                              .allowRemoteDCsForLocalConsistencyLevel().build());
+            } else {
+              builder = builder.withLoadBalancingPolicy(
+                      DCAwareRoundRobinPolicy.builder().withLocalDc(dataCenter).build());
             }
-          } else if (mapValue instanceof Map<?,?>) {
-            if (((Map<?, ?>)mapValue).size() == 0) {
-              continue;
+          } else {
+            if (allowRemoteDCsForLocalConsistencyLevel) {
+              builder = builder.withLoadBalancingPolicy(
+                      (DCAwareRoundRobinPolicy.builder().allowRemoteDCsForLocalConsistencyLevel().build()));
+            } else {
+              builder = builder.withLoadBalancingPolicy((DCAwareRoundRobinPolicy.builder().build()));
             }
           }
-          addSubColumn(key, fieldName, mapKey.toString(), mapValue);
+          break;
         }
+        case "TokenAwareRoundRobinPolicy":
+          builder = builder.withLoadBalancingPolicy(new TokenAwarePolicy(new RoundRobinPolicy()));
+          break;
+        case "TokenAwareDCAwareRoundRobinPolicy": {
+          String dataCenter = properties.getProperty(CassandraStoreParameters.DATA_CENTER);
+          boolean allowRemoteDCsForLocalConsistencyLevel = Boolean.parseBoolean(
+                  properties.getProperty(CassandraStoreParameters.ALLOW_REMOTE_DCS_FOR_LOCAL_CONSISTENCY_LEVEL));
+          if (dataCenter != null && !dataCenter.isEmpty()) {
+            if (allowRemoteDCsForLocalConsistencyLevel) {
+              builder = builder.withLoadBalancingPolicy(new TokenAwarePolicy(
+                      DCAwareRoundRobinPolicy.builder().withLocalDc(dataCenter)
+                              .allowRemoteDCsForLocalConsistencyLevel().build()));
+            } else {
+              builder = builder.withLoadBalancingPolicy(new TokenAwarePolicy(
+                      DCAwareRoundRobinPolicy.builder().withLocalDc(dataCenter).build()));
+            }
+          } else {
+            if (allowRemoteDCsForLocalConsistencyLevel) {
+              builder = builder.withLoadBalancingPolicy(new TokenAwarePolicy(
+                      DCAwareRoundRobinPolicy.builder().allowRemoteDCsForLocalConsistencyLevel().build()));
+            } else {
+              builder = builder.withLoadBalancingPolicy(
+                      new TokenAwarePolicy(DCAwareRoundRobinPolicy.builder().build()));
+            }
+          }
+          break;
+        }
+        default:
+          LOG.error("Unsupported Cassandra load balancing  policy: {} ", loadBalancingProp);
+          break;
       }
     }
-    else {
-      addColumn(key, fieldName, map);
-    }
+    return builder;
   }
 
-  /**
-   * Serialize value to ByteBuffer using 
-   * {@link org.apache.gora.cassandra.serializers.GoraSerializerTypeInferer#getSerializer(Object)}.
-   * @param value the member value {@link java.lang.Object}.
-   * @return ByteBuffer object
-   */
-  public ByteBuffer toByteBuffer(Object value) {
-    ByteBuffer byteBuffer = null;
-    Serializer<Object> serializer = GoraSerializerTypeInferer.getSerializer(value);
-    if (serializer == null) {
-      LOG.warn("Serializer not found for: " + value.toString());
+  private Cluster.Builder populateCredentials(Properties properties, Cluster.Builder builder) {
+    String usernameProp = properties.getProperty(CassandraStoreParameters.USERNAME);
+    String passwordProp = properties.getProperty(CassandraStoreParameters.PASSWORD);
+    if (usernameProp != null) {
+      builder = builder.withCredentials(usernameProp, passwordProp);
     }
-    else {
-      LOG.debug(serializer.getClass() + " selected as appropriate Serializer.");
-      byteBuffer = serializer.toByteBuffer(value);
-    }
-    if (byteBuffer == null) {
-      LOG.warn("Serialization value for: " + value.getClass().getName() + " = null");
-    }
-    return byteBuffer;
+    return builder;
   }
 
-  /**
-   * Select a family column in the keyspace.
-   * @param cassandraQuery a wrapper of the query
-   * @param family the family name to be queried
-   * @return a list of family rows
-   */
-  public List<Row<K, ByteBuffer, ByteBuffer>> execute(CassandraQuery<K, T> cassandraQuery, String family) {
-    
-    String[] columnNames = cassandraQuery.getColumns(family);
-    ByteBuffer[] columnNameByteBuffers = new ByteBuffer[columnNames.length];
-    for (int i = 0; i < columnNames.length; i++) {
-      columnNameByteBuffers[i] = StringSerializer.get().toByteBuffer(columnNames[i]);
+  private Cluster.Builder populatePoolingSettings(Properties properties, Cluster.Builder builder) {
+    String localCoreConnectionsPerHost = properties.getProperty(CassandraStoreParameters.LOCAL_CORE_CONNECTIONS_PER_HOST);
+    String remoteCoreConnectionsPerHost = properties.getProperty(CassandraStoreParameters.REMOTE_CORE_CONNECTIONS_PER_HOST);
+    String localMaxConnectionsPerHost = properties.getProperty(CassandraStoreParameters.LOCAL_MAX_CONNECTIONS_PER_HOST);
+    String remoteMaxConnectionsPerHost = properties.getProperty(CassandraStoreParameters.REMOTE_MAX_CONNECTIONS_PER_HOST);
+    String localNewConnectionThreshold = properties.getProperty(CassandraStoreParameters.LOCAL_NEW_CONNECTION_THRESHOLD);
+    String remoteNewConnectionThreshold = properties.getProperty(CassandraStoreParameters.REMOTE_NEW_CONNECTION_THRESHOLD);
+    String localMaxRequestsPerConnection = properties.getProperty(CassandraStoreParameters.LOCAL_MAX_REQUESTS_PER_CONNECTION);
+    String remoteMaxRequestsPerConnection = properties.getProperty(CassandraStoreParameters.REMOTE_MAX_REQUESTS_PER_CONNECTION);
+    PoolingOptions options = new PoolingOptions();
+    if (localCoreConnectionsPerHost != null) {
+      options.setCoreConnectionsPerHost(HostDistance.LOCAL, Integer.parseInt(localCoreConnectionsPerHost));
     }
-    Query<K, T> query = cassandraQuery.getQuery();
-    int limit = (int) query.getLimit();
-    if (limit < 1) {
-      limit = Integer.MAX_VALUE;
+    if (remoteCoreConnectionsPerHost != null) {
+      options.setCoreConnectionsPerHost(HostDistance.REMOTE, Integer.parseInt(remoteCoreConnectionsPerHost));
     }
-    K startKey = query.getStartKey();
-    K endKey = query.getEndKey();
-    
-    RangeSlicesQuery<K, ByteBuffer, ByteBuffer> rangeSlicesQuery = HFactory.createRangeSlicesQuery
-        (this.keyspace, this.keySerializer, ByteBufferSerializer.get(), ByteBufferSerializer.get());
-    rangeSlicesQuery.setColumnFamily(family);
-    rangeSlicesQuery.setKeys(startKey, endKey);
-    rangeSlicesQuery.setRange(ByteBuffer.wrap(new byte[0]), ByteBuffer.wrap(new byte[0]), false, GoraRecordReader.BUFFER_LIMIT_READ_VALUE);
-    rangeSlicesQuery.setRowCount(limit);
-    rangeSlicesQuery.setColumnNames(columnNameByteBuffers);
-    
-    QueryResult<OrderedRows<K, ByteBuffer, ByteBuffer>> queryResult = rangeSlicesQuery.execute();
-    OrderedRows<K, ByteBuffer, ByteBuffer> orderedRows = queryResult.get();
-    
-    return orderedRows.getList();
+    if (localMaxConnectionsPerHost != null) {
+      options.setMaxConnectionsPerHost(HostDistance.LOCAL, Integer.parseInt(localMaxConnectionsPerHost));
+    }
+    if (remoteMaxConnectionsPerHost != null) {
+      options.setMaxConnectionsPerHost(HostDistance.REMOTE, Integer.parseInt(remoteMaxConnectionsPerHost));
+    }
+    if (localNewConnectionThreshold != null) {
+      options.setNewConnectionThreshold(HostDistance.LOCAL, Integer.parseInt(localNewConnectionThreshold));
+    }
+    if (remoteNewConnectionThreshold != null) {
+      options.setNewConnectionThreshold(HostDistance.REMOTE, Integer.parseInt(remoteNewConnectionThreshold));
+    }
+    if (localMaxRequestsPerConnection != null) {
+      options.setMaxRequestsPerConnection(HostDistance.LOCAL, Integer.parseInt(localMaxRequestsPerConnection));
+    }
+    if (remoteMaxRequestsPerConnection != null) {
+      options.setMaxRequestsPerConnection(HostDistance.REMOTE, Integer.parseInt(remoteMaxRequestsPerConnection));
+    }
+    builder = builder.withPoolingOptions(options);
+    return builder;
   }
-  
-  private String getMappingFamily(String pField){
-    String family = null;
-    // checking if it was a UNION field the one we are retrieving
-    if (pField.indexOf(CassandraStore.UNION_COL_SUFIX) > 0)
-      family = this.cassandraMapping.getFamily(pField.substring(0,pField.indexOf(CassandraStore.UNION_COL_SUFIX)));
-    else
-      family = this.cassandraMapping.getFamily(pField);
-     return family;
-   }
- 
-  private String getMappingColumn(String pField){
-    String column = null;
-    if (pField.indexOf(CassandraStore.UNION_COL_SUFIX) > 0)
-      column = pField;
-    else
-      column = this.cassandraMapping.getColumn(pField);
-      return column;
-    }
 
-  /**
-   * Select the families that contain at least one column mapped to a query field.
-   * @param query indicates the columns to select
-   * @return a map which keys are the family names and values the 
-   * corresponding column names required to get all the query fields.
-   */
-  public Map<String, List<String>> getFamilyMap(Query<K, T> query) {
-    Map<String, List<String>> map = new HashMap<>();
-    Schema persistentSchema = query.getDataStore().newPersistent().getSchema();
-    for (String field: query.getFields()) {
-      String family = this.getMappingFamily(field);
-      String column = this.getMappingColumn(field);
-      
-      // check if the family value was already initialized 
-      List<String> list = map.get(family);
-      if (list == null) {
-        list = new ArrayList<>();
-        map.put(family, list);
-      }
-      if (persistentSchema.getField(field).schema().getType() == Type.UNION)
-        list.add(field + CassandraStore.UNION_COL_SUFIX);
-      if (column != null) {
-        list.add(column);
+  private Cluster.Builder populateQueryOptions(Properties properties, Cluster.Builder builder) {
+    String consistencyLevelProp = properties.getProperty(CassandraStoreParameters.CONSISTENCY_LEVEL);
+    String serialConsistencyLevelProp = properties.getProperty(CassandraStoreParameters.SERIAL_CONSISTENCY_LEVEL);
+    String fetchSize = properties.getProperty(CassandraStoreParameters.FETCH_SIZE);
+    QueryOptions options = new QueryOptions();
+    if (consistencyLevelProp != null) {
+      options.setConsistencyLevel(ConsistencyLevel.valueOf(consistencyLevelProp));
+    }
+    if (serialConsistencyLevelProp != null) {
+      options.setSerialConsistencyLevel(ConsistencyLevel.valueOf(serialConsistencyLevelProp));
+    }
+    if (fetchSize != null) {
+      options.setFetchSize(Integer.parseInt(fetchSize));
+    }
+    return builder.withQueryOptions(options);
+  }
+
+  private Cluster.Builder populateReconnectPolicy(Properties properties, Cluster.Builder builder) {
+    String reconnectionPolicy = properties.getProperty(CassandraStoreParameters.RECONNECTION_POLICY);
+    if (reconnectionPolicy != null) {
+      switch (reconnectionPolicy) {
+        case "ConstantReconnectionPolicy": {
+          String constantReconnectionPolicyDelay = properties.getProperty(CassandraStoreParameters.CONSTANT_RECONNECTION_POLICY_DELAY);
+          ConstantReconnectionPolicy policy = new ConstantReconnectionPolicy(Long.parseLong(constantReconnectionPolicyDelay));
+          builder = builder.withReconnectionPolicy(policy);
+          break;
+        }
+        case "ExponentialReconnectionPolicy": {
+          String exponentialReconnectionPolicyBaseDelay = properties.getProperty(CassandraStoreParameters.EXPONENTIAL_RECONNECTION_POLICY_BASE_DELAY);
+          String exponentialReconnectionPolicyMaxDelay = properties.getProperty(CassandraStoreParameters.EXPONENTIAL_RECONNECTION_POLICY_MAX_DELAY);
+
+          ExponentialReconnectionPolicy policy = new ExponentialReconnectionPolicy(Long.parseLong(exponentialReconnectionPolicyBaseDelay),
+                  Long.parseLong(exponentialReconnectionPolicyMaxDelay));
+          builder = builder.withReconnectionPolicy(policy);
+          break;
+        }
+        default:
+          LOG.error("Unsupported reconnection policy : {} ", reconnectionPolicy);
       }
     }
-    
-    return map;
+    return builder;
   }
 
-  /**
-   * Retrieves the cassandraMapping which holds whatever was mapped 
-   * from the gora-cassandra-mapping.xml
-   * @return 
-   */
-  public CassandraMapping getCassandraMapping(){
-    return this.cassandraMapping;
-  }
-  
-  /**
-   * Select the field names according to the column names, which format 
-   * if fully qualified: "family:column"
-   * @param query
-   * @return a map which keys are the fully qualified column 
-   * names and values the query fields
-   */
-  public Map<String, String> getReverseMap(Query<K, T> query) {
-    Map<String, String> map = new HashMap<>();
-    Schema persistentSchema = query.getDataStore().newPersistent().getSchema();
-    for (String field: query.getFields()) {
-      String family = this.getMappingFamily(field);
-      String column = this.getMappingColumn(field);
-      if (persistentSchema.getField(field).schema().getType() == Type.UNION)
-        map.put(family + ":" + field + CassandraStore.UNION_COL_SUFIX, field + CassandraStore.UNION_COL_SUFIX);
-      map.put(family + ":" + column, field);
+  private Cluster.Builder populateRetrytPolicy(Properties properties, Cluster.Builder builder) {
+    String retryPolicy = properties.getProperty(CassandraStoreParameters.RETRY_POLICY);
+    if (retryPolicy != null) {
+      switch (retryPolicy) {
+        case "DefaultRetryPolicy":
+          builder = builder.withRetryPolicy(DefaultRetryPolicy.INSTANCE);
+          break;
+        case "DowngradingConsistencyRetryPolicy":
+          builder = builder.withRetryPolicy(DowngradingConsistencyRetryPolicy.INSTANCE);
+          break;
+        case "FallthroughRetryPolicy":
+          builder = builder.withRetryPolicy(FallthroughRetryPolicy.INSTANCE);
+          break;
+        case "LoggingDefaultRetryPolicy":
+          builder = builder.withRetryPolicy(new LoggingRetryPolicy(DefaultRetryPolicy.INSTANCE));
+          break;
+        case "LoggingDowngradingConsistencyRetryPolicy":
+          builder = builder.withRetryPolicy(new LoggingRetryPolicy(DowngradingConsistencyRetryPolicy.INSTANCE));
+          break;
+        case "LoggingFallthroughRetryPolicy":
+          builder = builder.withRetryPolicy(new LoggingRetryPolicy(FallthroughRetryPolicy.INSTANCE));
+          break;
+        default:
+          LOG.error("Unsupported retry policy : {} ", retryPolicy);
+          break;
+      }
     }
-    
-    return map;
+    return builder;
   }
 
-  /**
-   * Determines if a column is a superColumn or not.
-   * @param family
-   * @return boolean
-   */
-  public boolean isSuper(String family) {
-    return this.cassandraMapping.isSuper(family);
-  }
-
-  public List<SuperRow<K, String, ByteBuffer, ByteBuffer>> executeSuper(CassandraQuery<K, T> cassandraQuery, String family) {
-    String[] columnNames = cassandraQuery.getColumns(family);
-    Query<K, T> query = cassandraQuery.getQuery();
-    int limit = (int) query.getLimit();
-    if (limit < 1) {
-      limit = Integer.MAX_VALUE;
+  private Cluster.Builder populateSocketOptions(Properties properties, Cluster.Builder builder) {
+    String connectionTimeoutMillisProp = properties.getProperty(CassandraStoreParameters.CONNECTION_TIMEOUT_MILLIS);
+    String keepAliveProp = properties.getProperty(CassandraStoreParameters.KEEP_ALIVE);
+    String readTimeoutMillisProp = properties.getProperty(CassandraStoreParameters.READ_TIMEOUT_MILLIS);
+    String receiveBufferSizeProp = properties.getProperty(CassandraStoreParameters.RECEIVER_BUFFER_SIZE);
+    String reuseAddress = properties.getProperty(CassandraStoreParameters.REUSE_ADDRESS);
+    String sendBufferSize = properties.getProperty(CassandraStoreParameters.SEND_BUFFER_SIZE);
+    String soLinger = properties.getProperty(CassandraStoreParameters.SO_LINGER);
+    String tcpNoDelay = properties.getProperty(CassandraStoreParameters.TCP_NODELAY);
+    SocketOptions options = new SocketOptions();
+    if (connectionTimeoutMillisProp != null) {
+      options.setConnectTimeoutMillis(Integer.parseInt(connectionTimeoutMillisProp));
     }
-    K startKey = query.getStartKey();
-    K endKey = query.getEndKey();
-    
-    RangeSuperSlicesQuery<K, String, ByteBuffer, ByteBuffer> rangeSuperSlicesQuery = HFactory.createRangeSuperSlicesQuery
-        (this.keyspace, this.keySerializer, StringSerializer.get(), ByteBufferSerializer.get(), ByteBufferSerializer.get());
-    rangeSuperSlicesQuery.setColumnFamily(family);    
-    rangeSuperSlicesQuery.setKeys(startKey, endKey);
-    rangeSuperSlicesQuery.setRange("", "", false, GoraRecordReader.BUFFER_LIMIT_READ_VALUE);
-    rangeSuperSlicesQuery.setRowCount(limit);
-    rangeSuperSlicesQuery.setColumnNames(columnNames);
-    
-    
-    QueryResult<OrderedSuperRows<K, String, ByteBuffer, ByteBuffer>> queryResult = rangeSuperSlicesQuery.execute();
-    OrderedSuperRows<K, String, ByteBuffer, ByteBuffer> orderedRows = queryResult.get();
-    return orderedRows.getList();
+    if (keepAliveProp != null) {
+      options.setKeepAlive(Boolean.parseBoolean(keepAliveProp));
+    }
+    if (readTimeoutMillisProp != null) {
+      options.setReadTimeoutMillis(Integer.parseInt(readTimeoutMillisProp));
+    }
+    if (receiveBufferSizeProp != null) {
+      options.setReceiveBufferSize(Integer.parseInt(receiveBufferSizeProp));
+    }
+    if (reuseAddress != null) {
+      options.setReuseAddress(Boolean.parseBoolean(reuseAddress));
+    }
+    if (sendBufferSize != null) {
+      options.setSendBufferSize(Integer.parseInt(sendBufferSize));
+    }
+    if (soLinger != null) {
+      options.setSoLinger(Integer.parseInt(soLinger));
+    }
+    if (tcpNoDelay != null) {
+      options.setTcpNoDelay(Boolean.parseBoolean(tcpNoDelay));
+    }
+    return builder.withSocketOptions(options);
+  }
 
-
+  private List<String> readCustomCodec(Properties properties) throws JDOMException, IOException {
+    String filename = properties.getProperty(CassandraStoreParameters.CUSTOM_CODEC_FILE);
+    if (filename != null) {
+      List<String> codecs = new ArrayList<>();
+      SAXBuilder builder = new SAXBuilder();
+      Document doc = builder.build(getClass().getClassLoader().getResourceAsStream(filename));
+      List<Element> codecElementList = doc.getRootElement().getChildren("codec");
+      for (Element codec : codecElementList) {
+        codecs.add(codec.getValue());
+      }
+      return codecs;
+    }
+    return null;
   }
 
   /**
-   * Obtain Schema/Keyspace name
-   * @return Keyspace
+   * This method returns configured read consistency level.
+   * @return read Consistency level
    */
-  public String getKeyspaceName() {
-    return this.cassandraMapping.getKeyspaceName();
+  public String getReadConsistencyLevel() {
+    return readConsistencyLevel;
   }
+
+  /**
+   * This method returns configured write consistency level.
+   * @return write Consistency level
+   */
+  public String getWriteConsistencyLevel() {
+    return writeConsistencyLevel;
+  }
+
+
+  public void close() {
+    this.session.close();
+    this.cluster.close();
+  }
+
+  private void registerCustomCodecs(List<String> codecs) throws Exception {
+    for (String codec : codecs) {
+      this.cluster.getConfiguration().getCodecRegistry().register((TypeCodec<?>) Class.forName(codec).newInstance());
+    }
+  }
+
 }

@@ -18,7 +18,18 @@
 
 package org.apache.gora.couchdb.store;
 
-import com.google.common.primitives.Ints;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.util.Utf8;
@@ -38,8 +49,10 @@ import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.AvroUtils;
 import org.apache.gora.util.ClassLoadingUtils;
+import org.apache.gora.util.GoraException;
 import org.ektorp.CouchDbConnector;
 import org.ektorp.CouchDbInstance;
+import org.ektorp.DocumentNotFoundException;
 import org.ektorp.ViewQuery;
 import org.ektorp.http.HttpClient;
 import org.ektorp.http.StdHttpClient;
@@ -50,10 +63,7 @@ import org.ektorp.support.CouchDbDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import com.google.common.primitives.Ints;
 
 /**
  * Implementation of a CouchDB data store to be used by gora.
@@ -105,9 +115,10 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
    * @param keyClass
    * @param persistentClass
    * @param properties
+   * @throws GoraException 
    */
   @Override
-  public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) {
+  public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) throws GoraException {
     LOG.debug("Initializing CouchDB store");
     super.initialize(keyClass, persistentClass, properties);
 
@@ -131,10 +142,8 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
 
       db = new StdCouchDbConnector(mapping.getDatabaseName(), dbInstance, myObjectMapperFactory);
       db.createDatabaseIfNotExists();
-
-    } catch (IOException e) {
-      LOG.error("Error while initializing CouchDB store: {}", new Object[] { e.getMessage() });
-      throw new RuntimeException(e);
+    } catch (Exception e) {
+      throw new GoraException("Error while initializing CouchDB store", e);
     }
   }
 
@@ -164,29 +173,45 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
    * Create a new database in CouchDB if necessary.
    */
   @Override
-  public void createSchema() {
-    if (schemaExists()) {
-      return;
+  public void createSchema() throws GoraException {
+    try {
+      if (schemaExists()) {
+        return;
+      }
+      dbInstance.createDatabase(mapping.getDatabaseName());
+    } catch (GoraException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new GoraException(e);
     }
-    dbInstance.createDatabase(mapping.getDatabaseName());
   }
 
   /**
    * Drop the database.
    */
   @Override
-  public void deleteSchema() {
-    if (schemaExists()) {
-      dbInstance.deleteDatabase(mapping.getDatabaseName());
-    }
+  public void deleteSchema() throws GoraException {
+    try {
+      if (schemaExists()) {
+        dbInstance.deleteDatabase(mapping.getDatabaseName());
+      }
+    } catch (GoraException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }     
   }
 
   /**
    * Check if the database already exists or should be created.
    */
   @Override
-  public boolean schemaExists() {
-    return dbInstance.checkIfDbExists(mapping.getDatabaseName());
+  public boolean schemaExists() throws GoraException {
+    try {
+      return dbInstance.checkIfDbExists(mapping.getDatabaseName());
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
   }
 
   /**
@@ -196,15 +221,18 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
    * @param fields list of fields to be loaded from the database
    */
   @Override
-  public T get(final K key, final String[] fields) {
+  public T get(final K key, final String[] fields) throws GoraException {
 
     final Map<String, Object>  result;
     try {
       result = db.get(Map.class, key.toString());
       return newInstance(result, getFieldsToQuery(fields));
+    } catch (DocumentNotFoundException e) {
+      return null ;
+    } catch (GoraException e) {
+      throw e;
     } catch (Exception e) {
-      LOG.info(e.getMessage(), e);
-      return null;
+      throw new GoraException(e);
     }
   }
 
@@ -215,7 +243,7 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
    * @param obj the object to be inserted
    */
   @Override
-  public void put(K key, T obj) {
+  public void put(K key, T obj) throws GoraException {
     final Map<String, Object> buffer = Collections.synchronizedMap(new LinkedHashMap<String, Object>());
     buffer.put("_id", key);
 
@@ -336,15 +364,19 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
    * @return whether the object was successfully deleted
    */
   @Override
-  public boolean delete(K key) {
+  public boolean delete(K key) throws GoraException {
     if (key == null) {
       deleteSchema();
       createSchema();
       return true;
     }
-    final String keyString = key.toString();
-    final Map<String, Object> referenceData = db.get(Map.class, keyString);
-    return StringUtils.isNotEmpty(db.delete(keyString, referenceData.get("_rev").toString()));
+    try {
+      final String keyString = key.toString();
+      final Map<String, Object> referenceData = db.get(Map.class, keyString);
+      return StringUtils.isNotEmpty(db.delete(keyString, referenceData.get("_rev").toString()));
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
   }
 
   /**
@@ -355,7 +387,7 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
    * @return number of deleted records
    */
   @Override
-  public long deleteByQuery(Query<K, T> query) {
+  public long deleteByQuery(Query<K, T> query) throws GoraException {
 
     final K key = query.getKey();
     final K startKey = query.getStartKey();
@@ -366,24 +398,28 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
       createSchema();
       return -1;
     } else {
-      final ViewQuery viewQuery = new ViewQuery()
-          .allDocs()
-          .includeDocs(true)
-          .key(key)
-          .startKey(startKey)
-          .endKey(endKey);
-
-      final List<Map> result = db.queryView(viewQuery, Map.class);
-      final Map<String, List<String>> revisionsToPurge = new HashMap<>();
-
-      for (Map map : result) {
-        final List<String> revisions = new ArrayList<>();
-        String keyString = map.get("_id").toString();
-        String rev = map.get("_rev").toString();
-        revisions.add(rev);
-        revisionsToPurge.put(keyString, revisions);
+      try {
+        final ViewQuery viewQuery = new ViewQuery()
+            .allDocs()
+            .includeDocs(true)
+            .key(key)
+            .startKey(startKey)
+            .endKey(endKey);
+  
+        final List<Map> result = db.queryView(viewQuery, Map.class);
+        final Map<String, List<String>> revisionsToPurge = new HashMap<>();
+  
+        for (Map map : result) {
+          final List<String> revisions = new ArrayList<>();
+          String keyString = map.get("_id").toString();
+          String rev = map.get("_rev").toString();
+          revisions.add(rev);
+          revisionsToPurge.put(keyString, revisions);
+        }
+        return db.purge(revisionsToPurge).getPurged().size();
+      } catch (Exception e) {
+        throw new GoraException(e);
       }
-      return db.purge(revisionsToPurge).getPurged().size();
     }
   }
 
@@ -401,18 +437,24 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
    * Execute the query and return the result.
    */
   @Override
-  public Result<K, T> execute(Query<K, T> query) {
-    query.setFields(getFieldsToQuery(query.getFields()));
-    final ViewQuery viewQuery = new ViewQuery()
-        .allDocs()
-        .includeDocs(true)
-        .startKey(query.getStartKey())
-        .endKey(query.getEndKey())
-        .limit(Ints.checkedCast(query.getLimit())); //FIXME GORA have long value but ektorp client use integer
+  public Result<K, T> execute(Query<K, T> query) throws GoraException {
 
-    CouchDBResult<K, T> couchDBResult = new CouchDBResult<>(this, query, db.queryView(viewQuery, Map.class));
+    try {
 
-    return couchDBResult;
+      query.setFields(getFieldsToQuery(query.getFields()));
+      final ViewQuery viewQuery = new ViewQuery()
+          .allDocs()
+          .includeDocs(true)
+          .startKey(query.getStartKey())
+          .endKey(query.getEndKey())
+          .limit(Ints.checkedCast(query.getLimit())); //FIXME GORA have long value but ektorp client use integer
+      CouchDBResult<K, T> couchDBResult = new CouchDBResult<>(this, query, db.queryView(viewQuery, Map.class));
+      return couchDBResult;
+
+    } catch (Exception e) {
+      throw new GoraException(e) ;
+    }
+
   }
 
   @Override
@@ -432,9 +474,9 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
    * @param result result from the query to the database
    * @param fields the list of fields to be mapped to the persistence class instance
    * @return a persistence class instance which content was deserialized
-   * @throws IOException
+   * @throws GoraException
    */
-  public T newInstance(Map<String, Object> result, String[] fields) throws IOException {
+  public T newInstance(Map<String, Object> result, String[] fields) throws GoraException {
     if (result == null)
       return null;
 
@@ -461,7 +503,7 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
 
   }
 
-  private Object fromCouchDBRecord(final Schema fieldSchema, final String docf, final Object value) {
+  private Object fromCouchDBRecord(final Schema fieldSchema, final String docf, final Object value) throws GoraException {
 
     final Object innerValue = ((Map) value).get(docf);
     if (innerValue == null) {
@@ -472,7 +514,7 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
     try {
       clazz = ClassLoadingUtils.loadClass(fieldSchema.getFullName());
     } catch (ClassNotFoundException e) {
-      LOG.debug(e.getMessage());
+      throw new GoraException(e) ;
     }
 
     final PersistentBase record = (PersistentBase) new BeanFactoryImpl(keyClass, clazz).newPersistent();
@@ -485,7 +527,7 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
     return record;
   }
 
-  private Object fromCouchDBMap(final Schema fieldSchema, final Field field, final String docf, final Object value) {
+  private Object fromCouchDBMap(final Schema fieldSchema, final Field field, final String docf, final Object value) throws GoraException {
 
     final Map<String, Object> map = (Map<String, Object>) ((Map<String, Object>) value).get(docf);
     final Map<Utf8, Object> rmap = new HashMap<>();
@@ -503,7 +545,7 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
     return new DirtyMapWrapper<>(rmap);
   }
 
-  private Object fromCouchDBUnion(final Schema fieldSchema, final Field field, final String docf, final Object value) {
+  private Object fromCouchDBUnion(final Schema fieldSchema, final Field field, final String docf, final Object value) throws GoraException {
 
     Object result;// schema [type0, type1]
     Schema.Type type0 = fieldSchema.getTypes().get(0).getType();
@@ -520,13 +562,13 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
       // Deserialize as if schema was ["type"]
       result = fromDBObject(innerSchema, field, docf, value);
     } else {
-      throw new IllegalStateException(
+      throw new GoraException(
           "CouchDBStore doesn't support 3 types union field yet. Please update your mapping");
     }
     return result;
   }
 
-  private Object fromCouchDBList(final Schema fieldSchema, final Field field, final String docf, final Object value) {
+  private Object fromCouchDBList(final Schema fieldSchema, final Field field, final String docf, final Object value) throws GoraException {
     final List<Object> list = (List<Object>) ((Map<String, Object>) value).get(docf);
     final List<Object> rlist = new ArrayList<>();
 
@@ -574,7 +616,7 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
     return result;
   }
 
-  private Object fromDBObject(final Schema fieldSchema, final Field field, final String docf, final Object value) {
+  private Object fromDBObject(final Schema fieldSchema, final Field field, final String docf, final Object value) throws GoraException {
     if (value == null) {
       return null;
     }
@@ -615,14 +657,23 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
   }
 
   @Override
-  public void flush() {
-    db.executeBulk(bulkDocs);
-    bulkDocs.clear();
-    db.flushBulkBuffer();
+  public void flush() throws GoraException {
+    try {
+      db.executeBulk(bulkDocs);
+      bulkDocs.clear();
+      db.flushBulkBuffer();
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
   }
 
   @Override
   public void close() {
-    flush();
+    try {
+      flush();
+    } catch (GoraException e) {
+      //Log and ignore. We are closing... so is doest not matter if it just died
+      LOG.warn("Error flushing when closing", e);
+    }
   }
 }

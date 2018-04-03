@@ -17,40 +17,83 @@
  */
 package org.apache.gora.solr.store;
 
-import java.io.IOException;
-
-import org.apache.gora.examples.generated.Employee;
+import org.apache.gora.examples.WebPageDataCreator;
 import org.apache.gora.examples.generated.WebPage;
+import org.apache.gora.query.Query;
 import org.apache.gora.solr.GoraSolrTestDriver;
-import org.apache.gora.store.DataStore;
-import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.DataStoreTestBase;
-import org.junit.Ignore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static junit.framework.Assert.assertNull;
+import static org.apache.gora.examples.WebPageDataCreator.SORTED_URLS;
+import static org.apache.gora.examples.WebPageDataCreator.URLS;
+import static org.apache.gora.store.DataStoreTestUtil.assertNumResults;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class TestSolrStore extends DataStoreTestBase {
+
+  private static final Logger LOG = LoggerFactory.getLogger(TestSolrStore.class);
+  private static final int NUM_KEYS = 4;
   
   static {
     setTestDriver(new GoraSolrTestDriver());
   }
 
   @Override
-  protected DataStore<String, Employee> createEmployeeDataStore()
-      throws IOException {
-    SolrStore<String, Employee> store = new SolrStore<>();
-    store.initialize(String.class, Employee.class, DataStoreFactory.createProps());
-    return store;
+  public void testDeleteByQueryFields()
+          throws Exception {
+    Query<String, WebPage> query;
+
+    //test 5 - delete all with some fields
+    WebPageDataCreator.createWebPageData(this.webPageStore);
+
+    query = this.webPageStore.newQuery();
+    query.setFields("outlinks"
+            , "parsedContent", "content");
+
+    assertNumResults(this.webPageStore.newQuery(), URLS.length);
+    this.webPageStore.deleteByQuery(query);
+
+    this.webPageStore.flush();
+
+    assertNumResults(this.webPageStore.newQuery(), URLS.length);
+
+    //assert that data is deleted
+    for (String SORTED_URL : SORTED_URLS) {
+      WebPage page = this.webPageStore.get(SORTED_URL);
+      assertNotNull(page);
+
+      assertNotNull(page.getUrl());
+      assertEquals(page.getUrl().toString(), SORTED_URL);
+      assertEquals("Map of Outlinks should have a size of '0' as the deleteByQuery "
+              + "not only removes the data but also the data structure.", 0, page.getOutlinks().size());
+      assertEquals(0, page.getParsedContent().size());
+      if (page.getContent() != null) {
+        LOG.info("url: {}", page.getUrl().toString());
+        LOG.info("limit: {}", page.getContent().limit());
+      } else {
+        assertNull(page.getContent());
+      }
+    }
+
+    //test 6 - delete some with some fields
+    WebPageDataCreator.createWebPageData(this.webPageStore);
+
+    query = this.webPageStore.newQuery();
+    query.setFields("url");
+    String startKey = SORTED_URLS[NUM_KEYS];
+    String endKey = SORTED_URLS[SORTED_URLS.length - NUM_KEYS];
+    query.setStartKey(startKey);
+    query.setEndKey(endKey);
+
+    assertNumResults(this.webPageStore.newQuery(), URLS.length);
+    this.webPageStore.deleteByQuery(query);
+
+    this.webPageStore.flush();
+
+    assertNumResults(query,0);
+
   }
-
-  @Override
-  protected DataStore<String, WebPage> createWebPageDataStore()
-      throws IOException {
-    SolrStore<String, WebPage> store = new SolrStore<>();
-    store.initialize(String.class, WebPage.class, DataStoreFactory.createProps());
-    return store;
-  }
-
-
-  @Ignore("GORA-310 and GORA-311 issues are not fixed at SolrStore")
-  @Override
-  public void testDeleteByQueryFields() throws IOException {}
 }

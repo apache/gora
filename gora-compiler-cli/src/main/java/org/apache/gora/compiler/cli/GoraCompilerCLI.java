@@ -20,8 +20,9 @@ package org.apache.gora.compiler.cli;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.gora.compiler.GoraCompiler;
-
+import org.apache.gora.compiler.utils.LicenseHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,24 +41,59 @@ public class GoraCompilerCLI {
       printHelp();
       System.exit(1);
     }
+    // Setting the default license header to ASLv2
+    LicenseHeaders licenseHeader = new LicenseHeaders("ASLv2");
+    // Checking for user provided license
+    for (int i = 0; i < args.length; i++) {
+      if ("-license".equals(args[i])) {
+        if (i == args.length - 1) {
+          LOG.error("Must supply a valid license id.");
+          printHelp();
+          System.exit(1);
+        }
+        if (licenseHeader.isValidLicense(args[i + 1])) {
+          licenseHeader.setLicenseName(args[i + 1]);
+          args = (String[]) ArrayUtils.removeElement(args, args[i + 1]);
+          args = (String[]) ArrayUtils.removeElement(args, args[i]);
+        } else {
+          LOG.error("Must supply a valid license id.");
+          printHelp();
+          System.exit(1);
+        }
+      }
+    }
+
     File outputDir = new File(args[args.length-1]);
     if(!outputDir.isDirectory()){
       LOG.error("Must supply a directory for output");
       printHelp();
       System.exit(1);
     }
-    File[] inputs = new File[args.length-1];
-    for(int i  = 0; i<inputs.length; i++){
-      File inputFile = new File(args[i]);
-      if(!inputFile.isFile()){
-        LOG.error("Input must be a file.");
+    // Processing input directory or input files
+    File inputDir = new File(args[0]);
+    File[] inputFiles = null;
+    if (inputDir.isDirectory()) {
+      if (inputDir.length() > 0)
+        inputFiles = inputDir.listFiles();
+      else {
+        LOG.error("Input directory must include at least one file.");
         printHelp();
         System.exit(1);
       }
-      inputs[i] = inputFile;
+    } else {
+      inputFiles = new File[args.length - 1];
+      for (int i = 0; i < inputFiles.length; i++) {
+        File inputFile = new File(args[i]);
+        if (!inputFile.isFile()) {
+          LOG.error("Input must be a file.");
+          printHelp();
+          System.exit(1);
+        }
+        inputFiles[i] = inputFile;
+      }
     }
     try {
-      GoraCompiler.compileSchema(inputs, outputDir);
+      GoraCompiler.compileSchema(inputFiles, outputDir, licenseHeader);
       LOG.info("Compiler executed SUCCESSFULL.");
     } catch (IOException e) {
       LOG.error("Error while compiling schema files. Check that the schemas are properly formatted.");
@@ -67,6 +103,16 @@ public class GoraCompilerCLI {
   }
 
   private static void printHelp() {
-    LOG.info("Usage: gora-compiler ( -h | --help ) | (<input> [<input>...] <output>)");
+    LOG.info("Usage: gora-compiler ( -h | --help ) | (<input> [<input>...] <output> [-license <id>])");
+    LOG.error("License header options include;\n" +
+              "\t\t  ASLv2   (Apache Software License v2.0) \n" +
+              "\t\t  AGPLv3  (GNU Affero General Public License) \n" +
+              "\t\t  CDDLv1  (Common Development and Distribution License v1.0) \n" +
+              "\t\t  FDLv13  (GNU Free Documentation License v1.3) \n" +
+              "\t\t  GPLv1   (GNU General Public License v1.0) \n" +
+              "\t\t  GPLv2   (GNU General Public License v2.0) \n" +
+              "\t\t  GPLv3   (GNU General Public License v3.0) \n" +
+              "\t\t  LGPLv21 (GNU Lesser General Public License v2.1) \n" +
+              "\t\t  LGPLv3  (GNU Lesser General Public License v2.1)");
   }
 }

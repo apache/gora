@@ -21,10 +21,10 @@ package org.apache.gora.memory.store;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NavigableMap;
-import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import org.apache.avro.Schema.Field;
@@ -38,6 +38,7 @@ import org.apache.gora.query.impl.ResultBase;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.AvroUtils;
+import org.apache.gora.util.GoraException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -147,7 +148,7 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
    */
   @SuppressWarnings("unchecked")
   @Override
-  public Result<K, T> execute(Query<K, T> query) {
+  public Result<K, T> execute(Query<K, T> query) throws GoraException {
     K startKey = query.getStartKey();
     K endKey = query.getEndKey();
     if(startKey == null) {
@@ -163,14 +164,18 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
     //check if query.fields is null
     query.setFields(getFieldsToQuery(query.getFields()));
-    ConcurrentNavigableMap<K,T> submap = null;
-    try {
-      submap =  map.subMap(startKey, true, endKey, true);
-    } catch (NullPointerException npe){
-      LOG.info("Either startKey || endKey || startKey and endKey value(s) is null. "
-          + "No results will be returned for query to MemStore.");
-      return new MemResult<>(this, query, new ConcurrentSkipListMap<K, T>());
+    NavigableMap<K,T> submap = null;
+    if (startKey != null && endKey != null) {
+      try {
+        submap =  map.subMap(startKey, true, endKey, true);
+      } catch (Exception e) {
+        throw new GoraException(e);
+      }
+    } else {
+      // Empty
+      submap = Collections.emptyNavigableMap() ;
     }
+    
     return new MemResult<>(this, query, submap);
   }
 

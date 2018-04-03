@@ -77,18 +77,6 @@ public class InfinispanStoreTest extends DataStoreTestBase {
     webPageDataStore = (InfinispanStore<String, WebPage>) webPageStore;
   }
 
-  @Override
-  protected DataStore<String, Employee> createEmployeeDataStore()
-      throws IOException {
-    throw new IllegalStateException("Using driver.");
-  }
-
-  @Override
-  protected DataStore<String, WebPage> createWebPageDataStore()
-      throws IOException {
-    throw new IllegalStateException("Using driver.");
-  }
-
   @Test
   public void testQueryMarshability() throws Exception {
     Utils.populateEmployeeStore(employeeStore, 100);

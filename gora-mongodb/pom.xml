@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache.gora</groupId>
     <artifactId>gora</artifactId>
-    <version>0.7-goraexplorer-SNAPSHOT</version>
+    <version>0.9-goraexplorer-SNAPSHOT</version>
     <relativePath>../</relativePath>
   </parent>
   <artifactId>gora-mongodb</artifactId>
@@ -52,7 +52,7 @@
   <properties>
     <osgi.import>*</osgi.import>
     <osgi.export>org.apache.gora.mongodb*;version="${project.version}";-noimport:=true</osgi.export>
-    <mongo.driver.version>3.4.2</mongo.driver.version>
+    <mongo.driver.version>3.5.0</mongo.driver.version>
     <mongo.embed.version>2.0.0</mongo.embed.version>
   </properties>
 

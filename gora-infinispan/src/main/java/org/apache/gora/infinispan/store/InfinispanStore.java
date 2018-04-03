@@ -17,6 +17,14 @@
  */
 package org.apache.gora.infinispan.store;
 
+import static org.apache.gora.mapreduce.GoraRecordReader.BUFFER_LIMIT_READ_NAME;
+import static org.apache.gora.mapreduce.GoraRecordReader.BUFFER_LIMIT_READ_VALUE;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+
 import org.apache.gora.infinispan.query.InfinispanQuery;
 import org.apache.gora.infinispan.query.InfinispanResult;
 import org.apache.gora.persistency.impl.PersistentBase;
@@ -24,14 +32,9 @@ import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.store.impl.DataStoreBase;
+import org.apache.gora.util.GoraException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.*;
-
-import static org.apache.gora.mapreduce.GoraRecordReader.BUFFER_LIMIT_READ_NAME;
-import static org.apache.gora.mapreduce.GoraRecordReader.BUFFER_LIMIT_READ_VALUE;
 
 /**
  * {@link org.apache.gora.infinispan.store.InfinispanStore} is the primary class
@@ -71,7 +74,7 @@ public class InfinispanStore<K, T extends PersistentBase> extends DataStoreBase<
    * @param properties
    */
   @Override
-  public synchronized void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) {
+  public synchronized void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) throws GoraException {
 
     try {
 
@@ -101,8 +104,10 @@ public class InfinispanStore<K, T extends PersistentBase> extends DataStoreBase<
       primaryFieldName = schema.getFields().get(0).name();
       this.infinispanClient.initialize(keyClass, persistentClass, properties);
 
+    } catch (GoraException e) {
+      throw e;
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new GoraException(e);
     }
   }
 
@@ -113,32 +118,40 @@ public class InfinispanStore<K, T extends PersistentBase> extends DataStoreBase<
   }
 
   @Override
-  public void createSchema() {
+  public void createSchema() throws GoraException {
     LOG.debug("createSchema()");
     this.infinispanClient.createCache();
   }
 
   @Override
-  public boolean delete(K key) {
+  public boolean delete(K key) throws GoraException {
     LOG.debug("delete(" + key+")");
-    this.infinispanClient.deleteByKey(key);
-    return true;
-  }
-
-  @Override
-  public long deleteByQuery(Query<K, T> query) {
-    ((InfinispanQuery<K, T>) query).build();
-    LOG.debug("deleteByQuery("+query.toString()+")");
-    InfinispanQuery<K, T> q = (InfinispanQuery) query;
-    q.build();
-    for( T t : q.list()){
-      infinispanClient.deleteByKey((K) t.get(primaryFieldPos));
+    try {
+      this.infinispanClient.deleteByKey(key);
+      return true;
+    } catch (Exception e) {
+      throw new GoraException(e);
     }
-    return q.getResultSize();
   }
 
   @Override
-  public void deleteSchema() {
+  public long deleteByQuery(Query<K, T> query) throws GoraException {
+    try {
+      ((InfinispanQuery<K, T>) query).build();
+      LOG.debug("deleteByQuery("+query.toString()+")");
+      InfinispanQuery<K, T> q = (InfinispanQuery) query;
+      q.build();
+      for( T t : q.list()){
+        infinispanClient.deleteByKey((K) t.get(primaryFieldPos));
+      }
+      return q.getResultSize();
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
+  }
+
+  @Override
+  public void deleteSchema() throws GoraException {
     LOG.debug("deleteSchema()");
     this.infinispanClient.dropCache();
   }
@@ -147,39 +160,47 @@ public class InfinispanStore<K, T extends PersistentBase> extends DataStoreBase<
    * Execute the query and return the result.
    */
   @Override
-  public Result<K, T> execute(Query<K, T> query) {
+  public Result<K, T> execute(Query<K, T> query) throws GoraException {
     LOG.debug("execute()");
-    ((InfinispanQuery<K,T>)query).build();
-    InfinispanResult<K,T> result = new InfinispanResult<>(this, (InfinispanQuery<K,T>)query);
-    LOG.trace("query: " + query.toString());
-    LOG.trace("result size: " + result.size());
-    return result;
-  }
-
-  @Override
-  public T get(K key){
-    LOG.debug("get("+key+")");
-    return infinispanClient.get(key);
-  }
-
-  @Override
-  public T get(K key, String[] fields) {
-    LOG.debug("get("+key+","+fields+")");
-    if (fields==null)
-      return infinispanClient.get(key);
-
-    InfinispanQuery<K, T> query = new InfinispanQuery<K, T>(this);
-    query.setKey(key);
-    query.setFields(fields);
-    query.build();
-
-
-    Result<K,T> result = query.execute();
     try {
+      ((InfinispanQuery<K,T>)query).build();
+      InfinispanResult<K,T> result = null;
+      result = new InfinispanResult<>(this, (InfinispanQuery<K,T>)query);
+      LOG.trace("query: " + query.toString());
+      LOG.trace("result size: " + result.size());
+      return result;
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
+  }
+
+  @Override
+  public T get(K key) throws GoraException {
+    LOG.debug("get("+key+")");
+    try {
+      return infinispanClient.get(key);
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
+  }
+
+  @Override
+  public T get(K key, String[] fields) throws GoraException {
+    LOG.debug("get("+key+","+fields+")");
+    try {
+      if (fields==null)
+        return infinispanClient.get(key);
+  
+      InfinispanQuery<K, T> query = new InfinispanQuery<K, T>(this);
+      query.setKey(key);
+      query.setFields(fields);
+      query.build();
+
+      Result<K,T> result = query.execute();
       result.next();
       return result.get();
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new GoraException(e);
     }
   }
 
@@ -242,9 +263,13 @@ public class InfinispanStore<K, T extends PersistentBase> extends DataStoreBase<
   }
 
   @Override
-  public void flush() {
+  public void flush() throws GoraException {
     LOG.debug("flush()");
-    infinispanClient.flush();
+    try {
+      infinispanClient.flush();
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
   }
 
   /**
@@ -267,7 +292,7 @@ public class InfinispanStore<K, T extends PersistentBase> extends DataStoreBase<
   }
 
   @Override
-  public void put(K key, T obj) {
+  public void put(K key, T obj) throws GoraException {
     LOG.debug("put(" +key.toString()+")");
     LOG.trace(obj.toString());
 
@@ -276,12 +301,16 @@ public class InfinispanStore<K, T extends PersistentBase> extends DataStoreBase<
 
     if (!obj.get(primaryFieldPos).equals(key) )
       LOG.warn("Invalid or different primary field :"+key+"<->"+obj.get(primaryFieldPos));
-
-    this.infinispanClient.put(key, obj);
+    
+    try {
+      this.infinispanClient.put(key, obj);
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
   }
 
   @Override
-  public boolean schemaExists() {
+  public boolean schemaExists() throws GoraException {
     LOG.debug("schemaExists()");
     return infinispanClient.cacheExists();
   }
