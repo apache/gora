@@ -75,3 +75,18 @@ for f in `ls $DIR` ; do
   echo "Command: $GORA_BIN goracompiler $DIR$f $OUTDIR"
   $GORA_BIN goracompiler $DIR$f $OUTDIR 
 done
+
+# GORA-CASSANDRA
+
+MODULE=gora-cassandra
+DIR=$GORA_HOME/$MODULE/src/examples/avro/
+OUTDIR=$GORA_HOME/$MODULE/src/examples/java
+GORA_BIN=$GORA_HOME/bin/gora
+
+rm -r $OUTDIR/org/apache/gora/cassandra/example/generated/AvroSerialization/*
+
+for f in `ls $DIR` ; do
+  echo "Compiling $DIR$f"
+  echo "Command: $GORA_BIN goracompiler $DIR$f $OUTDIR"
+  $GORA_BIN goracompiler $DIR$f $OUTDIR 
+done

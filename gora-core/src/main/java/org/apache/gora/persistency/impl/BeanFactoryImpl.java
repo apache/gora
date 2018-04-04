@@ -84,9 +84,10 @@ public class BeanFactoryImpl<K, T extends Persistent> implements BeanFactory<K, 
    * @param keyClass
    * @param persistentClassName - namespace.ClassName of the persistent entities
    * @throws ClassNotFoundException - If the persistent class name does not exist 
+   * @throws GoraException 
    */
   @SuppressWarnings({ "unchecked" })
-  public BeanFactoryImpl(Class<K> keyClass, String persistentClassName) throws ClassNotFoundException {
+  public BeanFactoryImpl(Class<K> keyClass, String persistentClassName) throws ClassNotFoundException, GoraException {
     this(keyClass, (Class<T>) ClassLoadingUtils.loadClass(persistentClassName)) ;
   }
   

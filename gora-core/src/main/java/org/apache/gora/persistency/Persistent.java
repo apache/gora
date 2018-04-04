@@ -123,8 +123,8 @@ public interface Persistent extends Dirtyable, Cloneable {
    * Returns the avro's data schema
    * @return the parsed schema definition
    */
-  public Schema getSchema() ;
+  public Schema getSchema();
   
-  public Persistent clone();
+  public Persistent clone() throws CloneNotSupportedException;
   
 }

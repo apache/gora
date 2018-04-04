@@ -133,4 +133,17 @@ public class Document implements Persistent {
 
   }
 
+  @Transient
+  @Override
+  public Schema getSchema() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Transient
+  @Override
+  public Persistent clone() {
+    return this.clone();
+  }
+  
 }

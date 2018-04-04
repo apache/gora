@@ -882,12 +882,12 @@
 
       <dependency>
         <groupId>org.apache.gora</groupId>
-        <artifactId>gora-solr-4</artifactId>
+        <artifactId>gora-solr</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.gora</groupId>
-        <artifactId>gora-solr-4</artifactId>
+        <artifactId>gora-solr</artifactId>
         <version>${project.version}</version>
         <classifier>tests</classifier>
       </dependency>

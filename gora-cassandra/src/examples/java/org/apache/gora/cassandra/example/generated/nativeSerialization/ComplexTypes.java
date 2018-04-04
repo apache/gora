@@ -196,4 +196,18 @@ public class ComplexTypes implements Persistent {
   public void clearDirty() {
 
   }
+  
+  @Transient
+  @Override
+  public Schema getSchema() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Transient
+  @Override
+  public Persistent clone() {
+    return this.clone();
+  }
+
 }
