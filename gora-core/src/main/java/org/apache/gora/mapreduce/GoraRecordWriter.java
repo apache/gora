@@ -76,4 +76,26 @@ public class GoraRecordWriter<K, T> extends RecordWriter<K, T> {
       throw new RuntimeException(e);
     }
   }
+  
+  /**
+   * Method that deletes an entity from a store by key.
+   * Needed for gora-pig.
+   * 
+   * @param key
+   * @throws IOException
+   */
+  public void delete(K key) throws IOException {
+    try{
+      store.delete(key) ;
+      counter.increment();
+      if (counter.isModulo()) {
+        LOG.info("Flushing the datastore after " + counter.getRecordsNumber() + " records");
+        store.flush();
+      }
+    }catch(Exception e){
+      LOG.error("Exception at GoraRecordWriter#delete() while deleting to datastore." + e.getMessage());
+      throw new IOException(e) ;
+    }
+  }
+
 }

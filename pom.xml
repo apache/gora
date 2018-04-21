@@ -765,6 +765,7 @@
     <module>gora-compiler</module>
     <module>gora-compiler-cli</module>
     <module>gora-core</module>
+    <module>gora-pig</module>
     <module>gora-accumulo</module>
     <module>gora-cassandra</module>
     <module>gora-goraci</module>
@@ -778,9 +779,9 @@
     <module>gora-maven-plugin</module>
     <module>gora-mongodb</module>
     <module>gora-solr</module>
+    <module>gora-aerospike</module>
     <module>gora-tutorial</module>
     <module>sources-dist</module>
-    <module>gora-aerospike</module>
   </modules>
 
   <properties>
@@ -790,10 +791,11 @@
     <avro.version>1.8.1</avro.version>
 <!--     <jackson.version>1.6.9</jackson.version> -->
     <!-- Hadoop Dependencies -->
-    <hadoop-2.version>2.5.2</hadoop-2.version>
-    <hadoop-2.test.version>2.5.2</hadoop-2.test.version>
-    <hbase.version>1.2.6</hbase.version>
-    <hbase.test.version>1.2.6</hbase.test.version>
+    <!-- HDP 2.6 hadoop+hbase versions -->
+    <hadoop-2.version>2.7.3</hadoop-2.version>
+    <hadoop-2.test.version>2.7.3</hadoop-2.test.version>
+    <hbase.version>1.1.2</hbase.version>
+    <hbase.test.version>1.1.2</hbase.test.version>
     <cxf-rt-frontend-jaxrs.version>2.5.2</cxf-rt-frontend-jaxrs.version>
     <!-- Amazon Dependencies -->
     <amazon.version>1.10.55</amazon.version>
@@ -852,6 +854,12 @@
     <maven-deploy-plugin.version>2.5</maven-deploy-plugin.version>
     <checksum-maven-plugin.version>1.0.1</checksum-maven-plugin.version>
     <maven-clean-plugin.version>2.5</maven-clean-plugin.version>
+
+    <!-- Pig Dependencies -->
+    <pig.version>0.16.0</pig.version>
+    <automaton.version>1.11-8</automaton.version>
+    <antlr.version>3.4</antlr.version>
+    <datafu.version>1.2.0</datafu.version>
 
     <!-- General Properties -->
     <implementation.build>${scmBranch}@r${buildNumber}</implementation.build>
@@ -1565,6 +1573,40 @@
         <groupId>com.github.raymanrt</groupId>
         <artifactId>orientqb</artifactId>
         <version>${orientqb.version}</version>
+      </dependency>
+
+      <!-- Pig -->
+      <dependency>
+          <groupId>org.apache.pig</groupId>
+          <artifactId>pig</artifactId>
+          <classifier>h2</classifier>
+          <version>${pig.version}</version>
+          <exclusions>
+              <exclusion>
+                  <groupId>org.apache.avro</groupId>
+                  <artifactId>avro</artifactId>
+              </exclusion>
+          </exclusions>
+      </dependency>
+
+      <dependency>
+          <groupId>dk.brics.automaton</groupId>
+          <artifactId>automaton</artifactId>
+          <version>${automaton.version}</version>
+          <scope>test</scope>
+      </dependency>
+
+      <dependency>
+          <groupId>org.antlr</groupId>
+          <artifactId>antlr-runtime</artifactId>
+          <version>${antlr.version}</version>
+          <scope>test</scope>
+      </dependency>
+
+      <dependency>
+          <groupId>com.linkedin.datafu</groupId>
+          <artifactId>datafu</artifactId>
+          <version>${datafu.version}</version>
       </dependency>
 
       <!-- Testing Dependencies -->

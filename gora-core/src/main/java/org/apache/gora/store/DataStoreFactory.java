@@ -357,6 +357,11 @@ public class DataStoreFactory{
       if(value != null) {
         return value;
       }
+      //try once with lowercase
+      value = getProperty(properties, fullKey.toLowerCase(Locale.getDefault()));
+      if(value != null) {
+        return value;
+      }
       if(clazz.equals(DataStoreBase.class)) {
         break;
       }
