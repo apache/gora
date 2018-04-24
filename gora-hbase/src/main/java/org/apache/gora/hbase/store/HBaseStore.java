@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URLClassLoader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -145,7 +146,7 @@ implements Configurable {
       InputStream mappingInputStream ;
       // If there is a mapping definition in the configuration, use it.
       if (getConf().get(XML_MAPPING_DEFINITION, null) != null) {
-           mappingInputStream = IOUtils.toInputStream(getConf().get(XML_MAPPING_DEFINITION, null)) ;
+           mappingInputStream = IOUtils.toInputStream(getConf().get(XML_MAPPING_DEFINITION), (Charset)null) ;
       }
       // Otherwise use the configuration from de default file gora-hbase-mapping.xml or whatever
       // configured in the key "gora.hbase.mapping.file"

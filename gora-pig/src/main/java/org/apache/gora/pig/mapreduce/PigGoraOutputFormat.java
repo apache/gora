@@ -1,4 +1,4 @@
-package org.apache.gora.pig;
+package org.apache.gora.pig.mapreduce;
 
 import java.io.IOException;
 

@@ -18,6 +18,7 @@ import org.apache.gora.mapreduce.GoraOutputFormat;
 import org.apache.gora.mapreduce.GoraRecordWriter;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.pig.mapreduce.GoraOutputFormatFactory;
+import org.apache.gora.pig.mapreduce.PigGoraOutputFormat;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.util.ClassLoadingUtils;
@@ -41,7 +42,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Storage to delete rows by key.
+ * 
+ * 
+ * STORE webpages_keys INTO '.' USING org.apache.gora.pig.GoraDeleteStorage(
+ *                          'java.lang.String',
+ *                          'admin.WebPage',
+ *                          'rows') ;
+ * 
  * @see GoraStorage
+ * 
  * TODO Delete the delete type "values", since will be mandatory to rewrite all the map (Gora 0.4+ does
  *      not implements incremental updates).
  *
@@ -122,9 +132,6 @@ public class GoraDeleteStorage implements StoreFuncInterface {
    */
   @SuppressWarnings("rawtypes")
   protected DataStore getDataStore() throws GoraException {
-    if (this.localJobConf == null) {
-      throw new GoraException("Calling getDataStore(). setStoreLocation() must be called first!") ;
-    }
     if (this.dataStore == null) {
       this.dataStore = DataStoreFactory.getDataStore(this.keyClass, this.persistentClass, this.localJobConf) ;
     }

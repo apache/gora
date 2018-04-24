@@ -5,7 +5,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,7 +13,6 @@ import java.util.Properties;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
-import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericData.Array;
 import org.apache.gora.mapreduce.GoraInputFormat;
 import org.apache.gora.mapreduce.GoraMapReduceUtils;
@@ -24,6 +22,9 @@ import org.apache.gora.mapreduce.GoraRecordWriter;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.pig.mapreduce.GoraInputFormatFactory;
 import org.apache.gora.pig.mapreduce.GoraOutputFormatFactory;
+import org.apache.gora.pig.mapreduce.PigGoraOutputFormat;
+import org.apache.gora.pig.util.PersistentUtils;
+import org.apache.gora.pig.util.SchemaUtils;
 import org.apache.gora.query.Query;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
@@ -46,15 +47,12 @@ import org.apache.pig.ResourceSchema;
 import org.apache.pig.ResourceSchema.ResourceFieldSchema;
 import org.apache.pig.ResourceStatistics;
 import org.apache.pig.StoreFuncInterface;
-import org.apache.pig.backend.executionengine.ExecException;
 import org.apache.pig.backend.hadoop.executionengine.mapReduceLayer.PigSplit;
 import org.apache.pig.builtin.Utf8StorageConverter;
-import org.apache.pig.data.BagFactory;
 import org.apache.pig.data.DataBag;
 import org.apache.pig.data.DataByteArray;
 import org.apache.pig.data.DataType;
 import org.apache.pig.data.Tuple;
-import org.apache.pig.data.TupleFactory;
 import org.apache.pig.impl.util.UDFContext;
 import org.apache.pig.impl.util.Utils;
 import org.slf4j.Logger;
@@ -120,6 +118,15 @@ import org.slf4j.LoggerFactory;
  * GoraStorage prepareToRead()          org.apache.gora.pig.GoraStorage@680d4a6a [E]
  * GoraStorage getNext()                org.apache.gora.pig.GoraStorage@680d4a6a [E] - repeated until end
  * </pre>
+ * 
+ * To store values, the usage is:
+ * 
+ * <pre>
+ * STORE webpages INTO '.' USING org.apache.gora.pig.GoraStorage(
+ *                         'java.lang.String',
+ *                         'admin.WebPage',
+ *                         'baseUrl,status,content') ;
+ * </pre>
  */
 public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMetadata {
 
@@ -129,11 +136,27 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
    * Key in UDFContext properties that marks config is set (set at backend nodes)  
    */
   private static final String GORA_CONFIG_SET = "gorastorage.config.set" ;
+  
+  /**
+   * Key in UDFContext properties used to pass the STORE Pig Schema from frontend to backend.
+   */
   private static final String GORA_STORE_SCHEMA = "gorastorage.pig.store.schema" ;
 
+  /**
+   * Job that Pig configures
+   */
   protected Job job;
+  
+  /**
+   * Local job with the local core-site.xml + UDFProperties data
+   */
   protected JobConf localJobConf ; 
+  
+  /**
+   * Signature for each different GoraStore (based on configuration), that determines the UDFProperties to use
+   */
   protected String udfcSignature = null ;
+  
   
   protected String keyClassName ;
   protected String persistentClassName ;
@@ -150,8 +173,8 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
   protected ResourceSchema writeResourceSchema ;
   private   Map<String, ResourceFieldSchemaWithIndex> writeResourceFieldSchemaMap ;
   
-  /** Fields to load as Query - same as {@link loadSaveFields} but without 'key' */
-  protected String[] loadQueryFields ;
+  /** Fields to load as Query - but without 'key' - */
+  protected List<String> loadQueryFields ;
   
   /** Setted to 'true' if location is '*'. All fields will be loaded into a tuple when reading,
    * and all tuple fields will be copied to the persistent instance when saving. */
@@ -193,23 +216,19 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
 
     this.persistentSchema = this.persistentClass.newInstance().getSchema() ;
 
-    // Populates this.loadQueryFields
+    // Populate this.loadQueryFields
     List<String> declaredConstructorFields = new ArrayList<String>() ;
-    
     if (csvFields.contains("*")) {
-      // Declared fields "*"
-      this.setLoadSaveAllFields(true) ;
+      // Declared fields "*" means all fields
+      this.loadSaveAllFields = true ;
       for (Field field : this.persistentSchema.getFields()) {
         declaredConstructorFields.add(field.name()) ;
       }
     } else {
-      // CSV fields declared in constructor.
-      String[] fieldsInConstructor = csvFields.split("\\s*,\\s*") ; // splits "field, field, field, field"
-      declaredConstructorFields.addAll(Arrays.asList(fieldsInConstructor)) ;
+      // CSV fields declared in constructor "field,field,field,field,..."
+      declaredConstructorFields.addAll(Arrays.asList(csvFields.split("\\s*,\\s*"))) ;
     }
-
-    this.setLoadQueryFields(declaredConstructorFields.toArray(new String[0])) ;
-
+    this.loadQueryFields = declaredConstructorFields ;
   }
 
   /**
@@ -220,10 +239,6 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
    * @throws GoraException on DataStore creation error.
    */
   protected DataStore<?, ? extends PersistentBase> getDataStore() throws GoraException {
-    if (this.localJobConf == null) {
-    	LOG.error("Error integrating gora-pig and Pig. Calling getDataStore(). setLocation()/setStoreLocation() must be called first!") ;
-    	throw new GoraException("Calling getDataStore(). setLocation()/setStoreLocation() must be called first!") ;
-    }
     if (this.dataStore == null) {
       this.dataStore = DataStoreFactory.getDataStore(this.keyClass, this.persistentClass, this.localJobConf) ;
     }
@@ -231,7 +246,7 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
   }
   
   /**
-   * Gets the job, initialized the localJobConf (the actual used to create a datastore) and splits from 'location' the fields to load/save
+   * Gets the job, initializes the localJobConf (the actual used to create a datastore) and splits from 'location' the fields to load/save
    */
   @Override
   public void setLocation(String location, Job job) throws IOException {
@@ -249,11 +264,21 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
       return UDFContext.getUDFContext().getUDFProperties(this.getClass(), new String[] {this.udfcSignature,this.keyClassName,this.persistentClassName});
   }
   
+  /**
+   * Creates a localConf based on the existing core-site.xml configuration files + job configuration + udfProperties configuration.
+   * 
+   * This is needed to pass frontend configuration to backend, althought seems not to be working because, for example, it does not load hbase-site.xml
+   * TODO Maybe get rid of this. Future modificactions will tell if if is needed.
+   * 
+   * @param job
+   * @return
+   */
   private JobConf initializeLocalJobConfig(Job job) {
     Properties udfProps = getUDFProperties();
     Configuration jobConf = job.getConfiguration();
     GoraMapReduceUtils.setIOSerializations(jobConf, true) ;
     JobConf localConf = new JobConf(jobConf); // localConf starts as a copy of jobConf
+
     if (udfProps.containsKey(GORA_CONFIG_SET)) {
       // Already configured (maybe from frontend to backend)
       for (Entry<Object, Object> entry : udfProps.entrySet()) {
@@ -283,8 +308,8 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
     this.inputFormat = GoraInputFormatFactory.createInstance(this.keyClass, this.persistentClass);
 
     Query query = this.getDataStore().newQuery() ;
-    if (this.isLoadSaveAllFields() == false) {
-      query.setFields(this.getLoadQueryFields()) ;
+    if (this.loadSaveAllFields== false) {
+      query.setFields(this.loadQueryFields.toArray(new String[0])) ;
     }
     GoraInputFormat.setInput(this.job, query, false) ;
     
@@ -310,12 +335,10 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
 
     try {
       if (!this.reader.nextKeyValue()) {
-          LOG.trace("    Fin de lectura (null)") ;
           return null;
       }
     } catch (Exception e) {
-      LOG.error("Error retrieving next key-value.", e) ;
-      throw new IOException(e);
+      throw new IOException("Error retrieving next key-value.", e);
     }
 
     PersistentBase persistentObj;
@@ -323,135 +346,14 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
 
     try {
       persistentKey = this.reader.getCurrentKey() ;
-      LOG.trace("    key: {}", persistentKey) ;
       persistentObj = this.reader.getCurrentValue();
     } catch (Exception e) {
-      LOG.error("Error reading next key-value.", e) ;
-      throw new IOException(e);
+      throw new IOException("Error reading next key-value.", e);
     }
 
-    return persistent2Tuple(persistentKey, persistentObj, this.getLoadQueryFields()) ;
-
+    return PersistentUtils.persistent2Tuple(persistentKey, persistentObj, this.loadQueryFields) ;
   }
-  
-  /**
-   * Creates a pig tuple from a PersistentBase, given some fields in order. It adds "key" field.
-   * The resulting tuple has fields (key, field1, field2,...)
-   *
-   * Internally calls persistentField2PigType(Schema, Object) for each field
-   * 
-   * @param persistentKey Key of the PersistentBase object
-   * @param persistentObj PersistentBase instance
-   * @return Tuple with schemafields+1 elements (1<sup>st</sup> element is the row key) 
-   * @throws ExecException
-   *           On setting tuple field errors
-   */
-  private static Tuple persistent2Tuple(Object persistentKey, PersistentBase persistentObj, String[] fields) throws ExecException {
-    Tuple tuple = TupleFactory.getInstance().newTuple(fields.length + 1);
-    Schema avroSchema = persistentObj.getSchema() ;
-
-    tuple.set(0, persistentKey) ;
     
-    int fieldIndex = 1 ;
-    for (String fieldName : fields) {
-      Field field = avroSchema.getField(fieldName) ;
-      Schema fieldSchema = field.schema() ;
-      Object fieldValue = persistentObj.get(field.pos()) ;
-      tuple.set(fieldIndex++, persistentField2PigType(fieldSchema, fieldValue)) ;
-    }
-    return tuple ;
-  }
-  
-  /**
-   * Recursively converts PersistentBase fields to Pig type: Tuple | Bag | String | Long | ...
-   * 
-   * The mapping is as follows:
-   * null         -> null
-   * Boolean      -> Boolean
-   * Enum         -> Integer
-   * ByteBuffer   -> DataByteArray
-   * String       -> String
-   * Float        -> Float
-   * Double       -> Double
-   * Integer      -> Integer
-   * Long         -> Long
-   * Union        -> X
-   * Record       -> Tuple
-   * Array        -> Bag
-   * Map<String,b'> -> HashMap<String,Object>
-   * 
-   * @param schema Source schema
-   * @param data Source data: PersistentBase | String | Long,...
-   * @return Pig type: Tuple | Bag | String | Long | ...
-   * @throws ExecException 
-   */
-  @SuppressWarnings("unchecked")
-  private static Object persistentField2PigType(Schema schema, Object data) throws ExecException {
-    
-    Type schemaType = schema.getType();
-
-    switch (schemaType) {
-      case NULL:    return null ;
-      case BOOLEAN: return (Boolean)data ; 
-      case ENUM:    return new Integer(((Enum<?>)data).ordinal()) ;
-      case BYTES:   return new DataByteArray(((ByteBuffer)data).array()) ;
-      case STRING:  return data.toString() ;
-        
-      case FLOAT:
-      case DOUBLE:
-      case INT:
-      case LONG:    return data ;
-
-      case UNION:
-        int unionIndex = GenericData.get().resolveUnion(schema, data) ;
-        Schema unionTypeSchema = schema.getTypes().get(unionIndex) ;
-        return persistentField2PigType(unionTypeSchema, data) ;
-
-      case RECORD:
-        List<Field> recordFields = schema.getFields() ;
-        int numRecordElements = recordFields.size() ;
-        
-        Tuple recordTuple = TupleFactory.getInstance().newTuple(numRecordElements);
-        
-        for (int i=0; i<numRecordElements ; i++ ) {
-          recordTuple.set(i, persistentField2PigType(recordFields.get(i).schema(), ((PersistentBase)data).get(i))) ;
-        }
-        return recordTuple ;
-
-      case ARRAY:
-        DataBag bag = BagFactory.getInstance().newDefaultBag() ;
-        Schema arrValueSchema = schema.getElementType() ;
-        for(Object element: (List<?>)data) {
-          Object pigElement = persistentField2PigType(arrValueSchema, element) ;
-          if (pigElement instanceof Tuple) {
-            bag.add((Tuple)pigElement) ;
-          } else {
-            Tuple arrElemTuple = TupleFactory.getInstance().newTuple(1) ;
-            arrElemTuple.set(0, pigElement) ;
-            bag.add(arrElemTuple) ;
-          }
-        }
-        return bag ;
-
-      case MAP:
-        HashMap<String,Object> map = new HashMap<String,Object>() ;
-        for (Entry<CharSequence,?> e : ((Map<CharSequence,?>)data).entrySet()) {
-          map.put(e.getKey().toString(), persistentField2PigType(schema.getValueType(), e.getValue())) ;
-        }
-        return map ;
-
-      case FIXED:
-        // TODO: Implement FIXED data type
-        LOG.error("FIXED type not implemented") ;
-        throw new RuntimeException("Fixed type not implemented") ;
-
-      default:
-        LOG.error("Unexpected schema type {}", schemaType) ;
-        throw new RuntimeException("Unexpected schema type " + schemaType) ;
-    }
-  
-  }
-  
   @Override
   public void setUDFContextSignature(String signature) {
     this.udfcSignature = signature;
@@ -464,37 +366,6 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
     return location ;
   }
   
-  /**  
-   * Class created to avoid the StackoverflowException of recursive schemas when creating the
-   * schema in #getSchema.
-   * It holds the count of how many references to a Record schema has been created in a recursive call
-   * to use it only once (not counting the topmost) and the third time will be returned a schemaless tuple (= avro record).
-   */
-  private class RecursiveRecordSchema {
-    Map<String,Integer> generatedSchemas = new HashMap<String,Integer>() ;
-    public int incSchema(String schemaName) {
-      int numReferences = 0 ;
-      if (generatedSchemas.containsKey(schemaName)) {
-        numReferences = generatedSchemas.get(schemaName) ;
-      }
-      generatedSchemas.put(schemaName, ++numReferences) ;
-      return numReferences ;
-    }
-    public void decSchema(String schemaName) {
-      if (generatedSchemas.containsKey(schemaName)) {
-        int numReferences = generatedSchemas.get(schemaName) ;
-        if (numReferences > 0) {
-          generatedSchemas.put(schemaName, --numReferences) ;
-        }
-      }
-    }
-    public void clear() {
-      generatedSchemas.clear() ;
-    }
-    
-  } ;
-  
-  private RecursiveRecordSchema recursiveRecordSchema = new RecursiveRecordSchema() ;
   /**
    * Retrieves the Pig Schema from the declared fields in constructor and the Avro Schema
    * Avro Schema must begin with a record.
@@ -505,123 +376,9 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
     // Reuse if already created
     if (this.readResourceSchema != null) return this.readResourceSchema ;
     
-    ResourceFieldSchema[] resourceFieldSchemas = null ;
-    
-    int numFields = this.loadQueryFields.length + 1 ;
-    resourceFieldSchemas = new ResourceFieldSchema[numFields] ;
-    resourceFieldSchemas[0] = new ResourceFieldSchema().setType(DataType.findType(this.keyClass)).setName("key") ;
-    for (int fieldIndex = 1; fieldIndex < numFields ; fieldIndex++) {
-      recursiveRecordSchema.clear() ; // Initialize the recursive schema checker in each field
-      Field field = this.persistentSchema.getField(this.loadQueryFields[fieldIndex-1]) ;
-      if (field == null) {
-        LOG.error("Field \"" + this.loadQueryFields[fieldIndex-1] + "\" not found in the entity " + this.persistentClassName ) ;
-        throw new IOException("Field \"" + this.loadQueryFields[fieldIndex-1] + "\" not found in the entity " + this.persistentClassName ) ;
-      }
-      resourceFieldSchemas[fieldIndex] = this.avro2ResouceFieldSchema(field.schema()).setName(field.name()) ;
-    }
-
-    ResourceSchema resourceSchema = new ResourceSchema().setFields(resourceFieldSchemas) ;
     // Save Pig schema inside the instance
-    this.readResourceSchema = resourceSchema ;
+    this.readResourceSchema = SchemaUtils.generatePigSchema(this.persistentSchema, this.loadQueryFields, this.keyClass) ;
     return this.readResourceSchema ;
-  }
-
-  private ResourceFieldSchema avro2ResouceFieldSchema(Schema schema) throws IOException {
-
-    Type schemaType = schema.getType();
-
-    switch (schemaType) {
-      case NULL:    return new ResourceFieldSchema().setType(DataType.NULL) ;
-      case BOOLEAN: return new ResourceFieldSchema().setType(DataType.BOOLEAN) ; 
-      case ENUM:    return new ResourceFieldSchema().setType(DataType.INTEGER) ;
-      case BYTES:   return new ResourceFieldSchema().setType(DataType.BYTEARRAY);
-      case STRING:  return new ResourceFieldSchema().setType(DataType.CHARARRAY) ;
-      case FLOAT:   return new ResourceFieldSchema().setType(DataType.FLOAT) ;
-      case DOUBLE:  return new ResourceFieldSchema().setType(DataType.DOUBLE) ;
-      case INT:     return new ResourceFieldSchema().setType(DataType.INTEGER) ;
-      case LONG:    return new ResourceFieldSchema().setType(DataType.LONG) ;
-  
-      case UNION:
-        // Returns the first not-null type
-        if (schema.getTypes().size() != 2) {
-          LOG.warn("Field UNION {} must be ['null','othertype']. Maybe wrong definition?") ;
-        }
-        for (Schema s: schema.getTypes()) {
-          if (s.getType() != Type.NULL) return avro2ResouceFieldSchema(s) ;
-        }
-        LOG.error("Union with only ['null']?") ;
-        throw new RuntimeException("Union with only ['null']?") ;
-  
-      case RECORD:
-        // A record in Gora is a Tuple in Pig
-        if (recursiveRecordSchema.incSchema(schema.getName()) > 1) {
-          // Recursivity detected (and we are 2 levels bellow desired)
-          recursiveRecordSchema.decSchema(schema.getName()) ; // So we can put the esquema of bother leafs
-          // Return a tuple schema with no fields
-          return new ResourceFieldSchema().setType(DataType.TUPLE) ;
-        }
-
-        int numRecordFields = schema.getFields().size() ;
-        Iterator<Field> recordFields = schema.getFields().iterator();
-        ResourceFieldSchema returnRecordResourceFieldSchema = new ResourceFieldSchema().setType(DataType.TUPLE) ;
-
-        ResourceFieldSchema[] recordFieldSchemas = new ResourceFieldSchema[numRecordFields] ;
-        for (int fieldIndex = 0; recordFields.hasNext(); fieldIndex++) {
-          Field schemaField = recordFields.next();
-          recordFieldSchemas[fieldIndex] = this.avro2ResouceFieldSchema(schemaField.schema()).setName(schemaField.name()) ;
-        }
-        
-        returnRecordResourceFieldSchema.setSchema(new ResourceSchema().setFields(recordFieldSchemas)) ;
-
-        return returnRecordResourceFieldSchema ;
-          
-      case ARRAY:
-        // An array in Gora is a Bag in Pig
-        // Maybe should be a Map with string(numeric) index to ensure order, but Avro and Pig data model are different :\
-        ResourceFieldSchema returnArrayResourceFieldSchema = new ResourceFieldSchema().setType(DataType.BAG) ;
-        Schema arrayElementType = schema.getElementType() ;
-        
-        returnArrayResourceFieldSchema.setSchema(
-            new ResourceSchema().setFields(
-                new ResourceFieldSchema[]{
-                    new ResourceFieldSchema().setType(DataType.TUPLE).setName("t").setSchema(
-                        new ResourceSchema().setFields(
-                            new ResourceFieldSchema[]{
-                                avro2ResouceFieldSchema(arrayElementType)
-                            }
-                        )
-                    )
-                }
-            )
-        ) ;
-
-        return returnArrayResourceFieldSchema ;
-  
-      case MAP:
-        // A map in Gora is a Map in Pig, but in pig is only chararray=>something
-        ResourceFieldSchema returnMapResourceFieldSchema = new ResourceFieldSchema().setType(DataType.MAP) ;
-        Schema mapValueType = schema.getValueType();
-        
-        returnMapResourceFieldSchema.setSchema(
-            new ResourceSchema().setFields(
-                new ResourceFieldSchema[]{
-                    avro2ResouceFieldSchema(mapValueType)
-                }
-            )
-        ) ;
-        
-        return returnMapResourceFieldSchema ;
-  
-      case FIXED:
-        // TODO Implement FIXED data type
-        LOG.error("FIXED type not implemented") ;
-        throw new RuntimeException("Fixed type not implemented") ;
-  
-      default:
-        LOG.error("Unexpected schema type {}", schemaType) ;
-        throw new RuntimeException("Unexpected schema type " + schemaType) ;
-    }
-    
   }
   
   @Override
@@ -664,8 +421,7 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
     try {
       this.outputFormat = GoraOutputFormatFactory.createInstance(PigGoraOutputFormat.class, this.keyClass, this.persistentClass);
     } catch (Exception e) {
-      LOG.error("Error creating PigGoraOutputFormat", e) ;
-      throw new IOException(e) ;
+      throw new IOException("Error creating PigGoraOutputFormat", e) ;
     }
     GoraOutputFormat.setOutput(this.job, this.getDataStore(), false) ;
     this.outputFormat.setConf(this.job.getConfiguration()) ;
@@ -681,159 +437,23 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
 
   @Override
   /**
+   * Set the schema for data to be stored.  This will be called on the
+   * front end during planning if the store is associated with a schema.
+   * 
    * Checks the pig schema using names, using the first element of the tuple as key (fieldname = 'key').
    * (key:key, name:recordfield, name:recordfield, name:recordfi...)
    * 
    * Sets UDFContext property GORA_STORE_SCHEMA with the schema to send it to the backend.
    * 
    * Not present names for recordfields will be treated as null .
-   */
-  public void checkSchema(ResourceSchema s) throws IOException {
-    // Expected pig schema: tuple (key, recordfield, recordfield, recordfi...)
-    ResourceFieldSchema[] pigFieldSchemas = s.getFields();
-    
-    List<String> pigFieldSchemasNames = new ArrayList<String>(Arrays.asList(s.fieldNames())) ;
-    
-    if ( !pigFieldSchemasNames.contains("key") ) {
-      LOG.error("Error when checking schema. Expected a field called \"key\", but not found.") ;
-      throw new IOException("Expected a field called \"key\", but not found.") ;
-    }
-
-    // All fields are mandatory
-    
-    List<String> mandatoryFieldNames = new ArrayList<String>(Arrays.asList(this.loadQueryFields)) ;
-    if (pigFieldSchemasNames.containsAll(mandatoryFieldNames)) {
-      for (ResourceFieldSchema pigFieldSchema: pigFieldSchemas) {
-        LOG.trace("  Pig field {}", pigFieldSchema.getName()) ;
-        if (mandatoryFieldNames.contains(pigFieldSchema.getName())) {
-          Field persistentField = this.persistentSchema.getField(pigFieldSchema.getName()) ; 
-          if (persistentField == null) {
-            LOG.error("Declared field in Pig [" + pigFieldSchema.getName() + "] to store does not exists in " + this.persistentClassName +".") ;
-            throw new IOException("Declared field in Pig [" + pigFieldSchema.getName() + "] to store does not exists in " + this.persistentClassName +".") ;
-          }
-          checkEqualSchema(pigFieldSchema, this.persistentSchema.getField(pigFieldSchema.getName()).schema()) ;
-        }        
-      }
-    } else {
-      LOG.error("Some fields declared in the constructor ("
-                            + Arrays.toString(this.loadQueryFields)
-                            + ") are missing in the tuples to be saved ("
-                            + Arrays.toString(s.fieldNames()) + ")" ) ;
-      throw new IOException("Some fields declared in the constructor ("
-                            + Arrays.toString(this.loadQueryFields)
-                            + ") are missing in the tuples to be saved ("
-                            + Arrays.toString(s.fieldNames()) + ")" ) ;
-    }
-    
-    // Save the schema to UDFContext to use it on backend when writing data
-    getUDFProperties().setProperty(GoraStorage.GORA_STORE_SCHEMA, s.toString()) ;
-  }
-  
-  /**
-   * Checks a Pig field schema comparing with avro schema, based on pig field's name (for record fields).
    * 
-   * @param pigFieldSchema A Pig field schema
-   * @param avroSchema Avro schema related with pig field schema.
-   * @throws IOException
+   * @param pigSchema to be checked
+   * @throws IOException if this schema is not acceptable.
    */
-  private void checkEqualSchema(ResourceFieldSchema pigFieldSchema, Schema avroSchema) throws IOException {
-
-    byte pigType  = pigFieldSchema.getType() ;
-    String fieldName = pigFieldSchema.getName() ;
-
-    Type avroType = avroSchema.getType() ;
-
-    // Switch that checks if avro type matches pig type, or if avro is union and some nested type matches pig type.
-    switch (pigType) {
-      case DataType.BAG: // Avro Array
-        LOG.trace("    Bag") ;
-        if (!avroType.equals(Type.ARRAY) && !checkUnionSchema(avroSchema, pigFieldSchema))
-          throw new IOException("Can not convert field [" + fieldName + "] from Pig BAG with schema " + pigFieldSchema.getSchema() + " to avro " + avroType.name()) ;
-        checkEqualSchema(pigFieldSchema.getSchema().getFields()[0].getSchema().getFields()[0], avroSchema.getElementType()) ;
-        break ;
-      case DataType.BOOLEAN:
-        LOG.trace("    Boolean") ;
-        if (!avroType.equals(Type.BOOLEAN) && !checkUnionSchema(avroSchema, pigFieldSchema))
-          throw new IOException("Can not convert field [" + fieldName + "] from Pig BOOLEAN with schema " + pigFieldSchema.getSchema() + " to avro " + avroType.name()) ;
-        break ;
-      case DataType.BYTEARRAY:
-        LOG.trace("    Bytearray") ;
-        if (!avroType.equals(Type.BYTES) && !checkUnionSchema(avroSchema, pigFieldSchema))
-          throw new IOException("Can not convert field [" + fieldName + "] from Pig BYTEARRAY with schema " + pigFieldSchema.getSchema() + " to avro " + avroType.name()) ;
-        break ;
-      case DataType.CHARARRAY: // String
-        LOG.trace("    Chararray") ;
-        if (!avroType.equals(Type.STRING) && !checkUnionSchema(avroSchema, pigFieldSchema))
-          throw new IOException("Can not convert field [" + fieldName + "] from Pig CHARARRAY with schema " + pigFieldSchema.getSchema() + " to avro " + avroType.name()) ;
-        break;
-      case DataType.DOUBLE:
-        LOG.trace("    Double") ;
-        if (!avroType.equals(Type.DOUBLE) && !checkUnionSchema(avroSchema, pigFieldSchema))
-          throw new IOException("Can not convert field [" + fieldName + "] from Pig DOUBLE with schema " + pigFieldSchema.getSchema() + " to avro " + avroType.name()) ;
-        break ;
-      case DataType.FLOAT:
-        LOG.trace("    Float") ;
-        if (!avroType.equals(Type.FLOAT) && !checkUnionSchema(avroSchema, pigFieldSchema))
-          throw new IOException("Can not convert field [" + fieldName + "] from Pig FLOAT with schema " + pigFieldSchema.getSchema() + " to avro " + avroType.name()) ;
-        break ;
-      case DataType.INTEGER: // Int or Enum
-        LOG.trace("    Integer") ;
-        if (!avroType.equals(Type.INT) && !avroType.equals(Type.ENUM) && !checkUnionSchema(avroSchema, pigFieldSchema))
-          throw new IOException("Can not convert field [" + fieldName + "] from Pig INTEGER with schema " + pigFieldSchema.getSchema() + " to avro " + avroType.name()) ;
-        break ;
-      case DataType.LONG:
-        LOG.trace("    Long") ;
-        if (!avroType.equals(Type.LONG) && !checkUnionSchema(avroSchema, pigFieldSchema))
-          throw new IOException("Can not convert field [" + fieldName + "] from Pig LONG with schema " + pigFieldSchema.getSchema() + " to avro " + avroType.name()) ;
-        break ;
-      case DataType.MAP: // Avro Map
-        LOG.trace("    Map") ;
-        if (!avroType.equals(Type.MAP) && !checkUnionSchema(avroSchema, pigFieldSchema))
-          throw new IOException("Can not convert field [" + fieldName + "] from Pig MAP with schema " + pigFieldSchema.getSchema() + " to avro " + avroType.name()) ;
-        break ;
-      case DataType.NULL: // Avro nullable??
-        LOG.trace("    Type Null") ;
-        if(!avroType.equals(Type.NULL) && !checkUnionSchema(avroSchema, pigFieldSchema))
-          throw new IOException("Can not convert field [" + fieldName + "] from Pig NULL with schema " + pigFieldSchema.getSchema() + " to avro " + avroType.name()) ;
-        break ;
-      case DataType.TUPLE: // Avro Record
-        LOG.trace("    Tuple") ;
-        if (!avroType.equals(Type.RECORD) && !checkUnionSchema(avroSchema, pigFieldSchema))
-          throw new IOException("Can not convert field [" + fieldName + "] from Pig TUPLE(record) with schema " + pigFieldSchema.getSchema() + " to avro " + avroType.name()) ;
-        break ;
-      default:
-        throw new IOException("Unexpected Pig schema type " + DataType.genTypeToNameMap().get(pigType) + " for avro schema field " + avroSchema.getName() +": " + avroType.name()) ;
-    }
-    
-  }
-
-  /**
-   * Checks and tries to match a pig field schema with an avro union schema. 
-   * @param avroSchema Schema with
-   * @param pigFieldSchema
-   * @return true: if a match is found
-   *         false: if avro schema is not UNION
-   * @throws IOException(message, Exception()) if avro schema is UNION but not match is found for pig field schema.
-   */
-  private boolean checkUnionSchema(Schema avroSchema, ResourceFieldSchema pigFieldSchema) throws IOException {
-    if (!avroSchema.getType().equals(Type.UNION)) return false ;
-
-    for (Schema unionElementSchema: avroSchema.getTypes()) {
-      try {
-        LOG.trace("    Checking pig schema '{}' with avro union '[{},...]'", DataType.findTypeName(pigFieldSchema.getType()), unionElementSchema.getType().getName()) ;
-        checkEqualSchema(pigFieldSchema, unionElementSchema) ;
-        return true ;
-      }catch (IOException e){
-        // Exception from inner union, rethrow
-        if (e.getCause() != null) {
-          throw e ;
-        }
-        // else ignore
-      }
-    }
-    // throws IOException(message,Exception()) to mark nested union exception.
-    LOG.error("Expected some field defined in '"+avroSchema.getName()+"' for pig schema type '"+DataType.genTypeToNameMap().get(pigFieldSchema.getType()+"'")) ;
-    throw new IOException("Expected some field defined in '"+avroSchema.getName()+"' for pig schema type '"+DataType.genTypeToNameMap().get(pigFieldSchema.getType()+"'")+"'", new Exception("Union not satisfied")) ;
+  public void checkSchema(ResourceSchema pigSchema) throws IOException {
+    SchemaUtils.checkStoreSchema(pigSchema, this.loadQueryFields, this.persistentSchema);
+    // Save the schema to UDFContext to use it on backend when writing data
+    getUDFProperties().setProperty(GoraStorage.GORA_STORE_SCHEMA, pigSchema.toString()) ;
   }
   
   @Override
@@ -843,15 +463,10 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
     
     // Get the schema of data to write from UDFContext (coming from frontend checkSchema())
     String strSchema = getUDFProperties().getProperty(GoraStorage.GORA_STORE_SCHEMA) ;
-    if (strSchema == null) {
-      LOG.error("Could not find schema in UDF context. Should have been set in checkSchema() in frontend.") ;
-      throw new IOException("Could not find schema in UDF context. Should have been set in checkSchema() in frontend.") ;
-    }
 
     LOG.info("Schema read from frontend to write: " + strSchema) ;
     // Parse de the schema from string stored in properties object
     this.writeResourceSchema = new ResourceSchema(Utils.getSchemaFromString(strSchema)) ;
-    if (LOG.isTraceEnabled()) LOG.trace(this.writeResourceSchema.toString()) ;
     this.writeResourceFieldSchemaMap = new HashMap<String, ResourceFieldSchemaWithIndex>() ;
     int index = 0 ;
     for (ResourceFieldSchema fieldSchema : this.writeResourceSchema.getFields()) {
@@ -873,9 +488,7 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
         LOG.trace("      resourcefield schema: {}", this.writeResourceFieldSchemaMap.get(fieldName).getResourceFieldSchema()) ;
         LOG.trace("      value: {} - {}",this.writeResourceFieldSchemaMap.get(fieldName).getIndex(), t.get(this.writeResourceFieldSchemaMap.get(fieldName).getIndex())) ;
       }
-
-      assert persistentObj != null ;
-            
+      
       ResourceFieldSchemaWithIndex writeResourceFieldSchemaWithIndex = this.writeResourceFieldSchemaMap.get(fieldName) ;
       if (writeResourceFieldSchemaWithIndex == null) {
         if (LOG.isTraceEnabled()) LOG.trace("Field {} defined in constructor not found in the tuple to persist, skipping field", fieldName) ;
@@ -892,6 +505,8 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
         throw new IOException("The field " + fieldName + " does not have a Pig schema when writing.") ;
       }
       
+      //TODO Move this put to PersistentUtils
+      //TODO Here is used the resourceFieldSchema and the index. Investigate about why is it needed
       persistentObj.put(fieldName,
                         this.writeField(persistentField.schema(),
                                         pigFieldSchema,
@@ -901,8 +516,7 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
     try {
       ((GoraRecordWriter<Object,PersistentBase>) this.writer).write(t.get(0), (PersistentBase) persistentObj) ;
     } catch (InterruptedException e) {
-      LOG.error("Error writing the tuple.", e) ;
-      throw new IOException(e) ;
+      throw new IOException("Error writing the tuple.",e) ;
     }
   }
 
@@ -910,29 +524,33 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
    * Converts one pig field data to PersistentBase Data.
    * 
    * @param avroSchema PersistentBase schema used to create new nested records
-   * @param field Pig schema of the field being converted
+   * @param pigField Pig schema of the field being converted
    * @param pigData Pig data relative to the schema
    * @return PersistentBase data
    * @throws IOException
    */
-  private Object writeField(Schema avroSchema, ResourceFieldSchema field, Object pigData) throws IOException {
+  private Object writeField(Schema avroSchema, ResourceFieldSchema pigField, Object pigData) throws IOException {
 
     // If data is null, return null (check if avro schema is right)
     if (pigData == null) {
       if (avroSchema.getType() != Type.UNION && avroSchema.getType() != Type.NULL) {
-        throw new IOException("Tuple field " + field.getName() + " is null, but Avro Schema is not union nor null") ;
+        throw new IOException("Tuple field " + pigField.getName() + " is null, but Avro Schema is not union nor null") ;
       } else {
         return null ;
       }
     }
     
     // If avroSchema is union, it will not be the null field, so select the proper one
+    // ONLY SUPPORT 2 ELEMENTS UNION!
     if (avroSchema.getType() == Type.UNION) {
-      //TODO Resolve the proper schema      
-      avroSchema = avroSchema.getTypes().get(1) ;
+      if (avroSchema.getTypes().get(0).getType() == Schema.Type.NULL) {
+        avroSchema = avroSchema.getTypes().get(1) ;        
+      } else {
+        avroSchema = avroSchema.getTypes().get(0) ;
+      }
     }
     
-    switch(field.getType()) {
+    switch(pigField.getType()) {
       case DataType.DOUBLE:
       case DataType.FLOAT:
       case DataType.LONG:
@@ -963,12 +581,12 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
         Map<String,Object> pigMap = (Map<String,Object>) pigData ;
         Map<String,Object> goraMap = new HashMap<String, Object>(pigMap.size()) ;
 
-        if (field.getSchema() == null) {
+        if (pigField.getSchema() == null) {
             throw new IOException("The map being written does not have schema.") ;
         }
         
         for(Entry<String,Object> pigEntry : pigMap.entrySet()) {
-          goraMap.put(pigEntry.getKey(), this.writeField(avroSchema.getValueType(), field.getSchema().getFields()[0], pigEntry.getValue())) ;
+          goraMap.put(pigEntry.getKey(), this.writeField(avroSchema.getValueType(), pigField.getSchema().getFields()[0], pigEntry.getValue())) ;
         }
         return goraMap ;
         
@@ -979,10 +597,10 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
           if (avroSchema.getElementType().getType() == Type.RECORD) {
             // If element type is record, the mapping Persistent->PigType deletes one nested tuple:
             // We want the map as: map((a1,a2,a3), (b1,b2,b3),...) instead of map(((a1,a2,a3)), ((b1,b2,b3)), ...)
-            persistentArray.add(this.writeField(avroSchema.getElementType(), field.getSchema().getFields()[0], pigArrayElement)) ;
+            persistentArray.add(this.writeField(avroSchema.getElementType(), pigField.getSchema().getFields()[0], pigArrayElement)) ;
           } else {
             // Every bag has a tuple as element type. Since this is not a record, that "tuple" container must be ignored
-            persistentArray.add(this.writeField(avroSchema.getElementType(), field.getSchema().getFields()[0].getSchema().getFields()[0], ((Tuple)pigArrayElement).get(0))) ;
+            persistentArray.add(this.writeField(avroSchema.getElementType(), pigField.getSchema().getFields()[0].getSchema().getFields()[0], ((Tuple)pigArrayElement).get(0))) ;
           }
         }
         return persistentArray ;
@@ -992,7 +610,7 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
         try {
           PersistentBase persistentRecord = (PersistentBase) ClassLoadingUtils.loadClass(avroSchema.getFullName()).newInstance();
           
-          ResourceFieldSchema[] tupleFieldSchemas = field.getSchema().getFields() ;
+          ResourceFieldSchema[] tupleFieldSchemas = pigField.getSchema().getFields() ;
           
           for (int i=0; i<tupleFieldSchemas.length; i++) {
             persistentRecord.put(tupleFieldSchemas[i].getName(),
@@ -1010,7 +628,7 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
         }
         
       default:
-        throw new IOException("Unexpected field " + field.getName() +" with Pig type "+ DataType.genTypeToNameMap().get(field.getType())) ;
+        throw new IOException("Unexpected field " + pigField.getName() +" with Pig type "+ DataType.genTypeToNameMap().get(pigField.getType())) ;
     }
     
   }
@@ -1027,23 +645,10 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
 
   @Override
   public void cleanupOnSuccess(String location, Job job) throws IOException {
-    if (dataStore != null) dataStore.flush() ;
-  }
-
-  public boolean isLoadSaveAllFields() {
-    return loadSaveAllFields;
-  }
-
-  public void setLoadSaveAllFields(boolean loadSaveAllFields) {
-    this.loadSaveAllFields = loadSaveAllFields;
-  }
-
-  public String[] getLoadQueryFields() {
-    return loadQueryFields;
-  }
-
-  public void setLoadQueryFields(String[] loadQueryFields) {
-    this.loadQueryFields = loadQueryFields;
+    if (dataStore != null){
+      dataStore.flush();
+      dataStore.close();
+    }
   }
 
 }
