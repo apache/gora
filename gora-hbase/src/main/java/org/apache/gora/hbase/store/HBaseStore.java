@@ -83,8 +83,7 @@ import org.slf4j.LoggerFactory;
  * DataStore for HBase. Thread safe.
  *
  */
-public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
-implements Configurable {
+public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
   public static final Logger LOG = LoggerFactory.getLogger(HBaseStore.class);
 
@@ -146,12 +145,13 @@ implements Configurable {
       InputStream mappingInputStream ;
       // If there is a mapping definition in the configuration, use it.
       if (getConf().get(XML_MAPPING_DEFINITION, null) != null) {
-           mappingInputStream = IOUtils.toInputStream(getConf().get(XML_MAPPING_DEFINITION), (Charset)null) ;
+        if (LOG.isTraceEnabled()) LOG.trace(XML_MAPPING_DEFINITION + " = " + getConf().get(XML_MAPPING_DEFINITION));  
+        mappingInputStream = IOUtils.toInputStream(getConf().get(XML_MAPPING_DEFINITION), (Charset)null) ;
       }
       // Otherwise use the configuration from de default file gora-hbase-mapping.xml or whatever
       // configured in the key "gora.hbase.mapping.file"
       else {
-          mappingInputStream = getClass().getClassLoader().getResourceAsStream(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE)) ;
+        mappingInputStream = getClass().getClassLoader().getResourceAsStream(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE)) ;
       }
       
       mapping = readMapping(mappingInputStream);
@@ -853,16 +853,6 @@ implements Configurable {
     }catch(IOException ex){
       LOG.error(ex.getMessage(), ex);
     }
-  }
-
-  @Override
-  public Configuration getConf() {
-    return conf;
-  }
-
-  @Override
-  public void setConf(Configuration conf) {
-    this.conf = conf;
   }
 
   /**

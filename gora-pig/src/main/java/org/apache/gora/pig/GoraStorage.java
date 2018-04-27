@@ -55,6 +55,10 @@ import org.apache.pig.data.DataType;
 import org.apache.pig.data.Tuple;
 import org.apache.pig.impl.util.UDFContext;
 import org.apache.pig.impl.util.Utils;
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,11 +135,6 @@ import org.slf4j.LoggerFactory;
 public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMetadata {
 
   public static final Logger LOG = LoggerFactory.getLogger(GoraStorage.class);
-
-  /**
-   * Key in UDFContext properties that marks config is set (set at backend nodes)  
-   */
-  private static final String GORA_CONFIG_SET = "gorastorage.config.set" ;
   
   /**
    * Key in UDFContext properties used to pass the STORE Pig Schema from frontend to backend.
@@ -157,9 +156,11 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
    */
   protected String udfcSignature = null ;
   
+  /**
+   * The GoraStorage configuration setted at constructor (converted from json to bean)
+   */
+  protected StorageConfiguration storageConfiguration ;
   
-  protected String keyClassName ;
-  protected String persistentClassName ;
   protected Class<?> keyClass;
   protected Class<? extends PersistentBase> persistentClass;
   protected Schema persistentSchema ;
@@ -180,43 +181,79 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
    * and all tuple fields will be copied to the persistent instance when saving. */
   protected boolean loadSaveAllFields = false ;
 
+  private ObjectMapper mapper = new ObjectMapper() ;
+  
   /**
-   * Creates a new GoraStorage with implicit "*" fields to load/save.  
-   * @param keyClassName
-   * @param persistentClassName
+   * Creates a new GoraStorage to load/save.
+   * 
+   * The constructor must have a JSON configuration string with the following fields (optional values in brackets):
+   * 
+   * <pre>
+   * {
+   *     ["keyClass": "",]
+   *     "persistentClass: "",
+   *     "fields": "",
+   *     ["goraProperties": "",]
+   *     ["mapping": "",]
+   *     ["configuration": {}]
+   * }
+   * </pre>
+   * 
+   * <ul>
+   *   <li>keyClass: full class name with namespace of the key class. By default "java.lang.String".</li>
+   *   <li>persistentClass: full class name with namespace of the compiled PersistentBase class.</li>
+   *   <li>fields: comma-separated list of fields to load, from the first level of fields in the persistent class.. Can use "*" to denote to load all fields, or to save all columns of a relation.</li>
+   *   <li>goraProperties: string with the content to use as gora.properties. If this key is missing, will try to load the values from the local file gora.properties.</li>
+   *   <li>mapping: string with the XML content to use as gora-xxx-mapping.xml. If this key is missing, will try to load from local file.</li>
+   *   <li>configuration: object with string key:values to override in the job configuration for hadoop.
+   * </ul>
+   * 
+   * Example of usage:
+   * <pre>
+   * webpage = LOAD '.' USING org.apache.gora.pig.GoraStorage('{
+   *   "persistentClass": "admin.WebPage",
+   *   "fields": "baseUrl,status",
+   *   "goraProperties": "gora.datastore.default=org.apache.gora.hbase.store.HBaseStore
+   *                      gora.datastore.autocreateschema=true
+   *                      gora.hbasestore.scanner.caching=1000",
+   *   "mapping": "<?xml version=\\"1.0\\" encoding="UTF-8\\"?>
+   *               <gora-odm>
+   *                 <table name=\\"webpage\\">
+   *                   <family name=\\"f\\" maxVersions=\\"1\\"/>
+   *                 </table>
+   *                 <class table=\\"webpage\\" keyClass=\\"java.lang.String\\" name=\\"admin.WebPage\\">
+   *                   <field name=\\"baseUrl\\" family=\\"f\\" qualifier=\\"bas\\"/>
+   *                   <field name=\\"status\\" family=\\"f\\" qualifier=\\"st\\"/>
+   *                 </class>
+   *               </gora-odm>",
+   *   "configuration": {
+   *     "hbase.zookeeper.quorum": "hdp4,hdp1,hdp3",
+   *     "zookeeper.znode.parent": "/hbase-unsecure"
+   *   }
+   * }') ;
+   * </pre>
+   * 
    * @throws IllegalAccessException 
    * @throws InstantiationException 
+   * @throws IOException 
+   * @throws JsonMappingException 
+   * @throws JsonParseException 
    */
-  public GoraStorage(String keyClassName, String persistentClassName) throws InstantiationException, IllegalAccessException {
-      this(keyClassName, persistentClassName, "*") ;
-  }
-
-  /**
-   * Creates a new GoraStorage and set the keyClass from the key class name.
-   * @param keyClassName key class. Full name with package (org.apache....)
-   * @param persistentClassName persistent class. Full name with package. 
-   * @param fields comma separated fields to load/save | '*' for all.
-   *   '*' loads all fields from the persistent class to each tuple.
-   *   '*' saves all fields of each tuple to persist (not mandatory all fields of the persistent class).
-   * @throws IllegalAccessException 
-   * @throws InstantiationException 
-   */
-  public GoraStorage(String keyClassName, String persistentClassName, String csvFields) throws InstantiationException, IllegalAccessException {
-    super();
-    this.keyClassName = keyClassName ;
-    this.persistentClassName = persistentClassName ;
+  public GoraStorage(String storageConfigurationString) throws InstantiationException, IllegalAccessException, JsonParseException, JsonMappingException, IOException {
+    super() ;
+    this.storageConfiguration = this.mapper.readValue(storageConfigurationString, StorageConfiguration.class) ;
+    
     try {
-      this.keyClass = ClassLoadingUtils.loadClass(keyClassName);
-      Class<?> persistentClazz = ClassLoadingUtils.loadClass(persistentClassName);
-      this.persistentClass = persistentClazz.asSubclass(PersistentBase.class);
+      this.keyClass = ClassLoadingUtils.loadClass(this.storageConfiguration.getKeyClass());
+      this.persistentClass = ClassLoadingUtils.loadClass(this.storageConfiguration.getPersistentClass()).asSubclass(PersistentBase.class);
     } catch (ClassNotFoundException e) {
-    	LOG.error("Error creating instance of key and/or persistent.", e) ;
-    	throw new RuntimeException(e);
+      throw new RuntimeException("Error creating instance of key and/or persistent.",e);
     }
-
+    
     this.persistentSchema = this.persistentClass.newInstance().getSchema() ;
 
     // Populate this.loadQueryFields
+    String csvFields = this.storageConfiguration.getFields() ;
     List<String> declaredConstructorFields = new ArrayList<String>() ;
     if (csvFields.contains("*")) {
       // Declared fields "*" means all fields
@@ -239,8 +276,17 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
    * @throws GoraException on DataStore creation error.
    */
   protected DataStore<?, ? extends PersistentBase> getDataStore() throws GoraException {
-    if (this.dataStore == null) {
-      this.dataStore = DataStoreFactory.getDataStore(this.keyClass, this.persistentClass, this.localJobConf) ;
+    if (this.dataStore == null) {      
+      try {
+        this.dataStore = DataStoreFactory.getDataStore(
+            this.storageConfiguration.getKeyClass(),
+            this.storageConfiguration.getPersistentClass(),
+            this.storageConfiguration.getGoraPropertiesAsProperties(),
+            this.localJobConf
+            ) ;
+      } catch (IOException e) {
+        throw new GoraException(e);
+      }
     }
     return this.dataStore ;
   }
@@ -253,67 +299,61 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
     GoraMapReduceUtils.setIOSerializations(job.getConfiguration(), true) ;
     // All Splits return length==0, but must not be combined (because actually are not ==0)
     job.getConfiguration().setBoolean("pig.noSplitCombination", true);
+    this.mergeGoraStorageConfigurationInto(job.getConfiguration());
     this.job = job;
-    this.localJobConf = this.initializeLocalJobConfig(job) ;
+    this.localJobConf = new JobConf(job.getConfiguration()) ;
+    this.mergeGoraStorageConfigurationInto(this.localJobConf) ;
   }
 
   /**
    * Returns UDFProperties based on <code>udfcSignature</code>, <code>keyClassName</code> and <code>persistentClassName</code>.
+   * @throws IOException - When the conversion bean->json fails
+   * @throws JsonMappingException - When the conversion bean->json fails
+   * @throws JsonGenerationException - When the conversion bean->json fails
    */
-  private Properties getUDFProperties() {
-      return UDFContext.getUDFContext().getUDFProperties(this.getClass(), new String[] {this.udfcSignature,this.keyClassName,this.persistentClassName});
+  private Properties getUDFProperties() throws JsonGenerationException, JsonMappingException, IOException {
+    return UDFContext.getUDFContext().getUDFProperties(this.getClass(),
+        new String[] {this.udfcSignature,this.storageConfiguration.getKeyClass(),this.storageConfiguration.getPersistentClass(),this.mapper.writeValueAsString(this.storageConfiguration)});
   }
   
   /**
-   * Creates a localConf based on the existing core-site.xml configuration files + job configuration + udfProperties configuration.
+   * Merges the configuration from the constructor into a Configuration. If the keys exists, they are not overwritten.
    * 
-   * This is needed to pass frontend configuration to backend, althought seems not to be working because, for example, it does not load hbase-site.xml
-   * TODO Maybe get rid of this. Future modificactions will tell if if is needed.
-   * 
-   * @param job
+   * @param configuration - The configuration to update with the non-existant keys-values
    * @return
+   * @throws IOException 
+   * @throws JsonMappingException 
+   * @throws JsonGenerationException 
    */
-  private JobConf initializeLocalJobConfig(Job job) {
-    Properties udfProps = getUDFProperties();
-    Configuration jobConf = job.getConfiguration();
-    GoraMapReduceUtils.setIOSerializations(jobConf, true) ;
-    JobConf localConf = new JobConf(jobConf); // localConf starts as a copy of jobConf
+  private void mergeGoraStorageConfigurationInto(Configuration configuration) {
+    GoraMapReduceUtils.setIOSerializations(configuration, true) ;
 
-    if (udfProps.containsKey(GORA_CONFIG_SET)) {
-      // Already configured (maybe from frontend to backend)
-      for (Entry<Object, Object> entry : udfProps.entrySet()) {
-        localConf.set((String) entry.getKey(), (String) entry.getValue());
-      }
-    } else {
-      // Not configured. We load into localConf the configuration and put it in udfProps
-      Configuration goraConf = new Configuration();
-      for (Entry<String, String> entry : goraConf) {
-        // JobConf may have some conf overriding ones in hbase-site.xml
-        // So only copy hbase config not in job config to UDFContext
-        // Also avoids copying core-default.xml and core-site.xml
-        // props in hbaseConf to UDFContext which would be redundant.
-        if (localConf.get(entry.getKey()) == null) {
-          udfProps.setProperty(entry.getKey(), entry.getValue());
-          localConf.set(entry.getKey(), entry.getValue());
-        }
-      }
-      udfProps.setProperty(GORA_CONFIG_SET, "true");
+    if (this.storageConfiguration.getMapping() != null) {
+      configuration.set("gora.mapping", this.storageConfiguration.getMapping()) ;
     }
-    return localConf;
+    
+    // Set the constructor configuration into the hadoop configuration
+    this.storageConfiguration.mergeConfiguration(configuration) ;
   }
   
   @Override
   @SuppressWarnings({ "rawtypes", "unchecked" })
   public InputFormat getInputFormat() throws IOException {
+    /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     * The Query instance here will be serialized to the workers (including configuration)
+     * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     */
     this.inputFormat = GoraInputFormatFactory.createInstance(this.keyClass, this.persistentClass);
-
     Query query = this.getDataStore().newQuery() ;
     if (this.loadSaveAllFields== false) {
       query.setFields(this.loadQueryFields.toArray(new String[0])) ;
     }
+    this.mergeGoraStorageConfigurationInto(this.job.getConfiguration());
     GoraInputFormat.setInput(this.job, query, false) ;
+    this.localJobConf = new JobConf(this.job.getConfiguration()) ;
+    this.mergeGoraStorageConfigurationInto(this.localJobConf);
     
-    inputFormat.setConf(this.job.getConfiguration()) ;
+    this.inputFormat.setConf(this.localJobConf);
     return this.inputFormat ; 
   }
 
@@ -432,7 +472,8 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
   public void setStoreLocation(String location, Job job) throws IOException {
     GoraMapReduceUtils.setIOSerializations(job.getConfiguration(), true) ;
     this.job = job ;
-    this.localJobConf = this.initializeLocalJobConfig(job) ;
+    this.localJobConf = new JobConf(job.getConfiguration()) ;
+    this.mergeGoraStorageConfigurationInto(this.localJobConf);
   }
 
   @Override

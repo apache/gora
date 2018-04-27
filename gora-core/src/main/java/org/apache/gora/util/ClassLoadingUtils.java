@@ -40,7 +40,7 @@ public class ClassLoadingUtils {
             clazz = loadClass(className, Thread.currentThread().getContextClassLoader());
         }
         if (clazz == null) {
-            throw new ClassNotFoundException("Failed to load class" + className);
+            throw new ClassNotFoundException("Failed to load class " + className);
         }
         return clazz;
     }
