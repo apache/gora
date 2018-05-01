@@ -98,7 +98,6 @@ public class InfinispanClient<K, T extends PersistentBase> implements Configurab
     try {
       Support.registerSchema(cacheManager, persistentClass.newInstance().getSchema());
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -113,7 +112,6 @@ public class InfinispanClient<K, T extends PersistentBase> implements Configurab
       cache.clear();
       cacheExists = false;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }

@@ -209,7 +209,6 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
           DEFAULT_MAPPING_FILE);
       mapping = readMapping(mappingFile);
     } catch (IOException e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
 
@@ -268,14 +267,12 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       try {
         this.adminServer = new LBHttpSolrClient(solrUrlElements);
       } catch (MalformedURLException e) {
-        LOG.error(e.getMessage());
-        throw new RuntimeException(e);
+        throw new GoraException(e);
       }
       try {
         this.server = new LBHttpSolrClient( solrUrlElements + "/" + mapping.getCoreName() );
       } catch (MalformedURLException e) {
-        LOG.error(e.getMessage());
-        throw new RuntimeException(e);
+        throw new GoraException(e);
       }
       if (serverUserAuth) {
         HttpClientUtil.setBasicAuth(
@@ -379,7 +376,6 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
         CoreAdminRequest.createCore(mapping.getCoreName(),
             mapping.getCoreName(), adminServer, solrConfig, solrSchema);
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -391,7 +387,6 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       server.deleteByQuery("*:*");
       server.commit();
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -408,7 +403,6 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       if (e.getMessage().contains("No such core")) {
         return; // it's ok, the core is not there
       } else {
-        LOG.error(e.getMessage(), e);
         throw new GoraException(e);
       }
     }
@@ -422,7 +416,6 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
           adminServer);
       exists = rsp.getUptime(mapping.getCoreName()) != null;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
     return exists;
@@ -474,7 +467,6 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       }
       return newInstance((SolrDocument) o, fields);
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -624,7 +616,6 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
         add(batch, commitWithin);
         batch.clear();
       } catch (Exception e) {
-        LOG.error(e.getMessage(), e);
         throw new GoraException(e);
       }
     }
@@ -738,7 +729,6 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       LOG.info(rsp.toString());
       return true;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -783,7 +773,6 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
     } catch (GoraException e) {
       throw e;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
     return 0;
@@ -820,7 +809,6 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
         batch.clear();
       }
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }

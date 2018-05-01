@@ -55,7 +55,6 @@ class NativeSerializer<K, T extends Persistent> extends CassandraSerializer {
     try {
       analyzePersistent();
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException("Error occurred while analyzing the persistent class, :" + e.getMessage(), e);
     }
     this.createSchema();
@@ -82,7 +81,6 @@ class NativeSerializer<K, T extends Persistent> extends CassandraSerializer {
       LOG.debug("Object is saved with key : {} and value : {}", key, value);
       mapper.save((T) value);
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -104,7 +102,6 @@ class NativeSerializer<K, T extends Persistent> extends CassandraSerializer {
       }      
       return object;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -122,7 +119,6 @@ class NativeSerializer<K, T extends Persistent> extends CassandraSerializer {
       mapper.delete(key);
       return true;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -231,7 +227,6 @@ class NativeSerializer<K, T extends Persistent> extends CassandraSerializer {
       }
       return cassandraResult;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }

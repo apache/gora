@@ -133,10 +133,8 @@ implements Configurable {
       mapping = readMapping(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE));
       filterUtil = new HBaseFilterUtil<>(this.conf);
     } catch (FileNotFoundException ex) {
-      LOG.error("{}  is not found, please check the file.", DEFAULT_MAPPING_FILE);
-      throw new GoraException(ex);
+      throw new GoraException("Mapping file '" + getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE) + "' not found.",ex);
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
 
@@ -158,7 +156,6 @@ implements Configurable {
       boolean autoflush = this.conf.getBoolean("hbase.client.autoflush.default", false);
       table = new HBaseTableConnection(getConf(), getSchemaName(), autoflush);
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
     closeHBaseAdmin();
@@ -186,7 +183,6 @@ implements Configurable {
     } catch (GoraException e) {
       throw e;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
     closeHBaseAdmin();
@@ -203,7 +199,6 @@ implements Configurable {
     } catch (GoraException e) {
       throw e;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
     closeHBaseAdmin();
@@ -214,7 +209,6 @@ implements Configurable {
     try{
       return admin.tableExists(mapping.getTable().getTableName());
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -230,7 +224,6 @@ implements Configurable {
     } catch (GoraException e) {
       throw e;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -285,7 +278,6 @@ implements Configurable {
     } catch (GoraException e) {
       throw e;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -369,7 +361,6 @@ implements Configurable {
       //success is a bit costly
       return true;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -397,7 +388,6 @@ implements Configurable {
     } catch (GoraException e) {
       throw e;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -407,7 +397,6 @@ implements Configurable {
     try{
       table.flushCommits();
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -491,7 +480,6 @@ implements Configurable {
         return result;
       }
     }catch(IOException ex){
-      LOG.error(ex.getMessage(), ex);
       throw new GoraException(ex) ;
     }
   }

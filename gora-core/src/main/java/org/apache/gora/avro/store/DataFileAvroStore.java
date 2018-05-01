@@ -60,7 +60,6 @@ public class DataFileAvroStore<K, T extends PersistentBase> extends AvroStore<K,
     try{
       getWriter().append(obj);
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -106,7 +105,6 @@ public class DataFileAvroStore<K, T extends PersistentBase> extends AvroStore<K,
     } catch (GoraException e) {
       throw e;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }

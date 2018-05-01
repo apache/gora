@@ -20,32 +20,28 @@ package org.apache.gora.jcache.store;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
-import java.util.NavigableMap;
 import java.util.NavigableSet;
 import java.util.Properties;
-import java.util.ArrayList;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.TimeUnit;
 
-import com.hazelcast.cache.HazelcastCachingProvider;
-import com.hazelcast.cache.ICache;
-import com.hazelcast.client.HazelcastClient;
-import com.hazelcast.client.config.ClientConfig;
-import com.hazelcast.client.config.XmlClientConfigBuilder;
-import com.hazelcast.config.CacheConfig;
-import com.hazelcast.config.Config;
-import com.hazelcast.config.ClasspathXmlConfig;
-import com.hazelcast.config.EvictionPolicy;
-import com.hazelcast.config.EvictionConfig;
-import com.hazelcast.config.InMemoryFormat;
-import com.hazelcast.core.Hazelcast;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Member;
-import com.hazelcast.core.Partition;
+import javax.cache.Cache;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
+import javax.cache.configuration.FactoryBuilder;
+import javax.cache.configuration.MutableCacheEntryListenerConfiguration;
+import javax.cache.expiry.AccessedExpiryPolicy;
+import javax.cache.expiry.CreatedExpiryPolicy;
+import javax.cache.expiry.Duration;
+import javax.cache.expiry.ModifiedExpiryPolicy;
+import javax.cache.expiry.TouchedExpiryPolicy;
+import javax.cache.spi.CachingProvider;
+
 import org.apache.avro.Schema;
 import org.apache.gora.jcache.query.JCacheQuery;
 import org.apache.gora.jcache.query.JCacheResult;
@@ -63,18 +59,21 @@ import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.cache.Cache;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
-import javax.cache.configuration.CacheEntryListenerConfiguration;
-import javax.cache.configuration.FactoryBuilder;
-import javax.cache.configuration.MutableCacheEntryListenerConfiguration;
-import javax.cache.expiry.AccessedExpiryPolicy;
-import javax.cache.expiry.ModifiedExpiryPolicy;
-import javax.cache.expiry.CreatedExpiryPolicy;
-import javax.cache.expiry.TouchedExpiryPolicy;
-import javax.cache.expiry.Duration;
-import javax.cache.spi.CachingProvider;
+import com.hazelcast.cache.HazelcastCachingProvider;
+import com.hazelcast.cache.ICache;
+import com.hazelcast.client.HazelcastClient;
+import com.hazelcast.client.config.ClientConfig;
+import com.hazelcast.client.config.XmlClientConfigBuilder;
+import com.hazelcast.config.CacheConfig;
+import com.hazelcast.config.ClasspathXmlConfig;
+import com.hazelcast.config.Config;
+import com.hazelcast.config.EvictionConfig;
+import com.hazelcast.config.EvictionPolicy;
+import com.hazelcast.config.InMemoryFormat;
+import com.hazelcast.core.Hazelcast;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.Member;
+import com.hazelcast.core.Partition;
 
 /**
  * {@link org.apache.gora.jcache.store.JCacheStore} is the primary class
@@ -295,7 +294,6 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
     } catch (GoraException e) {
       throw e;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -311,7 +309,6 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
     } catch (GoraException e) {
       throw e;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -321,7 +318,6 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
     try {
       return (manager.getCache(super.getPersistentClass().getSimpleName(), keyClass, persistentClass) != null);
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -335,7 +331,6 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
       }
       return getPersistent(persitent, fields);
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -345,7 +340,6 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
     try {
       return cache.get(key);
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -355,7 +349,6 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
     try {
       cache.put(key, val);
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -365,7 +358,6 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
     try {
       return cache.remove(key);
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -402,7 +394,6 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
     } catch (GoraException e) {
       throw e;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }    
   }
@@ -428,7 +419,6 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
       try {
         cacheEntrySubList =  cacheEntryList.subSet(startKey, true, endKey, true);
       } catch (Exception e) {
-        LOG.error(e.getMessage(), e);
         throw new GoraException(e);
       }
     } else {

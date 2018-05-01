@@ -158,7 +158,6 @@ extends FileBackedDataStoreBase<K, T> implements Configurable {
       if(encoder != null)
         encoder.flush();
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -178,7 +177,6 @@ extends FileBackedDataStoreBase<K, T> implements Configurable {
     try{
       getDatumWriter().write(obj, getEncoder());
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }

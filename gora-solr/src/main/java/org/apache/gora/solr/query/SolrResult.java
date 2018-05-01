@@ -88,7 +88,6 @@ public class SolrResult<K, T extends PersistentBase> extends ResultBase<K, T> {
       QueryResponse rsp = server.query(params);
       list = rsp.getResults();
     } catch (SolrServerException | IOException e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }

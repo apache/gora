@@ -87,6 +87,15 @@
       </roles>
     </developer>
     <developer>
+      <id>cguzel</id>
+      <name>Cihad Guzel</name>
+      <email>cguzel [at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
       <id>dogacan</id>
       <name>Doğacan Güney</name>
       <email>dogacan [at] apache [dot] org</email>
