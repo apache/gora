@@ -74,5 +74,4 @@ public class HBaseScannerResult<K, T extends PersistentBase> extends HBaseResult
   public int size() {
     return (int) this.limit;
   }
-  
 }

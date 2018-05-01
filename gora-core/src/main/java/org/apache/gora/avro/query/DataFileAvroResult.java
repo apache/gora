@@ -86,5 +86,4 @@ public class DataFileAvroResult<K, T extends PersistentBase> extends ResultBase<
   public int size() {
     return (int) (end - start);
   }
-  
 }

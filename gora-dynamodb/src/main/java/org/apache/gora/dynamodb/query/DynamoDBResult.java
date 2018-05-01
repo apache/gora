@@ -88,5 +88,4 @@ public class DynamoDBResult<K, T extends Persistent> extends ResultWSBase<K, T> 
   public int size() {
     return dynamoDBResultSet.size();
   }
-
 }

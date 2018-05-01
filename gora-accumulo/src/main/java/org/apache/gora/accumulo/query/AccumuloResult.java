@@ -53,7 +53,7 @@ public class AccumuloResult<K,T extends PersistentBase> extends ResultBase<K,T> 
   public AccumuloResult(DataStore<K,T> dataStore, Query<K,T> query, Scanner scanner) {
     super(dataStore, query);
     
-    if (this.limit > -1) {
+    if (this.limit > 0) {
       scanner.setBatchSize((int) this.limit);
     }
     iterator = new RowIterator(scanner.iterator());
@@ -98,5 +98,4 @@ public class AccumuloResult<K,T extends PersistentBase> extends ResultBase<K,T> 
   public int size() {
     return (int) this.limit;
   }
-  
 }

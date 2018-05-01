@@ -96,7 +96,7 @@ public interface Result<K, T extends Persistent> {
 
   void close() throws IOException;
   /**
-   * Returns the number items the result has.
+   * Returns the number of items the result has.
    *
    * @return the number of items
    */

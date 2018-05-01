@@ -102,7 +102,8 @@ public class OrientDBResult<K, T extends PersistentBase> extends ResultBase<K, T
 
   @Override
   public int size() {
-    return size;
+    int totalSize = size;
+    int intLimit = (int)this.limit;
+    return intLimit > 0 && totalSize>intLimit ? intLimit : totalSize;
   }
-
 }

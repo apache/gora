@@ -245,5 +245,27 @@ public class TestHBaseStore extends DataStoreTestBase {
     exceptionalConf.set("gora.hbase.mapping.file","gora-hbase-mapping-mismatch.xml");
     DataStoreFactory.createDataStore(HBaseStore.class, String.class, WebPage.class, exceptionalConf);
   }
-
+  
+  @Test
+  @Ignore("HBase does not support Result#size() without limit set")
+  @Override
+  public void testResultSize() throws Exception {
+  }
+  
+  @Test
+  @Ignore("HBase does not support Result#size() without limit set")
+  @Override
+  public void testResultSizeStartKey() throws Exception {
+  }
+  
+  @Ignore("HBase does not support Result#size() without limit set")
+  @Override
+  public void testResultSizeEndKey() throws Exception {
+  }
+  
+  @Test
+  @Ignore("HBase does not support Result#size() without limit set")
+  @Override
+  public void testResultSizeKeyRange() throws Exception {
+  }
 }
