@@ -18,8 +18,10 @@
 
 package org.apache.gora.hbase.store;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
@@ -177,4 +179,17 @@ public class HBaseMapping {
     }
   }
 
+  public String toString() {
+    StringBuilder strBuilder = new StringBuilder();
+    strBuilder.append(this.getTableName());
+    strBuilder.append("\n");
+    for (Entry<String, HBaseColumn> mappingEntry : this.columnMap.entrySet()) {
+      byte[] familyBytes = mappingEntry.getValue().getFamily() == null ? new byte[0] : mappingEntry.getValue().getFamily() ;
+      byte[] qualifierBytes = mappingEntry.getValue().getQualifier() == null ? new byte[0] : mappingEntry.getValue().getQualifier() ;
+      strBuilder.append(mappingEntry.getKey() + " -> " + new String(familyBytes, StandardCharsets.UTF_8) + ":" + new String(qualifierBytes, StandardCharsets.UTF_8)) ;
+      strBuilder.append("\n");
+    }
+    return strBuilder.toString() ;
+  }
+  
 }

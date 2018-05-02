@@ -92,8 +92,8 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
   public static final String DEFAULT_MAPPING_FILE = "gora-hbase-mapping.xml";
 
   /**
-   * Key to hold a mapping loaded from memory, instead from filesystem like
-   * the one at PARSE_MAPPING_FILE_KEY
+   * Key at DataStore Properties (same as gora.properties) to hold a mapping loaded from memory, instead from filesystem like
+   * the one at PARSE_MAPPING_FILE_KEY. If this key is present, the mapping is loaded from the value instead of gora-hbase-mapping.xml
    */
   public static final String XML_MAPPING_DEFINITION = "gora.mapping" ;  
   
@@ -143,10 +143,10 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       admin = ConnectionFactory.createConnection(getConf()).getAdmin();
       
       InputStream mappingInputStream ;
-      // If there is a mapping definition in the configuration, use it.
-      if (getConf().get(XML_MAPPING_DEFINITION, null) != null) {
-        if (LOG.isTraceEnabled()) LOG.trace(XML_MAPPING_DEFINITION + " = " + getConf().get(XML_MAPPING_DEFINITION));  
-        mappingInputStream = IOUtils.toInputStream(getConf().get(XML_MAPPING_DEFINITION), (Charset)null) ;
+      // If there is a mapping definition in the Properties, use it.
+      if (properties.containsKey(XML_MAPPING_DEFINITION)) {
+        if (LOG.isTraceEnabled()) LOG.trace(XML_MAPPING_DEFINITION + " = " + properties.getProperty(XML_MAPPING_DEFINITION));  
+        mappingInputStream = IOUtils.toInputStream(properties.getProperty(XML_MAPPING_DEFINITION), (Charset)null) ;
       }
       // Otherwise use the configuration from de default file gora-hbase-mapping.xml or whatever
       // configured in the key "gora.hbase.mapping.file"
@@ -155,6 +155,7 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       }
       
       mapping = readMapping(mappingInputStream);
+      if(LOG.isTraceEnabled()) LOG.trace(mapping.toString());
       filterUtil = new HBaseFilterUtil<>(this.conf);
     } catch (FileNotFoundException ex) {
       throw new GoraException("Mapping file '" + getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE) + "' not found.",ex);

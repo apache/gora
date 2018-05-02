@@ -3,7 +3,6 @@ package org.apache.gora.pig;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,14 +13,13 @@ import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericData.Array;
-import org.apache.gora.mapreduce.GoraInputFormat;
 import org.apache.gora.mapreduce.GoraMapReduceUtils;
 import org.apache.gora.mapreduce.GoraOutputFormat;
 import org.apache.gora.mapreduce.GoraRecordReader;
 import org.apache.gora.mapreduce.GoraRecordWriter;
 import org.apache.gora.persistency.impl.PersistentBase;
-import org.apache.gora.pig.mapreduce.GoraInputFormatFactory;
 import org.apache.gora.pig.mapreduce.GoraOutputFormatFactory;
+import org.apache.gora.pig.mapreduce.PigGoraInputFormat;
 import org.apache.gora.pig.mapreduce.PigGoraOutputFormat;
 import org.apache.gora.pig.util.PersistentUtils;
 import org.apache.gora.pig.util.SchemaUtils;
@@ -165,7 +163,7 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
   protected Class<? extends PersistentBase> persistentClass;
   protected Schema persistentSchema ;
   private   DataStore<?, ? extends PersistentBase> dataStore ;
-  protected GoraInputFormat<?,? extends PersistentBase> inputFormat ;
+  protected PigGoraInputFormat<?,? extends PersistentBase> inputFormat ;
   protected GoraRecordReader<?,? extends PersistentBase> reader ;
   protected PigGoraOutputFormat<?,? extends PersistentBase> outputFormat ;
   protected GoraRecordWriter<?,? extends PersistentBase> writer ;
@@ -177,10 +175,6 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
   /** Fields to load as Query - but without 'key' - */
   protected List<String> loadQueryFields ;
   
-  /** Setted to 'true' if location is '*'. All fields will be loaded into a tuple when reading,
-   * and all tuple fields will be copied to the persistent instance when saving. */
-  protected boolean loadSaveAllFields = false ;
-
   private ObjectMapper mapper = new ObjectMapper() ;
   
   /**
@@ -253,17 +247,13 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
     this.persistentSchema = this.persistentClass.newInstance().getSchema() ;
 
     // Populate this.loadQueryFields
-    String csvFields = this.storageConfiguration.getFields() ;
     List<String> declaredConstructorFields = new ArrayList<String>() ;
-    if (csvFields.contains("*")) {
-      // Declared fields "*" means all fields
-      this.loadSaveAllFields = true ;
+    if (this.storageConfiguration.isAllFieldsQuery()) {
       for (Field field : this.persistentSchema.getFields()) {
         declaredConstructorFields.add(field.name()) ;
       }
     } else {
-      // CSV fields declared in constructor "field,field,field,field,..."
-      declaredConstructorFields.addAll(Arrays.asList(csvFields.split("\\s*,\\s*"))) ;
+      declaredConstructorFields.addAll(this.storageConfiguration.getFieldsAsList()) ;
     }
     this.loadQueryFields = declaredConstructorFields ;
   }
@@ -275,7 +265,8 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
    * @return DataStore for &lt;keyClass,persistentClass&gt;
    * @throws GoraException on DataStore creation error.
    */
-  protected DataStore<?, ? extends PersistentBase> getDataStore() throws GoraException {
+  @SuppressWarnings("rawtypes")
+  protected DataStore getDataStore() throws GoraException {
     if (this.dataStore == null) {      
       try {
         this.dataStore = DataStoreFactory.getDataStore(
@@ -328,10 +319,6 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
   private void mergeGoraStorageConfigurationInto(Configuration configuration) {
     GoraMapReduceUtils.setIOSerializations(configuration, true) ;
 
-    if (this.storageConfiguration.getMapping() != null) {
-      configuration.set("gora.mapping", this.storageConfiguration.getMapping()) ;
-    }
-    
     // Set the constructor configuration into the hadoop configuration
     this.storageConfiguration.mergeConfiguration(configuration) ;
   }
@@ -339,21 +326,19 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
   @Override
   @SuppressWarnings({ "rawtypes", "unchecked" })
   public InputFormat getInputFormat() throws IOException {
-    /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-     * The Query instance here will be serialized to the workers (including configuration)
-     * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-     */
-    this.inputFormat = GoraInputFormatFactory.createInstance(this.keyClass, this.persistentClass);
+    this.inputFormat = new PigGoraInputFormat() ;
+    
+    // Here is where the QUERY is set
     Query query = this.getDataStore().newQuery() ;
-    if (this.loadSaveAllFields== false) {
+    if (!this.storageConfiguration.isAllFieldsQuery()) {
       query.setFields(this.loadQueryFields.toArray(new String[0])) ;
     }
-    this.mergeGoraStorageConfigurationInto(this.job.getConfiguration());
-    GoraInputFormat.setInput(this.job, query, false) ;
-    this.localJobConf = new JobConf(this.job.getConfiguration()) ;
-    this.mergeGoraStorageConfigurationInto(this.localJobConf);
+    this.inputFormat.setQuery(query);
     
+    this.inputFormat.setStorageConfiguration(this.storageConfiguration);
+    this.inputFormat.setDataStore(this.getDataStore()) ;
     this.inputFormat.setConf(this.localJobConf);
+    
     return this.inputFormat ; 
   }
 

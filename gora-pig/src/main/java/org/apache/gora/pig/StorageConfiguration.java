@@ -1,12 +1,26 @@
 package org.apache.gora.pig;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.tools.ant.filters.StringInputStream;
 
+/**
+ * Class that holds the GoraStorage configuration set at the pig script for the Storage:
+ * 
+ * LOAD '.' USING org.apache.gora.pig.GoraStorage('{
+ *         "persistentClass": "",
+ *         "fields": "",
+ *         "goraProperties": "",
+ *         "mapping": "",
+ *         "configuration": {}
+ * }') ;
+ * 
+ */
 public class StorageConfiguration {
 
   /**
@@ -20,7 +34,7 @@ public class StorageConfiguration {
   private String persistentClass ;
   
   /**
-   * Comma separated list of fields, defalts to "*"
+   * Comma separated list of fields "field1,field2,field3". Defalts to "*"
    */
   private String fields = "*" ;
   
@@ -32,7 +46,7 @@ public class StorageConfiguration {
   /**
    * String with the XML from gora-xxx-mapping.xml
    */
-  private String Mapping ;
+  private String mapping ;
   
   /**
    * Additional configuration that will be copied into Hadoop's Configuration, like HBase connection configuration 
@@ -62,7 +76,19 @@ public class StorageConfiguration {
   public void setFields(String fields) {
     this.fields = fields;
   }
+  
+  public List<String> getFieldsAsList() {
+    return Arrays.asList(this.fields.split("\\s*,\\s*")) ;
+  }
 
+  /**
+   * Flags if the fields has the value "*" selecting all fields.
+   * @return
+   */
+  public boolean isAllFieldsQuery() {
+    return "*".equals(this.fields) ;
+  }
+  
   public String getGoraProperties() {
     return goraProperties;
   }
@@ -79,15 +105,20 @@ public class StorageConfiguration {
   public Properties getGoraPropertiesAsProperties() throws IOException {
     Properties properties = new Properties();
     properties.load(new StringInputStream(this.goraProperties));
+    
+    if (this.getMapping() != null) {
+      properties.setProperty("gora.mapping", mapping) ;
+    }
+    
     return properties;
   }
   
   public String getMapping() {
-    return Mapping;
+    return mapping;
   }
 
   public void setMapping(String mapping) {
-    Mapping = mapping;
+    this.mapping = mapping;
   }
 
   public Map<String,String> getConfiguration() {
