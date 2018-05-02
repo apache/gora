@@ -94,7 +94,7 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
     public int size() {
       int totalSize = map.navigableKeySet().size();
       int intLimit = (int)this.limit;
-      return intLimit > 0 && totalSize>intLimit ? intLimit : totalSize;
+      return intLimit > 0 && totalSize > intLimit ? intLimit : totalSize;
     }
   }
 
