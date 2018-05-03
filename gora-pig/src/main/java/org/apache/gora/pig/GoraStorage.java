@@ -61,29 +61,72 @@ import org.slf4j.LoggerFactory;
 /**
  * Storage for Apache Pig.
  *
- * Example usage:
+ *
+ * <h1>Read tuples</h1>
+ * 
+ * Example of usage:
  *
  * <pre>
  * set job.name 'GoraPig test';
  * register gora/*.jar;
- * webpage = LOAD '.' USING org.apache.gora.pig.GoraStorage('java.lang.String','admin.WebPage','baseUrl,status,content') ;
+ * webpage = LOAD '.' USING org.apache.gora.pig.GoraStorage('{
+ *       "persistentClass": "admin.WebPage",
+ *       "fields": "baseUrl,status,content",
+ *       "goraProperties": "gora.datastore.default=org.apache.gora.hbase.store.HBaseStore\\ngora.datastore.autocreateschema=true\\ngora.hbasestore.scanner.caching=4",
+ *       "mapping": "<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>\\n<gora-odm>\\n<table name=\\"webpage\\">\\n<family name=\\"f\\" maxVersions=\\"1\\"/>\\n</table>\\n<class table=\\"webpage\\" keyClass=\\"java.lang.String\\" name=\\"admin.WebPage\\">\\n<field name=\\"baseUrl\\" family=\\"f\\" qualifier=\\"bas\\"/>\\n<field name=\\"status\\" family=\\"f\\" qualifier=\\"st\\"/>\\n<field name=\\"content\\" family=\\"f\\" qualifier=\\"cnt\\"/>\\n</class>\\n</gora-odm>",
+ *       "configuration": {
+ *           "hbase.zookeeper.quorum": "hdp4,hdp1,hdp3",
+ *           "zookeeper.znode.parent": "/hbase-unsecure"
+ *       }
+ * }') ;
  * dump webpage ;
  * </pre>
  *
- * In the example above, the folder gora must contain:
+ * If the files gora.properties, gora-hbase-mapping.xml and hbase-site.xml are provided
+ * through the classpath to Pig client and including inside the registered *.jar, the
+ * corresponding configuration parameters can be omitted. 
+ *
+ * There is another option: "keyClass" but it is omitted since the only key class supported at this
+ * moment is "java.lang.String".
+ *
+ * In the example above, the folder gora that is being registered must contain:
  * <ul>
- *   <li>All the contents of <code>gora-pig/lib</code></li>
+ *   <li>All the contents of <code>gora-pig/lib</code> (THIS LIST MUST BE REFINED), being the dependences needed for GoraStorage</li>
  *   <li>gora-pig jar</li>
+ *   <li>gora-x jar relative to the used backend</li>
  *   <li>A .jar file with the compiled entities (<code>admin.Webpage</code> in the example)</li>
- *   <li>A .jar file with the gora.properties, mapping and configuration files like HBase's hbase-site.xml./li>
+ *   <li>Optionally a .jar file with the gora.properties, mapping and configuration files like HBase's hbase-site.xml.</li>
  * </ul>
- * and the <code>/lib</code> folder of Apache Pig installation must contain all that files too.
+ * and the <code>/lib</code> folder of Apache Pig installation must contain all that files too (THIS LIST MUST BE REFINED).
  *
- * Source code:
+ * <h1>Saving values</h1>
+ * 
+ * To store values, the usage is:
+ * 
+ * <pre>
+ * STORE webpages INTO '.' USING org.apache.gora.pig.GoraStorage('{
+ *       "persistentClass": "admin.WebPage",
+ *       "fields": "baseUrl,status,content",
+ *       "goraProperties": "gora.datastore.default=org.apache.gora.hbase.store.HBaseStore\\ngora.datastore.autocreateschema=true\\ngora.hbasestore.scanner.caching=4",
+ *       "mapping": "<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>\\n<gora-odm>\\n<table name=\\"webpage\\">\\n<family name=\\"f\\" maxVersions=\\"1\\"/>\\n</table>\\n<class table=\\"webpage\\" keyClass=\\"java.lang.String\\" name=\\"admin.WebPage\\">\\n<field name=\\"baseUrl\\" family=\\"f\\" qualifier=\\"bas\\"/>\\n<field name=\\"status\\" family=\\"f\\" qualifier=\\"st\\"/>\\n<field name=\\"content\\" family=\\"f\\" qualifier=\\"cnt\\"/>\\n</class>\\n</gora-odm>",
+ *       "configuration": {
+ *           "hbase.zookeeper.quorum": "hdp4,hdp1,hdp3",
+ *           "zookeeper.znode.parent": "/hbase-unsecure"
+ *       }
+ * }') ;
+ * </pre>
+ * 
+ * All the declared fields in the "fields" configuration option must exist in the pig relation schema being written, and if there is a field declared that doesn't exist in
+ * the tuple the process fails with an exception.
+ * 
+ * ... Maybe the behavior should be to accept missing fields and allow to configure some "failIfFieldMissing" option.
+ * 
+ * <h2>About the source code and integration with Apache Pig</h2>
  *
+ * Here is a resume on some insight about how does Pig works, and in what order does it calls the Storage methdos.
  * In this class code <code>UDFContext.getUDFContext().isFrontend()</code> returns true when the Storage is a frontend instance.
- * BUT must know that the Storage classes are instanced several times at frontend. In the example above, this is the order of calls
- * and the several different instances:
+ * BUT must know that the Storage classes are instanced several times at frontend. In the example on top, this is the order of calls
+ * and the several different instances of GoraStorage:
  *
  * On LOAD at frontend:
  * <pre>
@@ -118,15 +161,6 @@ import org.slf4j.LoggerFactory;
  * GoraStorage prepareToRead()          org.apache.gora.pig.GoraStorage@680d4a6a [E]
  * GoraStorage getNext()                org.apache.gora.pig.GoraStorage@680d4a6a [E] - repeated until end
  * </pre>
- * 
- * To store values, the usage is:
- * 
- * <pre>
- * STORE webpages INTO '.' USING org.apache.gora.pig.GoraStorage(
- *                         'java.lang.String',
- *                         'admin.WebPage',
- *                         'baseUrl,status,content') ;
- * </pre>
  */
 public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMetadata {
 
@@ -135,7 +169,7 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
   /**
    * Key in UDFContext properties used to pass the STORE Pig Schema from frontend to backend.
    */
-  private static final String GORA_STORE_SCHEMA = "gorastorage.pig.store.schema" ;
+  protected static final String GORA_STORE_PIG_SCHEMA = "gorastorage.pig.store.schema" ;
 
   /**
    * Job that Pig configures
@@ -168,12 +202,17 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
   protected PigSplit split ;
   protected ResourceSchema readResourceSchema ;
   protected ResourceSchema writeResourceSchema ;
-  private   Map<String, ResourceFieldSchemaWithIndex> writeResourceFieldSchemaMap ;
+  protected Map<String, ResourceFieldSchemaWithIndex> writeResourceFieldSchemaMap ;
   
   /** Fields to load as Query - but without 'key' - */
   protected List<String> loadQueryFields ;
   
   private ObjectMapper mapper = new ObjectMapper() ;
+  
+  /**
+   * Private attribute to hold the cache of the index of the "key" field in the pig tuple when STORE in executed
+   */
+  protected int pigFieldKeyIndex ;
   
   /**
    * Creates a new GoraStorage to load/save.
@@ -194,7 +233,7 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
    * <ul>
    *   <li>keyClass: full class name with namespace of the key class. By default "java.lang.String".</li>
    *   <li>persistentClass: full class name with namespace of the compiled PersistentBase class.</li>
-   *   <li>fields: comma-separated list of fields to load, from the first level of fields in the persistent class.. Can use "*" to denote to load all fields, or to save all columns of a relation.</li>
+   *   <li>fields: comma-separated list of fields to load, from the first level of fields in the persistent class.. Can use "*" to denote to load all fields, or to save all columns of the pig tuples.</li>
    *   <li>goraProperties: string with the content to use as gora.properties. If this key is missing, will try to load the values from the local file gora.properties.</li>
    *   <li>mapping: string with the XML content to use as gora-xxx-mapping.xml. If this key is missing, will try to load from local file.</li>
    *   <li>configuration: object with string key:values to override in the job configuration for hadoop.
@@ -300,9 +339,8 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
    * @throws JsonMappingException - When the conversion bean->json fails
    * @throws JsonGenerationException - When the conversion bean->json fails
    */
-  private Properties getUDFProperties() throws JsonGenerationException, JsonMappingException, IOException {
-    return UDFContext.getUDFContext().getUDFProperties(this.getClass(),
-        new String[] {this.udfcSignature});
+  protected Properties getUDFProperties() throws JsonGenerationException, JsonMappingException, IOException {
+    return UDFContext.getUDFContext().getUDFProperties(this.getClass(), new String[] {this.udfcSignature});
   }
   
   /**
@@ -472,22 +510,18 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
    * @throws IOException if this schema is not acceptable.
    */
   public void checkSchema(ResourceSchema pigSchema) throws IOException {
-    if(LOG.isTraceEnabled()) LOG.trace("checkSchema() @ " + this);
     SchemaUtils.checkStoreSchema(pigSchema, this.loadQueryFields, this.persistentSchema);
     // Save the schema to UDFContext to use it on backend when writing data
-    getUDFProperties().setProperty(GoraStorage.GORA_STORE_SCHEMA, pigSchema.toString()) ;
+    this.getUDFProperties().setProperty(GoraStorage.GORA_STORE_PIG_SCHEMA, pigSchema.toString()) ;
   }
   
   @Override
   @SuppressWarnings({ "rawtypes", "unchecked" })
   public void prepareToWrite(RecordWriter writer) throws IOException {
-    if(LOG.isTraceEnabled()) LOG.trace("prepareToWrite() @ " + this);
-    this.writer = (GoraRecordWriter<?,? extends PersistentBase>) writer ;
-    
     // Get the schema of data to write from UDFContext (coming from frontend checkSchema())
-    String strSchema = getUDFProperties().getProperty(GoraStorage.GORA_STORE_SCHEMA) ;
+    String strSchema = this.getUDFProperties().getProperty(GoraStorage.GORA_STORE_PIG_SCHEMA) ;
+    this.writer = (GoraRecordWriter<?,? extends PersistentBase>) writer ;
 
-    LOG.info("Schema read from frontend to write: " + strSchema) ;
     // Parse de the schema from string stored in properties object
     this.writeResourceSchema = new ResourceSchema(Utils.getSchemaFromString(strSchema)) ;
     this.writeResourceFieldSchemaMap = new HashMap<String, ResourceFieldSchemaWithIndex>() ;
@@ -496,20 +530,21 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
       this.writeResourceFieldSchemaMap.put(fieldSchema.getName(),
                                            new ResourceFieldSchemaWithIndex(fieldSchema, index++)) ;
     }
+    this.pigFieldKeyIndex = this.writeResourceFieldSchemaMap.get("key").getIndex() ;
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public void putNext(Tuple t) throws IOException {
+  public void putNext(Tuple pigTuple) throws IOException {
 
     PersistentBase persistentObj = this.dataStore.newPersistent() ;
 
-    if (LOG.isTraceEnabled()) LOG.trace("key: {}", t.get(0)) ;
+    if (LOG.isTraceEnabled()) LOG.trace("key: {}", pigTuple.get(pigFieldKeyIndex)) ;
     for (String fieldName : this.loadQueryFields) {
       if (LOG.isTraceEnabled()) {
         LOG.trace("  Put fieldname: {}", fieldName) ;
         LOG.trace("      resourcefield schema: {}", this.writeResourceFieldSchemaMap.get(fieldName).getResourceFieldSchema()) ;
-        LOG.trace("      value: {} - {}",this.writeResourceFieldSchemaMap.get(fieldName).getIndex(), t.get(this.writeResourceFieldSchemaMap.get(fieldName).getIndex())) ;
+        LOG.trace("      value: {} - {}",this.writeResourceFieldSchemaMap.get(fieldName).getIndex(), pigTuple.get(this.writeResourceFieldSchemaMap.get(fieldName).getIndex())) ;
       }
       
       ResourceFieldSchemaWithIndex writeResourceFieldSchemaWithIndex = this.writeResourceFieldSchemaMap.get(fieldName) ;
@@ -529,32 +564,19 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
       }
 
       //TODO Move this put to PersistentUtils
-      //TODO Here is used the resourceFieldSchema and the index. Think about optimize
-      this.avroLT18putWrapper(persistentObj, fieldName,
-                        this.writeField(persistentField.schema(),
-                                        pigFieldSchema,
-                                        t.get(writeResourceFieldSchemaWithIndex.getIndex()))) ;
+      //TODO Here is used the resourceFieldSchema and the index. Think about optimize if possible
+      //TODO Find a better name to this.writeField, like 'tupleToPersistent'
+      int persistentFieldIndex = persistentObj.getSchema().getField(fieldName).pos() ;
+      persistentObj.put(persistentFieldIndex,
+                        this.writeField(persistentField.schema(), pigFieldSchema, pigTuple.get(writeResourceFieldSchemaWithIndex.getIndex()))) ;
+      persistentObj.setDirty(persistentFieldIndex);
     }
 
     try {
-      ((GoraRecordWriter<Object,PersistentBase>) this.writer).write(t.get(0), (PersistentBase) persistentObj) ;
+      ((GoraRecordWriter<Object,PersistentBase>) this.writer).write(pigTuple.get(pigFieldKeyIndex), (PersistentBase) persistentObj) ;
     } catch (InterruptedException e) {
       throw new IOException("Error writing the tuple.",e) ;
     }
-  }
-
-  /**
-   * HDP 2.6.4 uses Avro 1.7.4, but we need Avro 1.8.x. This is a workaround for the
-   * method SpecificRecordBase.put(String, Object) introduced in 1.8.x .
-   * 
-   * TODO Delete when Avro 1.7.4 gets deprecated or old enough.
-   * 
-   * @param persistentObj - The Persistent object to write a field
-   * @param fieldName - The field to write into
-   * @param value - The value to write
-   */
-  private void avroLT18putWrapper(PersistentBase persistentObj, String fieldName, Object value) {
-    persistentObj.put(persistentObj.getSchema().getField(fieldName).pos(), value);
   }
   
   /**

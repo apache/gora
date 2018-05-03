@@ -32,7 +32,10 @@ public class SchemaUtils {
    *                     'baseUrl,status') 
    * </pre>
    * the relation's schema is checked before storing.
-   * If there is any error, throws an IOException
+   * If there is any error, throws an IOException.
+   * 
+   * The check consist on checking the "key" field, and that all fields declared in the STORE command
+   * are present in the pig relation.
    * 
    * @param pigSchema - The Pig Schema to check.
    * @param queryFields - Declared storing fields ("baseUrl" and "status" in the example).
