@@ -47,7 +47,8 @@ public class SchemaUtils {
     List<String> pigFieldSchemasNames = new ArrayList<String>(Arrays.asList(pigSchema.fieldNames())) ;
     
     if ( !pigFieldSchemasNames.contains("key") ) {
-      throw new IOException("Expected a field called \"key\", but not found.") ;
+      LOG.info("Declared Pig fields: " + String.join(",", pigFieldSchemasNames));
+      throw new IOException("Expected a field called \"key\", but not found.");
     }
 
     // All fields are mandatory
@@ -155,9 +156,10 @@ public class SchemaUtils {
   private static boolean checkUnionSchema(Schema avroSchema, ResourceFieldSchema pigFieldSchema) throws IOException {
     if (!avroSchema.getType().equals(Type.UNION)) return false ;
 
+    LOG.trace("    checking against UNION");
     for (Schema unionElementSchema: avroSchema.getTypes()) {
       try {
-        LOG.trace("    Checking pig schema '{}' with avro union '[{},...]'", DataType.findTypeName(pigFieldSchema.getType()), unionElementSchema.getType().getName()) ;
+        LOG.trace("    union component {}", unionElementSchema.getType().getName()) ;
         checkEqualSchema(pigFieldSchema, unionElementSchema) ;
         return true ;
       }catch (IOException e){

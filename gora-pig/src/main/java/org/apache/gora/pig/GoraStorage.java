@@ -14,11 +14,9 @@ import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericData.Array;
 import org.apache.gora.mapreduce.GoraMapReduceUtils;
-import org.apache.gora.mapreduce.GoraOutputFormat;
 import org.apache.gora.mapreduce.GoraRecordReader;
 import org.apache.gora.mapreduce.GoraRecordWriter;
 import org.apache.gora.persistency.impl.PersistentBase;
-import org.apache.gora.pig.mapreduce.GoraOutputFormatFactory;
 import org.apache.gora.pig.mapreduce.PigGoraInputFormat;
 import org.apache.gora.pig.mapreduce.PigGoraOutputFormat;
 import org.apache.gora.pig.util.PersistentUtils;
@@ -304,7 +302,7 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
    */
   private Properties getUDFProperties() throws JsonGenerationException, JsonMappingException, IOException {
     return UDFContext.getUDFContext().getUDFProperties(this.getClass(),
-        new String[] {this.udfcSignature,this.storageConfiguration.getKeyClass(),this.storageConfiguration.getPersistentClass(),this.mapper.writeValueAsString(this.storageConfiguration)});
+        new String[] {this.udfcSignature});
   }
   
   /**
@@ -443,13 +441,10 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
   @Override
   @SuppressWarnings({ "rawtypes", "unchecked" })
   public OutputFormat getOutputFormat() throws IOException {
-    try {
-      this.outputFormat = GoraOutputFormatFactory.createInstance(PigGoraOutputFormat.class, this.keyClass, this.persistentClass);
-    } catch (Exception e) {
-      throw new IOException("Error creating PigGoraOutputFormat", e) ;
-    }
-    GoraOutputFormat.setOutput(this.job, this.getDataStore(), false) ;
-    this.outputFormat.setConf(this.job.getConfiguration()) ;
+    this.outputFormat = new PigGoraOutputFormat() ;
+    this.outputFormat.setStorageConfiguration(this.storageConfiguration);
+    this.outputFormat.setDataStore(this.getDataStore()) ;
+    this.outputFormat.setConf(this.localJobConf);
     return this.outputFormat ; 
   }
 
@@ -477,6 +472,7 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
    * @throws IOException if this schema is not acceptable.
    */
   public void checkSchema(ResourceSchema pigSchema) throws IOException {
+    if(LOG.isTraceEnabled()) LOG.trace("checkSchema() @ " + this);
     SchemaUtils.checkStoreSchema(pigSchema, this.loadQueryFields, this.persistentSchema);
     // Save the schema to UDFContext to use it on backend when writing data
     getUDFProperties().setProperty(GoraStorage.GORA_STORE_SCHEMA, pigSchema.toString()) ;
@@ -485,6 +481,7 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
   @Override
   @SuppressWarnings({ "rawtypes", "unchecked" })
   public void prepareToWrite(RecordWriter writer) throws IOException {
+    if(LOG.isTraceEnabled()) LOG.trace("prepareToWrite() @ " + this);
     this.writer = (GoraRecordWriter<?,? extends PersistentBase>) writer ;
     
     // Get the schema of data to write from UDFContext (coming from frontend checkSchema())
@@ -530,10 +527,10 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
       if (pigFieldSchema == null) {
         throw new IOException("The field " + fieldName + " does not have a Pig schema when writing.") ;
       }
-      
+
       //TODO Move this put to PersistentUtils
-      //TODO Here is used the resourceFieldSchema and the index. Investigate about why is it needed
-      persistentObj.put(fieldName,
+      //TODO Here is used the resourceFieldSchema and the index. Think about optimize
+      this.avroLT18putWrapper(persistentObj, fieldName,
                         this.writeField(persistentField.schema(),
                                         pigFieldSchema,
                                         t.get(writeResourceFieldSchemaWithIndex.getIndex()))) ;
@@ -546,6 +543,20 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
     }
   }
 
+  /**
+   * HDP 2.6.4 uses Avro 1.7.4, but we need Avro 1.8.x. This is a workaround for the
+   * method SpecificRecordBase.put(String, Object) introduced in 1.8.x .
+   * 
+   * TODO Delete when Avro 1.7.4 gets deprecated or old enough.
+   * 
+   * @param persistentObj - The Persistent object to write a field
+   * @param fieldName - The field to write into
+   * @param value - The value to write
+   */
+  private void avroLT18putWrapper(PersistentBase persistentObj, String fieldName, Object value) {
+    persistentObj.put(persistentObj.getSchema().getField(fieldName).pos(), value);
+  }
+  
   /**
    * Converts one pig field data to PersistentBase Data.
    * 
@@ -666,7 +677,10 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
 
   @Override
   public void cleanupOnFailure(String location, Job job) throws IOException {
-
+    if (dataStore != null){
+      dataStore.flush();
+      dataStore.close();
+    }
   }
 
   @Override

@@ -17,7 +17,6 @@ import org.apache.gora.mapreduce.GoraMapReduceUtils;
 import org.apache.gora.mapreduce.GoraOutputFormat;
 import org.apache.gora.mapreduce.GoraRecordWriter;
 import org.apache.gora.persistency.impl.PersistentBase;
-import org.apache.gora.pig.mapreduce.GoraOutputFormatFactory;
 import org.apache.gora.pig.mapreduce.PigGoraOutputFormat;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
@@ -60,7 +59,7 @@ public class GoraDeleteStorage implements StoreFuncInterface {
 
   public static final Logger LOG = LoggerFactory.getLogger(GoraDeleteStorage.class);
 
-  private enum DeleteType { ROWS, VALUES }  
+  private enum DeleteType { ROWS, VALUES };
   
   /**
    * Key in UDFContext properties that marks config is set (set at backend nodes)  
@@ -183,11 +182,8 @@ public class GoraDeleteStorage implements StoreFuncInterface {
   @Override
   @SuppressWarnings({ "rawtypes", "unchecked" })
   public OutputFormat getOutputFormat() throws IOException {
-    try {
-      this.outputFormat = GoraOutputFormatFactory.createInstance(PigGoraOutputFormat.class, this.keyClass, this.persistentClass);
-    } catch (Exception e) {
-      throw new IOException(e) ;
-    }
+
+    this.outputFormat = new PigGoraOutputFormat() ;
     GoraOutputFormat.setOutput(this.job, this.getDataStore(), false) ;
     this.outputFormat.setConf(this.job.getConfiguration()) ;
     return this.outputFormat ; 

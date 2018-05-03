@@ -178,6 +178,9 @@ public class DataStoreFactory{
   D createDataStore(Class<D> dataStoreClass
       , Class<K> keyClass, Class<T> persistent, Configuration conf, Properties properties) 
           throws GoraException {
+    if (properties == null || properties.size() == 0) {
+      properties = createProps();
+    }
     return createDataStore(dataStoreClass, keyClass, persistent, conf, properties, null);
   }
 
@@ -272,6 +275,9 @@ public class DataStoreFactory{
           = (Class<? extends DataStore<K, T>>) Class.forName(getDefaultDataStore(props));
       Class<K> k = (Class<K>) ClassLoadingUtils.loadClass(keyClass);
       Class<T> p = (Class<T>) ClassLoadingUtils.loadClass(persistentClass);
+      if (props == null || props.size() == 0) {
+        props = createProps();
+      }
       return createDataStore(c, k, p, conf, props, null);
     } catch(GoraException ex) {
       throw ex;
@@ -301,6 +307,9 @@ public class DataStoreFactory{
           = (Class<? extends DataStore<K, T>>) Class.forName(dataStoreClass);
       Class<K> k = (Class<K>) ClassLoadingUtils.loadClass(keyClass);
       Class<T> p = (Class<T>) ClassLoadingUtils.loadClass(persistentClass);
+      if (props == null || props.size() == 0) {
+        props = createProps();
+      }
       return createDataStore(c, k, p, conf, props, null);
     } catch(GoraException ex) {
       throw ex;
