@@ -251,18 +251,18 @@ public class TestHBaseStore extends DataStoreTestBase {
   @Override
   public void testResultSize() throws Exception {
   }
-  
+
   @Test
   @Ignore("HBase does not support Result#size() without limit set")
   @Override
   public void testResultSizeStartKey() throws Exception {
   }
-  
+
   @Ignore("HBase does not support Result#size() without limit set")
   @Override
   public void testResultSizeEndKey() throws Exception {
   }
-  
+
   @Test
   @Ignore("HBase does not support Result#size() without limit set")
   @Override

@@ -67,18 +67,18 @@ public class AccumuloStoreTest extends DataStoreTestBase {
   @Override
   public void testResultSize() throws Exception {
   }
-  
+
   @Test
   @Ignore("Accumulo does not support Result#size() without limit set")
   @Override
   public void testResultSizeStartKey() throws Exception {
   }
-  
+
   @Ignore("Accumulo does not support Result#size() without limit set")
   @Override
   public void testResultSizeEndKey() throws Exception {
   }
-  
+
   @Test
   @Ignore("Accumulo does not support Result#size() without limit set")
   @Override

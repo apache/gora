@@ -127,7 +127,7 @@ public class SolrResult<K, T extends PersistentBase> extends ResultBase<K, T> {
   @Override
   public int size() {
     int totalSize = list.size();
-    int intLimit = (int)this.limit;
-    return intLimit > 0 && totalSize>intLimit ? intLimit : totalSize;
+    int intLimit = (int) this.limit;
+    return intLimit > 0 && totalSize > intLimit ? intLimit : totalSize;
   }
 }

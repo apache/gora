@@ -1210,8 +1210,8 @@ public class DataStoreTestUtil {
   }
   
   public static void testResultSize(DataStore<String, WebPage> store,
-      boolean setStartKeys, boolean setEndKeys, boolean setLimit)
-  throws Exception {
+    boolean setStartKeys, boolean setEndKeys, boolean setLimit)
+    throws Exception {
     createWebPageData(store);
 
     //create sorted set of urls
@@ -1220,19 +1220,20 @@ public class DataStoreTestUtil {
     Collections.sort(sortedUrls);
 
     //try all ranges
-    for(int i=0; i<sortedUrls.size(); i++) {
-      for(int j=i; j<sortedUrls.size(); j++) {
+    for (int i = 0; i < sortedUrls.size(); i++) {
+      for (int j = i; j < sortedUrls.size(); j++) {
         Query<String, WebPage> query = store.newQuery();
-        if(setStartKeys)
+        if (setStartKeys) {
           query.setStartKey(sortedUrls.get(i));
-        if(setEndKeys)
+        }
+        if (setEndKeys) {
           query.setEndKey(sortedUrls.get(j));
-        int expectedLength = (setEndKeys ? j+1: sortedUrls.size()) -
-                             (setStartKeys ? i: 0);
-        if (setLimit){
+        }
+        int expectedLength = (setEndKeys ? j + 1 : sortedUrls.size()) - (setStartKeys ? i : 0);
+        if (setLimit) {
           //limit half of the expected results
-          int limit = expectedLength/2;
-          if (limit > 0){
+          int limit = expectedLength / 2;
+          if (limit > 0) {
             query.setLimit(limit);
           } else {
             continue;
@@ -1240,56 +1241,58 @@ public class DataStoreTestUtil {
         }
         Result<String, WebPage> result = query.execute();
         int size = result.size();
-        int r=0;
-        while(result.next()) {
+        int r = 0;
+        while (result.next()) {
           r++;
         }
         assertEquals(r, size);
-        if(!setEndKeys)
+        if (!setEndKeys) {
           break;
+        }
       }
-      if(!setStartKeys)
+      if (!setStartKeys) {
         break;
+      }
     }
   }
   
   public static void testResultSizeWebPages(DataStore<String, WebPage> store)
-  throws Exception {
+    throws Exception {
     testResultSize(store, false, false, false);
   }
-  
+
   public static void testResultSizeWebPagesStartKey(DataStore<String, WebPage> store)
-  throws Exception {
+    throws Exception {
     testResultSize(store, true, false, false);
   }
-  
+
   public static void testResultSizeWebPagesEndKey(DataStore<String, WebPage> store)
-  throws Exception {
+    throws Exception {
     testResultSize(store, false, false, false);
   }
-  
+
   public static void testResultSizeWebPagesKeyRange(DataStore<String, WebPage> store)
-  throws Exception {
+    throws Exception {
     testResultSize(store, true, true, false);
   }
-  
+
   public static void testResultSizeWebPagesWithLimit(DataStore<String, WebPage> store)
-  throws Exception {
+    throws Exception {
     testResultSize(store, false, false, true);
   }
-  
+
   public static void testResultSizeWebPagesStartKeyWithLimit(DataStore<String, WebPage> store)
-  throws Exception {
+    throws Exception {
     testResultSize(store, true, false, true);
   }
-  
+
   public static void testResultSizeWebPagesEndKeyWithLimit(DataStore<String, WebPage> store)
-  throws Exception {
+    throws Exception {
     testResultSize(store, false, false, true);
   }
-  
+
   public static void testResultSizeWebPagesKeyRangeWithLimit(DataStore<String, WebPage> store)
-  throws Exception {
+    throws Exception {
     testResultSize(store, true, true, true);
   }
 }
