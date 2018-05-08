@@ -760,6 +760,7 @@
     <module>gora-tutorial</module>
     <module>sources-dist</module>
     <module>gora-aerospike</module>
+    <module>gora-ignite</module>
   </modules>
 
   <properties>
