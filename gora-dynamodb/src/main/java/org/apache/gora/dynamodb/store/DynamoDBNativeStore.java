@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.commons.lang.NullArgumentException;
 import org.apache.gora.dynamodb.query.DynamoDBKey;
 import org.apache.gora.dynamodb.query.DynamoDBQuery;
 import org.apache.gora.dynamodb.query.DynamoDBResult;
@@ -191,11 +190,14 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
   public T newPersistent() throws GoraException {
     T obj = null;
     try {
-      obj = persistentClass.newInstance();
+      obj = persistentClass.getDeclaredConstructor().newInstance();
     } catch (InstantiationException e) {
       LOG.error("Error instantiating " + persistentClass.getCanonicalName(), e);
       throw new GoraException(e);
     } catch (IllegalAccessException e) {
+      LOG.error("Error instantiating " + persistentClass.getCanonicalName(),e );
+      throw new GoraException(e);
+    } catch (NoSuchMethodException | InvocationTargetException | IllegalArgumentException | SecurityException e) {
       LOG.error("Error instantiating " + persistentClass.getCanonicalName(),e );
       throw new GoraException(e);
     }
