@@ -19,6 +19,7 @@
 package org.apache.gora.persistency.ws.impl;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 import org.apache.gora.persistency.BeanFactory;
 import org.apache.gora.persistency.Persistent;
@@ -98,7 +99,7 @@ public class BeanFactoryWSImpl<K, T extends Persistent> implements BeanFactory<K
   public K newKey() throws Exception {
     // TODO this method should be checked to see how object states will be managed
     if(isKeyPersistent)
-      return keyClass.newInstance();
+      return keyClass.getDeclaredConstructor().newInstance();
     else if(keyConstructor == null) {
       throw new RuntimeException("Key class does not have a no-arg constructor");
     }
@@ -112,8 +113,9 @@ public class BeanFactoryWSImpl<K, T extends Persistent> implements BeanFactory<K
    */
   public T newPersistent() {
     try {
-      return persistentClass.newInstance();
-    } catch (InstantiationException | IllegalAccessException e) {
+      return persistentClass.getDeclaredConstructor().newInstance();
+    } catch (InstantiationException | IllegalAccessException | IllegalArgumentException |
+            InvocationTargetException | NoSuchMethodException | SecurityException e) {
       LOG.error(e.getMessage());
       throw new RuntimeException(e);
     }

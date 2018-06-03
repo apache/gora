@@ -18,6 +18,7 @@ package org.apache.gora.accumulo.store;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -374,7 +375,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       if (mapping.encoder == null || "".equals(mapping.encoder)) {
         encoder = new BinaryEncoder();
       } else {
-          encoder = (Encoder) getClass().getClassLoader().loadClass(mapping.encoder).newInstance();
+          encoder = (Encoder) getClass().getClassLoader().loadClass(mapping.encoder).getDeclaredConstructor().newInstance();
       }
 
       AuthenticationToken token = new PasswordToken(password);
@@ -391,7 +392,9 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
         createSchema();
       
     } catch (IOException | InstantiationException | IllegalAccessException |
-             ClassNotFoundException | AccumuloException | AccumuloSecurityException e) {
+             ClassNotFoundException | AccumuloException | AccumuloSecurityException |
+             NoSuchMethodException | SecurityException | IllegalArgumentException | 
+             InvocationTargetException e) {
       throw new GoraException(e);
     }
   }

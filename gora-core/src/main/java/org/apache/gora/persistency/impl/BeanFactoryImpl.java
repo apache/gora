@@ -77,7 +77,7 @@ public class BeanFactoryImpl<K, T extends Persistent> implements BeanFactory<K, 
   
   @Override
   public K newKey() throws Exception {
-    return keyClass.newInstance();
+    return keyClass.getDeclaredConstructor().newInstance();
   }
  
   @Override

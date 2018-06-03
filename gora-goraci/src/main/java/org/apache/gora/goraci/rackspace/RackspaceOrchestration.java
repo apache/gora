@@ -59,6 +59,7 @@ import com.google.inject.Module;
 
 import static com.google.common.collect.Iterables.any;
 import static com.google.common.collect.Iterables.concat;
+import java.lang.reflect.InvocationTargetException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,22 +117,26 @@ public class RackspaceOrchestration<K> {
    * @throws IllegalAccessException 
    * @throws InstantiationException 
    * @throws NoSuchElementException 
+   * @throws java.io.IOException 
+   * @throws java.lang.NoSuchMethodException 
+   * @throws java.lang.reflect.InvocationTargetException 
    */
-  public static void main(String[] args) throws NoSuchElementException, InstantiationException, IllegalAccessException, IOException {
+  public static void main(String[] args) throws NoSuchElementException, InstantiationException, IllegalAccessException, IOException, NoSuchMethodException, InvocationTargetException {
     Properties properties = DataStoreFactory.createProps();
     performRackspaceOrchestration(properties);
   }
   
-  private static void performRackspaceOrchestration(Properties properties) throws InstantiationException, IllegalAccessException, IOException {
-    rsContinent = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), 
+  private static void performRackspaceOrchestration(Properties properties) throws InstantiationException, 
+          IllegalAccessException, IOException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
+    rsContinent = DataStoreFactory.findProperty(properties, MemStore.class.getDeclaredConstructor().newInstance(), 
         RS_CONTINENT, "rackspace-cloudservers-us");
-    rsUser = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), RS_USERNAME, "asf-gora");
-    rsApiKey = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), RS_APIKEY, null);
-    rsRegion = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), RS_REGION, "DFW");
-    String rsFlavourId = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), RS_FLAVORID, null);
-    String rsImageId = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), RS_IMAGEID, null);
-    int numServers = Integer.parseInt(DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), RS_NUM_SERVERS, "10"));
-    String serverName = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), RS_SERVERNAME, "goraci_test_server");
+    rsUser = DataStoreFactory.findProperty(properties, MemStore.class.getDeclaredConstructor().newInstance(), RS_USERNAME, "asf-gora");
+    rsApiKey = DataStoreFactory.findProperty(properties, MemStore.class.getDeclaredConstructor().newInstance(), RS_APIKEY, null);
+    rsRegion = DataStoreFactory.findProperty(properties, MemStore.class.getDeclaredConstructor().newInstance(), RS_REGION, "DFW");
+    String rsFlavourId = DataStoreFactory.findProperty(properties, MemStore.class.getDeclaredConstructor().newInstance(), RS_FLAVORID, null);
+    String rsImageId = DataStoreFactory.findProperty(properties, MemStore.class.getDeclaredConstructor().newInstance(), RS_IMAGEID, null);
+    int numServers = Integer.parseInt(DataStoreFactory.findProperty(properties, MemStore.class.getDeclaredConstructor().newInstance(), RS_NUM_SERVERS, "10"));
+    String serverName = DataStoreFactory.findProperty(properties, MemStore.class.getDeclaredConstructor().newInstance(), RS_SERVERNAME, "goraci_test_server");
 
     novaApi = ContextBuilder.newBuilder(rsContinent).credentials(rsUser, rsApiKey).buildApi(NovaApi.class);
     LOG.info("Defining Rackspace cloudserver continent as: {}, and region: {}.", rsContinent, rsRegion);
@@ -150,7 +155,7 @@ public class RackspaceOrchestration<K> {
     File keyPairFile = null;
     String publicKey = null;
     //Use your own .pub key which should be on CP
-    if (DataStoreFactory.findBooleanProperty(properties, MemStore.class.newInstance(), RS_PUBKEY, "true")) {
+    if (DataStoreFactory.findBooleanProperty(properties, MemStore.class.getDeclaredConstructor().newInstance(), RS_PUBKEY, "true")) {
       keyPairFile = new File("~/.ssh/id_rsa.pub");
       LOG.info("Uploading local public key from ~/.ssh/id_rsa.pub to Rackspace...");
     } else {

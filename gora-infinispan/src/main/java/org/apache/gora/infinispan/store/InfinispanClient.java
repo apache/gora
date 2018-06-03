@@ -96,7 +96,7 @@ public class InfinispanClient<K, T extends PersistentBase> implements Configurab
 
   public synchronized void createSchema() throws GoraException {
     try {
-      Support.registerSchema(cacheManager, persistentClass.newInstance().getSchema());
+      Support.registerSchema(cacheManager, persistentClass.getConstructor().newInstance().getSchema());
     } catch (Exception e) {
       throw new GoraException(e);
     }
