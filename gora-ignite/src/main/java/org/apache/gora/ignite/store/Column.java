@@ -16,45 +16,55 @@
  */
 package org.apache.gora.ignite.store;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+public class Column {
 
-/**
- * Mapping definitions for Ignite.
- */
-public class IgniteMapping {
+  private String name;
+  private FieldType dataType;
 
-  private String tableName;
-  private Map<String, Column> fields;
-  private List<String> primaryKey;
-
-  public IgniteMapping() {
-    fields = new HashMap<>();
+  public Column(String name, FieldType dataType) {
+    this.name = name;
+    this.dataType = dataType;
   }
 
-  public String getTableName() {
-    return tableName;
+  public String getName() {
+    return name;
   }
 
-  public void setTableName(String tableName) {
-    this.tableName = tableName;
+  public void setName(String name) {
+    this.name = name;
   }
 
-  public Map<String, Column> getFields() {
-    return fields;
+  public FieldType getDataType() {
+    return dataType;
   }
 
-  public void setFields(Map<String, Column> fields) {
-    this.fields = fields;
+  public void setDataType(FieldType dataType) {
+    this.dataType = dataType;
   }
+  
+  
 
-  public List<String> getPrimaryKey() {
-    return primaryKey;
+  /**
+   * For a more detailed list of data types supported by Ignite and its
+   * equivalents in Java refer to
+   * https://apacheignite-sql.readme.io/docs/data-types
+   */
+  public static enum FieldType {
+    BOOLEAN,
+    INT,
+    TINYINT,
+    SMALLINT,
+    BIGINT,
+    DECIMAL,
+    DOUBLE,
+    REAL,
+    TIME,
+    DATE,
+    TIMESTAMP,
+    VARCHAR,
+    CHAR,
+    UUID,
+    BINARY,
+    ARRAY
   }
-
-  public void setPrimaryKey(List<String> primaryKey) {
-    this.primaryKey = primaryKey;
-  }
-
 }

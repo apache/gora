@@ -15,34 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.gora.ignite;
+package org.apache.gora.ignite.store;
 
-import org.apache.gora.GoraTestDriver;
-import org.apache.gora.ignite.store.IgniteStore;
-import org.apache.ignite.Ignite;
-import org.apache.ignite.Ignition;
+import org.apache.gora.ignite.GoraIgniteTestDriver;
+import org.apache.gora.store.DataStoreTestBase;
 
 /**
- * Helper class for third part tests using gora-ignite backend.
- *
- * @see GoraTestDriver
+ * Test case for IgniteStore.
  */
-public class GoraIgniteTestDriver extends GoraTestDriver {
+public class TestIgniteStore extends DataStoreTestBase {
 
-  private Ignite igniteInstance;
-
-  public GoraIgniteTestDriver() {
-    super(IgniteStore.class);
-  }
-
-  @Override
-  public void setUpClass() throws Exception {
-    igniteInstance = Ignition.start();
-  }
-
-  @Override
-  public void tearDownClass() throws Exception {
-    igniteInstance.close();
+  static {
+    setTestDriver(new GoraIgniteTestDriver());
   }
 
 }
