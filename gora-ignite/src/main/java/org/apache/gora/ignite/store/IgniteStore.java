@@ -22,11 +22,9 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.MessageFormat;
 import java.util.List;
-import java.util.Locale;
 import java.util.Properties;
-import java.util.logging.Level;
+import org.apache.gora.ignite.utils.IgniteSQLBuilder;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
@@ -105,20 +103,45 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
 
   @Override
   public void createSchema() throws GoraException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    if (connection == null) {
+      throw new GoraException(
+          "Impossible to create the schema as no connection has been initiated.");
+    }
+    if (schemaExists()) {
+      return;
+    }
+    try (Statement stmt = connection.createStatement()) {
+      String createTableSQL = IgniteSQLBuilder.createTable(igniteMapping);
+      stmt.executeUpdate(createTableSQL);
+      LOG.info("Table {} has been created for Ignite instance.",
+          igniteMapping.getTableName());
+    } catch (SQLException ex) {
+      throw new GoraException(ex);
+    }
   }
 
   @Override
   public void deleteSchema() throws GoraException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    if (connection == null) {
+      throw new GoraException(
+          "Impossible to delete the schema as no connection has been initiated.");
+    }
+    try (Statement stmt = connection.createStatement()) {
+      String dropTableSQL = IgniteSQLBuilder.dropTable(igniteMapping.getTableName());
+      stmt.executeUpdate(dropTableSQL);
+      LOG.info("Table {} has been dropped from Ignite instance.",
+          igniteMapping.getTableName());
+    } catch (SQLException ex) {
+      throw new GoraException(ex);
+    }
   }
 
   @Override
   public boolean schemaExists() throws GoraException {
     boolean exists = false;
     try (Statement stmt = connection.createStatement()) {
-      MessageFormat messageFormat = new MessageFormat("select * from {0} limit 0", Locale.getDefault());
-      ResultSet executeQuery = stmt.executeQuery(messageFormat.format(igniteMapping.getTableName()));
+      String tableExistsSQL = IgniteSQLBuilder.tableExists(igniteMapping.getTableName());
+      ResultSet executeQuery = stmt.executeQuery(tableExistsSQL);
       executeQuery.close();
       exists = true;
     } catch (SQLException ex) {
