@@ -80,9 +80,11 @@ public class IgniteMappingBuilder<K, T extends PersistentBase> {
           String tableName = dataStore.getSchemaName(tableNameFromMapping, dataStore.getPersistentClass());
           igniteMapping.setTableName(tableName);
           List<Element> prColumns = classElement.getChildren("primarykey");
-          List<String> prFields = new ArrayList<>();
+          List<Column> prFields = new ArrayList<>();
           for (Element aPrimaryKey : prColumns) {
-            prFields.add(aPrimaryKey.getAttributeValue("column"));
+            String name = aPrimaryKey.getAttributeValue("column");
+            String type = aPrimaryKey.getAttributeValue("type");
+            prFields.add(new Column(name, Column.FieldType.valueOf(type)));
           }
           igniteMapping.setPrimaryKey(prFields);
           List<Element> fields = classElement.getChildren("field");

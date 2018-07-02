@@ -19,17 +19,17 @@
 
 <gora-otd>
   <class name="org.apache.gora.examples.generated.Employee" keyClass="java.lang.String" table="Employee">
-    <primarykey column="ssn"/>
+    <primarykey column="pkssn" type="VARCHAR" />
     <field name="ssn" column="ssn" type="VARCHAR"/>
     <field name="name" column="name" type="VARCHAR"/>
     <field name="dateOfBirth" column="dateOfBirth" type="BIGINT"/>
     <field name="salary" column="salary" type="INT"/>
-    <field name="boss" column="boss" type="VARCHAR"/>
-    <field name="webpage" column="webpage" type="VARCHAR"/>
+    <field name="boss" column="boss" type="BINARY"/>
+    <field name="webpage" column="webpage" type="BINARY"/>
   </class>
   
   <class name="org.apache.gora.examples.generated.WebPage" keyClass="java.lang.String" table="WebPage">
-    <primarykey column="url"/>
+    <primarykey column="pkurl" type="VARCHAR"/>
     <field name="url" column="url" type="VARCHAR"/>
     <field name="content" column="content" type="BINARY"/>
     <field name="parsedContent" column="parsedContent" type="BINARY"/>
@@ -37,6 +37,6 @@
     <field name="headers" column="headers" type="BINARY"/>     
     <field name="metadata" column="metadata" type="BINARY"/>
     <field name="byteData" column="byteData" type="BINARY"/>
-    <field name="stringData" column="stringData" type="VARCHAR"/>
+    <field name="stringData" column="stringData" type="BINARY"/>
   </class>
 </gora-otd>

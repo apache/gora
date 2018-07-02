@@ -27,7 +27,7 @@ public class IgniteMapping {
 
   private String tableName;
   private Map<String, Column> fields;
-  private List<String> primaryKey;
+  private List<Column> primaryKey;
 
   public IgniteMapping() {
     fields = new HashMap<>();
@@ -49,11 +49,11 @@ public class IgniteMapping {
     this.fields = fields;
   }
 
-  public List<String> getPrimaryKey() {
+  public List<Column> getPrimaryKey() {
     return primaryKey;
   }
 
-  public void setPrimaryKey(List<String> primaryKey) {
+  public void setPrimaryKey(List<Column> primaryKey) {
     this.primaryKey = primaryKey;
   }
 
