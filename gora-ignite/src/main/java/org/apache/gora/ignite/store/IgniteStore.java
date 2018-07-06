@@ -28,19 +28,24 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.sql.rowset.CachedRowSet;
+import javax.sql.rowset.RowSetFactory;
+import javax.sql.rowset.RowSetProvider;
 import org.apache.avro.Schema;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.avro.util.Utf8;
+import org.apache.gora.ignite.query.IgniteQuery;
+import org.apache.gora.ignite.query.IgniteResult;
 import org.apache.gora.ignite.utils.IgniteSQLBuilder;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
+import org.apache.gora.query.impl.PartitionQueryImpl;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.AvroUtils;
 import org.apache.gora.util.GoraException;
@@ -334,22 +339,72 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
 
   @Override
   public long deleteByQuery(Query<K, T> query) throws GoraException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+
+    String deleteQuery;
+    if (query.getFields() != null && query.getFields().length < igniteMapping.getFields().size()) {
+      List<String> dbFields = new ArrayList<>();
+      for (String af : query.getFields()) {
+        dbFields.add(igniteMapping.getFields().get(af).getName());
+      }
+      deleteQuery = IgniteSQLBuilder.deleteQueryFields(igniteMapping, dbFields);
+    } else {
+      deleteQuery = IgniteSQLBuilder.deleteQuery(igniteMapping);
+    }
+    String selectQueryWhere = IgniteSQLBuilder.selectQueryWhere(igniteMapping, query.getStartKey(), query.getEndKey(), query.getLimit());
+    try (PreparedStatement stmt = connection.prepareStatement(deleteQuery + selectQueryWhere)) {
+      IgniteSQLBuilder.fillSelectQuery(stmt, query.getStartKey(), query.getEndKey());
+      stmt.executeUpdate();
+      return 0;
+    } catch (SQLException ex) {
+      throw new GoraException(ex);
+    }
   }
 
   @Override
   public Result<K, T> execute(Query<K, T> query) throws GoraException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    String[] fields = getFieldsToQuery(query.getFields());
+    //Avro fields to Ignite fields
+    List<String> dbFields = new ArrayList<>();
+    for (String af : fields) {
+      dbFields.add(igniteMapping.getFields().get(af).getName());
+    }
+    String selectQuery = IgniteSQLBuilder.selectQuery(igniteMapping, dbFields);
+    String selectQueryWhere = IgniteSQLBuilder.selectQueryWhere(igniteMapping, query.getStartKey(), query.getEndKey(), query.getLimit());
+    try {
+      PreparedStatement stmt = connection.prepareStatement(selectQuery + selectQueryWhere);
+      RowSetFactory factory = RowSetProvider.newFactory();
+      CachedRowSet rowset = factory.createCachedRowSet();
+      IgniteSQLBuilder.fillSelectQuery(stmt, query.getStartKey(), query.getEndKey());
+      ResultSet executeQuery = stmt.executeQuery();
+      rowset.populate(executeQuery);
+      IgniteResult<K, T> igniteResult = new IgniteResult<>(this, query);
+      igniteResult.setResultSet(rowset);
+      return igniteResult;
+    } catch (SQLException ex) {
+      throw new GoraException(ex);
+    }
+  }
+
+  public K extractKey(ResultSet r) throws SQLException {
+    assert igniteMapping.getPrimaryKey().size() == 1;
+    return (K) r.getObject(igniteMapping.getPrimaryKey().get(0).getName());
   }
 
   @Override
   public Query<K, T> newQuery() {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    IgniteQuery<K, T> query = new IgniteQuery<>(this);
+    query.setFields(getFieldsToQuery(null));
+    return query;
   }
 
   @Override
   public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query) throws IOException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    List<PartitionQuery<K, T>> partitions = new ArrayList<>();
+    PartitionQueryImpl<K, T> partitionQuery = new PartitionQueryImpl<>(
+        query);
+    partitionQuery.setConf(getConf());
+    partitions.add(partitionQuery);
+    return partitions;
   }
 
   @Override

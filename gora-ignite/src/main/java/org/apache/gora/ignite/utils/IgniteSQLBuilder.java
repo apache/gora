@@ -146,4 +146,93 @@ public class IgniteSQLBuilder {
       st.setObject(j, data[i]);
     }
   }
+
+  public static String selectQuery(IgniteMapping mapping, List<String> ifields) {
+    List<String> fields = new ArrayList<>();
+    for (Column c : mapping.getPrimaryKey()) {
+      fields.add(c.getName());
+    }
+    fields.addAll(ifields);
+    StringBuilder sqlBuilder = new StringBuilder();
+    sqlBuilder.append("SELECT ");
+    for (int i = 0; i < fields.size(); i++) {
+      sqlBuilder.append(fields.get(i));
+      sqlBuilder.append(i == fields.size() - 1 ? "" : " , ");
+    }
+    sqlBuilder.append(" FROM ");
+    sqlBuilder.append(mapping.getTableName());
+    return sqlBuilder.toString();
+  }
+
+  public static String deleteQuery(IgniteMapping mapping) {
+    StringBuilder sqlBuilder = new StringBuilder();
+    sqlBuilder.append("DELETE FROM ");
+    sqlBuilder.append(mapping.getTableName());
+    return sqlBuilder.toString();
+  }
+
+  public static String deleteQueryFields(IgniteMapping mapping, List<String> lsFields) {
+    StringBuilder sqlBuilder = new StringBuilder();
+    sqlBuilder.append("UPDATE ");
+    sqlBuilder.append(mapping.getTableName());
+    if (!lsFields.isEmpty()) {
+      sqlBuilder.append(" SET ");
+    }
+    for (int i = 0; i < lsFields.size(); i++) {
+      sqlBuilder.append(lsFields.get(i));
+      sqlBuilder.append(" = null");
+      sqlBuilder.append(i == lsFields.size() - 1 ? "" : " , ");
+    }
+    return sqlBuilder.toString();
+  }
+
+  public static String selectQueryWhere(IgniteMapping mapping, Object sk, Object ek, long limit) {
+    //composite keys pending
+    assert mapping.getPrimaryKey().size() == 1;
+    String keycolumn = mapping.getPrimaryKey().get(0).getName();
+    StringBuilder sqlBuilder = new StringBuilder();
+    if (sk != null || ek != null) {
+      sqlBuilder.append(" WHERE ");
+      if (sk != null && ek != null && sk.equals(ek)) {
+        sqlBuilder.append(keycolumn);
+        sqlBuilder.append("= ?");
+      } else {
+        if (sk != null) {
+          sqlBuilder.append(keycolumn);
+          sqlBuilder.append(">= ?");
+        }
+        if (sk != null && ek != null) {
+          sqlBuilder.append(" AND ");
+        }
+        if (ek != null) {
+          sqlBuilder.append(keycolumn);
+          sqlBuilder.append("<= ?");
+        }
+      }
+    }
+    if (limit > 0) {
+      sqlBuilder.append(" LIMIT " + limit);
+    }
+    return sqlBuilder.toString();
+  }
+
+  public static void fillSelectQuery(PreparedStatement st, Object sk, Object ek) throws SQLException {
+    if (sk != null || ek != null) {
+      if (sk != null && ek != null && sk.equals(ek)) {
+        st.setObject(1, sk);
+      } else {
+        if (sk != null && ek != null) {
+          st.setObject(1, sk);
+          st.setObject(2, ek);
+        } else {
+          if (sk != null) {
+            st.setObject(1, sk);
+          } else {
+            st.setObject(1, ek);
+          }
+        }
+      }
+    }
+  }
+
 }
