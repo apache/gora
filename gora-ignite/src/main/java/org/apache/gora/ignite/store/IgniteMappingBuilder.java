@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -70,6 +70,7 @@ public class IgniteMappingBuilder<K, T extends PersistentBase> {
         LOG.error("Mapping file '{}' could not be found!", mappingFile);
         throw new IOException("Mapping file '" + mappingFile + "' could not be found!");
       }
+      @SuppressWarnings("unchecked")
       List<Element> classes = document.getRootElement().getChildren("class");
       for (Element classElement : classes) {
         if (classElement.getAttributeValue("keyClass").equals(
@@ -79,6 +80,7 @@ public class IgniteMappingBuilder<K, T extends PersistentBase> {
           final String tableNameFromMapping = classElement.getAttributeValue("table");
           String tableName = dataStore.getSchemaName(tableNameFromMapping, dataStore.getPersistentClass());
           igniteMapping.setTableName(tableName);
+          @SuppressWarnings("unchecked")
           List<Element> prColumns = classElement.getChildren("primarykey");
           List<Column> prFields = new ArrayList<>();
           for (Element aPrimaryKey : prColumns) {
@@ -87,6 +89,7 @@ public class IgniteMappingBuilder<K, T extends PersistentBase> {
             prFields.add(new Column(name, Column.FieldType.valueOf(type)));
           }
           igniteMapping.setPrimaryKey(prFields);
+          @SuppressWarnings("unchecked")
           List<Element> fields = classElement.getChildren("field");
           Map<String, Column> mp = new HashMap<>();
           for (Element field : fields) {

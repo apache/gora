@@ -14,7 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.gora.ignite.utils;
+
 /**
- * This package contains Ignite datastore related all classes.
+ *
+ * Constants file for Ignite.
  */
-package org.apache.gora.ignite;
+public class IgniteBackendConstants {
+
+  /*
+  * Default configurations for Ignite
+  */
+  public static final String DEFAULT_IGNITE_HOST = "localhost";
+  public static final String DEFAULT_IGNITE_PORT = "10800";
+  
+  /*
+   * A '42000' error code is thrown by Ignite when a non-existent table is queried.
+   * More details: https://apacheignite-sql.readme.io/docs/jdbc-error-codes
+   */
+  public static final String DEFAULT_IGNITE_TABLE_NOT_EXISTS_CODE = "42000";
+}

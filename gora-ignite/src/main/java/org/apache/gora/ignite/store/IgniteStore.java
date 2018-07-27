@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -39,6 +39,7 @@ import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.avro.util.Utf8;
 import org.apache.gora.ignite.query.IgniteQuery;
 import org.apache.gora.ignite.query.IgniteResult;
+import org.apache.gora.ignite.utils.IgniteBackendConstants;
 import org.apache.gora.ignite.utils.IgniteSQLBuilder;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.impl.PersistentBase;
@@ -61,33 +62,24 @@ import org.slf4j.LoggerFactory;
  */
 public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
-  public static final Logger LOG = LoggerFactory.getLogger(IgniteStore.class);
+  private static final Logger LOG = LoggerFactory.getLogger(IgniteStore.class);
   private static final String PARSE_MAPPING_FILE_KEY = "gora.ignite.mapping.file";
   private static final String DEFAULT_MAPPING_FILE = "gora-ignite-mapping.xml";
   private IgniteParameters igniteParameters;
   private IgniteMapping igniteMapping;
   private Connection connection;
-
-  /*
-   * Create a threadlocal map for the datum readers and writers, because they
-   * are not thread safe, at least not before Avro 1.4.0 (See AVRO-650). When
-   * they are thread safe, it is possible to maintain a single reader and writer
-   * pair for every schema, instead of one for every thread.
-   */
-  public static final ConcurrentHashMap<Schema, SpecificDatumReader<?>> readerMap = new ConcurrentHashMap<>();
-
-  public static final ConcurrentHashMap<Schema, SpecificDatumWriter<?>> writerMap = new ConcurrentHashMap<>();
+  private static final ConcurrentHashMap<Schema, SpecificDatumReader<?>> readerMap = new ConcurrentHashMap<>();
+  private static final ConcurrentHashMap<Schema, SpecificDatumWriter<?>> writerMap = new ConcurrentHashMap<>();
 
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) throws GoraException {
-
     try {
       super.initialize(keyClass, persistentClass, properties);
-      IgniteMappingBuilder builder = new IgniteMappingBuilder(this);
+      IgniteMappingBuilder<K, T> builder = new IgniteMappingBuilder<K, T>(this);
       builder.readMappingFile(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE));
       igniteMapping = builder.getIgniteMapping();
-      igniteParameters = IgniteParameters.load(properties, conf);
-      connection = acquiereConnection();
+      igniteParameters = IgniteParameters.load(properties);
+      connection = acquireConnection();
       LOG.info("Ignite store was successfully initialized");
     } catch (ClassNotFoundException | SQLException ex) {
       LOG.error("Error while initializing Ignite store", ex);
@@ -95,7 +87,7 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
     }
   }
 
-  private Connection acquiereConnection() throws ClassNotFoundException, SQLException {
+  private Connection acquireConnection() throws ClassNotFoundException, SQLException {
     Class.forName("org.apache.ignite.IgniteJdbcThinDriver");
     StringBuilder urlBuilder = new StringBuilder();
     urlBuilder.append("jdbc:ignite:thin://");
@@ -115,8 +107,7 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
     if (igniteParameters.getAdditionalConfigurations() != null) {
       urlBuilder.append(igniteParameters.getAdditionalConfigurations());
     }
-    Connection conn = DriverManager.getConnection(urlBuilder.toString());
-    return conn;
+    return DriverManager.getConnection(urlBuilder.toString());
   }
 
   @Override
@@ -167,25 +158,19 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
 
   @Override
   public boolean schemaExists() throws GoraException {
-    boolean exists = false;
     try (Statement stmt = connection.createStatement()) {
       String tableExistsSQL = IgniteSQLBuilder.tableExists(igniteMapping.getTableName());
       ResultSet executeQuery = stmt.executeQuery(tableExistsSQL);
       executeQuery.close();
-      exists = true;
+      return true;
     } catch (SQLException ex) {
-      /**
-       * a 42000 error code is thrown by Ignite when a non-existent table
-       * queried. More details:
-       * https://apacheignite-sql.readme.io/docs/jdbc-error-codes
-       */
-      if (ex.getSQLState() != null && ex.getSQLState().equals("42000")) {
-        exists = false;
+      if (ex.getSQLState() != null
+          && ex.getSQLState().equals(IgniteBackendConstants.DEFAULT_IGNITE_TABLE_NOT_EXISTS_CODE)) {
+        return false;
       } else {
         throw new GoraException(ex);
       }
     }
-    return exists;
   }
 
   @Override
@@ -240,6 +225,7 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
     return persistent;
   }
 
+  @SuppressWarnings("unchecked")
   private Object deserializeFieldValue(Schema.Field field, Schema fieldSchema,
       Object igniteValue, T persistent) throws IOException {
     Object fieldValue = null;
@@ -298,7 +284,7 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
           Object v = obj.get(field.pos());
           if (get != null && v != null) {
             Schema fieldSchema = field.schema();
-            Object serializedObj = serializeFieldValue(get, fieldSchema, v);
+            Object serializedObj = serializeFieldValue(fieldSchema, v);
             data.put(get, serializedObj);
           }
         }
@@ -350,7 +336,7 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
     } else {
       deleteQuery = IgniteSQLBuilder.deleteQuery(igniteMapping);
     }
-    String selectQueryWhere = IgniteSQLBuilder.selectQueryWhere(igniteMapping, query.getStartKey(), query.getEndKey(), query.getLimit());
+    String selectQueryWhere = IgniteSQLBuilder.queryWhere(igniteMapping, query.getStartKey(), query.getEndKey(), query.getLimit());
     try (PreparedStatement stmt = connection.prepareStatement(deleteQuery + selectQueryWhere)) {
       IgniteSQLBuilder.fillSelectQuery(stmt, query.getStartKey(), query.getEndKey());
       stmt.executeUpdate();
@@ -369,9 +355,8 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
       dbFields.add(igniteMapping.getFields().get(af).getName());
     }
     String selectQuery = IgniteSQLBuilder.selectQuery(igniteMapping, dbFields);
-    String selectQueryWhere = IgniteSQLBuilder.selectQueryWhere(igniteMapping, query.getStartKey(), query.getEndKey(), query.getLimit());
-    try {
-      PreparedStatement stmt = connection.prepareStatement(selectQuery + selectQueryWhere);
+    String selectQueryWhere = IgniteSQLBuilder.queryWhere(igniteMapping, query.getStartKey(), query.getEndKey(), query.getLimit());
+    try (PreparedStatement stmt = connection.prepareStatement(selectQuery + selectQueryWhere)) {
       RowSetFactory factory = RowSetProvider.newFactory();
       CachedRowSet rowset = factory.createCachedRowSet();
       IgniteSQLBuilder.fillSelectQuery(stmt, query.getStartKey(), query.getEndKey());
@@ -385,6 +370,7 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
     }
   }
 
+  @SuppressWarnings("unchecked")
   public K extractKey(ResultSet r) throws SQLException {
     assert igniteMapping.getPrimaryKey().size() == 1;
     return (K) r.getObject(igniteMapping.getPrimaryKey().get(0).getName());
@@ -422,7 +408,8 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
     }
   }
 
-  private Object serializeFieldValue(Column get, Schema fieldSchema, Object fieldValue) {
+  @SuppressWarnings("unchecked")
+  private Object serializeFieldValue(Schema fieldSchema, Object fieldValue) {
     Object output = fieldValue;
     switch (fieldSchema.getType()) {
       case ARRAY:
@@ -442,7 +429,7 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
         if (fieldSchema.getTypes().size() == 2 && isNullable(fieldSchema)) {
           int schemaPos = getUnionSchema(fieldValue, fieldSchema);
           Schema unionSchema = fieldSchema.getTypes().get(schemaPos);
-          output = serializeFieldValue(get, unionSchema, fieldValue);
+          output = serializeFieldValue(unionSchema, fieldValue);
         } else {
           data = null;
           try {

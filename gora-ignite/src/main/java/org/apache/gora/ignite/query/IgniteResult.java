@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -33,7 +33,6 @@ import org.apache.gora.store.DataStore;
 public class IgniteResult<K, T extends PersistentBase> extends ResultBase<K, T> {
 
   private ResultSet resultSet;
-  private Statement st;
   private int size;
 
   public IgniteResult(DataStore<K, T> dataStore, Query<K, T> query) {
@@ -75,13 +74,6 @@ public class IgniteResult<K, T extends PersistentBase> extends ResultBase<K, T> 
     if (resultSet != null) {
       try {
         resultSet.close();
-      } catch (SQLException ex) {
-        throw new IOException(ex);
-      }
-    }
-    if (st != null) {
-      try {
-        st.close();
       } catch (SQLException ex) {
         throw new IOException(ex);
       }

@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import org.apache.gora.ignite.store.Column;
 import org.apache.gora.ignite.store.IgniteMapping;
 
@@ -40,10 +39,23 @@ public class IgniteSQLBuilder {
     return messageFormat.format(args);
   }
 
+  /**
+   * Returns a SQL query for determine whether a table exists or not.
+   *
+   * @param tableName The name of the table to be check.
+   * @return SQL query
+   */
   public static String tableExists(String tableName) {
     return format("SELECT * FROM {0} LIMIT 0", tableName);
   }
 
+  /**
+   * Returns a SQL create table statement for initializing a datastore based
+   * upon a Ignite Mapping definition.
+   *
+   * @param mapping The ignite mapping definition of the data store
+   * @return SQL create query (DDL).
+   */
   public static String createTable(IgniteMapping mapping) {
     StringBuilder sqlBuilder = new StringBuilder();
     sqlBuilder.append("CREATE TABLE ");
@@ -67,10 +79,25 @@ public class IgniteSQLBuilder {
     return sqlBuilder.toString();
   }
 
+  /**
+   * Returns a SQL drop table statement for deleting a datastore instance within
+   * ignite.
+   *
+   * @param tableName The name of the table to be dropped.
+   * @return SQL drop query (DDL).
+   */
   public static String dropTable(String tableName) {
     return format("DROP TABLE IF EXISTS {0} ;", tableName);
   }
 
+  /**
+   * Returns a bare SQL insert statement for adding a new record on a Ignite
+   * data store.
+   *
+   * @param mapping The ignite mapping definition of the data store
+   * @param data A map containing the Column-Value pairs of the new record.
+   * @return SQL insert statement
+   */
   public static String baseInsertStatement(IgniteMapping mapping, Map<Column, Object> data) {
     StringBuilder sqlBuilder = new StringBuilder();
     sqlBuilder.append("MERGE INTO ");
@@ -92,14 +119,31 @@ public class IgniteSQLBuilder {
     return sqlBuilder.toString();
   }
 
-  public static void fillInsertStatement(PreparedStatement st, Map<Column, Object> data) throws SQLException {
-    List<Entry<Column, Object>> list = new ArrayList<>(data.entrySet());
+  /**
+   * Fills a SQL PreparedStatement of a insert operation with the actual data to
+   * be inserted.
+   *
+   * @param statement The insertion PreparedStatement to be filled.
+   * @param insertData A map containing the Column-Value pairs of the new
+   * record.
+   * @throws SQLException When invalid values are provided as parameters for the
+   * insert statement.
+   */
+  public static void fillInsertStatement(PreparedStatement statement, Map<Column, Object> insertData) throws SQLException {
+    List<Entry<Column, Object>> list = new ArrayList<>(insertData.entrySet());
     for (int i = 0; i < list.size(); i++) {
       int j = i + 1;
-      st.setObject(j, list.get(i).getValue());
+      statement.setObject(j, list.get(i).getValue());
     }
   }
 
+  /**
+   * Returns a bare SQL statement for deleting a record from the Ignite data
+   * store.
+   *
+   * @param mapping The ignite mapping definition of the data store
+   * @return SQL delete statement
+   */
   public static String delete(IgniteMapping mapping) {
     StringBuilder sqlBuilder = new StringBuilder();
     sqlBuilder.append("DELETE FROM ");
@@ -113,20 +157,38 @@ public class IgniteSQLBuilder {
     return sqlBuilder.toString();
   }
 
-  public static void fillDeleteStatement(PreparedStatement st, IgniteMapping mapping, Object... data) throws SQLException {
-    assert mapping.getPrimaryKey().size() == data.length;
+  /**
+   * Fills a SQL PreparedStatement of a delete operation with the actual key of
+   * the record to be deleted
+   *
+   * @param statement The deletion PreparedStatement to be filled.
+   * @param mapping The ignite mapping definition of the data store
+   * @param deleteData An Object array containing the primary key values of the
+   * record to be deleted
+   * @throws SQLException When invalid keys' values are provided as parameters
+   */
+  public static void fillDeleteStatement(PreparedStatement statement, IgniteMapping mapping, Object... deleteData) throws SQLException {
+    assert mapping.getPrimaryKey().size() == deleteData.length;
     for (int i = 0; i < mapping.getPrimaryKey().size(); i++) {
       int j = i + 1;
-      st.setObject(j, data[i]);
+      statement.setObject(j, deleteData[i]);
     }
   }
 
-  public static String selectGet(IgniteMapping mapping, List<String> fields) {
+  /**
+   * Returns a bare SQL statement for retrieving a record from the ignite data
+   * store
+   *
+   * @param mapping The ignite mapping definition of the data store
+   * @param columns A list of columns to be retrieved within the select query
+   * @return SQL select statement
+   */
+  public static String selectGet(IgniteMapping mapping, List<String> columns) {
     StringBuilder sqlBuilder = new StringBuilder();
     sqlBuilder.append("SELECT ");
-    for (int i = 0; i < fields.size(); i++) {
-      sqlBuilder.append(fields.get(i));
-      sqlBuilder.append(i == fields.size() - 1 ? "" : " , ");
+    for (int i = 0; i < columns.size(); i++) {
+      sqlBuilder.append(columns.get(i));
+      sqlBuilder.append(i == columns.size() - 1 ? "" : " , ");
     }
     sqlBuilder.append(" FROM ");
     sqlBuilder.append(mapping.getTableName());
@@ -139,20 +201,39 @@ public class IgniteSQLBuilder {
     return sqlBuilder.toString();
   }
 
-  public static void fillSelectStatement(PreparedStatement st, IgniteMapping mapping, Object... data) throws SQLException {
-    assert mapping.getPrimaryKey().size() == data.length;
+  /**
+   * Fills a SQL PreparedStatement of a select operation with the actual keys of
+   * the record to be retrieved
+   *
+   * @param statement The select PreparedStatement to be filled.
+   * @param mapping The ignite mapping definition of the data store
+   * @param selectData An Object array containing the primary key values of the
+   * record to be retrieved
+   * @throws SQLException When invalid keys' values are provided as parameters
+   */
+  public static void fillSelectStatement(PreparedStatement statement, IgniteMapping mapping, Object... selectData) throws SQLException {
+    assert mapping.getPrimaryKey().size() == selectData.length;
     for (int i = 0; i < mapping.getPrimaryKey().size(); i++) {
       int j = i + 1;
-      st.setObject(j, data[i]);
+      statement.setObject(j, selectData[i]);
     }
   }
 
-  public static String selectQuery(IgniteMapping mapping, List<String> ifields) {
+  /**
+   * Returns a base SQL statement for retrieving multiple records from the
+   * ignite data store
+   *
+   * @param mapping The ignite mapping definition of the data store
+   * @param selectFields A list of columns to be retrieved within the select
+   * query
+   * @return SQL select statement
+   */
+  public static String selectQuery(IgniteMapping mapping, List<String> selectFields) {
     List<String> fields = new ArrayList<>();
     for (Column c : mapping.getPrimaryKey()) {
       fields.add(c.getName());
     }
-    fields.addAll(ifields);
+    fields.addAll(selectFields);
     StringBuilder sqlBuilder = new StringBuilder();
     sqlBuilder.append("SELECT ");
     for (int i = 0; i < fields.size(); i++) {
@@ -164,6 +245,13 @@ public class IgniteSQLBuilder {
     return sqlBuilder.toString();
   }
 
+  /**
+   * Returns a base SQL statement for deleting multiple records from the ignite
+   * data store
+   *
+   * @param mapping The ignite mapping definition of the data store
+   * @return SQL delete statement
+   */
   public static String deleteQuery(IgniteMapping mapping) {
     StringBuilder sqlBuilder = new StringBuilder();
     sqlBuilder.append("DELETE FROM ");
@@ -171,64 +259,91 @@ public class IgniteSQLBuilder {
     return sqlBuilder.toString();
   }
 
-  public static String deleteQueryFields(IgniteMapping mapping, List<String> lsFields) {
+  /**
+   * Returns a base SQL statement for deleting fields from records of the ignite
+   * data store
+   *
+   * @param mapping The ignite mapping definition of the data store
+   * @param deleteFields A list of columns to be deleted (set to null)
+   * @return SQL update statement
+   */
+  public static String deleteQueryFields(IgniteMapping mapping, List<String> deleteFields) {
     StringBuilder sqlBuilder = new StringBuilder();
     sqlBuilder.append("UPDATE ");
     sqlBuilder.append(mapping.getTableName());
-    if (!lsFields.isEmpty()) {
+    if (!deleteFields.isEmpty()) {
       sqlBuilder.append(" SET ");
     }
-    for (int i = 0; i < lsFields.size(); i++) {
-      sqlBuilder.append(lsFields.get(i));
+    for (int i = 0; i < deleteFields.size(); i++) {
+      sqlBuilder.append(deleteFields.get(i));
       sqlBuilder.append(" = null");
-      sqlBuilder.append(i == lsFields.size() - 1 ? "" : " , ");
+      sqlBuilder.append(i == deleteFields.size() - 1 ? "" : " , ");
     }
     return sqlBuilder.toString();
   }
 
-  public static String selectQueryWhere(IgniteMapping mapping, Object sk, Object ek, long limit) {
+  /**
+   * Returns a SQL's WHERE segment with proper conditions set for
+   * Querying/Deleting/Updating multiple records of a ignite data store
+   *
+   * @param mapping The ignite mapping definition of the data store
+   * @param startKey Start key of the WHERE condition
+   * @param endKey End key of the WHERE condition
+   * @param limit The maximum number of records to be consider
+   * @return SQL WHERE segment
+   */
+  public static String queryWhere(IgniteMapping mapping, Object startKey, Object endKey, long limit) {
     //composite keys pending
     assert mapping.getPrimaryKey().size() == 1;
     String keycolumn = mapping.getPrimaryKey().get(0).getName();
     StringBuilder sqlBuilder = new StringBuilder();
-    if (sk != null || ek != null) {
+    if (startKey != null || endKey != null) {
       sqlBuilder.append(" WHERE ");
-      if (sk != null && ek != null && sk.equals(ek)) {
+      if (startKey != null && endKey != null && startKey.equals(endKey)) {
         sqlBuilder.append(keycolumn);
         sqlBuilder.append("= ?");
       } else {
-        if (sk != null) {
+        if (startKey != null) {
           sqlBuilder.append(keycolumn);
           sqlBuilder.append(">= ?");
         }
-        if (sk != null && ek != null) {
+        if (startKey != null && endKey != null) {
           sqlBuilder.append(" AND ");
         }
-        if (ek != null) {
+        if (endKey != null) {
           sqlBuilder.append(keycolumn);
           sqlBuilder.append("<= ?");
         }
       }
     }
     if (limit > 0) {
-      sqlBuilder.append(" LIMIT " + limit);
+      sqlBuilder.append(" LIMIT ").append(limit);
     }
     return sqlBuilder.toString();
   }
 
-  public static void fillSelectQuery(PreparedStatement st, Object sk, Object ek) throws SQLException {
-    if (sk != null || ek != null) {
-      if (sk != null && ek != null && sk.equals(ek)) {
-        st.setObject(1, sk);
+  /**
+   * Fills a SQL PreparedStatement's WHERE segment of a select/delete/update
+   * operation with proper key values
+   *
+   * @param statement The select PreparedStatement to be filled.
+   * @param startKey Start key of the WHERE condition
+   * @param endKey End key of the WHERE condition
+   * @throws SQLException When invalid keys' values are provided as parameters
+   */
+  public static void fillSelectQuery(PreparedStatement statement, Object startKey, Object endKey) throws SQLException {
+    if (startKey != null || endKey != null) {
+      if (startKey != null && endKey != null && startKey.equals(endKey)) {
+        statement.setObject(1, startKey);
       } else {
-        if (sk != null && ek != null) {
-          st.setObject(1, sk);
-          st.setObject(2, ek);
+        if (startKey != null && endKey != null) {
+          statement.setObject(1, startKey);
+          statement.setObject(2, endKey);
         } else {
-          if (sk != null) {
-            st.setObject(1, sk);
+          if (startKey != null) {
+            statement.setObject(1, startKey);
           } else {
-            st.setObject(1, ek);
+            statement.setObject(1, endKey);
           }
         }
       }

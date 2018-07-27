@@ -37,3 +37,4 @@ ivy/ivy*.jar
 **/gora-solr-5/src/test/conf/solr/collection1/data/
 **/_rest_managed.json
 **/gora-solr/src/test/conf/solr-managed-schema/collection1/data/
+**/nbactions.xml
