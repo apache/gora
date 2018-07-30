@@ -956,6 +956,21 @@
         <version>${project.version}</version>
         <type>test-jar</type>
       </dependency>
+      
+      <!--Ignite DataStore dependencies -->
+      
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-ignite</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-ignite</artifactId>
+        <version>${project.version}</version>
+        <type>test-jar</type>
+      </dependency>
+      
       <!-- End of Internal Depednecies -->
 
       <dependency>
@@ -1573,7 +1588,13 @@
         <artifactId>testcontainers</artifactId>
         <version>${test.container.version}</version>
       </dependency>
-
+      
+      <!-- Testing Dependencies for Ignite-->
+      <dependency>
+        <groupId>org.apache.ignite</groupId>
+        <artifactId>ignite-indexing</artifactId>
+        <version>${ignite.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 

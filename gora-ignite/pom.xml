@@ -119,14 +119,6 @@
     </dependency>
 
     <dependency>
-      <!-- Ignite mini was trying to load the Shell, which failed with the version of jline in the parent pom -->
-      <groupId>jline</groupId>
-      <artifactId>jline</artifactId>
-      <version>2.11</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
       <groupId>org.apache.zookeeper</groupId>
       <artifactId>zookeeper</artifactId>
       <scope>test</scope>
