@@ -15,6 +15,6 @@
  * limitations under the License.
  */
 /**
- * This package contains all the Ignite store related classes.
+ * This package contains the core classes of the ignite datastore.
  */
 package org.apache.gora.ignite.store;

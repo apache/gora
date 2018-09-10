@@ -21,32 +21,56 @@ public class Column {
   private String name;
   private FieldType dataType;
 
+  /**
+   * Constructor for Column
+   *
+   * @param name Column's name
+   * @param dataType Column's data type
+   */
   public Column(String name, FieldType dataType) {
     this.name = name;
     this.dataType = dataType;
   }
 
+  /**
+   * Returns the column's name
+   *
+   * @return Column's name
+   */
   public String getName() {
     return name;
   }
 
+  /**
+   * Sets the column's name
+   *
+   * @param name Column's name
+   */
   public void setName(String name) {
     this.name = name;
   }
 
+  /**
+   * Returns the column's data-type
+   *
+   * @return Column's data-type
+   */
   public FieldType getDataType() {
     return dataType;
   }
 
+  /**
+   * Sets the column's data-type
+   *
+   * @param dataType Column's data-type
+   */
   public void setDataType(FieldType dataType) {
     this.dataType = dataType;
   }
-  
-  
 
   /**
-   * For a more detailed list of data types supported by Ignite and its
-   * equivalents in Java refer to
+   * Ignite supported data-type enumeration. For a more detailed list of data
+   * types supported by Ignite and its equivalents in Java refer to
    * https://apacheignite-sql.readme.io/docs/data-types
    */
   public static enum FieldType {

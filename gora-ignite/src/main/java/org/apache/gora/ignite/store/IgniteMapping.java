@@ -29,30 +29,63 @@ public class IgniteMapping {
   private Map<String, Column> fields;
   private List<Column> primaryKey;
 
+  /**
+   * Empty constructor for the IgniteMapping class
+   */
   public IgniteMapping() {
     fields = new HashMap<>();
   }
 
+  /**
+   * Returns the name of ignite table linked to the mapping.
+   *
+   * @return Table's name.
+   */
   public String getTableName() {
     return tableName;
   }
 
+  /**
+   * Sets the table name of the ignite mapping
+   *
+   * @param tableName Table's name
+   */
   public void setTableName(String tableName) {
     this.tableName = tableName;
   }
 
+  /**
+   * Returns a map with all field-column mappings
+   *
+   * @return Map containing mapped fields
+   */
   public Map<String, Column> getFields() {
     return fields;
   }
 
+  /**
+   * Sets field-column mappings
+   *
+   * @param fields Map containing mapped fields
+   */
   public void setFields(Map<String, Column> fields) {
     this.fields = fields;
   }
 
+  /**
+   * Returns the primary key's list of columns
+   *
+   * @return List with columns
+   */
   public List<Column> getPrimaryKey() {
     return primaryKey;
   }
 
+  /**
+   * Sets the primary key's columns
+   *
+   * @param primaryKey List with columns
+   */
   public void setPrimaryKey(List<Column> primaryKey) {
     this.primaryKey = primaryKey;
   }

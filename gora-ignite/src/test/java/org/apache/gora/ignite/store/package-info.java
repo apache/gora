@@ -15,6 +15,6 @@
  * limitations under the License.
  */
 /**
- * This package contains Query related classes.
+ * This package contains Ignite datastore tests.
  */
-package org.apache.gora.ignite.query;
+package org.apache.gora.ignite.store;

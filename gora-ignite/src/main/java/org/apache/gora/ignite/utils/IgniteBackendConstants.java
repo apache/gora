@@ -22,15 +22,52 @@ package org.apache.gora.ignite.utils;
  */
 public class IgniteBackendConstants {
 
+  /**
+   * Ignite JDBC constants
+   */
+  public static final String DRIVER_NAME = "org.apache.ignite.IgniteJdbcThinDriver";
+  public static final String JDBC_PREFIX = "jdbc:ignite:thin://";
+
   /*
   * Default configurations for Ignite
-  */
+   */
   public static final String DEFAULT_IGNITE_HOST = "localhost";
   public static final String DEFAULT_IGNITE_PORT = "10800";
-  
+
   /*
    * A '42000' error code is thrown by Ignite when a non-existent table is queried.
    * More details: https://apacheignite-sql.readme.io/docs/jdbc-error-codes
    */
   public static final String DEFAULT_IGNITE_TABLE_NOT_EXISTS_CODE = "42000";
+
+  /**
+   * Property indicating the Ignite Schema to be used
+   */
+  public static final String PROP_SCHEMA = "gora.datastore.ignite.schema";
+
+  /**
+   * Property indicating the Ignite Cluster Node IP
+   */
+  public static final String PROP_HOST = "gora.datastore.ignite.host";
+
+  /**
+   * Property indicating the port used by the Ignite Server
+   */
+  public static final String PROP_PORT = "gora.datastore.ignite.port";
+
+  /**
+   * Property indicating the username to connect to the server
+   */
+  public static final String PROP_USER = "gora.datastore.ignite.user";
+
+  /**
+   * Property indicating the password to connect to the server
+   */
+  public static final String PROP_PASSWORD = "gora.datastore.ignite.password";
+
+  /**
+   * Property indicating additional JDBC options
+   */
+  public static final String PROP_ADDITIONALS = "gora.datastore.ignite.additionalConfigurations";
+
 }

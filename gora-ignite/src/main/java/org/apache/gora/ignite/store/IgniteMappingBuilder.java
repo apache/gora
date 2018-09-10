@@ -44,19 +44,39 @@ public class IgniteMappingBuilder<K, T extends PersistentBase> {
 
   private final IgniteStore<K, T> dataStore;
 
+  /**
+   * Constructor for IgniteMappingBuilder
+   *
+   * @param store IgniteStore instance
+   */
   public IgniteMappingBuilder(final IgniteStore<K, T> store) {
     this.igniteMapping = new IgniteMapping();
     this.dataStore = store;
   }
 
+  /**
+   * Returns the Ignite Mapping being built
+   *
+   * @return Ignite Mapping instance
+   */
   public IgniteMapping getIgniteMapping() {
     return igniteMapping;
   }
 
+  /**
+   * Sets the Ignite Mapping
+   *
+   * @param igniteMapping Ignite Mapping instance
+   */
   public void setIgniteMapping(IgniteMapping igniteMapping) {
     this.igniteMapping = igniteMapping;
   }
 
+  /**
+   * Reads Ignite mappings from file
+   *
+   * @param mappingFile File name relative to the resource's classpath
+   */
   public void readMappingFile(String mappingFile) {
     try {
       SAXBuilder saxBuilder = new SAXBuilder();
@@ -102,11 +122,9 @@ public class IgniteMappingBuilder<K, T extends PersistentBase> {
           break;
         }
       }
-
     } catch (IOException | JDOMException | ConfigurationException e) {
       throw new RuntimeException(e);
     }
     LOG.info("Gora Ignite mapping file was read successfully.");
-
   }
 }

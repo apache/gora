@@ -81,6 +81,9 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
       igniteParameters = IgniteParameters.load(properties);
       connection = acquireConnection();
       LOG.info("Ignite store was successfully initialized");
+      if (!schemaExists()) {
+        createSchema();
+      }
     } catch (ClassNotFoundException | SQLException ex) {
       LOG.error("Error while initializing Ignite store", ex);
       throw new GoraException(ex);
@@ -88,9 +91,9 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
   }
 
   private Connection acquireConnection() throws ClassNotFoundException, SQLException {
-    Class.forName("org.apache.ignite.IgniteJdbcThinDriver");
+    Class.forName(IgniteBackendConstants.DRIVER_NAME);
     StringBuilder urlBuilder = new StringBuilder();
-    urlBuilder.append("jdbc:ignite:thin://");
+    urlBuilder.append(IgniteBackendConstants.JDBC_PREFIX);
     urlBuilder.append(igniteParameters.getHost());
     if (igniteParameters.getPort() != null) {
       urlBuilder.append(":" + igniteParameters.getPort());
@@ -187,9 +190,9 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
     for (String af : avFields) {
       dbFields.add(igniteMapping.getFields().get(af).getName());
     }
-    String selectQuery = IgniteSQLBuilder.selectGet(igniteMapping, dbFields);
+    String selectQuery = IgniteSQLBuilder.createSelectQueryGet(igniteMapping, dbFields);
     try (PreparedStatement stmt = connection.prepareStatement(selectQuery)) {
-      IgniteSQLBuilder.fillSelectStatement(stmt, igniteMapping, keyl);
+      IgniteSQLBuilder.fillSelectQuery(stmt, igniteMapping, keyl);
       ResultSet rs = stmt.executeQuery();
       boolean data = rs.next();
       T resp = null;
@@ -204,21 +207,20 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
     } catch (SQLException | IOException ex) {
       throw new GoraException(ex);
     }
-
   }
 
-  public T newInstance(ResultSet rs, String[] fields) throws GoraException, SQLException, IOException {
+  public T newInstance(ResultSet resultset, String[] fields) throws GoraException, SQLException, IOException {
     fields = getFieldsToQuery(fields);
     T persistent = newPersistent();
     for (String f : fields) {
       Schema.Field field = fieldMap.get(f);
       Schema fieldSchema = field.schema();
       String dbField = igniteMapping.getFields().get(f).getName();
-      Object sv = rs.getObject(dbField);
-      if (sv == null) {
+      Object fieldValue = resultset.getObject(dbField);
+      if (fieldValue == null) {
         continue;
       }
-      Object v = deserializeFieldValue(field, fieldSchema, sv, persistent);
+      Object v = deserializeFieldValue(field, fieldSchema, fieldValue, persistent);
       persistent.put(field.pos(), v);
       persistent.setDirty(field.pos());
     }
@@ -263,7 +265,6 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
         fieldValue = igniteValue;
     }
     return fieldValue;
-
   }
 
   @Override
@@ -280,17 +281,17 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
           //Composite keys pending..
         }
         for (Schema.Field field : fields) {
-          Column get = igniteMapping.getFields().get(field.name());
-          Object v = obj.get(field.pos());
-          if (get != null && v != null) {
+          Column mappedColumn = igniteMapping.getFields().get(field.name());
+          Object fieldValue = obj.get(field.pos());
+          if (mappedColumn != null && fieldValue != null) {
             Schema fieldSchema = field.schema();
-            Object serializedObj = serializeFieldValue(fieldSchema, v);
-            data.put(get, serializedObj);
+            Object serializedObj = serializeFieldValue(fieldSchema, fieldValue);
+            data.put(mappedColumn, serializedObj);
           }
         }
-        String baseInsertStatement = IgniteSQLBuilder.baseInsertStatement(igniteMapping, data);
+        String baseInsertStatement = IgniteSQLBuilder.createInsertQuery(igniteMapping, data);
         try (PreparedStatement stmt = connection.prepareStatement(baseInsertStatement)) {
-          IgniteSQLBuilder.fillInsertStatement(stmt, data);
+          IgniteSQLBuilder.fillInsertQuery(stmt, data);
           stmt.executeUpdate();
         } catch (SQLException ex) {
           throw new GoraException(ex);
@@ -307,15 +308,15 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
   @Override
   public boolean delete(K key) throws GoraException {
     String deleteQuery = null;
-    Object[] keyl = null;
+    Object[] keyArray = null;
     if (igniteMapping.getPrimaryKey().size() == 1) {
-      deleteQuery = IgniteSQLBuilder.delete(igniteMapping);
-      keyl = new Object[]{key};
+      deleteQuery = IgniteSQLBuilder.createDeleteQuery(igniteMapping);
+      keyArray = new Object[]{key};
     } else {
       //Composite key pending
     }
     try (PreparedStatement stmt = connection.prepareStatement(deleteQuery)) {
-      IgniteSQLBuilder.fillDeleteStatement(stmt, igniteMapping, keyl);
+      IgniteSQLBuilder.fillDeleteQuery(stmt, igniteMapping, keyArray);
       stmt.executeUpdate();
       return true;
     } catch (SQLException ex) {
@@ -325,20 +326,19 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
 
   @Override
   public long deleteByQuery(Query<K, T> query) throws GoraException {
-
     String deleteQuery;
     if (query.getFields() != null && query.getFields().length < igniteMapping.getFields().size()) {
       List<String> dbFields = new ArrayList<>();
       for (String af : query.getFields()) {
         dbFields.add(igniteMapping.getFields().get(af).getName());
       }
-      deleteQuery = IgniteSQLBuilder.deleteQueryFields(igniteMapping, dbFields);
+      deleteQuery = IgniteSQLBuilder.createDeleteQueryWithFields(igniteMapping, dbFields);
     } else {
-      deleteQuery = IgniteSQLBuilder.deleteQuery(igniteMapping);
+      deleteQuery = IgniteSQLBuilder.createDeleteQueryMultipleRecords(igniteMapping);
     }
-    String selectQueryWhere = IgniteSQLBuilder.queryWhere(igniteMapping, query.getStartKey(), query.getEndKey(), query.getLimit());
+    String selectQueryWhere = IgniteSQLBuilder.createWhereClause(igniteMapping, query.getStartKey(), query.getEndKey(), query.getLimit());
     try (PreparedStatement stmt = connection.prepareStatement(deleteQuery + selectQueryWhere)) {
-      IgniteSQLBuilder.fillSelectQuery(stmt, query.getStartKey(), query.getEndKey());
+      IgniteSQLBuilder.fillWhereClause(stmt, query.getStartKey(), query.getEndKey());
       stmt.executeUpdate();
       return 0;
     } catch (SQLException ex) {
@@ -351,19 +351,18 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
     String[] fields = getFieldsToQuery(query.getFields());
     //Avro fields to Ignite fields
     List<String> dbFields = new ArrayList<>();
-    for (String af : fields) {
-      dbFields.add(igniteMapping.getFields().get(af).getName());
+    for (String aField : fields) {
+      dbFields.add(igniteMapping.getFields().get(aField).getName());
     }
-    String selectQuery = IgniteSQLBuilder.selectQuery(igniteMapping, dbFields);
-    String selectQueryWhere = IgniteSQLBuilder.queryWhere(igniteMapping, query.getStartKey(), query.getEndKey(), query.getLimit());
+    String selectQuery = IgniteSQLBuilder.createSelectQuery(igniteMapping, dbFields);
+    String selectQueryWhere = IgniteSQLBuilder.createWhereClause(igniteMapping, query.getStartKey(), query.getEndKey(), query.getLimit());
     try (PreparedStatement stmt = connection.prepareStatement(selectQuery + selectQueryWhere)) {
       RowSetFactory factory = RowSetProvider.newFactory();
       CachedRowSet rowset = factory.createCachedRowSet();
-      IgniteSQLBuilder.fillSelectQuery(stmt, query.getStartKey(), query.getEndKey());
+      IgniteSQLBuilder.fillWhereClause(stmt, query.getStartKey(), query.getEndKey());
       ResultSet executeQuery = stmt.executeQuery();
       rowset.populate(executeQuery);
-      IgniteResult<K, T> igniteResult = new IgniteResult<>(this, query);
-      igniteResult.setResultSet(rowset);
+      IgniteResult<K, T> igniteResult = new IgniteResult<>(this, query, rowset);
       return igniteResult;
     } catch (SQLException ex) {
       throw new GoraException(ex);
@@ -462,7 +461,6 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
         break;
       default:
         throw new AssertionError(fieldSchema.getType().name());
-
     }
     return output;
   }
@@ -558,7 +556,6 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
       writer = new SpecificDatumWriter(fieldSchema);// ignore dirty bits
       writerMap.put(fieldSchema, writer);
     }
-
     return writer;
   }
 

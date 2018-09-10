@@ -18,42 +18,11 @@ package org.apache.gora.ignite.store;
 
 import java.util.Properties;
 import org.apache.gora.ignite.utils.IgniteBackendConstants;
-import org.apache.hadoop.conf.Configuration;
 
 /**
  * Parameters definitions for Ignite.
  */
 public class IgniteParameters {
-
-  /**
-   * Property indicating the Ignite Schema to be used
-   */
-  public static final String PROP_SCHEMA = "gora.datastore.ignite.schema";
-
-  /**
-   * Property indicating the Ignite Cluster Node IP
-   */
-  public static final String PROP_HOST = "gora.datastore.ignite.host";
-
-  /**
-   * Property indicating the port used by the Ignite Server
-   */
-  public static final String PROP_PORT = "gora.datastore.ignite.port";
-
-  /**
-   * Property indicating the username to connect to the server
-   */
-  public static final String PROP_USER = "gora.datastore.ignite.user";
-
-  /**
-   * Property indicating the password to connect to the server
-   */
-  public static final String PROP_PASSWORD = "gora.datastore.ignite.password";
-
-  /**
-   * Property indicating additional JDBC options
-   */
-  public static final String PROP_ADDITIONALS = "gora.datastore.ignite.additionalConfigurations";
 
   private String host;
   private String port;
@@ -79,62 +48,130 @@ public class IgniteParameters {
     this.additionalConfigurations = additionalConfigurations;
   }
 
+  /**
+   * Returns the ignite hostname
+   *
+   * @return IP/domain of the ignite server
+   */
   public String getHost() {
     return host;
   }
 
+  /**
+   * Sets the ignite hostname
+   *
+   * @param host IP/domain of the ignite server
+   */
   public void setHost(String host) {
     this.host = host;
   }
 
+  /**
+   * Returns the ignite port
+   *
+   * @return Port of the ignite server eg. 10800
+   */
   public String getPort() {
     return port;
   }
 
+  /**
+   * Sets the ignite port
+   *
+   * @param port Port of the ignite server eg. 10800
+   */
   public void setPort(String port) {
     this.port = port;
   }
 
+  /**
+   * Returns the username used for the ignite connection
+   *
+   * @return Username of ignite
+   */
   public String getUser() {
     return user;
   }
 
+  /**
+   * Sets the username used for the ignite connection
+   *
+   * @param user Username of ignite
+   */
   public void setUser(String user) {
     this.user = user;
   }
 
+  /**
+   * Returns the secrets used for the ignite connection
+   *
+   * @return Password of the ignite user
+   */
   public String getPassword() {
     return password;
   }
 
+  /**
+   * Sets the secrets used for the ignite connection
+   *
+   * @param password Password of the ignite user
+   */
   public void setPassword(String password) {
     this.password = password;
   }
 
+  /**
+   * Returns additional configurations used for the JDBC connection For more
+   * details refer to https://apacheignite-sql.readme.io/docs/jdbc-driver
+   *
+   * @return String containing JDBC configurations
+   */
   public String getAdditionalConfigurations() {
     return additionalConfigurations;
   }
 
+  /**
+   * Sets additional configurations used for the JDBC connection. For more
+   * details refer to https://apacheignite-sql.readme.io/docs/jdbc-driver
+   *
+   * @param additionalConfigurations String containing JDBC configurations
+   */
   public void setAdditionalConfigurations(String additionalConfigurations) {
     this.additionalConfigurations = additionalConfigurations;
   }
 
+  /**
+   * Returns the ignite schema for the JDBC connection
+   *
+   * @return Ignite schema e.g. PUBLIC
+   */
   public String getSchema() {
     return schema;
   }
 
+  /**
+   * Sets the ignite schema for the JDBC connection
+   *
+   * @param schema Ignite schema e.g. PUBLIC
+   */
   public void setSchema(String schema) {
     this.schema = schema;
   }
 
+  /**
+   * Reads Ignite parameters from a properties list
+   *
+   * @param properties Properties list
+   * @return Ignite parameters instance
+   */
   public static IgniteParameters load(Properties properties) {
     return new IgniteParameters(
-        properties.getProperty(PROP_HOST, IgniteBackendConstants.DEFAULT_IGNITE_HOST),
-        properties.getProperty(PROP_PORT, IgniteBackendConstants.DEFAULT_IGNITE_PORT),
-        properties.getProperty(PROP_SCHEMA, null),
-        properties.getProperty(PROP_USER, null),
-        properties.getProperty(PROP_PASSWORD, null),
-        properties.getProperty(PROP_ADDITIONALS, null));
+        properties.getProperty(IgniteBackendConstants.PROP_HOST, IgniteBackendConstants.DEFAULT_IGNITE_HOST),
+        properties.getProperty(IgniteBackendConstants.PROP_PORT, IgniteBackendConstants.DEFAULT_IGNITE_PORT),
+        properties.getProperty(IgniteBackendConstants.PROP_SCHEMA),
+        properties.getProperty(IgniteBackendConstants.PROP_USER),
+        properties.getProperty(IgniteBackendConstants.PROP_PASSWORD),
+        properties.getProperty(IgniteBackendConstants.PROP_ADDITIONALS));
   }
 
 }

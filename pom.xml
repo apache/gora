@@ -433,7 +433,7 @@
           </dependencies>
         </plugin>
         <!--This plugin's configuration is used to store Eclipse m2e settings 
-          only. It has no influence on the Maven build itself. -->
+        only. It has no influence on the Maven build itself. -->
         <plugin>
           <groupId>org.eclipse.m2e</groupId>
           <artifactId>lifecycle-mapping</artifactId>
@@ -647,17 +647,17 @@
       <build>
         <plugins>
           <!-- <plugin> <groupId>org.apache.rat</groupId> <artifactId>apache-rat-plugin</artifactId> 
-            <version>${apache-rat-plugin.version}</version> <executions> <execution> 
-            <id>rat-verify</id> <phase>test</phase> <goals> <goal>check</goal> </goals> 
-            </execution> </executions> <configuration> <licenses> <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense"> 
-            <licenseFamilyCategory>ASL20</licenseFamilyCategory> <licenseFamilyName>Apache 
-            Software License, 2.0</licenseFamilyName> <notes>Single licensed ASL v2.0</notes> 
-            <patterns> <pattern>Licensed to the Apache Software Foundation (ASF) under 
-            one or more contributor license agreements.</pattern> </patterns> </license> 
-            </licenses> <excludeSubProjects>false</excludeSubProjects> <excludes> <exclude>CHANGES.txt</exclude> 
-            <exclude>README.txt</exclude> <exclude>NOTICE.txt</exclude> <exclude>LICENSE.txt</exclude> 
-            <exclude>KEYS</exclude> <exclude>doap_Gora.rdf</exclude> <exclude>.gitignore/**/**</exclude> 
-            </excludes> </configuration> </plugin -->
+          <version>${apache-rat-plugin.version}</version> <executions> <execution> 
+          <id>rat-verify</id> <phase>test</phase> <goals> <goal>check</goal> </goals> 
+          </execution> </executions> <configuration> <licenses> <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense"> 
+          <licenseFamilyCategory>ASL20</licenseFamilyCategory> <licenseFamilyName>Apache 
+          Software License, 2.0</licenseFamilyName> <notes>Single licensed ASL v2.0</notes> 
+          <patterns> <pattern>Licensed to the Apache Software Foundation (ASF) under 
+          one or more contributor license agreements.</pattern> </patterns> </license> 
+          </licenses> <excludeSubProjects>false</excludeSubProjects> <excludes> <exclude>CHANGES.txt</exclude> 
+          <exclude>README.txt</exclude> <exclude>NOTICE.txt</exclude> <exclude>LICENSE.txt</exclude> 
+          <exclude>KEYS</exclude> <exclude>doap_Gora.rdf</exclude> <exclude>.gitignore/**/**</exclude> 
+          </excludes> </configuration> </plugin -->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-source-plugin</artifactId>
@@ -768,7 +768,7 @@
     <osgi.version>4.2.0</osgi.version>
     <!-- Avro Dependencies -->
     <avro.version>1.8.1</avro.version>
-<!--     <jackson.version>1.6.9</jackson.version> -->
+    <!--     <jackson.version>1.6.9</jackson.version> -->
     <!-- Hadoop Dependencies -->
     <hadoop-2.version>2.5.2</hadoop-2.version>
     <hadoop-2.test.version>2.5.2</hadoop-2.test.version>
@@ -782,6 +782,7 @@
     <cassandra.version>3.11.0</cassandra.version>
     <!-- Ignite Dependencies -->
     <ignite.version>2.6.0</ignite.version>
+    <sqlbuilder.version>2.1.7</sqlbuilder.version>
     <!-- Solr Dependencies -->
     <lucene-solr.version>6.5.1</lucene-solr.version>
     <solr-solrj.version>6.5.1</solr-solrj.version>
@@ -970,6 +971,11 @@
         <version>${project.version}</version>
         <type>test-jar</type>
       </dependency>
+      <dependency>
+        <groupId>com.healthmarketscience.sqlbuilder</groupId>
+        <artifactId>sqlbuilder</artifactId>
+        <version>${sqlbuilder.version}</version>
+      </dependency>
       
       <!-- End of Internal Depednecies -->
 
@@ -1045,26 +1051,26 @@
             <groupId>org.apache.hadoop</groupId>
             <artifactId>avro</artifactId>
           </exclusion>
-			    <exclusion>
-				    <artifactId>slf4j-log4j12</artifactId>
-				    <groupId>org.slf4j</groupId>
-			    </exclusion>
-			    <exclusion>
-				    <artifactId>hadoop-common</artifactId>
-				    <groupId>org.apache.hadoop</groupId>
-			    </exclusion>
-			    <exclusion>
-				    <artifactId>hadoop-yarn-common</artifactId>
-				    <groupId>org.apache.hadoop</groupId>
-			    </exclusion>
-			    <exclusion>
-				    <artifactId>hadoop-mapreduce-client-core</artifactId>
-				    <groupId>org.apache.hadoop</groupId>
-			    </exclusion>
-			    <exclusion>
-				    <artifactId>hadoop-auth</artifactId>
-				    <groupId>org.apache.hadoop</groupId>
-			    </exclusion>
+          <exclusion>
+            <artifactId>slf4j-log4j12</artifactId>
+            <groupId>org.slf4j</groupId>
+          </exclusion>
+          <exclusion>
+            <artifactId>hadoop-common</artifactId>
+            <groupId>org.apache.hadoop</groupId>
+          </exclusion>
+          <exclusion>
+            <artifactId>hadoop-yarn-common</artifactId>
+            <groupId>org.apache.hadoop</groupId>
+          </exclusion>
+          <exclusion>
+            <artifactId>hadoop-mapreduce-client-core</artifactId>
+            <groupId>org.apache.hadoop</groupId>
+          </exclusion>
+          <exclusion>
+            <artifactId>hadoop-auth</artifactId>
+            <groupId>org.apache.hadoop</groupId>
+          </exclusion>
         </exclusions>
       </dependency>
       <dependency>
@@ -1077,26 +1083,26 @@
             <groupId>org.apache.hadoop</groupId>
             <artifactId>avro</artifactId>
           </exclusion>
-			    <exclusion>
-				    <artifactId>slf4j-log4j12</artifactId>
-				    <groupId>org.slf4j</groupId>
-			    </exclusion>
-			    <exclusion>
-				    <artifactId>hadoop-common</artifactId>
-				    <groupId>org.apache.hadoop</groupId>
-			    </exclusion>
-			    <exclusion>
-				    <artifactId>hadoop-yarn-common</artifactId>
-				    <groupId>org.apache.hadoop</groupId>
-			    </exclusion>
-			    <exclusion>
-				    <artifactId>hadoop-mapreduce-client-core</artifactId>
-				    <groupId>org.apache.hadoop</groupId>
-			    </exclusion>
-			    <exclusion>
-				    <artifactId>hadoop-auth</artifactId>
-				    <groupId>org.apache.hadoop</groupId>
-			    </exclusion>
+          <exclusion>
+            <artifactId>slf4j-log4j12</artifactId>
+            <groupId>org.slf4j</groupId>
+          </exclusion>
+          <exclusion>
+            <artifactId>hadoop-common</artifactId>
+            <groupId>org.apache.hadoop</groupId>
+          </exclusion>
+          <exclusion>
+            <artifactId>hadoop-yarn-common</artifactId>
+            <groupId>org.apache.hadoop</groupId>
+          </exclusion>
+          <exclusion>
+            <artifactId>hadoop-mapreduce-client-core</artifactId>
+            <groupId>org.apache.hadoop</groupId>
+          </exclusion>
+          <exclusion>
+            <artifactId>hadoop-auth</artifactId>
+            <groupId>org.apache.hadoop</groupId>
+          </exclusion>
         </exclusions>
       </dependency>
 
@@ -1593,6 +1599,11 @@
       <dependency>
         <groupId>org.apache.ignite</groupId>
         <artifactId>ignite-indexing</artifactId>
+        <version>${ignite.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.ignite</groupId>
+        <artifactId>ignite-core</artifactId>
         <version>${ignite.version}</version>
       </dependency>
     </dependencies>

@@ -35,8 +35,15 @@ public class IgniteResult<K, T extends PersistentBase> extends ResultBase<K, T> 
   private ResultSet resultSet;
   private int size;
 
-  public IgniteResult(DataStore<K, T> dataStore, Query<K, T> query) {
+  public IgniteResult(DataStore<K, T> dataStore, Query<K, T> query, ResultSet resultSet) throws SQLException {
     super(dataStore, query);
+    this.resultSet = resultSet;
+    if (resultSet.last()) {
+      size = resultSet.getRow();
+    } else {
+      size = 0;
+    }
+    resultSet.beforeFirst();
   }
 
   @Override
@@ -78,16 +85,6 @@ public class IgniteResult<K, T extends PersistentBase> extends ResultBase<K, T> 
         throw new IOException(ex);
       }
     }
-  }
-
-  public void setResultSet(ResultSet resultSet) throws SQLException {
-    this.resultSet = resultSet;
-    if (resultSet.last()) {
-      size = resultSet.getRow();
-    } else {
-      size = 0;
-    }
-    resultSet.beforeFirst();
   }
 
 }

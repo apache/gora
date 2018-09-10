@@ -19,6 +19,7 @@ package org.apache.gora.ignite.query;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.impl.QueryBase;
 import org.apache.gora.store.DataStore;
+import org.apache.gora.query.Query;
 
 /**
  * Ignite specific implementation of the {@link Query} interface.
@@ -27,6 +28,10 @@ public class IgniteQuery<K, T extends PersistentBase> extends QueryBase<K, T> {
 
   public IgniteQuery(DataStore<K, T> dataStore) {
     super(dataStore);
+  }
+  
+  public IgniteQuery() {
+    super(null);
   }
 
 }

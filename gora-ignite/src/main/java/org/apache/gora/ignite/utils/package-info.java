@@ -15,6 +15,6 @@
  * limitations under the License.
  */
 /**
- * This package contains Ignite datastore related all classes.
+ * This package contains utility classes.
  */
 package org.apache.gora.ignite.utils;
