@@ -126,7 +126,7 @@ public class GoraStorageTest {
   public void testLoadSaveSubset() throws IOException {
 
     pigServer.setJobName("gora-pig test - load all fields");
-    pigServer.registerJar("target/gora-pig-0.9-goraexplorer-SNAPSHOT.jar");
+    pigServer.registerJar("target/gora-pig-0.9-SNAPSHOT.jar");
     pigServer.registerQuery("paginas = LOAD '.' using org.apache.gora.pig.GoraStorage (" +
         "'java.lang.String'," +
         "'org.apache.gora.examples.generated.WebPage'," +
@@ -181,7 +181,7 @@ public class GoraStorageTest {
     }
     
     pigServer.setJobName("gora-pig test - update map");
-    pigServer.registerJar("target/gora-pig-0.9-goraexplorer-SNAPSHOT.jar");
+    pigServer.registerJar("target/gora-pig-0.9-SNAPSHOT.jar");
     pigServer.registerQuery("define MapMerge org.apache.gora.pig.udf.MapMerge();") ;
     pigServer.registerQuery("map_values = LOAD '" + valuesSource + "' USING PigStorage('|') AS (outlinks:map[chararray]) ;") ;
     pigServer.registerQuery("pages = LOAD '.' using org.apache.gora.pig.GoraStorage (" +
@@ -207,7 +207,7 @@ public class GoraStorageTest {
   public void testLoadSaveAllFields() throws IOException {
 
     pigServer.setJobName("gora-pig test - load all fields");
-    pigServer.registerJar("target/gora-pig-0.9-goraexplorer-SNAPSHOT.jar");
+    pigServer.registerJar("target/gora-pig-0.9-SNAPSHOT.jar");
     pigServer.registerQuery("paginas = LOAD '.' using org.apache.gora.pig.GoraStorage (" +
     		"'java.lang.String'," +
     		"'org.apache.gora.examples.generated.WebPage'," +
@@ -261,7 +261,7 @@ public class GoraStorageTest {
     }
     
     pigServer.setJobName("gora-pig test - delete rows");
-    pigServer.registerJar("target/gora-pig-0.9-goraexplorer-SNAPSHOT.jar");
+    pigServer.registerJar("target/gora-pig-0.9-SNAPSHOT.jar");
     pigServer.registerQuery("delete_rows = LOAD '" + valuesSource + "' AS (key:chararray) ;") ;
     pigServer.registerQuery("STORE delete_rows INTO '.' using org.apache.gora.pig.GoraDeleteStorage(" +
         "'java.lang.String'," +
@@ -292,7 +292,7 @@ public class GoraStorageTest {
     }
     
     pigServer.setJobName("gora-pig test - delete map values");
-    pigServer.registerJar("target/gora-pig-0.9-goraexplorer-SNAPSHOT.jar");
+    pigServer.registerJar("target/gora-pig-0.9-SNAPSHOT.jar");
     pigServer.registerQuery("map_values = LOAD '" + valuesSource + "' USING PigStorage('|') AS (outlinks:map[chararray]) ;") ;
     pigServer.registerQuery("pages = LOAD '.' using org.apache.gora.pig.GoraStorage (" +
         "'java.lang.String'," +
