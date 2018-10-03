@@ -90,4 +90,9 @@ public class MongoDBResult<K, T extends PersistentBase> extends
     this.cursor = cursor;
     this.size = cursor.size();
   }
+
+  @Override
+  public int size() {
+    return size;
+  }
 }

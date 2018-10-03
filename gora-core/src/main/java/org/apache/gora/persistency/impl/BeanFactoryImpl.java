@@ -26,8 +26,6 @@ import org.apache.gora.util.ClassLoadingUtils;
 import org.apache.gora.util.GoraException;
 import org.apache.gora.util.ReflectionUtils;
 
-import com.esotericsoftware.minlog.Log;
-
 /**
  * A default implementation of the {@link BeanFactory} interface. Constructs
  * the keys by using reflection, {@link Persistent} objects by calling
@@ -93,7 +91,7 @@ public class BeanFactoryImpl<K, T extends Persistent> implements BeanFactory<K, 
   
   @Override
   public K newKey() throws Exception {
-    return keyClass.newInstance();
+    return keyClass.getDeclaredConstructor().newInstance();
   }
  
   @Override

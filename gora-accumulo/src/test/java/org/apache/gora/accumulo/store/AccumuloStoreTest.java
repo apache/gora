@@ -24,9 +24,13 @@ import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.DataStoreTestBase;
+import static org.apache.gora.store.DataStoreTestBase.log;
+import org.apache.gora.store.DataStoreTestUtil;
+import static org.apache.gora.store.DataStoreTestUtil.testResultSize;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Before;
 import org.junit.Ignore;
+import org.junit.Test;
 
 /**
  * Tests extending {@link org.apache.gora.store.DataStoreTestBase}
@@ -56,5 +60,28 @@ public class AccumuloStoreTest extends DataStoreTestBase {
   @Ignore("skipped until GORA-66 is resolved")
   @Override
   public void testDeleteByQueryFields() throws IOException {
+  }
+  
+  @Test
+  @Ignore("Accumulo does not support Result#size() without limit set")
+  @Override
+  public void testResultSize() throws Exception {
+  }
+
+  @Test
+  @Ignore("Accumulo does not support Result#size() without limit set")
+  @Override
+  public void testResultSizeStartKey() throws Exception {
+  }
+
+  @Ignore("Accumulo does not support Result#size() without limit set")
+  @Override
+  public void testResultSizeEndKey() throws Exception {
+  }
+
+  @Test
+  @Ignore("Accumulo does not support Result#size() without limit set")
+  @Override
+  public void testResultSizeKeyRange() throws Exception {
   }
 }

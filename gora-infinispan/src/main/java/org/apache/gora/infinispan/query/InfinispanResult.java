@@ -68,6 +68,7 @@ public class InfinispanResult<K, T extends PersistentBase> extends ResultBase<K,
     return true;
   }
 
+  @Override
   public int size() {
     return list.size();
   }

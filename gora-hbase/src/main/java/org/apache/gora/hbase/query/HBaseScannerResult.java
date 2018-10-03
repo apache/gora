@@ -63,8 +63,15 @@ public class HBaseScannerResult<K, T extends PersistentBase> extends HBaseResult
   
   @Override
   public float getProgress() throws IOException {
-    //TODO: if limit is set, we know how far we have gone 
-    return 0;
+    if (this.limit != -1) {
+      return (float) this.offset / (float) this.limit;
+    } else {
+      return 0;
+    }
   }
-  
+
+  @Override
+  public int size() {
+    return (int) this.limit;
+  }
 }

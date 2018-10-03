@@ -81,5 +81,9 @@ public class DataFileAvroResult<K, T extends PersistentBase> extends ResultBase<
     persistent = reader.next(persistent);
     return true;
   }
-  
+
+  @Override
+  public int size() {
+    return (int) (end - start);
+  }
 }

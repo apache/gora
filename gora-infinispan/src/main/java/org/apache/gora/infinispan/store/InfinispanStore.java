@@ -91,7 +91,7 @@ public class InfinispanStore<K, T extends PersistentBase> extends DataStoreBase<
           + keyClass.getCanonicalName()
           + ", persistent class: "
           + persistentClass.getCanonicalName());
-      schema = persistentClass.newInstance().getSchema();
+      schema = persistentClass.getDeclaredConstructor().newInstance().getSchema();
 
       splitSize = Integer.valueOf(
           properties.getProperty( BUFFER_LIMIT_READ_NAME,

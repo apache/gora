@@ -508,7 +508,7 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
 
   public ResultScanner createScanner(Query<K, T> query) throws IOException {
     final Scan scan = new Scan();
-    
+    scan.setMaxResultSize(query.getLimit());
     scan.setCaching(this.getScannerCaching()) ; 
     
     if (query.getStartKey() != null) {
