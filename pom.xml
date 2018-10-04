@@ -770,7 +770,6 @@
     <avro.version>1.8.1</avro.version>
 <!--     <jackson.version>1.6.9</jackson.version> -->
     <!-- Hadoop Dependencies -->
-    <!-- HDP 2.6 hadoop+hbase versions -->
     <hadoop-2.version>2.5.2</hadoop-2.version>
     <hadoop-2.test.version>2.5.2</hadoop-2.test.version>
     <hbase.version>1.2.6</hbase.version>
