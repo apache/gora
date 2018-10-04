@@ -771,10 +771,10 @@
 <!--     <jackson.version>1.6.9</jackson.version> -->
     <!-- Hadoop Dependencies -->
     <!-- HDP 2.6 hadoop+hbase versions -->
-    <hadoop-2.version>2.7.3</hadoop-2.version>
-    <hadoop-2.test.version>2.7.3</hadoop-2.test.version>
-    <hbase.version>1.1.2</hbase.version>
-    <hbase.test.version>1.1.2</hbase.test.version>
+    <hadoop-2.version>2.5.2</hadoop-2.version>
+    <hadoop-2.test.version>2.5.2</hadoop-2.test.version>
+    <hbase.version>1.2.6</hbase.version>
+    <hbase.test.version>1.2.6</hbase.test.version>
     <cxf-rt-frontend-jaxrs.version>2.5.2</cxf-rt-frontend-jaxrs.version>
     <!-- Amazon Dependencies -->
     <amazon.version>1.10.55</amazon.version>
