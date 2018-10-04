@@ -329,27 +329,6 @@
     <url>https://builds.apache.org/job/Gora-trunk/</url>
   </ciManagement>
 
-  <distributionManagement>
-    <repository>
-        <id>nishilua-central</id>
-        <name>nishilua-releases</name>
-        <url>http://maven.nishilua.com/artifactory/libs-release-local</url>
-    </repository>
-    <snapshotRepository>
-        <id>nishilua-snapshots</id>
-        <name>nishilua-snapshots</name>
-        <url>http://maven.nishilua.com/artifactory/libs-snapshot-local</url>
-    </snapshotRepository>
-  </distributionManagement>
-
-  <repositories>
-    <repository>
-      <id>nishilua-snapshots</id>
-      <name>libs-snapshot</name>
-      <url>http://maven.nishilua.com/artifactory/libs-snapshot</url>
-    </repository>
-  </repositories>
-
   <!--distributionManagement>
     <repository>
       <id>apache.releases.https</id>
