@@ -24,10 +24,11 @@ import java.nio.charset.Charset;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseTestingUtility;
-import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.MiniHBaseCluster;
-import org.apache.hadoop.hbase.client.HBaseAdmin;
-import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Admin;
+import org.apache.hadoop.hbase.client.Table;
+import org.apache.hadoop.hbase.client.TableDescriptor;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -151,9 +152,9 @@ public final class HBaseClusterSingleton {
    * @throws IOException
    */
   public void ensureTable(byte[] tableName, byte[][] cfs) throws IOException {
-    HBaseAdmin admin = htu.getHBaseAdmin();
-    if (!admin.tableExists(tableName)) {
-      HTable hTable = htu.createTable(tableName, cfs);
+    Admin admin = htu.getAdmin();
+    if (!admin.tableExists(TableName.valueOf(tableName))) {
+      Table hTable = htu.createTable(TableName.valueOf(tableName), cfs);
       hTable.close();
     }
   }
@@ -163,9 +164,9 @@ public final class HBaseClusterSingleton {
    * @throws Exception
    */
   public void truncateAllTables() throws Exception {
-    HBaseAdmin admin = htu.getHBaseAdmin();
-    for(HTableDescriptor table:admin.listTables()) {
-      HTable hTable = htu.deleteTableData(table.getName());
+    Admin admin = htu.getAdmin();
+    for(TableDescriptor table:admin.listTableDescriptors()) {
+      Table hTable = htu.deleteTableData(table.getTableName());
       hTable.close();
     }
   }
@@ -176,10 +177,10 @@ public final class HBaseClusterSingleton {
    * @throws Exception
    */
   public void deleteAllTables() throws Exception {
-    HBaseAdmin admin = htu.getHBaseAdmin();
-    for(HTableDescriptor table:admin.listTables()) {
-      admin.disableTable(table.getName());
-      admin.deleteTable(table.getName());
+    Admin admin = htu.getAdmin();
+    for(TableDescriptor table:admin.listTableDescriptors()) {
+      admin.disableTable(table.getTableName());
+      admin.deleteTable(table.getTableName());
     }
   }
 

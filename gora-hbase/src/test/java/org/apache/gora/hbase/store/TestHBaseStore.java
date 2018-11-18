@@ -22,14 +22,17 @@ import org.apache.avro.util.Utf8;
 import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.hbase.GoraHBaseTestDriver;
-import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.DataStoreTestBase;
 import org.apache.gora.util.GoraException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.*;
+import org.apache.hadoop.hbase.client.Admin;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
+import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -69,8 +72,8 @@ public class TestHBaseStore extends DataStoreTestBase {
 
   @Override
   public void assertSchemaExists(String schemaName) throws Exception {
-    HBaseAdmin admin = getTestDriver().getHbaseUtil().getHBaseAdmin();
-    assertTrue("Table should exist for...", admin.tableExists(schemaName));
+    Admin admin = getTestDriver().getHbaseUtil().getAdmin();
+    assertTrue("Table should exist for...", admin.tableExists(TableName.valueOf(schemaName)));
   }
 
   @Override
@@ -141,7 +144,7 @@ public class TestHBaseStore extends DataStoreTestBase {
     // Check directly with HBase
 
 
-    table = new HTable(conf,"WebPage");
+    table = conn.getTable(TableName.valueOf("WebPage"));
     get = new Get(Bytes.toBytes("com.example/http"));
     result = table.get(get);
     actualBytes = result.getValue(Bytes.toBytes("content"), null);
@@ -168,7 +171,8 @@ public class TestHBaseStore extends DataStoreTestBase {
     webPageStore.flush() ;
     
     // Read directly from HBase
-    HTable table = new HTable(conf,"WebPage");
+    Connection conn = ConnectionFactory.createConnection(conf);
+    Table table = conn.getTable(TableName.valueOf("WebPage"));
     Get get = new Get(Bytes.toBytes("com.example/http"));
     org.apache.hadoop.hbase.client.Result result = table.get(get);
 
