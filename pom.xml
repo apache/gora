@@ -757,10 +757,10 @@
     <module>gora-maven-plugin</module>
     <module>gora-mongodb</module>
     <module>gora-solr</module>
-    <module>gora-tutorial</module>
-    <module>sources-dist</module>
     <module>gora-aerospike</module>
     <module>gora-ignite</module>
+    <module>gora-tutorial</module>
+    <module>sources-dist</module>
   </modules>
 
   <properties>
@@ -793,7 +793,7 @@
     <restlet.version>2.3.1</restlet.version>
 
     <spark.version>2.2.1</spark.version>
-    <aerospike.version>4.0.6</aerospike.version>
+    <aerospike.version>4.2.2</aerospike.version>
     <!-- Misc Dependencies -->
     <guava.version>13.0</guava.version>
     <commons-lang.version>2.6</commons-lang.version>
@@ -1568,6 +1568,13 @@
         <groupId>com.github.raymanrt</groupId>
         <artifactId>orientqb</artifactId>
         <version>${orientqb.version}</version>
+      </dependency>
+
+      <!--Aerospike Dependency -->
+      <dependency>
+        <groupId>com.aerospike</groupId>
+        <artifactId>aerospike-client</artifactId>
+        <version>${aerospike.version}</version>
       </dependency>
 
       <!-- Testing Dependencies -->
