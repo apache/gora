@@ -791,6 +791,8 @@
     <httpcomponents.version>4.4.1</httpcomponents.version>
     <commons-io.version>2.5</commons-io.version>
     <restlet.version>2.3.1</restlet.version>
+    <!-- Flink Dependencies -->
+    <flink.version>1.6.2</flink.version>
 
     <spark.version>2.2.1</spark.version>
     <aerospike.version>4.0.6</aerospike.version>
@@ -981,7 +983,7 @@
 
       <dependency>
         <groupId>org.apache.spark</groupId>
-        <artifactId>spark-core_2.10</artifactId>
+        <artifactId>spark-core_2.11</artifactId>
         <version>${spark.version}</version>
         <scope>provided</scope>
         <exclusions>
@@ -990,6 +992,38 @@
             <artifactId>javax.servlet</artifactId>
           </exclusion>
         </exclusions>
+      </dependency>
+
+      <!-- Flink dependencies -->
+
+      <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-core</artifactId>
+        <version>${flink.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-hadoop-compatibility_2.11</artifactId>
+        <version>${flink.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-java</artifactId>
+        <version>${flink.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-avro</artifactId>
+        <version>${flink.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-clients_2.11</artifactId>
+        <version>${flink.version}</version>
       </dependency>
 
       <!--Hadoop dependencies -->
