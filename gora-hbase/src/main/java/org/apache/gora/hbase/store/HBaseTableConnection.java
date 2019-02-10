@@ -154,8 +154,8 @@ public class HBaseTableConnection {
     return getTable().exists(get);
   }
 
-  public boolean[] existsAll(List<Get> list) throws IOException {
-    return getTable().existsAll(list);
+  public boolean[] exists(List<Get> list) throws IOException {
+    return getTable().exists(list);
   }
 
   public Result get(Get get) throws IOException {

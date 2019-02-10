@@ -59,11 +59,11 @@ import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HConstants;
-import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.client.Admin;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.TableDescriptor;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
@@ -177,7 +177,7 @@ implements Configurable {
       if(schemaExists()) {
         return;
       }
-      HTableDescriptor tableDesc = mapping.getTable();
+      TableDescriptor tableDesc = mapping.getTable();
   
       admin.createTable(tableDesc);
     } catch (GoraException e) {
@@ -490,14 +490,12 @@ implements Configurable {
     scan.setCaching(this.getScannerCaching()) ; 
     
     if (query.getStartKey() != null) {
-      scan.setStartRow(toBytes(query.getStartKey()));
+      scan.withStartRow(toBytes(query.getStartKey()));
     }
     if (query.getEndKey() != null) {
-      // In HBase the end key is exclusive, so we add a trail zero to make it inclusive
-      // as the Gora's query interface declares.
-      byte[] endKey = toBytes(query.getEndKey());
-      byte[] inclusiveEndKey = Arrays.copyOf(endKey, endKey.length+1);
-      scan.setStopRow(inclusiveEndKey);
+      // In HBase the end key is exclusive, so we make it inclusive by explicitly passing
+      // boolean 'true' as the Gora's query interface declares.
+      scan.withStopRow(toBytes(query.getEndKey()), true);
     }
     addFields(scan, query);
     if (query.getFilter() != null) {
