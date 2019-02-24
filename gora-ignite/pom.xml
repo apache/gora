@@ -26,10 +26,10 @@
     <version>0.9-SNAPSHOT</version>
     <relativePath>../</relativePath>
   </parent>
-  <artifactId>gora-aerospike</artifactId>
+  <artifactId>gora-ignite</artifactId>
   <packaging>bundle</packaging>
 
-  <name>Apache Gora :: Aerospike</name>
+  <name>Apache Gora :: Ignite</name>
   <url>http://gora.apache.org</url>
   <description>The Apache Gora open source framework provides an in-memory data model and
     persistence for big data. Gora supports persisting to column stores, key value stores,
@@ -51,26 +51,8 @@
 
   <properties>
     <osgi.import>*</osgi.import>
-    <osgi.export>org.apache.gora.aerospike*;version="${project.version}";-noimport:=true</osgi.export>
+    <osgi.export>org.apache.gora.ignite*;version="${project.version}";-noimport:=true</osgi.export>
   </properties>
-
-  <profiles>
-    <profile>
-      <id>aerospike-with-test</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <version>2.4.2</version>
-            <configuration>
-              <skipTests>false</skipTests>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 
   <build>
     <directory>target</directory>
@@ -81,21 +63,14 @@
     <sourceDirectory>src/main/java</sourceDirectory>
     <testResources>
       <testResource>
-        <directory>${project.basedir}/src/test/conf</directory>
+        <directory>${project.basedir}/src/test/resources</directory>
         <includes>
           <include>**/*</include>
         </includes>
+        <!--targetPath>${project.basedir}/target/classes/</targetPath -->
       </testResource>
     </testResources>
     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.4.2</version>
-        <configuration>
-          <skipTests>true</skipTests>
-        </configuration>
-      </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
@@ -131,23 +106,28 @@
       <scope>test</scope>
     </dependency>
 
-    <!--Aerospike Dependency -->
+    <!--Ignite Dependency -->
     <dependency>
-      <groupId>com.aerospike</groupId>
-      <artifactId>aerospike-client</artifactId>
+      <groupId>org.apache.ignite</groupId>
+      <artifactId>ignite-core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.zookeeper</groupId>
+      <artifactId>zookeeper</artifactId>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.apache.avro</groupId>
       <artifactId>avro</artifactId>
     </dependency>
-
-    <!-- Hadoop Dependencies -->
-    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-client</artifactId>
-    </dependency>
-
+    
     <dependency>
       <groupId>org.jdom</groupId>
       <artifactId>jdom</artifactId>
@@ -159,14 +139,37 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
     </dependency>
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>javax.jms</groupId>
+          <artifactId>jms</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
 
     <!-- Testing Dependencies -->
     <dependency>
-      <groupId>org.testcontainers</groupId>
-      <artifactId>testcontainers</artifactId>
-      <scope>test</scope>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
     </dependency>
 
-  </dependencies>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-minicluster</artifactId>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.apache.ignite</groupId>
+      <artifactId>ignite-indexing</artifactId>
+    </dependency>
 
+    <dependency>
+      <groupId>com.healthmarketscience.sqlbuilder</groupId>
+      <artifactId>sqlbuilder</artifactId>
+    </dependency>
+  </dependencies>
+  
 </project>

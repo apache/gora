@@ -88,6 +88,9 @@ public class AerospikeQueryResult<K, T extends Persistent> extends ResultBase<K,
 
   @Override
   public int size() {
-    return resultRecords.size();
+    // Fix query limit natively from Aerospike client
+    int totalSize = resultRecords.size();
+    int intLimit = (int) this.limit;
+    return intLimit > 0 && totalSize > intLimit ? intLimit : totalSize;
   }
 }

@@ -23,9 +23,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.hadoop.hbase.HColumnDescriptor;
-import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.ColumnFamilyDescriptor;
+import org.apache.hadoop.hbase.client.ColumnFamilyDescriptorBuilder;
+import org.apache.hadoop.hbase.client.ColumnFamilyDescriptorBuilder.ModifyableColumnFamilyDescriptor;
+import org.apache.hadoop.hbase.client.TableDescriptor;
+import org.apache.hadoop.hbase.client.TableDescriptorBuilder;
 import org.apache.hadoop.hbase.io.compress.Compression.Algorithm;
 import org.apache.hadoop.hbase.regionserver.BloomType;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -36,12 +39,12 @@ import org.apache.hadoop.hbase.util.Bytes;
  */
 public class HBaseMapping {
 
-  private final HTableDescriptor tableDescriptor;
+  private final TableDescriptor tableDescriptor;
   
   // a map from field name to hbase column
   private final Map<String, HBaseColumn> columnMap;
   
-  public HBaseMapping(HTableDescriptor tableDescriptor,
+  public HBaseMapping(TableDescriptor tableDescriptor,
       Map<String, HBaseColumn> columnMap) {
     super();
     this.tableDescriptor = tableDescriptor;
@@ -50,10 +53,10 @@ public class HBaseMapping {
   
 
   public String getTableName() {
-    return tableDescriptor.getNameAsString();
+    return tableDescriptor.getTableName().getNameAsString();
   }
   
-  public HTableDescriptor getTable() {
+  public TableDescriptor getTable() {
     return tableDescriptor;
   }
   
@@ -67,7 +70,7 @@ public class HBaseMapping {
    *
    */
   public static class HBaseMappingBuilder { 
-    private Map<String, Map<String, HColumnDescriptor>> tableToFamilies = 
+    private Map<String, Map<String, ColumnFamilyDescriptor>> tableToFamilies =
       new HashMap<>();
     private Map<String, HBaseColumn> columnMap = 
       new HashMap<>();
@@ -100,29 +103,30 @@ public class HBaseMapping {
       // For example nest columns in families. Of course this would break compatibility.
       
       
-      Map<String, HColumnDescriptor> families = getOrCreateFamilies(tableName);
-      
-      
-      HColumnDescriptor columnDescriptor = getOrCreateFamily(familyName, families);
+      Map<String, ColumnFamilyDescriptor> families = getOrCreateFamilies(tableName);
+
+      ColumnFamilyDescriptor columnDescriptor = getOrCreateFamily(familyName, families);
+      ModifyableColumnFamilyDescriptor modifyableColFamilyDescriptor =
+              (ModifyableColumnFamilyDescriptor) columnDescriptor;
       
       if(compression != null)
-        columnDescriptor.setCompressionType(Algorithm.valueOf(compression));
+        modifyableColFamilyDescriptor.setCompressionType(Algorithm.valueOf(compression));
       if(blockCache != null)
-        columnDescriptor.setBlockCacheEnabled(Boolean.parseBoolean(blockCache));
+        modifyableColFamilyDescriptor.setBlockCacheEnabled(Boolean.parseBoolean(blockCache));
       if(blockSize != null)
-        columnDescriptor.setBlocksize(Integer.parseInt(blockSize));
+        modifyableColFamilyDescriptor.setBlocksize(Integer.parseInt(blockSize));
       if(bloomFilter != null)
-        columnDescriptor.setBloomFilterType(BloomType.valueOf(bloomFilter));
+        modifyableColFamilyDescriptor.setBloomFilterType(BloomType.valueOf(bloomFilter));
       if(maxVersions != null)
-        columnDescriptor.setMaxVersions(Integer.parseInt(maxVersions));
+        modifyableColFamilyDescriptor.setMaxVersions(Integer.parseInt(maxVersions));
       if(timeToLive != null)
-        columnDescriptor.setTimeToLive(Integer.parseInt(timeToLive));
+        modifyableColFamilyDescriptor.setTimeToLive(Integer.parseInt(timeToLive));
       if(inMemory != null)
-        columnDescriptor.setInMemory(Boolean.parseBoolean(inMemory));
+        modifyableColFamilyDescriptor.setInMemory(Boolean.parseBoolean(inMemory));
     }
 
     public void addColumnFamily(String tableName, String familyName) {
-      Map<String, HColumnDescriptor> families = getOrCreateFamilies(tableName);
+      Map<String, ColumnFamilyDescriptor> families = getOrCreateFamilies(tableName);
       getOrCreateFamily(familyName, families);
     }
     
@@ -134,20 +138,22 @@ public class HBaseMapping {
       HBaseColumn column = new HBaseColumn(familyBytes, qualifierBytes);
       columnMap.put(fieldName, column);
     }
-    
 
-    private HColumnDescriptor getOrCreateFamily(String familyName,
-        Map<String, HColumnDescriptor> families) {
-      HColumnDescriptor columnDescriptor = families.get(familyName);
+
+    private ColumnFamilyDescriptor getOrCreateFamily(String familyName,
+                                                     Map<String, ColumnFamilyDescriptor> families) {
+      ColumnFamilyDescriptor columnDescriptor = families.get(familyName);
       if (columnDescriptor == null) {
-        columnDescriptor=new HColumnDescriptor(familyName);
+        ColumnFamilyDescriptorBuilder columnDescBuilder = ColumnFamilyDescriptorBuilder
+                .newBuilder(Bytes.toBytes(familyName));
+        columnDescriptor = columnDescBuilder.build();
         families.put(familyName, columnDescriptor);
       }
       return columnDescriptor;
     }
 
-    private Map<String, HColumnDescriptor> getOrCreateFamilies(String tableName) {
-      Map<String, HColumnDescriptor> families;
+    private Map<String, ColumnFamilyDescriptor> getOrCreateFamilies(String tableName) {
+      Map<String, ColumnFamilyDescriptor> families;
       families = tableToFamilies.get(tableName);
       if (families == null) {
         families = new HashMap<>();
@@ -157,7 +163,7 @@ public class HBaseMapping {
     }
     
     public void renameTable(String oldName, String newName) {
-      Map<String, HColumnDescriptor> families = tableToFamilies.remove(oldName);
+      Map<String, ColumnFamilyDescriptor> families = tableToFamilies.remove(oldName);
       if (families == null) throw new IllegalArgumentException(oldName + " does not exist");
       tableToFamilies.put(newName, families);
     }
@@ -167,15 +173,17 @@ public class HBaseMapping {
      */
     public HBaseMapping build() {
       if (tableName == null) throw new IllegalStateException("tableName is not specified");
-      
-      Map<String, HColumnDescriptor> families = tableToFamilies.get(tableName.getNameAsString());
+
+      Map<String, ColumnFamilyDescriptor> families = tableToFamilies.get(tableName.getNameAsString());
       if (families == null) throw new IllegalStateException("no families for table " + tableName);
-      
-      HTableDescriptor tableDescriptors = new HTableDescriptor(tableName);
-      for (HColumnDescriptor desc : families.values()) {
-        tableDescriptors.addFamily(desc);
+
+      TableDescriptorBuilder tableDescBuilder = TableDescriptorBuilder.newBuilder(tableName);
+
+      for (ColumnFamilyDescriptor familyDescriptor : families.values()) {
+        tableDescBuilder.setColumnFamily(familyDescriptor);
       }
-      return new HBaseMapping(tableDescriptors, columnMap);
+      TableDescriptor tableDescriptor = tableDescBuilder.build();
+      return new HBaseMapping(tableDescriptor, columnMap);
     }
   }
 

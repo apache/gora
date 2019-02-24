@@ -28,7 +28,7 @@ import org.apache.gora.filter.SingleFieldValueFilter;
 import org.apache.gora.hbase.store.HBaseColumn;
 import org.apache.gora.hbase.store.HBaseStore;
 import org.apache.gora.persistency.impl.PersistentBase;
-import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
+import org.apache.hadoop.hbase.CompareOperator;
 import org.apache.hadoop.hbase.filter.FilterList.Operator;
 import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 
@@ -69,7 +69,7 @@ public class DefaultFactory <K, T extends PersistentBase> extends BaseFactory<K,
       SingleFieldValueFilter<K, T> fieldFilter = (SingleFieldValueFilter<K, T>) filter;
 
       HBaseColumn column = store.getMapping().getColumn(fieldFilter.getFieldName());
-      CompareOp compareOp = getCompareOp(fieldFilter.getFilterOp());
+      CompareOperator compareOp = getCompareOp(fieldFilter.getFilterOp());
       byte[] family = column.getFamily();
       byte[] qualifier = column.getQualifier();
       byte[] value = HBaseByteInterface.toBytes(fieldFilter.getOperands().get(0));
@@ -81,7 +81,7 @@ public class DefaultFactory <K, T extends PersistentBase> extends BaseFactory<K,
       MapFieldValueFilter<K, T> mapFilter = (MapFieldValueFilter<K, T>) filter;
 
       HBaseColumn column = store.getMapping().getColumn(mapFilter.getFieldName());
-      CompareOp compareOp = getCompareOp(mapFilter.getFilterOp());
+      CompareOperator compareOp = getCompareOp(mapFilter.getFilterOp());
       byte[] family = column.getFamily();
       byte[] qualifier = HBaseByteInterface.toBytes(mapFilter.getMapKey());
       byte[] value = HBaseByteInterface.toBytes(mapFilter.getOperands().get(0));
@@ -95,20 +95,20 @@ public class DefaultFactory <K, T extends PersistentBase> extends BaseFactory<K,
     }
   }
 
-  private CompareOp getCompareOp(FilterOp filterOp) {
+  private CompareOperator getCompareOp(FilterOp filterOp) {
     switch (filterOp) {
       case EQUALS:
-        return CompareOp.EQUAL;
+        return CompareOperator.EQUAL;
       case NOT_EQUALS:
-        return CompareOp.NOT_EQUAL;
+        return CompareOperator.NOT_EQUAL;
       case LESS:
-        return CompareOp.LESS;
+        return CompareOperator.LESS;
       case LESS_OR_EQUAL:
-        return CompareOp.LESS_OR_EQUAL;
+        return CompareOperator.LESS_OR_EQUAL;
       case GREATER:
-        return CompareOp.GREATER;
+        return CompareOperator.GREATER;
       case GREATER_OR_EQUAL:
-        return CompareOp.GREATER_OR_EQUAL;
+        return CompareOperator.GREATER_OR_EQUAL;
       default:
         throw new IllegalArgumentException(filterOp + " no HBase equivalent yet");
     }
