@@ -835,9 +835,6 @@
 
     <!-- Pig Dependencies -->
     <pig.version>0.16.0</pig.version>
-    <automaton.version>1.11-8</automaton.version>
-    <antlr.version>3.4</antlr.version>
-    <datafu.version>1.2.0</datafu.version>
 
     <!-- General Properties -->
     <implementation.build>${scmBranch}@r${buildNumber}</implementation.build>
@@ -1565,26 +1562,6 @@
                   <artifactId>avro</artifactId>
               </exclusion>
           </exclusions>
-      </dependency>
-
-      <dependency>
-          <groupId>dk.brics.automaton</groupId>
-          <artifactId>automaton</artifactId>
-          <version>${automaton.version}</version>
-          <scope>test</scope>
-      </dependency>
-
-      <dependency>
-          <groupId>org.antlr</groupId>
-          <artifactId>antlr-runtime</artifactId>
-          <version>${antlr.version}</version>
-          <scope>test</scope>
-      </dependency>
-
-      <dependency>
-          <groupId>com.linkedin.datafu</groupId>
-          <artifactId>datafu</artifactId>
-          <version>${datafu.version}</version>
       </dependency>
 
       <!-- Testing Dependencies -->
