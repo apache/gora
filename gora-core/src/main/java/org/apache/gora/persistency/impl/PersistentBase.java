@@ -235,11 +235,10 @@ public abstract class PersistentBase extends SpecificRecordBase implements
       return false;
     }
   }
-  
+
+  @Override
   public List<Field> getUnmanagedFields(){
-    List<Field> fields = getSchema().getFields();
-    //return fields.subList(1, fields.size());
-    return fields;
+    return getSchema().getFields();
   }
   
 }

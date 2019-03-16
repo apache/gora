@@ -718,7 +718,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
           // continue like a regular top-level union
         case RECORD:
           final SpecificDatumWriter<Object> writer = new SpecificDatumWriter<>(field.schema());
-          final byte[] byteData = IOUtils.serialize(writer,o);
+          final byte[] byteData = IOUtils.serialize(writer, o);
           m.put(col.getFirst(), col.getSecond(), new Value(byteData));
           count++;
           break;

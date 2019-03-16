@@ -19,6 +19,7 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <groupId>org.apache</groupId>
     <artifactId>apache</artifactId>
@@ -320,33 +321,6 @@
     <url>https://builds.apache.org/job/Gora-trunk/</url>
   </ciManagement>
 
-  <!--distributionManagement>
-    <repository>
-      <id>apache.releases.https</id>
-      <name>Apache Release Distribution Repository</name>
-      <url>https://repository.apache.org/service/local/staging/deploy/maven2</url>
-    </repository>
-    <snapshotRepository>
-      <id>apache.snapshots.https</id>
-      <name>Apache Development Snapshot Repository</name>
-      <url>https://repository.apache.org/content/repositories/snapshots</url>
-    </snapshotRepository>
-  </distributionManagement>
-
-  <repositories>
-    <repository>
-      <id>apache.snapshots</id>
-      <url>http://repository.apache.org/snapshots/</url>
-      <name>Apache Snapshot Repo</name>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-    </repository>
-  </repositories-->
-
   <build>
     <defaultGoal>install</defaultGoal>
     <directory>target</directory>
@@ -637,18 +611,6 @@
       <id>release</id>
       <build>
         <plugins>
-          <!-- <plugin> <groupId>org.apache.rat</groupId> <artifactId>apache-rat-plugin</artifactId> 
-            <version>${apache-rat-plugin.version}</version> <executions> <execution> 
-            <id>rat-verify</id> <phase>test</phase> <goals> <goal>check</goal> </goals> 
-            </execution> </executions> <configuration> <licenses> <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense"> 
-            <licenseFamilyCategory>ASL20</licenseFamilyCategory> <licenseFamilyName>Apache 
-            Software License, 2.0</licenseFamilyName> <notes>Single licensed ASL v2.0</notes> 
-            <patterns> <pattern>Licensed to the Apache Software Foundation (ASF) under 
-            one or more contributor license agreements.</pattern> </patterns> </license> 
-            </licenses> <excludeSubProjects>false</excludeSubProjects> <excludes> <exclude>CHANGES.txt</exclude> 
-            <exclude>README.txt</exclude> <exclude>NOTICE.txt</exclude> <exclude>LICENSE.txt</exclude> 
-            <exclude>KEYS</exclude> <exclude>doap_Gora.rdf</exclude> <exclude>.gitignore/**/**</exclude> 
-            </excludes> </configuration> </plugin -->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-source-plugin</artifactId>
@@ -742,7 +704,7 @@
     <module>gora-infinispan</module>
     <module>gora-jcache</module>
     <module>gora-orientdb</module>
-    <!-- module>gora-lucene</module -->
+    <module>gora-lucene</module>
     <module>gora-dynamodb</module>
     <module>gora-couchdb</module>
     <module>gora-maven-plugin</module>
@@ -771,7 +733,7 @@
     <cassandra-driver.version>3.3.0</cassandra-driver.version>
     <cassandra.version>3.11.0</cassandra.version>
     <!-- Solr Dependencies -->
-    <lucene-solr.version>6.5.1</lucene-solr.version>
+    <lucene-solr.version>8.0.0</lucene-solr.version>
     <solr-solrj.version>6.5.1</solr-solrj.version>
     <jetty.version>9.3.14.v20161028</jetty.version>
     <tika.version>1.12</tika.version>
@@ -941,6 +903,17 @@
       <dependency>
         <groupId>org.apache.gora</groupId>
         <artifactId>gora-aerospike</artifactId>
+        <version>${project.version}</version>
+        <type>test-jar</type>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-lucene</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-lucene</artifactId>
         <version>${project.version}</version>
         <type>test-jar</type>
       </dependency>
