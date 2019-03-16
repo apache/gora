@@ -124,4 +124,16 @@ extends ResultBase<K, T> {
       return 0;
     }
   }
+
+  @Override
+  public int size() {
+    if (scoreDocs == null) {
+      return (int) limit;
+    } else {
+      int totalSize = scoreDocs.length;
+      int intLimit = (int) this.limit;
+      return intLimit > 0 && totalSize > intLimit ? intLimit : totalSize;
+    }
+  }
+
 }
