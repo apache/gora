@@ -358,4 +358,52 @@ public abstract class DataStoreTestBase {
     log.info("test method: testGetPartitions");
     DataStoreTestUtil.testGetPartitions(webPageStore);
   }
+  
+  @Test
+  public void testResultSize() throws Exception {
+    log.info("test method: testResultSize");
+    DataStoreTestUtil.testResultSizeWebPages(webPageStore);
+  }
+
+  @Test
+  public void testResultSizeStartKey() throws Exception {
+    log.info("test method: testResultSizeStartKey");
+    DataStoreTestUtil.testResultSizeWebPagesStartKey(webPageStore);
+  }
+
+  @Test
+  public void testResultSizeEndKey() throws Exception {
+    log.info("test method: testResultSizeEndKey");
+    DataStoreTestUtil.testResultSizeWebPagesEndKey(webPageStore);
+  }
+
+  @Test
+  public void testResultSizeKeyRange() throws Exception {
+    log.info("test method: testResultSizeKeyRange");
+    DataStoreTestUtil.testResultSizeWebPagesKeyRange(webPageStore);
+  }
+
+  @Test
+  public void testResultSizeWithLimit() throws Exception {
+    log.info("test method: testResultSizeWithLimit");
+    DataStoreTestUtil.testResultSizeWebPagesWithLimit(webPageStore);
+  }
+
+  @Test
+  public void testResultSizeStartKeyWithLimit() throws Exception {
+    log.info("test method: testResultSizeStartKeyWithLimit");
+    DataStoreTestUtil.testResultSizeWebPagesStartKeyWithLimit(webPageStore);
+  }
+
+  @Test
+  public void testResultSizeEndKeyWithLimit() throws Exception {
+    log.info("test method: testResultSizeEndKeyWithLimit");
+    DataStoreTestUtil.testResultSizeWebPagesEndKeyWithLimit(webPageStore);
+  }
+
+  @Test
+  public void testResultSizeKeyRangeWithLimit() throws Exception {
+    log.info("test method: testResultSizeKeyRangeWithLimit");
+    DataStoreTestUtil.testResultSizeWebPagesKeyRangeWithLimit(webPageStore);
+  }
 }

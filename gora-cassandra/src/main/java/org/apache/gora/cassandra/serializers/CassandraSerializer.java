@@ -114,7 +114,6 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
       LOG.debug("creating Cassandra column family / table {}", mapping.getCoreName());
       this.client.getSession().execute(CassandraQueryFactory.getCreateTableQuery(mapping));
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -126,7 +125,6 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
       LOG.debug("dropping Cassandra keyspace {}", mapping.getKeySpace().getName());
       this.client.getSession().execute(CassandraQueryFactory.getDropKeySpaceQuery(mapping));
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -140,7 +138,6 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
       LOG.debug("truncating Cassandra table {}", mapping.getCoreName());
       this.client.getSession().execute(CassandraQueryFactory.getTruncateTableQuery(mapping));
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -155,7 +152,6 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
         return false;
       }
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -245,7 +241,6 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
       LOG.info("Delete By Query method doesn't return the deleted element count.");
       return 0;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }

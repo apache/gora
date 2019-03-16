@@ -90,7 +90,6 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
     } catch (GoraException e) {
       throw e;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException("Error while initializing Cassandra store: " + e.getMessage(), e);
     }
   }
@@ -167,10 +166,9 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
       if (beanFactory != null) {
         return beanFactory.newKey();
       } else {
-        return keyClass.newInstance();
+        return keyClass.getDeclaredConstructor().newInstance();
       }
     } catch (Exception e) {
-      LOG.error("Error while instantiating a key: " + e.getMessage(), e);
       throw new GoraException("Error while instantiating a key: " + e.getMessage(), e);
     }
   }
@@ -185,10 +183,9 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
       if (beanFactory != null) {
         return this.beanFactory.newPersistent();
       } else {
-        return persistentClass.newInstance();
+        return persistentClass.getDeclaredConstructor().newInstance();
       }
     } catch (Exception e) {
-      LOG.error("Error while instantiating a persistent: " + e.getMessage(), e);
       throw new GoraException("Error while instantiating a key: " + e.getMessage(), e);
     }
   }
@@ -265,7 +262,6 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
     try {
         return (Result<K, T>) cassandraSerializer.execute(this, query);
     } catch (Exception e) {
-        this.LOG.error(e.getMessage(), e);
         throw new GoraException(e);
     }
   }
@@ -301,7 +297,6 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
       partitions.add(pqi);
       return partitions;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }

@@ -51,6 +51,7 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Files;
 import com.google.inject.Module;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  *This class contains all of the Chef software provisioning code required to
@@ -80,15 +81,17 @@ public class ChefSoftwareProvisioning {
   public ChefSoftwareProvisioning() {
   }
   
-  private static void performChefComputeServiceBootstrapping(Properties properties) throws IOException, InstantiationException, IllegalAccessException {
+  private static void performChefComputeServiceBootstrapping(Properties properties) throws 
+          IOException, InstantiationException, IllegalAccessException, 
+          NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
     // Get the credentials that will be used to authenticate to the Chef server
-    String rsContinent = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), 
+    String rsContinent = DataStoreFactory.findProperty(properties, MemStore.class.getDeclaredConstructor().newInstance(), 
         RS_CONTINENT, "rackspace-cloudservers-us");
-    String rsUser = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), RS_USERNAME, "asf-gora");
-    String rsApiKey = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), RS_APIKEY, null);
-    String rsRegion = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), RS_REGION, "DFW");
-    String client = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), CHEF_CLIENT, System.getProperty("user.name"));
-    String organization = DataStoreFactory.findProperty(properties, MemStore.class.newInstance(), CHEF_ORGANIZATION, null);
+    String rsUser = DataStoreFactory.findProperty(properties, MemStore.class.getDeclaredConstructor().newInstance(), RS_USERNAME, "asf-gora");
+    String rsApiKey = DataStoreFactory.findProperty(properties, MemStore.class.getDeclaredConstructor().newInstance(), RS_APIKEY, null);
+    String rsRegion = DataStoreFactory.findProperty(properties, MemStore.class.getDeclaredConstructor().newInstance(), RS_REGION, "DFW");
+    String client = DataStoreFactory.findProperty(properties, MemStore.class.getDeclaredConstructor().newInstance(), CHEF_CLIENT, System.getProperty("user.name"));
+    String organization = DataStoreFactory.findProperty(properties, MemStore.class.getDeclaredConstructor().newInstance(), CHEF_ORGANIZATION, null);
     String pemFile = System.getProperty("user.home") + "/.chef/" + client + ".pem";
     String credential = Files.toString(new File(pemFile), Charsets.UTF_8);
 
@@ -169,7 +172,7 @@ public class ChefSoftwareProvisioning {
    * @throws IllegalAccessException 
    * @throws InstantiationException 
    */
-  public static void main(String[] args) throws InstantiationException, IllegalAccessException, IOException {
+  public static void main(String[] args) throws InstantiationException, IllegalAccessException, IOException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
     Properties props = DataStoreFactory.createProps();
     ChefSoftwareProvisioning.performChefComputeServiceBootstrapping(props);
   }

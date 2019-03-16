@@ -91,7 +91,7 @@ public class InfinispanStore<K, T extends PersistentBase> extends DataStoreBase<
           + keyClass.getCanonicalName()
           + ", persistent class: "
           + persistentClass.getCanonicalName());
-      schema = persistentClass.newInstance().getSchema();
+      schema = persistentClass.getDeclaredConstructor().newInstance().getSchema();
 
       splitSize = Integer.valueOf(
           properties.getProperty( BUFFER_LIMIT_READ_NAME,
@@ -107,7 +107,6 @@ public class InfinispanStore<K, T extends PersistentBase> extends DataStoreBase<
     } catch (GoraException e) {
       throw e;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -131,7 +130,6 @@ public class InfinispanStore<K, T extends PersistentBase> extends DataStoreBase<
       this.infinispanClient.deleteByKey(key);
       return true;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -148,7 +146,6 @@ public class InfinispanStore<K, T extends PersistentBase> extends DataStoreBase<
       }
       return q.getResultSize();
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -173,7 +170,6 @@ public class InfinispanStore<K, T extends PersistentBase> extends DataStoreBase<
       LOG.trace("result size: " + result.size());
       return result;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -184,7 +180,6 @@ public class InfinispanStore<K, T extends PersistentBase> extends DataStoreBase<
     try {
       return infinispanClient.get(key);
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -205,7 +200,6 @@ public class InfinispanStore<K, T extends PersistentBase> extends DataStoreBase<
       result.next();
       return result.get();
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -274,7 +268,6 @@ public class InfinispanStore<K, T extends PersistentBase> extends DataStoreBase<
     try {
       infinispanClient.flush();
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -312,7 +305,6 @@ public class InfinispanStore<K, T extends PersistentBase> extends DataStoreBase<
     try {
       this.infinispanClient.put(key, obj);
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }

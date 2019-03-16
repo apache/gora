@@ -291,7 +291,6 @@ DataStoreBase<K, T> {
       LOG.debug("Collection {} has been created for Mongo instance {}.",
           new Object[] { mapping.getCollectionName(), mongoClientDB.getMongo() });
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -313,7 +312,6 @@ DataStoreBase<K, T> {
           "Collection {} has been dropped for Mongo instance {}.",
           new Object[] { mongoClientColl.getFullName(), mongoClientDB.getMongo() });
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -326,7 +324,6 @@ DataStoreBase<K, T> {
     try {
       return mongoClientDB.collectionExists(mapping.getCollectionName());
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -343,7 +340,6 @@ DataStoreBase<K, T> {
             new Object[] { client });
       }
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -381,7 +377,6 @@ DataStoreBase<K, T> {
       // Build the corresponding persistent
       return newInstance(res, dbFields);
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -405,7 +400,6 @@ DataStoreBase<K, T> {
             + "new, neither dirty.", new Object[] { obj });
       }
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -452,7 +446,6 @@ DataStoreBase<K, T> {
       WriteResult writeResult = mongoClientColl.remove(removeKey);
       return writeResult != null && writeResult.getN() > 0;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -468,7 +461,6 @@ DataStoreBase<K, T> {
       }
       return 0;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -505,7 +497,6 @@ DataStoreBase<K, T> {
   
       return mongoResult;
     } catch(Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }

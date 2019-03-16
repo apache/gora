@@ -158,7 +158,6 @@ public class AvroStore<K, T extends PersistentBase>
       if(encoder != null)
         encoder.flush();
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -178,7 +177,6 @@ public class AvroStore<K, T extends PersistentBase>
     try{
       getDatumWriter().write(obj, getEncoder());
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }

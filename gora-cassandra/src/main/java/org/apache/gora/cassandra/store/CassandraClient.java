@@ -528,7 +528,7 @@ public class CassandraClient {
 
   private void registerCustomCodecs(List<String> codecs) throws Exception {
     for (String codec : codecs) {
-      this.cluster.getConfiguration().getCodecRegistry().register((TypeCodec<?>) Class.forName(codec).newInstance());
+      this.cluster.getConfiguration().getCodecRegistry().register((TypeCodec<?>) Class.forName(codec).getDeclaredConstructor().newInstance());
     }
   }
 

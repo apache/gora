@@ -36,7 +36,7 @@ import java.time.Duration;
  */
 public class TestAerospikeStoreMapReduceSerialization {
 
-  private static final String DOCKER_CONTAINER_NAME = "aerospike/aerospike-server:latest";
+  private static final String DOCKER_CONTAINER_NAME = "aerospike/aerospike-server:4.3.1.4";
 
   @ClassRule
   public static GenericContainer aerospikeContainer = new GenericContainer(DOCKER_CONTAINER_NAME)

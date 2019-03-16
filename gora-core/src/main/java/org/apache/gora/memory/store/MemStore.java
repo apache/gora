@@ -89,6 +89,13 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
       return true;
     }
+
+    @Override
+    public int size() {
+      int totalSize = map.navigableKeySet().size();
+      int intLimit = (int) this.limit;
+      return intLimit > 0 && totalSize > intLimit ? intLimit : totalSize;
+    }
   }
 
   // This map behaves like DB, has to be static and concurrent collection
@@ -169,7 +176,6 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
       try {
         submap =  map.subMap(startKey, true, endKey, true);
       } catch (Exception e) {
-        LOG.error(e.getMessage(), e);
         throw new GoraException(e);
       }
     } else {

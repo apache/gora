@@ -171,7 +171,6 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
       }
       schemaTx.getMetadata().getSchema().reload();
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -186,7 +185,6 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
       schemaTx.activateOnCurrentThread();
       schemaTx.getMetadata().getSchema().dropClass(orientDBMapping.getDocumentClass());
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -202,7 +200,6 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
       return schemaTx.getMetadata().getSchema()
               .existsClass(orientDBMapping.getDocumentClass());
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -235,7 +232,6 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
         return null;
       }
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -265,7 +261,6 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
           docBatch.add(document);
         }
       } catch (Exception e) {
-        LOG.error(e.getMessage(), e);
         throw new GoraException(e);
       }
     } else {
@@ -296,7 +291,6 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
         return false;
       }
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -334,7 +328,6 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
           return 0;
         }
       } catch (Exception e) {
-        LOG.error(e.getMessage(), e);
         throw new GoraException(e);
       }
     } else {
@@ -362,7 +355,6 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
           return result.size();
         }
       } catch (Exception e) {
-        LOG.error(e.getMessage(), e);
         throw new GoraException(e);
       }
     }
@@ -388,7 +380,6 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
       result.setLimit((int) query.getLimit());
       return new OrientDBResult<K, T>(this, query, result);
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -430,7 +421,6 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
         updateTx.save(document);
       }
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     } finally {
       docBatch.clear();
@@ -691,7 +681,6 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
     try {
       clazz = ClassLoadingUtils.loadClass(fieldSchema.getFullName());
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
     PersistentBase record = (PersistentBase) new BeanFactoryImpl(keyClass, clazz).newPersistent();

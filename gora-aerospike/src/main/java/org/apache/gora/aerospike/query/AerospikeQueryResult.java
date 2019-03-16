@@ -85,4 +85,12 @@ public class AerospikeQueryResult<K, T extends Persistent> extends ResultBase<K,
             .createPersistentInstance(resultRecords.get((int) this.offset).getRecord(), fields);
     return true;
   }
+
+  @Override
+  public int size() {
+    // Fix query limit natively from Aerospike client
+    int totalSize = resultRecords.size();
+    int intLimit = (int) this.limit;
+    return intLimit > 0 && totalSize > intLimit ? intLimit : totalSize;
+  }
 }

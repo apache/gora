@@ -59,11 +59,11 @@ import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HConstants;
-import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.client.Admin;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.TableDescriptor;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
@@ -133,10 +133,8 @@ implements Configurable {
       mapping = readMapping(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE));
       filterUtil = new HBaseFilterUtil<>(this.conf);
     } catch (FileNotFoundException ex) {
-      LOG.error("{}  is not found, please check the file.", DEFAULT_MAPPING_FILE);
-      throw new GoraException(ex);
+      throw new GoraException("Mapping file '" + getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE) + "' not found.",ex);
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
 
@@ -158,7 +156,6 @@ implements Configurable {
       boolean autoflush = this.conf.getBoolean("hbase.client.autoflush.default", false);
       table = new HBaseTableConnection(getConf(), getSchemaName(), autoflush);
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
     closeHBaseAdmin();
@@ -180,13 +177,12 @@ implements Configurable {
       if(schemaExists()) {
         return;
       }
-      HTableDescriptor tableDesc = mapping.getTable();
+      TableDescriptor tableDesc = mapping.getTable();
   
       admin.createTable(tableDesc);
     } catch (GoraException e) {
       throw e;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
     closeHBaseAdmin();
@@ -203,7 +199,6 @@ implements Configurable {
     } catch (GoraException e) {
       throw e;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
     closeHBaseAdmin();
@@ -214,7 +209,6 @@ implements Configurable {
     try{
       return admin.tableExists(mapping.getTable().getTableName());
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -230,7 +224,6 @@ implements Configurable {
     } catch (GoraException e) {
       throw e;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -285,7 +278,6 @@ implements Configurable {
     } catch (GoraException e) {
       throw e;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -369,7 +361,6 @@ implements Configurable {
       //success is a bit costly
       return true;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -397,7 +388,6 @@ implements Configurable {
     } catch (GoraException e) {
       throw e;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -407,7 +397,6 @@ implements Configurable {
     try{
       table.flushCommits();
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -491,25 +480,22 @@ implements Configurable {
         return result;
       }
     }catch(IOException ex){
-      LOG.error(ex.getMessage(), ex);
       throw new GoraException(ex) ;
     }
   }
 
   public ResultScanner createScanner(Query<K, T> query) throws IOException {
     final Scan scan = new Scan();
-    
+    scan.setMaxResultSize(query.getLimit());
     scan.setCaching(this.getScannerCaching()) ; 
     
     if (query.getStartKey() != null) {
-      scan.setStartRow(toBytes(query.getStartKey()));
+      scan.withStartRow(toBytes(query.getStartKey()));
     }
     if (query.getEndKey() != null) {
-      // In HBase the end key is exclusive, so we add a trail zero to make it inclusive
-      // as the Gora's query interface declares.
-      byte[] endKey = toBytes(query.getEndKey());
-      byte[] inclusiveEndKey = Arrays.copyOf(endKey, endKey.length+1);
-      scan.setStopRow(inclusiveEndKey);
+      // In HBase the end key is exclusive, so we make it inclusive by explicitly passing
+      // boolean 'true' as the Gora's query interface declares.
+      scan.withStopRow(toBytes(query.getEndKey()), true);
     }
     addFields(scan, query);
     if (query.getFilter() != null) {

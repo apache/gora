@@ -163,7 +163,6 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
     } catch (GoraException e) {
       throw e;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -239,7 +238,6 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
         LOG.error("{} Persistent bean isn't extended by {} .", new Object[]{this.persistentClass, PersistentBase.class});
       }
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -272,7 +270,6 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
       }
       return obj;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -411,7 +408,6 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
       ResultSet resultSet = client.getSession().execute(statement);
       return resultSet.wasApplied();
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
@@ -466,7 +462,6 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
       }
       return cassandraResult;
     } catch (Exception e) {
-      LOG.error(e.getMessage(), e);
       throw new GoraException(e);
     }
   }
