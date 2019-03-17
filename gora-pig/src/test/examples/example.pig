@@ -16,6 +16,12 @@
  * limitations under the License.
  */
 set job.name 'GoraStorage test' ;
+
 register gora/*.jar ;
-webpage = LOAD '.' using org.apache.gora.pig.GoraStorage('java.lang.String','admin.WebPage','baseUrl,status,content') ;
-dump webpage;
+
+webpage = LOAD '.' USING org.apache.gora.pig.GoraStorage('{
+      "persistentClass": "com.example.WebPage",
+      "fields": "baseUrl,status,content"
+}') ;
+
+dump webpage ;
