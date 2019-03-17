@@ -337,7 +337,7 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
   }
   
   /**
-   * Gets the job, initializes the localJobConf (the actual used to create a datastore) and splits from 'location' the fields to load/save
+   * Gets the job, initializes the localJobConf (the actual used to create a datastore)
    */
   @Override
   public void setLocation(String location, Job job) throws IOException {

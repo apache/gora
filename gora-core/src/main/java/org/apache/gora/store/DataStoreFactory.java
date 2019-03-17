@@ -229,7 +229,6 @@ public class DataStoreFactory{
   /**
    * Instantiate a new {@link DataStore}. Uses default properties. Uses 'null' schema.
    * 
-   * @param dataStoreClass The datastore implementation class <i>as string</i>.
    * @param keyClass The key class <i>as string</i>.
    * @param persistentClass The value class <i>as string</i>.
    * @param conf {@link Configuration} to be used be the store.
