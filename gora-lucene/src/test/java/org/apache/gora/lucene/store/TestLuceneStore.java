@@ -19,7 +19,11 @@ package org.apache.gora.lucene.store;
 
 import org.apache.gora.store.DataStoreTestBase;
 import org.apache.gora.util.OperationNotSupportedException;
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -27,38 +31,44 @@ import org.junit.Test;
  */
 public class TestLuceneStore extends DataStoreTestBase {
 
-  static {
+  @BeforeClass
+  public static void setUpClass() throws Exception {
     setTestDriver(new TestLuceneStoreDriver());
+    DataStoreTestBase.setUpClass();
   }
 
-  
+  @AfterClass
+  public static void tearDownClass() throws Exception {
+    DataStoreTestBase.tearDownClass();
+  }
+
   @Before
   public void setUp() throws Exception {
     super.setUp();
   }
 
-  @Test(expected=AssertionError.class)
+  @After
+  public void tearDown() throws Exception {
+    super.tearDown();
+    //this is not handled at super class level
+    super.employeeStore.close();
+    super.webPageStore.close();
+  }
+
+  @Test(expected = AssertionError.class)
   public void testSchemaExists() throws Exception {
     super.testSchemaExists();
   }
-  
-  @Test(expected=OperationNotSupportedException.class)
+
+  @Test(expected = OperationNotSupportedException.class)
   public void testGetPartitions() throws Exception {
     super.testGetPartitions();
   }
 
-
-  public void testUpdate() throws Exception {
-  }
-  public void testGetRecursive() throws Exception {
-  }
-  public void testGetDoubleRecursive() throws Exception {
-  }
-  public void testGetNested() throws Exception {
-  }
+  @Ignore("3 types union field is not supported by LuceneStore.")
+  @Override
   public void testGet3UnionField() throws Exception {
+    //3 types union field is not supported by LuceneStore.
   }
-  public void testDeleteByQueryFields() throws Exception {
-  }
-  
+
 }

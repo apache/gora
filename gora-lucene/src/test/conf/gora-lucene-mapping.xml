@@ -24,6 +24,8 @@
     <field name="name" column="name"/>
     <field name="dateOfBirth" column="dateOfBirth"/>
     <field name="salary" column="salary"/>
+    <field name="boss" column="boss"/>
+    <field name="webpage" column="webpage"/>
   </class>
 
   <class name="org.apache.gora.examples.generated.WebPage" keyClass="java.lang.String">
@@ -32,6 +34,7 @@
     <field name="content" column="content"/>
     <field name="parsedContent" column="parsedContent"/>
     <field name="outlinks" column="outlinks"/>
+    <field name="headers" column="headers"/>
     <field name="metadata" column="metadata"/>
   </class>
 

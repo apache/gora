@@ -19,6 +19,8 @@ package org.apache.gora.lucene.store;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
+import org.apache.avro.specific.SpecificDatumReader;
+import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.avro.util.Utf8;
 import org.apache.gora.lucene.query.LuceneQuery;
 import org.apache.gora.lucene.query.LuceneResult;
@@ -44,6 +46,7 @@ import org.apache.lucene.document.StringField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
+import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.ScoreDoc;
@@ -63,19 +66,14 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.FileSystems;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 /**
  * {@link org.apache.gora.lucene.store.LuceneStore} is the primary class
  * responsible for GORA CRUD operations on Lucene.
  */
-public class LuceneStore<K, T extends PersistentBase> 
-extends FileBackedDataStoreBase<K, T> implements Configurable {
+public class LuceneStore<K, T extends PersistentBase>
+        extends FileBackedDataStoreBase<K, T> implements Configurable {
 
   private static final Logger LOG = LoggerFactory.getLogger(LuceneStore.class);
 
@@ -88,10 +86,11 @@ extends FileBackedDataStoreBase<K, T> implements Configurable {
   private LuceneMapping mapping;
   private IndexWriter writer;
   private SearcherManager searcherManager;
+  private Directory dir;
 
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
-          Properties properties) throws GoraException {
+                         Properties properties) throws GoraException {
     try {
       super.initialize(keyClass, persistentClass, properties);
     } catch (GoraException ge) {
@@ -124,7 +123,8 @@ extends FileBackedDataStoreBase<K, T> implements Configurable {
     String persistentClassObject = persistentClass.getCanonicalName();
     String dataStoreOutputPath = outputPath + "_" + persistentClassObject
             .substring(persistentClassObject.lastIndexOf('.') + 1).toLowerCase(Locale.getDefault());
-    try(Directory dir = FSDirectory.open(FileSystems.getDefault().getPath(dataStoreOutputPath))) {
+    try {
+      dir = FSDirectory.open(FileSystems.getDefault().getPath(dataStoreOutputPath));
 
       Analyzer analyzer = new StandardAnalyzer();
       IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
@@ -135,7 +135,7 @@ extends FileBackedDataStoreBase<K, T> implements Configurable {
       writer = new IndexWriter(dir, iwc);
       //TODO do we definately want all past deletions to be applied.
       searcherManager = new SearcherManager(writer, true, true, new SearcherFactory());
-    } catch (IOException e ) {
+    } catch (IOException e) {
       LOG.error("Error opening {} with Lucene FSDirectory.", outputPath, e);
     }
   }
@@ -198,19 +198,47 @@ extends FileBackedDataStoreBase<K, T> implements Configurable {
 
 
   @Override
-  public long deleteByQuery(Query<K,T> query) {
+  public long deleteByQuery(Query<K, T> query) {
     try {
       // Figure out how many were there before
-      LuceneQuery<K,T> q = (LuceneQuery<K,T>)query;
-      LuceneResult<K,T> r = (LuceneResult<K,T>)q.execute();
+      LuceneQuery<K, T> q = (LuceneQuery<K, T>) query;
+      LuceneResult<K, T> r = (LuceneResult<K, T>) q.execute();
       int before = r.getScoreDocs().length;
 
-      // Delete them
-      writer.deleteDocuments(q.toLuceneQuery());
-      searcherManager.maybeRefresh();
+      if (query.getFields() == null || (query.getFields().length == getFields().length)) {
+        // Delete them
+        writer.deleteDocuments(q.toLuceneQuery());
+        searcherManager.maybeRefresh();
+      } else {
+        Query<K,T>  selectQuery = this.newQuery();
+        selectQuery.setStartKey(q.getStartKey());
+        selectQuery.setEndKey(q.getEndKey());
+        LuceneResult<K, T> selectResult = (LuceneResult<K, T>) selectQuery.execute();
+        ScoreDoc[] scoreDocs =  selectResult.getScoreDocs();
+        HashSet<String> fields = new HashSet<>();
+        fields.addAll(mapping.getLuceneFields());
+        IndexSearcher searcher = selectResult.getSearcher();
+        if (scoreDocs.length > 0) {
+          for (ScoreDoc scoreDoc : scoreDocs) {
+            Document doc = searcher.doc(scoreDoc.doc, fields);
+            for (String avroField : query.getFields()) {
+              String docField = mapping.getLuceneField(avroField);
+              if (doc.getField(docField) != null) {
+                doc.removeField(docField);
+              }
+            }
+            String key = doc.get(getMapping().getPrimaryKey());
+            doc.removeField(getMapping().getPrimaryKey());
+            doc.removeField(getMapping().getPrimaryKey());
+            writer.updateDocument(new Term(mapping.getPrimaryKey(), key), doc);
+            searcherManager.maybeRefresh();
+          }
+        }
+        //selectResult.close();
+      }
 
       // Figure out how many there are after
-      r = (LuceneResult<K,T>)q.execute();
+      r = (LuceneResult<K, T>) q.execute();
       int after = r.getScoreDocs().length;
 
       return before - after;
@@ -239,8 +267,7 @@ extends FileBackedDataStoreBase<K, T> implements Configurable {
     if (fieldsToLoad != null) {
       fields = new HashSet<>(fieldsToLoad.length);
       fields.addAll(Arrays.asList(fieldsToLoad));
-    }
-    else {
+    } else {
       fields = new HashSet<>();
       fields.addAll(mapping.getLuceneFields());
     }
@@ -252,7 +279,7 @@ extends FileBackedDataStoreBase<K, T> implements Configurable {
         Document doc = s.doc(hits[0].doc, fields);
         LOG.debug("get:Document: {}", doc.toString());
         String[] a = {};
-        return newInstance( doc, fields.toArray(a) );
+        return newInstance(doc, fields.toArray(a));
       }
       searcherManager.release(s);
     } catch (IOException e) {
@@ -261,93 +288,145 @@ extends FileBackedDataStoreBase<K, T> implements Configurable {
     return null;
   }
 
+  private Object convertDocFieldToAvroUnion(final Schema fieldSchema,
+                                            final Schema.Field field,
+                                            final String sf,
+                                            final Document doc) throws IOException {
+    Object result;
+    Schema.Type type0 = fieldSchema.getTypes().get(0).getType();
+    Schema.Type type1 = fieldSchema.getTypes().get(1).getType();
+
+    if (!type0.equals(type1)
+            && (type0.equals(Schema.Type.NULL) || type1.equals(Schema.Type.NULL))) {
+      Schema innerSchema = null;
+      if (type0.equals(Schema.Type.NULL)) {
+        innerSchema = fieldSchema.getTypes().get(1);
+      } else {
+        innerSchema = fieldSchema.getTypes().get(0);
+      }
+
+      result = convertToIndexableFieldToAvroField(doc, field, innerSchema, sf);
+    } else {
+      throw new GoraException("LuceneStore only supports Union of two types field.");
+    }
+    return result;
+  }
+
+
+  private SpecificDatumReader getDatumReader(Schema fieldSchema) {
+    // reuse
+    return new SpecificDatumReader(fieldSchema);
+  }
+
+  private Object convertToIndexableFieldToAvroField(final Document doc,
+                                                    final Schema.Field field,
+                                                    final Schema fieldSchema,
+                                                    final String sf) throws IOException {
+    Object result = null;
+    T persistent = newPersistent();
+    Object sv;
+    switch (fieldSchema.getType()) {
+      case MAP:
+      case ARRAY:
+      case RECORD:
+        sv = doc.getBinaryValue(sf);
+        if (sv == null) {
+          break;
+        }
+        BytesRef b = (BytesRef) sv;
+        SpecificDatumReader reader = getDatumReader(fieldSchema);
+        result = IOUtils.deserialize(b.bytes, reader, persistent.get(field.pos()));
+        break;
+      case UNION:
+        result = convertDocFieldToAvroUnion(fieldSchema, field, sf, doc);
+        break;
+      case ENUM:
+        sv = doc.get(sf);
+        if (sv == null) {
+          break;
+        }
+        result = AvroUtils.getEnumValue(fieldSchema, (String) sv);
+        break;
+      case BYTES:
+        sv = doc.getBinaryValue(sf);
+        if (sv == null) {
+          break;
+        }
+        result = ByteBuffer.wrap(((BytesRef) sv).bytes);
+        break;
+      default:
+        sv = doc.get(sf);
+        if (sv == null) {
+          break;
+        }
+        result = convertLuceneFieldToAvroField(fieldSchema.getType(), sv);
+    }
+    return result;
+  }
+
 
   public T newInstance(Document doc, String[] fields) throws IOException {
     T persistent = newPersistent();
-    if ( fields == null ) {
-      fields = fieldMap.keySet().toArray( new String[fieldMap.size()] );
+    if (fields == null) {
+      fields = fieldMap.keySet().toArray(new String[fieldMap.size()]);
     }
     String pk = mapping.getPrimaryKey();
 
-    for ( String f : fields ) {
-      org.apache.avro.Schema.Field field = fieldMap.get( f );
-      Schema fieldSchema = field.schema();
+    for (String f : fields) {
+      org.apache.avro.Schema.Field field = fieldMap.get(f);
       String sf;
-      if ( pk.equals( f ) ) {
+      if (pk.equals(f)) {
         sf = f;
       } else {
         sf = mapping.getLuceneField(f);
       }
-      Object v;
-      Object sv;
-      switch ( fieldSchema.getType() ) {
-        case MAP:
-        case ARRAY:
-        case RECORD:
-        case UNION:
-        sv = doc.getBinaryValue(sf);
-        if (sv == null)
-          continue;
-        BytesRef b = (BytesRef)sv;
-        v = IOUtils.deserialize(b.bytes, datumReader, (T) persistent.get( field.pos() ));
-        persistent.put( field.pos(), v );
-        break;
-        case ENUM:
-        sv = doc.get(sf);
-        if (sv == null)
-          continue;
-        v = AvroUtils.getEnumValue( fieldSchema, (String) sv );
-        persistent.put( field.pos(), v );
-        break;
-        default:
-        sv = doc.get(sf);
-        if (sv == null)
-          continue;
-        put(persistent, field.pos(), fieldSchema.getType(), sv);
+      Schema fieldSchema = field.schema();
+      Object fieldValue = convertToIndexableFieldToAvroField(doc, field, fieldSchema, sf);
+      if (fieldValue == null) {
+        continue;
       }
-      persistent.setDirty( field.pos() );
+      persistent.put(field.pos(), fieldValue);
+      persistent.setDirty(field.pos());
     }
     persistent.clearDirty();
     return persistent;
   }
 
 
-  void put(T p, int pos, Type t, Object o) {
-    switch(t) {
+  private Object convertLuceneFieldToAvroField(Type t, Object o) {
+    Object result = null;
+    switch (t) {
       case FIXED:
-      // Could we combine this with the BYTES section below and
-      // either fix the size of the array or not depending on Type?
-      // This might be a buffer copy. Do we need to pad if the
-      // fixed sized data is smaller than the type? Do we truncate
-      // if the data is larger than the type?
-      LOG.error("Fixed-sized fields are not supported yet");
-      break;
-      case BYTES:
-      p.put(pos, ByteBuffer.wrap((byte[]) o));
-      break;
+        // Could we combine this with the BYTES section below and
+        // either fix the size of the array or not depending on Type?
+        // This might be a buffer copy. Do we need to pad if the
+        // fixed sized data is smaller than the type? Do we truncate
+        // if the data is larger than the type?
+        LOG.error("Fixed-sized fields are not supported yet");
+        break;
       case BOOLEAN:
-      p.put(pos, Boolean.parseBoolean((String)o));
-      break;
+        result = Boolean.parseBoolean((String) o);
+        break;
       case DOUBLE:
-      p.put(pos, Double.parseDouble((String)o));
-      break;
+        result = Double.parseDouble((String) o);
+        break;
       case FLOAT:
-      p.put(pos, Float.parseFloat((String)o));
-      break;
+        result = Float.parseFloat((String) o);
+        break;
       case INT:
-      p.put(pos, Integer.parseInt((String)o));
-      break;
+        result = Integer.parseInt((String) o);
+        break;
       case LONG:
-      p.put(pos, Long.parseLong((String)o));
-      break;
+        result = Long.parseLong((String) o);
+        break;
       case STRING:
-      p.put(pos, new Utf8( o.toString()));
-      break;
+        result = new Utf8(o.toString());
+        break;
       default:
-      LOG.error("Unknown field type: {}", t);
+        LOG.error("Unknown field type: {}", t);
     }
+    return result;
   }
-
 
   @Override
   public String getSchemaName() {
@@ -355,8 +434,82 @@ extends FileBackedDataStoreBase<K, T> implements Configurable {
   }
 
   @Override
-  public Query<K,T> newQuery() {
-    return new LuceneQuery<>( this );
+  public Query<K, T> newQuery() {
+    return new LuceneQuery<>(this);
+  }
+
+  private IndexableField convertAvroUnionToDocumentField(final String sf,
+                                                         final Schema fieldSchema,
+                                                         final Object value) {
+    IndexableField result;
+    Schema.Type type0 = fieldSchema.getTypes().get(0).getType();
+    Schema.Type type1 = fieldSchema.getTypes().get(1).getType();
+
+    if (!type0.equals(type1)
+            && (type0.equals(Schema.Type.NULL) || type1.equals(Schema.Type.NULL))) {
+      Schema innerSchema = null;
+      if (type0.equals(Schema.Type.NULL)) {
+        innerSchema = fieldSchema.getTypes().get(1);
+      } else {
+        innerSchema = fieldSchema.getTypes().get(0);
+      }
+      result = convertToIndexableField(sf, innerSchema, value);
+    } else {
+      throw new IllegalStateException("LuceneStore only supports Union of two types field.");
+    }
+    return result;
+  }
+
+  private SpecificDatumWriter getDatumWriter(Schema fieldSchema) {
+    return new SpecificDatumWriter(fieldSchema);
+  }
+
+  private IndexableField convertToIndexableField(String sf, Schema fieldSchema, Object o) {
+    IndexableField result = null;
+    switch (fieldSchema.getType()) {
+      case MAP: //TODO: These should be handled better
+      case ARRAY:
+      case RECORD:
+        // For now we'll just store the bytes
+        byte[] data = new byte[0];
+        try {
+          SpecificDatumWriter writer = getDatumWriter(fieldSchema);
+          data = IOUtils.serialize(writer, o);
+        } catch (IOException e) {
+          LOG.error("Error occurred while serializing record", e);
+        }
+        result = new StoredField(sf, data);
+        break;
+      case UNION:
+        result = convertAvroUnionToDocumentField(sf, fieldSchema, o);
+        break;
+      case BYTES:
+        result = new StoredField(sf, ((ByteBuffer) o).array());
+        break;
+      case ENUM:
+      case STRING:
+        //TODO make this Text based on a mapping.xml attribute
+        result = new StringField(sf, o.toString(), Store.YES);
+        break;
+      case BOOLEAN:
+        result = new StringField(sf, o.toString(), Store.YES);
+        break;
+      case DOUBLE:
+        result = new StoredField(sf, (Double) o);
+        break;
+      case FLOAT:
+        result = new StoredField(sf, (Float) o);
+        break;
+      case INT:
+        result = new StoredField(sf, (Integer) o);
+        break;
+      case LONG:
+        result = new StoredField(sf, (Long) o);
+        break;
+      default:
+        LOG.error("Unknown field type: {}", fieldSchema.getType());
+    }
+    return result;
   }
 
   @Override
@@ -366,12 +519,12 @@ extends FileBackedDataStoreBase<K, T> implements Configurable {
 
     // populate the doc
     List<org.apache.avro.Schema.Field> fields = schema.getFields();
-    for ( org.apache.avro.Schema.Field field : fields) {
+    for (org.apache.avro.Schema.Field field : fields) {
       if (!persistent.isDirty(field.name())) {
         continue;
       }
       String sf = mapping.getLuceneField(field.name());
-      if ( sf == null ) {
+      if (sf == null) {
         continue;
       }
       Schema fieldSchema = field.schema();
@@ -379,55 +532,15 @@ extends FileBackedDataStoreBase<K, T> implements Configurable {
       if (o == null) {
         continue;
       }
-      switch (fieldSchema.getType()) {
-        case MAP: //TODO: These should be handled better
-        case ARRAY:
-        case RECORD:
-        case UNION:
-          // For now we'll just store the bytes
-          byte[] data = new byte[0];
-          try {
-            data = IOUtils.serialize(datumWriter, (T)o);
-          } catch (IOException e) {
-            LOG.error( e.getMessage(), e );
-          }
-          doc.add(new StoredField(sf, data));
-          break;
-        case BYTES:
-          doc.add(new StoredField(sf, ((ByteBuffer) o).array()));
-          break;
-        case ENUM:
-        case STRING:
-          //TODO make this Text based on a mapping.xml attribute
-          doc.add( new StringField(sf, o.toString(), Store.YES));
-          break;
-        case BOOLEAN:
-          doc.add(new StringField(sf, o.toString(), Store.YES));
-          break;
-        case DOUBLE:
-          doc.add(new StoredField(sf, (Double)o));
-          break;
-        case FLOAT:
-          doc.add(new StoredField(sf, (Float)o));
-          break;
-        case INT:
-          doc.add(new StoredField(sf, (Integer)o));
-          break;
-        case LONG:
-          doc.add(new StoredField(sf, (Long)o));
-          break;
-        default:
-        LOG.error( "Unknown field type: {}", fieldSchema.getType() );
-      }
+      doc.add(convertToIndexableField(sf, fieldSchema, o));
     }
-    LOG.info( "DOCUMENT: {}", doc );
+    LOG.info("DOCUMENT: {}", doc);
     try {
       doc.add(new StringField(mapping.getPrimaryKey(), key.toString(), Store.YES));
-      LOG.info( "DOCUMENT: {}", doc );
+      LOG.info("DOCUMENT: {}", doc);
       if (get(key, null) == null) {
         writer.addDocument(doc);
-      }
-      else {
+      } else {
         writer.updateDocument(
                 new Term(mapping.getPrimaryKey(), key.toString()),
                 doc);
@@ -440,13 +553,13 @@ extends FileBackedDataStoreBase<K, T> implements Configurable {
   }
 
   @Override
-  protected Result<K,T> executePartial(FileSplitPartitionQuery<K,T> arg0)
+  protected Result<K, T> executePartial(FileSplitPartitionQuery<K, T> arg0)
           throws IOException {
     throw new OperationNotSupportedException("executePartial is not supported for LuceneStore");
   }
 
   @Override
-  protected Result<K,T> executeQuery(Query<K,T> query) throws IOException {
+  protected Result<K, T> executeQuery(Query<K, T> query) throws IOException {
     try {
       return new LuceneResult<>(this, query, searcherManager);
     } catch (IOException e) {
@@ -456,7 +569,7 @@ extends FileBackedDataStoreBase<K, T> implements Configurable {
   }
 
   @Override
-  public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query){
+  public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query) {
     throw new OperationNotSupportedException("getPartitions is not supported for LuceneStore");
   }
 
@@ -475,6 +588,7 @@ extends FileBackedDataStoreBase<K, T> implements Configurable {
     try {
       searcherManager.close();
       writer.close();
+      dir.close();
     } catch (IOException e) {
       LOG.error("Error in close: {}", e);
     }

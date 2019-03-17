@@ -85,6 +85,8 @@ extends ResultBase<K, T> {
     return scoreDocs;
   }
 
+  public IndexSearcher getSearcher() { return searcher;}
+
   @SuppressWarnings("unchecked")
   @Override
   protected boolean nextInner() throws IOException {
