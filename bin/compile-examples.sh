@@ -36,7 +36,10 @@ DIR=$GORA_HOME/$MODULE/src/examples/avro/
 OUTDIR=$GORA_HOME/$MODULE/src/examples/java
 GORA_BIN=$GORA_HOME/bin/gora
 
+# Preserve pacakge-info.java
+mv $OUTDIR/org/apache/gora/examples/generated/package-info.java $OUTDIR/org/apache/gora/examples/generated-package-info.java.bck
 rm -r $OUTDIR/org/apache/gora/examples/generated/*
+mv $OUTDIR/org/apache/gora/examples/generated-package-info.java.bck $OUTDIR/org/apache/gora/examples/generated/package-info.java
 
 for f in `ls $DIR` ; do
   echo "Compiling $DIR$f"
@@ -52,7 +55,10 @@ DIR=$GORA_HOME/$MODULE/src/main/avro/
 OUTDIR=$GORA_HOME/$MODULE/src/main/java
 GORA_BIN=$GORA_HOME/bin/gora
 
+# Preserve pacakge-info.java
+mv $OUTDIR/org/apache/gora/goraci/generated/package-info.java $OUTDIR/org/apache/gora/goraci/generated-package-info.java.bck
 rm -r $OUTDIR/org/apache/gora/goraci/generated/*
+mv $OUTDIR/org/apache/gora/goraci/generated-package-info.java.bck $OUTDIR/org/apache/gora/goraci/generated/package-info.java
 
 for f in `ls $DIR` ; do
   echo "Compiling $DIR$f"
@@ -68,7 +74,10 @@ DIR=$GORA_HOME/$MODULE/src/main/avro/
 OUTDIR=$GORA_HOME/$MODULE/src/main/java
 GORA_BIN=$GORA_HOME/bin/gora
 
+# Preserve pacakge-info.java
+mv $OUTDIR/org/apache/gora/tutorial/log/generated/package-info.java $OUTDIR/org/apache/gora/tutorial/log/generated-package-info.java.bck
 rm -r $OUTDIR/org/apache/gora/tutorial/log/generated/*
+mv $OUTDIR/org/apache/gora/tutorial/log/generated-package-info.java.bck $OUTDIR/org/apache/gora/tutorial/log/generated/package-info.java
 
 for f in `ls $DIR` ; do
   echo "Compiling $DIR$f"
@@ -83,7 +92,10 @@ DIR=$GORA_HOME/$MODULE/src/examples/avro/
 OUTDIR=$GORA_HOME/$MODULE/src/examples/java
 GORA_BIN=$GORA_HOME/bin/gora
 
+# Preserve pacakge-info.java
+mv $OUTDIR/org/apache/gora/cassandra/example/generated/AvroSerialization/package-info.java $OUTDIR/org/apache/gora/cassandra/example/generated/generated-package-info.java.bck
 rm -r $OUTDIR/org/apache/gora/cassandra/example/generated/AvroSerialization/*
+mv $OUTDIR/org/apache/gora/cassandra/example/generated/generated-package-info.java.bck $OUTDIR/org/apache/gora/cassandra/example/generated/AvroSerialization/package-info.java
 
 for f in `ls $DIR` ; do
   echo "Compiling $DIR$f"
