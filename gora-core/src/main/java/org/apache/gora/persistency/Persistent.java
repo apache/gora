@@ -125,6 +125,11 @@ public interface Persistent extends Dirtyable, Cloneable {
    */
   public Schema getSchema();
   
+  /**
+   * Returns a deep copy of a Persistent instance. Each generated Persistent's subclass implements the clone with a builder.
+   * @return A deep copy of a Persistent instance.
+   * @throws CloneNotSupportedException
+   */
   public Persistent clone() throws CloneNotSupportedException;
   
 }
