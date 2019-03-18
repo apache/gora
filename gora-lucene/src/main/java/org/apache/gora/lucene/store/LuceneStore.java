@@ -66,7 +66,13 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.FileSystems;
-import java.util.*;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * {@link org.apache.gora.lucene.store.LuceneStore} is the primary class
@@ -183,7 +189,6 @@ public class LuceneStore<K, T extends PersistentBase>
     }
   }
 
-
   @Override
   public boolean delete(K key) {
     try {
@@ -196,6 +201,15 @@ public class LuceneStore<K, T extends PersistentBase>
     return false;
   }
 
+  private boolean isPrimaryKeyIncluded(String[] fields) {
+    HashSet<String> luceneFields = new HashSet<>();
+    if (fields.length > 0) {
+      for (String field : fields) {
+        luceneFields.add(getMapping().getLuceneField(field));
+      }
+    }
+    return luceneFields.contains(getMapping().getPrimaryKey());
+  }
 
   @Override
   public long deleteByQuery(Query<K, T> query) {
@@ -205,16 +219,17 @@ public class LuceneStore<K, T extends PersistentBase>
       LuceneResult<K, T> r = (LuceneResult<K, T>) q.execute();
       int before = r.getScoreDocs().length;
 
-      if (query.getFields() == null || (query.getFields().length == getFields().length)) {
+      if (query.getFields() == null || (query.getFields().length == getFields().length)
+              || isPrimaryKeyIncluded(query.getFields())) {
         // Delete them
         writer.deleteDocuments(q.toLuceneQuery());
         searcherManager.maybeRefresh();
       } else {
-        Query<K,T>  selectQuery = this.newQuery();
+        Query<K, T> selectQuery = this.newQuery();
         selectQuery.setStartKey(q.getStartKey());
         selectQuery.setEndKey(q.getEndKey());
         LuceneResult<K, T> selectResult = (LuceneResult<K, T>) selectQuery.execute();
-        ScoreDoc[] scoreDocs =  selectResult.getScoreDocs();
+        ScoreDoc[] scoreDocs = selectResult.getScoreDocs();
         HashSet<String> fields = new HashSet<>();
         fields.addAll(mapping.getLuceneFields());
         IndexSearcher searcher = selectResult.getSearcher();
@@ -228,13 +243,12 @@ public class LuceneStore<K, T extends PersistentBase>
               }
             }
             String key = doc.get(getMapping().getPrimaryKey());
-            doc.removeField(getMapping().getPrimaryKey());
-            doc.removeField(getMapping().getPrimaryKey());
+            doc.add(new StringField(mapping.getPrimaryKey(), key, Store.YES));
             writer.updateDocument(new Term(mapping.getPrimaryKey(), key), doc);
             searcherManager.maybeRefresh();
           }
         }
-        //selectResult.close();
+        selectResult.close();
       }
 
       // Figure out how many there are after
@@ -248,7 +262,6 @@ public class LuceneStore<K, T extends PersistentBase>
     return 0;
   }
 
-
   @Override
   public void deleteSchema() {
     try {
@@ -258,7 +271,6 @@ public class LuceneStore<K, T extends PersistentBase>
       LOG.error("Unable to deleteAll: {}", e);
     }
   }
-
 
   @Override
   public T get(K key, String[] fieldsToLoad) {
@@ -312,7 +324,6 @@ public class LuceneStore<K, T extends PersistentBase>
     return result;
   }
 
-
   private SpecificDatumReader getDatumReader(Schema fieldSchema) {
     // reuse
     return new SpecificDatumReader(fieldSchema);
@@ -364,7 +375,6 @@ public class LuceneStore<K, T extends PersistentBase>
     return result;
   }
 
-
   public T newInstance(Document doc, String[] fields) throws IOException {
     T persistent = newPersistent();
     if (fields == null) {
@@ -391,7 +401,6 @@ public class LuceneStore<K, T extends PersistentBase>
     persistent.clearDirty();
     return persistent;
   }
-
 
   private Object convertLuceneFieldToAvroField(Type t, Object o) {
     Object result = null;
@@ -549,7 +558,6 @@ public class LuceneStore<K, T extends PersistentBase>
     } catch (IOException e) {
       LOG.error("Error updating document: {}", e);
     }
-
   }
 
   @Override

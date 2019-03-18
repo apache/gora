@@ -24,29 +24,29 @@ import java.util.HashMap;
  * LuceneMapping holds the mapping for Gora in-memory data bean to Physical Lucene store.
  */
 public class LuceneMapping {
-  private final HashMap<String,String> mapping;
+  private final HashMap<String, String> mapping;
   private String primaryKey;
-  
+
   public LuceneMapping() {
     mapping = new HashMap<>();
   }
-  
+
   public void addField(String goraField, String luceneField) {
     mapping.put(goraField, luceneField);
   }
-  
+
   public void setPrimaryKey(String luceneKey) {
     primaryKey = luceneKey;
   }
-  
+
   public String getPrimaryKey() {
     return primaryKey;
   }
-  
+
   public String getLuceneField(String goraField) {
     return mapping.get(goraField);
   }
-  
+
   public Collection<String> getLuceneFields() {
     return mapping.values();
   }

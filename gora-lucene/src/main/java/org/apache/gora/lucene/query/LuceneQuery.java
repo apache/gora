@@ -38,20 +38,19 @@ public class LuceneQuery<K, T extends PersistentBase> extends QueryBase<K, T> {
     super(null);
     store = null;
   }
-  
+
   public LuceneQuery(DataStore<K, T> dataStore) {
     super(dataStore);
-    store = (LuceneStore<K, T>)dataStore;
+    store = (LuceneStore<K, T>) dataStore;
   }
-  
+
   public Query toLuceneQuery() {
     LuceneMapping mapping = store.getMapping();
     String pk = mapping.getPrimaryKey();
     Query q;
     if (getKey() != null) {
       q = new TermQuery(new Term(pk, getKey().toString()));
-    } 
-    else {
+    } else {
       //TODO: Change this to a NumericRangeQuery when necessary (it's faster)
       String lower = null;
       String upper = null;
@@ -64,9 +63,7 @@ public class LuceneQuery<K, T extends PersistentBase> extends QueryBase<K, T> {
       }
       if (upper == null && lower == null) {
         q = new MatchAllDocsQuery();
-      }
-      else {
-        fields = new String[] {pk};
+      } else {
         q = TermRangeQuery.newStringRange(pk, lower, upper, true, true);
       }
     }

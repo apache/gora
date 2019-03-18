@@ -19,9 +19,6 @@
 package org.apache.gora.lucene.store;
 
 import org.apache.gora.GoraTestDriver;
-import org.apache.gora.persistency.Persistent;
-import org.apache.gora.store.DataStore;
-import org.apache.gora.util.GoraException;
 
 /**
  * TestLuceneStoreDriver class is used to initialize
