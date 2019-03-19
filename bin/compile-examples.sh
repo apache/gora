@@ -36,8 +36,69 @@ DIR=$GORA_HOME/$MODULE/src/examples/avro/
 OUTDIR=$GORA_HOME/$MODULE/src/examples/java
 GORA_BIN=$GORA_HOME/bin/gora
 
+# Preserve pacakge-info.java
+mv $OUTDIR/org/apache/gora/examples/generated/package-info.java $OUTDIR/org/apache/gora/examples/generated-package-info.java.bck
+rm -r $OUTDIR/org/apache/gora/examples/generated/*
+mv $OUTDIR/org/apache/gora/examples/generated-package-info.java.bck $OUTDIR/org/apache/gora/examples/generated/package-info.java
+
 for f in `ls $DIR` ; do
   echo "Compiling $DIR$f"
-  $GORA_BIN compile $DIR$f $OUTDIR 
+  echo "Command: $GORA_BIN goracompiler $DIR$f $OUTDIR"
+  $GORA_BIN goracompiler $DIR$f $OUTDIR 
 done
 
+
+# GORACI
+
+MODULE=gora-goraci
+DIR=$GORA_HOME/$MODULE/src/main/avro/
+OUTDIR=$GORA_HOME/$MODULE/src/main/java
+GORA_BIN=$GORA_HOME/bin/gora
+
+# Preserve pacakge-info.java
+mv $OUTDIR/org/apache/gora/goraci/generated/package-info.java $OUTDIR/org/apache/gora/goraci/generated-package-info.java.bck
+rm -r $OUTDIR/org/apache/gora/goraci/generated/*
+mv $OUTDIR/org/apache/gora/goraci/generated-package-info.java.bck $OUTDIR/org/apache/gora/goraci/generated/package-info.java
+
+for f in `ls $DIR` ; do
+  echo "Compiling $DIR$f"
+  echo "Command: $GORA_BIN goracompiler $DIR$f $OUTDIR"
+  $GORA_BIN goracompiler $DIR$f $OUTDIR 
+done
+
+
+# TUTORIAL
+
+MODULE=gora-tutorial
+DIR=$GORA_HOME/$MODULE/src/main/avro/
+OUTDIR=$GORA_HOME/$MODULE/src/main/java
+GORA_BIN=$GORA_HOME/bin/gora
+
+# Preserve pacakge-info.java
+mv $OUTDIR/org/apache/gora/tutorial/log/generated/package-info.java $OUTDIR/org/apache/gora/tutorial/log/generated-package-info.java.bck
+rm -r $OUTDIR/org/apache/gora/tutorial/log/generated/*
+mv $OUTDIR/org/apache/gora/tutorial/log/generated-package-info.java.bck $OUTDIR/org/apache/gora/tutorial/log/generated/package-info.java
+
+for f in `ls $DIR` ; do
+  echo "Compiling $DIR$f"
+  echo "Command: $GORA_BIN goracompiler $DIR$f $OUTDIR"
+  $GORA_BIN goracompiler $DIR$f $OUTDIR 
+done
+
+# GORA-CASSANDRA
+
+MODULE=gora-cassandra
+DIR=$GORA_HOME/$MODULE/src/examples/avro/
+OUTDIR=$GORA_HOME/$MODULE/src/examples/java
+GORA_BIN=$GORA_HOME/bin/gora
+
+# Preserve pacakge-info.java
+mv $OUTDIR/org/apache/gora/cassandra/example/generated/AvroSerialization/package-info.java $OUTDIR/org/apache/gora/cassandra/example/generated/generated-package-info.java.bck
+rm -r $OUTDIR/org/apache/gora/cassandra/example/generated/AvroSerialization/*
+mv $OUTDIR/org/apache/gora/cassandra/example/generated/generated-package-info.java.bck $OUTDIR/org/apache/gora/cassandra/example/generated/AvroSerialization/package-info.java
+
+for f in `ls $DIR` ; do
+  echo "Compiling $DIR$f"
+  echo "Command: $GORA_BIN goracompiler $DIR$f $OUTDIR"
+  $GORA_BIN goracompiler $DIR$f $OUTDIR 
+done

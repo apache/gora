@@ -242,4 +242,7 @@ public abstract class PersistentBase extends SpecificRecordBase implements
     return fields;
   }
   
+  @Override
+  public abstract Persistent clone();
+  
 }

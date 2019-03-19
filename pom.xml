@@ -745,6 +745,7 @@
     <module>gora-compiler</module>
     <module>gora-compiler-cli</module>
     <module>gora-core</module>
+    <module>gora-pig</module>
     <module>gora-accumulo</module>
     <module>gora-cassandra</module>
     <module>gora-goraci</module>
@@ -836,6 +837,9 @@
     <maven-deploy-plugin.version>2.5</maven-deploy-plugin.version>
     <checksum-maven-plugin.version>1.0.1</checksum-maven-plugin.version>
     <maven-clean-plugin.version>2.5</maven-clean-plugin.version>
+
+    <!-- Pig Dependencies -->
+    <pig.version>0.16.0</pig.version>
 
     <!-- General Properties -->
     <implementation.build>${scmBranch}@r${buildNumber}</implementation.build>
@@ -1569,6 +1573,20 @@
         <groupId>com.github.raymanrt</groupId>
         <artifactId>orientqb</artifactId>
         <version>${orientqb.version}</version>
+      </dependency>
+
+      <!-- Pig -->
+      <dependency>
+          <groupId>org.apache.pig</groupId>
+          <artifactId>pig</artifactId>
+          <classifier>h2</classifier>
+          <version>${pig.version}</version>
+          <exclusions>
+              <exclusion>
+                  <groupId>org.apache.avro</groupId>
+                  <artifactId>avro</artifactId>
+              </exclusion>
+          </exclusions>
       </dependency>
 
       <!--Aerospike Dependency -->

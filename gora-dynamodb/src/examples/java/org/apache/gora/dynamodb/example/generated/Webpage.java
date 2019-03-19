@@ -2,12 +2,13 @@ package org.apache.gora.dynamodb.example.generated;
 
 import java.util.List;
 
+import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.Tombstone;
+
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 
 @DynamoDBTable(tableName = "Webpage")
@@ -69,4 +70,6 @@ public class Webpage implements Persistent {
     public List<Field> getUnmanagedFields() { return null; }
     @Override
     public Persistent newInstance() { return new Webpage(); }
+    @Override
+    public Schema getSchema() { return null; }
 }

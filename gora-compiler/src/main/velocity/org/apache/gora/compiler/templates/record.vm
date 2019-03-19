@@ -180,6 +180,11 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
     return new #if ($schema.getNamespace())$schema.getNamespace().#end${this.mangle($schema.getName())}.Builder(other);
   }
   
+  @Override
+  public #if ($schema.getNamespace())$schema.getNamespace().#end${this.mangle($schema.getName())} clone() {
+    return newBuilder(this).build();
+  }
+  
   private static java.nio.ByteBuffer deepCopyToReadOnlyBuffer(
       java.nio.ByteBuffer input) {
     java.nio.ByteBuffer copy = java.nio.ByteBuffer.allocate(input.capacity());

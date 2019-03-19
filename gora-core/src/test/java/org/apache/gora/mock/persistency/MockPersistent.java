@@ -133,4 +133,10 @@ public class MockPersistent extends PersistentBase {
                     null));
   }
 
+    @Override
+    public Persistent clone() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

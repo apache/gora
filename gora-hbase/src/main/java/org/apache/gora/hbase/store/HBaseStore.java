@@ -22,8 +22,10 @@ import static org.apache.gora.hbase.util.HBaseByteInterface.toBytes;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URLClassLoader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -40,6 +42,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.util.Utf8;
+import org.apache.commons.io.IOUtils;
 import org.apache.gora.hbase.query.HBaseGetResult;
 import org.apache.gora.hbase.query.HBaseQuery;
 import org.apache.gora.hbase.query.HBaseScannerResult;
@@ -55,8 +58,6 @@ import org.apache.gora.query.impl.PartitionQueryImpl;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.GoraException;
-import org.apache.hadoop.conf.Configurable;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.client.Admin;
@@ -80,8 +81,7 @@ import org.slf4j.LoggerFactory;
  * DataStore for HBase. Thread safe.
  *
  */
-public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
-implements Configurable {
+public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
   public static final Logger LOG = LoggerFactory.getLogger(HBaseStore.class);
 
@@ -89,6 +89,12 @@ implements Configurable {
 
   public static final String DEFAULT_MAPPING_FILE = "gora-hbase-mapping.xml";
 
+  /**
+   * Key at DataStore Properties (same as gora.properties) to hold a mapping loaded from memory, instead from filesystem like
+   * the one at PARSE_MAPPING_FILE_KEY. If this key is present, the mapping is loaded from the value instead of gora-hbase-mapping.xml
+   */
+  public static final String XML_MAPPING_DEFINITION = "gora.mapping" ;  
+  
   private static final String SCANNER_CACHING_PROPERTIES_KEY = "scanner.caching" ;
   private static final int SCANNER_CACHING_PROPERTIES_DEFAULT = 0 ;
 
@@ -118,6 +124,9 @@ implements Configurable {
    * reading the mapping file. Initialize is called when then the call to
    * {@link org.apache.gora.store.DataStoreFactory#createDataStore} is made.
    *
+   * The mapping can be passed as a configuration parameter 'gora.mapping' or taken from
+   * gora-hbase-mapping.xml (in this order).
+   *
    * @param keyClass
    * @param persistentClass
    * @param properties
@@ -130,7 +139,20 @@ implements Configurable {
     try {
       this.conf = HBaseConfiguration.create(getConf());
       admin = ConnectionFactory.createConnection(getConf()).getAdmin();
-      mapping = readMapping(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE));
+      
+      InputStream mappingInputStream ;
+      // If there is a mapping definition in the Properties, use it.
+      if (properties.containsKey(XML_MAPPING_DEFINITION)) {
+        if (LOG.isTraceEnabled()) LOG.trace(XML_MAPPING_DEFINITION + " = " + properties.getProperty(XML_MAPPING_DEFINITION));  
+        mappingInputStream = IOUtils.toInputStream(properties.getProperty(XML_MAPPING_DEFINITION), (Charset)null) ;
+      }
+      // Otherwise use the configuration from de default file gora-hbase-mapping.xml or whatever
+      // configured in the key "gora.hbase.mapping.file"
+      else {
+        mappingInputStream = getClass().getClassLoader().getResourceAsStream(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE)) ;
+      }
+      
+      mapping = readMapping(mappingInputStream);
       filterUtil = new HBaseFilterUtil<>(this.conf);
     } catch (FileNotFoundException ex) {
       throw new GoraException("Mapping file '" + getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE) + "' not found.",ex);
@@ -234,7 +256,7 @@ implements Configurable {
    * This behavior happens in maps and arrays too.
    * 
    * ["null","type"] type (a.k.a. optional field) is persisted like as if it is
-   * ["type"], but the column get deleted if value==null (so value read after
+   * ["type"], but the column gets deleted if value==null (so value read after
    * will be null).
    * 
    * @param persistent
@@ -732,14 +754,13 @@ implements Configurable {
   }
 
   @SuppressWarnings("unchecked")
-  private HBaseMapping readMapping(String filename) throws IOException {
+  private HBaseMapping readMapping(InputStream mappingStream) throws IOException {
 
     HBaseMappingBuilder mappingBuilder = new HBaseMappingBuilder();
 
     try {
       SAXBuilder builder = new SAXBuilder();
-      Document doc = builder.build(getClass().getClassLoader()
-          .getResourceAsStream(filename));
+      Document doc = builder.build(mappingStream);
       Element root = doc.getRootElement();
 
       List<Element> tableElements = root.getChildren("table");
@@ -806,7 +827,7 @@ implements Configurable {
       LOG.error("Error while trying to read the mapping file {}. "
               + "Expected to be in the classpath "
               + "(ClassLoader#getResource(java.lang.String)).",
-              filename) ;
+              mappingStream) ;
       LOG.error("Actual classpath = {}", Arrays.asList(
           ((URLClassLoader) getClass().getClassLoader()).getURLs()));
       throw ex ;
@@ -828,16 +849,6 @@ implements Configurable {
     }catch(IOException ex){
       LOG.error(ex.getMessage(), ex);
     }
-  }
-
-  @Override
-  public Configuration getConf() {
-    return conf;
-  }
-
-  @Override
-  public void setConf(Configuration conf) {
-    this.conf = conf;
   }
 
   /**
