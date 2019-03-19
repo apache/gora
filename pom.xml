@@ -19,6 +19,7 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <groupId>org.apache</groupId>
     <artifactId>apache</artifactId>
@@ -648,16 +649,16 @@
       <build>
         <plugins>
           <!-- <plugin> <groupId>org.apache.rat</groupId> <artifactId>apache-rat-plugin</artifactId> 
-          <version>${apache-rat-plugin.version}</version> <executions> <execution> 
-          <id>rat-verify</id> <phase>test</phase> <goals> <goal>check</goal> </goals> 
-          </execution> </executions> <configuration> <licenses> <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense"> 
-          <licenseFamilyCategory>ASL20</licenseFamilyCategory> <licenseFamilyName>Apache 
-          Software License, 2.0</licenseFamilyName> <notes>Single licensed ASL v2.0</notes> 
-          <patterns> <pattern>Licensed to the Apache Software Foundation (ASF) under 
-          one or more contributor license agreements.</pattern> </patterns> </license> 
-          </licenses> <excludeSubProjects>false</excludeSubProjects> <excludes> <exclude>CHANGES.txt</exclude> 
-          <exclude>README.txt</exclude> <exclude>NOTICE.txt</exclude> <exclude>LICENSE.txt</exclude> 
-          <exclude>KEYS</exclude> <exclude>doap_Gora.rdf</exclude> <exclude>.gitignore/**/**</exclude> 
+          <version>${apache-rat-plugin.version}</version> <executions> <execution>
+          <id>rat-verify</id> <phase>test</phase> <goals> <goal>check</goal> </goals>
+          </execution> </executions> <configuration> <licenses> <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
+          <licenseFamilyCategory>ASL20</licenseFamilyCategory> <licenseFamilyName>Apache
+          Software License, 2.0</licenseFamilyName> <notes>Single licensed ASL v2.0</notes>
+          <patterns> <pattern>Licensed to the Apache Software Foundation (ASF) under
+          one or more contributor license agreements.</pattern> </patterns> </license>
+          </licenses> <excludeSubProjects>false</excludeSubProjects> <excludes> <exclude>CHANGES.txt</exclude>
+          <exclude>README.txt</exclude> <exclude>NOTICE.txt</exclude> <exclude>LICENSE.txt</exclude>
+          <exclude>KEYS</exclude> <exclude>doap_Gora.rdf</exclude> <exclude>.gitignore/**/**</exclude>
           </excludes> </configuration> </plugin -->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
@@ -753,7 +754,7 @@
     <module>gora-infinispan</module>
     <module>gora-jcache</module>
     <module>gora-orientdb</module>
-    <!-- module>gora-lucene</module -->
+    <module>gora-lucene</module>
     <module>gora-dynamodb</module>
     <module>gora-couchdb</module>
     <module>gora-maven-plugin</module>
@@ -786,7 +787,7 @@
     <ignite.version>2.6.0</ignite.version>
     <sqlbuilder.version>2.1.7</sqlbuilder.version>
     <!-- Solr Dependencies -->
-    <lucene-solr.version>6.5.1</lucene-solr.version>
+    <lucene-solr.version>8.0.0</lucene-solr.version>
     <solr-solrj.version>6.5.1</solr-solrj.version>
     <jetty.version>9.3.14.v20161028</jetty.version>
     <tika.version>1.12</tika.version>
@@ -962,9 +963,20 @@
         <version>${project.version}</version>
         <type>test-jar</type>
       </dependency>
-      
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-lucene</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-lucene</artifactId>
+        <version>${project.version}</version>
+        <type>test-jar</type>
+      </dependency>
+
       <!--Ignite DataStore dependencies -->
-      
+
       <dependency>
         <groupId>org.apache.gora</groupId>
         <artifactId>gora-ignite</artifactId>
@@ -981,7 +993,7 @@
         <artifactId>sqlbuilder</artifactId>
         <version>${sqlbuilder.version}</version>
       </dependency>
-      
+
       <!-- End of Internal Depednecies -->
 
       <dependency>
@@ -1620,7 +1632,7 @@
         <artifactId>testcontainers</artifactId>
         <version>${test.container.version}</version>
       </dependency>
-      
+
       <!-- Testing Dependencies for Ignite-->
       <dependency>
         <groupId>org.apache.ignite</groupId>

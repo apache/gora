@@ -285,8 +285,7 @@ public class IOUtils {
 
     try (ByteBufferInputStream is = new ByteBufferInputStream(list)) {
       deserializer.open(is);
-      T newObj = deserializer.deserialize(obj);
-      return newObj;
+      return deserializer.deserialize(obj);
 
     }finally {
       if(deserializer != null)
@@ -433,7 +432,7 @@ public class IOUtils {
     WritableUtils.writeVInt(out, boolArray.length);
 
     byte b = 0;
-    int i = 0;
+    int i;
     for(i=0; i<boolArray.length; i++) {
       if(i % 8 == 0 && i != 0) {
         out.writeByte(b);
@@ -494,7 +493,7 @@ public class IOUtils {
 
     byte b = 0;
     byte[] arr = new byte[byteArrLength];
-    int i = 0;
+    int i;
     int arrIndex = 0;
     for(i=0; i<boolArray.length; i++) {
       if(i % 8 == 0 && i != 0) {
@@ -610,9 +609,8 @@ public class IOUtils {
     String classKey = dataKey + "._class";
     String className = conf.get(classKey);
     try {
-      T obj = (T) DefaultStringifier.load(conf, dataKey, ClassLoadingUtils.loadClass(className));
-      return obj;
-    } catch (Exception ex) {
+      return (T) DefaultStringifier.load(conf, dataKey, ClassLoadingUtils.loadClass(className));
+    } catch (IOException | ClassNotFoundException ex) {
       throw new IOException(ex);
     }
   }
@@ -659,7 +657,8 @@ public class IOUtils {
         buffer.limit(count);
         buffers.add(buffer);
       }
-      if(count < BUFFER_SIZE) break;
+      if (count < BUFFER_SIZE)
+        break;
     }
 
     return getAsBytes(buffers);
