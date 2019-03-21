@@ -312,7 +312,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
                 .withBaseSolrUrls(solrUrlElements)
                 .withHttpClient(HttpClientUtil.createClient(params))
                 .build();
-        if (solrUrlElements.length > 1) {
+        if (solrUrlElements.length > 0) {
           for (int counter = 0; counter < solrUrlElements.length; counter++) {
             solrUrlElements[counter] = solrUrlElements[counter] + "/" + mapping.getCoreName();
           }
@@ -326,7 +326,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
         this.adminServer = new LBHttpSolrClient.Builder()
                 .withBaseSolrUrls(solrUrlElements)
                 .build();
-        if (solrUrlElements.length > 1) {
+        if (solrUrlElements.length > 0) {
           for (int counter = 0; counter < solrUrlElements.length; counter++) {
             solrUrlElements[counter] = solrUrlElements[counter] + "/" + mapping.getCoreName();
           }
