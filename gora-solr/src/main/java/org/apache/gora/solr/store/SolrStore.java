@@ -15,7 +15,6 @@
 package org.apache.gora.solr.store;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,7 +45,6 @@ import org.apache.gora.util.AvroUtils;
 import org.apache.gora.util.GoraException;
 import org.apache.gora.util.IOUtils;
 import org.apache.hadoop.util.StringUtils;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
@@ -229,58 +227,113 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
           SOLR_SERVER_PASSWORD, null);
     }
     LOG.info("Using Solr server at " + SolrClientUrl);
-    String solrJServerType = ((solrJServerImpl == null || solrJServerImpl.equals(""))?"http":solrJServerImpl);
+    String solrJServerType = ((solrJServerImpl == null || solrJServerImpl.equals("")) ? "http" : solrJServerImpl);
     // HttpSolrClient - denoted by "http" in properties
     if (solrJServerType.toLowerCase(Locale.getDefault()).equals("http")) {
       LOG.info("Using HttpSolrClient Solrj implementation.");
-      this.adminServer = new HttpSolrClient(SolrClientUrl);
-      this.server = new HttpSolrClient( SolrClientUrl + "/" + mapping.getCoreName() );
       if (serverUserAuth) {
-        HttpClientUtil.setBasicAuth(
-            (DefaultHttpClient) ((HttpSolrClient) adminServer).getHttpClient(),
-            serverUsername, serverPassword);
-        HttpClientUtil.setBasicAuth(
-            (DefaultHttpClient) ((HttpSolrClient) server).getHttpClient(),
-            serverUsername, serverPassword);
+        ModifiableSolrParams params = new ModifiableSolrParams();
+        params.set("httpBasicAuthUser", serverUsername);
+        params.set("httpBasicAuthPassword", serverPassword);
+        this.adminServer = new HttpSolrClient.Builder(SolrClientUrl)
+                .withHttpClient(HttpClientUtil.createClient(params))
+                .build();
+        this.server = new HttpSolrClient.Builder(SolrClientUrl + "/" + mapping.getCoreName())
+                .withHttpClient(HttpClientUtil.createClient(params))
+                .build();
+      } else {
+        this.adminServer = new HttpSolrClient.Builder(SolrClientUrl)
+                .build();
+        this.server = new HttpSolrClient.Builder(SolrClientUrl + "/" + mapping.getCoreName())
+                .build();
       }
       // CloudSolrClient - denoted by "cloud" in properties
     } else if (solrJServerType.toLowerCase(Locale.getDefault()).equals("cloud")) {
       LOG.info("Using CloudSolrClient Solrj implementation.");
-      this.adminServer = new CloudSolrClient(SolrClientUrl);
-      this.server = new CloudSolrClient( SolrClientUrl + "/" + mapping.getCoreName() );
       if (serverUserAuth) {
-        HttpClientUtil.setBasicAuth(
-            (DefaultHttpClient) ((CloudSolrClient) adminServer).getLbClient().getHttpClient(),
-            serverUsername, serverPassword);
-        HttpClientUtil.setBasicAuth(
-            (DefaultHttpClient) ((CloudSolrClient) server).getLbClient().getHttpClient(),
-            serverUsername, serverPassword);
+        ModifiableSolrParams params = new ModifiableSolrParams();
+        params.set("httpBasicAuthUser", serverUsername);
+        params.set("httpBasicAuthPassword", serverPassword);
+        List<String> adminSolrUrls = new ArrayList();
+        adminSolrUrls.add(SolrClientUrl);
+        this.adminServer = new CloudSolrClient.Builder(adminSolrUrls)
+                .withHttpClient(HttpClientUtil.createClient(params))
+                .build();
+        List<String> serverSolrUrls = new ArrayList();
+        serverSolrUrls.add(SolrClientUrl + "/" + mapping.getCoreName());
+        this.server = new CloudSolrClient.Builder(serverSolrUrls)
+                .withHttpClient(HttpClientUtil.createClient(params))
+                .build();
+      } else {
+        List<String> adminSolrUrls = new ArrayList();
+        adminSolrUrls.add(SolrClientUrl);
+        this.adminServer = new CloudSolrClient.Builder(adminSolrUrls)
+                .build();
+        List<String> serverSolrUrls = new ArrayList();
+        serverSolrUrls.add(SolrClientUrl + "/" + mapping.getCoreName());
+        this.server = new CloudSolrClient.Builder(serverSolrUrls)
+                .build();
       }
     } else if (solrJServerType.toLowerCase(Locale.getDefault()).equals("concurrent")) {
       LOG.info("Using ConcurrentUpdateSolrClient Solrj implementation.");
-      this.adminServer = new ConcurrentUpdateSolrClient(SolrClientUrl, 1000, 10);
-      this.server = new ConcurrentUpdateSolrClient( SolrClientUrl + "/" + mapping.getCoreName(), 1000, 10);
       // LBHttpSolrClient - denoted by "loadbalance" in properties
+      if (serverUserAuth) {
+        ModifiableSolrParams params = new ModifiableSolrParams();
+        params.set("httpBasicAuthUser", serverUsername);
+        params.set("httpBasicAuthPassword", serverPassword);
+        this.adminServer = new ConcurrentUpdateSolrClient.Builder(SolrClientUrl)
+                .withHttpClient(HttpClientUtil.createClient(params))
+                .withQueueSize(1000)
+                .withThreadCount(10)
+                .build();
+        this.server = new ConcurrentUpdateSolrClient.Builder(SolrClientUrl + "/" + mapping.getCoreName())
+                .withHttpClient(HttpClientUtil.createClient(params))
+                .withQueueSize(1000)
+                .withThreadCount(10)
+                .build();
+      } else {
+        this.adminServer = new ConcurrentUpdateSolrClient.Builder(SolrClientUrl)
+                .withQueueSize(1000)
+                .withThreadCount(10)
+                .build();
+        this.server = new ConcurrentUpdateSolrClient.Builder(SolrClientUrl + "/" + mapping.getCoreName())
+                .withQueueSize(1000)
+                .withThreadCount(10)
+                .build();
+      }
     } else if (solrJServerType.toLowerCase(Locale.getDefault()).equals("loadbalance")) {
       LOG.info("Using LBHttpSolrClient Solrj implementation.");
-      String[] solrUrlElements = StringUtils.split(SolrClientUrl);
-      try {
-        this.adminServer = new LBHttpSolrClient(solrUrlElements);
-      } catch (MalformedURLException e) {
-        throw new GoraException(e);
-      }
-      try {
-        this.server = new LBHttpSolrClient( solrUrlElements + "/" + mapping.getCoreName() );
-      } catch (MalformedURLException e) {
-        throw new GoraException(e);
-      }
       if (serverUserAuth) {
-        HttpClientUtil.setBasicAuth(
-            (DefaultHttpClient) ((LBHttpSolrClient) adminServer).getHttpClient(),
-            serverUsername, serverPassword);
-        HttpClientUtil.setBasicAuth(
-            (DefaultHttpClient) ((LBHttpSolrClient) server).getHttpClient(),
-            serverUsername, serverPassword);
+        ModifiableSolrParams params = new ModifiableSolrParams();
+        params.set("httpBasicAuthUser", serverUsername);
+        params.set("httpBasicAuthPassword", serverPassword);
+        String[] solrUrlElements = StringUtils.split(SolrClientUrl);
+        this.adminServer = new LBHttpSolrClient.Builder()
+                .withBaseSolrUrls(solrUrlElements)
+                .withHttpClient(HttpClientUtil.createClient(params))
+                .build();
+        if (solrUrlElements.length > 1) {
+          for (int counter = 0; counter < solrUrlElements.length; counter++) {
+            solrUrlElements[counter] = solrUrlElements[counter] + "/" + mapping.getCoreName();
+          }
+        }
+        this.server = new LBHttpSolrClient.Builder()
+                .withHttpClient(HttpClientUtil.createClient(params))
+                .withBaseSolrUrls(solrUrlElements)
+                .build();
+      } else {
+        String[] solrUrlElements = StringUtils.split(SolrClientUrl);
+        this.adminServer = new LBHttpSolrClient.Builder()
+                .withBaseSolrUrls(solrUrlElements)
+                .build();
+        if (solrUrlElements.length > 1) {
+          for (int counter = 0; counter < solrUrlElements.length; counter++) {
+            solrUrlElements[counter] = solrUrlElements[counter] + "/" + mapping.getCoreName();
+          }
+        }
+        this.server = new LBHttpSolrClient.Builder()
+                .withBaseSolrUrls(solrUrlElements)
+                .build();
       }
     }
     if (autoCreateSchema) {
