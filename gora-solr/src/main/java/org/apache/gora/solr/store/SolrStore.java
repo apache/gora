@@ -189,6 +189,21 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
 
   public static final ConcurrentHashMap<Schema, SpecificDatumWriter<?>> writerMap = new ConcurrentHashMap<>();
 
+  protected static final int DEFAULT_SOLR_CONCURRENT_CLIENT_QUEUE_SIZE = 1000;
+
+  protected static final int DEFAULT_SOLR_CONCURRENT_CLIENT_THREAD_COUNT = 10;
+
+  protected static final String SOLR_CONCURRENT_CLIENT_QUEUE_SIZE_PROPERTY
+          = "solr.concurrentclient.queue_size";
+
+  protected static final String SOLR_CONCURRENT_CLIENT_THREAD_COUNT_PROPERTY
+          = "solr.concurrentclient.thread_count";
+
+  private int queueSize = DEFAULT_SOLR_CONCURRENT_CLIENT_QUEUE_SIZE;
+
+  private int threadCount = DEFAULT_SOLR_CONCURRENT_CLIENT_THREAD_COUNT;
+
+
   /**
    * Initialize the data store by reading the credentials, setting the client's properties up and
    * reading the mapping file. Initialize is called when then the call to
@@ -208,6 +223,28 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       mapping = readMapping(mappingFile);
     } catch (IOException e) {
       throw new GoraException(e);
+    }
+
+    String queueSizeString = DataStoreFactory.findProperty(properties, this,
+            SOLR_CONCURRENT_CLIENT_QUEUE_SIZE_PROPERTY, null);
+    if (queueSizeString != null) {
+      try {
+        queueSize = Integer.parseInt(queueSizeString);
+      } catch (NumberFormatException nfe) {
+        LOG.warn("Invalid concurrent client queue size '{}' , using default {}", queueSizeString,
+                DEFAULT_SOLR_CONCURRENT_CLIENT_QUEUE_SIZE);
+      }
+    }
+
+    String threadCountString = DataStoreFactory.findProperty(properties, this,
+            SOLR_CONCURRENT_CLIENT_THREAD_COUNT_PROPERTY, null);
+    if (threadCountString != null) {
+      try {
+        threadCount = Integer.parseInt(threadCountString);
+      } catch (NumberFormatException nfe) {
+        LOG.warn("Invalid concurrent client thread count '{}' , using default {}", threadCountString,
+                DEFAULT_SOLR_CONCURRENT_CLIENT_THREAD_COUNT);
+      }
     }
 
     SolrClientUrl = DataStoreFactory.findProperty(properties, this,
@@ -283,22 +320,22 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
         params.set("httpBasicAuthPassword", serverPassword);
         this.adminServer = new ConcurrentUpdateSolrClient.Builder(SolrClientUrl)
                 .withHttpClient(HttpClientUtil.createClient(params))
-                .withQueueSize(1000)
-                .withThreadCount(10)
+                .withQueueSize(queueSize)
+                .withThreadCount(threadCount)
                 .build();
         this.server = new ConcurrentUpdateSolrClient.Builder(SolrClientUrl + "/" + mapping.getCoreName())
                 .withHttpClient(HttpClientUtil.createClient(params))
-                .withQueueSize(1000)
-                .withThreadCount(10)
+                .withQueueSize(queueSize)
+                .withThreadCount(threadCount)
                 .build();
       } else {
         this.adminServer = new ConcurrentUpdateSolrClient.Builder(SolrClientUrl)
-                .withQueueSize(1000)
-                .withThreadCount(10)
+                .withQueueSize(queueSize)
+                .withThreadCount(threadCount)
                 .build();
         this.server = new ConcurrentUpdateSolrClient.Builder(SolrClientUrl + "/" + mapping.getCoreName())
-                .withQueueSize(1000)
-                .withThreadCount(10)
+                .withQueueSize(queueSize)
+                .withThreadCount(threadCount)
                 .build();
       }
     } else if (solrJServerType.toLowerCase(Locale.getDefault()).equals("loadbalance")) {
