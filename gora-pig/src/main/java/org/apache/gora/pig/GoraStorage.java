@@ -90,7 +90,7 @@ import org.slf4j.LoggerFactory;
  *       "persistentClass": "admin.WebPage",
  *       "fields": "baseUrl,status,content",
  *       "goraProperties": "gora.datastore.default=org.apache.gora.hbase.store.HBaseStore\\ngora.datastore.autocreateschema=true\\ngora.hbasestore.scanner.caching=4",
- *       "mapping": "<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>\\n<gora-odm>\\n<table name=\\"webpage\\">\\n<family name=\\"f\\" maxVersions=\\"1\\"/>\\n</table>\\n<class table=\\"webpage\\" keyClass=\\"java.lang.String\\" name=\\"admin.WebPage\\">\\n<field name=\\"baseUrl\\" family=\\"f\\" qualifier=\\"bas\\"/>\\n<field name=\\"status\\" family=\\"f\\" qualifier=\\"st\\"/>\\n<field name=\\"content\\" family=\\"f\\" qualifier=\\"cnt\\"/>\\n</class>\\n</gora-odm>",
+ *       "mapping": "{@code<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>\\n<gora-odm>\\n<table name=\\"webpage\\">\\n<family name=\\"f\\" maxVersions=\\"1\\"/>\\n</table>\\n<class table=\\"webpage\\" keyClass=\\"java.lang.String\\" name=\\"admin.WebPage\\">\\n<field name=\\"baseUrl\\" family=\\"f\\" qualifier=\\"bas\\"/>\\n<field name=\\"status\\" family=\\"f\\" qualifier=\\"st\\"/>\\n<field name=\\"content\\" family=\\"f\\" qualifier=\\"cnt\\"/>\\n</class>\\n</gora-odm>},
  *       "configuration": {
  *           "hbase.zookeeper.quorum": "hdp4,hdp1,hdp3",
  *           "zookeeper.znode.parent": "/hbase-unsecure"
@@ -125,7 +125,7 @@ import org.slf4j.LoggerFactory;
  *       "persistentClass": "admin.WebPage",
  *       "fields": "baseUrl,status,content",
  *       "goraProperties": "gora.datastore.default=org.apache.gora.hbase.store.HBaseStore\\ngora.datastore.autocreateschema=true\\ngora.hbasestore.scanner.caching=4",
- *       "mapping": "<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>\\n<gora-odm>\\n<table name=\\"webpage\\">\\n<family name=\\"f\\" maxVersions=\\"1\\"/>\\n</table>\\n<class table=\\"webpage\\" keyClass=\\"java.lang.String\\" name=\\"admin.WebPage\\">\\n<field name=\\"baseUrl\\" family=\\"f\\" qualifier=\\"bas\\"/>\\n<field name=\\"status\\" family=\\"f\\" qualifier=\\"st\\"/>\\n<field name=\\"content\\" family=\\"f\\" qualifier=\\"cnt\\"/>\\n</class>\\n</gora-odm>",
+ *       "mapping": {@code<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>\\n<gora-odm>\\n<table name=\\"webpage\\">\\n<family name=\\"f\\" maxVersions=\\"1\\"/>\\n</table>\\n<class table=\\"webpage\\" keyClass=\\"java.lang.String\\" name=\\"admin.WebPage\\">\\n<field name=\\"baseUrl\\" family=\\"f\\" qualifier=\\"bas\\"/>\\n<field name=\\"status\\" family=\\"f\\" qualifier=\\"st\\"/>\\n<field name=\\"content\\" family=\\"f\\" qualifier=\\"cnt\\"/>\\n</class>\\n</gora-odm>},
  *       "configuration": {
  *           "hbase.zookeeper.quorum": "hdp4,hdp1,hdp3",
  *           "zookeeper.znode.parent": "/hbase-unsecure"
@@ -264,7 +264,7 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
    *   "goraProperties": "gora.datastore.default=org.apache.gora.hbase.store.HBaseStore
    *                      gora.datastore.autocreateschema=true
    *                      gora.hbasestore.scanner.caching=1000",
-   *   "mapping": "<?xml version=\\"1.0\\" encoding="UTF-8\\"?>
+   *   "mapping": {@code<?xml version=\\"1.0\\" encoding="UTF-8\\"?>
    *               <gora-odm>
    *                 <table name=\\"webpage\\">
    *                   <family name=\\"f\\" maxVersions=\\"1\\"/>
@@ -273,7 +273,7 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
    *                   <field name=\\"baseUrl\\" family=\\"f\\" qualifier=\\"bas\\"/>
    *                   <field name=\\"status\\" family=\\"f\\" qualifier=\\"st\\"/>
    *                 </class>
-   *               </gora-odm>",
+   *               </gora-odm>},
    *   "configuration": {
    *     "hbase.zookeeper.quorum": "hdp4,hdp1,hdp3",
    *     "zookeeper.znode.parent": "/hbase-unsecure"
@@ -352,9 +352,9 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
 
   /**
    * Returns UDFProperties based on <code>udfcSignature</code>, <code>keyClassName</code> and <code>persistentClassName</code>.
-   * @throws IOException - When the conversion bean->json fails
-   * @throws JsonMappingException - When the conversion bean->json fails
-   * @throws JsonGenerationException - When the conversion bean->json fails
+   * @throws IOException - When the conversion from bean to json fails
+   * @throws JsonMappingException - When the conversion from bean to json fails
+   * @throws JsonGenerationException - When the conversion from bean to json fails
    */
   protected Properties getUDFProperties() throws JsonGenerationException, JsonMappingException, IOException {
     return UDFContext.getUDFContext().getUDFProperties(this.getClass(), new String[] {this.udfcSignature});

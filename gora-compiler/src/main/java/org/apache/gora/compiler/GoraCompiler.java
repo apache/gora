@@ -91,11 +91,11 @@ public class GoraCompiler extends SpecificCompiler {
   /**
    * Compiles a single schema. Any subschemas must be included in the own schema.
    * 
-   * @param sourceSchema String with the schema definition in json (avro)
-   * @param dest Path where .java classes will be written
-   * @param templatesPath Path where Gora's velocity templates are. If null, will use DEFAULT_TEMPLATES_PATH
-   * @return The compiled resulting Schema
-   * @throws IOException
+   * @param sourceSchema String with the schema definition in json (avro).
+   * @param dest Path where .java classes will be written.
+   * @param templatesPath Path where Gora's velocity templates are. If null, will use DEFAULT_TEMPLATES_PATH.
+   * @return The compiled resulting Schema.
+   * @throws IOException If there's an issue with compiling to the destination.
    */
   public static Schema compileSchema(String sourceSchema, File dest, String templatesPath) throws IOException {
     Schema.Parser parser = new Schema.Parser();
@@ -183,10 +183,10 @@ public class GoraCompiler extends SpecificCompiler {
   }
 
   /**
-   * Recognizes camel case
+   * Recognizes camel case.
    *
-   * @param s converts the given input string to camel case
-   * @return the converted camel case string
+   * @param s converts the given input string to camel case.
+   * @return the converted camel case string.
    */
   public static String toUpperCase(String s) {
     StringBuilder builder = new StringBuilder();
