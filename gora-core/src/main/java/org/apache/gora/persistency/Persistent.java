@@ -19,12 +19,15 @@ package org.apache.gora.persistency;
 
 import java.util.List;
 
+import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
 * Objects that are persisted by Gora implements this interface.
 */
-public interface Persistent extends Dirtyable {
+public interface Persistent extends Dirtyable, Cloneable {
 
   public static String DIRTY_BYTES_FIELD_NAME = "__g__dirty";
 
@@ -64,6 +67,7 @@ public interface Persistent extends Dirtyable {
 * @param fieldIndex
 * the offset of the field in the object
 */
+  @JsonIgnore
   void setDirty(int fieldIndex);
 
   /**
@@ -72,6 +76,7 @@ public interface Persistent extends Dirtyable {
 * @param field
 * the name of the field
 */
+  @JsonIgnore
   void setDirty(String field);
 
   /**
@@ -113,4 +118,18 @@ public interface Persistent extends Dirtyable {
    * @return a new instance of the object
    */
   Persistent newInstance();
+  
+  /**
+   * Returns the avro's data schema
+   * @return the parsed schema definition
+   */
+  public Schema getSchema();
+  
+  /**
+   * Returns a deep copy of a Persistent instance. Each generated Persistent's subclass implements the clone with a builder.
+   * @return A deep copy of a Persistent instance.
+   * @throws CloneNotSupportedException
+   */
+  public Persistent clone() throws CloneNotSupportedException;
+  
 }

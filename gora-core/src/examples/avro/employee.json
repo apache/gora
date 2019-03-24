@@ -14,20 +14,22 @@
           "name": "WebPage",
           "namespace": "org.apache.gora.examples.generated",
           "fields" : [
-           {"name": "url", "type": ["null","string"], "default":null},
-           {"name": "content", "type": ["null","bytes"],"default":null},
-           {"name": "parsedContent", "type": {"type":"array", "items": "string"},"default":{}},
-           {"name": "outlinks", "type": {"type":"map", "values":["null", "string"]},"default":{}},
-           {"name": "headers", "type": ["null", {"type": "map", "values": ["null", "string"]}],"default":null},
-           {"name": "metadata", "default":null, "type": {
-            "name": "Metadata",
-            "type": "record",
-            "namespace": "org.apache.gora.examples.generated",
-            "fields": [
-             {"name": "version", "type": "int","default":0},
-             {"name": "data", "type": {"type": "map", "values": "string"},"default":{}}
-            ]
-          }}
+            {"name": "url", "type": ["null","string"], "default":null},
+            {"name": "content", "type": ["null","bytes"],"default":null},
+            {"name": "parsedContent", "type": {"type":"array", "items": "string"},"default":{}},
+            {"name": "outlinks", "type": {"type":"map", "values":["null", "string"]},"default":{}},
+            {"name": "headers", "type": ["null", {"type": "map", "values": ["null", "string"]}],"default":null},
+            {"name": "metadata", "default":null, "type": {
+              "name": "Metadata",
+              "type": "record",
+              "namespace": "org.apache.gora.examples.generated",
+              "fields": [
+               {"name": "version", "type": "int","default":0},
+               {"name": "data", "type": {"type": "map", "values": "string"},"default":{}}
+              ]
+            }},
+            {"name": "byteData", "type": {"type":"map", "values":"bytes"}, "default":{}},
+            {"name": "stringData", "type": {"type":"map", "values":"string"}, "default":{}}
           ]
         }
       ]}

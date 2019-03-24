@@ -1,21 +1,21 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ *Licensed to the Apache Software Foundation (ASF) under one
+ *or more contributor license agreements.  See the NOTICE file
+ *distributed with this work for additional information
+ *regarding copyright ownership.  The ASF licenses this file
+ *to you under the Apache License, Version 2.0 (the"
+ *License"); you may not use this file except in compliance
+ *with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+  * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ *Unless required by applicable law or agreed to in writing, software
+ *distributed under the License is distributed on an "AS IS" BASIS,
+ *WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *See the License for the specific language governing permissions and
+ *limitations under the License.
  */
-package org.apache.gora.tutorial.log.generated;
+package org.apache.gora.tutorial.log.generated;  
 
 public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
   public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"MetricDatum\",\"namespace\":\"org.apache.gora.tutorial.log.generated\",\"fields\":[{\"name\":\"metricDimension\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"timestamp\",\"type\":\"long\",\"default\":0},{\"name\":\"metric\",\"type\":\"long\",\"default\":0}],\"default\":null}");
@@ -63,9 +63,9 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
   };
 
   public static final String[] _ALL_FIELDS = {
-          "metricDimension",
-          "timestamp",
-          "metric",
+  "metricDimension",
+  "timestamp",
+  "metric",
   };
 
   /**
@@ -80,24 +80,24 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
   private long timestamp;
   private long metric;
   public org.apache.avro.Schema getSchema() { return SCHEMA$; }
-  // Used by DatumWriter.  Applications should not call.
+  // Used by DatumWriter.  Applications should not call. 
   public java.lang.Object get(int field$) {
     switch (field$) {
-      case 0: return metricDimension;
-      case 1: return timestamp;
-      case 2: return metric;
-      default: throw new org.apache.avro.AvroRuntimeException("Bad index");
+    case 0: return metricDimension;
+    case 1: return timestamp;
+    case 2: return metric;
+    default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
-
-  // Used by DatumReader.  Applications should not call.
+  
+  // Used by DatumReader.  Applications should not call. 
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value) {
     switch (field$) {
-      case 0: metricDimension = (java.lang.CharSequence)(value); break;
-      case 1: timestamp = (java.lang.Long)(value); break;
-      case 2: metric = (java.lang.Long)(value); break;
-      default: throw new org.apache.avro.AvroRuntimeException("Bad index");
+    case 0: metricDimension = (java.lang.CharSequence)(value); break;
+    case 1: timestamp = (java.lang.Long)(value); break;
+    case 2: metric = (java.lang.Long)(value); break;
+    default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
 
@@ -116,7 +116,7 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
     this.metricDimension = value;
     setDirty(0);
   }
-
+  
   /**
    * Checks the dirty status of the 'metricDimension' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
@@ -140,7 +140,7 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
     this.timestamp = value;
     setDirty(1);
   }
-
+  
   /**
    * Checks the dirty status of the 'timestamp' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
@@ -164,7 +164,7 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
     this.metric = value;
     setDirty(2);
   }
-
+  
   /**
    * Checks the dirty status of the 'metric' field. A field is dirty if it represents a change that has not yet been written to the database.
    * @param value the value to set.
@@ -177,19 +177,24 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
   public static org.apache.gora.tutorial.log.generated.MetricDatum.Builder newBuilder() {
     return new org.apache.gora.tutorial.log.generated.MetricDatum.Builder();
   }
-
+  
   /** Creates a new MetricDatum RecordBuilder by copying an existing Builder */
   public static org.apache.gora.tutorial.log.generated.MetricDatum.Builder newBuilder(org.apache.gora.tutorial.log.generated.MetricDatum.Builder other) {
     return new org.apache.gora.tutorial.log.generated.MetricDatum.Builder(other);
   }
-
+  
   /** Creates a new MetricDatum RecordBuilder by copying an existing MetricDatum instance */
   public static org.apache.gora.tutorial.log.generated.MetricDatum.Builder newBuilder(org.apache.gora.tutorial.log.generated.MetricDatum other) {
     return new org.apache.gora.tutorial.log.generated.MetricDatum.Builder(other);
   }
-
+  
+  @Override
+  public org.apache.gora.tutorial.log.generated.MetricDatum clone() {
+    return newBuilder(this).build();
+  }
+  
   private static java.nio.ByteBuffer deepCopyToReadOnlyBuffer(
-          java.nio.ByteBuffer input) {
+      java.nio.ByteBuffer input) {
     java.nio.ByteBuffer copy = java.nio.ByteBuffer.allocate(input.capacity());
     int position = input.position();
     input.reset();
@@ -210,12 +215,12 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
     copy.limit(limit);
     return copy.asReadOnlyBuffer();
   }
-
+  
   /**
    * RecordBuilder for MetricDatum instances.
    */
   public static class Builder extends org.apache.avro.specific.SpecificRecordBuilderBase<MetricDatum>
-          implements org.apache.avro.data.RecordBuilder<MetricDatum> {
+    implements org.apache.avro.data.RecordBuilder<MetricDatum> {
 
     private java.lang.CharSequence metricDimension;
     private long timestamp;
@@ -225,15 +230,15 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
     private Builder() {
       super(org.apache.gora.tutorial.log.generated.MetricDatum.SCHEMA$);
     }
-
+    
     /** Creates a Builder by copying an existing Builder */
     private Builder(org.apache.gora.tutorial.log.generated.MetricDatum.Builder other) {
       super(other);
     }
-
+    
     /** Creates a Builder by copying an existing MetricDatum instance */
     private Builder(org.apache.gora.tutorial.log.generated.MetricDatum other) {
-      super(org.apache.gora.tutorial.log.generated.MetricDatum.SCHEMA$);
+            super(org.apache.gora.tutorial.log.generated.MetricDatum.SCHEMA$);
       if (isValidValue(fields()[0], other.metricDimension)) {
         this.metricDimension = (java.lang.CharSequence) data().deepCopy(fields()[0].schema(), other.metricDimension);
         fieldSetFlags()[0] = true;
@@ -252,75 +257,75 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
     public java.lang.CharSequence getMetricDimension() {
       return metricDimension;
     }
-
+    
     /** Sets the value of the 'metricDimension' field */
     public org.apache.gora.tutorial.log.generated.MetricDatum.Builder setMetricDimension(java.lang.CharSequence value) {
       validate(fields()[0], value);
       this.metricDimension = value;
       fieldSetFlags()[0] = true;
-      return this;
+      return this; 
     }
-
+    
     /** Checks whether the 'metricDimension' field has been set */
     public boolean hasMetricDimension() {
       return fieldSetFlags()[0];
     }
-
+    
     /** Clears the value of the 'metricDimension' field */
     public org.apache.gora.tutorial.log.generated.MetricDatum.Builder clearMetricDimension() {
       metricDimension = null;
       fieldSetFlags()[0] = false;
       return this;
     }
-
+    
     /** Gets the value of the 'timestamp' field */
     public java.lang.Long getTimestamp() {
       return timestamp;
     }
-
+    
     /** Sets the value of the 'timestamp' field */
     public org.apache.gora.tutorial.log.generated.MetricDatum.Builder setTimestamp(long value) {
       validate(fields()[1], value);
       this.timestamp = value;
       fieldSetFlags()[1] = true;
-      return this;
+      return this; 
     }
-
+    
     /** Checks whether the 'timestamp' field has been set */
     public boolean hasTimestamp() {
       return fieldSetFlags()[1];
     }
-
+    
     /** Clears the value of the 'timestamp' field */
     public org.apache.gora.tutorial.log.generated.MetricDatum.Builder clearTimestamp() {
       fieldSetFlags()[1] = false;
       return this;
     }
-
+    
     /** Gets the value of the 'metric' field */
     public java.lang.Long getMetric() {
       return metric;
     }
-
+    
     /** Sets the value of the 'metric' field */
     public org.apache.gora.tutorial.log.generated.MetricDatum.Builder setMetric(long value) {
       validate(fields()[2], value);
       this.metric = value;
       fieldSetFlags()[2] = true;
-      return this;
+      return this; 
     }
-
+    
     /** Checks whether the 'metric' field has been set */
     public boolean hasMetric() {
       return fieldSetFlags()[2];
     }
-
+    
     /** Clears the value of the 'metric' field */
     public org.apache.gora.tutorial.log.generated.MetricDatum.Builder clearMetric() {
       fieldSetFlags()[2] = false;
       return this;
     }
-
+    
     @Override
     public MetricDatum build() {
       try {
@@ -334,9 +339,9 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
       }
     }
   }
-
+  
   public MetricDatum.Tombstone getTombstone(){
-    return TOMBSTONE;
+  	return TOMBSTONE;
   }
 
   public MetricDatum newInstance(){
@@ -344,87 +349,87 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
   }
 
   private static final Tombstone TOMBSTONE = new Tombstone();
-
+  
   public static final class Tombstone extends MetricDatum implements org.apache.gora.persistency.Tombstone {
-
-    private Tombstone() { }
-
-    /**
-     * Gets the value of the 'metricDimension' field.
-     */
-    public java.lang.CharSequence getMetricDimension() {
-      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-    }
-
-    /**
-     * Sets the value of the 'metricDimension' field.
-     * @param value the value to set.
-     */
-    public void setMetricDimension(java.lang.CharSequence value) {
-      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-    }
-
-    /**
-     * Checks the dirty status of the 'metricDimension' field. A field is dirty if it represents a change that has not yet been written to the database.
-     * @param value the value to set.
-     */
-    public boolean isMetricDimensionDirty() {
-      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-    }
-
-    /**
-     * Gets the value of the 'timestamp' field.
-     */
-    public java.lang.Long getTimestamp() {
-      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-    }
-
-    /**
-     * Sets the value of the 'timestamp' field.
-     * @param value the value to set.
-     */
-    public void setTimestamp(java.lang.Long value) {
-      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-    }
-
-    /**
-     * Checks the dirty status of the 'timestamp' field. A field is dirty if it represents a change that has not yet been written to the database.
-     * @param value the value to set.
-     */
-    public boolean isTimestampDirty() {
-      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-    }
-
-    /**
-     * Gets the value of the 'metric' field.
-     */
-    public java.lang.Long getMetric() {
-      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-    }
-
-    /**
-     * Sets the value of the 'metric' field.
-     * @param value the value to set.
-     */
-    public void setMetric(java.lang.Long value) {
-      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-    }
-
-    /**
-     * Checks the dirty status of the 'metric' field. A field is dirty if it represents a change that has not yet been written to the database.
-     * @param value the value to set.
-     */
-    public boolean isMetricDirty() {
-      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-    }
-
-
+  
+      private Tombstone() { }
+  
+	  		  /**
+	   * Gets the value of the 'metricDimension' field.
+		   */
+	  public java.lang.CharSequence getMetricDimension() {
+	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+	  }
+	
+	  /**
+	   * Sets the value of the 'metricDimension' field.
+		   * @param value the value to set.
+	   */
+	  public void setMetricDimension(java.lang.CharSequence value) {
+	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+	  }
+	  
+	  /**
+	   * Checks the dirty status of the 'metricDimension' field. A field is dirty if it represents a change that has not yet been written to the database.
+		   * @param value the value to set.
+	   */
+	  public boolean isMetricDimensionDirty() {
+	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+	  }
+	
+				  /**
+	   * Gets the value of the 'timestamp' field.
+		   */
+	  public java.lang.Long getTimestamp() {
+	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+	  }
+	
+	  /**
+	   * Sets the value of the 'timestamp' field.
+		   * @param value the value to set.
+	   */
+	  public void setTimestamp(java.lang.Long value) {
+	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+	  }
+	  
+	  /**
+	   * Checks the dirty status of the 'timestamp' field. A field is dirty if it represents a change that has not yet been written to the database.
+		   * @param value the value to set.
+	   */
+	  public boolean isTimestampDirty() {
+	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+	  }
+	
+				  /**
+	   * Gets the value of the 'metric' field.
+		   */
+	  public java.lang.Long getMetric() {
+	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+	  }
+	
+	  /**
+	   * Sets the value of the 'metric' field.
+		   * @param value the value to set.
+	   */
+	  public void setMetric(java.lang.Long value) {
+	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+	  }
+	  
+	  /**
+	   * Checks the dirty status of the 'metric' field. A field is dirty if it represents a change that has not yet been written to the database.
+		   * @param value the value to set.
+	   */
+	  public boolean isMetricDirty() {
+	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+	  }
+	
+		  
   }
 
   private static final org.apache.avro.io.DatumWriter
-          DATUM_WRITER$ = new org.apache.avro.specific.SpecificDatumWriter(SCHEMA$);
+            DATUM_WRITER$ = new org.apache.avro.specific.SpecificDatumWriter(SCHEMA$);
   private static final org.apache.avro.io.DatumReader
-          DATUM_READER$ = new org.apache.avro.specific.SpecificDatumReader(SCHEMA$);
+            DATUM_READER$ = new org.apache.avro.specific.SpecificDatumReader(SCHEMA$);
 
   /**
    * Writes AVRO data bean to output stream in the form of AVRO Binary encoding format. This will transform
@@ -457,5 +462,6 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
             .directBinaryDecoder((java.io.InputStream) in,
                     null));
   }
-
+  
 }
+

@@ -58,7 +58,7 @@ public class GoraRecordReader<K, T extends PersistentBase> extends RecordReader<
     }
 
     counter.setRecordsMax(recordsMax);
-    LOG.info("gora.buffer.read.limit = " + recordsMax);
+    LOG.info(BUFFER_LIMIT_READ_NAME + " = " + recordsMax);
 
     this.query.setLimit(recordsMax);
   }

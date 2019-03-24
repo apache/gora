@@ -19,10 +19,11 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <groupId>org.apache</groupId>
     <artifactId>apache</artifactId>
-    <version>10</version>
+    <version>21</version>
   </parent>
 
   <groupId>org.apache.gora</groupId>
@@ -183,6 +184,7 @@
       <roles>
         <role>Committer</role>
         <role>PMC Member</role>
+        <role>PMC Chair</role>
       </roles>
     </developer>
     <developer>
@@ -201,7 +203,7 @@
       <roles>
         <role>Committer</role>
         <role>PMC Member</role>
-        <role>PMC Chair</role>
+        <role>Champion</role>
       </roles>
     </developer>
     <developer>
@@ -315,9 +317,9 @@
   </mailingLists>
 
   <scm>
-    <connection>scm:git:http://git-wip-us.apache.org/repos/asf/gora.git</connection>
-    <developerConnection>scm:git:http://git-wip-us.apache.org/repos/asf/gora.git</developerConnection>
-    <url>https://git-wip-us.apache.org/repos/asf/gora.git</url>
+    <connection>scm:git:http://gitbox.apache.org/repos/asf/gora.git</connection>
+    <developerConnection>scm:git:http://gitbox.apache.org/repos/asf/gora.git</developerConnection>
+    <url>https://gitbox.apache.org/repos/asf/gora.git</url>
     <tag>HEAD</tag>
   </scm>
   <issueManagement>
@@ -647,16 +649,16 @@
       <build>
         <plugins>
           <!-- <plugin> <groupId>org.apache.rat</groupId> <artifactId>apache-rat-plugin</artifactId> 
-          <version>${apache-rat-plugin.version}</version> <executions> <execution> 
-          <id>rat-verify</id> <phase>test</phase> <goals> <goal>check</goal> </goals> 
-          </execution> </executions> <configuration> <licenses> <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense"> 
-          <licenseFamilyCategory>ASL20</licenseFamilyCategory> <licenseFamilyName>Apache 
-          Software License, 2.0</licenseFamilyName> <notes>Single licensed ASL v2.0</notes> 
-          <patterns> <pattern>Licensed to the Apache Software Foundation (ASF) under 
-          one or more contributor license agreements.</pattern> </patterns> </license> 
-          </licenses> <excludeSubProjects>false</excludeSubProjects> <excludes> <exclude>CHANGES.txt</exclude> 
-          <exclude>README.txt</exclude> <exclude>NOTICE.txt</exclude> <exclude>LICENSE.txt</exclude> 
-          <exclude>KEYS</exclude> <exclude>doap_Gora.rdf</exclude> <exclude>.gitignore/**/**</exclude> 
+          <version>${apache-rat-plugin.version}</version> <executions> <execution>
+          <id>rat-verify</id> <phase>test</phase> <goals> <goal>check</goal> </goals>
+          </execution> </executions> <configuration> <licenses> <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
+          <licenseFamilyCategory>ASL20</licenseFamilyCategory> <licenseFamilyName>Apache
+          Software License, 2.0</licenseFamilyName> <notes>Single licensed ASL v2.0</notes>
+          <patterns> <pattern>Licensed to the Apache Software Foundation (ASF) under
+          one or more contributor license agreements.</pattern> </patterns> </license>
+          </licenses> <excludeSubProjects>false</excludeSubProjects> <excludes> <exclude>CHANGES.txt</exclude>
+          <exclude>README.txt</exclude> <exclude>NOTICE.txt</exclude> <exclude>LICENSE.txt</exclude>
+          <exclude>KEYS</exclude> <exclude>doap_Gora.rdf</exclude> <exclude>.gitignore/**/**</exclude>
           </excludes> </configuration> </plugin -->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
@@ -744,6 +746,7 @@
     <module>gora-compiler</module>
     <module>gora-compiler-cli</module>
     <module>gora-core</module>
+    <module>gora-pig</module>
     <module>gora-accumulo</module>
     <module>gora-cassandra</module>
     <module>gora-goraci</module>
@@ -751,16 +754,16 @@
     <module>gora-infinispan</module>
     <module>gora-jcache</module>
     <module>gora-orientdb</module>
-    <!-- module>gora-lucene</module -->
+    <module>gora-lucene</module>
     <module>gora-dynamodb</module>
     <module>gora-couchdb</module>
     <module>gora-maven-plugin</module>
     <module>gora-mongodb</module>
     <module>gora-solr</module>
-    <module>gora-tutorial</module>
-    <module>sources-dist</module>
     <module>gora-aerospike</module>
     <module>gora-ignite</module>
+    <module>gora-tutorial</module>
+    <module>sources-dist</module>
   </modules>
 
   <properties>
@@ -772,8 +775,8 @@
     <!-- Hadoop Dependencies -->
     <hadoop-2.version>2.5.2</hadoop-2.version>
     <hadoop-2.test.version>2.5.2</hadoop-2.test.version>
-    <hbase.version>1.2.6</hbase.version>
-    <hbase.test.version>1.2.6</hbase.test.version>
+    <hbase.version>2.1.1</hbase.version>
+    <hbase.test.version>2.1.1</hbase.test.version>
     <cxf-rt-frontend-jaxrs.version>2.5.2</cxf-rt-frontend-jaxrs.version>
     <!-- Amazon Dependencies -->
     <amazon.version>1.10.55</amazon.version>
@@ -784,18 +787,18 @@
     <ignite.version>2.6.0</ignite.version>
     <sqlbuilder.version>2.1.7</sqlbuilder.version>
     <!-- Solr Dependencies -->
-    <lucene-solr.version>6.5.1</lucene-solr.version>
-    <solr-solrj.version>6.5.1</solr-solrj.version>
-    <jetty.version>9.3.14.v20161028</jetty.version>
+    <lucene-solr.version>8.0.0</lucene-solr.version>
+    <solr-solrj.version>8.0.0</solr-solrj.version>
+    <jetty.version>9.4.14.v20181114</jetty.version>
     <tika.version>1.12</tika.version>
-    <httpcomponents.version>4.4.1</httpcomponents.version>
+    <httpcomponents.version>4.5.6</httpcomponents.version>
     <commons-io.version>2.5</commons-io.version>
     <restlet.version>2.3.1</restlet.version>
     <!-- Flink Dependencies -->
     <flink.version>1.6.2</flink.version>
 
     <spark.version>2.2.1</spark.version>
-    <aerospike.version>4.0.6</aerospike.version>
+    <aerospike.version>4.2.2</aerospike.version>
     <!-- Misc Dependencies -->
     <guava.version>13.0</guava.version>
     <commons-lang.version>2.6</commons-lang.version>
@@ -837,6 +840,9 @@
     <maven-deploy-plugin.version>2.5</maven-deploy-plugin.version>
     <checksum-maven-plugin.version>1.0.1</checksum-maven-plugin.version>
     <maven-clean-plugin.version>2.5</maven-clean-plugin.version>
+
+    <!-- Pig Dependencies -->
+    <pig.version>0.16.0</pig.version>
 
     <!-- General Properties -->
     <implementation.build>${scmBranch}@r${buildNumber}</implementation.build>
@@ -959,9 +965,20 @@
         <version>${project.version}</version>
         <type>test-jar</type>
       </dependency>
-      
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-lucene</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-lucene</artifactId>
+        <version>${project.version}</version>
+        <type>test-jar</type>
+      </dependency>
+
       <!--Ignite DataStore dependencies -->
-      
+
       <dependency>
         <groupId>org.apache.gora</groupId>
         <artifactId>gora-ignite</artifactId>
@@ -978,7 +995,7 @@
         <artifactId>sqlbuilder</artifactId>
         <version>${sqlbuilder.version}</version>
       </dependency>
-      
+
       <!-- End of Internal Depednecies -->
 
       <dependency>
@@ -1604,6 +1621,27 @@
         <version>${orientqb.version}</version>
       </dependency>
 
+      <!-- Pig -->
+      <dependency>
+          <groupId>org.apache.pig</groupId>
+          <artifactId>pig</artifactId>
+          <classifier>h2</classifier>
+          <version>${pig.version}</version>
+          <exclusions>
+              <exclusion>
+                  <groupId>org.apache.avro</groupId>
+                  <artifactId>avro</artifactId>
+              </exclusion>
+          </exclusions>
+      </dependency>
+
+      <!--Aerospike Dependency -->
+      <dependency>
+        <groupId>com.aerospike</groupId>
+        <artifactId>aerospike-client</artifactId>
+        <version>${aerospike.version}</version>
+      </dependency>
+
       <!-- Testing Dependencies -->
       <dependency>
         <groupId>org.apache.hadoop</groupId>
@@ -1628,7 +1666,7 @@
         <artifactId>testcontainers</artifactId>
         <version>${test.container.version}</version>
       </dependency>
-      
+
       <!-- Testing Dependencies for Ignite-->
       <dependency>
         <groupId>org.apache.ignite</groupId>

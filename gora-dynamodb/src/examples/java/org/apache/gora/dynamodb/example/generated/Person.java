@@ -3,6 +3,7 @@ package org.apache.gora.dynamodb.example.generated;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.Tombstone;
@@ -76,4 +77,6 @@ public class Person implements Persistent {
     public List<Field> getUnmanagedFields() { return null; }
     @Override
     public Persistent newInstance() { return new Person(); }
+    @Override
+    public Schema getSchema() { return null; }
 }

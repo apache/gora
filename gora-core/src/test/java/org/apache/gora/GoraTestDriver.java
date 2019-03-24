@@ -50,6 +50,14 @@ public abstract class GoraTestDriver {
     this.dataStoreClass = (Class<? extends DataStore<?, ?>>) dataStoreClass;
     this.dataStores = new HashSet<>();
   }
+  
+  /**
+   * Method to obtain the datastore class configured in the constructor when creating the test driver.
+   * @return Returns the configured dataStoreClass
+   */
+  public Class<? extends DataStore<?, ?>> getDataStoreClass() {
+    return this.dataStoreClass ;
+  }
 
   /** Should be called once before the tests are started, probably in the
    * method annotated with org.junit.BeforeClass

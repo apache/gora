@@ -1,0 +1,369 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.gora.pig;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
+import java.util.Map.Entry;
+import java.util.Properties;
+
+import junit.framework.Assert;
+
+import org.apache.avro.util.Utf8;
+import org.apache.gora.examples.generated.Metadata;
+import org.apache.gora.examples.generated.WebPage;
+import org.apache.gora.store.DataStore;
+import org.apache.gora.store.DataStoreFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hbase.HBaseTestingUtility;
+import org.apache.pig.ExecType;
+import org.apache.pig.PigServer;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
+
+public class GoraStorageTest {
+
+  /** The configuration */
+  protected static Configuration            configuration;
+
+  private static HBaseTestingUtility        utility;
+  private static PigServer                  pigServer;
+  private static DataStore<String, WebPage> dataStore;
+
+  /**
+   * Configures if execute pigServer in local or in a cluster
+   */
+  private static ExecType pigServerExecType = ExecType.LOCAL ; 
+  
+  @BeforeClass
+  public static void setUpBeforeClass() throws Exception {
+    Configuration localExecutionConfiguration = new Configuration();
+    localExecutionConfiguration.setStrings("hadoop.log.dir", localExecutionConfiguration.get("hadoop.tmp.dir"));
+    localExecutionConfiguration.setStrings("hbase.master.distributed.log.splitting", "false") ;
+    localExecutionConfiguration.setStrings("hbase.master.logcleaner.plugins", "org.apache.hadoop.hbase.master.cleaner.TimeToLiveLogCleaner") ;
+    utility = new HBaseTestingUtility(localExecutionConfiguration);
+    utility.startMiniCluster();
+    utility.startMiniMapReduceCluster();
+    configuration = utility.getConfiguration();
+
+    configuration.writeXml(new FileOutputStream("target/test-classes/core-site.xml"));
+    File fileConfiguration = new File("target/test-classes/core-site.xml") ;
+    fileConfiguration.deleteOnExit();
+    
+    Properties props = new Properties();
+    Iterator<Entry<String,String>> it = configuration.iterator() ;
+
+    while (it.hasNext()) {
+      Entry<String,String> par = it.next() ;
+      props.setProperty(par.getKey(), par.getValue()) ;
+    }
+    //props.setProperty("fs.default.name", configuration.get("fs.default.name"));
+    //props.setProperty("mapred.job.tracker", configuration.get("mapred.job.tracker"));
+    pigServer = new PigServer(GoraStorageTest.pigServerExecType, props);
+
+    dataStore = DataStoreFactory.getDataStore(String.class, WebPage.class, configuration);
+  }
+
+  @AfterClass
+  public static void tearDownAfterClass() throws Exception {
+    if (pigServer != null) {
+      pigServer.shutdown();
+    }
+    if (utility != null) {
+      utility.shutdownMiniMapReduceCluster();
+    }
+  }
+
+  @Before
+	public void setUp() throws Exception {
+
+    dataStore.delete("key1") ;
+    dataStore.delete("key7") ;
+    
+    WebPage w = WebPage.newBuilder().build() ;
+	  
+	  w.setUrl(new Utf8("http://gora.apache.org")) ;
+	  w.setContent(ByteBuffer.wrap("Texto 1".getBytes(StandardCharsets.UTF_8))) ;
+	  w.getParsedContent().add(new Utf8("elemento1")) ;
+    w.getParsedContent().add(new Utf8("elemento2")) ;
+    w.getOutlinks().put(new Utf8("k1"), new Utf8("v1")) ;
+    Metadata m = Metadata.newBuilder().build() ;
+    m.setVersion(3) ;
+    w.setMetadata(m) ;
+    
+    dataStore.put("key1", w) ;
+    
+    w.clear() ;
+    w.setUrl(new Utf8("http://www.google.com")) ;
+    w.setContent(ByteBuffer.wrap("Texto 2".getBytes(StandardCharsets.UTF_8))) ;
+    w.getParsedContent().add(new Utf8("elemento7")) ;
+    w.getParsedContent().add(new Utf8("elemento15")) ;
+    w.getOutlinks().put(new Utf8("k7"), new Utf8("v7")) ;
+    m = Metadata.newBuilder().build() ;
+    m.setVersion(7) ;
+    w.setMetadata(m) ;
+    
+    dataStore.put("key7", w) ;
+    dataStore.flush() ;
+	}
+
+  @After
+  public void tearDown() throws Exception {
+  }
+
+  /**
+   * Test loading/saving a subset of the fields defined in the constructor
+   */
+  @Test
+  public void testLoadSaveSubset() throws IOException {
+
+    pigServer.setJobName("gora-pig test - load all fields");
+    pigServer.registerJar("target/gora-pig-0.9-SNAPSHOT.jar");
+    pigServer.registerQuery("paginas = LOAD '.' using org.apache.gora.pig.GoraStorage (" +
+        "'java.lang.String'," +
+        "'org.apache.gora.examples.generated.WebPage'," +
+        "'url, content') ;",1);
+    pigServer.registerQuery("resultado = FOREACH paginas GENERATE key, UPPER(url) as url, content ;",2);
+    pigServer.registerQuery("STORE resultado INTO '.' using org.apache.gora.pig.GoraStorage(" +
+        "'java.lang.String'," +
+        "'org.apache.gora.examples.generated.WebPage'," +
+        "'url') ;",3);
+    
+    WebPage webpageUpper = dataStore.get("key1") ;
+    Assert.assertNotNull("Record with key 'key1' not found", webpageUpper) ;
+    
+    WebPage expected = WebPage.newBuilder().build() ;
+    expected.setUrl(new Utf8("HTTP://GORA.APACHE.ORG")) ;
+    expected.setContent(ByteBuffer.wrap("Texto 1".getBytes(StandardCharsets.UTF_8))) ;
+    expected.getOutlinks().put(new Utf8("k1"), new Utf8("v1")) ;
+    expected.getParsedContent().add(new Utf8("elemento1")) ;
+    expected.getParsedContent().add(new Utf8("elemento2")) ;
+    Metadata m = Metadata.newBuilder().build() ;
+    m.setVersion(3) ;
+    expected.setMetadata(m) ;
+
+    Assert.assertEquals(expected, webpageUpper) ;
+    
+    webpageUpper = dataStore.get("key7") ;
+    Assert.assertNotNull("Expected record with key 'key7' not found", webpageUpper) ;
+    expected = WebPage.newBuilder().build() ;
+    expected.setUrl(new Utf8("HTTP://WWW.GOOGLE.COM")) ;
+    expected.setContent(ByteBuffer.wrap("Texto 2".getBytes(StandardCharsets.UTF_8))) ;
+    expected.getOutlinks().put(new Utf8("k7"), new Utf8("v7")) ;
+    expected.getParsedContent().add(new Utf8("elemento7")) ;
+    expected.getParsedContent().add(new Utf8("elemento15")) ;
+    m = Metadata.newBuilder().build() ;
+    m.setVersion(7) ;
+    expected.setMetadata(m) ;
+    Assert.assertEquals(expected, webpageUpper) ;
+    
+  }
+
+  @Test
+  public void testUpdateMap() throws IOException {
+    FileSystem hdfs = FileSystem.get(configuration) ;
+    // Values to add to output links of webpage
+    hdfs.copyFromLocalFile(new Path("src/test/resources/test-delete-map-values-addvals.csv"), new Path("test-delete-map-values-addvals.csv")) ;
+
+    String valuesSource = null ;
+    if (GoraStorageTest.pigServerExecType == ExecType.LOCAL) {
+      valuesSource = "src/test/resources/test-delete-map-values-addvals.csv" ;
+    } else {
+      valuesSource = "test-delete-map-values-addvals.csv" ;
+    }
+    
+    pigServer.setJobName("gora-pig test - update map");
+    pigServer.registerJar("target/gora-pig-0.9-SNAPSHOT.jar");
+    pigServer.registerQuery("define MapMerge org.apache.gora.pig.udf.MapMerge();") ;
+    pigServer.registerQuery("map_values = LOAD '" + valuesSource + "' USING PigStorage('|') AS (outlinks:map[chararray]) ;") ;
+    pigServer.registerQuery("pages = LOAD '.' using org.apache.gora.pig.GoraStorage (" +
+        "'java.lang.String'," +
+        "'org.apache.gora.examples.generated.WebPage'," +
+        "'outlinks') ;",1);
+    pigServer.registerQuery("pages_updated = FOREACH pages GENERATE key, MapMerge(outlinks, map_values.outlinks) as outlinks:map[chararray] ;") ;
+    pigServer.registerQuery("STORE pages_updated INTO '.' using org.apache.gora.pig.GoraStorage(" +
+        "'java.lang.String'," +
+        "'org.apache.gora.examples.generated.WebPage'," +
+        "'outlinks') ;",3);
+
+    WebPage webpage = dataStore.get("key1") ;
+    Assert.assertTrue("Record 'key1' expected to have 'k1#v1' in outlinks", webpage.getOutlinks().get(new Utf8("k1")).toString().compareTo("v1") == 0) ;
+    Assert.assertTrue("Record 'key1' expected to have 'k2#v2' in outlinks", webpage.getOutlinks().get(new Utf8("k2")).toString().compareTo("v2") == 0) ;
+    Assert.assertTrue("Record 'key1' expected to have 'k3#v3' in outlinks", webpage.getOutlinks().get(new Utf8("k3")).toString().compareTo("v3") == 0) ;
+  }
+  
+  /**
+   * Tests loading/saving all fields with '*'
+   */
+  @Test
+  public void testLoadSaveAllFields() throws IOException {
+
+    pigServer.setJobName("gora-pig test - load all fields");
+    pigServer.registerJar("target/gora-pig-0.9-SNAPSHOT.jar");
+    pigServer.registerQuery("paginas = LOAD '.' using org.apache.gora.pig.GoraStorage (" +
+    		"'java.lang.String'," +
+    		"'org.apache.gora.examples.generated.WebPage'," +
+    		"'*') ;",1);
+    pigServer.registerQuery("resultado = FOREACH paginas GENERATE key, UPPER(url) as url, content, outlinks, headers," +
+    		"                                   parsedContent, metadata ;",2);
+    pigServer.registerQuery("STORE resultado INTO '.' using org.apache.gora.pig.GoraStorage(" +
+        "'java.lang.String'," +
+        "'org.apache.gora.examples.generated.WebPage'," +
+        "'*') ;",3);
+    
+    WebPage webpageUpper = dataStore.get("key1") ;
+    Assert.assertNotNull("Expected record with key 'key1' not found", webpageUpper) ;
+    
+    WebPage expected = dataStore.getBeanFactory().newPersistent() ;
+    expected.setUrl(new Utf8("HTTP://GORA.APACHE.ORG")) ;
+    expected.setContent(ByteBuffer.wrap("Texto 1".getBytes(StandardCharsets.UTF_8))) ;
+    expected.getOutlinks().put(new Utf8("k1"), new Utf8("v1")) ;
+    expected.getParsedContent().add(new Utf8("elemento1")) ;
+    expected.getParsedContent().add(new Utf8("elemento2")) ;
+    Metadata m = Metadata.newBuilder().build() ;
+    m.setVersion(3) ;
+    expected.setMetadata(m) ;
+
+    Assert.assertEquals(expected, webpageUpper) ;
+    
+    webpageUpper = dataStore.get("key7") ;
+    Assert.assertNotNull("Expected record with key 'key7' not found", webpageUpper) ;
+    expected = dataStore.getBeanFactory().newPersistent() ;
+    expected.setUrl(new Utf8("HTTP://WWW.GOOGLE.COM")) ;
+    expected.setContent(ByteBuffer.wrap("Texto 2".getBytes(StandardCharsets.UTF_8))) ;
+    expected.getOutlinks().put(new Utf8("k7"), new Utf8("v7")) ;
+    expected.getParsedContent().add(new Utf8("elemento7")) ;
+    expected.getParsedContent().add(new Utf8("elemento15")) ;
+    m =  Metadata.newBuilder().build() ;
+    m.setVersion(7) ;
+    expected.setMetadata(m) ;
+    Assert.assertEquals(expected, webpageUpper) ;
+  }
+
+  @Test
+  public void testDeleteRows() throws IOException {
+    FileSystem hdfs = FileSystem.get(configuration) ;
+    hdfs.copyFromLocalFile(new Path("src/test/resources/test-delete-rows.csv"), new Path("test-delete-rows.csv")) ;
+
+    String valuesSource = null ;
+    if (GoraStorageTest.pigServerExecType == ExecType.LOCAL) {
+      valuesSource = "src/test/resources/test-delete-rows.csv" ;
+    } else {
+      valuesSource = "test-delete-rows.csv" ;
+    }
+    
+    pigServer.setJobName("gora-pig test - delete rows");
+    pigServer.registerJar("target/gora-pig-0.9-SNAPSHOT.jar");
+    pigServer.registerQuery("delete_rows = LOAD '" + valuesSource + "' AS (key:chararray) ;") ;
+    pigServer.registerQuery("STORE delete_rows INTO '.' using org.apache.gora.pig.GoraDeleteStorage(" +
+        "'java.lang.String'," +
+        "'org.apache.gora.examples.generated.WebPage'," +
+        "'rows') ;");
+    
+    WebPage webpage = dataStore.get("key1") ;
+    Assert.assertNull("Record with key 'key1' found", webpage) ;
+
+    webpage = dataStore.get("key7") ;
+    Assert.assertNotNull("Record with key 'key7' not found", webpage) ;
+  }
+  
+  @Test
+  @Ignore
+  public void testDeleteMapValues() throws IOException {
+    FileSystem hdfs = FileSystem.get(configuration) ;
+    // Values to add to output links of webpage
+    hdfs.copyFromLocalFile(new Path("src/test/resources/test-delete-map-values-addvals.csv"), new Path("test-delete-map-values-addvals.csv")) ;
+    // Values to delete from output links of webpage with key 'key1'
+    hdfs.copyFromLocalFile(new Path("src/test/resources/test-delete-map-values.csv"), new Path("test-delete-map-values.csv")) ;
+
+    String valuesSource = null ;
+    if (GoraStorageTest.pigServerExecType == ExecType.LOCAL) {
+      valuesSource = "src/test/resources/test-delete-map-values-addvals.csv" ;
+    } else {
+      valuesSource = "test-delete-map-values-addvals.csv" ;
+    }
+    
+    pigServer.setJobName("gora-pig test - delete map values");
+    pigServer.registerJar("target/gora-pig-0.9-SNAPSHOT.jar");
+    pigServer.registerQuery("map_values = LOAD '" + valuesSource + "' USING PigStorage('|') AS (outlinks:map[chararray]) ;") ;
+    pigServer.registerQuery("pages = LOAD '.' using org.apache.gora.pig.GoraStorage (" +
+        "'java.lang.String'," +
+        "'org.apache.gora.examples.generated.WebPage'," +
+        "'outlinks') ;",1);
+    pigServer.registerQuery("pages_updated = FOREACH pages GENERATE key, map_values.outlinks as outlinks ;") ;
+    pigServer.registerQuery("STORE pages_updated INTO '.' using org.apache.gora.pig.GoraStorage(" +
+        "'java.lang.String'," +
+        "'org.apache.gora.examples.generated.WebPage'," +
+        "'outlinks') ;",3);
+
+    // Now, both pages must have "k2#v2" and "k3#v3" in outlinks, but not k1
+
+    WebPage webpage = dataStore.get("key1") ;
+    Assert.assertFalse("Record 'key1' expected to NOT have 'k1' in outlinks", webpage.getOutlinks().containsKey(new Utf8("k1"))) ;
+    Assert.assertTrue("Record 'key1' expected to have 'k2' in outlinks", webpage.getOutlinks().containsKey(new Utf8("k2"))) ;
+    Assert.assertTrue("Record 'key1' expected to have 'k3' in outlinks", webpage.getOutlinks().containsKey(new Utf8("k3"))) ;
+    Assert.assertTrue("Record 'key1' expected to have 'k2#v2' in outlinks", webpage.getOutlinks().get(new Utf8("k2")).toString().compareTo("v2") == 0) ;
+    Assert.assertTrue("Record 'key1' expected to have 'k3#v3' in outlinks", webpage.getOutlinks().get(new Utf8("k3")).toString().compareTo("v3") == 0) ;
+
+    webpage = dataStore.get("key7") ;
+    Assert.assertFalse("Record 'key7' expected to NOT have 'k7' in outlinks", webpage.getOutlinks().containsKey(new Utf8("k7"))) ;
+    Assert.assertTrue("Record 'key7' expected to have 'k2' in outlinks", webpage.getOutlinks().containsKey(new Utf8("k2"))) ;
+    Assert.assertTrue("Record 'key7' expected to have 'k3' in outlinks", webpage.getOutlinks().containsKey(new Utf8("k3"))) ;
+    Assert.assertTrue("Record 'key7' expected to have 'k2#v2' in outlinks", webpage.getOutlinks().get(new Utf8("k2")).toString().compareTo("v2") == 0) ;
+    Assert.assertTrue("Record 'key7' expected to have 'k3#v3' in outlinks", webpage.getOutlinks().get(new Utf8("k3")).toString().compareTo("v3") == 0) ;
+    
+    if (GoraStorageTest.pigServerExecType == ExecType.LOCAL) {
+      valuesSource = "src/test/resources/test-delete-map-values.csv" ;
+    } else {
+      valuesSource = "test-delete-map-values.csv" ;
+    }
+
+    
+    pigServer.registerQuery("delete_values = LOAD '" + valuesSource + "' USING PigStorage('|') AS (key:chararray, outlinks:map[chararray]) ; ") ;
+    pigServer.registerQuery("STORE delete_values INTO '.' using org.apache.gora.pig.GoraDeleteStorage(" +
+        "'java.lang.String'," +
+        "'org.apache.gora.examples.generated.WebPage'," +
+        "'values') ;");
+    
+    // Now, page with "key1" must not contain in outlinks key "k1", but contain "k2" and "k3"
+
+    webpage = dataStore.get("key1") ;
+    Assert.assertFalse("Record 'key1' expected to NOT have 'k1' in outlinks", !webpage.getOutlinks().containsKey(new Utf8("k1"))) ;
+    Assert.assertTrue("Record 'key1' expected to have 'k2' in outlinks", webpage.getOutlinks().containsKey(new Utf8("k2"))) ;
+    Assert.assertTrue("Record 'key1' expected to NOT have 'k3' in outlinks", webpage.getOutlinks().containsKey(new Utf8("k3"))) ;
+    Assert.assertTrue("Record 'key1' expected to have 'k2#v2' in outlinks", webpage.getOutlinks().get(new Utf8("k2")).toString().compareTo("v2") == 0) ;
+
+    webpage = dataStore.get("key7") ;
+    Assert.assertFalse("Record 'key7' expected to NOT have 'k7' in outlinks", webpage.getOutlinks().containsKey(new Utf8("k7"))) ;
+    Assert.assertTrue("Record 'key7' expected to have 'k2' in outlinks", webpage.getOutlinks().containsKey(new Utf8("k2"))) ;
+    Assert.assertTrue("Record 'key7' expected to have 'k3' in outlinks", webpage.getOutlinks().containsKey(new Utf8("k3"))) ;
+    Assert.assertTrue("Record 'key7' expected to have 'k2#v2' in outlinks", webpage.getOutlinks().get(new Utf8("k2")).toString().compareTo("v2") == 0) ;
+    Assert.assertTrue("Record 'key7' expected to have 'k3#v3' in outlinks", webpage.getOutlinks().get(new Utf8("k3")).toString().compareTo("v3") == 0) ;
+  }
+}
+ 

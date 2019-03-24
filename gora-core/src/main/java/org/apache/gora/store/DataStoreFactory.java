@@ -178,6 +178,9 @@ public class DataStoreFactory{
   D createDataStore(Class<D> dataStoreClass
       , Class<K> keyClass, Class<T> persistent, Configuration conf, Properties properties) 
           throws GoraException {
+    if (properties == null || properties.size() == 0) {
+      properties = createProps();
+    }
     return createDataStore(dataStoreClass, keyClass, persistent, conf, properties, null);
   }
 
@@ -226,7 +229,6 @@ public class DataStoreFactory{
   /**
    * Instantiate a new {@link DataStore}. Uses default properties. Uses 'null' schema.
    * 
-   * @param dataStoreClass The datastore implementation class <i>as string</i>.
    * @param keyClass The key class <i>as string</i>.
    * @param persistentClass The value class <i>as string</i>.
    * @param conf {@link Configuration} to be used be the store.
@@ -251,6 +253,70 @@ public class DataStoreFactory{
     }
   }
 
+  /**
+   * Instantiate a new {@link DataStore}. Uses default properties. Uses 'null' schema.
+   * 
+   * @param dataStoreClass The datastore implementation class <i>as string</i>.
+   * @param keyClass The key class <i>as string</i>.
+   * @param persistentClass The value class <i>as string</i>.
+   * @param props Gora properties configuration
+   * @param conf {@link Configuration} to be used be the store.
+   * @return A new store instance.
+   * @throws GoraException
+   */
+  @SuppressWarnings({ "unchecked" })
+  public static <K, T extends Persistent> DataStore<K, T> getDataStore(
+      String keyClass, String persistentClass, Properties props, Configuration conf)
+          throws GoraException {
+
+    try {
+      Class<? extends DataStore<K,T>> c
+          = (Class<? extends DataStore<K, T>>) Class.forName(getDefaultDataStore(props));
+      Class<K> k = (Class<K>) ClassLoadingUtils.loadClass(keyClass);
+      Class<T> p = (Class<T>) ClassLoadingUtils.loadClass(persistentClass);
+      if (props == null || props.size() == 0) {
+        props = createProps();
+      }
+      return createDataStore(c, k, p, conf, props, null);
+    } catch(GoraException ex) {
+      throw ex;
+    } catch (Exception ex) {
+      throw new GoraException(ex);
+    }
+  }
+  
+  /**
+   * Instantiate a new {@link DataStore}. Uses default properties. Uses 'null' schema.
+   * 
+   * @param dataStoreClass The datastore implementation class <i>as string</i>.
+   * @param keyClass The key class <i>as string</i>.
+   * @param persistentClass The value class <i>as string</i>.
+   * @param props Gora properties configuration
+   * @param conf {@link Configuration} to be used be the store.
+   * @return A new store instance.
+   * @throws GoraException
+   */
+  @SuppressWarnings({ "unchecked" })
+  public static <K, T extends Persistent> DataStore<K, T> getDataStore(
+      String dataStoreClass, String keyClass, String persistentClass, Properties props, Configuration conf)
+          throws GoraException {
+
+    try {
+      Class<? extends DataStore<K,T>> c
+          = (Class<? extends DataStore<K, T>>) Class.forName(dataStoreClass);
+      Class<K> k = (Class<K>) ClassLoadingUtils.loadClass(keyClass);
+      Class<T> p = (Class<T>) ClassLoadingUtils.loadClass(persistentClass);
+      if (props == null || props.size() == 0) {
+        props = createProps();
+      }
+      return createDataStore(c, k, p, conf, props, null);
+    } catch(GoraException ex) {
+      throw ex;
+    } catch (Exception ex) {
+      throw new GoraException(ex);
+    }
+  }
+  
   /**
    * Instantiate <i>the default</i> {@link DataStore}. Uses default properties. Uses 'null' schema.
    * 
@@ -325,6 +391,11 @@ public class DataStoreFactory{
     while(true) {
       String fullKey = GORA + "." + org.apache.gora.util.StringUtils.getClassname(clazz).toLowerCase(Locale.getDefault()) + "." + baseKey;
       String value = getProperty(properties, fullKey);
+      if(value != null) {
+        return value;
+      }
+      //try once with lowercase
+      value = getProperty(properties, fullKey.toLowerCase(Locale.getDefault()));
       if(value != null) {
         return value;
       }
@@ -412,7 +483,7 @@ public class DataStoreFactory{
     return mappingFilename;
   }
 
-  private static String getDefaultDataStore(Properties properties) {
+  public static String getDefaultDataStore(Properties properties) {
     return getProperty(properties, GORA_DEFAULT_DATASTORE_KEY);
   }
 
