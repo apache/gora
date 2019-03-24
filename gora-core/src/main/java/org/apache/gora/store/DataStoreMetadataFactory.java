@@ -43,8 +43,10 @@ public class DataStoreMetadataFactory {
   /**
    * Creates a metadata analyzer given the Hadoop Configuration instance. Uses the default gora.properties where it takes the
    * base name from the default store to infer the metadata analyzer to create.
-   * @throws GoraException
-   * @throws ClassNotFoundException - Exception thrown when does not exists a suitable metadata analyzer class
+   * @param configuration The Configuration.
+   * @return DataStoreMetadataAnalyzer Metadata analyzer, instance of {@link DataStoreMetadataAnalyzer}.
+   * @throws GoraException If any error occurred.
+   * @throws ClassNotFoundException - Exception thrown when does not exists a suitable metadata analyzer class.
    */
   public static DataStoreMetadataAnalyzer createAnalyzer(Configuration configuration) throws GoraException, ClassNotFoundException {
     return createAnalyzer(configuration, DataStoreFactory.createProps());
@@ -53,8 +55,11 @@ public class DataStoreMetadataFactory {
   /**
    * Creates a metadata analyzer given the Hadoop Configuration instance and the gora properties to use. It uses this properties
    * to infer the metadata analyzer to create.
-   * @throws GoraException
-   * @throws ClassNotFoundException - Exception thrown when does not exists a suitable metadata analyzer class
+   * @param configuration The Configuration.
+   * @param properties The gora properties to be used to create metadata analyzer.
+   * @return DataStoreMetadataAnalyzer Metadata analyzer, instance of {@link DataStoreMetadataAnalyzer}.
+   * @throws GoraException If any error occurred.
+   * @throws ClassNotFoundException - Exception thrown when does not exists a suitable metadata analyzer class.
    */
   public static DataStoreMetadataAnalyzer createAnalyzer(Configuration configuration, Properties properties) throws GoraException, ClassNotFoundException {    
     String metadataAnalyzerClassName = DataStoreFactory.getDefaultDataStore(properties) + "MetadataAnalyzer";
@@ -62,18 +67,25 @@ public class DataStoreMetadataFactory {
   }
 
   /**
-   * Creates the metadata analyzer with the name given. 
-   * @throws GoraException
-   * @throws ClassNotFoundException - Exception thrown when does not exists a suitable metadata analyzer class
+   * Creates the metadata analyzer with the name given.
+   * @param metadataAnalyzerClassName Class name of the DataStoreMetadataAnalyzer, refer : {@link DataStoreMetadataAnalyzer}.
+   * @param configuration The Hadoop Configuration.
+   * @return DataStoreMetadataAnalyzer Metadata analyzer, instance of {@link DataStoreMetadataAnalyzer}.
+   * @throws GoraException If any error occurred.
+   * @throws ClassNotFoundException - Exception thrown when does not exists a suitable metadata analyzer class.
    */
   public static DataStoreMetadataAnalyzer createAnalyzer(String metadataAnalyzerClassName, Configuration configuration) throws GoraException, ClassNotFoundException {
     return createAnalyzer(metadataAnalyzerClassName, configuration, DataStoreFactory.createProps()) ;
   }
 
   /**
-   * Main factory method that creates a Metadata Analyzer given a metadata analyzer class name, a Hadoop Configuration instance and Gora Properties
-   * @throws GoraException
-   * @throws ClassNotFoundException - Exception thrown when does not exists a suitable metadata analyzer class
+   * Main factory method that creates a Metadata Analyzer given a metadata analyzer class name, a Hadoop Configuration instance and Gora Properties.
+   * @return DataStoreMetadataAnalyzer Metadata analyzer, instance of {@link DataStoreMetadataAnalyzer}.
+   * @param metadataAnalyzerClassName Class name of the DataStoreMetadataAnalyzer, refer : {@link DataStoreMetadataAnalyzer}.
+   * @param configuration The Configuration.
+   * @param properties The gora properties to be used to create metadata analyzer.
+   * @throws GoraException If any error occurred.
+   * @throws ClassNotFoundException - Exception thrown when does not exists a suitable metadata analyzer class.
    */
   public static DataStoreMetadataAnalyzer createAnalyzer(String metadataAnalyzerClassName, Configuration configuration, Properties properties) throws GoraException, ClassNotFoundException {
     try {

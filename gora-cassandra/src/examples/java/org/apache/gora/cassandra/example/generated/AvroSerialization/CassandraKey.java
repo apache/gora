@@ -115,7 +115,6 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
   
   /**
    * Checks the dirty status of the 'url' field. A field is dirty if it represents a change that has not yet been written to the database.
-   * @param value the value to set.
    */
   public boolean isUrlDirty() {
     return isDirty(0);
@@ -139,7 +138,6 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
   
   /**
    * Checks the dirty status of the 'timestamp' field. A field is dirty if it represents a change that has not yet been written to the database.
-   * @param value the value to set.
    */
   public boolean isTimestampDirty() {
     return isDirty(1);
@@ -313,7 +311,6 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
 	  
 	  /**
 	   * Checks the dirty status of the 'url' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
 	   */
 	  public boolean isUrlDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -336,7 +333,6 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
 	  
 	  /**
 	   * Checks the dirty status of the 'timestamp' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
 	   */
 	  public boolean isTimestampDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
