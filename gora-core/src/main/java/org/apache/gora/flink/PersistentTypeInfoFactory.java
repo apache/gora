@@ -29,7 +29,7 @@ import java.util.Map;
  * Create Flink Type info factory for persistent data beans. Type information contains details
  * such as how the values of particular type serialized and deserialized.
  */
-public class GoraPersistentTypeFactory<T> extends TypeInfoFactory<T> {
+public class PersistentTypeInfoFactory<T> extends TypeInfoFactory<T> {
 
   @Override
   public TypeInformation<T> createTypeInfo(Type type,

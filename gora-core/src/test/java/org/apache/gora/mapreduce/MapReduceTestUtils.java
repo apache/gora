@@ -27,6 +27,7 @@ import java.util.Map;
 
 import org.apache.avro.Schema.Field;
 import org.apache.gora.examples.WebPageDataCreator;
+import org.apache.gora.examples.flink.FlinkWordCount;
 import org.apache.gora.examples.generated.TokenDatum;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.examples.mapreduce.MapReduceSerialization;
@@ -182,6 +183,36 @@ public class MapReduceTestUtils {
 
     while (serializationResult.next()) {
       assertEquals(expectedPage, serializationResult.get());
+    }
+  }
+
+  public static void testFlinkWordCount(Configuration conf, DataStore<String, WebPage> inStore, DataStore<String,
+          TokenDatum> outStore) throws Exception {
+    //Datastore now has to be a Hadoop based datastore
+    ((DataStoreBase<String, WebPage>) inStore).setConf(conf);
+    ((DataStoreBase<String, TokenDatum>) outStore).setConf(conf);
+
+    //create input
+    WebPageDataCreator.createWebPageData(inStore);
+
+    //run Flink Job
+    FlinkWordCount flinkWordCount = new FlinkWordCount();
+    flinkWordCount.wordCount(inStore, outStore, conf);
+
+    //assert results
+    HashMap<String, Integer> actualCounts = new HashMap<>();
+    for (String content : WebPageDataCreator.CONTENTS) {
+      if (content != null) {
+        for (String token : content.split(" ")) {
+          Integer count = actualCounts.get(token);
+          if (count == null)
+            count = 0;
+          actualCounts.put(token, ++count);
+        }
+      }
+    }
+    for (Map.Entry<String, Integer> entry : actualCounts.entrySet()) {
+      assertTokenCount(outStore, entry.getKey(), entry.getValue());
     }
   }
 

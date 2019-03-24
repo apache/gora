@@ -40,67 +40,68 @@ import java.nio.file.Path;
 /**
  * Core class which handles Gora - Flink Engine integration.
  */
-public class GoraFlinkEngine<KEYIN, VALUEIN extends PersistentBase, KEYOUT, VALUEOUT extends PersistentBase> {
+public class GoraFlinkEngine<KeyIn, ValueIn
+        extends PersistentBase, KeyOut, ValueOut extends PersistentBase> {
 
-  Class<KEYIN> classKeyIn;
-  Class<VALUEIN> classValueIn;
-  Class<KEYOUT> classKeyOut;
-  Class<VALUEOUT> classValueOut;
+  private Class<KeyIn> classKeyIn;
+  private Class<ValueIn> classValueIn;
+  private Class<KeyOut> classKeyOut;
+  private Class<ValueOut> classValueOut;
 
-  public GoraFlinkEngine(Class<KEYIN> classKeyIn,
-                         Class<VALUEIN> classValueIn) {
+  public GoraFlinkEngine(Class<KeyIn> classKeyIn,
+                         Class<ValueIn> classValueIn) {
     this.classKeyIn = classKeyIn;
     this.classValueIn = classValueIn;
   }
 
-  public GoraFlinkEngine(Class<KEYIN> classKeyIn,
-                         Class<VALUEIN> classValueIn,
-                         Class<KEYOUT> classKeyOut,
-                         Class<VALUEOUT> classValueOut) {
+  public GoraFlinkEngine(Class<KeyIn> classKeyIn,
+                         Class<ValueIn> classValueIn,
+                         Class<KeyOut> classKeyOut,
+                         Class<ValueOut> classValueOut) {
     this.classKeyIn = classKeyIn;
     this.classValueIn = classValueIn;
     this.classKeyOut = classKeyOut;
     this.classValueOut = classValueOut;
   }
 
-  public DataSource<Tuple2<KEYIN, VALUEIN>> createDataSource(ExecutionEnvironment env,
+  public DataSource<Tuple2<KeyIn, ValueIn>> createDataSource(ExecutionEnvironment env,
                                                              Configuration conf,
-                                                             Class<? extends DataStore<KEYIN, VALUEIN>> dataStoreClass)
+                                                             Class<? extends DataStore<KeyIn, ValueIn>> dataStoreClass)
           throws IOException {
     Preconditions.checkNotNull(classKeyIn);
     Preconditions.checkNotNull(classValueIn);
     Job job = new Job(conf);
-    DataStore<KEYIN, VALUEIN> dataStore = DataStoreFactory.getDataStore(dataStoreClass
+    DataStore<KeyIn, ValueIn> dataStore = DataStoreFactory.getDataStore(dataStoreClass
             , classKeyIn, classValueIn, job.getConfiguration());
     GoraInputFormat.setInput(job, dataStore.newQuery(), true);
-    HadoopInputFormat<KEYIN, VALUEIN> wrappedGoraInput =
+    HadoopInputFormat<KeyIn, ValueIn> wrappedGoraInput =
             new HadoopInputFormat<>(new GoraInputFormat<>(),
                     classKeyIn, classValueIn, job);
     return env.createInput(wrappedGoraInput);
   }
 
-  public DataSource<Tuple2<KEYIN, VALUEIN>> createDataSource(ExecutionEnvironment env,
+  public DataSource<Tuple2<KeyIn, ValueIn>> createDataSource(ExecutionEnvironment env,
                                                              Configuration conf,
-                                                             DataStore<KEYIN, VALUEIN> dataStore)
+                                                             DataStore<KeyIn, ValueIn> dataStore)
           throws IOException {
     Preconditions.checkNotNull(classKeyIn);
     Preconditions.checkNotNull(classValueIn);
     Job job = new Job(conf);
     GoraInputFormat.setInput(job, dataStore.newQuery(), true);
-    HadoopInputFormat<KEYIN, VALUEIN> wrappedGoraInput =
+    HadoopInputFormat<KeyIn, ValueIn> wrappedGoraInput =
             new HadoopInputFormat<>(new GoraInputFormat<>(),
                     classKeyIn, classValueIn, job);
     return env.createInput(wrappedGoraInput);
   }
 
-  public OutputFormat<Tuple2<KEYOUT, VALUEOUT>> createDataSink(Configuration conf,
-                                                               DataStore<KEYOUT, VALUEOUT> dataStore)
+  public OutputFormat<Tuple2<KeyOut, ValueOut>> createDataSink(Configuration conf,
+                                                               DataStore<KeyOut, ValueOut> dataStore)
           throws IOException {
     Preconditions.checkNotNull(classKeyOut);
     Preconditions.checkNotNull(classValueOut);
     Job job = new Job(conf);
     GoraOutputFormat.setOutput(job, dataStore, true);
-    HadoopOutputFormat<KEYOUT, VALUEOUT> wrappedGoraOutput =
+    HadoopOutputFormat<KeyOut, ValueOut> wrappedGoraOutput =
             new HadoopOutputFormat<>(
                     new GoraOutputFormat<>(), job);
     // Temp fix to prevent NullPointerException from Flink side.
@@ -110,16 +111,16 @@ public class GoraFlinkEngine<KEYIN, VALUEIN extends PersistentBase, KEYOUT, VALU
 
   }
 
-  public OutputFormat<Tuple2<KEYOUT, VALUEOUT>> createDataSink(Configuration conf,
-                                                               Class<? extends DataStore<KEYOUT, VALUEOUT>> dataStoreClass)
+  public OutputFormat<Tuple2<KeyOut, ValueOut>> createDataSink(Configuration conf,
+                                                               Class<? extends DataStore<KeyOut, ValueOut>> dataStoreClass)
           throws IOException {
     Preconditions.checkNotNull(classKeyOut);
     Preconditions.checkNotNull(classValueOut);
     Job job = new Job(conf);
-    DataStore<KEYOUT, VALUEOUT> dataStore = DataStoreFactory.getDataStore(dataStoreClass
+    DataStore<KeyOut, ValueOut> dataStore = DataStoreFactory.getDataStore(dataStoreClass
             , classKeyOut, classValueOut, job.getConfiguration());
     GoraOutputFormat.setOutput(job, dataStore, true);
-    HadoopOutputFormat<KEYOUT, VALUEOUT> wrappedGoraOutput =
+    HadoopOutputFormat<KeyOut, ValueOut> wrappedGoraOutput =
             new HadoopOutputFormat<>(
                     new GoraOutputFormat<>(), job);
     // Temp fix to prevent NullPointerException from Flink side.
