@@ -93,11 +93,7 @@ public class InfinispanStore<K, T extends PersistentBase> extends DataStoreBase<
           + persistentClass.getCanonicalName());
       schema = persistentClass.getDeclaredConstructor().newInstance().getSchema();
 
-      splitSize = Integer.valueOf(
-          properties.getProperty( BUFFER_LIMIT_READ_NAME,
-              getConf().get(
-                  BUFFER_LIMIT_READ_NAME,
-                  Integer.toString(BUFFER_LIMIT_READ_VALUE))));
+      splitSize = Integer.parseInt(properties.getProperty(BUFFER_LIMIT_READ_NAME, getConf().get(BUFFER_LIMIT_READ_NAME, String.valueOf(BUFFER_LIMIT_READ_VALUE))));
       LOG.info("split size: "+splitSize);
 
       primaryFieldPos = 0;

@@ -52,7 +52,7 @@
   <properties>
     <osgi.import>*</osgi.import>
     <osgi.export>org.apache.gora.solr*;version="${project.version}";-noimport:=true</osgi.export>
-    <jetty.version>9.3.14.v20161028</jetty.version>
+    <jetty.version>9.4.14.v20181114</jetty.version>
   </properties>
 
   <build>
