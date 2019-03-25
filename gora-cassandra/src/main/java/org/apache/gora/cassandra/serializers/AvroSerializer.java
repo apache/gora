@@ -466,4 +466,25 @@ class AvroSerializer<K, T extends PersistentBase> extends CassandraSerializer {
     }
   }
 
+	@Override
+	public boolean exists(Object key) throws GoraException {
+		try {
+			ArrayList<String> cassandraKeys = new ArrayList<>();
+			ArrayList<Object> cassandraValues = new ArrayList<>();
+			AvroCassandraUtils.processKeys(mapping, key, cassandraKeys, cassandraValues);
+			String cqlQuery = CassandraQueryFactory.getCheckExistsQuery(mapping, cassandraKeys);
+			SimpleStatement statement = new SimpleStatement(cqlQuery, cassandraValues.toArray());
+			if (readConsistencyLevel != null) {
+				statement.setConsistencyLevel(ConsistencyLevel.valueOf(readConsistencyLevel));
+			}
+			ResultSet resultSet = client.getSession().execute(statement);
+			Iterator<Row> iterator = resultSet.iterator();
+			Row next = iterator.next();
+			long aInt = next.getLong(0);
+			return aInt != 0;
+		} catch (Exception e) {
+			throw new GoraException(e);
+		}
+	}
+
 }

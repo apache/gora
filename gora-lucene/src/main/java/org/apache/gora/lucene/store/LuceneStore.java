@@ -272,6 +272,22 @@ public class LuceneStore<K, T extends PersistentBase>
     }
   }
 
+	@Override
+	public boolean exists(K key) throws GoraException{
+		boolean resp = false;
+		try {
+			final IndexSearcher s = searcherManager.acquire();
+			TermQuery q = new TermQuery(new Term(mapping.getPrimaryKey(), key.toString()));
+			if (s.count(q) > 0) {
+				resp = true;
+			}
+			searcherManager.release(s);
+		} catch (IOException e) {
+			LOG.error("Error in exists: {}", e);
+		}
+		return resp;
+	}
+	
   @Override
   public T get(K key, String[] fieldsToLoad) {
 

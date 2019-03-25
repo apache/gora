@@ -128,7 +128,16 @@ public interface DataStore<K, T extends Persistent> {
    */
   T newPersistent() throws GoraException;
 
-  /**
+	/**
+	 * Verify whether a key exists in the data store.
+	 *
+	 * @param key the key of the object
+	 * @return true if the key exists, false otherwise
+	 */
+	boolean exists(K key) throws GoraException;
+	
+	
+	/**
    * Returns the object corresponding to the given key fetching all the fields.
    * @param key the key of the object
    * @return the Object corresponding to the key or null if it cannot be found

@@ -542,4 +542,9 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
     return rangeKey;
   }
 
+	@Override
+	public boolean exists(K key) throws GoraException {
+		return get (key)!=null;
+	}
+
 }

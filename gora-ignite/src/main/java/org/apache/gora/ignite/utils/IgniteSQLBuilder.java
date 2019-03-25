@@ -22,6 +22,7 @@ import com.healthmarketscience.sqlbuilder.CreateTableQuery;
 import com.healthmarketscience.sqlbuilder.CustomSql;
 import com.healthmarketscience.sqlbuilder.DeleteQuery;
 import com.healthmarketscience.sqlbuilder.DropQuery;
+import com.healthmarketscience.sqlbuilder.FunctionCall;
 import com.healthmarketscience.sqlbuilder.InsertQuery;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.SqlObject;
@@ -180,6 +181,27 @@ public class IgniteSQLBuilder {
     }
   }
 
+	/**
+   * Returns a bare SQL statement for checking if a key exists
+   *
+   * @param mapping The ignite mapping definition of the data store
+   * @return SQL select statement
+   */
+  public static String createSelectQueryExists(IgniteMapping mapping) {
+    DbSpec spec = new DbSpec();
+    DbSchema schema = spec.addDefaultSchema();
+    DbTable aTable = schema.addTable(mapping.getTableName());
+    SelectQuery selectQuery = new SelectQuery();
+		selectQuery.addCustomColumns(FunctionCall.countAll());
+		selectQuery.addFromTable(aTable);
+    for (int i = 0; i < mapping.getPrimaryKey().size(); i++) {
+      selectQuery.addCondition(new BinaryCondition(BinaryCondition.Op.EQUAL_TO,
+          new DbColumn(aTable, mapping.getPrimaryKey().get(i).getName(), null),
+          SqlObject.QUESTION_MARK));
+    }
+    return selectQuery.validate().toString();
+  }
+	
   /**
    * Returns a bare SQL statement for retrieving a record from the ignite data
    * store
