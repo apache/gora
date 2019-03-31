@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  * STORE webpages INTO '.' USING org.apache.gora.pig.GoraDeleteStorage('{
  *       "persistentClass": "admin.WebPage",
  *       "goraProperties": "gora.datastore.default=org.apache.gora.hbase.store.HBaseStore\\ngora.datastore.autocreateschema=true\\ngora.hbasestore.scanner.caching=4",
- *       "mapping": "<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>\\n<gora-odm>\\n<table name=\\"webpage\\">\\n<family name=\\"f\\" maxVersions=\\"1\\"/>\\n</table>\\n<class table=\\"webpage\\" keyClass=\\"java.lang.String\\" name=\\"admin.WebPage\\">\\n<field name=\\"baseUrl\\" family=\\"f\\" qualifier=\\"bas\\"/>\\n<field name=\\"status\\" family=\\"f\\" qualifier=\\"st\\"/>\\n<field name=\\"content\\" family=\\"f\\" qualifier=\\"cnt\\"/>\\n</class>\\n</gora-odm>",
+ *       "mapping": {@code<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>\\n<gora-odm>\\n<table name=\\"webpage\\">\\n<family name=\\"f\\" maxVersions=\\"1\\"/>\\n</table>\\n<class table=\\"webpage\\" keyClass=\\"java.lang.String\\" name=\\"admin.WebPage\\">\\n<field name=\\"baseUrl\\" family=\\"f\\" qualifier=\\"bas\\"/>\\n<field name=\\"status\\" family=\\"f\\" qualifier=\\"st\\"/>\\n<field name=\\"content\\" family=\\"f\\" qualifier=\\"cnt\\"/>\\n</class>\\n</gora-odm>},
  *       "configuration": {
  *           "hbase.zookeeper.quorum": "hdp4,hdp1,hdp3",
  *           "zookeeper.znode.parent": "/hbase-unsecure"
@@ -92,8 +92,8 @@ public class GoraDeleteStorage extends GoraStorage {
   }
   
   /**
-   * If delete type = ROWS => deletes all the rows with the given keys
-   * If delete type = VALUES => for all fields with a name related to avro map, deletes the elements
+   * If delete type = ROWS : deletes all the rows with the given keys
+   * If delete type = VALUES : for all fields with a name related to avro map, deletes the elements
    */
   @SuppressWarnings("unchecked")
   @Override

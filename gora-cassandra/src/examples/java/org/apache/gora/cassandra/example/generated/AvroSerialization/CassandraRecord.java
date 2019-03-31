@@ -170,7 +170,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   
   /**
    * Checks the dirty status of the 'dataString' field. A field is dirty if it represents a change that has not yet been written to the database.
-   * @param value the value to set.
    */
   public boolean isDataStringDirty() {
     return isDirty(0);
@@ -194,7 +193,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   
   /**
    * Checks the dirty status of the 'dataInt' field. A field is dirty if it represents a change that has not yet been written to the database.
-   * @param value the value to set.
    */
   public boolean isDataIntDirty() {
     return isDirty(1);
@@ -218,7 +216,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   
   /**
    * Checks the dirty status of the 'dataLong' field. A field is dirty if it represents a change that has not yet been written to the database.
-   * @param value the value to set.
    */
   public boolean isDataLongDirty() {
     return isDirty(2);
@@ -242,7 +239,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   
   /**
    * Checks the dirty status of the 'dataDouble' field. A field is dirty if it represents a change that has not yet been written to the database.
-   * @param value the value to set.
    */
   public boolean isDataDoubleDirty() {
     return isDirty(3);
@@ -266,7 +262,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   
   /**
    * Checks the dirty status of the 'dataBytes' field. A field is dirty if it represents a change that has not yet been written to the database.
-   * @param value the value to set.
    */
   public boolean isDataBytesDirty() {
     return isDirty(4);
@@ -290,7 +285,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   
   /**
    * Checks the dirty status of the 'arrayInt' field. A field is dirty if it represents a change that has not yet been written to the database.
-   * @param value the value to set.
    */
   public boolean isArrayIntDirty() {
     return isDirty(5);
@@ -314,7 +308,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   
   /**
    * Checks the dirty status of the 'arrayString' field. A field is dirty if it represents a change that has not yet been written to the database.
-   * @param value the value to set.
    */
   public boolean isArrayStringDirty() {
     return isDirty(6);
@@ -338,7 +331,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   
   /**
    * Checks the dirty status of the 'arrayLong' field. A field is dirty if it represents a change that has not yet been written to the database.
-   * @param value the value to set.
    */
   public boolean isArrayLongDirty() {
     return isDirty(7);
@@ -362,7 +354,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   
   /**
    * Checks the dirty status of the 'arrayDouble' field. A field is dirty if it represents a change that has not yet been written to the database.
-   * @param value the value to set.
    */
   public boolean isArrayDoubleDirty() {
     return isDirty(8);
@@ -386,7 +377,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   
   /**
    * Checks the dirty status of the 'mapInt' field. A field is dirty if it represents a change that has not yet been written to the database.
-   * @param value the value to set.
    */
   public boolean isMapIntDirty() {
     return isDirty(9);
@@ -410,7 +400,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   
   /**
    * Checks the dirty status of the 'mapString' field. A field is dirty if it represents a change that has not yet been written to the database.
-   * @param value the value to set.
    */
   public boolean isMapStringDirty() {
     return isDirty(10);
@@ -434,7 +423,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   
   /**
    * Checks the dirty status of the 'mapLong' field. A field is dirty if it represents a change that has not yet been written to the database.
-   * @param value the value to set.
    */
   public boolean isMapLongDirty() {
     return isDirty(11);
@@ -458,7 +446,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   
   /**
    * Checks the dirty status of the 'mapDouble' field. A field is dirty if it represents a change that has not yet been written to the database.
-   * @param value the value to set.
    */
   public boolean isMapDoubleDirty() {
     return isDirty(12);
@@ -973,7 +960,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 	  
 	  /**
 	   * Checks the dirty status of the 'dataString' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
 	   */
 	  public boolean isDataStringDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -996,7 +982,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 	  
 	  /**
 	   * Checks the dirty status of the 'dataInt' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
 	   */
 	  public boolean isDataIntDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -1019,7 +1004,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 	  
 	  /**
 	   * Checks the dirty status of the 'dataLong' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
 	   */
 	  public boolean isDataLongDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -1042,7 +1026,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 	  
 	  /**
 	   * Checks the dirty status of the 'dataDouble' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
 	   */
 	  public boolean isDataDoubleDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -1065,7 +1048,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 	  
 	  /**
 	   * Checks the dirty status of the 'dataBytes' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
 	   */
 	  public boolean isDataBytesDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -1088,7 +1070,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 	  
 	  /**
 	   * Checks the dirty status of the 'arrayInt' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
 	   */
 	  public boolean isArrayIntDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -1111,7 +1092,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 	  
 	  /**
 	   * Checks the dirty status of the 'arrayString' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
 	   */
 	  public boolean isArrayStringDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -1134,7 +1114,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 	  
 	  /**
 	   * Checks the dirty status of the 'arrayLong' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
 	   */
 	  public boolean isArrayLongDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -1157,7 +1136,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 	  
 	  /**
 	   * Checks the dirty status of the 'arrayDouble' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
 	   */
 	  public boolean isArrayDoubleDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -1180,7 +1158,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 	  
 	  /**
 	   * Checks the dirty status of the 'mapInt' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
 	   */
 	  public boolean isMapIntDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -1203,7 +1180,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 	  
 	  /**
 	   * Checks the dirty status of the 'mapString' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
 	   */
 	  public boolean isMapStringDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -1226,7 +1202,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 	  
 	  /**
 	   * Checks the dirty status of the 'mapLong' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
 	   */
 	  public boolean isMapLongDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
@@ -1249,7 +1224,6 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
 	  
 	  /**
 	   * Checks the dirty status of the 'mapDouble' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
 	   */
 	  public boolean isMapDoubleDirty() {
 	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");

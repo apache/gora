@@ -99,13 +99,16 @@ public class DataStoreFactory{
 
   /**
    * Instantiate a new {@link DataStore}. Uses default properties. Uses 'null' schema.
-   * 
+   *
+   * @param <D> The class of datastore.
+   * @param <K> The class of keys in the datastore.
+   * @param <T> The class of persistent objects in the datastore.
    * @param dataStoreClass The datastore implementation class.
    * @param keyClass The key class.
    * @param persistent The value class.
    * @param conf {@link Configuration} to be used be the store.
    * @return A new store instance.
-   * @throws GoraException
+   * @throws GoraException If any error occurred.
    */
   public static <D extends DataStore<K,T>, K, T extends Persistent>
   D createDataStore(Class<D> dataStoreClass
@@ -115,14 +118,17 @@ public class DataStoreFactory{
 
   /**
    * Instantiate a new {@link DataStore}. Uses default properties.
-   * 
+   *
+   * @param <D> The class of datastore.
+   * @param <K> The class of keys in the datastore.
+   * @param <T> The class of persistent objects in the datastore.
    * @param dataStoreClass The datastore implementation class.
    * @param keyClass The key class.
    * @param persistent The value class.
    * @param conf {@link Configuration} to be used be the store.
    * @param schemaName A default schemaname that will be put on the properties.
    * @return A new store instance.
-   * @throws GoraException
+   * @throws GoraException If any error occurred.
    */
   public static <D extends DataStore<K,T>, K, T extends Persistent>
   D createDataStore(Class<D> dataStoreClass , Class<K> keyClass, 
@@ -132,7 +138,10 @@ public class DataStoreFactory{
 
   /**
    * Instantiate a new {@link DataStore}.
-   * 
+   *
+   * @param <D> The class of datastore.
+   * @param <K> The class of keys in the datastore.
+   * @param <T> The class of persistent objects in the datastore.
    * @param dataStoreClass The datastore implementation class.
    * @param keyClass The key class.
    * @param persistent The value class.
@@ -140,7 +149,7 @@ public class DataStoreFactory{
    * @param properties The properties to be used be the store.
    * @param schemaName A default schemaname that will be put on the properties.
    * @return A new store instance.
-   * @throws GoraException
+   * @throws GoraException If any error occurred.
    */
   public static <D extends DataStore<K,T>, K, T extends Persistent>
   D createDataStore(Class<D> dataStoreClass, Class<K> keyClass
@@ -165,14 +174,17 @@ public class DataStoreFactory{
 
   /**
    * Instantiate a new {@link DataStore}. Uses 'null' schema.
-   * 
+   *
+   * @param <D> The class of datastore.
+   * @param <K> The class of keys in the datastore.
+   * @param <T> The class of persistent objects in the datastore.
    * @param dataStoreClass The datastore implementation class.
    * @param keyClass The key class.
    * @param persistent The value class.
    * @param conf {@link Configuration} to be used be the store.
    * @param properties The properties to be used be the store.
    * @return A new store instance.
-   * @throws GoraException
+   * @throws GoraException If any error occurred.
    */
   public static <D extends DataStore<K,T>, K, T extends Persistent>
   D createDataStore(Class<D> dataStoreClass
@@ -186,13 +198,16 @@ public class DataStoreFactory{
 
   /**
    * Instantiate a new {@link DataStore}. Uses default properties. Uses 'null' schema.
-   * 
+   *
+   * @param <D> The class of datastore.
+   * @param <K> The class of keys in the datastore.
+   * @param <T> The class of persistent objects in the datastore.
    * @param dataStoreClass The datastore implementation class.
    * @param keyClass The key class.
    * @param persistentClass The value class.
    * @param conf {@link Configuration} to be used be the store.
    * @return A new store instance.
-   * @throws GoraException
+   * @throws GoraException If any error occurred.
    */
   public static <D extends DataStore<K,T>, K, T extends Persistent>
   D getDataStore( Class<D> dataStoreClass, Class<K> keyClass,
@@ -203,13 +218,15 @@ public class DataStoreFactory{
 
   /**
    * Instantiate a new {@link DataStore}. Uses default properties. Uses 'null' schema.
-   * 
+   *
+   * @param <K> The class of keys in the datastore.
+   * @param <T> The class of persistent objects in the datastore.
    * @param dataStoreClass The datastore implementation class <i>as string</i>.
    * @param keyClass The key class.
    * @param persistentClass The value class.
    * @param conf {@link Configuration} to be used be the store.
    * @return A new store instance.
-   * @throws GoraException
+   * @throws GoraException If any error occurred.
    */
   @SuppressWarnings("unchecked")
   public static <K, T extends Persistent> DataStore<K, T> getDataStore(
@@ -228,12 +245,14 @@ public class DataStoreFactory{
 
   /**
    * Instantiate a new {@link DataStore}. Uses default properties. Uses 'null' schema.
-   * 
+   *
+   * @param <K> The class of keys in the datastore.
+   * @param <T> The class of persistent objects in the datastore.
    * @param keyClass The key class <i>as string</i>.
    * @param persistentClass The value class <i>as string</i>.
    * @param conf {@link Configuration} to be used be the store.
    * @return A new store instance.
-   * @throws GoraException
+   * @throws GoraException If any error occurred.
    */
   @SuppressWarnings({ "unchecked" })
   public static <K, T extends Persistent> DataStore<K, T> getDataStore(
@@ -255,14 +274,15 @@ public class DataStoreFactory{
 
   /**
    * Instantiate a new {@link DataStore}. Uses default properties. Uses 'null' schema.
-   * 
-   * @param dataStoreClass The datastore implementation class <i>as string</i>.
+   *
+   * @param <K> The class of keys in the datastore.
+   * @param <T> The class of persistent objects in the datastore.
    * @param keyClass The key class <i>as string</i>.
    * @param persistentClass The value class <i>as string</i>.
    * @param props Gora properties configuration
    * @param conf {@link Configuration} to be used be the store.
    * @return A new store instance.
-   * @throws GoraException
+   * @throws GoraException If any error occurred.
    */
   @SuppressWarnings({ "unchecked" })
   public static <K, T extends Persistent> DataStore<K, T> getDataStore(
@@ -287,14 +307,16 @@ public class DataStoreFactory{
   
   /**
    * Instantiate a new {@link DataStore}. Uses default properties. Uses 'null' schema.
-   * 
+   *
+   * @param <K> The class of keys in the datastore.
+   * @param <T> The class of persistent objects in the datastore.
    * @param dataStoreClass The datastore implementation class <i>as string</i>.
    * @param keyClass The key class <i>as string</i>.
    * @param persistentClass The value class <i>as string</i>.
    * @param props Gora properties configuration
    * @param conf {@link Configuration} to be used be the store.
    * @return A new store instance.
-   * @throws GoraException
+   * @throws GoraException If any error occurred.
    */
   @SuppressWarnings({ "unchecked" })
   public static <K, T extends Persistent> DataStore<K, T> getDataStore(
@@ -323,11 +345,13 @@ public class DataStoreFactory{
    * Note:
    *    consider that default dataStore is always visible
    *
+   * @param <K> The class of keys in the datastore.
+   * @param <T> The class of persistent objects in the datastore.
    * @param keyClass The key class.
    * @param persistent The value class.
    * @param conf {@link Configuration} to be used be the store.
    * @return A new store instance.
-   * @throws GoraException
+   * @throws GoraException If any error occurred.
    */
   @SuppressWarnings("unchecked")
   public static <K, T extends Persistent> DataStore<K, T> getDataStore(
@@ -351,6 +375,8 @@ public class DataStoreFactory{
    * Note:
    *    consider that default dataStore is always visible
    *
+   * @param <K> The class of keys in the datastore.
+   * @param <T> The class of persistent objects in the datastore.
    * @param keyClass The key class.
    * @param persistent The value class.
    * @param conf {@link Configuration} To be used be the store.
@@ -513,7 +539,11 @@ public class DataStoreFactory{
   }
 
   /**
-   * Set a property
+   * Set a property.
+   *
+   * @param properties Properties which hold keys from which we can obtain values for datastore mappings.
+   * @param baseKey Base key name.
+   * @param value Property value.
    */
   private static void setProperty(Properties properties, String baseKey, String value) {
     if(value != null) {
@@ -522,7 +552,12 @@ public class DataStoreFactory{
   }
 
   /**
-   * Sets a property for the datastore of the given class
+   * Sets a property for the datastore of the given class.
+   *
+   * @param properties Properties which hold keys from which we can obtain values for datastore mappings.
+   * @param dataStoreClass The datastore implementation class.
+   * @param baseKey Base key name
+   * @param value Property value.
    */
   private static<D extends DataStore<K,T>, K, T extends Persistent>
   void setProperty(Properties properties, Class<D> dataStoreClass, String baseKey, String value) {
@@ -530,7 +565,10 @@ public class DataStoreFactory{
   }
 
   /**
-   * Gets the default schema name of a given store class 
+   * Gets the default schema name of a given store class.
+   *
+   * @param properties Properties which hold keys from which we can obtain values for datastore mappings.
+   * @param store Data store {@link org.apache.gora.store.DataStore} object to get default schema name.
    */
   public static String getDefaultSchemaName(Properties properties, DataStore<?,?> store) {
     return findProperty(properties, store, SCHEMA_NAME, null);
@@ -538,6 +576,9 @@ public class DataStoreFactory{
 
   /**
    * Sets the default schema name.
+   *
+   * @param properties Properties which hold keys from which we can obtain values for datastore mappings.
+   * @param schemaName Schema name.
    */
   public static void setDefaultSchemaName(Properties properties, String schemaName) {
     if (schemaName != null) {
@@ -546,7 +587,14 @@ public class DataStoreFactory{
   }
 
   /**
-   * Sets the default schema name to be used by the datastore of the given class
+   * Sets the default schema name to be used by the datastore of the given class.
+   *
+   * @param <D> The class of datastore.
+   * @param <K> The class of keys in the datastore.
+   * @param <T> The class of persistent objects in the datastore.
+   * @param properties Properties which hold keys from which we can obtain values for datastore mappings.
+   * @param dataStoreClass The datastore implementation class.
+   * @param schemaName Schema name.
    */
   public static<D extends DataStore<K,T>, K, T extends Persistent>
   void setDefaultSchemaName(Properties properties, Class<D> dataStoreClass, String schemaName) {
