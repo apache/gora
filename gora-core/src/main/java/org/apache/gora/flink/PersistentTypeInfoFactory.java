@@ -20,7 +20,7 @@ package org.apache.gora.flink;
 
 import org.apache.flink.api.common.typeinfo.TypeInfoFactory;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.apache.flink.api.java.typeutils.GenericTypeInfo;
+import org.apache.gora.persistency.impl.PersistentBase;
 
 import java.lang.reflect.Type;
 import java.util.Map;
@@ -29,17 +29,16 @@ import java.util.Map;
  * Create Flink Type info factory for persistent data beans. Type information contains details
  * such as how the values of particular type serialized and deserialized.
  */
-public class PersistentTypeInfoFactory<T> extends TypeInfoFactory<T> {
+public class PersistentTypeInfoFactory<T extends PersistentBase> extends TypeInfoFactory<T> {
 
   @Override
   public TypeInformation<T> createTypeInfo(Type type,
                                            Map<String, TypeInformation<?>> genericParameters) {
-    // Return GenericTypeInfo here and serialization of all generic types in Flink are carried out by KryoSerializer.
-    // Possibly can register custom serializer for Persistent beans with Kryo Eg:-
-    // env.getConfig().registerTypeWithKryoSerializer(PersistentBase.class, PersistentSerializer.class);
-    // One way plugin custom serialization is to extend TypeInformation<T> interface and have our own,
+    // Return PersistentTypeInfo which is extended GenericTypeInfo leverage own serializer.
+    // - serialization of all generic types in Flink are carried out by KryoSerializer.
+    // One way of plugin custom serialization is to extend TypeInformation<T> interface and have our own,
     // custom Flink type information and have our own custom serializer registered there,
     // based on serialization performance on different engines.
-    return new GenericTypeInfo<T>((Class) type);
+    return new PersistentTypeInfo<T>((Class) type);
   }
 }

@@ -63,7 +63,7 @@ public abstract class QueryBase<K, T extends PersistentBase>
 
   protected long limit = -1;
 
-  private Configuration conf;
+  protected Configuration conf;
 
   public QueryBase(DataStore<K,T> dataStore) {
     this.dataStore = (DataStoreBase<K, T>)dataStore;

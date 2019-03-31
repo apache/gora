@@ -117,9 +117,6 @@ public class FlinkWordCount {
     log.info("Total WebPage Count: {}", webPages.count());
     log.info("Total TokenDatum count: {}", wordCounts.count());
 
-    inStore.close();
-    outStore.close();
-
     log.info("Flink Job completed with success");
 
     return 1;

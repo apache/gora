@@ -197,12 +197,6 @@
       <artifactId>hadoop-minicluster</artifactId>
       <scope>test</scope>
     </dependency>
-      <dependency>
-          <groupId>org.apache.lucene</groupId>
-          <artifactId>lucene-suggest</artifactId>
-          <version>RELEASE</version>
-          <scope>compile</scope>
-      </dependency>
 
   </dependencies>
 
