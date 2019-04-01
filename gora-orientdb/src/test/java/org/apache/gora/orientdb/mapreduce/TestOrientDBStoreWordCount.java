@@ -15,32 +15,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.gora.mongodb.mapreduce;
+package org.apache.gora.orientdb.mapreduce;
 
+import org.apache.gora.GoraTestDriver;
 import org.apache.gora.examples.generated.TokenDatum;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.mapreduce.MapReduceTestUtils;
-import org.apache.gora.mongodb.store.MongoStore;
+import org.apache.gora.orientdb.GoraOrientDBTestDriver;
+import org.apache.gora.orientdb.store.OrientDBStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
- * Tests related to {@link org.apache.gora.mongodb.store.MongoStore} using
+ * Tests related to {@link org.apache.gora.orientdb.store.OrientDBStore} using
  * mapreduce.
  */
-public class TestMongoStoreWordCount extends GoraMongoMapredTest {
+public class TestOrientDBStoreWordCount  {
 
-  private MongoStore<String, WebPage> webPageStore;
-  private MongoStore<String, TokenDatum> tokenStore;
+  private OrientDBStore<String, WebPage> webPageStore;
+  private OrientDBStore<String, TokenDatum> tokenStore;
+
+  protected static GoraTestDriver testDriver = new GoraOrientDBTestDriver();
 
   @Before
   public void setUp() throws Exception {
-    webPageStore = DataStoreFactory.getDataStore(MongoStore.class,
+    testDriver.setUpClass();
+    webPageStore = DataStoreFactory.getDataStore(OrientDBStore.class,
         String.class, WebPage.class, testDriver.getConfiguration());
-    tokenStore = DataStoreFactory.getDataStore(MongoStore.class, String.class,
+    tokenStore = DataStoreFactory.getDataStore(OrientDBStore.class, String.class,
         TokenDatum.class, testDriver.getConfiguration());
   }
 
@@ -48,25 +52,18 @@ public class TestMongoStoreWordCount extends GoraMongoMapredTest {
   public void tearDown() throws Exception {
     webPageStore.close();
     tokenStore.close();
+    testDriver.tearDownClass();
   }
 
   @Test
   public void testWordCount() throws Exception {
     MapReduceTestUtils.testWordCount(testDriver.getConfiguration(),
-        webPageStore, tokenStore);
+            webPageStore, tokenStore);
   }
 
   @Test
   public void testFlinkWordCountFlink() throws Exception {
     MapReduceTestUtils.testFlinkWordCount(testDriver.getConfiguration(), webPageStore, tokenStore);
-  }
-
-  //todo fix config
-  @Ignore
-  @Test
-  public void testSparkWordCount() throws Exception {
-    MapReduceTestUtils.testSparkWordCount(testDriver.getConfiguration(),
-        webPageStore, tokenStore);
   }
 
 }
