@@ -32,7 +32,9 @@ import org.apache.gora.util.AvroUtils;
 import java.io.IOException;
 
 /**
- * Custom Serializer extends TypeSerializer<T> written to serialize and deserialize Gora data beans.
+ * Custom Serializer extends TypeSerializer written to serialize and deserialize Gora data beans.
+ *
+ * @param <T> Persistent record type.
  */
 public class PersistentTypeSerializer<T extends PersistentBase> extends TypeSerializerSingleton<T> {
 
