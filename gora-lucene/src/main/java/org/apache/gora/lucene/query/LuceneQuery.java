@@ -17,11 +17,15 @@
  */
 package org.apache.gora.lucene.query;
 
-import org.apache.gora.persistency.impl.PersistentBase;
-import org.apache.gora.query.impl.QueryBase;
 import org.apache.gora.lucene.store.LuceneMapping;
 import org.apache.gora.lucene.store.LuceneStore;
+import org.apache.gora.persistency.impl.PersistentBase;
+import org.apache.gora.query.impl.QueryBase;
 import org.apache.gora.store.DataStore;
+import org.apache.lucene.document.DoublePoint;
+import org.apache.lucene.document.FloatPoint;
+import org.apache.lucene.document.IntPoint;
+import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
@@ -29,44 +33,65 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TermRangeQuery;
 
 /**
- * LuceneQuery hold in memory Gora representation for  {@link org.apache.lucene.search.Query}
+ * LuceneQuery hold in memory Gora representation for
+ * {@link org.apache.lucene.search.Query}
  */
 public class LuceneQuery<K, T extends PersistentBase> extends QueryBase<K, T> {
-  private final LuceneStore<K, T> store;
 
-  public LuceneQuery() {
-    super(null);
-    store = null;
-  }
+    private final LuceneStore<K, T> store;
 
-  public LuceneQuery(DataStore<K, T> dataStore) {
-    super(dataStore);
-    store = (LuceneStore<K, T>) dataStore;
-  }
-
-  public Query toLuceneQuery() {
-    LuceneMapping mapping = store.getMapping();
-    String pk = mapping.getPrimaryKey();
-    Query q;
-    if (getKey() != null) {
-      q = new TermQuery(new Term(pk, getKey().toString()));
-    } else {
-      //TODO: Change this to a NumericRangeQuery when necessary (it's faster)
-      String lower = null;
-      String upper = null;
-      if (getStartKey() != null) {
-        //Do we need to escape the term?
-        lower = getStartKey().toString();
-      }
-      if (getEndKey() != null) {
-        upper = getEndKey().toString();
-      }
-      if (upper == null && lower == null) {
-        q = new MatchAllDocsQuery();
-      } else {
-        q = TermRangeQuery.newStringRange(pk, lower, upper, true, true);
-      }
+    public LuceneQuery() {
+        super(null);
+        store = null;
     }
-    return q;
-  }
+
+    public LuceneQuery(DataStore<K, T> dataStore) {
+        super(dataStore);
+        store = (LuceneStore<K, T>) dataStore;
+    }
+
+    public Query toLuceneQuery() {
+        LuceneMapping mapping = store.getMapping();
+        String pk = mapping.getPrimaryKey();
+        Query q;
+        if (getKey() != null) {
+            q = new TermQuery(new Term(pk, getKey().toString()));
+        } else {
+            if (getEndKey() == null && getStartKey() == null) {
+                return new MatchAllDocsQuery();
+            } else {
+                q = inferType(pk, getStartKey(), getEndKey());
+            }
+        }
+        return q;
+    }
+
+    private <T> Query inferType(String pk, T lower, T upper) {
+        if (((lower != null && lower.getClass() == Integer.class)
+                || (upper != null && upper.getClass() == Integer.class))) {
+            int ilower = lower == null ? Integer.MIN_VALUE : Integer.valueOf(lower.toString());
+            int iupper = upper == null ? Integer.MAX_VALUE : Integer.valueOf(upper.toString());
+            return IntPoint.newRangeQuery(pk, ilower, iupper);
+        } else if (((lower != null && lower.getClass() == Long.class)
+                || (upper != null && upper.getClass() == Long.class))) {
+            long llower = lower == null ? Long.MIN_VALUE : Long.valueOf(lower.toString());
+            long lupper = upper == null ? Long.MAX_VALUE : Long.valueOf(upper.toString());
+            return LongPoint.newRangeQuery(pk, llower, lupper);
+        } else if (((lower != null && lower.getClass() == Float.class)
+                || (upper != null && upper.getClass() == Float.class))) {
+            float flower = lower == null ? Float.MIN_VALUE : Float.valueOf(lower.toString());
+            float fupper = upper == null ? Float.MAX_VALUE : Float.valueOf(upper.toString());
+            return FloatPoint.newRangeQuery(pk, flower, fupper);
+        } else if (((lower != null && lower.getClass() == Double.class)
+                || (upper != null && upper.getClass() == Double.class))) {
+            double dlower = lower == null ? Double.MIN_VALUE : Double.valueOf(lower.toString());
+            double dupper = upper == null ? Double.MAX_VALUE : Double.valueOf(upper.toString());
+            return DoublePoint.newRangeQuery(pk, dlower, dupper);
+        } else {
+            // Infer string type by default if it cannot detect a numeric datatype.
+            String slower = lower == null ? null : lower.toString();
+            String supper = upper == null ? null : upper.toString();
+            return TermRangeQuery.newStringRange(pk, slower, supper, true, true);
+        }
+    }
 }
