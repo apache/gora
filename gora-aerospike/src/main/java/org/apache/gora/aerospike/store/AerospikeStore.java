@@ -185,16 +185,16 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
       throw new GoraException(e);
     }
   }
-	
-	@Override
-	public boolean exists(K key) throws GoraException {
-		try {
-			Key recordKey = getAerospikeKey(key);
-			return aerospikeClient.exists(aerospikeParameters.getAerospikeMapping().getReadPolicy(), recordKey);
-		} catch (Exception e) {
-			throw new GoraException(e);
-		}
-	}
+
+  @Override
+  public boolean exists(K key) throws GoraException {
+    try {
+      Key recordKey = getAerospikeKey(key);
+      return aerospikeClient.exists(aerospikeParameters.getAerospikeMapping().getReadPolicy(), recordKey);
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
+  }
 
   /**
    * Method to insert the persistent objects with the given key to the aerospike database server.

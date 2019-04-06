@@ -195,8 +195,8 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
     }
     return getPersistent(obj, getFieldsToQuery(fields));
   }
-	
-	@SuppressWarnings("unchecked")
+
+  @SuppressWarnings("unchecked")
   @Override
   public boolean exists(K key) {
     return map.containsKey(key);

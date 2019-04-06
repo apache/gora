@@ -181,7 +181,7 @@ public class IgniteSQLBuilder {
     }
   }
 
-	/**
+  /**
    * Returns a bare SQL statement for checking if a key exists
    *
    * @param mapping The ignite mapping definition of the data store
@@ -192,8 +192,8 @@ public class IgniteSQLBuilder {
     DbSchema schema = spec.addDefaultSchema();
     DbTable aTable = schema.addTable(mapping.getTableName());
     SelectQuery selectQuery = new SelectQuery();
-		selectQuery.addCustomColumns(FunctionCall.countAll());
-		selectQuery.addFromTable(aTable);
+    selectQuery.addCustomColumns(FunctionCall.countAll());
+    selectQuery.addFromTable(aTable);
     for (int i = 0; i < mapping.getPrimaryKey().size(); i++) {
       selectQuery.addCondition(new BinaryCondition(BinaryCondition.Op.EQUAL_TO,
           new DbColumn(aTable, mapping.getPrimaryKey().get(i).getName(), null),
@@ -201,7 +201,7 @@ public class IgniteSQLBuilder {
     }
     return selectQuery.validate().toString();
   }
-	
+
   /**
    * Returns a bare SQL statement for retrieving a record from the ignite data
    * store

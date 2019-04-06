@@ -180,7 +180,7 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
    */
   public abstract T get(K key) throws GoraException;
 	
-	/**
+  /**
    * Check if key exists
    *
    * @param key key value

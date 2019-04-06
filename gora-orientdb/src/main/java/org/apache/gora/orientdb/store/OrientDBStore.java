@@ -955,4 +955,8 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
             .replace("\u00FB", "=");
   }
 
+  @Override
+  public boolean exists(K key) throws GoraException {
+    return get(key) != null;
+  }
 }

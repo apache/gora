@@ -214,18 +214,18 @@ public abstract class DataStoreTestBase {
     DataStoreTestUtil.testEmptyUpdateEmployee(employeeStore);
   }
 
-	@Test
-	public void testExists() throws Exception {
-		log.info("test method: testExists");
-		DataStoreTestUtil.testExistsEmployee(employeeStore);
-	}
-	
-	@Test
-	public void testBenchamarkExists() throws Exception {
-		log.info("test method: testBenchamarkExists");
-		DataStoreTestUtil.testBenchmarkGetExists(employeeStore);
-	}
-	
+  @Test
+  public void testExists() throws Exception {
+    log.info("test method: testExists");
+    DataStoreTestUtil.testExistsEmployee(employeeStore);
+  }
+
+  @Test
+  public void testBenchamarkExists() throws Exception {
+    log.info("test method: testBenchamarkExists");
+    DataStoreTestUtil.testBenchmarkGetExists(employeeStore);
+  }
+
   @Test
   public void testGet() throws Exception {
     log.info("test method: testGet");

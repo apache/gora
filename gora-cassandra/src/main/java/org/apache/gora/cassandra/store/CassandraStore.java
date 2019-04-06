@@ -333,10 +333,10 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
     return cassandraSerializer.schemaExists();
   }
 
-	@Override
-	public boolean exists(K key) throws GoraException {
-		return cassandraSerializer.exists(key);
-	}
+  @Override
+  public boolean exists(K key) throws GoraException {
+    return cassandraSerializer.exists(key);
+  }
 
   public enum SerializerType {
     AVRO("AVRO"), NATIVE("NATIVE");

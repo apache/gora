@@ -179,10 +179,10 @@ public class InfinispanStore<K, T extends PersistentBase> extends DataStoreBase<
       throw new GoraException(e);
     }
   }
-	
-	@Override
+
+  @Override
   public boolean exists(K key) throws GoraException {
-    LOG.debug("exists("+key+")");
+    LOG.debug("exists({})", key);
     try {
       return infinispanClient.containsKey(key);
     } catch (Exception e) {

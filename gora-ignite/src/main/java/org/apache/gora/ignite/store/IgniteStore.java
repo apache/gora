@@ -176,7 +176,7 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
     }
   }
 
-	@Override
+  @Override
   public boolean exists(K key) throws GoraException {
     Object[] keyl = null;
     if (igniteMapping.getPrimaryKey().size() == 1) {
@@ -189,9 +189,9 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
       IgniteSQLBuilder.fillSelectQuery(stmt, igniteMapping, keyl);
       ResultSet rs = stmt.executeQuery();
       rs.next();
-			int resp = rs.getInt(1);
+      int resp = rs.getInt(1);
       rs.close();
-      return resp!=0;
+      return resp != 0;
     } catch (SQLException ex) {
       throw new GoraException(ex);
     }

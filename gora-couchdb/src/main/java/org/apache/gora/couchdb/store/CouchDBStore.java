@@ -235,8 +235,8 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
       throw new GoraException(e);
     }
   }
-	
-	@Override
+
+  @Override
   public boolean exists(final K key) throws GoraException {
     try {
       return db.contains(key.toString());

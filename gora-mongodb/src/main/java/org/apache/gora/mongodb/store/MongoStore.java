@@ -380,16 +380,16 @@ DataStoreBase<K, T> {
       throw new GoraException(e);
     }
   }
-	
-	@Override
+
+  @Override
   public boolean exists(final K key) throws GoraException {
     try {
       // Prepare the MongoDB query
       BasicDBObject q = new BasicDBObject("_id", key);
-			BasicDBObject proj = new BasicDBObject();
+      BasicDBObject proj = new BasicDBObject();
       // Execute the query
       DBObject res = mongoClientColl.findOne(q, proj);
-      return res!=null;
+      return res != null;
     } catch (Exception e) {
       throw new GoraException(e);
     }

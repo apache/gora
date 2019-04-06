@@ -150,11 +150,6 @@ public abstract class DataStoreBase<K, T extends PersistentBase>
     return beanFactory;
   }
 
-	@Override
-	public boolean exists(K key) throws GoraException {
-		return get(key, new String[0]) != null;
-	}
-	
   @Override
   public T get(K key) throws GoraException {
     return get(key, getFieldsToQuery(null));

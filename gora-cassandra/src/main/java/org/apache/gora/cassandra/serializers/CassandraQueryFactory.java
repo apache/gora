@@ -313,13 +313,13 @@ class CassandraQueryFactory {
     String[] columnNames = getColumnNames(mapping, keyFields);
     return processKeys(columnNames, select);
   }
-	
-	  /**
-   * This method returns CQL Select query to check if a key exists.
-   * This method is used for Avro Serialization
-   * refer: http://docs.datastax.com/en/cql/3.3/cql/cql_reference/cqlSelect.html
+
+  /**
+   * This method returns CQL Select query to check if a key exists. This method
+   * is used for Avro Serialization refer:
+   * http://docs.datastax.com/en/cql/3.3/cql/cql_reference/cqlSelect.html
    *
-   * @param mapping   Cassandra Mapping {@link CassandraMapping}
+   * @param mapping Cassandra Mapping {@link CassandraMapping}
    * @param keyFields key fields
    * @return CQL Query
    */

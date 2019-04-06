@@ -133,4 +133,9 @@ DataStoreBase<K, T> implements IDynamoDB<K, T> {
     // TODO Auto-generated method stub
     return false;
   }
+
+  @Override
+  public boolean exists(K key) throws GoraException {
+    return get(key) != null;
+  }
 }
