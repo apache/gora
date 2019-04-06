@@ -17,6 +17,17 @@
  */
 package org.apache.gora.lucene.store;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.file.FileSystems;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Properties;
+import java.util.Set;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.specific.SpecificDatumReader;
@@ -40,7 +51,11 @@ import org.apache.hadoop.conf.Configurable;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.DoublePoint;
 import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.document.FloatPoint;
+import org.apache.lucene.document.IntPoint;
+import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.index.IndexWriter;
@@ -60,19 +75,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.file.FileSystems;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Properties;
-import java.util.Set;
 
 /**
  * {@link org.apache.gora.lucene.store.LuceneStore} is the primary class
@@ -96,7 +98,7 @@ public class LuceneStore<K, T extends PersistentBase>
 
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
-                         Properties properties) throws GoraException {
+          Properties properties) throws GoraException {
     try {
       super.initialize(keyClass, persistentClass, properties);
     } catch (GoraException ge) {
@@ -153,7 +155,6 @@ public class LuceneStore<K, T extends PersistentBase>
 
       DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
       org.w3c.dom.Document dom = db.parse(getClass().getClassLoader().getResourceAsStream(filename));
-
       Element root = dom.getDocumentElement();
 
       NodeList nl = root.getElementsByTagName("class");
@@ -301,9 +302,9 @@ public class LuceneStore<K, T extends PersistentBase>
   }
 
   private Object convertDocFieldToAvroUnion(final Schema fieldSchema,
-                                            final Schema.Field field,
-                                            final String sf,
-                                            final Document doc) throws IOException {
+          final Schema.Field field,
+          final String sf,
+          final Document doc) throws IOException {
     Object result;
     Schema.Type type0 = fieldSchema.getTypes().get(0).getType();
     Schema.Type type1 = fieldSchema.getTypes().get(1).getType();
@@ -330,9 +331,9 @@ public class LuceneStore<K, T extends PersistentBase>
   }
 
   private Object convertToIndexableFieldToAvroField(final Document doc,
-                                                    final Schema.Field field,
-                                                    final Schema fieldSchema,
-                                                    final String sf) throws IOException {
+          final Schema.Field field,
+          final Schema fieldSchema,
+          final String sf) throws IOException {
     Object result = null;
     T persistent = newPersistent();
     Object sv;
@@ -448,8 +449,8 @@ public class LuceneStore<K, T extends PersistentBase>
   }
 
   private IndexableField convertAvroUnionToDocumentField(final String sf,
-                                                         final Schema fieldSchema,
-                                                         final Object value) {
+          final Schema fieldSchema,
+          final Object value) {
     IndexableField result;
     Schema.Type type0 = fieldSchema.getTypes().get(0).getType();
     Schema.Type type1 = fieldSchema.getTypes().get(1).getType();
@@ -545,7 +546,17 @@ public class LuceneStore<K, T extends PersistentBase>
     }
     LOG.info("DOCUMENT: {}", doc);
     try {
-      doc.add(new StringField(mapping.getPrimaryKey(), key.toString(), Store.YES));
+      if (key instanceof Integer) {
+        doc.add(new IntPoint(mapping.getPrimaryKey(), ((Integer) key).intValue()));
+      } else if (key instanceof Long) {
+        doc.add(new LongPoint(mapping.getPrimaryKey(), ((Long) key).longValue()));
+      } else if (key instanceof Float) {
+        doc.add(new FloatPoint(mapping.getPrimaryKey(), ((Float) key).floatValue()));
+      } else if (key instanceof Double) {
+        doc.add(new DoublePoint(mapping.getPrimaryKey(), ((Double) key).doubleValue()));
+      } else {
+        doc.add(new StringField(mapping.getPrimaryKey(), key.toString(), Store.YES));
+      }
       LOG.info("DOCUMENT: {}", doc);
       if (get(key, null) == null) {
         writer.addDocument(doc);

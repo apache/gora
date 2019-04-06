@@ -39,3 +39,4 @@ ivy/ivy*.jar
 **/gora-solr/src/test/conf/solr-managed-schema/collection1/data/
 test_lucene_index_employee
 test_lucene_index_webpage/
+test_lucene_index_employeeint/

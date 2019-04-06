@@ -18,32 +18,40 @@
 package org.apache.gora.lucene.store;
 
 import org.apache.gora.examples.WebPageDataCreator;
+import static org.apache.gora.examples.WebPageDataCreator.SORTED_URLS;
+import static org.apache.gora.examples.WebPageDataCreator.URLS;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.query.Query;
+import org.apache.gora.query.Result;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreTestBase;
+import static org.apache.gora.store.DataStoreTestBase.log;
 import org.apache.gora.store.DataStoreTestUtil;
+import org.apache.gora.util.GoraException;
 import org.apache.gora.util.OperationNotSupportedException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.gora.examples.WebPageDataCreator.SORTED_URLS;
-import static org.apache.gora.examples.WebPageDataCreator.URLS;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertEquals;
-
-
 /**
- * TestLuceneStore class executes tests for {@link org.apache.gora.lucene.store.LuceneStore}
+ * TestLuceneStore class executes tests for
+ * {@link org.apache.gora.lucene.store.LuceneStore}
  */
 public class TestLuceneStore extends DataStoreTestBase {
 
   private static final Logger LOG = LoggerFactory.getLogger(DataStoreTestUtil.class);
+  private DataStore<Integer, EmployeeInt> employeeIntStore;
+
+  @Before
+  public void config() throws Exception {
+    employeeIntStore = testDriver.createDataStore(Integer.class, EmployeeInt.class);
+  }
 
   @BeforeClass
   public static void setUpClass() throws Exception {
@@ -67,6 +75,28 @@ public class TestLuceneStore extends DataStoreTestBase {
     //3 types union field is not supported by LuceneStore.
   }
 
+  public static void createDummySimplifiedEmployees(DataStore<Integer, EmployeeInt> dataStore) throws GoraException {
+    for (int i = 0; i < 10; i++) {
+      EmployeeInt employee = EmployeeInt.newBuilder().build();
+      employee.setSsn(i);
+      dataStore.put(i, employee);
+    }
+  }
+
+  @Test
+  public void testInferDataType() throws GoraException {
+    Query<Integer, EmployeeInt> query = employeeIntStore.newQuery();
+
+    createDummySimplifiedEmployees(employeeIntStore);
+
+    query.setStartKey(0);
+    query.setEndKey(10);
+    Result<Integer, EmployeeInt> results = query.execute();
+
+    assertEquals(10, results.size());
+
+  }
+
   @Test
   public void testDeleteByQueryFields() throws Exception {
     log.info("test method: testQueryByQueryFields");
@@ -83,8 +113,8 @@ public class TestLuceneStore extends DataStoreTestBase {
     WebPageDataCreator.createWebPageData(store);
 
     query = store.newQuery();
-    query.setFields("outlinks"
-            , "parsedContent", "content");
+    query.setFields("outlinks",
+            "parsedContent", "content");
 
     DataStoreTestUtil.assertNumResults(store.newQuery(), URLS.length);
     store.deleteByQuery(query);
