@@ -434,6 +434,11 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
    */
   @Override
   public void close() {
+    try {
+      flush();
+    } catch (Exception ex) {
+      LOG.error("Error occurred while flushing data to OrientDB : ", ex);
+    }
     docBatch.clear();
     remoteServerAdmin.close();
     connectionPool.close();

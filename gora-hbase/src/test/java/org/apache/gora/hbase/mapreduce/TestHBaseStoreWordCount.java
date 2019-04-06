@@ -59,6 +59,11 @@ public class TestHBaseStoreWordCount {
     MapReduceTestUtils.testWordCount(cluster.getConf(), webPageStore, tokenStore);
   }
 
+  @Test
+  public void testFlinkWordCountFlink() throws Exception {
+    MapReduceTestUtils.testFlinkWordCount(cluster.getConf(), webPageStore, tokenStore);
+  }
+
   //todo fix config
   @Ignore
   @Test

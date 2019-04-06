@@ -36,7 +36,7 @@ public class GoraInputSplit extends InputSplit
   implements Writable, Configurable {
 
   protected PartitionQuery<?,?> query;
-  private Configuration conf;
+  protected Configuration conf;
   
   public GoraInputSplit() {
   }
@@ -73,6 +73,8 @@ public class GoraInputSplit extends InputSplit
   @Override
   public void readFields(DataInput in) throws IOException {
     try {
+      conf =  new Configuration();
+      conf.readFields(in);
       query = IOUtils.deserialize(conf, in, null);
     } catch (ClassNotFoundException ex) {
       throw new IOException(ex);
@@ -81,6 +83,7 @@ public class GoraInputSplit extends InputSplit
 
   @Override
   public void write(DataOutput out) throws IOException {
+    conf.write(out);
     IOUtils.serialize(getConf(), out, query);
   }
   
