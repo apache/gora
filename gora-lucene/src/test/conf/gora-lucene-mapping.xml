@@ -18,7 +18,7 @@
 
 <gora-otd>
 
-  <class name="org.apache.gora.lucene.store.EmployeeInt" keyClass="java.lang.Integer">
+  <class name="org.apache.gora.examples.generated.EmployeeInt" keyClass="java.lang.Integer">
     <primarykey column="ssn"/>
     <field name="ssn" column="ssn"/>
   </class>

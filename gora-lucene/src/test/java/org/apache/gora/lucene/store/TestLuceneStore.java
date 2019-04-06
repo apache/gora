@@ -20,6 +20,7 @@ package org.apache.gora.lucene.store;
 import org.apache.gora.examples.WebPageDataCreator;
 import static org.apache.gora.examples.WebPageDataCreator.SORTED_URLS;
 import static org.apache.gora.examples.WebPageDataCreator.URLS;
+import org.apache.gora.examples.generated.EmployeeInt;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;

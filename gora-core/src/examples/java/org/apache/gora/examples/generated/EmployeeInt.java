@@ -15,11 +15,11 @@
  *See the License for the specific language governing permissions and
  *limitations under the License.
  */
-package org.apache.gora.lucene.store;
+package org.apache.gora.examples.generated;
 
 public class EmployeeInt extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
 
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"EmployeeInt\",\"namespace\":\"org.apache.gora.examples.generated\",\"fields\":[{\"name\":\"ssn\",\"type\":\"int\",\"default\":100}],\"default\":null}");
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"EmployeeInt\",\"namespace\":\"org.apache.gora.examples.generated\",\"fields\":[{\"name\":\"ssn\",\"type\":\"int\",\"default\":0}],\"default\":null}");
   private static final long serialVersionUID = -333122997722160004L;
 
   /**
