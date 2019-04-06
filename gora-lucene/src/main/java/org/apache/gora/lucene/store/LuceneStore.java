@@ -547,13 +547,13 @@ public class LuceneStore<K, T extends PersistentBase>
     LOG.info("DOCUMENT: {}", doc);
     try {
       if (key instanceof Integer) {
-        doc.add(new IntPoint(mapping.getPrimaryKey(), ((Integer) key).intValue()));
+        doc.add(new IntPoint(mapping.getPrimaryKey(), (Integer) key));
       } else if (key instanceof Long) {
-        doc.add(new LongPoint(mapping.getPrimaryKey(), ((Long) key).longValue()));
+        doc.add(new LongPoint(mapping.getPrimaryKey(), (Long) key));
       } else if (key instanceof Float) {
-        doc.add(new FloatPoint(mapping.getPrimaryKey(), ((Float) key).floatValue()));
+        doc.add(new FloatPoint(mapping.getPrimaryKey(), (Float) key));
       } else if (key instanceof Double) {
-        doc.add(new DoublePoint(mapping.getPrimaryKey(), ((Double) key).doubleValue()));
+        doc.add(new DoublePoint(mapping.getPrimaryKey(), (Double) key));
       } else {
         doc.add(new StringField(mapping.getPrimaryKey(), key.toString(), Store.YES));
       }

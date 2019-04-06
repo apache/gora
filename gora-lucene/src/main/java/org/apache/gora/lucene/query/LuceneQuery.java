@@ -66,26 +66,26 @@ public class LuceneQuery<K, T extends PersistentBase> extends QueryBase<K, T> {
     return q;
   }
 
-  private <T> Query inferType(String pk, T lower, T upper) {
+  private <K> Query inferType(String pk, K lower, K upper) {
     if (((lower != null && lower.getClass() == Integer.class)
             || (upper != null && upper.getClass() == Integer.class))) {
-      int ilower = lower == null ? Integer.MIN_VALUE : Integer.valueOf(lower.toString());
-      int iupper = upper == null ? Integer.MAX_VALUE : Integer.valueOf(upper.toString());
+      int ilower = lower == null ? Integer.MIN_VALUE : (Integer) lower;
+      int iupper = upper == null ? Integer.MAX_VALUE : (Integer) upper;
       return IntPoint.newRangeQuery(pk, ilower, iupper);
     } else if (((lower != null && lower.getClass() == Long.class)
             || (upper != null && upper.getClass() == Long.class))) {
-      long llower = lower == null ? Long.MIN_VALUE : Long.valueOf(lower.toString());
-      long lupper = upper == null ? Long.MAX_VALUE : Long.valueOf(upper.toString());
+      long llower = lower == null ? Long.MIN_VALUE : (Long) lower;
+      long lupper = upper == null ? Long.MAX_VALUE : (Long) upper;
       return LongPoint.newRangeQuery(pk, llower, lupper);
     } else if (((lower != null && lower.getClass() == Float.class)
             || (upper != null && upper.getClass() == Float.class))) {
-      float flower = lower == null ? Float.MIN_VALUE : Float.valueOf(lower.toString());
-      float fupper = upper == null ? Float.MAX_VALUE : Float.valueOf(upper.toString());
+      float flower = lower == null ? Float.MIN_VALUE : (Float) lower;
+      float fupper = upper == null ? Float.MAX_VALUE : (Float) upper;
       return FloatPoint.newRangeQuery(pk, flower, fupper);
     } else if (((lower != null && lower.getClass() == Double.class)
             || (upper != null && upper.getClass() == Double.class))) {
-      double dlower = lower == null ? Double.MIN_VALUE : Double.valueOf(lower.toString());
-      double dupper = upper == null ? Double.MAX_VALUE : Double.valueOf(upper.toString());
+      double dlower = lower == null ? Double.MIN_VALUE : (Double) lower;
+      double dupper = upper == null ? Double.MAX_VALUE : (Double) upper;
       return DoublePoint.newRangeQuery(pk, dlower, dupper);
     } else {
       // Infer string type by default if it cannot detect a numeric datatype.

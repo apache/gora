@@ -32,7 +32,6 @@ import org.apache.gora.util.OperationNotSupportedException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -46,12 +45,6 @@ import org.slf4j.LoggerFactory;
 public class TestLuceneStore extends DataStoreTestBase {
 
   private static final Logger LOG = LoggerFactory.getLogger(DataStoreTestUtil.class);
-  private DataStore<Integer, EmployeeInt> employeeIntStore;
-
-  @Before
-  public void config() throws Exception {
-    employeeIntStore = testDriver.createDataStore(Integer.class, EmployeeInt.class);
-  }
 
   @BeforeClass
   public static void setUpClass() throws Exception {
@@ -85,6 +78,9 @@ public class TestLuceneStore extends DataStoreTestBase {
 
   @Test
   public void testInferDataType() throws GoraException {
+    DataStore<Integer, EmployeeInt> employeeIntStore;
+    employeeIntStore = testDriver.createDataStore(Integer.class, EmployeeInt.class);
+
     Query<Integer, EmployeeInt> query = employeeIntStore.newQuery();
 
     createDummySimplifiedEmployees(employeeIntStore);
