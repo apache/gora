@@ -55,16 +55,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.util.Arrays;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertNotNull;
-
 /**
  * Test case for HBaseStore.
  */
@@ -133,6 +123,7 @@ public class TestHBaseStore extends DataStoreTestBase {
     // to retrieve the union correctly
     
     // Test writing+reading a null value. FIELD in HBASE MUST become DELETED
+    webPageStore = testDriver.createDataStore(String.class, WebPage.class);
     WebPage page = webPageStore.get("com.example/http") ;
     page.setContent(null) ;
     webPageStore.put("com.example/http", page) ;
