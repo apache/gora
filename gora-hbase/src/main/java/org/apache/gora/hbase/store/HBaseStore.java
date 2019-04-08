@@ -626,7 +626,7 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
   private void addTimeRange(Get get, Query<K, T> query) throws IOException {
     if(query.getStartTime() > 0 || query.getEndTime() > 0) {
       if(query.getStartTime() == query.getEndTime()) {
-        get.setTimeStamp(query.getStartTime());
+        get.setTimestamp(query.getStartTime());
       } else {
         long startTime = query.getStartTime() > 0 ? query.getStartTime() : 0;
         long endTime = query.getEndTime() > 0 ? query.getEndTime() : Long.MAX_VALUE;
