@@ -62,7 +62,7 @@ public class TestMongoStoreWordCount extends GoraMongoMapredTest {
   }
 
   //todo fix config
-  @Ignore
+  //@Ignore
   @Test
   public void testSparkWordCount() throws Exception {
     MapReduceTestUtils.testSparkWordCount(testDriver.getConfiguration(),

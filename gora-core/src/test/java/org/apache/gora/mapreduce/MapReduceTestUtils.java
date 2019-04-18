@@ -123,7 +123,7 @@ public class MapReduceTestUtils {
     //run Spark
     SparkWordCount wordCount = new SparkWordCount();
     wordCount.wordCount(inStore, outStore);
-
+    
     //assert results
     HashMap<String, Integer> actualCounts = new HashMap<>();
     for(String content : WebPageDataCreator.CONTENTS) {
