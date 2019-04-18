@@ -64,7 +64,7 @@ public class WebPageDataCreator {
   }
   
   public static final String[] CONTENTS = {
-    //null,
+     null,
     "foo",
     "foo1 bar1 baz1",
     "a b c d e",
@@ -74,7 +74,7 @@ public class WebPageDataCreator {
     "a b b b b b a",
     "a a a",
     "foo bar baz",
-    "fck fck dck",
+    //"fck fck dck",
   };
   
   public static final int[][] LINKS = {
