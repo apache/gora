@@ -210,7 +210,7 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
           admin.close();
         }
       } catch (IOException e) {
-        //Ignore
+        LOG.error("An error occurred whilst closing HBase Admin. ", e);
       }
     }
   }
@@ -235,7 +235,7 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
           admin.close();
         }
       } catch (IOException e) {
-        //Ignore
+        LOG.error("An error occurred whilst closing HBase Admin. ", e);
       }
     }
   }
@@ -254,7 +254,7 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
           admin.close();
         }
       } catch (IOException e) {
-        //Ignore
+        LOG.error("An error occurred whilst closing HBase Admin. ", e);
       }
     }
   }
