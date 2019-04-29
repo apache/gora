@@ -35,13 +35,11 @@ import org.apache.gora.examples.generated.Metadata;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Ignore
 public class TestHBaseByteInterface {
 
   private static final Logger LOG = LoggerFactory.getLogger(TestHBaseByteInterface.class);
