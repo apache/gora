@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 
@@ -314,21 +315,7 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
         addPutsAndDeletes(put, delete, o, field.schema().getType(),
                 field.schema(), hcol, hcol.getQualifier());
       }
-
-      if (put.size() > 0) {
-        if (delete.size() > 0) {
-          RowMutations putAndDelete = new RowMutations(keyRaw);
-          putAndDelete.add(delete);
-          putAndDelete.add(put);
-          table.mutateRow(putAndDelete);
-        } else {
-          table.put(put);
-        }
-      } else {
-        if (delete.size() > 0) {
-          table.delete(delete);
-        }
-      }
+      table.updateRow(keyRaw, put, delete);
     } catch (GoraException e) {
       throw e;
     } catch (Exception e) {
@@ -367,12 +354,17 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       } else {
         delete.addColumns(hcol.getFamily(), qualifier);
       }
-      @SuppressWarnings({ "rawtypes", "unchecked" })
-      Set<Entry> set = ((Map) o).entrySet();
-      for (@SuppressWarnings("rawtypes") Entry entry : set) {
-        byte[] qual = toBytes(entry.getKey());
-        addPutsAndDeletes(put, delete, entry.getValue(), schema.getValueType()
-            .getType(), schema.getValueType(), hcol, qual);
+      if (Objects.nonNull(qualifier)) {
+        byte[] serializedBytes = toBytes(o, schema);
+        put.addColumn(hcol.getFamily(), qualifier, serializedBytes);
+      } else {
+        @SuppressWarnings({"rawtypes", "unchecked"})
+        Set<Entry> set = ((Map) o).entrySet();
+        for (@SuppressWarnings("rawtypes") Entry entry : set) {
+          byte[] qual = toBytes(entry.getKey());
+          addPutsAndDeletes(put, delete, entry.getValue(), schema.getValueType()
+                  .getType(), schema.getValueType(), hcol, qual);
+        }
       }
       break;
     case ARRAY:
@@ -583,6 +575,12 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       addFamilyOrColumn(get, col, resolvedSchema);
       break;
     case MAP:
+      if (Objects.nonNull(col.qualifier)) {
+        get.addColumn(col.family, col.qualifier);
+      } else {
+        get.addFamily(col.family);
+      }
+      break;
     case ARRAY:
       get.addFamily(col.family);
       break;
@@ -613,6 +611,12 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       addFamilyOrColumn(scan, col, resolvedSchema);
       break;
     case MAP:
+      if (Objects.nonNull(col.qualifier)) {
+        scan.addColumn(col.family, col.qualifier);
+      } else {
+        scan.addFamily(col.family);
+      }
+      break;
     case ARRAY:
       scan.addFamily(col.family);
       break;
@@ -646,6 +650,11 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       addFamilyOrColumn(delete, col, resolvedSchema);
       break;
     case MAP:
+      if (Objects.nonNull(col.qualifier )) {
+        delete.addColumn(col.family, col.qualifier);
+      } else {
+        delete.addFamily(col.family);
+      }
     case ARRAY:
       delete.addFamily(col.family);
       break;
@@ -712,25 +721,33 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       }
       break;
     case MAP:
-      NavigableMap<byte[], byte[]> qualMap = result.getNoVersionMap().get(
-          col.getFamily());
-      if (qualMap == null) {
-        return;
+      if (Objects.nonNull(col.getQualifier())) {
+        byte[] val = result.getValue(col.getFamily(), col.getQualifier());
+        if (val == null) {
+          return;
+        }
+        setField(persistent, field, val);
+      } else {
+        NavigableMap<byte[], byte[]> qualMap = result.getNoVersionMap().get(
+                col.getFamily());
+        if (qualMap == null) {
+          return;
+        }
+        Schema valueSchema = fieldSchema.getValueType();
+        Map<Utf8, Object> map = new HashMap<>();
+        for (Entry<byte[], byte[]> e : qualMap.entrySet()) {
+          map.put(new Utf8(Bytes.toString(e.getKey())),
+                  fromBytes(valueSchema, e.getValue()));
+        }
+        setField(persistent, field, map);
       }
-      Schema valueSchema = fieldSchema.getValueType();
-      Map<Utf8, Object> map = new HashMap<>();
-      for (Entry<byte[], byte[]> e : qualMap.entrySet()) {
-        map.put(new Utf8(Bytes.toString(e.getKey())),
-            fromBytes(valueSchema, e.getValue()));
-      }
-      setField(persistent, field, map);
       break;
     case ARRAY:
-      qualMap = result.getFamilyMap(col.getFamily());
+      NavigableMap<byte[], byte[]> qualMap = result.getFamilyMap(col.getFamily());
       if (qualMap == null) {
         return;
       }
-      valueSchema = fieldSchema.getElementType();
+      Schema valueSchema = fieldSchema.getElementType();
       ArrayList<Object> arrayList = new ArrayList<>();
       DirtyListWrapper<Object> dirtyListWrapper = new DirtyListWrapper<>(arrayList);
       for (Entry<byte[], byte[]> e : qualMap.entrySet()) {

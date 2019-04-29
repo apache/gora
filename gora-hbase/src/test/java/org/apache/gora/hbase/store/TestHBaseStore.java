@@ -47,8 +47,15 @@ import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Admin;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
+import org.apache.hadoop.hbase.client.ColumnFamilyDescriptor;
+import org.apache.hadoop.hbase.client.ColumnFamilyDescriptorBuilder;
+import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Table;
+import org.apache.hadoop.hbase.client.TableDescriptor;
+import org.apache.hadoop.hbase.client.TableDescriptorBuilder;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -316,5 +323,43 @@ public class TestHBaseStore extends DataStoreTestBase {
   @Ignore("HBase does not support Result#size() without limit set")
   @Override
   public void testResultSizeKeyRange() throws Exception {
+  }
+
+  @Test
+  public void testNewVersionBehavior() throws IOException {
+    // Following Test fails in HBase 2.0.5 when NEW_VERSION_BEHAVIOR == true
+    // Persisting for cases where qualifier ==  null, deleting row does not delete the column family.
+    // Once these issues are fixed, we could remove the workarounds we have added on
+    // HBaseDataStore #put method.
+    Connection conn = ConnectionFactory.createConnection(conf);
+
+    TableName test = TableName.valueOf("Test");
+    TableDescriptorBuilder tableDescBuilder = TableDescriptorBuilder.newBuilder(test);
+    ColumnFamilyDescriptorBuilder columnDescBuilder = ColumnFamilyDescriptorBuilder
+            .newBuilder(Bytes.toBytes("test-family"));
+    columnDescBuilder.setNewVersionBehavior(true);
+    ColumnFamilyDescriptor columnDescriptor = columnDescBuilder.build();
+    tableDescBuilder.addColumnFamily(columnDescriptor);
+    TableDescriptor tableDescriptor = tableDescBuilder.build();
+
+    conn.getAdmin().createTable(tableDescriptor);
+
+    Table table = conn.getTable(test);
+
+    Put put = new Put(Bytes.toBytes("com.example/http"));
+    put.addColumn(Bytes.toBytes("test-family"), null, Bytes.toBytes("test-value"));
+    table.put(put);
+
+    Delete del = new Delete(Bytes.toBytes("com.example/http"));
+    table.delete(del);
+
+    Get get = new Get(Bytes.toBytes("com.example/http"));
+    //get.addColumn(Bytes.toBytes("test-family"), null);
+    Result result = table.get(get);
+    byte[] value = result.getValue(Bytes.toBytes("test-family"), null);
+
+    if (value != null) {
+      // Test failed, this should be null after the delete row operation.
+    }
   }
 }

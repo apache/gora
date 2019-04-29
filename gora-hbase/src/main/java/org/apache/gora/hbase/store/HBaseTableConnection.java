@@ -85,14 +85,14 @@ public class HBaseTableConnection {
     this.autoFlush = autoflush;
   }
 
-  private Table getTable() throws IOException {
-    Table tableRef = table.get();
-    if (tableRef == null) {
-      tableRef = connection.getTable(tableName);
-      tPool.add(tableRef); //keep track
-      table.set(tableRef);
+  public Table getTable() throws IOException {
+    Table tableInstance = table.get();
+    if (tableInstance == null) {
+      tableInstance = connection.getTable(tableName);
+      tPool.add(tableInstance); //keep track
+      table.set(tableInstance);
     }
-    return tableRef;
+    return tableInstance;
   }
 
   public void flushCommits() throws IOException {
@@ -163,35 +163,67 @@ public class HBaseTableConnection {
     return getTable().getScanner(scan);
   }
 
-  public void mutateRow(RowMutations m) throws IOException {
-    getTable().mutateRow(m);
+  public void updateRow(byte[] keyRaw, Put put, Delete delete) throws IOException {
+    if (autoFlush) {
+      Table tableInstance = getTable();
+      if (put.size() > 0) {
+        if (delete.size() > 0) {
+          RowMutations update = new RowMutations(keyRaw);
+          update.add(delete);
+          update.add(put);
+          tableInstance.mutateRow(update);
+        } else {
+          tableInstance.put(put);
+        }
+      } else {
+        if (delete.size() > 0) {
+          tableInstance.delete(delete);
+        }
+      }
+    } else {
+      if (delete.size() > 0) {
+        buffer.add(delete);
+      }
+
+      if (put.size() > 0) {
+        buffer.add(put);
+      }
+    }
   }
 
   public void put(Put put) throws IOException {
-    buffer.add(put);
     if (autoFlush) {
-      flushCommits();
+      Table tableInstance = getTable();
+      tableInstance.put(put);
+    } else {
+      buffer.add(put);
     }
   }
 
   public void put(List<Put> puts) throws IOException {
-    buffer.addAll(puts);
     if (autoFlush) {
-      flushCommits();
+      Table tableInstance = getTable();
+      tableInstance.put(puts);
+    } else {
+      buffer.addAll(puts);
     }
   }
 
   public void delete(Delete delete) throws IOException {
-    buffer.add(delete);
     if (autoFlush) {
-      flushCommits();
+      Table tableInstance = getTable();
+      tableInstance.delete(delete);
+    } else {
+      buffer.add(delete);
     }
   }
 
   public void delete(List<Delete> deletes) throws IOException {
-    buffer.addAll(deletes);
     if (autoFlush) {
-      flushCommits();
+      Table tableInstance = getTable();
+      tableInstance.delete(deletes);
+    } else {
+      buffer.addAll(deletes);
     }
   }
 
