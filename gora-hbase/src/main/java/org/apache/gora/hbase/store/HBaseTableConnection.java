@@ -163,7 +163,7 @@ public class HBaseTableConnection {
     return getTable().getScanner(scan);
   }
 
-  public void updateRow(byte[] keyRaw, Put put, Delete delete) throws IOException {
+  public void updateRow(byte[] keyRaw, Mutation put, Mutation delete) throws IOException {
     if (autoFlush) {
       Table tableInstance = getTable();
       if (put.size() > 0) {
@@ -173,11 +173,11 @@ public class HBaseTableConnection {
           update.add(put);
           tableInstance.mutateRow(update);
         } else {
-          tableInstance.put(put);
+          tableInstance.put((Put) put);
         }
       } else {
         if (delete.size() > 0) {
-          tableInstance.delete(delete);
+          tableInstance.delete((Delete) delete);
         }
       }
     } else {

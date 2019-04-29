@@ -98,6 +98,9 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
   private static final String SCANNER_CACHING_PROPERTIES_KEY = "scanner.caching" ;
   private static final int SCANNER_CACHING_PROPERTIES_DEFAULT = 0 ;
 
+  private static final String HBASE_CLIENT_AUTO_FLUSH_PROPERTIES_KEY = "hbase.client.autoflush.enabled";
+  private static final boolean HBASE_CLIENT_AUTO_FLUSH_PROPERTIES_DEFAULT = false;
+
   private static final int PUTS_AND_DELETES_PUT_TS_OFFSET = 1;
   private static final int PUTS_AND_DELETES_DELETE_TS_OFFSET = 2;
   
@@ -169,7 +172,9 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     }
 
     try{
-      boolean autoflush = this.conf.getBoolean("hbase.client.autoflush.default", false);
+      boolean autoflush = Boolean.valueOf(DataStoreFactory.findProperty(this.properties, this,
+              HBASE_CLIENT_AUTO_FLUSH_PROPERTIES_KEY,
+              String.valueOf(HBASE_CLIENT_AUTO_FLUSH_PROPERTIES_DEFAULT)));
       table = new HBaseTableConnection(getConf(), getSchemaName(), autoflush);
     } catch (Exception e) {
       throw new GoraException(e);
