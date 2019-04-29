@@ -24,11 +24,13 @@ import java.util.stream.Collectors;
 
 import org.apache.gora.store.impl.DataStoreMetadataAnalyzer;
 import org.apache.gora.util.GoraException;
-import org.apache.hadoop.hbase.HTableDescriptor;
+
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Admin;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
+import org.apache.hadoop.hbase.client.TableDescriptor;
+
 
 public class HBaseStoreMetadataAnalyzer extends DataStoreMetadataAnalyzer {
 
@@ -66,7 +68,7 @@ public class HBaseStoreMetadataAnalyzer extends DataStoreMetadataAnalyzer {
         try {
             Admin hbaseAdmin = this.hbaseConnection.getAdmin();
             TableName hbaseTableName =  TableName.valueOf(tableName);
-            HTableDescriptor tableDescriptor = hbaseAdmin.getTableDescriptor(hbaseTableName) ;
+            TableDescriptor tableDescriptor = hbaseAdmin.getDescriptor(hbaseTableName);
             HBaseTableMetadata tableMetadata = new HBaseTableMetadata() ;
             tableMetadata.getColumnFamilies().addAll(Arrays.stream(tableDescriptor.getColumnFamilies()).map(hcolumn -> hcolumn.getNameAsString()).collect(Collectors.toList())) ;
             hbaseAdmin.close();
