@@ -26,6 +26,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HRegionLocation;
 import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Admin;
 import org.apache.hadoop.hbase.client.BufferedMutator;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
@@ -36,6 +37,7 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.RegionLocator;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.RowMutations;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Pair;
@@ -57,11 +59,10 @@ public class HBaseTableConnection {
   private final Connection connection;
   private final RegionLocator regionLocator;
   // BufferedMutator used for doing async flush i.e. autoflush = false
-  private final ThreadLocal<ConcurrentLinkedQueue<Mutation>> buffers;
-  private final ThreadLocal<Table> tables;
+  private final ConcurrentLinkedQueue<Mutation> buffer = new ConcurrentLinkedQueue<>();
+  private final ThreadLocal<Table> table;
 
   private final BlockingQueue<Table> tPool = new LinkedBlockingQueue<>();
-  private final BlockingQueue<ConcurrentLinkedQueue<Mutation>> bPool = new LinkedBlockingQueue<>();
   @SuppressWarnings("unused")
   private final boolean autoFlush;
   private final TableName tableName;
@@ -75,45 +76,30 @@ public class HBaseTableConnection {
    * @throws IOException
    */
   public HBaseTableConnection(Configuration conf, String tableName, boolean autoflush)
-      throws IOException {
+          throws IOException {
     this.conf = conf;
-
-    this.tables = new ThreadLocal<>();
-    this.buffers = new ThreadLocal<>();
+    this.table = new ThreadLocal<>();
     this.connection = ConnectionFactory.createConnection(conf);
     this.tableName = TableName.valueOf(tableName);
     this.regionLocator = this.connection.getRegionLocator(this.tableName);
-
     this.autoFlush = autoflush;
   }
 
-  private Table getTable() throws IOException {
-    Table table = tables.get();
-    if (table == null) {
-      table = connection.getTable(tableName);
-      tPool.add(table); //keep track
-      tables.set(table);
+  public Table getTable() throws IOException {
+    Table tableInstance = table.get();
+    if (tableInstance == null) {
+      tableInstance = connection.getTable(tableName);
+      tPool.add(tableInstance); //keep track
+      table.set(tableInstance);
     }
-    return table;
-  }
-
-  private ConcurrentLinkedQueue<Mutation> getBuffer() throws IOException {
-    ConcurrentLinkedQueue<Mutation> buffer = buffers.get();
-    if (buffer == null) {
-      buffer = new ConcurrentLinkedQueue<>();
-      bPool.add(buffer);
-      buffers.set(buffer);
-    }
-    return buffer;
+    return tableInstance;
   }
 
   public void flushCommits() throws IOException {
     BufferedMutator bufMutator = connection.getBufferedMutator(this.tableName);
-    for (ConcurrentLinkedQueue<Mutation> buffer : bPool) {
-      while (!buffer.isEmpty()) {
-        Mutation m = buffer.poll();
-        bufMutator.mutate(m);
-      }
+    while (!buffer.isEmpty()) {
+      Mutation m = buffer.poll();
+      bufMutator.mutate(m);
     }
     bufMutator.flush();
     bufMutator.close();
@@ -129,6 +115,10 @@ public class HBaseTableConnection {
     for (Table table : tPool) {
       table.close();
     }
+
+    if (!connection.isClosed()) {
+      connection.close();
+    }
   }
 
   public Configuration getConfiguration() {
@@ -137,13 +127,16 @@ public class HBaseTableConnection {
 
   /**
    * getStartEndKeys provided by {@link HRegionLocation}.
+   *
    * @see RegionLocator#getStartEndKeys()
    */
   public Pair<byte[][], byte[][]> getStartEndKeys() throws IOException {
     return regionLocator.getStartEndKeys();
   }
+
   /**
    * getRegionLocation provided by {@link HRegionLocation}
+   *
    * @see RegionLocator#getRegionLocation(byte[])
    */
   public HRegionLocation getRegionLocation(final byte[] bs) throws IOException {
@@ -170,23 +163,75 @@ public class HBaseTableConnection {
     return getTable().getScanner(scan);
   }
 
+  public void updateRow(byte[] keyRaw, Mutation put, Mutation delete) throws IOException {
+    if (autoFlush) {
+      Table tableInstance = getTable();
+      if (put.size() > 0) {
+        if (delete.size() > 0) {
+          RowMutations update = new RowMutations(keyRaw);
+          update.add(delete);
+          update.add(put);
+          tableInstance.mutateRow(update);
+        } else {
+          tableInstance.put((Put) put);
+        }
+      } else {
+        if (delete.size() > 0) {
+          tableInstance.delete((Delete) delete);
+        }
+      }
+    } else {
+      if (delete.size() > 0) {
+        buffer.add(delete);
+      }
+
+      if (put.size() > 0) {
+        buffer.add(put);
+      }
+    }
+  }
+
   public void put(Put put) throws IOException {
-    getBuffer().add(put);
+    if (autoFlush) {
+      Table tableInstance = getTable();
+      tableInstance.put(put);
+    } else {
+      buffer.add(put);
+    }
   }
 
   public void put(List<Put> puts) throws IOException {
-    getBuffer().addAll(puts);
+    if (autoFlush) {
+      Table tableInstance = getTable();
+      tableInstance.put(puts);
+    } else {
+      buffer.addAll(puts);
+    }
   }
 
   public void delete(Delete delete) throws IOException {
-    getBuffer().add(delete);
+    if (autoFlush) {
+      Table tableInstance = getTable();
+      tableInstance.delete(delete);
+    } else {
+      buffer.add(delete);
+    }
   }
 
   public void delete(List<Delete> deletes) throws IOException {
-    getBuffer().addAll(deletes);
+    if (autoFlush) {
+      Table tableInstance = getTable();
+      tableInstance.delete(deletes);
+    } else {
+      buffer.addAll(deletes);
+    }
   }
 
   public TableName getName() {
     return tableName;
+  }
+
+  public Admin getAdmin() throws IOException {
+    return connection.getAdmin();
   }
 }

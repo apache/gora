@@ -58,10 +58,10 @@ public class HBaseByteInterface {
    * writer pair for every schema, instead of one for every thread.
    */
   
-  public static final ConcurrentHashMap<String, SpecificDatumReader<?>> readerMap = 
+  public static final ConcurrentHashMap<Schema, SpecificDatumReader<?>> readerMap =
       new ConcurrentHashMap<>();
      
-  public static final ConcurrentHashMap<String, SpecificDatumWriter<?>> writerMap = 
+  public static final ConcurrentHashMap<Schema, SpecificDatumWriter<?>> writerMap =
       new ConcurrentHashMap<>();
 
   /**
@@ -118,17 +118,18 @@ public class HBaseByteInterface {
       //   or val == null
       // => deserialize like "case RECORD"
 
+    case MAP:
     case RECORD:
       // For UNION schemas, must use a specific SpecificDatumReader
       // from the readerMap since unions don't have own name
       // (key name in map will be "UNION-type-type-...")
-      String schemaId = schema.getType().equals(Schema.Type.UNION) ? String.valueOf(schema.hashCode()) : schema.getFullName();      
+      // String schemaId = schema.getType().equals(Schema.Type.UNION) ? String.valueOf(schema.hashCode()) : schema.getFullName();
       
-      SpecificDatumReader<?> reader = readerMap.get(schemaId);
+      SpecificDatumReader<?> reader = readerMap.get(schema);
       if (reader == null) {
         reader = new SpecificDatumReader(schema);// ignore dirty bits
         SpecificDatumReader localReader=null;
-        if((localReader=readerMap.putIfAbsent(schemaId, reader))!=null) {
+        if((localReader=readerMap.putIfAbsent(schema, reader))!=null) {
           reader = localReader;
         }
       }
@@ -230,11 +231,12 @@ public class HBaseByteInterface {
     case BOOLEAN: return (Boolean)o ? new byte[] {1} : new byte[] {0};
     case ENUM:    return new byte[] { (byte)((Enum<?>) o).ordinal() };
     case UNION:
+    case MAP:
     case RECORD:
       SpecificDatumWriter writer = writerMap.get(schema.getFullName());
       if (writer == null) {
         writer = new SpecificDatumWriter(schema);// ignore dirty bits
-        writerMap.put(schema.getFullName(),writer);
+        writerMap.put(schema,writer);
       }
 
       BinaryEncoder encoderFromCache = encoders.get();
