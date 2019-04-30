@@ -1,0 +1,8 @@
+  {
+    "type": "record",
+    "name": "EmployeeInt","default":null,
+    "namespace": "org.apache.gora.examples.generated",
+    "fields" : [
+      {"name": "ssn", "type": "int", "default":0}
+    ]
+  }
