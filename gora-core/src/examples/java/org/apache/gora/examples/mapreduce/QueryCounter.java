@@ -78,7 +78,7 @@ public class QueryCounter<K, T extends Persistent> extends Configured implements
    * @throws IOException
    */
   public Job createJob(Query<K,T> query) throws IOException {
-    Job job = new Job(getConf());
+    Job job = Job.getInstance(getConf());
 
     job.setJobName("QueryCounter");
     job.setNumReduceTasks(0);

@@ -105,7 +105,7 @@ public class WordCount extends Configured implements Tool {
    */
   public Job createJob(Query<String,WebPage> query
       , DataStore<String,TokenDatum> outStore) throws IOException {
-    Job job = new Job(getConf());
+    Job job = Job.getInstance(getConf());
    
     job.setJobName("WordCount");
     
