@@ -92,7 +92,7 @@ public class MapReduceSerialization extends Configured implements Tool {
    */
   public Job createJob(DataStore<String, WebPage> inStore, Query<String, WebPage> query
           , DataStore<String, WebPage> outStore) throws IOException {
-    Job job = new Job(getConf());
+    Job job = Job.getInstance(getConf());
 
     job.setJobName("Check serialization of dirty bits");
 

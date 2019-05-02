@@ -339,7 +339,7 @@ public class TestHBaseStore extends DataStoreTestBase {
             .newBuilder(Bytes.toBytes("test-family"));
     columnDescBuilder.setNewVersionBehavior(true);
     ColumnFamilyDescriptor columnDescriptor = columnDescBuilder.build();
-    tableDescBuilder.addColumnFamily(columnDescriptor);
+    tableDescBuilder.setColumnFamily(columnDescriptor);
     TableDescriptor tableDescriptor = tableDescBuilder.build();
 
     conn.getAdmin().createTable(tableDescriptor);

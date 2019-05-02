@@ -33,10 +33,6 @@ public class NullOutputCommitter extends OutputCommitter {
   }
 
   @Override
-  public void cleanupJob(JobContext arg0) throws IOException {
-  }
-
-  @Override
   public void commitTask(TaskAttemptContext arg0) throws IOException {
   }
 
