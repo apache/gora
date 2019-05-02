@@ -403,7 +403,7 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
     if (!manager.isClosed()) {
       manager.close();
     }
-    //hazelcastInstance.shutdown();
+    cachingProvider.close();
     persistentDataStore.close();
     LOG.info("JCache Gora datastore destroyed successfully.");
   }
