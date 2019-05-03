@@ -381,6 +381,20 @@ DataStoreBase<K, T> {
     }
   }
 
+  @Override
+  public boolean exists(final K key) throws GoraException {
+    try {
+      // Prepare the MongoDB query
+      BasicDBObject q = new BasicDBObject("_id", key);
+      BasicDBObject proj = new BasicDBObject();
+      // Execute the query
+      DBObject res = mongoClientColl.findOne(q, proj);
+      return res != null;
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
+  }
+
   /**
    * Persist an object into the store.
    * 

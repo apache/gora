@@ -544,6 +544,21 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
   }
 
   @Override
+  public boolean exists(K key) throws GoraException {
+    ModifiableSolrParams params = new ModifiableSolrParams();
+    params.set(CommonParams.QT, "/get");
+    params.set(CommonParams.FL, " ");
+    params.set("id", key.toString());
+    try {
+      QueryResponse rsp = server.query(params);
+      Object o = rsp.getResponse().get("doc");
+      return o != null;
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
+  }
+
+  @Override
   public T get(K key, String[] fields) throws GoraException {
     ModifiableSolrParams params = new ModifiableSolrParams();
     params.set(CommonParams.QT, "/get");

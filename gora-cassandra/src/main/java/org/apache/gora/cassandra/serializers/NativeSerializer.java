@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
 import com.datastax.driver.core.SimpleStatement;
 import com.datastax.driver.mapping.Mapper;
 import com.datastax.driver.mapping.MappingManager;
@@ -258,4 +259,26 @@ class NativeSerializer<K, T extends Persistent> extends CassandraSerializer {
     }
     return key;
   }
+
+  @Override
+  public boolean exists(Object key) throws GoraException {
+    try {
+      ArrayList<String> cassandraKeys = new ArrayList<>();
+      ArrayList<Object> cassandraValues = new ArrayList<>();
+      AvroCassandraUtils.processKeys(mapping, key, cassandraKeys, cassandraValues);
+      String cqlQuery = CassandraQueryFactory.getCheckExistsQuery(mapping, cassandraKeys);
+      SimpleStatement statement = new SimpleStatement(cqlQuery, cassandraValues.toArray());
+      if (readConsistencyLevel != null) {
+        statement.setConsistencyLevel(ConsistencyLevel.valueOf(readConsistencyLevel));
+      }
+      ResultSet resultSet = client.getSession().execute(statement);
+      Iterator<Row> iterator = resultSet.iterator();
+      Row next = iterator.next();
+      long aInt = next.getLong(0);
+      return aInt != 0;
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
+  }
+
 }

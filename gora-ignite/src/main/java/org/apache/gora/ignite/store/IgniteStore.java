@@ -177,6 +177,27 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
   }
 
   @Override
+  public boolean exists(K key) throws GoraException {
+    Object[] keyl = null;
+    if (igniteMapping.getPrimaryKey().size() == 1) {
+      keyl = new Object[]{key};
+    } else {
+      //Composite key pending
+    }
+    String selectQuery = IgniteSQLBuilder.createSelectQueryExists(igniteMapping);
+    try (PreparedStatement stmt = connection.prepareStatement(selectQuery)) {
+      IgniteSQLBuilder.fillSelectQuery(stmt, igniteMapping, keyl);
+      ResultSet rs = stmt.executeQuery();
+      rs.next();
+      int resp = rs.getInt(1);
+      rs.close();
+      return resp != 0;
+    } catch (SQLException ex) {
+      throw new GoraException(ex);
+    }
+  }
+
+  @Override
   public T get(K key, String[] fields) throws GoraException {
     String[] avFields = getFieldsToQuery(fields);
     Object[] keyl = null;

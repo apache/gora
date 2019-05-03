@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -166,6 +167,49 @@ public class DataStoreTestUtil {
 
     dataStore.deleteSchema();
     assertFalse(dataStore.schemaExists());
+  }
+
+  public static void testExistsEmployee(DataStore<String, Employee> dataStore)
+      throws Exception {
+    dataStore.createSchema();
+    Employee employee = DataStoreTestUtil.createEmployee();
+    String uuid = UUID.randomUUID().toString();
+    dataStore.put(uuid, employee);
+    dataStore.flush();
+    assertTrue(dataStore.exists(uuid));
+    dataStore.delete(uuid);
+    dataStore.flush();
+    assertFalse(dataStore.exists(uuid));
+  }
+
+  public static void testBenchmarkGetExists(DataStore<String, Employee> dataStore)
+      throws Exception {
+    dataStore.createSchema();
+    List<String> listKey = new ArrayList<>();
+    for (int i = 0; i < 100; i++) {
+      listKey.add(UUID.randomUUID().toString());
+    }
+    for (String id : listKey) {
+      Employee employee = DataStoreTestUtil.createEmployee();
+      dataStore.put(id, employee);
+    }
+    dataStore.flush();
+    long start = System.currentTimeMillis();
+    for (String id : listKey) {
+      assertTrue(dataStore.exists(id));
+      assertFalse(dataStore.exists("mock:" + id));
+    }
+    long end = System.currentTimeMillis();
+    long total = end - start;
+    LOG.info("Time exists() : {}", total);
+    start = System.currentTimeMillis();
+    for (String id : listKey) {
+      assertTrue(dataStore.get(id) != null);
+      assertFalse(dataStore.get("mock:" + id) != null);
+    }
+    end = System.currentTimeMillis();
+    total = end - start;
+    LOG.info("Time get() : {}", total);
   }
 
   public static void testGetEmployee(DataStore<String, Employee> dataStore)

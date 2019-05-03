@@ -270,6 +270,15 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
   }
 
   @Override
+  public boolean exists(K key) throws GoraException {
+    try {
+      return cache.containsKey(key);
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
+  }
+
+  @Override
   public T get(K key) throws GoraException {
     try {
       return cache.get(key);

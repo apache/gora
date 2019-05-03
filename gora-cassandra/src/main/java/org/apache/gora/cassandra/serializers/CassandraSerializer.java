@@ -179,6 +179,14 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
    * @return persistent value
    */
   public abstract T get(K key) throws GoraException;
+	
+  /**
+   * Check if key exists
+   *
+   * @param key key value
+   * @return true/false
+   */
+  public abstract boolean exists(K key) throws GoraException;
 
   /**
    * Deletes persistent value according to the key
