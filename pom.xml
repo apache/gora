@@ -755,12 +755,14 @@
                 <fileSet>
                   <directory>${project.build.directory}</directory>
                   <includes>
-                    <include>${project.artifactId}-${project.version}-source-release.zip</include>
-                    <include>${project.artifactId}-${project.version}-source-release.tar*</include>
+                    <include>*.zip</include>
+                    <include>*.tar.gz</include>
+                    <include>*.jar</include>
+                    <include>*.pom</include>
                   </includes>
                 </fileSet>
               </fileSets>
-              <failIfNoFiles>false</failIfNoFiles><!-- usually, no file to do checksum: don't consider error -->
+              <failIfNoFiles>false</failIfNoFiles>
             </configuration>
           </plugin>
         </plugins>
