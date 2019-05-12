@@ -41,6 +41,7 @@ import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.store.DataStore;
+import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.util.GoraException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -226,7 +227,9 @@ public class DynamoDBStore<K, T extends Persistent> implements DataStore<K, T> {
     setDynamoDBClient(DynamoDBUtils.getClient(
         properties.getProperty(CLI_TYP_PROP), creds));
     getDynamoDBClient().setEndpoint(properties.getProperty(ENDPOINT_PROP));
-    setDynamoDbMapping(readMapping());
+    String mappingFile = DataStoreFactory.getMappingFile(properties, this,
+            MAPPING_FILE);
+    setDynamoDbMapping(readMapping(mappingFile));
     setConsistency(properties.getProperty(CONSISTENCY_READS));
   }
 
@@ -311,14 +314,14 @@ public class DynamoDBStore<K, T extends Persistent> implements DataStore<K, T> {
    * @throws IOException
    */
   @SuppressWarnings("unchecked")
-  private DynamoDBMapping readMapping() throws IOException {
+  private DynamoDBMapping readMapping(String filename) throws IOException {
 
     DynamoDBMappingBuilder mappingBuilder = new DynamoDBMappingBuilder();
 
     try {
       SAXBuilder builder = new SAXBuilder();
       Document doc = builder.build(getClass().getClassLoader()
-          .getResourceAsStream(MAPPING_FILE));
+          .getResourceAsStream(filename));
       if (doc == null || doc.getRootElement() == null)
         throw new GoraException("Unable to load " + MAPPING_FILE
             + ". Please check its existance!");
