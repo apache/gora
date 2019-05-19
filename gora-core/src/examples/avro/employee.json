@@ -8,6 +8,7 @@
       {"name": "ssn", "type": "string", "default":""},
       {"name": "salary", "type": "int","default":0},
       {"name": "boss", "type":["null","Employee","string"],"default":null},
+      {"name": "value", "type": "string", "default":""},
       {"name": "webpage","default":null, "type":["null",
         {
           "type": "record",

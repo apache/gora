@@ -98,14 +98,14 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
   // Used by DatumWriter.  Applications should not call. 
   public java.lang.Object get(int field$) {
     switch (field$) {
-    case 0: return url;
-    case 1: return timestamp;
-    case 2: return ip;
-    case 3: return httpMethod;
-    case 4: return httpStatusCode;
-    case 5: return responseSize;
-    case 6: return referrer;
-    case 7: return userAgent;
+    case 0: return this.url;
+    case 1: return this.timestamp;
+    case 2: return this.ip;
+    case 3: return this.httpMethod;
+    case 4: return this.httpStatusCode;
+    case 5: return this.responseSize;
+    case 6: return this.referrer;
+    case 7: return this.userAgent;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -114,14 +114,14 @@ public class Pageview extends org.apache.gora.persistency.impl.PersistentBase im
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: url = (java.lang.CharSequence)(value); break;
-    case 1: timestamp = (java.lang.Long)(value); break;
-    case 2: ip = (java.lang.CharSequence)(value); break;
-    case 3: httpMethod = (java.lang.CharSequence)(value); break;
-    case 4: httpStatusCode = (java.lang.Integer)(value); break;
-    case 5: responseSize = (java.lang.Integer)(value); break;
-    case 6: referrer = (java.lang.CharSequence)(value); break;
-    case 7: userAgent = (java.lang.CharSequence)(value); break;
+    case 0: this.url = (java.lang.CharSequence)(value); break;
+    case 1: this.timestamp = (java.lang.Long)(value); break;
+    case 2: this.ip = (java.lang.CharSequence)(value); break;
+    case 3: this.httpMethod = (java.lang.CharSequence)(value); break;
+    case 4: this.httpStatusCode = (java.lang.Integer)(value); break;
+    case 5: this.responseSize = (java.lang.Integer)(value); break;
+    case 6: this.referrer = (java.lang.CharSequence)(value); break;
+    case 7: this.userAgent = (java.lang.CharSequence)(value); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }

@@ -114,19 +114,19 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   // Used by DatumWriter.  Applications should not call. 
   public java.lang.Object get(int field$) {
     switch (field$) {
-    case 0: return dataString;
-    case 1: return dataInt;
-    case 2: return dataLong;
-    case 3: return dataDouble;
-    case 4: return dataBytes;
-    case 5: return arrayInt;
-    case 6: return arrayString;
-    case 7: return arrayLong;
-    case 8: return arrayDouble;
-    case 9: return mapInt;
-    case 10: return mapString;
-    case 11: return mapLong;
-    case 12: return mapDouble;
+    case 0: return this.dataString;
+    case 1: return this.dataInt;
+    case 2: return this.dataLong;
+    case 3: return this.dataDouble;
+    case 4: return this.dataBytes;
+    case 5: return this.arrayInt;
+    case 6: return this.arrayString;
+    case 7: return this.arrayLong;
+    case 8: return this.arrayDouble;
+    case 9: return this.mapInt;
+    case 10: return this.mapString;
+    case 11: return this.mapLong;
+    case 12: return this.mapDouble;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -135,19 +135,19 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: dataString = (java.lang.CharSequence)(value); break;
-    case 1: dataInt = (java.lang.Integer)(value); break;
-    case 2: dataLong = (java.lang.Long)(value); break;
-    case 3: dataDouble = (java.lang.Double)(value); break;
-    case 4: dataBytes = (java.nio.ByteBuffer)(value); break;
-    case 5: arrayInt = (java.util.List<java.lang.Integer>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyListWrapper((java.util.List)value)); break;
-    case 6: arrayString = (java.util.List<java.lang.CharSequence>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyListWrapper((java.util.List)value)); break;
-    case 7: arrayLong = (java.util.List<java.lang.Long>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyListWrapper((java.util.List)value)); break;
-    case 8: arrayDouble = (java.util.List<java.lang.Double>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyListWrapper((java.util.List)value)); break;
-    case 9: mapInt = (java.util.Map<java.lang.CharSequence,java.lang.Integer>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)value)); break;
-    case 10: mapString = (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)value)); break;
-    case 11: mapLong = (java.util.Map<java.lang.CharSequence,java.lang.Long>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)value)); break;
-    case 12: mapDouble = (java.util.Map<java.lang.CharSequence,java.lang.Double>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)value)); break;
+    case 0: this.dataString = (java.lang.CharSequence)(value); break;
+    case 1: this.dataInt = (java.lang.Integer)(value); break;
+    case 2: this.dataLong = (java.lang.Long)(value); break;
+    case 3: this.dataDouble = (java.lang.Double)(value); break;
+    case 4: this.dataBytes = (java.nio.ByteBuffer)(value); break;
+    case 5: this.arrayInt = (java.util.List<java.lang.Integer>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyListWrapper((java.util.List)value)); break;
+    case 6: this.arrayString = (java.util.List<java.lang.CharSequence>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyListWrapper((java.util.List)value)); break;
+    case 7: this.arrayLong = (java.util.List<java.lang.Long>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyListWrapper((java.util.List)value)); break;
+    case 8: this.arrayDouble = (java.util.List<java.lang.Double>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyListWrapper((java.util.List)value)); break;
+    case 9: this.mapInt = (java.util.Map<java.lang.CharSequence,java.lang.Integer>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)value)); break;
+    case 10: this.mapString = (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)value)); break;
+    case 11: this.mapLong = (java.util.Map<java.lang.CharSequence,java.lang.Long>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)value)); break;
+    case 12: this.mapDouble = (java.util.Map<java.lang.CharSequence,java.lang.Double>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)value)); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }

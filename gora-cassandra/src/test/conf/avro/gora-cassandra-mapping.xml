@@ -42,6 +42,7 @@
         <field name="name" column="name" type="text"/>
         <field name="dateOfBirth" column="dob" type="bigint"/>
         <field name="ssn" column="ssn" type="text"/>
+				<field name="value" column="value" type="text"/>
         <field name="salary" column="salary" type="int"/>
         <field name="boss" column="boss" type="blob"/>
         <field name="webpage" column="webpage" type="blob"/>

@@ -114,7 +114,7 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
     switch (field$) {
 #set ($i = 0)
 #foreach ($field in $schema.getFields())
-    case $i: return ${this.mangle($field.name(), $schema.isError())};
+    case $i: return this.${this.mangle($field.name(), $schema.isError())};
 #set ($i = $i + 1)
 #end
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
@@ -127,7 +127,7 @@ public class ${this.mangle($schema.getName())}#if ($schema.isError()) extends or
     switch (field$) {
 #set ($i = 0)
 #foreach ($field in $schema.getFields())
-    case $i: ${this.mangle($field.name(), $schema.isError())} = (${this.javaType($field.schema())})(${this.generateAppropriateWrapperOrValueForPut($field.schema())}); break;
+    case $i: this.${this.mangle($field.name(), $schema.isError())} = (${this.javaType($field.schema())})(${this.generateAppropriateWrapperOrValueForPut($field.schema())}); break;
 #set ($i = $i + 1)
 #end
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");

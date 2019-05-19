@@ -81,8 +81,8 @@ public class ImmutableFields extends org.apache.gora.persistency.impl.Persistent
   // Used by DatumWriter.  Applications should not call. 
   public java.lang.Object get(int field$) {
     switch (field$) {
-    case 0: return v1;
-    case 1: return v2;
+    case 0: return this.v1;
+    case 1: return this.v2;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -91,8 +91,8 @@ public class ImmutableFields extends org.apache.gora.persistency.impl.Persistent
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: v1 = (java.lang.Integer)(value); break;
-    case 1: v2 = (org.apache.gora.examples.generated.V2)(value); break;
+    case 0: this.v1 = (java.lang.Integer)(value); break;
+    case 1: this.v2 = (org.apache.gora.examples.generated.V2)(value); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }

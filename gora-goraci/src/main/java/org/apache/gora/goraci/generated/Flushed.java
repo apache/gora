@@ -77,7 +77,7 @@ public class Flushed extends org.apache.gora.persistency.impl.PersistentBase imp
   // Used by DatumWriter.  Applications should not call. 
   public java.lang.Object get(int field$) {
     switch (field$) {
-    case 0: return count;
+    case 0: return this.count;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -86,7 +86,7 @@ public class Flushed extends org.apache.gora.persistency.impl.PersistentBase imp
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: count = (java.lang.Long)(value); break;
+    case 0: this.count = (java.lang.Long)(value); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }

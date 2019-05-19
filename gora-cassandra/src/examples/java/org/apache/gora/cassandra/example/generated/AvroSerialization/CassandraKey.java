@@ -81,8 +81,8 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
   // Used by DatumWriter.  Applications should not call. 
   public java.lang.Object get(int field$) {
     switch (field$) {
-    case 0: return url;
-    case 1: return timestamp;
+    case 0: return this.url;
+    case 1: return this.timestamp;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -91,8 +91,8 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: url = (java.lang.CharSequence)(value); break;
-    case 1: timestamp = (java.lang.Long)(value); break;
+    case 0: this.url = (java.lang.CharSequence)(value); break;
+    case 1: this.timestamp = (java.lang.Long)(value); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
