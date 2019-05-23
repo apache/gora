@@ -103,16 +103,20 @@ public class GoraCompilerCLI {
   }
 
   private static void printHelp() {
-    LOG.info("Usage: gora-compiler ( -h | --help ) | (<input> [<input>...] <output> [-license <id>])");
-    LOG.error("License header options include;\n" +
-              "\t\t  ASLv2   (Apache Software License v2.0) \n" +
-              "\t\t  AGPLv3  (GNU Affero General Public License) \n" +
-              "\t\t  CDDLv1  (Common Development and Distribution License v1.0) \n" +
-              "\t\t  FDLv13  (GNU Free Documentation License v1.3) \n" +
-              "\t\t  GPLv1   (GNU General Public License v1.0) \n" +
-              "\t\t  GPLv2   (GNU General Public License v2.0) \n" +
-              "\t\t  GPLv3   (GNU General Public License v3.0) \n" +
-              "\t\t  LGPLv21 (GNU Lesser General Public License v2.1) \n" +
-              "\t\t  LGPLv3  (GNU Lesser General Public License v2.1)");
+    LOG.info("Usage: GoraCompiler <schema file> <output dir> [-license <id>]\n" +
+            "   <schema file>     - individual avsc file to be compiled or a directory path containing avsc files\n" +
+            "   <output dir>      - output directory for generated Java files\n" +
+            "   [-license <id>]   - the preferred license header to add to the generated Java file.\n" +
+            "Current License header options include;\n" +
+            "\t\t  ASLv2   (Apache Software License v2.0) \n" +
+            "\t\t  AGPLv3  (GNU Affero General Public License) \n" +
+            "\t\t  CDDLv1  (Common Development and Distribution License v1.0) \n" +
+            "\t\t  FDLv13  (GNU Free Documentation License v1.3) \n" +
+            "\t\t  GPLv1   (GNU General Public License v1.0) \n" +
+            "\t\t  GPLv2   (GNU General Public License v2.0) \n" +
+            "\t\t  GPLv3   (GNU General Public License v3.0) \n" +
+            "\t\t  LGPLv21 (GNU Lesser General Public License v2.1) \n" +
+            "\t\t  LGPLv3  (GNU Lesser General Public License v2.1)"
+    );
   }
 }
