@@ -26,7 +26,7 @@
     <!-- Employee Fields -->
     <field name="ssn"         type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
     <field name="name"        type="string" indexed="true" stored="true" />
-		<field name="value"        type="string" indexed="true" stored="true" />
+    <field name="value"        type="string" indexed="true" stored="true" />
     <field name="dateOfBirth" type="long" stored="true" /> 
     <field name="salary"      type="int" stored="true" /> 
     <field name="boss"        type="binary" stored="true" />

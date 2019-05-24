@@ -22,7 +22,7 @@
         <field name="name" docfield="name" type="string"/>
         <field name="dateOfBirth" docfield="dateOfBirth" type="long"/>
         <field name="ssn" docfield="ssn" type="string"/>
-				<field name="value" docfield="value" type="string"/>
+        <field name="value" docfield="value" type="string"/>
         <field name="salary" docfield="salary" type="integer"/>
         <field name="boss" docfield="boss" type="any"/>
         <field name="webpage" docfield="webpage" type="embedded"/>

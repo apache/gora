@@ -24,7 +24,7 @@
     <field name="name" bin="name"/>
     <field name="dateOfBirth" bin="dateOfBirth"/>
     <field name="ssn" bin="ssn"/>
-		<field name="value" bin="value"/>
+    <field name="value" bin="value"/>
     <field name="salary" bin="salary"/>
     <field name="boss" bin="boss"/>
     <field name="webpage" bin="webpage"/>

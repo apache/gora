@@ -20,7 +20,7 @@
   <class name="org.apache.gora.examples.generated.Employee" keyClass="java.lang.String" table="Employee">
     <primarykey column="ssn"/>
     <field name="name" column="name"/>
-		<field name="value" column="value"/>
+    <field name="value" column="value"/>
     <field name="dateOfBirth" column="dateOfBirth"/>
     <field name="salary" column="salary"/>
     <field name="boss" column="boss"/>

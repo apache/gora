@@ -34,7 +34,7 @@
     <field name="name" family="info" qualifier="nm"/>
     <field name="dateOfBirth" family="info" qualifier="db"/>
     <field name="ssn" family="info" qualifier="sn"/>
-		<field name="value" family="info" qualifier="vl"/>
+    <field name="value" family="info" qualifier="vl"/>
     <field name="salary" family="info" qualifier="sl"/>
     <field name="boss" family="info" qualifier="bs"/>
     <field name="webpage" family="info" qualifier="wp"/>
