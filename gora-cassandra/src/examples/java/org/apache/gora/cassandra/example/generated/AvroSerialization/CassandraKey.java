@@ -115,6 +115,7 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
   
   /**
    * Checks the dirty status of the 'url' field. A field is dirty if it represents a change that has not yet been written to the database.
+   * @param value the value to set.
    */
   public boolean isUrlDirty() {
     return isDirty(0);
@@ -138,6 +139,7 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
   
   /**
    * Checks the dirty status of the 'timestamp' field. A field is dirty if it represents a change that has not yet been written to the database.
+   * @param value the value to set.
    */
   public boolean isTimestampDirty() {
     return isDirty(1);
@@ -281,7 +283,7 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
   }
   
   public CassandraKey.Tombstone getTombstone(){
-  	return TOMBSTONE;
+    return TOMBSTONE;
   }
 
   public CassandraKey newInstance(){
@@ -292,53 +294,55 @@ public class CassandraKey extends org.apache.gora.persistency.impl.PersistentBas
   
   public static final class Tombstone extends CassandraKey implements org.apache.gora.persistency.Tombstone {
   
-      private Tombstone() { }
+    private Tombstone() { }
   
-	  		  /**
-	   * Gets the value of the 'url' field.
-		   */
-	  public java.lang.CharSequence getUrl() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'url' field.
-		   * @param value the value to set.
-	   */
-	  public void setUrl(java.lang.CharSequence value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'url' field. A field is dirty if it represents a change that has not yet been written to the database.
-	   */
-	  public boolean isUrlDirty() {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-				  /**
-	   * Gets the value of the 'timestamp' field.
-		   */
-	  public java.lang.Long getTimestamp() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'timestamp' field.
-		   * @param value the value to set.
-	   */
-	  public void setTimestamp(java.lang.Long value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'timestamp' field. A field is dirty if it represents a change that has not yet been written to the database.
-	   */
-	  public boolean isTimestampDirty() {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-		  
+      /**
+     * Gets the value of the 'url' field.
+         */
+    public java.lang.CharSequence getUrl() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+
+    /**
+     * Sets the value of the 'url' field.
+         * @param value the value to set.
+     */
+    public void setUrl(java.lang.CharSequence value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+  
+    /**
+     * Checks the dirty status of the 'url' field. A field is dirty if it represents a change that has not yet been written to the database.
+         * @param value the value to set.
+     */
+    public boolean isUrlDirty() {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+
+        /**
+     * Gets the value of the 'timestamp' field.
+         */
+    public java.lang.Long getTimestamp() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+
+    /**
+     * Sets the value of the 'timestamp' field.
+         * @param value the value to set.
+     */
+    public void setTimestamp(java.lang.Long value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+  
+    /**
+     * Checks the dirty status of the 'timestamp' field. A field is dirty if it represents a change that has not yet been written to the database.
+         * @param value the value to set.
+     */
+    public boolean isTimestampDirty() {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+
+    
   }
 
   private static final org.apache.avro.io.DatumWriter
