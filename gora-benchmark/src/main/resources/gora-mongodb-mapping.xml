@@ -1,0 +1,33 @@
+<gora-otd>
+
+    <class name="generated.User" keyClass="java.lang.String" document="users">
+    	
+        <field name="userId" docfield="userId" type="string"/>
+        <field name="field0" docfield="field0" type="string"/>
+        <field name="field1" docfield="field1" type="string"/>
+        <field name="field2" docfield="field2" type="string"/>
+        <field name="field3" docfield="field3" type="string"/>
+        <field name="field4" docfield="field4" type="string"/>
+        <field name="field5" docfield="field5" type="string"/>
+        <field name="field6" docfield="field6" type="string"/>
+        <field name="field7" docfield="field7" type="string"/>
+        <field name="field8" docfield="field8" type="string"/>
+        <field name="field9" docfield="field9" type="string"/>
+    </class>
+    
+    <class name="generated.Person" keyClass="java.lang.String" document="person">
+    	
+        <field name="userId" docfield="userId" type="string"/>
+        <field name="firstName" docfield="firstName" type="string"/>
+        <field name="lastName" docfield="lastName" type="string"/>
+        <field name="birthDate" docfield="birthDate" type="string"/>
+        <field name="company" docfield="company" type="string"/>
+        <field name="city" docfield="city" type="string"/>
+        <field name="address" docfield="address" type="string"/>
+        <field name="email" docfield="email" type="string"/>
+        <field name="streetname" docfield="streetname" type="string"/>
+        <field name="streetsuffix" docfield="streetsuffix" type="string"/>
+        <field name="personalnumber" docfield="personalnumber" type="string" />
+    </class>
+
+</gora-otd>

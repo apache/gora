@@ -1,0 +1,18 @@
+ {
+  "type": "record",
+  "name": "User", "default":null,
+  "namespace": "generated",
+  "fields" : [
+    {"name": "userId", "type": ["null","string"], "default":null},
+    {"name": "field0", "type": ["null","string"], "default":null},
+    {"name": "field1", "type": ["null","string"], "default":null},
+    {"name": "field2", "type": ["null","string"], "default":null},
+    {"name": "field3", "type": ["null","string"], "default":null},
+    {"name": "field4", "type": ["null","string"], "default":null},
+    {"name": "field5", "type": ["null","string"], "default":null},
+    {"name": "field6", "type": ["null","string"], "default":null},
+    {"name": "field7", "type": ["null","string"], "default":null},
+    {"name": "field8", "type": ["null","string"], "default":null},
+    {"name": "field9", "type": ["null","string"], "default":null}
+  ]
+}

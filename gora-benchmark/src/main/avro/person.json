@@ -1,0 +1,18 @@
+ {
+  "type": "record",
+  "name": "Person", "default":null,
+  "namespace": "generated",
+  "fields" : [
+    {"name": "userId", "type": ["null","string"], "default":null},
+    {"name": "firstName", "type": ["null","string"], "default":null},
+    {"name": "lastName", "type": ["null","string"], "default":null},
+    {"name": "birthDate", "type": ["null","int"], "default":null},
+    {"name": "company", "type": ["null","string"], "default":null},
+    {"name": "city", "type": ["null","string"], "default":null},
+    {"name": "address", "type": ["null","string"], "default":null},
+    {"name": "email", "type": ["null","string"], "default":null},
+    {"name": "streetname", "type": ["null","string"], "default":null},
+    {"name": "streetsuffix", "type": ["null","string"], "default":null},
+    {"name": "personalnumber", "type": ["null","int"], "default":null}
+  ]
+}
