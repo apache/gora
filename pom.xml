@@ -792,6 +792,7 @@
     <module>gora-ignite</module>
     <module>gora-tutorial</module>
     <module>sources-dist</module>
+    <module>gora-hazelcast-jet</module>
   </modules>
 
   <properties>
