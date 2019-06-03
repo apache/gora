@@ -112,7 +112,7 @@
       <artifactId>jedis</artifactId>
     </dependency>
 
-<!--    <dependency>
+    <!--    <dependency>
       <groupId>org.apache.redis</groupId>
       <artifactId>redis-minicluster</artifactId>
       <version>${redis.version}</version>
@@ -165,6 +165,12 @@
       <artifactId>junit</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>com.github.fppt</groupId>
+      <artifactId>jedis-mock</artifactId>
+      <version>0.1.13</version>
+    </dependency>
+    
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-minicluster</artifactId>

@@ -16,28 +16,23 @@
  */
 package org.apache.gora.redis.store;
 
-import java.util.HashMap;
-import java.util.Map;
-import org.apache.hadoop.io.Text;
-import org.apache.redis.core.util.Pair;
-
 /**
  * Mapping definitions for Redis.
  */
 public class RedisMapping {
 
-  /**
-   * A map of field names to Field objects containing schema's fields
-   */
-  Map<String,Pair<Text,Text>> fieldMap = new HashMap<>();
-
-  /**
-   * Look up the column associated to the Avro field.
-   */
-  Map<Pair<Text,Text>,String> columnMap = new HashMap<>();
-
-  Map<String,String> tableConfig = new HashMap<>();
-  String tableName;
-  String encoder;
+//  /**
+//   * A map of field names to Field objects containing schema's fields
+//   */
+//  Map<String,Pair<Text,Text>> fieldMap = new HashMap<>();
+//
+//  /**
+//   * Look up the column associated to the Avro field.
+//   */
+//  Map<Pair<Text,Text>,String> columnMap = new HashMap<>();
+//
+//  Map<String,String> tableConfig = new HashMap<>();
+//  String tableName;
+//  String encoder;
 
 }

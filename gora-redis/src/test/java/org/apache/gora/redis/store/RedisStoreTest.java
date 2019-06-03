@@ -16,63 +16,21 @@
  */
 package org.apache.gora.redis.store;
 
-import java.io.IOException;
 import org.apache.gora.redis.GoraRedisTestDriver;
 import org.apache.gora.store.DataStoreTestBase;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
 
 /**
- * Tests extending {@link org.apache.gora.store.DataStoreTestBase}
- * which run the base JUnit test suite for Gora.
+ * Tests extending {@link org.apache.gora.store.DataStoreTestBase} which run the
+ * base JUnit test suite for Gora.
  */
 public class RedisStoreTest extends DataStoreTestBase {
 
   static {
-    try {
     setTestDriver(new GoraRedisTestDriver());
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  @Before
-  public void setUp() throws Exception {
-    super.setUp();
   }
 
   public GoraRedisTestDriver getTestDriver() {
     return (GoraRedisTestDriver) testDriver;
   }
 
-  //Until GORA-66 is resolved this test will always fail, so
-  //do not run it
-  @Ignore("skipped until GORA-66 is resolved")
-  @Override
-  public void testDeleteByQueryFields() throws IOException {
-  }
-  
-  @Test
-  @Ignore("Redis does not support Result#size() without limit set")
-  @Override
-  public void testResultSize() throws Exception {
-  }
-
-  @Test
-  @Ignore("Redis does not support Result#size() without limit set")
-  @Override
-  public void testResultSizeStartKey() throws Exception {
-  }
-
-  @Ignore("Redis does not support Result#size() without limit set")
-  @Override
-  public void testResultSizeEndKey() throws Exception {
-  }
-
-  @Test
-  @Ignore("Redis does not support Result#size() without limit set")
-  @Override
-  public void testResultSizeKeyRange() throws Exception {
-  }
 }

@@ -17,30 +17,24 @@
 package org.apache.gora.redis.query;
 
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.Map.Entry;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.ResultBase;
+import org.apache.gora.redis.store.RedisStore;
 import org.apache.gora.store.DataStore;
-import org.apache.redis.core.client.RowIterator;
-import org.apache.redis.core.client.Scanner;
-import org.apache.redis.core.data.ByteSequence;
-import org.apache.redis.core.data.Key;
-import org.apache.redis.core.data.Value;
 
 /**
- * Redis specific implementation of the {@link org.apache.gora.query.Result} interface.
+ * Redis specific implementation of the {@link org.apache.gora.query.Result}
+ * interface.
  */
-public class RedisResult<K,T extends PersistentBase> extends ResultBase<K,T> {
-  
-  private RowIterator iterator;
+public class RedisResult<K, T extends PersistentBase> extends ResultBase<K, T> {
 
+//  private RowIterator iterator;
   /**
    * Gets the data store used
    */
-  public RedisStore<K,T> getDataStore() {
-    return (RedisStore<K,T>) super.getDataStore();
+  public RedisStore<K, T> getDataStore() {
+    return (RedisStore<K, T>) super.getDataStore();
   }
 
   /**
@@ -48,13 +42,13 @@ public class RedisResult<K,T extends PersistentBase> extends ResultBase<K,T> {
    * @param query
    * @param scanner
    */
-  public RedisResult(DataStore<K,T> dataStore, Query<K,T> query, Scanner scanner) {
+  public RedisResult(DataStore<K, T> dataStore, Query<K, T> query) {//, Scanner scanner) {
     super(dataStore, query);
-    
-    if (this.limit > 0) {
-      scanner.setBatchSize((int) this.limit);
-    }
-    iterator = new RowIterator(scanner.iterator());
+
+//    if (this.limit > 0) {
+//      scanner.setBatchSize((int) this.limit);
+//    }
+//    iterator = new RowIterator(scanner.iterator());
   }
 
   /**
@@ -68,10 +62,10 @@ public class RedisResult<K,T extends PersistentBase> extends ResultBase<K,T> {
       return 0;
     }
   }
-  
+
   @Override
   public void close() throws IOException {
-    
+
   }
 
   /**
@@ -79,16 +73,17 @@ public class RedisResult<K,T extends PersistentBase> extends ResultBase<K,T> {
    */
   @Override
   protected boolean nextInner() throws IOException {
-    
-    if (!iterator.hasNext())
-      return false;
-    
-    key = null;
-    
-    Iterator<Entry<Key,Value>> nextRow = iterator.next();
-    ByteSequence row = getDataStore().populate(nextRow, persistent);
-    key = ((RedisStore<K, T>) dataStore).fromBytes(getKeyClass(), row.toArray());
-    
+//
+//    if (!iterator.hasNext()) {
+//      return false;
+//    }
+//
+//    key = null;
+//
+//    Iterator<Entry<Key, Value>> nextRow = iterator.next();
+//    ByteSequence row = getDataStore().populate(nextRow, persistent);
+//    key = ((RedisStore<K, T>) dataStore).fromBytes(getKeyClass(), row.toArray());
+
     return true;
   }
 

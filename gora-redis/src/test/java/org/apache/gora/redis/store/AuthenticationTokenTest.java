@@ -17,13 +17,10 @@
 package org.apache.gora.redis.store;
 
 import java.util.List;
-import java.util.Properties;
 import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.redis.minicluster.MiniRedisCluster;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -45,40 +42,40 @@ public class AuthenticationTokenTest {
   @Rule
   public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-  private MiniRedisCluster cluster;
+//  private MiniRedisCluster cluster;
   private DataStore<String, Employee> employeeStore;
 
   @Before
   @SuppressWarnings("unchecked")
   public void setUp() throws Exception {
-    cluster = new MiniRedisCluster(temporaryFolder.getRoot(), PASSWORD);
-    cluster.start();
-
-    Properties properties = DataStoreFactory.createProps();
-    properties.setProperty(
-        GORA_DATASTORE + RedisStore.MOCK_PROPERTY,
-        "false");
-    properties.setProperty(
-        GORA_DATASTORE + RedisStore.INSTANCE_NAME_PROPERTY,
-        cluster.getInstanceName());
-    properties.setProperty(
-        GORA_DATASTORE + RedisStore.ZOOKEEPERS_NAME_PROPERTY,
-        cluster.getZooKeepers());
-    properties.setProperty(
-        GORA_DATASTORE + RedisStore.PASSWORD_PROPERTY,
-        PASSWORD);
-
-    employeeStore = DataStoreFactory.createDataStore(
-        RedisStore.class,
-        String.class,
-        Employee.class,
-        new Configuration(),
-        properties);
+//    cluster = new MiniRedisCluster(temporaryFolder.getRoot(), PASSWORD);
+//    cluster.start();
+//
+//    Properties properties = DataStoreFactory.createProps();
+//    properties.setProperty(
+//        GORA_DATASTORE + RedisStore.MOCK_PROPERTY,
+//        "false");
+//    properties.setProperty(
+//        GORA_DATASTORE + RedisStore.INSTANCE_NAME_PROPERTY,
+//        cluster.getInstanceName());
+//    properties.setProperty(
+//        GORA_DATASTORE + RedisStore.ZOOKEEPERS_NAME_PROPERTY,
+//        cluster.getZooKeepers());
+//    properties.setProperty(
+//        GORA_DATASTORE + RedisStore.PASSWORD_PROPERTY,
+//        PASSWORD);
+//
+//    employeeStore = DataStoreFactory.createDataStore(
+//        RedisStore.class,
+//        String.class,
+//        Employee.class,
+//        new Configuration(),
+//        properties);
   }
 
   @After
   public void tearDown() throws Exception {
-    cluster.stop();
+//    cluster.stop();
   }
 
   @Test

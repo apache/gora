@@ -17,56 +17,35 @@
  */
 package org.apache.gora.redis;
 
+import com.github.fppt.jedismock.RedisServer;
 import java.io.IOException;
 import org.apache.gora.GoraTestDriver;
 import org.apache.gora.redis.store.RedisStore;
-import org.apache.redis.minicluster.MiniRedisCluster;
-import org.apache.redis.minicluster.MiniRedisConfig;
-import org.junit.Rule;
-import org.junit.rules.TemporaryFolder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * @author lmcgibbn
+ * Helper class to execute tests in a embedded instance of Redis.
  *
+ * @author Xavier Sumba
  */
 public class GoraRedisTestDriver extends GoraTestDriver {
 
-  private static final Logger LOG = LoggerFactory.getLogger(GoraRedisTestDriver.class);
-  private static MiniRedisCluster cluster = null;
-  private static final String PASSWORD = "drowssap";
+  private static RedisServer server = null;
 
-  @Rule
-  public TemporaryFolder tmpDir = new TemporaryFolder();
-
-  public GoraRedisTestDriver() throws Exception {
+  public GoraRedisTestDriver() {
     super(RedisStore.class);
   }
 
   @Override
-  public void setUpClass() throws IOException, InterruptedException {
-    log.info("Starting Redis MiniRedisCluster...");
-    try {
-      tmpDir.create();
-      MiniRedisConfig miniCfg = new MiniRedisConfig(tmpDir.getRoot(), PASSWORD);
-      miniCfg.setInstanceName("goraTest");
-      miniCfg.setZooKeeperPort(56321);
-      cluster = new MiniRedisCluster(miniCfg);
-      cluster.start();
-    } catch (Exception e) {
-      LOG.error("Error starting Redis MiniRedisCluster: {}", e.getMessage());
-      // cleanup
-      tearDownClass();
-    }
+  public void setUpClass() throws IOException {
+    server = RedisServer.newRedisServer();
+    log.info("Starting Redis Mock...");
+    server.start();
   }
 
   @Override
-  public void tearDownClass() throws IOException, InterruptedException {
-    log.info("Shutting down Redis MiniRedisCluster...");
-    if (cluster != null) {
-      cluster.stop();
-    }
-    tmpDir.delete();
+  public void tearDownClass() throws Exception {
+    log.info("Shutting down Redis Mock...");
+    server.stop();
+    server = null;
   }
 }
