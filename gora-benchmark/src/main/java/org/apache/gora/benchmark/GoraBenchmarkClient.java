@@ -159,7 +159,8 @@ public class GoraBenchmarkClient extends DB {
   @Override
   public int read(String table, String key, Set<String> fields, HashMap<String, ByteIterator> result) {
     try {
-      User user = (fields.size() == 0 ) ? dataStore.get(key) : dataStore.get(key, fields.toArray(new String[fields.size()]));
+      //check for null is necessary. 
+      User user = (fields == null || fields.size() == 0 ) ? dataStore.get(key) : dataStore.get(key, fields.toArray(new String[fields.size()]));
       Class<?> clazz = Class.forName(prop.getProperty("persistent.class"));
       for (int i = 0; i < Integer.parseInt(fieldCount); i++) {
         String methodName = "getField"+i;
@@ -237,7 +238,7 @@ public class GoraBenchmarkClient extends DB {
         }
       }
       dataStore.put(user.getUserId().toString(), user);
-      dataStore.flush();
+      //dataStore.flush();
     } catch (Exception e) {
       
       return FAILED;

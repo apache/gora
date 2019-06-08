@@ -19,7 +19,7 @@ import com.yahoo.ycsb.StringByteIterator;
 
 import generated.User;
 
-public class GoraInsertTest {
+public class GoraClientTest {
   
 
   private static final String TABLE = "users";
@@ -67,16 +67,16 @@ public class GoraInsertTest {
     int result1 = client.insert(TABLE, "key1", DATA_TO_INSERT);
     int result2 = client.insert(TABLE, "key2", DATA_TO_INSERT);
     int result3 = client.insert(TABLE, "key3", DATA_TO_INSERT);
-    assertEquals(result1, 0);
-    assertEquals(result2, 0);
-    assertEquals(result3, 0);
+    assertEquals(0, result1);
+    assertEquals(0, result2);
+    assertEquals(0, result3);
   }
   
   
   @Test
   public void   testRead() {
     HashMap<String, ByteIterator> results = new HashMap<>();
-    Set<String> fields = new HashSet<>();
+    Set<String> fields = new HashSet<>();//this could be null as well
     //fields.add("field0");
     int result = client.read(TABLE, "key1", fields, results);
     assertEquals(0, result);
@@ -99,8 +99,11 @@ public class GoraInsertTest {
   public void testUpdate() throws GoraException{
     int result = client.update(TABLE, "key1", DATA_TO_UPDATE);
     assertEquals(result,0);
-    User u = readRecord("key1");
-    assertEquals("updated0", u.getField0().toString());
+    if(result==0) {
+     client.dataStore.flush();
+     User u = readRecord("key1");
+     assertEquals("updated0", u.getField0().toString());
+    }
     //Read Record from 
   }
   
