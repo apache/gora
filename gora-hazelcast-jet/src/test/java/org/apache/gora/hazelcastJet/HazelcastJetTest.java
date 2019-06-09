@@ -27,12 +27,13 @@ public class HazelcastJetTest {
         }
         query = dataStore.newQuery();
         query.setStartKey(0L);
-        query.setEndKey(50L);
+        query.setEndKey(55L);
 
         HazelcastJetEngine2<Long, Pageview> hazelcastJetEngine2 = new HazelcastJetEngine2<>();
         BatchSource<Pageview> fileSource = hazelcastJetEngine2.createDataSource(query);
         Pipeline p = Pipeline.create();
         p.drawFrom(fileSource)
+                .filter(item -> item.getIp().toString().equals("88.240.129.183"))
                 .drainTo(Sinks.list("results"));
 
         JetInstance jet = Jet.newJetInstance();
