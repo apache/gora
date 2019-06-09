@@ -22,25 +22,39 @@ import org.junit.Test;
 public class HazelcastJetTest {
 
     @Test
-    public void testJet() {
-//        Pipeline p = Pipeline.create();
-//        p.drawFrom(Sources.batchFromProcessor("gora", new GenerateNumbersPMetaSupplier(10)))
-//                .drainTo(Sinks.list("results"));
-//
-//        JetInstance jet = Jet.newJetInstance();
-//        try
-//        {
-//            jet.newJob(p).join();
-//            IList<Object> results = jet.getList("results");
-//
-//            for (Object object: results) {
-//                System.out.println(object);
-//            }
-//        } finally
-//
-//        {
-//            Jet.shutdownAll();
-//        }
+    public void testNewJetSource() {
+
+        try {
+            dataStore = DataStoreFactory.getDataStore(Long.class, Pageview.class,
+                    new Configuration());
+        } catch (GoraException e) {
+            e.printStackTrace();
+        }
+        query = dataStore.newQuery();
+        query.setStartKey(0L);
+        query.setEndKey(50L);
+
+        JetExecutionMethod2<Long, Pageview> jetExecutionMethod2 = new JetExecutionMethod2<>();
+        BatchSource<Pageview> fileSource = jetExecutionMethod2.createDataSource(query);
+        Pipeline p = Pipeline.create();
+        p.drawFrom(fileSource)
+                .drainTo(Sinks.list("results"));
+
+        JetInstance jet = Jet.newJetInstance();
+        Jet.newJetInstance();
+        try
+        {
+            jet.newJob(p).join();
+            IList<Pageview> results = jet.getList("results");
+
+            for (Pageview pageview: results) {
+                System.out.println(pageview);
+            }
+        } finally
+
+        {
+            Jet.shutdownAll();
+        }
 
 
 //        JetInstance jet = Jet.newJetInstance();
@@ -71,7 +85,7 @@ public class HazelcastJetTest {
 //        int upperBound = 10;
 //        DAG dag = new DAG();
 //        Vertex generateNumbers = dag.newVertex("generate-numbers",
-//                new GenerateNumbersPMetaSupplier(upperBound));
+//                new GoraJetMetaSupplier(upperBound));
 //        Vertex logInput = dag.newVertex("log-input",
 //                DiagnosticProcessors.writeLoggerP(i -> "Received number: " + i));
 //        dag.edge(Edge.between(generateNumbers, logInput));
