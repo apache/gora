@@ -23,7 +23,7 @@ import static com.hazelcast.jet.Traversers.traverseIterable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 
-public class JetExecutionMethod2<KeyIn, ValueIn extends PersistentBase> {
+public class HazelcastJetEngine2<KeyIn, ValueIn extends PersistentBase> {
     public BatchSource<ValueIn> createDataSource(Query<KeyIn, ValueIn> query) {
         BatchSource<ValueIn> source = Sources.batchFromProcessor("gora",
                 new GoraJetMetaSupplier<KeyIn, ValueIn>(query));

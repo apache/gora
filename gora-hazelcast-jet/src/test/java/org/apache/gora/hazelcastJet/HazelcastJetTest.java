@@ -3,14 +3,9 @@ package org.apache.gora.hazelcastJet;
 import com.hazelcast.core.IList;
 import com.hazelcast.jet.Jet;
 import com.hazelcast.jet.JetInstance;
-import com.hazelcast.jet.core.DAG;
-import com.hazelcast.jet.core.Edge;
-import com.hazelcast.jet.core.Vertex;
-import com.hazelcast.jet.core.processor.DiagnosticProcessors;
 import com.hazelcast.jet.pipeline.BatchSource;
 import com.hazelcast.jet.pipeline.Pipeline;
 import com.hazelcast.jet.pipeline.Sinks;
-import com.hazelcast.jet.pipeline.Sources;
 import org.apache.gora.hazelcastJet.generated.Pageview;
 import org.apache.gora.query.Query;
 import org.apache.gora.store.DataStore;
@@ -34,8 +29,8 @@ public class HazelcastJetTest {
         query.setStartKey(0L);
         query.setEndKey(50L);
 
-        JetExecutionMethod2<Long, Pageview> jetExecutionMethod2 = new JetExecutionMethod2<>();
-        BatchSource<Pageview> fileSource = jetExecutionMethod2.createDataSource(query);
+        HazelcastJetEngine2<Long, Pageview> hazelcastJetEngine2 = new HazelcastJetEngine2<>();
+        BatchSource<Pageview> fileSource = hazelcastJetEngine2.createDataSource(query);
         Pipeline p = Pipeline.create();
         p.drawFrom(fileSource)
                 .drainTo(Sinks.list("results"));
