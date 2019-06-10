@@ -37,8 +37,7 @@ public class GoraRedisTestDriver extends GoraTestDriver {
 
   @Override
   public void setUpClass() throws IOException {
-    server = RedisServer.newRedisServer();
-    log.info("Starting Redis Mock...");
+    server = RedisServer.newRedisServer(6387);
     server.start();
   }
 

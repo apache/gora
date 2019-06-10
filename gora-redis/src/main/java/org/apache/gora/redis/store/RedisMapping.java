@@ -21,18 +21,25 @@ package org.apache.gora.redis.store;
  */
 public class RedisMapping {
 
-//  /**
-//   * A map of field names to Field objects containing schema's fields
-//   */
-//  Map<String,Pair<Text,Text>> fieldMap = new HashMap<>();
-//
-//  /**
-//   * Look up the column associated to the Avro field.
-//   */
-//  Map<Pair<Text,Text>,String> columnMap = new HashMap<>();
-//
-//  Map<String,String> tableConfig = new HashMap<>();
-//  String tableName;
-//  String encoder;
+  private int datebase;
+  private String prefix;
 
+  public int getDatebase() {
+    return datebase;
+  }
+
+  public void setDatebase(int datebase) {
+    this.datebase = datebase;
+  }
+
+  public String getPrefix() {
+    return prefix;
+  }
+
+  public void setPrefix(String prefix) {
+    this.prefix = prefix;
+  }
+
+  
+  
 }
