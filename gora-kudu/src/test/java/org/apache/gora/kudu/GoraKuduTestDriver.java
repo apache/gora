@@ -19,10 +19,7 @@ package org.apache.gora.kudu;
 
 import org.apache.gora.GoraTestDriver;
 import org.apache.gora.kudu.store.KuduStore;
-import org.apache.kudu.client.KuduClient;
 import org.apache.kudu.test.KuduTestHarness;
-import org.apache.kudu.test.cluster.MiniKuduCluster;
-import org.junit.Rule;
 
 /**
  * Helper class for third part tests using gora-kudu backend.
@@ -45,6 +42,7 @@ public class GoraKuduTestDriver extends GoraTestDriver {
 
   @Override
   public void tearDownClass() throws Exception {
+    harness.after();
   }
 
 }

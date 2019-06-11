@@ -17,9 +17,11 @@
 package org.apache.gora.kudu.store;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Level;
+import org.apache.commons.io.IOUtils;
 import org.apache.gora.kudu.mapping.KuduMapping;
 import org.apache.gora.kudu.mapping.KuduMappingBuilder;
 import org.apache.gora.kudu.utils.KuduParameters;
@@ -45,6 +47,7 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
   private static final Logger LOG = LoggerFactory.getLogger(KuduStore.class);
   private static final String PARSE_MAPPING_FILE_KEY = "gora.kudu.mapping.file";
   private static final String DEFAULT_MAPPING_FILE = "gora-kudu-mapping.xml";
+  private static final String XML_MAPPING_DEFINITION = "gora.mapping";
   private KuduParameters kuduParameters;
   private KuduMapping kuduMapping;
   private KuduClient client;
@@ -54,7 +57,16 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
     try {
       super.initialize(keyClass, persistentClass, properties);
       KuduMappingBuilder<K, T> builder = new KuduMappingBuilder<K, T>(this);
-      builder.readMappingFile(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE));
+      InputStream mappingStream;
+      if (properties.containsKey(XML_MAPPING_DEFINITION)) {
+        if (LOG.isTraceEnabled()) {
+          LOG.trace(XML_MAPPING_DEFINITION + " = " + properties.getProperty(XML_MAPPING_DEFINITION));
+        }
+        mappingStream = IOUtils.toInputStream(properties.getProperty(XML_MAPPING_DEFINITION), (Charset) null);
+      } else {
+        mappingStream = getClass().getClassLoader().getResourceAsStream(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE));
+      }
+      builder.readMappingFile(mappingStream);
       kuduMapping = builder.getKuduMapping();
       kuduParameters = KuduParameters.load(properties, getConf());
       KuduClient.KuduClientBuilder kuduClientBuilder = new KuduClient.KuduClientBuilder(kuduParameters.getMasterAddresses());
@@ -83,7 +95,7 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
         createSchema();
       }
     } catch (Exception ex) {
-      LOG.error("Error while initializing Ignite store", ex);
+      LOG.error("Error while initializing Kudu store", ex);
       throw new GoraException(ex);
     }
   }
@@ -94,8 +106,7 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
   }
 
   @Override
-  public String getSchemaName(final String mappingSchemaName,
-      final Class<?> persistentClass) {
+  public String getSchemaName(final String mappingSchemaName, final Class<?> persistentClass) {
     return super.getSchemaName(mappingSchemaName, persistentClass);
   }
 

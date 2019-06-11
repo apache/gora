@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.gora.kudu.store.KuduStore;
 import org.apache.gora.persistency.impl.PersistentBase;
+import org.apache.gora.util.GoraException;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -76,20 +77,19 @@ public class KuduMappingBuilder<K, T extends PersistentBase> {
   /**
    * Reads Kudu mappings from file
    *
-   * @param mappingFile File name relative to the resource's classpath
+   * @param inputStream Mapping input stream
    */
-  public void readMappingFile(String mappingFile) {
+  public void readMappingFile(InputStream inputStream) throws GoraException {
     try {
       SAXBuilder saxBuilder = new SAXBuilder();
-      InputStream inputStream = getClass().getClassLoader().getResourceAsStream(mappingFile);
       if (inputStream == null) {
-        LOG.error("Mapping file '{}' could not be found!", mappingFile);
-        throw new IOException("Mapping file '" + mappingFile + "' could not be found!");
+        LOG.error("The mapping input stream is null!");
+        throw new GoraException("The mapping input stream is null!");
       }
       Document document = saxBuilder.build(inputStream);
       if (document == null) {
-        LOG.error("Mapping file '{}' could not be found!", mappingFile);
-        throw new IOException("Mapping file '" + mappingFile + "' could not be found!");
+        LOG.error("The mapping document is null!");
+        throw new GoraException("The mapping document is null!");
       }
       @SuppressWarnings("unchecked")
       List<Element> classes = document.getRootElement().getChildren("class");
@@ -138,7 +138,7 @@ public class KuduMappingBuilder<K, T extends PersistentBase> {
         }
       }
     } catch (IOException | JDOMException | ConfigurationException e) {
-      throw new RuntimeException(e);
+      throw new GoraException(e);
     }
     LOG.info("Gora Kudu mapping file was read successfully.");
   }
