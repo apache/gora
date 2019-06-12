@@ -17,9 +17,9 @@
  */
 package org.apache.gora.benchmark;
 
-import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Locale;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
@@ -57,25 +57,34 @@ public class GoraBenchmarkClient extends DB {
   
   private static final int FAILED = 1;
   
+  private static final String FIELDS[] = User._ALL_FIELDS;
+  
   public static String fieldCount;
   
+  /**This is only for set to array conversion in {@link read()} method*/
+  private String[] DUMMY_ARRAY = new String[0];
+  
   DataStore<String, User> dataStore;
+  
+  User user;
   
   private Properties prop;
 
   public GoraBenchmarkClient() {}
+ 
 
   public void init() throws DBException {
     try {
+      user = new User();
       //Get YCSB properties
       prop = getProperties();
-      //I planned to make this generic, so that users can define their own key and persistence class. 
-      //However this will require the user to generate corresponding AVRO and mapping files. So I think 
-      //it may be best to leave because that will have less effect on the benchmark results.
+      
+      fieldCount = prop.getProperty(CoreWorkload.FIELD_COUNT_PROPERTY, CoreWorkload.FIELD_COUNT_PROPERTY_DEFAULT);
+      
       String keyClass = prop.getProperty("key.class", "java.lang.String");
       String persistentClass = prop.getProperty("persistent.class", "generated.User");
       Properties p = DataStoreFactory.createProps();
-      fieldCount = prop.getProperty(CoreWorkload.FIELD_COUNT_PROPERTY, CoreWorkload.FIELD_COUNT_PROPERTY_DEFAULT);
+      
       dataStore = DataStoreFactory.getDataStore(keyClass, persistentClass, p, new Configuration());
     } catch (GoraException e) {
       //e.printStackTrace();
@@ -97,7 +106,7 @@ public class GoraBenchmarkClient extends DB {
    * Delete a record from the database.
    *
    * @param table The name of the table
-   * @param key The record key of the record to delete.
+   * @param key The recordallSetMethods key of the record to delete.
    * @return The result of the operation.
    */
   @Override
@@ -118,7 +127,7 @@ public class GoraBenchmarkClient extends DB {
    * Any field/value pairs in the specified values HashMap will be written into the
    * record with the specified record key.
    *
-   * @param table The name of the table
+   * @param table The name of the table"field"+i
    * @param key The record key of the record to insert.
    * @param values A HashMap of field/value pairs to insert in the record. Each HashMap will have a 
    * @return The result of the operation.
@@ -127,19 +136,15 @@ public class GoraBenchmarkClient extends DB {
   public int insert(String table, String key, HashMap<String, ByteIterator> values) {
     // TODO Auto-generated method stub
     try {
-      User user = new User();
       user.setUserId(key);
-      //Another method of getting the fieldCount is to use value.size() since we have field,value structure in each
-      //data to be inserted.
-      Class<?> clazz = Class.forName(prop.getProperty("persistent.class"));
       for (int i = 0; i < Integer.parseInt(fieldCount); i++) {
-        String methodName = "setField"+i;
-        //LOG.info(methodName);
-        Method m = clazz.getMethod(methodName, CharSequence.class);
-        m.invoke(user, values.get("field"+i).toString());
+          String field = FIELDS[i+1];
+          int fieldIndex = i+1;
+          String fieldValue = values.get(field).toString();
+          user.put(fieldIndex, fieldValue);
+          user.setDirty(fieldIndex);
       }
-      dataStore.put(user.getUserId().toString(), user);
-      //dataStore.flush();
+      dataStore.put(key, user);
     } catch (Exception e) {
       //e.printStackTrace();
       return FAILED;
@@ -153,21 +158,19 @@ public class GoraBenchmarkClient extends DB {
    * @param table The name of the table
    * @param key The record key of the record to read.
    * @param fields The list of fields to read, or null for all of them
-   * @param result A HashMap of field/value pairs for the result
+   * @param result A HashMap oftestInsert field/value pairs for the result
    * @return The result of the operation.
    */
   @Override
   public int read(String table, String key, Set<String> fields, HashMap<String, ByteIterator> result) {
     try {
       //check for null is necessary. 
-      User user = (fields == null || fields.size() == 0 ) ? dataStore.get(key) : dataStore.get(key, fields.toArray(new String[fields.size()]));
-      Class<?> clazz = Class.forName(prop.getProperty("persistent.class"));
+      User user = (fields == null || fields.size() == 0 ) ? dataStore.get(key) : dataStore.get(key, fields.toArray(DUMMY_ARRAY));
       for (int i = 0; i < Integer.parseInt(fieldCount); i++) {
-        String methodName = "getField"+i;
-        //LOG.info(methodName);
-        Method m = clazz.getMethod(methodName);
-        String value = m.invoke(user).toString();
-        result.put("field"+i, new StringByteIterator(value));
+        String field = FIELDS[i+1];
+        int fieldIndex = i + 1;
+        String value = user.get(fieldIndex).toString();
+        result.put(field, new StringByteIterator(value));
       }
     } catch (Exception e) {
      return FAILED;
@@ -194,18 +197,15 @@ public class GoraBenchmarkClient extends DB {
       goraQuery.setStartKey(startKey);
       goraQuery.setLimit(recordCount);
       Result<String, User> resultSet = goraQuery.execute();
-      Class<?> clazz = Class.forName(prop.getProperty("persistent.class"));
-      //LOG.info(resultSet.size()+"Scan results returned");
       while(resultSet.next()) {
         User user = resultSet.get();
         HashMap<String, ByteIterator> hm = new HashMap<>();
         for (int i = 0; i < Integer.parseInt(fieldCount); i++) {
-          String methodName = "getField"+i;
-          //LOG.info(methodName);
-          Method m = clazz.getMethod(methodName);
-            String value = m.invoke(user).toString();
-            hm.put("field"+i, new StringByteIterator(value));
-          }
+          String field = FIELDS[i+1];
+          int fieldIndex = i + 1;
+          String value = user.get(fieldIndex).toString();
+          hm.put(field, new StringByteIterator(value));
+        }
         result.add(hm);
       }
     } catch (Exception e) {
@@ -229,12 +229,13 @@ public class GoraBenchmarkClient extends DB {
     try {
       //We first get the database object to update
       User user = dataStore.get(key);
-      Class<?> clazz = Class.forName(prop.getProperty("persistent.class"));
+      List<String> allFields = Arrays.asList(FIELDS);
       for(String field: values.keySet()) {
         if(GoraBenchmarkUtils.isFieldUpdatable(field, values)) {
-          String methodName = "set"+field.substring(0,1).toUpperCase(Locale.ROOT)+field.substring(1);
-          Method m = clazz.getMethod(methodName, CharSequence.class);
-          m.invoke(user, values.get(field).toString());
+          /**Get the index of the field from the global fields array and call the right method*/
+          int indexOfFieldInArray = allFields.indexOf(field);
+          user.put(indexOfFieldInArray, values.get(field).toString());
+          user.setDirty(indexOfFieldInArray);
         }
       }
       dataStore.put(user.getUserId().toString(), user);
