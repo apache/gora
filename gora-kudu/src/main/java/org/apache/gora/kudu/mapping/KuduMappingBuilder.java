@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javafx.util.Pair;
 import org.apache.gora.kudu.store.KuduStore;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.util.GoraException;
@@ -37,13 +38,13 @@ import org.slf4j.LoggerFactory;
  * Builder for Mapping definitions of Kudu.
  */
 public class KuduMappingBuilder<K, T extends PersistentBase> {
-
+  
   private static final Logger LOG = LoggerFactory.getLogger(KuduMappingBuilder.class);
   /**
    * Mapping instance being built
    */
   private KuduMapping kuduMapping;
-
+  
   private final KuduStore<K, T> dataStore;
 
   /**
@@ -95,28 +96,47 @@ public class KuduMappingBuilder<K, T extends PersistentBase> {
       List<Element> classes = document.getRootElement().getChildren("class");
       for (Element classElement : classes) {
         if (classElement.getAttributeValue("keyClass").equals(
-            dataStore.getKeyClass().getCanonicalName())
-            && classElement.getAttributeValue("name").equals(
-                dataStore.getPersistentClass().getCanonicalName())) {
+                dataStore.getKeyClass().getCanonicalName())
+                && classElement.getAttributeValue("name").equals(
+                        dataStore.getPersistentClass().getCanonicalName())) {
           final String tableNameFromMapping = classElement.getAttributeValue("table");
           String tableName = dataStore.getSchemaName(tableNameFromMapping, dataStore.getPersistentClass());
           kuduMapping.setTableName(tableName);
           @SuppressWarnings("unchecked")
-          List<Element> prColumns = classElement.getChildren("primarykey");
-          List<Column> prFields = new ArrayList<>();
-          for (Element aPrimaryKey : prColumns) {
-            String name = aPrimaryKey.getAttributeValue("column");
-            String type = aPrimaryKey.getAttributeValue("type");
-            Column.DataType aDataType = Column.DataType.valueOf(type);
-            if (aDataType == Column.DataType.DECIMAL) {
-              int precision = Integer.parseInt(aPrimaryKey.getAttributeValue("precision"));
-              int scale = Integer.parseInt(aPrimaryKey.getAttributeValue("scale"));
-              prFields.add(new Column(name, new Column.FieldType(precision, scale)));
-            } else {
-              prFields.add(new Column(name, new Column.FieldType(aDataType)));
+          List<Element> tables = document.getRootElement().getChildren("table");
+          for (Element tableElement : tables) {
+            if (tableElement.getAttributeValue("name").equals(tableNameFromMapping)) {
+              @SuppressWarnings("unchecked")
+              List<Element> prColumns = tableElement.getChildren("primaryKey");
+              List<Column> prFields = new ArrayList<>();
+              for (Element aPrimaryKey : prColumns) {
+                String name = aPrimaryKey.getAttributeValue("column");
+                String type = aPrimaryKey.getAttributeValue("type");
+                Column.DataType aDataType = Column.DataType.valueOf(type);
+                if (aDataType == Column.DataType.DECIMAL) {
+                  int precision = Integer.parseInt(aPrimaryKey.getAttributeValue("precision"));
+                  int scale = Integer.parseInt(aPrimaryKey.getAttributeValue("scale"));
+                  prFields.add(new Column(name, new Column.FieldType(precision, scale)));
+                } else {
+                  prFields.add(new Column(name, new Column.FieldType(aDataType)));
+                }
+              }
+              kuduMapping.setPrimaryKey(prFields);
+              Element hashPartition = tableElement.getChild("hashPartition");
+              if (hashPartition != null) {
+                int numBuckets = Integer.parseInt(hashPartition.getAttributeValue("numBuckets"));
+                kuduMapping.setHashBuckets(numBuckets);
+              }
+              List<Pair<String, String>> ranges = new ArrayList();
+              @SuppressWarnings("unchecked")
+              List<Element> rangePartitions = tableElement.getChildren("rangePartition");
+              for (Element rangePartition : rangePartitions) {
+                String lower = rangePartition.getAttributeValue("lower");
+                String upper = rangePartition.getAttributeValue("upper");
+                ranges.add(new Pair<>(lower, upper));
+              }
             }
           }
-          kuduMapping.setPrimaryKey(prFields);
           @SuppressWarnings("unchecked")
           List<Element> fields = classElement.getChildren("field");
           Map<String, Column> mp = new HashMap<>();

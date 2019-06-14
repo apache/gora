@@ -19,6 +19,7 @@ package org.apache.gora.kudu.mapping;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javafx.util.Pair;
 
 /**
  * Mapping definitions for Kudu.
@@ -28,6 +29,8 @@ public class KuduMapping {
   private String tableName;
   private Map<String, Column> fields;
   private List<Column> primaryKey;
+  private int hashBuckets;
+  private List<Pair<String, String>> rangePartitions;
 
   /**
    * Empty constructor for the KuduMapping class
@@ -88,6 +91,22 @@ public class KuduMapping {
    */
   public void setPrimaryKey(List<Column> primaryKey) {
     this.primaryKey = primaryKey;
+  }
+
+  public int getHashBuckets() {
+    return hashBuckets;
+  }
+
+  public void setHashBuckets(int hashBuckets) {
+    this.hashBuckets = hashBuckets;
+  }
+
+  public List<Pair<String, String>> getRangePartitions() {
+    return rangePartitions;
+  }
+
+  public void setRangePartitions(List<Pair<String, String>> rangePartitions) {
+    this.rangePartitions = rangePartitions;
   }
 
 }

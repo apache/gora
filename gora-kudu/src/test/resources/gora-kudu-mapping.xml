@@ -10,33 +10,43 @@
 
        http://www.apache.org/licenses/LICENSE-2.0
 
-	 Unless required by applicable law or agreed to in writing, software
-	 distributed under the License is distributed on an "AS IS" BASIS,
-	 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	 See the License for the specific language governing permissions and
-	 limitations under the License.
+         Unless required by applicable law or agreed to in writing, software
+         distributed under the License is distributed on an "AS IS" BASIS,
+         WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+         See the License for the specific language governing permissions and
+         limitations under the License.
 -->
 
 <gora-otd>
-	<class name="org.apache.gora.examples.generated.Employee" keyClass="java.lang.String" table="Employee">
-		<primarykey column="pkssn" type="STRING" />
-		<field name="ssn" column="ssn" type="STRING"/>
-		<field name="name" column="name" type="STRING"/>
-		<field name="dateOfBirth" column="dateOfBirth" type="UNIXTIME_MICROS"/>
-		<field name="salary" column="salary" type="INT16"/>
-		<field name="boss" column="boss" type="BINARY"/>
-		<field name="webpage" column="webpage" type="BINARY"/>
-	</class>
   
-	<class name="org.apache.gora.examples.generated.WebPage" keyClass="java.lang.String" table="WebPage">
-		<primarykey column="pkurl" type="STRING"/>
-		<field name="url" column="url" type="STRING"/>
-		<field name="content" column="content" type="BINARY"/>
-		<field name="parsedContent" column="parsedContent" type="BINARY"/>
-		<field name="outlinks" column="outlinks" type="BINARY"/>
-		<field name="headers" column="headers" type="BINARY"/>     
-		<field name="metadata" column="metadata" type="BINARY"/>
-		<field name="byteData" column="byteData" type="BINARY"/>
-		<field name="stringData" column="stringData" type="BINARY"/>
-	</class>
+  <table name ="Employee">
+    <primaryKey column="pkssn" type="STRING" />
+    <hashPartition numBuckets="8"/>
+  </table>
+  
+  <class name="org.apache.gora.examples.generated.Employee" keyClass="java.lang.String" table="Employee">
+    <field name="ssn" column="ssn" type="STRING"/>
+    <field name="name" column="name" type="STRING"/>
+    <field name="dateOfBirth" column="dateOfBirth" type="UNIXTIME_MICROS"/>
+    <field name="salary" column="salary" type="INT16"/>
+    <field name="boss" column="boss" type="BINARY"/>
+    <field name="webpage" column="webpage" type="BINARY"/>
+  </class>
+  
+  <table name ="WebPage">
+    <primaryKey column="pkurl" type="STRING" />
+    <rangePartition lower="" upper ="1000"/>
+    <rangePartition lower="1000" upper =""/>
+  </table>
+  
+  <class name="org.apache.gora.examples.generated.WebPage" keyClass="java.lang.String" table="WebPage">
+    <field name="url" column="url" type="STRING"/>
+    <field name="content" column="content" type="BINARY"/>
+    <field name="parsedContent" column="parsedContent" type="BINARY"/>
+    <field name="outlinks" column="outlinks" type="BINARY"/>
+    <field name="headers" column="headers" type="BINARY"/>     
+    <field name="metadata" column="metadata" type="BINARY"/>
+    <field name="byteData" column="byteData" type="BINARY"/>
+    <field name="stringData" column="stringData" type="BINARY"/>
+  </class>
 </gora-otd>

@@ -19,9 +19,13 @@ package org.apache.gora.kudu.store;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import javafx.util.Pair;
 import org.apache.commons.io.IOUtils;
+import org.apache.gora.kudu.mapping.Column;
 import org.apache.gora.kudu.mapping.KuduMapping;
 import org.apache.gora.kudu.mapping.KuduMappingBuilder;
 import org.apache.gora.kudu.utils.KuduParameters;
@@ -31,8 +35,15 @@ import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.GoraException;
+import org.apache.kudu.ColumnSchema;
+import org.apache.kudu.Schema;
+import org.apache.kudu.Type;
+import org.apache.kudu.client.ColumnRangePredicate;
+import org.apache.kudu.client.CreateTableOptions;
 import org.apache.kudu.client.KuduClient;
 import org.apache.kudu.client.KuduException;
+import org.apache.kudu.client.PartialRow;
+import org.apache.kudu.util.DecimalUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,7 +123,49 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
 
   @Override
   public void createSchema() throws GoraException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    try {
+      List<ColumnSchema> columns = new ArrayList<>();
+      List<String> keys = new ArrayList<>();
+      for (Column pk : kuduMapping.getPrimaryKey()) {
+        columns.add(new ColumnSchema.ColumnSchemaBuilder(pk.getName(), Type.valueOf(pk.getDataType().toString())).key(true).build());
+        keys.add(pk.getName());
+      }
+      for (Map.Entry<String, Column> clt : kuduMapping.getFields().entrySet()) {
+        Column aColumn = clt.getValue();
+        ColumnSchema aColumnSch;
+        ColumnSchema.ColumnSchemaBuilder aBaseColumn = new ColumnSchema.ColumnSchemaBuilder(aColumn.getName(), Type.valueOf(aColumn.getDataType().toString())).nullable(true);
+        if (aColumn.getDataType().getType() == Column.DataType.DECIMAL) {
+          aColumnSch = aBaseColumn.typeAttributes(DecimalUtil.typeAttributes(aColumn.getDataType().getPrecision(), aColumn.getDataType().getScale())).build();
+        } else {
+          aColumnSch = aBaseColumn.build();
+        }
+        columns.add(aColumnSch);
+      }
+      Schema sch = new Schema(columns);
+      CreateTableOptions cto = new CreateTableOptions();
+      if (kuduMapping.getHashBuckets() > 0) {
+        cto.addHashPartitions(keys, kuduMapping.getHashBuckets());
+      }
+      if (!kuduMapping.getRangePartitions().isEmpty()) {
+        cto.setRangePartitionColumns(keys);
+        for (Pair<String, String> range : kuduMapping.getRangePartitions()) {
+          PartialRow lowerPar = sch.newPartialRow();
+          PartialRow upperPar = sch.newPartialRow();
+          for (String ky : keys) {
+            if (!range.getKey().isEmpty()) {
+              lowerPar.addString(ky, range.getKey());
+            }
+            if (!range.getValue().isEmpty()) {
+              upperPar.addString(ky, range.getValue());
+            }
+          }
+          cto.addRangePartition(lowerPar, upperPar);
+        }
+      }
+      client.createTable(kuduMapping.getTableName(), sch, cto);
+    } catch (KuduException ex) {
+      throw new GoraException(ex);
+    }
   }
 
   @Override

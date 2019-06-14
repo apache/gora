@@ -119,5 +119,13 @@ public class Column {
       this.scale = scale;
     }
 
+    public DataType getType() {
+      return type;
+    }
+
+    public void setType(DataType type) {
+      this.type = type;
+    }
+
   }
 }
