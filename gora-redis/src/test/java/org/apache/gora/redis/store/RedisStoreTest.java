@@ -31,38 +31,38 @@ public class RedisStoreTest extends DataStoreTestBase {
     setTestDriver(new GoraRedisTestDriver());
   }
 
-  @Test
-  @Ignore
-  public void testExists() throws Exception {
-
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testPut() throws Exception {
-
-  }
-
+//  @Test
+//  @Override
+//  public void testExists() throws Exception {
+//    super.testExists();
+//  }
+//
+//  @Test
+//  @Ignore
+//  @Override
+//  public void testPut() throws Exception {
+//
+//  }
+//
   @Test
   @Ignore
   @Override
   public void testDelete() throws Exception {
-
   }
-
-  @Test
-  @Ignore
-  @Override
-  public void testGet() throws Exception {
-
-  }
-
-  @Test
-  @Ignore
-  public void testBenchamarkExists() throws Exception {
-
-  }
+//
+//  @Test
+//  @Ignore
+//  @Override
+//  public void testGet() throws Exception {
+//
+//  }
+//
+//  @Test
+//  @Ignore
+//  @Override
+//  public void testBenchamarkExists() throws Exception {
+//
+//  }
 
   @Test
   @Ignore

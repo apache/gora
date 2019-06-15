@@ -16,24 +16,27 @@
  */
 package org.apache.gora.redis.store;
 
-import com.fasterxml.jackson.dataformat.avro.AvroMapper;
-import com.fasterxml.jackson.dataformat.avro.AvroSchema;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Properties;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import org.apache.avro.Schema;
+import org.apache.commons.io.IOUtils;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
+import org.apache.gora.redis.util.DatumHandler;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.GoraException;
 import org.redisson.Redisson;
-import org.redisson.api.RBucket;
+import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
-import org.redisson.codec.JsonJacksonCodec;
 import org.redisson.config.Config;
+import org.redisson.config.ReadMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -55,10 +58,12 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
   protected static final String PASSWORD_PROPERTY = "redis.password";
   protected static final String PARSE_MAPPING_FILE_KEY = "gora.redis.mapping.file";
   protected static final String DEFAULT_MAPPING_FILE = "gora-redis-mapping.xml";
+  protected static final String XML_MAPPING_DEFINITION = "gora.mapping";
   private RedissonClient redisInstance;
   private RedisMapping mapping;
-
   public static final Logger LOG = LoggerFactory.getLogger(RedisStore.class);
+
+  private static final DatumHandler handler = new DatumHandler();
 
   /**
    * Initialize the data store by reading the credentials, setting the client's
@@ -74,17 +79,46 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
   public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) throws GoraException {
     try {
       super.initialize(keyClass, persistentClass, properties);
-      String host = properties.getProperty("gora.datastore.redis.instance");
-      mapping = readMapping(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE));
 
+      InputStream mappingStream;
+      if (properties.containsKey(XML_MAPPING_DEFINITION)) {
+        if (LOG.isTraceEnabled()) {
+          LOG.trace(XML_MAPPING_DEFINITION + " = " + properties.getProperty(XML_MAPPING_DEFINITION));
+        }
+        mappingStream = IOUtils.toInputStream(properties.getProperty(XML_MAPPING_DEFINITION), (Charset) null);
+      } else {
+        mappingStream = getClass().getClassLoader().getResourceAsStream(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE));
+      }
+      mapping = readMapping(mappingStream);
       Config config = new Config();
-      com.fasterxml.jackson.dataformat.avro.AvroMapper am = new AvroMapper();
-      AvroSchema schemaFor = new AvroSchema(schema);
-      JsonJacksonCodec jsoncodec = new JsonJacksonCodec();
-      config.setCodec(jsoncodec);
-      config.useSingleServer()
-          .setAddress("redis://" + host)
-          .setDatabase(mapping.getDatebase());
+      String mode = properties.getProperty("gora.datastore.redis.mode");
+      String name = properties.getProperty("gora.datastore.redis.masterName");
+      String readm = properties.getProperty("gora.datastore.redis.readMode");
+      //Override address in tests
+      String[] hosts = getConf().get("gora.datastore.redis.address", properties.getProperty("gora.datastore.redis.address")).split(",");
+      switch (mode) {
+        case "single":
+          config.useSingleServer()
+                  .setAddress("redis://" + hosts[0])
+                  .setDatabase(mapping.getDatebase());
+          break;
+        case "cluster":
+          config.useClusterServers()
+                  .addNodeAddress(hosts);
+          break;
+        case "replicated":
+          config.useReplicatedServers()
+                  .addNodeAddress(hosts)
+                  .setDatabase(mapping.getDatebase());
+          break;
+        case "sentinel":
+          config.useSentinelServers()
+                  .setMasterName(name)
+                  .setReadMode(ReadMode.valueOf(readm))
+                  .addSentinelAddress(hosts)
+                  .setDatabase(mapping.getDatebase());
+          break;
+      }
       redisInstance = Redisson.create(config);
       if (autoCreateSchema && !schemaExists()) {
         createSchema();
@@ -94,24 +128,24 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     }
   }
 
-  protected RedisMapping readMapping(String filename) throws IOException {
+  protected RedisMapping readMapping(InputStream inputStream) throws IOException {
     try {
       RedisMapping mapping = new RedisMapping();
       DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-      Document dom = db.parse(getClass().getClassLoader().getResourceAsStream(filename));
+      Document dom = db.parse(inputStream);
       Element root = dom.getDocumentElement();
       NodeList nl = root.getElementsByTagName("class");
       for (int i = 0; i < nl.getLength(); i++) {
         Element classElement = (Element) nl.item(i);
         if (classElement.getAttribute("keyClass").equals(keyClass.getCanonicalName())
-            && classElement.getAttribute("name").equals(persistentClass.getCanonicalName())) {
+                && classElement.getAttribute("name").equals(persistentClass.getCanonicalName())) {
           mapping.setDatebase(Integer.parseInt(classElement.getAttribute("database")));
           mapping.setPrefix(classElement.getAttribute("prefix"));
         }
       }
       return mapping;
     } catch (Exception ex) {
-      throw new IOException("Unable to read " + filename, ex);
+      throw new IOException(ex);
     }
   }
 
@@ -126,6 +160,7 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
 
   @Override
   public void deleteSchema() throws GoraException {
+    redisInstance.getKeys().flushdb();
   }
 
   @Override
@@ -133,22 +168,69 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     return true;
   }
 
-  @Override
-  public T get(K key, String[] fields) throws GoraException {
-    RBucket<T> bucket = redisInstance.getBucket(mapping.getPrefix() + "." + key);
-    return bucket.get();
+  private String generateKey(Object baseKey) {
+    return mapping.getPrefix() + ".key." + baseKey;
+  }
+
+  private String generateIndexKey() {
+    return mapping.getPrefix() + ".index";
+  }
+
+  public T newInstance(RMap<String, Object> map, String[] fields) throws GoraException, IOException {
+    fields = getFieldsToQuery(fields);
+    T persistent = newPersistent();
+    for (String f : fields) {
+      Schema.Field field = fieldMap.get(f);
+      Object fieldValue = handler.deserializeFieldValue(field, field.schema(), map.get(field.name()), persistent);
+      if (fieldValue == null) {
+        continue;
+      }
+      persistent.put(field.pos(), fieldValue);
+      persistent.setDirty(field.pos());
+    }
+    return persistent;
   }
 
   @Override
-  public void put(K key, T val) throws GoraException {
-    RBucket<T> bucket = redisInstance.getBucket(mapping.getPrefix() + "." + key);
-    bucket.set(val);
+  public T get(K key, String[] fields) throws GoraException {
+    RMap<String, Object> map = redisInstance.getMap(generateKey(key));
+    try {
+      if (map.size() != 0) {
+        return newInstance(map, fields);
+      } else {
+        return null;
+      }
+    } catch (IOException ex) {
+      throw new GoraException(ex);
+    }
+  }
+
+  @Override
+  public void put(K key, T obj) throws GoraException {
+    try {
+      if (obj.isDirty()) {
+        Schema schema = obj.getSchema();
+        List<Schema.Field> fields = schema.getFields();
+        RMap<String, Object> map = redisInstance.getMap(generateKey(key));
+        for (Schema.Field field : fields) {
+          Object fieldValue = handler.serializeFieldValue(field.schema(), obj.get(field.pos()));
+          if (fieldValue != null) {
+            map.put(field.name(), fieldValue);
+          }
+        }
+      } else {
+        LOG.info("Ignored putting object {} in the store as it is neither "
+                + "new, neither dirty.", new Object[]{obj});
+      }
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
   }
 
   @Override
   public boolean delete(K key) throws GoraException {
-    RBucket<T> bucket = redisInstance.getBucket(mapping.getPrefix() + "." + key);
-    return bucket.delete();
+    RMap<String, Object> map = redisInstance.getMap(generateKey(key));
+    return map.delete();
   }
 
   @Override
@@ -184,7 +266,6 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
   }
 
   public boolean exists(K key) throws GoraException {
-    RBucket<T> bucket = redisInstance.getBucket(mapping.getPrefix() + "." + key);
-    return bucket.isExists();
+    return redisInstance.getKeys().countExists(generateKey(key)) != 0;
   }
 }

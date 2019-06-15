@@ -17,10 +17,10 @@
  */
 package org.apache.gora.redis;
 
-import com.github.fppt.jedismock.RedisServer;
 import java.io.IOException;
 import org.apache.gora.GoraTestDriver;
 import org.apache.gora.redis.store.RedisStore;
+import org.testcontainers.containers.GenericContainer;
 
 /**
  * Helper class to execute tests in a embedded instance of Redis.
@@ -28,23 +28,24 @@ import org.apache.gora.redis.store.RedisStore;
  * @author Xavier Sumba
  */
 public class GoraRedisTestDriver extends GoraTestDriver {
-
-  private static RedisServer server = null;
-
+  
+  private static final String DOCKER_CONTAINER_NAME = "redis:3.0.6";
+  private GenericContainer redisContainer = new GenericContainer(DOCKER_CONTAINER_NAME).withExposedPorts(6379);
+  
   public GoraRedisTestDriver() {
     super(RedisStore.class);
   }
-
+  
   @Override
   public void setUpClass() throws IOException {
-    server = RedisServer.newRedisServer(6387);
-    server.start();
+    redisContainer.start();
+    log.info("Setting up Redis test driver");
+    conf.set("gora.datastore.redis.address", redisContainer.getContainerIpAddress() + ":" + redisContainer.getMappedPort(6379));
   }
-
+  
   @Override
   public void tearDownClass() throws Exception {
-    log.info("Shutting down Redis Mock...");
-    server.stop();
-    server = null;
+    redisContainer.stop();
+    log.info("Tearing down Redis test driver");
   }
 }
