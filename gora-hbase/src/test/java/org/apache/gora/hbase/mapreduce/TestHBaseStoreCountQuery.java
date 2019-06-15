@@ -45,7 +45,8 @@ public class TestHBaseStoreCountQuery {
 
   @After
   public void tearDown() throws Exception {
-    webPageStore.close();
+    // This webPageStore datastore is closed from testCountQuery()
+    // webPageStore.close();
   }
   
   @Test

@@ -37,7 +37,7 @@ import org.apache.gora.persistency.Persistent;
 */
 @TypeInfo(PersistentTypeInfoFactory.class)
 public abstract class PersistentBase extends SpecificRecordBase implements
-    Persistent, java.io.Externalizable {
+        Persistent {
 
   /** Bytes used to represent weather or not a field is dirty. */
   private java.nio.ByteBuffer __g__dirty;

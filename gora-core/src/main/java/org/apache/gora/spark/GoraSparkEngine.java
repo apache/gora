@@ -105,8 +105,15 @@ public class GoraSparkEngine<K, V extends Persistent> {
    */
     public <K, V extends Persistent> Configuration generateOutputConf(DataStore<K, V> dataStore)
        throws IOException {
+      Configuration hadoopConf;
 
-      Configuration hadoopConf = new Configuration();
+      if ((dataStore instanceof Configurable)
+              && ((Configurable) dataStore).getConf() != null) {
+        hadoopConf = ((Configurable) dataStore).getConf();
+      } else {
+        hadoopConf = new Configuration();
+      }
+
       GoraMapReduceUtils.setIOSerializations(hadoopConf, true);
       Job job = Job.getInstance(hadoopConf);
 

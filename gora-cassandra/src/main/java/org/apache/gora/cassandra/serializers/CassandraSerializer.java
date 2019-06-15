@@ -17,6 +17,7 @@
 package org.apache.gora.cassandra.serializers;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -36,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.driver.core.KeyspaceMetadata;
 import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
 import com.datastax.driver.core.SimpleStatement;
 import com.datastax.driver.core.TableMetadata;
 
@@ -179,6 +181,32 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
    * @return persistent value
    */
   public abstract T get(K key) throws GoraException;
+	
+  /**
+   * Check if key exists
+   *
+   * @param key key value
+   * @return true/false
+   */
+  public boolean exists(Object key) throws GoraException {
+    try {
+      ArrayList<String> cassandraKeys = new ArrayList<>();
+      ArrayList<Object> cassandraValues = new ArrayList<>();
+      AvroCassandraUtils.processKeys(mapping, key, cassandraKeys, cassandraValues);
+      String cqlQuery = CassandraQueryFactory.getCheckExistsQuery(mapping, cassandraKeys);
+      SimpleStatement statement = new SimpleStatement(cqlQuery, cassandraValues.toArray());
+      if (readConsistencyLevel != null) {
+        statement.setConsistencyLevel(ConsistencyLevel.valueOf(readConsistencyLevel));
+      }
+      ResultSet resultSet = client.getSession().execute(statement);
+      Iterator<Row> iterator = resultSet.iterator();
+      Row next = iterator.next();
+      long count = next.getLong(0);
+      return count != 0;
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
+  }
 
   /**
    * Deletes persistent value according to the key

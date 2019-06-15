@@ -70,7 +70,7 @@ public class GoraFlinkEngine<KeyIn, ValueIn
           throws IOException {
     Preconditions.checkNotNull(classKeyIn);
     Preconditions.checkNotNull(classValueIn);
-    Job job = new Job(conf);
+    Job job = Job.getInstance(conf);
     DataStore<KeyIn, ValueIn> dataStore = DataStoreFactory.getDataStore(dataStoreClass
             , classKeyIn, classValueIn, job.getConfiguration());
     GoraInputFormat.setInput(job, dataStore.newQuery(), true);
@@ -86,7 +86,7 @@ public class GoraFlinkEngine<KeyIn, ValueIn
           throws IOException {
     Preconditions.checkNotNull(classKeyIn);
     Preconditions.checkNotNull(classValueIn);
-    Job job = new Job(conf);
+    Job job = Job.getInstance(conf);
     GoraInputFormat.setInput(job, dataStore.newQuery(), true);
     HadoopInputFormat<KeyIn, ValueIn> wrappedGoraInput =
             new HadoopInputFormat<>(new GoraInputFormat<>(),
@@ -99,7 +99,7 @@ public class GoraFlinkEngine<KeyIn, ValueIn
           throws IOException {
     Preconditions.checkNotNull(classKeyOut);
     Preconditions.checkNotNull(classValueOut);
-    Job job = new Job(conf);
+    Job job = Job.getInstance(conf);
     GoraOutputFormat.setOutput(job, dataStore, true);
     HadoopOutputFormat<KeyOut, ValueOut> wrappedGoraOutput =
             new HadoopOutputFormat<>(
@@ -116,7 +116,7 @@ public class GoraFlinkEngine<KeyIn, ValueIn
           throws IOException {
     Preconditions.checkNotNull(classKeyOut);
     Preconditions.checkNotNull(classValueOut);
-    Job job = new Job(conf);
+    Job job = Job.getInstance(conf);
     DataStore<KeyOut, ValueOut> dataStore = DataStoreFactory.getDataStore(dataStoreClass
             , classKeyOut, classValueOut, job.getConfiguration());
     GoraOutputFormat.setOutput(job, dataStore, true);

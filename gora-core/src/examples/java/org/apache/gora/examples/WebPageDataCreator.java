@@ -64,7 +64,7 @@ public class WebPageDataCreator {
   }
   
   public static final String[] CONTENTS = {
-    null,
+     null,
     "foo",
     "foo1 bar1 baz1",
     "a b c d e",

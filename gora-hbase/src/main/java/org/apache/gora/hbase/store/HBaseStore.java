@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 
@@ -61,7 +62,6 @@ import org.apache.gora.util.GoraException;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.client.Admin;
-import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.TableDescriptor;
@@ -98,11 +98,12 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
   private static final String SCANNER_CACHING_PROPERTIES_KEY = "scanner.caching" ;
   private static final int SCANNER_CACHING_PROPERTIES_DEFAULT = 0 ;
 
+  private static final String HBASE_CLIENT_AUTO_FLUSH_PROPERTIES_KEY = "hbase.client.autoflush.enabled";
+  private static final boolean HBASE_CLIENT_AUTO_FLUSH_PROPERTIES_DEFAULT = false;
+
   private static final int PUTS_AND_DELETES_PUT_TS_OFFSET = 1;
   private static final int PUTS_AND_DELETES_DELETE_TS_OFFSET = 2;
   
-  private volatile Admin admin;
-
   private volatile HBaseTableConnection table;
 
   private final boolean autoCreateSchema = true;
@@ -138,7 +139,6 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
 
     try {
       this.conf = HBaseConfiguration.create(getConf());
-      admin = ConnectionFactory.createConnection(getConf()).getAdmin();
       
       InputStream mappingInputStream ;
       // If there is a mapping definition in the Properties, use it.
@@ -171,16 +171,18 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       this.setScannerCaching(SCANNER_CACHING_PROPERTIES_DEFAULT) ; // Default value if something is wrong
     }
 
-    if(autoCreateSchema) {
-      createSchema();
-    }
     try{
-      boolean autoflush = this.conf.getBoolean("hbase.client.autoflush.default", false);
+      boolean autoflush = Boolean.valueOf(DataStoreFactory.findProperty(this.properties, this,
+              HBASE_CLIENT_AUTO_FLUSH_PROPERTIES_KEY,
+              String.valueOf(HBASE_CLIENT_AUTO_FLUSH_PROPERTIES_DEFAULT)));
       table = new HBaseTableConnection(getConf(), getSchemaName(), autoflush);
     } catch (Exception e) {
       throw new GoraException(e);
     }
-    closeHBaseAdmin();
+
+    if (autoCreateSchema) {
+      createSchema();
+    }
   }
 
   @Override
@@ -195,25 +197,35 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
 
   @Override
   public void createSchema() throws GoraException {
-    try{
-      if(schemaExists()) {
+    Admin admin = null;
+    try {
+      admin = table.getAdmin();
+      if (schemaExists()) {
         return;
       }
       TableDescriptor tableDesc = mapping.getTable();
-  
       admin.createTable(tableDesc);
     } catch (GoraException e) {
       throw e;
     } catch (Exception e) {
       throw new GoraException(e);
+    } finally {
+      try {
+        if (admin != null) {
+          admin.close();
+        }
+      } catch (IOException e) {
+        LOG.error("An error occurred whilst closing HBase Admin. ", e);
+      }
     }
-    closeHBaseAdmin();
   }
 
   @Override
   public void deleteSchema() throws GoraException {
-    try{
-      if(!schemaExists()) {
+    Admin admin = null;
+    try {
+      admin = table.getAdmin();
+      if (!schemaExists()) {
         return;
       }
       admin.disableTable(mapping.getTable().getTableName());
@@ -222,16 +234,33 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       throw e;
     } catch (Exception e) {
       throw new GoraException(e);
+    } finally {
+      try {
+        if (admin != null) {
+          admin.close();
+        }
+      } catch (IOException e) {
+        LOG.error("An error occurred whilst closing HBase Admin. ", e);
+      }
     }
-    closeHBaseAdmin();
   }
 
   @Override
   public boolean schemaExists() throws GoraException {
-    try{
+    Admin admin = null;
+    try {
+      admin = table.getAdmin();
       return admin.tableExists(mapping.getTable().getTableName());
     } catch (Exception e) {
       throw new GoraException(e);
+    } finally {
+      try {
+        if (admin != null) {
+          admin.close();
+        }
+      } catch (IOException e) {
+        LOG.error("An error occurred whilst closing HBase Admin. ", e);
+      }
     }
   }
 
@@ -243,6 +272,18 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       addFields(get, fields);
       Result result = table.get(get);
       return newInstance(result, fields);
+    } catch (GoraException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
+  }
+
+  @Override
+  public boolean exists(K key) throws GoraException {
+    try {
+      Get get = new Get(toBytes(key));
+      return table.exists(get);
     } catch (GoraException e) {
       throw e;
     } catch (Exception e) {
@@ -282,21 +323,15 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
         HBaseColumn hcol = mapping.getColumn(field.name());
         if (hcol == null) {
           String errorMsg = "HBase mapping for field ["
-              + persistent.getClass().getName() + "#" + field.name()
-              + "] not found. Wrong gora-hbase-mapping.xml?";
+                  + persistent.getClass().getName() + "#" + field.name()
+                  + "] not found. Wrong gora-hbase-mapping.xml?";
           LOG.error(errorMsg);
           throw new GoraException(errorMsg);
         }
         addPutsAndDeletes(put, delete, o, field.schema().getType(),
-            field.schema(), hcol, hcol.getQualifier());
+                field.schema(), hcol, hcol.getQualifier());
       }
-
-      if (delete.size() > 0) {
-        table.delete(delete);
-      }
-      if (put.size() > 0) {
-        table.put(put);
-      }
+      table.updateRow(keyRaw, put, delete);
     } catch (GoraException e) {
       throw e;
     } catch (Exception e) {
@@ -335,12 +370,17 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       } else {
         delete.addColumns(hcol.getFamily(), qualifier);
       }
-      @SuppressWarnings({ "rawtypes", "unchecked" })
-      Set<Entry> set = ((Map) o).entrySet();
-      for (@SuppressWarnings("rawtypes") Entry entry : set) {
-        byte[] qual = toBytes(entry.getKey());
-        addPutsAndDeletes(put, delete, entry.getValue(), schema.getValueType()
-            .getType(), schema.getValueType(), hcol, qual);
+      if (Objects.nonNull(qualifier)) {
+        byte[] serializedBytes = toBytes(o, schema);
+        put.addColumn(hcol.getFamily(), qualifier, serializedBytes);
+      } else {
+        @SuppressWarnings({"rawtypes", "unchecked"})
+        Set<Entry> set = ((Map) o).entrySet();
+        for (@SuppressWarnings("rawtypes") Entry entry : set) {
+          byte[] qual = toBytes(entry.getKey());
+          addPutsAndDeletes(put, delete, entry.getValue(), schema.getValueType()
+                  .getType(), schema.getValueType(), hcol, qual);
+        }
       }
       break;
     case ARRAY:
@@ -551,6 +591,12 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       addFamilyOrColumn(get, col, resolvedSchema);
       break;
     case MAP:
+      if (Objects.nonNull(col.qualifier)) {
+        get.addColumn(col.family, col.qualifier);
+      } else {
+        get.addFamily(col.family);
+      }
+      break;
     case ARRAY:
       get.addFamily(col.family);
       break;
@@ -581,6 +627,12 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       addFamilyOrColumn(scan, col, resolvedSchema);
       break;
     case MAP:
+      if (Objects.nonNull(col.qualifier)) {
+        scan.addColumn(col.family, col.qualifier);
+      } else {
+        scan.addFamily(col.family);
+      }
+      break;
     case ARRAY:
       scan.addFamily(col.family);
       break;
@@ -614,6 +666,11 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       addFamilyOrColumn(delete, col, resolvedSchema);
       break;
     case MAP:
+      if (Objects.nonNull(col.qualifier )) {
+        delete.addColumn(col.family, col.qualifier);
+      } else {
+        delete.addFamily(col.family);
+      }
     case ARRAY:
       delete.addFamily(col.family);
       break;
@@ -626,7 +683,7 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
   private void addTimeRange(Get get, Query<K, T> query) throws IOException {
     if(query.getStartTime() > 0 || query.getEndTime() > 0) {
       if(query.getStartTime() == query.getEndTime()) {
-        get.setTimeStamp(query.getStartTime());
+        get.setTimestamp(query.getStartTime());
       } else {
         long startTime = query.getStartTime() > 0 ? query.getStartTime() : 0;
         long endTime = query.getEndTime() > 0 ? query.getEndTime() : Long.MAX_VALUE;
@@ -680,25 +737,33 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       }
       break;
     case MAP:
-      NavigableMap<byte[], byte[]> qualMap = result.getNoVersionMap().get(
-          col.getFamily());
-      if (qualMap == null) {
-        return;
+      if (Objects.nonNull(col.getQualifier())) {
+        byte[] val = result.getValue(col.getFamily(), col.getQualifier());
+        if (val == null) {
+          return;
+        }
+        setField(persistent, field, val);
+      } else {
+        NavigableMap<byte[], byte[]> qualMap = result.getNoVersionMap().get(
+                col.getFamily());
+        if (qualMap == null) {
+          return;
+        }
+        Schema valueSchema = fieldSchema.getValueType();
+        Map<Utf8, Object> map = new HashMap<>();
+        for (Entry<byte[], byte[]> e : qualMap.entrySet()) {
+          map.put(new Utf8(Bytes.toString(e.getKey())),
+                  fromBytes(valueSchema, e.getValue()));
+        }
+        setField(persistent, field, map);
       }
-      Schema valueSchema = fieldSchema.getValueType();
-      Map<Utf8, Object> map = new HashMap<>();
-      for (Entry<byte[], byte[]> e : qualMap.entrySet()) {
-        map.put(new Utf8(Bytes.toString(e.getKey())),
-            fromBytes(valueSchema, e.getValue()));
-      }
-      setField(persistent, field, map);
       break;
     case ARRAY:
-      qualMap = result.getFamilyMap(col.getFamily());
+      NavigableMap<byte[], byte[]> qualMap = result.getFamilyMap(col.getFamily());
       if (qualMap == null) {
         return;
       }
-      valueSchema = fieldSchema.getElementType();
+      Schema valueSchema = fieldSchema.getElementType();
       ArrayList<Object> arrayList = new ArrayList<>();
       DirtyListWrapper<Object> dirtyListWrapper = new DirtyListWrapper<>(arrayList);
       for (Entry<byte[], byte[]> e : qualMap.entrySet()) {
@@ -874,13 +939,5 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     }
     this.scannerCaching = numRows ;
     return this ;
-  }
-  
-  private void closeHBaseAdmin(){
-    try {
-      admin.close();
-    } catch (IOException ioe) {
-      LOG.error("An error occured whilst closing HBase Admin", ioe);
-    }
   }
 }

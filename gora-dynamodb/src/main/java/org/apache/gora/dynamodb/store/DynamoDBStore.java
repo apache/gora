@@ -583,4 +583,9 @@ public class DynamoDBStore<K, T extends Persistent> implements DataStore<K, T> {
   public void setDynamoDBClient(AmazonDynamoDB dynamoDBClient) {
     this.dynamoDBClient = dynamoDBClient;
   }
+
+  @Override
+  public boolean exists(K key) throws GoraException {
+    return dynamoDbStore.exists(key);
+  }
 }

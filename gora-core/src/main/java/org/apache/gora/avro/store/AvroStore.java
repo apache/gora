@@ -59,6 +59,11 @@ public class AvroStore<K, T extends PersistentBase>
 
   public static final Logger LOG = LoggerFactory.getLogger(AvroStore.class);
 
+  @Override
+  public boolean exists(K key) throws GoraException {
+    return get(key) != null;
+  }
+  
   /**
    * The type of the avro Encoder/Decoder.
    */
