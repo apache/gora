@@ -19,7 +19,10 @@ package org.apache.gora.redis.store;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -30,10 +33,13 @@ import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.redis.util.DatumHandler;
+import org.apache.gora.redis.util.StorageMode;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.GoraException;
 import org.redisson.Redisson;
+import org.redisson.api.RBucket;
 import org.redisson.api.RMap;
+import org.redisson.api.RScoredSortedSet;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 import org.redisson.config.ReadMode;
@@ -64,6 +70,7 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
   public static final Logger LOG = LoggerFactory.getLogger(RedisStore.class);
 
   private static final DatumHandler handler = new DatumHandler();
+  private StorageMode mode;
 
   /**
    * Initialize the data store by reading the credentials, setting the client's
@@ -91,6 +98,8 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       }
       mapping = readMapping(mappingStream);
       Config config = new Config();
+      String storage = getConf().get("gora.datastore.redis.storage", properties.getProperty("gora.datastore.redis.storage"));
+      mode = StorageMode.valueOf(storage);
       String mode = properties.getProperty("gora.datastore.redis.mode");
       String name = properties.getProperty("gora.datastore.redis.masterName");
       String readm = properties.getProperty("gora.datastore.redis.readMode");
@@ -99,24 +108,24 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       switch (mode) {
         case "single":
           config.useSingleServer()
-                  .setAddress("redis://" + hosts[0])
-                  .setDatabase(mapping.getDatebase());
+              .setAddress("redis://" + hosts[0])
+              .setDatabase(mapping.getDatebase());
           break;
         case "cluster":
           config.useClusterServers()
-                  .addNodeAddress(hosts);
+              .addNodeAddress(hosts);
           break;
         case "replicated":
           config.useReplicatedServers()
-                  .addNodeAddress(hosts)
-                  .setDatabase(mapping.getDatebase());
+              .addNodeAddress(hosts)
+              .setDatabase(mapping.getDatebase());
           break;
         case "sentinel":
           config.useSentinelServers()
-                  .setMasterName(name)
-                  .setReadMode(ReadMode.valueOf(readm))
-                  .addSentinelAddress(hosts)
-                  .setDatabase(mapping.getDatebase());
+              .setMasterName(name)
+              .setReadMode(ReadMode.valueOf(readm))
+              .addSentinelAddress(hosts)
+              .setDatabase(mapping.getDatebase());
           break;
       }
       redisInstance = Redisson.create(config);
@@ -138,9 +147,18 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       for (int i = 0; i < nl.getLength(); i++) {
         Element classElement = (Element) nl.item(i);
         if (classElement.getAttribute("keyClass").equals(keyClass.getCanonicalName())
-                && classElement.getAttribute("name").equals(persistentClass.getCanonicalName())) {
+            && classElement.getAttribute("name").equals(persistentClass.getCanonicalName())) {
           mapping.setDatebase(Integer.parseInt(classElement.getAttribute("database")));
           mapping.setPrefix(classElement.getAttribute("prefix"));
+          NodeList elementsByTagName = classElement.getElementsByTagName("field");
+          Map<String, String> map = new HashMap<>();
+          for (int j = 0; j < elementsByTagName.getLength(); j++) {
+            Element item = (Element) elementsByTagName.item(j);
+            String name = item.getAttribute("name");
+            String column = item.getAttribute("column");
+            map.put(name, column);
+          }
+          mapping.setFields(map);
         }
       }
       return mapping;
@@ -149,42 +167,93 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     }
   }
 
+  /**
+   * Redis, being a schemaless database does not support explicit schema
+   * creation. When the records are added to the database, the schema is created
+   * on the fly. Thus, schema operations are unavailable in gora-redis module.
+   *
+   * @return null
+   */
   @Override
   public String getSchemaName() {
-    return mapping.getDatebase() + "";
+    return null;
   }
 
+  /**
+   * Redis, being a schemaless database does not support explicit schema
+   * creation. When the records are added to the database, the schema is created
+   * on the fly. Thus, schema operations are unavailable in gora-redis module.
+   */
   @Override
   public void createSchema() throws GoraException {
   }
 
+  /**
+   * Redis, being a schemaless database does not support explicit schema
+   * creation. When the records are added to the database, the schema is created
+   * on the fly. Thus, schema operations are unavailable in gora-redis module.
+   */
   @Override
   public void deleteSchema() throws GoraException {
-    redisInstance.getKeys().flushdb();
   }
 
+  /**
+   * Redis, being a schemaless database does not support explicit schema
+   * creation. When the records are added to the database, the schema is created
+   * on the fly. Thus, schema operations are unavailable in gora-redis module.
+   *
+   * @return true
+   */
   @Override
   public boolean schemaExists() throws GoraException {
     return true;
   }
 
-  private String generateKey(Object baseKey) {
+  private String generateKeyHash(Object baseKey) {
     return mapping.getPrefix() + ".key." + baseKey;
+  }
+
+  private String generateKeyString(String field, Object baseKey) {
+    return generateKeyStringBase(baseKey) + field;
+  }
+
+  private String generateKeyStringBase(Object baseKey) {
+    return mapping.getPrefix() + ".key." + baseKey + ".field.";
   }
 
   private String generateIndexKey() {
     return mapping.getPrefix() + ".index";
   }
 
-  public T newInstance(RMap<String, Object> map, String[] fields) throws GoraException, IOException {
+  public T newInstanceFromString(K key, String[] fields) throws GoraException, IOException {
+    fields = getFieldsToQuery(fields);
+    T persistent = newPersistent();
+    int countRetrieved = 0;
+    for (String f : fields) {
+      Schema.Field field = fieldMap.get(f);
+      RBucket<Object> bucket = redisInstance.getBucket(generateKeyString(mapping.getFields().get(field.name()), key));
+      Object val = bucket.get();
+      if (val == null) {
+        continue;
+      }
+      Object fieldValue = handler.deserializeFieldValue(field, field.schema(), val, persistent);
+      countRetrieved++;
+      persistent.put(field.pos(), fieldValue);
+      persistent.setDirty(field.pos());
+    }
+    return countRetrieved > 0 ? persistent : null;
+  }
+
+  public T newInstanceFromHash(RMap<String, Object> map, String[] fields) throws GoraException, IOException {
     fields = getFieldsToQuery(fields);
     T persistent = newPersistent();
     for (String f : fields) {
       Schema.Field field = fieldMap.get(f);
-      Object fieldValue = handler.deserializeFieldValue(field, field.schema(), map.get(field.name()), persistent);
-      if (fieldValue == null) {
+      Object val = map.get(mapping.getFields().get(field.name()));
+      if (val == null) {
         continue;
       }
+      Object fieldValue = handler.deserializeFieldValue(field, field.schema(), val, persistent);
       persistent.put(field.pos(), fieldValue);
       persistent.setDirty(field.pos());
     }
@@ -193,12 +262,16 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
 
   @Override
   public T get(K key, String[] fields) throws GoraException {
-    RMap<String, Object> map = redisInstance.getMap(generateKey(key));
     try {
-      if (map.size() != 0) {
-        return newInstance(map, fields);
+      if (mode == StorageMode.HASH) {
+        RMap<String, Object> map = redisInstance.getMap(generateKeyHash(key));
+        if (!map.isEmpty()) {
+          return newInstanceFromHash(map, fields);
+        } else {
+          return null;
+        }
       } else {
-        return null;
+        return newInstanceFromString(key, fields);
       }
     } catch (IOException ex) {
       throw new GoraException(ex);
@@ -211,16 +284,29 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       if (obj.isDirty()) {
         Schema schema = obj.getSchema();
         List<Schema.Field> fields = schema.getFields();
-        RMap<String, Object> map = redisInstance.getMap(generateKey(key));
-        for (Schema.Field field : fields) {
-          Object fieldValue = handler.serializeFieldValue(field.schema(), obj.get(field.pos()));
-          if (fieldValue != null) {
-            map.put(field.name(), fieldValue);
+        //update secundary index
+        RScoredSortedSet<K> secundaryIndex = redisInstance.getScoredSortedSet(generateIndexKey());
+        secundaryIndex.add(0, key);
+        if (mode == StorageMode.HASH) {
+          RMap<String, Object> map = redisInstance.getMap(generateKeyHash(key));
+          for (Schema.Field field : fields) {
+            Object fieldValue = handler.serializeFieldValue(field.schema(), obj.get(field.pos()));
+            if (fieldValue != null) {
+              map.put(mapping.getFields().get(field.name()), fieldValue);
+            }
+          }
+        } else {
+          for (Schema.Field field : fields) {
+            Object fieldValue = handler.serializeFieldValue(field.schema(), obj.get(field.pos()));
+            if (fieldValue != null) {
+              RBucket<Object> bucket = redisInstance.getBucket(generateKeyString(mapping.getFields().get(field.name()), key));
+              bucket.set(fieldValue);
+            }
           }
         }
       } else {
         LOG.info("Ignored putting object {} in the store as it is neither "
-                + "new, neither dirty.", new Object[]{obj});
+            + "new, neither dirty.", new Object[]{obj});
       }
     } catch (Exception e) {
       throw new GoraException(e);
@@ -229,8 +315,15 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
 
   @Override
   public boolean delete(K key) throws GoraException {
-    RMap<String, Object> map = redisInstance.getMap(generateKey(key));
-    return map.delete();
+    //update secundary index
+    RScoredSortedSet<K> secundaryIndex = redisInstance.getScoredSortedSet(generateIndexKey());
+    secundaryIndex.remove(key);
+    if (mode == StorageMode.HASH) {
+      RMap<String, Object> map = redisInstance.getMap(generateKeyHash(key));
+      return map.delete();
+    } else {
+      return redisInstance.getKeys().deleteByPattern(generateKeyStringBase(key) + "*") > 0;
+    }
   }
 
   @Override
@@ -265,7 +358,13 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     redisInstance.shutdown();
   }
 
+  @Override
   public boolean exists(K key) throws GoraException {
-    return redisInstance.getKeys().countExists(generateKey(key)) != 0;
+    if (mode == StorageMode.HASH) {
+      return redisInstance.getKeys().countExists(generateKeyHash(key)) != 0;
+    } else {
+      Iterator<String> respKeys = redisInstance.getKeys().getKeysByPattern(generateKeyStringBase(key) + "*", 1).iterator();
+      return respKeys.hasNext();
+    }
   }
 }

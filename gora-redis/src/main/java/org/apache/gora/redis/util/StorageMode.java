@@ -14,41 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.gora.redis.store;
+package org.apache.gora.redis.util;
 
-import java.util.Map;
-
-/**
- * Mapping definitions for Redis.
- */
-public class RedisMapping {
-
-  private int datebase;
-  private String prefix;
-  private Map<String, String> fields;
-
-  public int getDatebase() {
-    return datebase;
-  }
-
-  public void setDatebase(int datebase) {
-    this.datebase = datebase;
-  }
-
-  public String getPrefix() {
-    return prefix;
-  }
-
-  public void setPrefix(String prefix) {
-    this.prefix = prefix;
-  }
-
-  public Map<String, String> getFields() {
-    return fields;
-  }
-
-  public void setFields(Map<String, String> fields) {
-    this.fields = fields;
-  }
-
+public enum StorageMode {
+  HASH, STRING
 }

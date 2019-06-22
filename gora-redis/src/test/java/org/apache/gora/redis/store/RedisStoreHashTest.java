@@ -17,6 +17,7 @@
 package org.apache.gora.redis.store;
 
 import org.apache.gora.redis.GoraRedisTestDriver;
+import org.apache.gora.redis.util.StorageMode;
 import org.apache.gora.store.DataStoreTestBase;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -25,10 +26,32 @@ import org.junit.Test;
  * Tests extending {@link org.apache.gora.store.DataStoreTestBase} which run the
  * base JUnit test suite for Gora.
  */
-public class RedisStoreTest extends DataStoreTestBase {
+public class RedisStoreHashTest extends DataStoreTestBase {
 
   static {
-    setTestDriver(new GoraRedisTestDriver());
+    setTestDriver(new GoraRedisTestDriver(StorageMode.HASH));
+  }
+
+  // Unsupported functionality due to the limitations in Aerospike java client
+  @Test
+  @Ignore("Explicit schema creation related functionality is not supported in Redis")
+  @Override
+  public void testTruncateSchema() throws Exception {
+    super.testTruncateSchema();
+  }
+
+  @Test
+  @Ignore("Explicit schema creation related functionality is not supported in Redis")
+  @Override
+  public void testDeleteSchema() throws Exception {
+    super.testDeleteSchema();
+  }
+
+  @Test
+  @Ignore("Explicit schema creation related functionality is not supported in Redis")
+  @Override
+  public void testSchemaExists() throws Exception {
+    super.testSchemaExists();
   }
 
 //  @Test
@@ -67,12 +90,6 @@ public class RedisStoreTest extends DataStoreTestBase {
   @Test
   @Ignore
   @Override
-  public void testSchemaExists() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
   public void testNewInstance() throws Exception {
 
   }
@@ -87,18 +104,6 @@ public class RedisStoreTest extends DataStoreTestBase {
   @Ignore
   @Override
   public void testAutoCreateSchema() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testTruncateSchema() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testDeleteSchema() throws Exception {
   }
 
   @Test

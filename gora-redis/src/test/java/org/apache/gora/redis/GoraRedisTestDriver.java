@@ -20,6 +20,7 @@ package org.apache.gora.redis;
 import java.io.IOException;
 import org.apache.gora.GoraTestDriver;
 import org.apache.gora.redis.store.RedisStore;
+import org.apache.gora.redis.util.StorageMode;
 import org.testcontainers.containers.GenericContainer;
 
 /**
@@ -28,21 +29,24 @@ import org.testcontainers.containers.GenericContainer;
  * @author Xavier Sumba
  */
 public class GoraRedisTestDriver extends GoraTestDriver {
-  
+
   private static final String DOCKER_CONTAINER_NAME = "redis:3.0.6";
   private GenericContainer redisContainer = new GenericContainer(DOCKER_CONTAINER_NAME).withExposedPorts(6379);
-  
-  public GoraRedisTestDriver() {
+  private StorageMode storageMode;
+
+  public GoraRedisTestDriver(StorageMode storageMode) {
     super(RedisStore.class);
+    this.storageMode = storageMode;
   }
-  
+
   @Override
   public void setUpClass() throws IOException {
     redisContainer.start();
     log.info("Setting up Redis test driver");
     conf.set("gora.datastore.redis.address", redisContainer.getContainerIpAddress() + ":" + redisContainer.getMappedPort(6379));
+    conf.set("gora.datastore.redis.storage", storageMode.name());
   }
-  
+
   @Override
   public void tearDownClass() throws Exception {
     redisContainer.stop();
