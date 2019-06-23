@@ -93,18 +93,39 @@ public class KuduMapping {
     this.primaryKey = primaryKey;
   }
 
+  /**
+   * Returns the number of hash buckets for the table
+   *
+   * @return number of buckets
+   */
   public int getHashBuckets() {
     return hashBuckets;
   }
 
+  /**
+   * Sets the number of hash buckets
+   *
+   * @param hashBuckets number of hash buckets
+   */
   public void setHashBuckets(int hashBuckets) {
     this.hashBuckets = hashBuckets;
   }
 
+  /**
+   * Return a list of the range partitions of the table
+   *
+   * @return list of range partitions (Pair lower and upper bounds)
+   */
   public List<Pair<String, String>> getRangePartitions() {
     return rangePartitions;
   }
 
+  /**
+   * Sets the list of the range partitions of the table
+   *
+   * @param rangePartitions list of range partitions (Pair lower and upper
+   * bounds)
+   */
   public void setRangePartitions(List<Pair<String, String>> rangePartitions) {
     this.rangePartitions = rangePartitions;
   }

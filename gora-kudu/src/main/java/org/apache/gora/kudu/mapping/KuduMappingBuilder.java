@@ -27,6 +27,7 @@ import javafx.util.Pair;
 import org.apache.gora.kudu.store.KuduStore;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.util.GoraException;
+import org.apache.kudu.Type;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -96,9 +97,9 @@ public class KuduMappingBuilder<K, T extends PersistentBase> {
       List<Element> classes = document.getRootElement().getChildren("class");
       for (Element classElement : classes) {
         if (classElement.getAttributeValue("keyClass").equals(
-                dataStore.getKeyClass().getCanonicalName())
-                && classElement.getAttributeValue("name").equals(
-                        dataStore.getPersistentClass().getCanonicalName())) {
+            dataStore.getKeyClass().getCanonicalName())
+            && classElement.getAttributeValue("name").equals(
+                dataStore.getPersistentClass().getCanonicalName())) {
           final String tableNameFromMapping = classElement.getAttributeValue("table");
           String tableName = dataStore.getSchemaName(tableNameFromMapping, dataStore.getPersistentClass());
           kuduMapping.setTableName(tableName);
@@ -112,8 +113,8 @@ public class KuduMappingBuilder<K, T extends PersistentBase> {
               for (Element aPrimaryKey : prColumns) {
                 String name = aPrimaryKey.getAttributeValue("column");
                 String type = aPrimaryKey.getAttributeValue("type");
-                Column.DataType aDataType = Column.DataType.valueOf(type);
-                if (aDataType == Column.DataType.DECIMAL) {
+                Type aDataType = Type.valueOf(type);
+                if (aDataType == Type.DECIMAL) {
                   int precision = Integer.parseInt(aPrimaryKey.getAttributeValue("precision"));
                   int scale = Integer.parseInt(aPrimaryKey.getAttributeValue("scale"));
                   prFields.add(new Column(name, new Column.FieldType(precision, scale)));
@@ -135,6 +136,7 @@ public class KuduMappingBuilder<K, T extends PersistentBase> {
                 String upper = rangePartition.getAttributeValue("upper");
                 ranges.add(new Pair<>(lower, upper));
               }
+              kuduMapping.setRangePartitions(ranges);
             }
           }
           @SuppressWarnings("unchecked")
@@ -144,8 +146,8 @@ public class KuduMappingBuilder<K, T extends PersistentBase> {
             String fieldName = field.getAttributeValue("name");
             String columnName = field.getAttributeValue("column");
             String columnType = field.getAttributeValue("type");
-            Column.DataType aDataType = Column.DataType.valueOf(columnType);
-            if (aDataType == Column.DataType.DECIMAL) {
+            Type aDataType = Type.valueOf(columnType);
+            if (aDataType == Type.DECIMAL) {
               int precision = Integer.parseInt(field.getAttributeValue("precision"));
               int scale = Integer.parseInt(field.getAttributeValue("scale"));
               mp.put(fieldName, new Column(columnName, new Column.FieldType(precision, scale)));

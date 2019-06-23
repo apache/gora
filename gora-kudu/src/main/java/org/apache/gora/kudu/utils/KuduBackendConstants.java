@@ -27,6 +27,9 @@ public class KuduBackendConstants {
    */
   public static final String DEFAULT_KUDU_MASTERS = "localhost:123";
 
+  /**
+   * List of keys used in the configuration file of Kudu
+   */
   public static final String PROP_MASTERADDRESSES = "gora.datastore.kudu.masterAddresses";
   public static final String PROP_BOSSCOUNT = "gora.datastore.kudu.bossCount";
   public static final String PROP_DEFAULTADMINOPERATIONTIMEOUTMS = "gora.datastore.kudu.defaultAdminOperationTimeoutMs";
@@ -34,7 +37,6 @@ public class KuduBackendConstants {
   public static final String PROP_DEFAULTSOCKETREADTIMEOUTMS = "gora.datastore.kudu.defaultSocketReadTimeoutMs";
   public static final String PROP_CLIENTSTATISTICS = "gora.datastore.kudu.clientStatistics";
   public static final String PROP_WORKERCOUNT = "gora.datastore.kudu.workerCount";
-
   public static final String AS_PROP_OVERRIDING = "gora.kudu.override.hadoop.configuration";
 
 }

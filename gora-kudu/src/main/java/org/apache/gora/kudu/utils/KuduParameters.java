@@ -40,6 +40,12 @@ public class KuduParameters {
     return masterAddresses;
   }
 
+  /**
+   * Set list of masters
+   *
+   * @param masterAddresses comma-separated list of "host:port" pairs of the
+   * masters
+   */
   public void setMasterAddresses(String masterAddresses) {
     this.masterAddresses = masterAddresses;
   }
@@ -48,6 +54,12 @@ public class KuduParameters {
     return bossCount;
   }
 
+  /**
+   * Set the maximum number of boss threads. Optional. If not provided, 1 is
+   * used.
+   *
+   * @param bossCount
+   */
   public void setBossCount(Integer bossCount) {
     this.bossCount = bossCount;
   }
@@ -56,6 +68,13 @@ public class KuduParameters {
     return defaultAdminOperationTimeoutMs;
   }
 
+  /**
+   * Sets the default timeout used for administrative operations (e.g.
+   * createTable, deleteTable, etc). Optional. If not provided, defaults to 30s.
+   * A value of 0 disables the timeout.
+   *
+   * @param defaultAdminOperationTimeoutMs a timeout in milliseconds
+   */
   public void setDefaultAdminOperationTimeoutMs(Long defaultAdminOperationTimeoutMs) {
     this.defaultAdminOperationTimeoutMs = defaultAdminOperationTimeoutMs;
   }
@@ -64,6 +83,13 @@ public class KuduParameters {
     return defaultOperationTimeoutMs;
   }
 
+  /**
+   * Sets the default timeout used for user operations (using sessions and
+   * scanners). Optional. If not provided, defaults to 30s. A value of 0
+   * disables the timeout.
+   *
+   * @param defaultOperationTimeoutMs a timeout in milliseconds
+   */
   public void setDefaultOperationTimeoutMs(Long defaultOperationTimeoutMs) {
     this.defaultOperationTimeoutMs = defaultOperationTimeoutMs;
   }
@@ -72,6 +98,14 @@ public class KuduParameters {
     return defaultSocketReadTimeoutMs;
   }
 
+  /**
+   * Sets the default timeout to use when waiting on data from a socket.
+   * Optional. If not provided, defaults to 10s. A value of 0 disables the
+   * timeout.
+   *
+   * @param defaultSocketReadTimeoutMs a timeout in milliseconds
+   *
+   */
   public void setDefaultSocketReadTimeoutMs(Long defaultSocketReadTimeoutMs) {
     this.defaultSocketReadTimeoutMs = defaultSocketReadTimeoutMs;
   }
@@ -88,6 +122,12 @@ public class KuduParameters {
     return workerCount;
   }
 
+  /**
+   * Set the maximum number of worker threads. Optional. If not provided, (2 *
+   * the number of available processors) is used.
+   *
+   * @param workerCount
+   */
   public void setWorkerCount(Integer workerCount) {
     this.workerCount = workerCount;
   }
@@ -96,6 +136,8 @@ public class KuduParameters {
    * Reads Kudu parameters from a properties list
    *
    * @param properties Properties list
+   * @param conf Configuration object used for overriding parameters on runtime
+   * (For setting testing environment)
    * @return Kudu parameters instance
    */
   public static KuduParameters load(Properties properties, Configuration conf) {

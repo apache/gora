@@ -17,8 +17,6 @@
  */
 package org.apache.gora.kudu.store;
 
-import java.io.IOException;
-import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.kudu.GoraKuduTestDriver;
 import org.apache.gora.store.DataStoreTestBase;
 import org.junit.Ignore;
@@ -34,40 +32,42 @@ public class TestKuduStore extends DataStoreTestBase {
   }
 
   @Test
-  @Ignore
   @Override
-  public void testNewInstance() throws Exception {
-
+  public void testCreateSchema() throws Exception {
+    super.testCreateSchema();
   }
 
   @Test
-  @Ignore
   @Override
-  public void testCreateSchema() throws Exception {
+  public void testSchemaExists() throws Exception {
+    super.testSchemaExists();
   }
-  
+
   @Test
   @Ignore
   @Override
   public void testAutoCreateSchema() throws Exception {
+    super.testAutoCreateSchema();
   }
 
   @Test
   @Ignore
   @Override
   public void testTruncateSchema() throws Exception {
+    super.testTruncateSchema();
   }
 
   @Test
   @Ignore
   @Override
   public void testDeleteSchema() throws Exception {
+    super.testDeleteSchema();
   }
 
   @Test
   @Ignore
   @Override
-  public void testSchemaExists() throws Exception {
+  public void testNewInstance() throws Exception {
   }
 
   @Test
@@ -76,7 +76,7 @@ public class TestKuduStore extends DataStoreTestBase {
   public void testPut() throws Exception {
   }
 
-@Test
+  @Test
   @Ignore
   @Override
   public void testPutNested() throws Exception {
@@ -88,20 +88,17 @@ public class TestKuduStore extends DataStoreTestBase {
   public void testPutArray() throws Exception {
   }
 
-  
   @Test
   @Ignore
   @Override
   public void testPutBytes() throws Exception {
   }
 
-
   @Test
   @Ignore
   @Override
   public void testPutMap() throws Exception {
   }
-
 
   @Test
   @Ignore

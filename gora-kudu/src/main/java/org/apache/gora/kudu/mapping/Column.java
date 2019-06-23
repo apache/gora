@@ -16,6 +16,8 @@
  */
 package org.apache.gora.kudu.mapping;
 
+import org.apache.kudu.Type;
+
 public class Column {
 
   private String name;
@@ -73,57 +75,85 @@ public class Column {
    * types supported by Kudu refer to
    * https://kudu.apache.org/docs/schema_design.html#column-design
    */
-  public static enum DataType {
-    BOOL,
-    INT8,
-    INT16,
-    INT32,
-    INT64,
-    UNIXTIME_MICROS,
-    FLOAT,
-    DOUBLE,
-    DECIMAL,
-    STRING,
-    BINARY;
-  }
-
   public static class FieldType {
 
     private int precision;
     private int scale;
-    private DataType type;
+    private Type type;
 
-    public FieldType(DataType type) {
+    /**
+     * Constructor for FieldType
+     *
+     * @param type Kudu's Type
+     */
+    public FieldType(Type type) {
       this.type = type;
     }
 
+    /**
+     * Constructor for FieldType Implicitly uses a Decimal Kudu Type with
+     * precision and scale attributes
+     *
+     * @param precision Decimal precision
+     * @param scale Decimal scale
+     */
     public FieldType(int precision, int scale) {
-      this.type = DataType.DECIMAL;
+      this.type = Type.DECIMAL;
       this.precision = precision;
       this.scale = scale;
     }
 
+    /**
+     * Returns the precision of a Decimal type
+     *
+     * @return Decimal column precision
+     */
     public int getPrecision() {
       return precision;
     }
 
+    /**
+     * Sets the decimal precision
+     *
+     * @param precision Decimal column precision
+     */
     public void setPrecision(int precision) {
       this.precision = precision;
     }
 
+    /**
+     * Returns the scale of a Decimal type
+     *
+     * @return Decimal column scale
+     */
     public int getScale() {
       return scale;
     }
 
+    /**
+     * Sets the decimal scale
+     *
+     * @param scale Decimal column scale
+     */
     public void setScale(int scale) {
       this.scale = scale;
     }
 
-    public DataType getType() {
+    /**
+     * Returns the kudu type of the column
+     *
+     * @return Kudu type
+     */
+    public Type getType() {
       return type;
     }
 
-    public void setType(DataType type) {
+    /**
+     * Sets the kudu type of the column
+     *
+     * @param type Kudu type
+     */
+    public void setType(Type type) {
       this.type = type;
     }
 

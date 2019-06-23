@@ -18,12 +18,16 @@ package org.apache.gora.kudu.store;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.nio.charset.Charset;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import javafx.util.Pair;
+import org.apache.avro.generic.GenericData;
 import org.apache.commons.io.IOUtils;
 import org.apache.gora.kudu.mapping.Column;
 import org.apache.gora.kudu.mapping.KuduMapping;
@@ -38,10 +42,13 @@ import org.apache.gora.util.GoraException;
 import org.apache.kudu.ColumnSchema;
 import org.apache.kudu.Schema;
 import org.apache.kudu.Type;
-import org.apache.kudu.client.ColumnRangePredicate;
 import org.apache.kudu.client.CreateTableOptions;
 import org.apache.kudu.client.KuduClient;
 import org.apache.kudu.client.KuduException;
+import org.apache.kudu.client.KuduPredicate;
+import org.apache.kudu.client.KuduScanner;
+import org.apache.kudu.client.KuduSession;
+import org.apache.kudu.client.KuduTable;
 import org.apache.kudu.client.PartialRow;
 import org.apache.kudu.util.DecimalUtil;
 import org.slf4j.Logger;
@@ -62,6 +69,8 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
   private KuduParameters kuduParameters;
   private KuduMapping kuduMapping;
   private KuduClient client;
+  private KuduSession session;
+  private KuduTable table;
 
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) throws GoraException {
@@ -100,11 +109,12 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
         kuduClientBuilder.disableStatistics();
       }
       client = kuduClientBuilder.build();
-
+      session = client.newSession();
       LOG.info("Kudu store was successfully initialized");
       if (!schemaExists()) {
         createSchema();
       }
+      table = client.openTable(kuduMapping.getTableName());
     } catch (Exception ex) {
       LOG.error("Error while initializing Kudu store", ex);
       throw new GoraException(ex);
@@ -123,18 +133,25 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
 
   @Override
   public void createSchema() throws GoraException {
+    if (client == null) {
+      throw new GoraException(
+          "Impossible to create the schema as no connection has been initiated.");
+    }
+    if (schemaExists()) {
+      return;
+    }
     try {
       List<ColumnSchema> columns = new ArrayList<>();
       List<String> keys = new ArrayList<>();
       for (Column pk : kuduMapping.getPrimaryKey()) {
-        columns.add(new ColumnSchema.ColumnSchemaBuilder(pk.getName(), Type.valueOf(pk.getDataType().toString())).key(true).build());
+        columns.add(new ColumnSchema.ColumnSchemaBuilder(pk.getName(), pk.getDataType().getType()).key(true).build());
         keys.add(pk.getName());
       }
       for (Map.Entry<String, Column> clt : kuduMapping.getFields().entrySet()) {
         Column aColumn = clt.getValue();
         ColumnSchema aColumnSch;
-        ColumnSchema.ColumnSchemaBuilder aBaseColumn = new ColumnSchema.ColumnSchemaBuilder(aColumn.getName(), Type.valueOf(aColumn.getDataType().toString())).nullable(true);
-        if (aColumn.getDataType().getType() == Column.DataType.DECIMAL) {
+        ColumnSchema.ColumnSchemaBuilder aBaseColumn = new ColumnSchema.ColumnSchemaBuilder(aColumn.getName(), aColumn.getDataType().getType()).nullable(true);
+        if (aColumn.getDataType().getType() == Type.DECIMAL) {
           aColumnSch = aBaseColumn.typeAttributes(DecimalUtil.typeAttributes(aColumn.getDataType().getPrecision(), aColumn.getDataType().getScale())).build();
         } else {
           aColumnSch = aBaseColumn.build();
@@ -188,7 +205,49 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
 
   @Override
   public boolean exists(K key) throws GoraException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    ColumnSchema column = table.getSchema().getColumn(kuduMapping.getPrimaryKey().get(0).getName());
+    KuduScanner.KuduScannerBuilder scannerBuilder = client.newScannerBuilder(table);
+    scannerBuilder.limit(1);
+    scannerBuilder.setProjectedColumnIndexes(new ArrayList<>());
+    scannerBuilder.addPredicate(createEqualPredicate(column, key));
+    KuduScanner build = scannerBuilder.build();
+    return build.hasMoreRows();
+  }
+
+  private KuduPredicate createEqualPredicate(ColumnSchema column, K key) {
+    KuduPredicate pred;
+    switch (column.getType()) {
+      case INT8:
+      case INT16:
+      case INT32:
+      case INT64:
+        pred = KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.EQUAL, Long.parseLong(key.toString()));
+        break;
+      case BINARY:
+        pred = KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.EQUAL, (byte[]) key);
+        break;
+      case STRING:
+        pred = KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.EQUAL, key.toString());
+        break;
+      case BOOL:
+        pred = KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.EQUAL, Boolean.parseBoolean(key.toString()));
+        break;
+      case FLOAT:
+        pred = KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.EQUAL, Float.parseFloat(key.toString()));
+        break;
+      case DOUBLE:
+        pred = KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.EQUAL, Double.parseDouble(key.toString()));
+        break;
+      case UNIXTIME_MICROS:
+        pred = KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.EQUAL, Timestamp.from(Instant.ofEpochMilli(Long.parseLong(key.toString()))));
+        break;
+      case DECIMAL:
+        pred = KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.EQUAL, new BigDecimal(key.toString()));
+        break;
+      default:
+        throw new AssertionError(column.getType().name());
+    }
+    return pred;
   }
 
   @Override
@@ -228,12 +287,17 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
 
   @Override
   public void flush() throws GoraException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    try {
+      session.flush();
+    } catch (KuduException ex) {
+      throw new GoraException(ex);
+    }
   }
 
   @Override
   public void close() {
     try {
+      session.close();
       client.close();
       LOG.info("Kudu datastore destroyed successfully.");
     } catch (KuduException ex) {
