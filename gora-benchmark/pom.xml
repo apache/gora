@@ -137,6 +137,11 @@
 			<scope>test</scope>
 		</dependency>
 
+		<dependency>
+			<artifactId>gora-compiler</artifactId>
+			<groupId>org.apache.gora</groupId>
+		</dependency>
+
 		<!-- Logging Dependencies -->
 		<dependency>
 			<groupId>org.slf4j</groupId>

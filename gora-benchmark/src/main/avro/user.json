@@ -1,18 +1,1012 @@
- {
-  "type": "record",
-  "name": "User", "default":null,
-  "namespace": "generated",
-  "fields" : [
-    {"name": "userId", "type": ["null","string"], "default":null},
-    {"name": "field0", "type": ["null","string"], "default":null},
-    {"name": "field1", "type": ["null","string"], "default":null},
-    {"name": "field2", "type": ["null","string"], "default":null},
-    {"name": "field3", "type": ["null","string"], "default":null},
-    {"name": "field4", "type": ["null","string"], "default":null},
-    {"name": "field5", "type": ["null","string"], "default":null},
-    {"name": "field6", "type": ["null","string"], "default":null},
-    {"name": "field7", "type": ["null","string"], "default":null},
-    {"name": "field8", "type": ["null","string"], "default":null},
-    {"name": "field9", "type": ["null","string"], "default":null}
-  ]
+{
+    "name": "User",
+    "namespace": "generated",
+    "type": "record",
+    "fields": [
+        {
+            "default": "null",
+            "name": "userId",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field0",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field1",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field2",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field3",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field4",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field5",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field6",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field7",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field8",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field9",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field10",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field11",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field12",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field13",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field14",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field15",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field16",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field17",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field18",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field19",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field20",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field21",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field22",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field23",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field24",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field25",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field26",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field27",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field28",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field29",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field30",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field31",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field32",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field33",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field34",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field35",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field36",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field37",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field38",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field39",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field40",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field41",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field42",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field43",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field44",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field45",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field46",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field47",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field48",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field49",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field50",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field51",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field52",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field53",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field54",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field55",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field56",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field57",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field58",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field59",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field60",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field61",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field62",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field63",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field64",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field65",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field66",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field67",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field68",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field69",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field70",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field71",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field72",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field73",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field74",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field75",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field76",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field77",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field78",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field79",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field80",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field81",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field82",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field83",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field84",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field85",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field86",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field87",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field88",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field89",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field90",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field91",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field92",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field93",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field94",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field95",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field96",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field97",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field98",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field99",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field100",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field101",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field102",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field103",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field104",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field105",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field106",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field107",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field108",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field109",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field110",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field111",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field112",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field113",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field114",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field115",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field116",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field117",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field118",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field119",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field120",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field121",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field122",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field123",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field124",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field125",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field126",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field127",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field128",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field129",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field130",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field131",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field132",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field133",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field134",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field135",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field136",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field137",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field138",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field139",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field140",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field141",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field142",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field143",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field144",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field145",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field146",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field147",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field148",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field149",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field150",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field151",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field152",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field153",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field154",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field155",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field156",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field157",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field158",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field159",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field160",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field161",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field162",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field163",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field164",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field165",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field166",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field167",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field168",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field169",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field170",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field171",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field172",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field173",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field174",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field175",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field176",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field177",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field178",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field179",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field180",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field181",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field182",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field183",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field184",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field185",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field186",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field187",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field188",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field189",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field190",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field191",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field192",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field193",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field194",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field195",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field196",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field197",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field198",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field199",
+            "type": "string"
+        }
+    ]
 }

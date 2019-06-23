@@ -3,8 +3,10 @@ package org.apache.gora.benchmark;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
@@ -12,10 +14,12 @@ import java.util.Vector;
 import org.apache.gora.util.GoraException;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.yahoo.ycsb.ByteIterator;
 import com.yahoo.ycsb.StringByteIterator;
+import com.yahoo.ycsb.workloads.CoreWorkload;
 
 import generated.User;
 
@@ -26,19 +30,32 @@ public class GoraClientTest {
   private GoraBenchmarkClient client;
   private static HashMap<String, ByteIterator> DATA_TO_INSERT;
   private static HashMap<String, ByteIterator> DATA_TO_UPDATE;
+  private static List<String> dataStores = new ArrayList<String>();
+  
+  private static final int NUMBER_OF_FIELDS = 50;
+  
+  private GoraBenchmarkUtils bmutils = new GoraBenchmarkUtils();
   
   //Setup is executed before each test. Use @BeforeClass if you want to execute a code block just once.
   @Before
   public void setUp() throws Exception {
+    //dataStores.add("mongodb");
+    //dataStores.add("hbase");
+    //bmutils.generateAvroSchema(NUMBER_OF_FIELDS);
+    //for(String dataStore: dataStores) {
+      //bmutils.generateMappingFile(dataStore);
+    //}
+    //bmutils.generateDataBeans();
     DATA_TO_INSERT = new HashMap<>();
     DATA_TO_UPDATE = new HashMap<>();
-    for(int i=0; i < 10; i++) {
+    for(int i=0; i < NUMBER_OF_FIELDS; i++) {
       DATA_TO_INSERT.put("field"+i, new StringByteIterator("value"+i));
       DATA_TO_UPDATE.put("field"+i, new StringByteIterator("updated"+i));
     }
     Properties p = new Properties();
     p.setProperty("key.class", "java.lang.String");
     p.setProperty("persistent.class", "generated.User");
+    p.setProperty(CoreWorkload.FIELD_COUNT_PROPERTY, NUMBER_OF_FIELDS+"");
     client = new GoraBenchmarkClient();
     client.setProperties(p);
     client.init();
@@ -107,6 +124,20 @@ public class GoraClientTest {
     //Read Record from 
   }
   
+  @Test
+  public void testgenearateMappingFile() {
+    bmutils.generateMappingFile("mongodb");
+  }
+  
+  @Test
+  public void testgenerateAvroSchema() {
+    bmutils.generateAvroSchema(NUMBER_OF_FIELDS);
+  }
+  
+  @Test
+  public void testGenerateDataBeans() {
+    bmutils.generateDataBeans();
+  }
  
  
 

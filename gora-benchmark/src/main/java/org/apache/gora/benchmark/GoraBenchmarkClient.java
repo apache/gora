@@ -59,33 +59,51 @@ public class GoraBenchmarkClient extends DB {
   
   private static final String FIELDS[] = User._ALL_FIELDS;
   
-  public static String fieldCount;
+  private static volatile boolean executed;
+  
+  public static  int fieldCount;
   
   /**This is only for set to array conversion in {@link read()} method*/
   private String[] DUMMY_ARRAY = new String[0];
   
   DataStore<String, User> dataStore;
   
-  User user;
+  GoraBenchmarkUtils goraBenchmarkUtils = new GoraBenchmarkUtils();
+  
+  User user = new User();
   
   private Properties prop;
 
   public GoraBenchmarkClient() {}
  
 
+  /* (non-Javadoc)
+   * @see com.yahoo.ycsb.DB#init()
+   */
   public void init() throws DBException {
     try {
-      user = new User();
-      //Get YCSB properties
-      prop = getProperties();
       
-      fieldCount = prop.getProperty(CoreWorkload.FIELD_COUNT_PROPERTY, CoreWorkload.FIELD_COUNT_PROPERTY_DEFAULT);
-      
-      String keyClass = prop.getProperty("key.class", "java.lang.String");
-      String persistentClass = prop.getProperty("persistent.class", "generated.User");
-      Properties p = DataStoreFactory.createProps();
-      
-      dataStore = DataStoreFactory.getDataStore(keyClass, persistentClass, p, new Configuration());
+        //Get YCSB properties
+        prop = getProperties();
+        
+        fieldCount = Integer.parseInt(prop.getProperty(CoreWorkload.FIELD_COUNT_PROPERTY, CoreWorkload.FIELD_COUNT_PROPERTY_DEFAULT));
+        
+        String keyClass = prop.getProperty("key.class", "java.lang.String");
+        String persistentClass = prop.getProperty("persistent.class", "generated.User");
+        Properties p = DataStoreFactory.createProps();
+        dataStore = DataStoreFactory.getDataStore(keyClass, persistentClass, p, new Configuration());
+        synchronized(GoraBenchmarkClient.class) {
+          if(executed)
+            return;
+          executed = true;
+          goraBenchmarkUtils.generateAvroSchema(fieldCount);
+          String dataStoreName = goraBenchmarkUtils.getDataStore(p);
+          goraBenchmarkUtils.generateMappingFile(dataStoreName);
+          goraBenchmarkUtils.generateDataBeans();
+         
+        }
+        
+        
     } catch (GoraException e) {
       //e.printStackTrace();
     }
@@ -98,8 +116,11 @@ public class GoraBenchmarkClient extends DB {
    * loss might occur.
    */
   public void cleanup() throws DBException {
-    if (dataStore != null)
-      dataStore.close();
+    synchronized (GoraBenchmarkClient.class) {
+      if (dataStore != null)
+        dataStore.close();
+    }
+
   }
   
   /**
@@ -137,7 +158,7 @@ public class GoraBenchmarkClient extends DB {
     // TODO Auto-generated method stub
     try {
       user.setUserId(key);
-      for (int i = 0; i < Integer.parseInt(fieldCount); i++) {
+      for (int i = 0; i < fieldCount; i++) {
           String field = FIELDS[i+1];
           int fieldIndex = i+1;
           String fieldValue = values.get(field).toString();
@@ -166,7 +187,7 @@ public class GoraBenchmarkClient extends DB {
     try {
       //check for null is necessary. 
       User user = (fields == null || fields.size() == 0 ) ? dataStore.get(key) : dataStore.get(key, fields.toArray(DUMMY_ARRAY));
-      for (int i = 0; i < Integer.parseInt(fieldCount); i++) {
+      for (int i = 0; i < fieldCount; i++) {
         String field = FIELDS[i+1];
         int fieldIndex = i + 1;
         String value = user.get(fieldIndex).toString();
@@ -200,7 +221,7 @@ public class GoraBenchmarkClient extends DB {
       while(resultSet.next()) {
         User user = resultSet.get();
         HashMap<String, ByteIterator> hm = new HashMap<>();
-        for (int i = 0; i < Integer.parseInt(fieldCount); i++) {
+        for (int i = 0; i < fieldCount; i++) {
           String field = FIELDS[i+1];
           int fieldIndex = i + 1;
           String value = user.get(fieldIndex).toString();
