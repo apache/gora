@@ -14,9 +14,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#        www.shellcheck.net was used to validate this script
 
-# Ensure that any extra CLASSPATH variables are set via setenv.sh
+#Adapted from YCSB's version of ycsb.sh. 
 CLASSPATH="."
 
 # Attempt to find the available JAVA, if JAVA_HOME not set
@@ -73,13 +72,9 @@ YCSB_ARGS=$(echo "$@" | cut -d' ' -f2-)
 
 #echo $YCSB_ARGS
 
-# About to run YCSB
+# Print details to standard output
 echo "$JAVA_HOME/bin/java $JAVA_OPTS -classpath $CLASSPATH $YCSB_CLASS $YCSB_COMMAND -db $DB_CLASS $YCSB_ARGS"
 
-# Run YCSB
-# Shellcheck reports the following line as needing double quotes to prevent
-# globbing and word splitting.  However, word splitting is the desired effect
-# here.  So, the shellcheck error is disabled for this line.
-# shellcheck disable=SC2086
+# Run Gora Bench
 "$JAVA_HOME/bin/java" $JAVA_OPTS -classpath "$CLASSPATH" $YCSB_CLASS $YCSB_COMMAND -db $DB_CLASS $YCSB_ARGS
 

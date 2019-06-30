@@ -100,7 +100,6 @@ public class GoraBenchmarkClient extends DB {
           String dataStoreName = goraBenchmarkUtils.getDataStore(p);
           goraBenchmarkUtils.generateMappingFile(dataStoreName);
           goraBenchmarkUtils.generateDataBeans();
-         
         }
         
         
