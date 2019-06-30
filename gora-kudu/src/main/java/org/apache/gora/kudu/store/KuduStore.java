@@ -18,17 +18,14 @@ package org.apache.gora.kudu.store;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import javafx.util.Pair;
-import org.apache.avro.generic.GenericData;
-import org.apache.commons.io.IOUtils;
 import org.apache.gora.kudu.mapping.Column;
 import org.apache.gora.kudu.mapping.KuduMapping;
 import org.apache.gora.kudu.mapping.KuduMappingBuilder;
@@ -38,18 +35,29 @@ import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.store.impl.DataStoreBase;
+import org.apache.gora.util.AvroUtils;
 import org.apache.gora.util.GoraException;
 import org.apache.kudu.ColumnSchema;
-import org.apache.kudu.Schema;
+import org.apache.avro.Schema;
+import org.apache.avro.specific.SpecificDatumReader;
+import org.apache.avro.specific.SpecificDatumWriter;
+import org.apache.avro.util.Utf8;
+import org.apache.gora.kudu.utils.KuduClientUtils;
+import org.apache.gora.persistency.Persistent;
+import org.apache.gora.util.IOUtils;
 import org.apache.kudu.Type;
 import org.apache.kudu.client.CreateTableOptions;
+import org.apache.kudu.client.Delete;
+import org.apache.kudu.client.Insert;
 import org.apache.kudu.client.KuduClient;
 import org.apache.kudu.client.KuduException;
-import org.apache.kudu.client.KuduPredicate;
 import org.apache.kudu.client.KuduScanner;
 import org.apache.kudu.client.KuduSession;
 import org.apache.kudu.client.KuduTable;
+import org.apache.kudu.client.OperationResponse;
 import org.apache.kudu.client.PartialRow;
+import org.apache.kudu.client.RowResult;
+import org.apache.kudu.client.RowResultIterator;
 import org.apache.kudu.util.DecimalUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +80,9 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
   private KuduSession session;
   private KuduTable table;
 
+  private static final ConcurrentHashMap<Schema, SpecificDatumReader<?>> readerMap = new ConcurrentHashMap<>();
+  private static final ConcurrentHashMap<Schema, SpecificDatumWriter<?>> writerMap = new ConcurrentHashMap<>();
+
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) throws GoraException {
     try {
@@ -82,7 +93,7 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
         if (LOG.isTraceEnabled()) {
           LOG.trace(XML_MAPPING_DEFINITION + " = " + properties.getProperty(XML_MAPPING_DEFINITION));
         }
-        mappingStream = IOUtils.toInputStream(properties.getProperty(XML_MAPPING_DEFINITION), (Charset) null);
+        mappingStream = org.apache.commons.io.IOUtils.toInputStream(properties.getProperty(XML_MAPPING_DEFINITION), (Charset) null);
       } else {
         mappingStream = getClass().getClassLoader().getResourceAsStream(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE));
       }
@@ -113,8 +124,9 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       LOG.info("Kudu store was successfully initialized");
       if (!schemaExists()) {
         createSchema();
+      } else {
+        table = client.openTable(kuduMapping.getTableName());
       }
-      table = client.openTable(kuduMapping.getTableName());
     } catch (Exception ex) {
       LOG.error("Error while initializing Kudu store", ex);
       throw new GoraException(ex);
@@ -158,7 +170,7 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
         }
         columns.add(aColumnSch);
       }
-      Schema sch = new Schema(columns);
+      org.apache.kudu.Schema sch = new org.apache.kudu.Schema(columns);
       CreateTableOptions cto = new CreateTableOptions();
       if (kuduMapping.getHashBuckets() > 0) {
         cto.addHashPartitions(keys, kuduMapping.getHashBuckets());
@@ -179,7 +191,7 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
           cto.addRangePartition(lowerPar, upperPar);
         }
       }
-      client.createTable(kuduMapping.getTableName(), sch, cto);
+      table = client.createTable(kuduMapping.getTableName(), sch, cto);
     } catch (KuduException ex) {
       throw new GoraException(ex);
     }
@@ -189,6 +201,7 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
   public void deleteSchema() throws GoraException {
     try {
       client.deleteTable(kuduMapping.getTableName());
+      table = null;
     } catch (KuduException ex) {
       throw new GoraException(ex);
     }
@@ -205,64 +218,94 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
 
   @Override
   public boolean exists(K key) throws GoraException {
-    ColumnSchema column = table.getSchema().getColumn(kuduMapping.getPrimaryKey().get(0).getName());
-    KuduScanner.KuduScannerBuilder scannerBuilder = client.newScannerBuilder(table);
-    scannerBuilder.limit(1);
-    scannerBuilder.setProjectedColumnIndexes(new ArrayList<>());
-    scannerBuilder.addPredicate(createEqualPredicate(column, key));
-    KuduScanner build = scannerBuilder.build();
-    return build.hasMoreRows();
-  }
-
-  private KuduPredicate createEqualPredicate(ColumnSchema column, K key) {
-    KuduPredicate pred;
-    switch (column.getType()) {
-      case INT8:
-      case INT16:
-      case INT32:
-      case INT64:
-        pred = KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.EQUAL, Long.parseLong(key.toString()));
-        break;
-      case BINARY:
-        pred = KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.EQUAL, (byte[]) key);
-        break;
-      case STRING:
-        pred = KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.EQUAL, key.toString());
-        break;
-      case BOOL:
-        pred = KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.EQUAL, Boolean.parseBoolean(key.toString()));
-        break;
-      case FLOAT:
-        pred = KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.EQUAL, Float.parseFloat(key.toString()));
-        break;
-      case DOUBLE:
-        pred = KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.EQUAL, Double.parseDouble(key.toString()));
-        break;
-      case UNIXTIME_MICROS:
-        pred = KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.EQUAL, Timestamp.from(Instant.ofEpochMilli(Long.parseLong(key.toString()))));
-        break;
-      case DECIMAL:
-        pred = KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.EQUAL, new BigDecimal(key.toString()));
-        break;
-      default:
-        throw new AssertionError(column.getType().name());
+    try {
+      ColumnSchema column = table.getSchema().getColumn(kuduMapping.getPrimaryKey().get(0).getName());
+      KuduScanner.KuduScannerBuilder scannerBuilder = client.newScannerBuilder(table);
+      scannerBuilder.limit(1);
+      scannerBuilder.setProjectedColumnIndexes(new ArrayList<>());
+      scannerBuilder.addPredicate(KuduClientUtils.createEqualPredicate(column, key));
+      KuduScanner build = scannerBuilder.build();
+      boolean hasMoreRows = build.hasMoreRows();
+      RowResultIterator nextRows = build.nextRows();
+      return hasMoreRows && nextRows.hasNext();
+    } catch (Exception e) {
+      throw new GoraException(e);
     }
-    return pred;
   }
 
   @Override
   public T get(K key, String[] fields) throws GoraException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    String[] avFields = getFieldsToQuery(fields);
+    List<String> dbFields = new ArrayList<>();
+    for (String af : avFields) {
+      dbFields.add(kuduMapping.getFields().get(af).getName());
+    }
+    try {
+      ColumnSchema column = table.getSchema().getColumn(kuduMapping.getPrimaryKey().get(0).getName());
+      KuduScanner.KuduScannerBuilder scannerBuilder = client.newScannerBuilder(table);
+      scannerBuilder.limit(1);
+      scannerBuilder.setProjectedColumnNames(dbFields);
+      scannerBuilder.addPredicate(KuduClientUtils.createEqualPredicate(column, key));
+      KuduScanner build = scannerBuilder.build();
+      boolean data = build.hasMoreRows();
+      RowResultIterator nextRows = build.nextRows();
+      data = nextRows.hasNext();
+      T resp = null;
+      if (data) {
+        RowResult next = nextRows.next();
+        resp = newInstance(next, fields);
+        if (nextRows.hasNext()) {
+          LOG.warn("Multiple results for primary key {} in the schema {}, ignoring additional rows.", key, kuduMapping.getTableName());
+        }
+      }
+      build.close();
+      return resp;
+    } catch (Exception ex) {
+      throw new GoraException(ex);
+    }
   }
 
   @Override
   public void put(K key, T obj) throws GoraException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    try {
+      if (obj.isDirty()) {
+        Column pkc = kuduMapping.getPrimaryKey().get(0);
+        Insert insert = table.newInsert();
+        PartialRow row = insert.getRow();
+        KuduClientUtils.addObjectRow(row, pkc, key);
+        Schema schema = obj.getSchema();
+        List<Schema.Field> fields = schema.getFields();
+        for (Schema.Field field : fields) {
+          Column mappedColumn = kuduMapping.getFields().get(field.name());
+          Object fieldValue = obj.get(field.pos());
+          if (mappedColumn != null && fieldValue != null) {
+            Schema fieldSchema = field.schema();
+            Object serializedObj = serializeFieldValue(fieldSchema, fieldValue);
+            KuduClientUtils.addObjectRow(row, mappedColumn, serializedObj);
+          }
+        }
+        session.apply(insert);
+      } else {
+        LOG.info("Ignored putting object {} in the store as it is neither "
+            + "new, neither dirty.", new Object[]{obj});
+      }
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
   }
 
   @Override
   public boolean delete(K key) throws GoraException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    try {
+      Column pkc = kuduMapping.getPrimaryKey().get(0);
+      Delete delete = table.newDelete();
+      PartialRow row = delete.getRow();
+      KuduClientUtils.addObjectRow(row, pkc, key);
+      OperationResponse apply = session.apply(delete);
+      return !apply.hasRowError();
+    } catch (KuduException ex) {
+      throw new GoraException(ex);
+    }
   }
 
   @Override
@@ -305,4 +348,213 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
     }
   }
 
+  public T newInstance(RowResult next, String[] fields) throws GoraException, IOException {
+    fields = getFieldsToQuery(fields);
+    T persistent = newPersistent();
+    for (String f : fields) {
+      Schema.Field field = fieldMap.get(f);
+      Schema fieldSchema = field.schema();
+      Column column = kuduMapping.getFields().get(f);
+      if (next.isNull(column.getName())) {
+        continue;
+      }
+      Object fieldValue = KuduClientUtils.getObjectRow(next, column);
+      Object v = deserializeFieldValue(field, fieldSchema, fieldValue, persistent);
+      persistent.put(field.pos(), v);
+      persistent.setDirty(field.pos());
+    }
+    return persistent;
+  }
+
+  @SuppressWarnings("unchecked")
+  private Object deserializeFieldValue(Schema.Field field, Schema fieldSchema,
+      Object igniteValue, T persistent) throws IOException {
+    Object fieldValue = null;
+    switch (fieldSchema.getType()) {
+      case MAP:
+      case ARRAY:
+      case RECORD:
+        @SuppressWarnings("rawtypes") SpecificDatumReader reader = getDatumReader(fieldSchema);
+        fieldValue = IOUtils.deserialize((byte[]) igniteValue, reader,
+            persistent.get(field.pos()));
+        break;
+      case ENUM:
+        fieldValue = AvroUtils.getEnumValue(fieldSchema, igniteValue.toString());
+        break;
+      case FIXED:
+        break;
+      case BYTES:
+        fieldValue = ByteBuffer.wrap((byte[]) igniteValue);
+        break;
+      case STRING:
+        fieldValue = new Utf8(igniteValue.toString());
+        break;
+      case UNION:
+        if (fieldSchema.getTypes().size() == 2 && isNullable(fieldSchema)) {
+          int schemaPos = getUnionSchema(igniteValue, fieldSchema);
+          Schema unionSchema = fieldSchema.getTypes().get(schemaPos);
+          fieldValue = deserializeFieldValue(field, unionSchema, igniteValue, persistent);
+        } else {
+          reader = getDatumReader(fieldSchema);
+          fieldValue = IOUtils.deserialize((byte[]) igniteValue, reader,
+              persistent.get(field.pos()));
+        }
+        break;
+      default:
+        fieldValue = igniteValue;
+    }
+    return fieldValue;
+  }
+
+  @SuppressWarnings("unchecked")
+  private Object serializeFieldValue(Schema fieldSchema, Object fieldValue) {
+    Object output = fieldValue;
+    switch (fieldSchema.getType()) {
+      case ARRAY:
+      case MAP:
+      case RECORD:
+        byte[] data = null;
+        try {
+          @SuppressWarnings("rawtypes")
+          SpecificDatumWriter writer = getDatumWriter(fieldSchema);
+          data = IOUtils.serialize(writer, fieldValue);
+        } catch (IOException e) {
+          LOG.error(e.getMessage(), e);
+        }
+        output = data;
+        break;
+      case UNION:
+        if (fieldSchema.getTypes().size() == 2 && isNullable(fieldSchema)) {
+          int schemaPos = getUnionSchema(fieldValue, fieldSchema);
+          Schema unionSchema = fieldSchema.getTypes().get(schemaPos);
+          output = serializeFieldValue(unionSchema, fieldValue);
+        } else {
+          data = null;
+          try {
+            @SuppressWarnings("rawtypes")
+            SpecificDatumWriter writer = getDatumWriter(fieldSchema);
+            data = IOUtils.serialize(writer, fieldValue);
+          } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
+          }
+          output = data;
+        }
+        break;
+      case FIXED:
+        break;
+      case ENUM:
+      case STRING:
+        output = fieldValue.toString();
+        break;
+      case BYTES:
+        output = ((ByteBuffer) fieldValue).array();
+        break;
+      case INT:
+      case LONG:
+      case FLOAT:
+      case DOUBLE:
+      case BOOLEAN:
+        output = fieldValue;
+        break;
+      case NULL:
+        break;
+      default:
+        throw new AssertionError(fieldSchema.getType().name());
+    }
+    return output;
+  }
+
+  /**
+   * Method to retrieve the corresponding schema type index of a particular
+   * object having UNION schema. As UNION type can have one or more types and at
+   * a given instance, it holds an object of only one type of the defined types,
+   * this method is used to figure out the corresponding instance's schema type
+   * index.
+   *
+   * @param instanceValue value that the object holds
+   * @param unionSchema union schema containing all of the data types
+   * @return the unionSchemaPosition corresponding schema position
+   */
+  private int getUnionSchema(Object instanceValue, Schema unionSchema) {
+    int unionSchemaPos = 0;
+    for (Schema currentSchema : unionSchema.getTypes()) {
+      Schema.Type schemaType = currentSchema.getType();
+      if (instanceValue instanceof CharSequence && schemaType.equals(Schema.Type.STRING)) {
+        return unionSchemaPos;
+      }
+      if (instanceValue instanceof ByteBuffer && schemaType.equals(Schema.Type.BYTES)) {
+        return unionSchemaPos;
+      }
+      if (instanceValue instanceof byte[] && schemaType.equals(Schema.Type.BYTES)) {
+        return unionSchemaPos;
+      }
+      if (instanceValue instanceof Integer && schemaType.equals(Schema.Type.INT)) {
+        return unionSchemaPos;
+      }
+      if (instanceValue instanceof Long && schemaType.equals(Schema.Type.LONG)) {
+        return unionSchemaPos;
+      }
+      if (instanceValue instanceof Double && schemaType.equals(Schema.Type.DOUBLE)) {
+        return unionSchemaPos;
+      }
+      if (instanceValue instanceof Float && schemaType.equals(Schema.Type.FLOAT)) {
+        return unionSchemaPos;
+      }
+      if (instanceValue instanceof Boolean && schemaType.equals(Schema.Type.BOOLEAN)) {
+        return unionSchemaPos;
+      }
+      if (instanceValue instanceof Map && schemaType.equals(Schema.Type.MAP)) {
+        return unionSchemaPos;
+      }
+      if (instanceValue instanceof List && schemaType.equals(Schema.Type.ARRAY)) {
+        return unionSchemaPos;
+      }
+      if (instanceValue instanceof Persistent && schemaType.equals(Schema.Type.RECORD)) {
+        return unionSchemaPos;
+      }
+      if (instanceValue instanceof byte[] && schemaType.equals(Schema.Type.MAP)) {
+        return unionSchemaPos;
+      }
+      if (instanceValue instanceof byte[] && schemaType.equals(Schema.Type.RECORD)) {
+        return unionSchemaPos;
+      }
+      if (instanceValue instanceof byte[] && schemaType.equals(Schema.Type.ARRAY)) {
+        return unionSchemaPos;
+      }
+      unionSchemaPos++;
+    }
+    return 0;
+  }
+
+  @SuppressWarnings("rawtypes")
+  private SpecificDatumReader getDatumReader(Schema fieldSchema) {
+    SpecificDatumReader<?> reader = readerMap.get(fieldSchema);
+    if (reader == null) {
+      reader = new SpecificDatumReader(fieldSchema);// ignore dirty bits
+      SpecificDatumReader localReader = null;
+      if ((localReader = readerMap.putIfAbsent(fieldSchema, reader)) != null) {
+        reader = localReader;
+      }
+    }
+    return reader;
+  }
+
+  @SuppressWarnings("rawtypes")
+  private SpecificDatumWriter getDatumWriter(Schema fieldSchema) {
+    SpecificDatumWriter writer = writerMap.get(fieldSchema);
+    if (writer == null) {
+      writer = new SpecificDatumWriter(fieldSchema);// ignore dirty bits
+      writerMap.put(fieldSchema, writer);
+    }
+    return writer;
+  }
+
+  private boolean isNullable(Schema unionSchema) {
+    for (Schema innerSchema : unionSchema.getTypes()) {
+      if (innerSchema.getType().equals(Schema.Type.NULL)) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

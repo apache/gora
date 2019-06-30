@@ -42,6 +42,22 @@ public class TestKuduStore extends DataStoreTestBase {
   public void testSchemaExists() throws Exception {
     super.testSchemaExists();
   }
+  @Test
+  @Override
+  public void testPut() throws Exception {
+    super.testPut();
+  }
+  @Test
+  @Override
+  public void testExists() throws Exception {
+    super.testExists();
+  }
+
+  @Test
+  @Override
+  public void testBenchamarkExists() throws Exception {
+    super.testBenchamarkExists();
+  }
 
   @Test
   @Ignore
@@ -68,12 +84,6 @@ public class TestKuduStore extends DataStoreTestBase {
   @Ignore
   @Override
   public void testNewInstance() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testPut() throws Exception {
   }
 
   @Test
@@ -116,18 +126,6 @@ public class TestKuduStore extends DataStoreTestBase {
   @Ignore
   @Override
   public void testEmptyUpdate() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testExists() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testBenchamarkExists() throws Exception {
   }
 
   @Test

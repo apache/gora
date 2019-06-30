@@ -26,9 +26,10 @@
   
   <class name="org.apache.gora.examples.generated.Employee" keyClass="java.lang.String" table="Employee">
     <field name="ssn" column="ssn" type="STRING"/>
+    <field name="value" column="value" type="STRING"/>
     <field name="name" column="name" type="STRING"/>
-    <field name="dateOfBirth" column="dateOfBirth" type="UNIXTIME_MICROS"/>
-    <field name="salary" column="salary" type="INT16"/>
+    <field name="dateOfBirth" column="dateOfBirth" type="INT64"/>
+    <field name="salary" column="salary" type="INT32"/>
     <field name="boss" column="boss" type="BINARY"/>
     <field name="webpage" column="webpage" type="BINARY"/>
   </class>
