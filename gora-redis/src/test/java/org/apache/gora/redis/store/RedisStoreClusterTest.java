@@ -27,10 +27,10 @@ import org.junit.Test;
  * Tests extending {@link org.apache.gora.store.DataStoreTestBase} which run the
  * base JUnit test suite for Gora.
  */
-public class RedisStoreStringTest extends DataStoreTestBase {
+public class RedisStoreClusterTest extends DataStoreTestBase {
 
   static {
-    setTestDriver(new GoraRedisTestDriver(StorageMode.STRING, ServerMode.SINGLE));
+    setTestDriver(new GoraRedisTestDriver(StorageMode.HASH, ServerMode.CLUSTER));
   }
 
   // Unsupported functionality due to the limitations in Aerospike java client

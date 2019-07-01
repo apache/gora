@@ -33,13 +33,19 @@ import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.redis.util.DatumHandler;
+import org.apache.gora.redis.util.ServerMode;
 import org.apache.gora.redis.util.StorageMode;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.GoraException;
 import org.redisson.Redisson;
+import org.redisson.api.BatchOptions;
+import org.redisson.api.RBatch;
 import org.redisson.api.RBucket;
+import org.redisson.api.RBucketAsync;
+import org.redisson.api.RFuture;
+import org.redisson.api.RLexSortedSetAsync;
 import org.redisson.api.RMap;
-import org.redisson.api.RScoredSortedSet;
+import org.redisson.api.RMapAsync;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 import org.redisson.config.ReadMode;
@@ -100,27 +106,31 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       Config config = new Config();
       String storage = getConf().get("gora.datastore.redis.storage", properties.getProperty("gora.datastore.redis.storage"));
       mode = StorageMode.valueOf(storage);
-      String mode = properties.getProperty("gora.datastore.redis.mode");
-      String name = properties.getProperty("gora.datastore.redis.masterName");
-      String readm = properties.getProperty("gora.datastore.redis.readMode");
+      String modeString = getConf().get("gora.datastore.redis.mode", properties.getProperty("gora.datastore.redis.mode"));
+      ServerMode mode = ServerMode.valueOf(modeString);
+      String name = getConf().get("gora.datastore.redis.masterName", properties.getProperty("gora.datastore.redis.masterName"));
+      String readm = getConf().get("gora.datastore.redis.readMode", properties.getProperty("gora.datastore.redis.readMode"));
       //Override address in tests
       String[] hosts = getConf().get("gora.datastore.redis.address", properties.getProperty("gora.datastore.redis.address")).split(",");
+      for (int i = 0; i < hosts.length; i++) {
+        hosts[i] = "redis://" + hosts[i];
+      }
       switch (mode) {
-        case "single":
+        case SINGLE:
           config.useSingleServer()
-              .setAddress("redis://" + hosts[0])
+              .setAddress(hosts[0])
               .setDatabase(mapping.getDatebase());
           break;
-        case "cluster":
+        case CLUSTER:
           config.useClusterServers()
               .addNodeAddress(hosts);
           break;
-        case "replicated":
+        case REPLICATED:
           config.useReplicatedServers()
               .addNodeAddress(hosts)
               .setDatabase(mapping.getDatebase());
           break;
-        case "sentinel":
+        case SENTINEL:
           config.useSentinelServers()
               .setMasterName(name)
               .setReadMode(ReadMode.valueOf(readm))
@@ -284,26 +294,28 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       if (obj.isDirty()) {
         Schema schema = obj.getSchema();
         List<Schema.Field> fields = schema.getFields();
+        RBatch batchInstance = redisInstance.createBatch(BatchOptions.defaults());
         //update secundary index
-        RScoredSortedSet<K> secundaryIndex = redisInstance.getScoredSortedSet(generateIndexKey());
-        secundaryIndex.add(0, key);
+        RLexSortedSetAsync secundaryIndex = batchInstance.getLexSortedSet(generateIndexKey());
+        secundaryIndex.addAsync(key.toString());
         if (mode == StorageMode.HASH) {
-          RMap<String, Object> map = redisInstance.getMap(generateKeyHash(key));
+          RMapAsync<Object, Object> map = batchInstance.getMap(generateKeyHash(key));
           for (Schema.Field field : fields) {
             Object fieldValue = handler.serializeFieldValue(field.schema(), obj.get(field.pos()));
             if (fieldValue != null) {
-              map.put(mapping.getFields().get(field.name()), fieldValue);
+              map.putAsync(mapping.getFields().get(field.name()), fieldValue);
             }
           }
         } else {
           for (Schema.Field field : fields) {
             Object fieldValue = handler.serializeFieldValue(field.schema(), obj.get(field.pos()));
             if (fieldValue != null) {
-              RBucket<Object> bucket = redisInstance.getBucket(generateKeyString(mapping.getFields().get(field.name()), key));
-              bucket.set(fieldValue);
+              RBucketAsync<Object> bucket = batchInstance.getBucket(generateKeyString(mapping.getFields().get(field.name()), key));
+              bucket.setAsync(fieldValue);
             }
           }
         }
+        batchInstance.execute();
       } else {
         LOG.info("Ignored putting object {} in the store as it is neither "
             + "new, neither dirty.", new Object[]{obj});
@@ -315,15 +327,25 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
 
   @Override
   public boolean delete(K key) throws GoraException {
-    //update secundary index
-    RScoredSortedSet<K> secundaryIndex = redisInstance.getScoredSortedSet(generateIndexKey());
-    secundaryIndex.remove(key);
-    if (mode == StorageMode.HASH) {
-      RMap<String, Object> map = redisInstance.getMap(generateKeyHash(key));
-      return map.delete();
-    } else {
-      return redisInstance.getKeys().deleteByPattern(generateKeyStringBase(key) + "*") > 0;
+    try {
+      RBatch batchInstance = redisInstance.createBatch(BatchOptions.defaults());
+      //update secundary index
+      RLexSortedSetAsync secundaryIndex = batchInstance.getLexSortedSet(generateIndexKey());
+      secundaryIndex.removeAsync(key.toString());
+      if (mode == StorageMode.HASH) {
+        RMapAsync<Object, Object> map = batchInstance.getMap(generateKeyHash(key));
+        RFuture<Boolean> deleteAsync = map.deleteAsync();
+        batchInstance.execute();
+        return deleteAsync.get();
+      } else {
+        RFuture<Long> deleteByPatternAsync = batchInstance.getKeys().deleteByPatternAsync(generateKeyStringBase(key) + "*");
+        batchInstance.execute();
+        return deleteByPatternAsync.get() > 0;
+      }
+    } catch (Exception ex) {
+      throw new GoraException(ex);
     }
+
   }
 
   @Override

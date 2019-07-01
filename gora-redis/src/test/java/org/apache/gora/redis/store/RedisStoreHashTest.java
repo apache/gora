@@ -17,6 +17,7 @@
 package org.apache.gora.redis.store;
 
 import org.apache.gora.redis.GoraRedisTestDriver;
+import org.apache.gora.redis.util.ServerMode;
 import org.apache.gora.redis.util.StorageMode;
 import org.apache.gora.store.DataStoreTestBase;
 import org.junit.Ignore;
@@ -29,7 +30,7 @@ import org.junit.Test;
 public class RedisStoreHashTest extends DataStoreTestBase {
 
   static {
-    setTestDriver(new GoraRedisTestDriver(StorageMode.HASH));
+    setTestDriver(new GoraRedisTestDriver(StorageMode.HASH, ServerMode.SINGLE));
   }
 
   // Unsupported functionality due to the limitations in Aerospike java client
