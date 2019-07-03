@@ -26,6 +26,10 @@
     <family name="misc"/>
   </table>
 
+  <table name="ResultPageView"> <!-- optional descriptors for tables -->
+    <family name="common"/> <!-- This can also have params like compression, bloom filters -->
+  </table>
+
   <class name="org.apache.gora.hazelcastJet.generated.Pageview" keyClass="java.lang.Long" table="AccessLog">
     <field name="url" family="common" qualifier="url"/>
     <field name="timestamp" family="common" qualifier="timestamp"/>
@@ -41,6 +45,12 @@
     <field name="metricDimension" family="common"  qualifier="metricDimension"/>
     <field name="timestamp" family="common" qualifier="ts"/>
     <field name="metric" family="common" qualifier="metric"/>
+  </class>
+
+  <class name="org.apache.gora.hazelcastJet.generated.ResultPageView" keyClass="java.lang.Long" table="Results">
+    <field name="url" family="common" qualifier="url"/>
+    <field name="timestamp" family="common" qualifier="timestamp"/>
+    <field name="ip" family="common" qualifier="ip" />
   </class>
 
 </gora-otd>
