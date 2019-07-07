@@ -58,7 +58,11 @@ public class RedisStoreStringTest extends DataStoreTestBase {
 //  @Test
 //  @Override
 //  public void testExists() throws Exception {
-//    super.testExists();
+//    try {
+//      super.testExists();
+//    } catch (Exception e) {
+//      e.printStackTrace();
+//    }
 //  }
 //
 //  @Test
@@ -73,12 +77,15 @@ public class RedisStoreStringTest extends DataStoreTestBase {
   @Override
   public void testDelete() throws Exception {
   }
-//
+
 //  @Test
-//  @Ignore
 //  @Override
 //  public void testGet() throws Exception {
-//
+////    try {
+////      super.testGet();
+////    } catch (Exception e) {
+////     // e.printStackTrace();
+////    }
 //  }
 //
 //  @Test

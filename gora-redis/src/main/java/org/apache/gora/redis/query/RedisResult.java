@@ -17,11 +17,13 @@
 package org.apache.gora.redis.query;
 
 import java.io.IOException;
+import java.util.Collection;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.ResultBase;
 import org.apache.gora.redis.store.RedisStore;
 import org.apache.gora.store.DataStore;
+import org.redisson.api.RedissonClient;
 
 /**
  * Redis specific implementation of the {@link org.apache.gora.query.Result}
@@ -29,7 +31,10 @@ import org.apache.gora.store.DataStore;
  */
 public class RedisResult<K, T extends PersistentBase> extends ResultBase<K, T> {
 
-//  private RowIterator iterator;
+  private RedissonClient connection;
+  private Collection<String> range;
+  private String[] fields;
+
   /**
    * Gets the data store used
    */
@@ -42,13 +47,12 @@ public class RedisResult<K, T extends PersistentBase> extends ResultBase<K, T> {
    * @param query
    * @param scanner
    */
-  public RedisResult(DataStore<K, T> dataStore, Query<K, T> query) {//, Scanner scanner) {
+  public RedisResult(DataStore<K, T> dataStore, Query<K, T> query, RedissonClient con, Collection<String> rg, String[] fls) {//, Scanner scanner) {
     super(dataStore, query);
 
-//    if (this.limit > 0) {
-//      scanner.setBatchSize((int) this.limit);
-//    }
-//    iterator = new RowIterator(scanner.iterator());
+    this.connection = con;
+    this.range = rg;
+    this.fields = fls;
   }
 
   /**
@@ -65,7 +69,6 @@ public class RedisResult<K, T extends PersistentBase> extends ResultBase<K, T> {
 
   @Override
   public void close() throws IOException {
-
   }
 
   /**
@@ -73,22 +76,28 @@ public class RedisResult<K, T extends PersistentBase> extends ResultBase<K, T> {
    */
   @Override
   protected boolean nextInner() throws IOException {
-//
-//    if (!iterator.hasNext()) {
-//      return false;
-//    }
-//
-//    key = null;
-//
-//    Iterator<Entry<Key, Value>> nextRow = iterator.next();
-//    ByteSequence row = getDataStore().populate(nextRow, persistent);
-//    key = ((RedisStore<K, T>) dataStore).fromBytes(getKeyClass(), row.toArray());
-
     return true;
   }
 
   @Override
   public int size() {
-    return (int) this.limit;
+    return this.range.size();
   }
+
+  public RedissonClient getConnection() {
+    return connection;
+  }
+
+  public void setConnection(RedissonClient connection) {
+    this.connection = connection;
+  }
+
+  public Collection<String> getRange() {
+    return range;
+  }
+
+  public void setRange(Collection<String> range) {
+    this.range = range;
+  }
+
 }

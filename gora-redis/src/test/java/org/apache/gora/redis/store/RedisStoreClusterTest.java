@@ -82,10 +82,13 @@ public class RedisStoreClusterTest extends DataStoreTestBase {
 //  }
 //
 //  @Test
-//  @Ignore
 //  @Override
 //  public void testBenchamarkExists() throws Exception {
-//
+//    try{
+//      super.testBenchamarkExists();
+//    }catch (Exception e ){
+//      e.printStackTrace();
+//    }
 //  }
 
   @Test

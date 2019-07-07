@@ -26,6 +26,7 @@ public class RedisMapping {
   private int datebase;
   private String prefix;
   private Map<String, String> fields;
+  private Map<String, String> types;
 
   public int getDatebase() {
     return datebase;
@@ -49,6 +50,14 @@ public class RedisMapping {
 
   public void setFields(Map<String, String> fields) {
     this.fields = fields;
+  }
+
+  public Map<String, String> getTypes() {
+    return types;
+  }
+
+  public void setTypes(Map<String, String> types) {
+    this.types = types;
   }
 
 }

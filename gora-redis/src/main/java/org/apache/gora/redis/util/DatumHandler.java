@@ -18,17 +18,24 @@ package org.apache.gora.redis.util;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.avro.Schema;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.avro.util.Utf8;
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.DirtyListWrapper;
+import org.apache.gora.persistency.impl.DirtyMapWrapper;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.util.AvroUtils;
 import org.apache.gora.util.IOUtils;
+import org.redisson.api.RList;
+import org.redisson.api.RMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,8 +108,44 @@ public class DatumHandler<T extends PersistentBase> {
   }
 
   @SuppressWarnings("unchecked")
+  public Map<Object, Object> serializeFieldMap(Schema fieldSchema, Object fieldValue) {
+    Map<Object, Object> map = new HashMap();
+    switch (fieldSchema.getType()) {
+      case MAP:
+        Map<CharSequence, ?> mp = (Map<CharSequence, ?>) fieldValue;
+        for (Entry<CharSequence, ?> e : mp.entrySet()) {
+          String mapKey = e.getKey().toString();
+          Object mapValue = e.getValue();
+          mapValue = serializeFieldValue(fieldSchema, mapValue);
+          map.put(mapKey, mapValue);
+        }
+        break;
+      default:
+        throw new AssertionError(fieldSchema.getType().name());
+    }
+    return map;
+  }
+
+  @SuppressWarnings("unchecked")
+  public List<Object> serializeFieldList(Schema fieldSchema, Object fieldValue) {
+    List<Object> sFL = new ArrayList();
+    switch (fieldSchema.getType()) {
+      case ARRAY:
+        List<?> ls = (List<?>) fieldValue;
+        for (Object lsValue : ls) {
+          Object lsValue_ = serializeFieldValue(fieldSchema, lsValue);
+          sFL.add(lsValue_);
+        }
+        break;
+      default:
+        throw new AssertionError(fieldSchema.getType().name());
+    }
+    return sFL;
+  }
+
+  @SuppressWarnings("unchecked")
   public Object deserializeFieldValue(Schema.Field field, Schema fieldSchema,
-          Object redisValue, T persistent) throws IOException {
+      Object redisValue, T persistent) throws IOException {
     Object fieldValue = null;
     switch (fieldSchema.getType()) {
       case MAP:
@@ -110,7 +153,7 @@ public class DatumHandler<T extends PersistentBase> {
       case RECORD:
         @SuppressWarnings("rawtypes") SpecificDatumReader reader = getDatumReader(fieldSchema);
         fieldValue = IOUtils.deserialize((byte[]) redisValue, reader,
-                persistent.get(field.pos()));
+            persistent.get(field.pos()));
         break;
       case ENUM:
         fieldValue = AvroUtils.getEnumValue(fieldSchema, redisValue.toString());
@@ -131,13 +174,48 @@ public class DatumHandler<T extends PersistentBase> {
         } else {
           reader = getDatumReader(fieldSchema);
           fieldValue = IOUtils.deserialize((byte[]) redisValue, reader,
-                  persistent.get(field.pos()));
+              persistent.get(field.pos()));
         }
         break;
       default:
         fieldValue = redisValue;
     }
     return fieldValue;
+  }
+
+  @SuppressWarnings("unchecked")
+  public Object deserializeFieldMap(Schema.Field field, Schema fieldSchema,
+      RMap<Object, Object> redisMap, T persistent) throws IOException {
+    Map<Utf8, Object> fieldValue = new HashMap<>();
+    switch (fieldSchema.getType()) {
+      case MAP:
+        for (Entry<Object, Object> aEntry : redisMap.entrySet()) {
+          String key = aEntry.getKey().toString();
+          Object value = deserializeFieldValue(field, fieldSchema, aEntry.getValue(), persistent);
+          fieldValue.put(new Utf8(key), value);
+        }
+        break;
+      default:
+        throw new AssertionError(fieldSchema.getType().name());
+    }
+    return new DirtyMapWrapper<>(fieldValue);
+  }
+
+  @SuppressWarnings("unchecked")
+  public Object deserializeFieldList(Schema.Field field, Schema fieldSchema,
+      RList<Object> redisList, T persistent) throws IOException {
+    List<Object> fieldValue = new ArrayList<>();
+    switch (fieldSchema.getType()) {
+      case ARRAY:
+        for (Object ob : redisList) {
+          Object value = deserializeFieldValue(field, fieldSchema, ob, persistent);
+          fieldValue.add(value);
+        }
+        break;
+      default:
+        throw new AssertionError(fieldSchema.getType().name());
+    }
+    return new DirtyListWrapper<>(fieldValue);
   }
 
   @SuppressWarnings("rawtypes")

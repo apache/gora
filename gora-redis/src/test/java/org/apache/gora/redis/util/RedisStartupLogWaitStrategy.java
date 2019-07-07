@@ -27,10 +27,11 @@ import org.testcontainers.containers.output.WaitingConsumer;
 
 public class RedisStartupLogWaitStrategy extends GenericContainer.AbstractWaitStrategy {
 
-  private static final String regEx = ".*CONFIG REWRITE executed with success.*";
+  private static final String regEx = ".*Background AOF rewrite finished successfully.*";
 
-  private int times = 12;
+  private int times = 3;
 
+  @Override
   protected void waitUntilReady() {
     WaitingConsumer waitingConsumer = new WaitingConsumer();
     this.container.followOutput(waitingConsumer);

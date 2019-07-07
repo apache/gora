@@ -65,30 +65,31 @@ public class GoraRedisTestDriver extends GoraTestDriver {
     log.info("Setting up Redis test driver");
     conf.set("gora.datastore.redis.storage", storageMode.name());
     conf.set("gora.datastore.redis.mode", serverMode.name());
+    String bridgeIpAddress = redisContainer.getContainerInfo().getNetworkSettings().getNetworks().values().iterator().next().getIpAddress();
     switch (serverMode) {
       case SINGLE:
-        conf.set("gora.datastore.redis.address", redisContainer.getContainerIpAddress() + ":" + 7006);
+        conf.set("gora.datastore.redis.address", bridgeIpAddress + ":" + 7006);
         break;
       case CLUSTER:
         conf.set("gora.datastore.redis.address",
-            redisContainer.getContainerIpAddress() + ":" + 7000 + ","
-            + redisContainer.getContainerIpAddress() + ":" + 7001 + ","
-            + redisContainer.getContainerIpAddress() + ":" + 7002
+            bridgeIpAddress + ":" + 7000 + ","
+            + bridgeIpAddress + ":" + 7001 + ","
+            + bridgeIpAddress + ":" + 7002
         );
         break;
       case REPLICATED:
         conf.set("gora.datastore.redis.address",
-            redisContainer.getContainerIpAddress() + ":" + 7000 + ","
-            + redisContainer.getContainerIpAddress() + ":" + 7004
+            bridgeIpAddress + ":" + 7000 + ","
+            + bridgeIpAddress + ":" + 7004
         );
         break;
       case SENTINEL:
         conf.set("gora.datastore.redis.masterName", "sentinel7000");
         conf.set("gora.datastore.redis.readMode", "MASTER");
         conf.set("gora.datastore.redis.address",
-            redisContainer.getContainerIpAddress() + ":" + 5000 + ","
-            + redisContainer.getContainerIpAddress() + ":" + 5001 + ","
-            + redisContainer.getContainerIpAddress() + ":" + 5002
+            bridgeIpAddress + ":" + 5000 + ","
+            + bridgeIpAddress + ":" + 5001 + ","
+            + bridgeIpAddress + ":" + 5000
         );
         break;
       default:
