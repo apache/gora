@@ -92,7 +92,7 @@ public class GoraBenchmarkClient extends DB {
         String persistentClass = prop.getProperty("persistent.class", "generated.User");
         Properties p = DataStoreFactory.createProps();
         dataStore = DataStoreFactory.getDataStore(keyClass, persistentClass, p, new Configuration());
-        synchronized(GoraBenchmarkClient.class) {
+        synchronized(GoraBenchmarkClient.class) { 
           if(executed)
             return;
           executed = true;
@@ -101,7 +101,7 @@ public class GoraBenchmarkClient extends DB {
           goraBenchmarkUtils.generateMappingFile(dataStoreName);
           goraBenchmarkUtils.generateDataBeans();
         }
-        
+       
         
     } catch (GoraException e) {
       //e.printStackTrace();
@@ -235,7 +235,7 @@ public class GoraBenchmarkClient extends DB {
     return SUCCESS;
   }
   
-  /**
+  /**arbitarly
    * Update a record in the database. Any field/value pairs in the specified values HashMap will be written into the
    * record with the specified record key, overwriting any existing values with the same field name.
    *

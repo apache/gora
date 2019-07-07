@@ -12,15 +12,5 @@
     <field docfield="field7" name="field7" type="string"/>
     <field docfield="field8" name="field8" type="string"/>
     <field docfield="field9" name="field9" type="string"/>
-    <field docfield="field10" name="field10" type="string"/>
-    <field docfield="field11" name="field11" type="string"/>
-    <field docfield="field12" name="field12" type="string"/>
-    <field docfield="field13" name="field13" type="string"/>
-    <field docfield="field14" name="field14" type="string"/>
-    <field docfield="field15" name="field15" type="string"/>
-    <field docfield="field16" name="field16" type="string"/>
-    <field docfield="field17" name="field17" type="string"/>
-    <field docfield="field18" name="field18" type="string"/>
-    <field docfield="field19" name="field19" type="string"/>
   </class>
 </gora-otd>

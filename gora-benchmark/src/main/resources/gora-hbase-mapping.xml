@@ -15,5 +15,45 @@
     <field family="info" name="field7" qualifier="field7"/>
     <field family="info" name="field8" qualifier="field8"/>
     <field family="info" name="field9" qualifier="field9"/>
+    <field family="info" name="field10" qualifier="field10"/>
+    <field family="info" name="field11" qualifier="field11"/>
+    <field family="info" name="field12" qualifier="field12"/>
+    <field family="info" name="field13" qualifier="field13"/>
+    <field family="info" name="field14" qualifier="field14"/>
+    <field family="info" name="field15" qualifier="field15"/>
+    <field family="info" name="field16" qualifier="field16"/>
+    <field family="info" name="field17" qualifier="field17"/>
+    <field family="info" name="field18" qualifier="field18"/>
+    <field family="info" name="field19" qualifier="field19"/>
+    <field family="info" name="field20" qualifier="field20"/>
+    <field family="info" name="field21" qualifier="field21"/>
+    <field family="info" name="field22" qualifier="field22"/>
+    <field family="info" name="field23" qualifier="field23"/>
+    <field family="info" name="field24" qualifier="field24"/>
+    <field family="info" name="field25" qualifier="field25"/>
+    <field family="info" name="field26" qualifier="field26"/>
+    <field family="info" name="field27" qualifier="field27"/>
+    <field family="info" name="field28" qualifier="field28"/>
+    <field family="info" name="field29" qualifier="field29"/>
+    <field family="info" name="field30" qualifier="field30"/>
+    <field family="info" name="field31" qualifier="field31"/>
+    <field family="info" name="field32" qualifier="field32"/>
+    <field family="info" name="field33" qualifier="field33"/>
+    <field family="info" name="field34" qualifier="field34"/>
+    <field family="info" name="field35" qualifier="field35"/>
+    <field family="info" name="field36" qualifier="field36"/>
+    <field family="info" name="field37" qualifier="field37"/>
+    <field family="info" name="field38" qualifier="field38"/>
+    <field family="info" name="field39" qualifier="field39"/>
+    <field family="info" name="field40" qualifier="field40"/>
+    <field family="info" name="field41" qualifier="field41"/>
+    <field family="info" name="field42" qualifier="field42"/>
+    <field family="info" name="field43" qualifier="field43"/>
+    <field family="info" name="field44" qualifier="field44"/>
+    <field family="info" name="field45" qualifier="field45"/>
+    <field family="info" name="field46" qualifier="field46"/>
+    <field family="info" name="field47" qualifier="field47"/>
+    <field family="info" name="field48" qualifier="field48"/>
+    <field family="info" name="field49" qualifier="field49"/>
   </class>
 </gora-otd>

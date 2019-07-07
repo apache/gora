@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<gora-otd>
+  <class keyClass="java.lang.String" name="generated.User" table="users">
+    <field name="userId"/>
+    <field name="field0"/>
+    <field name="field1"/>
+    <field name="field2"/>
+    <field name="field3"/>
+    <field name="field4"/>
+    <field name="field5"/>
+    <field name="field6"/>
+    <field name="field7"/>
+    <field name="field8"/>
+    <field name="field9"/>
+  </class>
+</gora-otd>

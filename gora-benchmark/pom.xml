@@ -182,7 +182,14 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
-
+		
+		<!-- Apache CouchDB java client -->
+	    <dependency>
+	      <groupId>org.ektorp</groupId>
+	      <artifactId>org.ektorp</artifactId>
+	      <version>1.4.2</version>
+	    </dependency>
+	
 
 
 

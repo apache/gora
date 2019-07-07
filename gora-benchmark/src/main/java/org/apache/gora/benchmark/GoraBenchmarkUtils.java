@@ -56,11 +56,13 @@ public class GoraBenchmarkUtils {
   private static final String NAMESPACE_KEY = "namespace";
   private static final String NAME_KEY = "name";
   private static final String MONGODB = "mongodb";
+  private static final String COUCHDB = "couchdb";
   private static final String HBASE = "hbase";
   private static final String KEYCLASS = "java.lang.String";
   private static String DB_MAPPING_PATH = "src/main/resources";
   private static final String MONGO_MAPPING_FILE = "gora-mongodb-mapping.xml";
   private static final String HBASE_MAPPING_FILE = "gora-hbase-mapping.xml";
+  private static final String COUCHDB_MAPPING_FILE = "gora-couchdb-mapping.xml";
   
   private static final File BEAN_DESTINATION_DIR = new File("src/main/java/");
   private static final String DEFAULT_DATA_STORE_KEY = "gora.datastore.default";
@@ -140,7 +142,9 @@ public class GoraBenchmarkUtils {
         result = new StreamResult(new File(DB_MAPPING_PATH+"/"+MONGO_MAPPING_FILE));
       }else if(dbName.equals(HBASE)) {
         result = new StreamResult(new File(DB_MAPPING_PATH+"/"+HBASE_MAPPING_FILE));
-      } 
+      }else if(dbName.equals(COUCHDB)) {
+        result = new StreamResult(new File(DB_MAPPING_PATH+"/"+COUCHDB_MAPPING_FILE));
+      }  
       transformer.transform(source, result);
 
       // Output to console for testing
@@ -156,7 +160,7 @@ public class GoraBenchmarkUtils {
       //e.printStackTrace();
     } catch (TransformerException e) {
       // TODO Auto-generated catch blockString
-      //e.printStackTrace();
+      //e.printStackTrace();DEFAULT_DATA_STORE_KEY
     }
   }
   
@@ -214,6 +218,43 @@ public class GoraBenchmarkUtils {
   public void buildMappingDocument(Iterator<String> keys, String db, Document mappingDocument, Element rootNode,
       String fullNameSpace, JSONObject jsonObject) {
     switch (db) {
+    case COUCHDB: {
+      Element mappingClass = mappingDocument.createElement("class");
+      rootNode.appendChild(mappingClass);
+
+      // setting attribute to element
+      Attr beanName = mappingDocument.createAttribute("name");
+      beanName.setValue(fullNameSpace);
+      mappingClass.setAttributeNode(beanName);
+
+      // setting attribute to element
+      Attr keyClass = mappingDocument.createAttribute("keyClass");
+      keyClass.setValue(KEYCLASS);
+      mappingClass.setAttributeNode(keyClass);
+
+      // setting attribute to element
+      Attr table = mappingDocument.createAttribute("table");
+      table.setValue("users");
+      mappingClass.setAttributeNode(table);
+      while (keys.hasNext()) {
+        String currentKey = keys.next();
+        if (jsonObject.get(currentKey) instanceof JSONArray) {
+          JSONArray mappingFields = jsonObject.getJSONArray(currentKey);
+          for (int i = 0; i < mappingFields.length(); i++) {
+            JSONObject currentObj = mappingFields.getJSONObject(i);
+            Element fields = mappingDocument.createElement("field");
+
+            Attr name = mappingDocument.createAttribute("name");
+            name.setValue(currentObj.getString("name"));
+            fields.setAttributeNode(name);
+            
+            mappingClass.appendChild(fields);
+          }
+        }
+      }
+    }
+
+      break;
     case MONGODB: {
       Element mappingClass = mappingDocument.createElement("class");
       rootNode.appendChild(mappingClass);
@@ -260,8 +301,8 @@ public class GoraBenchmarkUtils {
     }
 
       break;
+      
     case HBASE:{
-      {
         Element mappingDescription = mappingDocument.createElement("table");
         rootNode.appendChild(mappingDescription);
         
@@ -318,7 +359,6 @@ public class GoraBenchmarkUtils {
               type.setValue("info");
               fields.setAttributeNode(type);
               mappingClass.appendChild(fields);
-            }
           }
         }
       }
@@ -335,10 +375,13 @@ public class GoraBenchmarkUtils {
     String dataStore = "hbase";
     switch (defaultDataStore) {
     case "org.apache.gora.mongodb.store.MongoStore":
-      dataStore = "mongodb";
+      dataStore = MONGODB;
       break;
     case "org.apache.gora.mongodb.store.HBaseStore":
-      dataStore = "hbase";
+      dataStore = HBASE;
+      break;
+    case "org.apache.gora.couchdb.store.CouchDBStore":
+      dataStore = COUCHDB;
       break;
     default:
       break;

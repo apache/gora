@@ -32,7 +32,7 @@ public class GoraClientTest {
   private static HashMap<String, ByteIterator> DATA_TO_UPDATE;
   private static List<String> dataStores = new ArrayList<String>();
   
-  private static final int NUMBER_OF_FIELDS = 50;
+  private static final int NUMBER_OF_FIELDS = 10;
   
   private GoraBenchmarkUtils bmutils = new GoraBenchmarkUtils();
   
@@ -45,7 +45,7 @@ public class GoraClientTest {
     //for(String dataStore: dataStores) {
       //bmutils.generateMappingFile(dataStore);
     //}
-    //bmutils.generateDataBeans();
+    //bmutils.generateDataBeans();testInsert
     DATA_TO_INSERT = new HashMap<>();
     DATA_TO_UPDATE = new HashMap<>();
     for(int i=0; i < NUMBER_OF_FIELDS; i++) {
@@ -75,7 +75,7 @@ public class GoraClientTest {
   
   @Test
   public void testClientInitialisation() {
-    assertNotNull(client);
+    assertNotNull(client.dataStore);
   }
   
 
