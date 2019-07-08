@@ -18,6 +18,8 @@ package org.apache.gora.kudu.utils;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.gora.kudu.mapping.Column;
 import org.apache.kudu.ColumnSchema;
 import org.apache.kudu.Type;
@@ -26,7 +28,7 @@ import org.apache.kudu.client.PartialRow;
 import org.apache.kudu.client.RowResult;
 
 public class KuduClientUtils {
-  
+
   public static Object getObjectRow(RowResult row, Column column) {
     Type type = column.getDataType().getType();
     Object res;
@@ -44,7 +46,7 @@ public class KuduClientUtils {
         res = row.getLong(column.getName());
         break;
       case BINARY:
-        res = row.getBinary(column.getName());
+        res = row.getBinaryCopy(column.getName());
         break;
       case STRING:
         res = row.getString(column.getName());
@@ -69,7 +71,7 @@ public class KuduClientUtils {
     }
     return res;
   }
-  
+
   public static void addObjectRow(PartialRow row, Column column, Object key) {
     Type type = column.getDataType().getType();
     switch (type) {
@@ -114,7 +116,7 @@ public class KuduClientUtils {
         throw new AssertionError(type.name());
     }
   }
-  
+
   public static KuduPredicate createEqualPredicate(ColumnSchema column, Object key) {
     KuduPredicate pred;
     switch (column.getType()) {
@@ -149,5 +151,81 @@ public class KuduClientUtils {
         throw new AssertionError(column.getType().name());
     }
     return pred;
+  }
+
+  public static List<KuduPredicate> createRangePredicate(ColumnSchema column, Object startK, Object endK) {
+    List<KuduPredicate> predList = new ArrayList<>();
+    switch (column.getType()) {
+      case INT8:
+      case INT16:
+      case INT32:
+      case INT64:
+        if (startK != null) {
+          predList.add(KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.GREATER_EQUAL, (long) startK));
+        }
+        if (endK != null) {
+          predList.add(KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.LESS_EQUAL, (long) endK));
+        }
+        break;
+      case BINARY:
+        if (startK != null) {
+          predList.add(KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.GREATER_EQUAL, (byte[]) startK));
+        }
+        if (endK != null) {
+          predList.add(KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.LESS_EQUAL, (byte[]) endK));
+        }
+        break;
+      case STRING:
+        if (startK != null) {
+          predList.add(KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.GREATER_EQUAL, (String) startK));
+        }
+        if (endK != null) {
+          predList.add(KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.LESS_EQUAL, (String) endK));
+        }
+        break;
+      case BOOL:
+        if (startK != null) {
+          predList.add(KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.GREATER_EQUAL, (boolean) startK));
+        }
+        if (endK != null) {
+          predList.add(KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.LESS_EQUAL, (boolean) endK));
+        }
+        break;
+      case FLOAT:
+        if (startK != null) {
+          predList.add(KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.GREATER_EQUAL, (float) startK));
+        }
+        if (endK != null) {
+          predList.add(KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.LESS_EQUAL, (float) endK));
+        }
+        break;
+      case DOUBLE:
+        if (startK != null) {
+          predList.add(KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.GREATER_EQUAL, (double) startK));
+        }
+        if (endK != null) {
+          predList.add(KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.LESS_EQUAL, (double) endK));
+        }
+        break;
+      case UNIXTIME_MICROS:
+        if (startK != null) {
+          predList.add(KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.GREATER_EQUAL, (Timestamp) startK));
+        }
+        if (endK != null) {
+          predList.add(KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.LESS_EQUAL, (Timestamp) endK));
+        }
+        break;
+      case DECIMAL:
+        if (startK != null) {
+          predList.add(KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.GREATER_EQUAL, (BigDecimal) startK));
+        }
+        if (endK != null) {
+          predList.add(KuduPredicate.newComparisonPredicate(column, KuduPredicate.ComparisonOp.LESS_EQUAL, (BigDecimal) endK));
+        }
+        break;
+      default:
+        throw new AssertionError(column.getType().name());
+    }
+    return predList;
   }
 }

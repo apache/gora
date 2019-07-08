@@ -32,91 +32,6 @@ public class TestKuduStore extends DataStoreTestBase {
   }
 
   @Test
-  @Override
-  public void testCreateSchema() throws Exception {
-    super.testCreateSchema();
-  }
-
-  @Test
-  @Override
-  public void testSchemaExists() throws Exception {
-    super.testSchemaExists();
-  }
-  @Test
-  @Override
-  public void testPut() throws Exception {
-    super.testPut();
-  }
-  @Test
-  @Override
-  public void testExists() throws Exception {
-    super.testExists();
-  }
-
-  @Test
-  @Override
-  public void testBenchamarkExists() throws Exception {
-    super.testBenchamarkExists();
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testAutoCreateSchema() throws Exception {
-    super.testAutoCreateSchema();
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testTruncateSchema() throws Exception {
-    super.testTruncateSchema();
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testDeleteSchema() throws Exception {
-    super.testDeleteSchema();
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testNewInstance() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testPutNested() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testPutArray() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testPutBytes() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testPutMap() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testPutMixedMaps() throws Exception {
-  }
-
-  @Test
   @Ignore
   @Override
   public void testUpdate() throws Exception {
@@ -126,12 +41,6 @@ public class TestKuduStore extends DataStoreTestBase {
   @Ignore
   @Override
   public void testEmptyUpdate() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testGet() throws Exception {
   }
 
   @Test
@@ -186,6 +95,7 @@ public class TestKuduStore extends DataStoreTestBase {
   @Ignore
   @Override
   public void testQuery() throws Exception {
+    super.testQuery();
   }
 
   @Test
@@ -225,9 +135,9 @@ public class TestKuduStore extends DataStoreTestBase {
   }
 
   @Test
-  @Ignore
   @Override
   public void testDelete() throws Exception {
+    //super.testDelete();
   }
 
   @Test

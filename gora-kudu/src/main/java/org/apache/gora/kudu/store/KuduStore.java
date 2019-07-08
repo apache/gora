@@ -16,6 +16,7 @@
  */
 package org.apache.gora.kudu.store;
 
+import org.apache.gora.kudu.query.KuduResult;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -42,15 +43,19 @@ import org.apache.avro.Schema;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.avro.util.Utf8;
+import org.apache.gora.kudu.query.KuduQuery;
 import org.apache.gora.kudu.utils.KuduClientUtils;
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.query.impl.PartitionQueryImpl;
 import org.apache.gora.util.IOUtils;
 import org.apache.kudu.Type;
+import org.apache.kudu.client.AsyncKuduScanner;
 import org.apache.kudu.client.CreateTableOptions;
 import org.apache.kudu.client.Delete;
 import org.apache.kudu.client.Insert;
 import org.apache.kudu.client.KuduClient;
 import org.apache.kudu.client.KuduException;
+import org.apache.kudu.client.KuduPredicate;
 import org.apache.kudu.client.KuduScanner;
 import org.apache.kudu.client.KuduSession;
 import org.apache.kudu.client.KuduTable;
@@ -315,17 +320,47 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
 
   @Override
   public Result<K, T> execute(Query<K, T> query) throws GoraException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    String[] avFields = getFieldsToQuery(query.getFields());
+    List<String> dbFields = new ArrayList<>();
+    for (String af : avFields) {
+      dbFields.add(kuduMapping.getFields().get(af).getName());
+    }
+    try {
+      ColumnSchema column = table.getSchema().getColumn(kuduMapping.getPrimaryKey().get(0).getName());
+      dbFields.add(kuduMapping.getPrimaryKey().get(0).getName());
+      KuduScanner.KuduScannerBuilder scannerBuilder = client.newScannerBuilder(table);
+      if (query.getLimit() != -1) {
+        scannerBuilder.limit(query.getLimit());
+      }
+      scannerBuilder.setProjectedColumnNames(dbFields);
+      List<KuduPredicate> rangePredicates = KuduClientUtils.createRangePredicate(column, query.getStartKey(), query.getEndKey());
+      for (KuduPredicate predicate : rangePredicates) {
+        scannerBuilder.addPredicate(predicate);
+      }
+      scannerBuilder.addPredicate(KuduPredicate.newIsNotNullPredicate(column));
+      KuduScanner build = scannerBuilder.build();
+      KuduResult<K, T> kuduResult = new KuduResult<>(this, query, build);
+      return kuduResult;
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
   }
 
   @Override
   public Query<K, T> newQuery() {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    KuduQuery<K, T> query = new KuduQuery<>(this);
+    query.setFields(getFieldsToQuery(null));
+    return query;
   }
 
   @Override
   public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query) throws IOException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    List<PartitionQuery<K, T>> partitions = new ArrayList<>();
+    PartitionQueryImpl<K, T> partitionQuery = new PartitionQueryImpl<>(
+        query);
+    partitionQuery.setConf(getConf());
+    partitions.add(partitionQuery);
+    return partitions;
   }
 
   @Override
@@ -367,41 +402,47 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
   }
 
   @SuppressWarnings("unchecked")
+  public K extractKey(RowResult r) {
+    Column column = kuduMapping.getPrimaryKey().get(0);
+    return (K) KuduClientUtils.getObjectRow(r, column);
+  }
+
+  @SuppressWarnings("unchecked")
   private Object deserializeFieldValue(Schema.Field field, Schema fieldSchema,
-      Object igniteValue, T persistent) throws IOException {
+      Object kuduValue, T persistent) throws IOException {
     Object fieldValue = null;
     switch (fieldSchema.getType()) {
       case MAP:
       case ARRAY:
       case RECORD:
         @SuppressWarnings("rawtypes") SpecificDatumReader reader = getDatumReader(fieldSchema);
-        fieldValue = IOUtils.deserialize((byte[]) igniteValue, reader,
+        fieldValue = IOUtils.deserialize((byte[]) kuduValue, reader,
             persistent.get(field.pos()));
         break;
       case ENUM:
-        fieldValue = AvroUtils.getEnumValue(fieldSchema, igniteValue.toString());
+        fieldValue = AvroUtils.getEnumValue(fieldSchema, kuduValue.toString());
         break;
       case FIXED:
         break;
       case BYTES:
-        fieldValue = ByteBuffer.wrap((byte[]) igniteValue);
+        fieldValue = ByteBuffer.wrap((byte[]) kuduValue);
         break;
       case STRING:
-        fieldValue = new Utf8(igniteValue.toString());
+        fieldValue = new Utf8(kuduValue.toString());
         break;
       case UNION:
         if (fieldSchema.getTypes().size() == 2 && isNullable(fieldSchema)) {
-          int schemaPos = getUnionSchema(igniteValue, fieldSchema);
+          int schemaPos = getUnionSchema(kuduValue, fieldSchema);
           Schema unionSchema = fieldSchema.getTypes().get(schemaPos);
-          fieldValue = deserializeFieldValue(field, unionSchema, igniteValue, persistent);
+          fieldValue = deserializeFieldValue(field, unionSchema, kuduValue, persistent);
         } else {
           reader = getDatumReader(fieldSchema);
-          fieldValue = IOUtils.deserialize((byte[]) igniteValue, reader,
+          fieldValue = IOUtils.deserialize((byte[]) kuduValue, reader,
               persistent.get(field.pos()));
         }
         break;
       default:
-        fieldValue = igniteValue;
+        fieldValue = kuduValue;
     }
     return fieldValue;
   }
