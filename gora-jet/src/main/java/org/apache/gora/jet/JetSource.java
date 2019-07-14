@@ -24,13 +24,13 @@ public class JetSource<KeyIn, ValueIn extends PersistentBase> implements Process
 
   private transient int totalParallelism;
   private transient int localParallelism;
-  private List<ValueIn> allResultsList = new ArrayList<>();
+  private List<JetOutputFormat<KeyIn, ValueIn>> allResultsList = new ArrayList<>();
 
   JetSource(Query<KeyIn, ValueIn> query) {
     try {
       Result<KeyIn, ValueIn> result = query.execute();
       while (result.next()) {
-        allResultsList.add(result.get());
+        allResultsList.add(new JetOutputFormat<>(result.getKey(), result.get()));
       }
 
     } catch (Exception e) {
@@ -66,10 +66,10 @@ public class JetSource<KeyIn, ValueIn extends PersistentBase> implements Process
     return map::get;
   }
 
-  List<ValueIn> getPartionedData(int start, int end) {
+  List<JetOutputFormat<KeyIn, ValueIn>> getPartionedData(int start, int end) {
     if (end > allResultsList.size())
       end = allResultsList.size();
-    List<ValueIn> resultsList = new ArrayList<>();
+    List<JetOutputFormat<KeyIn, ValueIn>> resultsList = new ArrayList<>();
     for (int i = start; i < end; i++) {
       resultsList.add(allResultsList.get(i));
     }
@@ -79,9 +79,9 @@ public class JetSource<KeyIn, ValueIn extends PersistentBase> implements Process
 
 class GoraJetProcessor<KeyIn, ValueIn extends PersistentBase> extends AbstractProcessor {
 
-  private final Traverser<ValueIn> traverser;
+  private final Traverser<JetOutputFormat<KeyIn, ValueIn>> traverser;
 
-  GoraJetProcessor(List<ValueIn> list) {
+  GoraJetProcessor(List<JetOutputFormat<KeyIn, ValueIn>> list) {
     this.traverser = traverseIterable(list);
   }
 

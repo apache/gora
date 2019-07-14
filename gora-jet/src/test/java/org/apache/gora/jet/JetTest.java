@@ -49,16 +49,16 @@ public class JetTest {
     query.setEndKey(55L);
 
     JetEngine<Long, Pageview, Long, ResultPageView> jetEngine = new JetEngine<>();
-    BatchSource<Pageview> fileSource = jetEngine.createDataSource(query);
+    BatchSource<JetOutputFormat<Long, Pageview>> fileSource = jetEngine.createDataSource(query);
     Pipeline p = Pipeline.create();
     p.drawFrom(fileSource)
-        .filter(item -> item.getIp().toString().equals("88.240.129.183"))
+        .filter(item -> item.getValue().getIp().toString().equals("88.240.129.183"))
         .map(e -> {
           ResultPageView resultPageView = new ResultPageView();
-          resultPageView.setIp(e.getIp());
-          resultPageView.setTimestamp(e.getTimestamp());
-          resultPageView.setUrl(e.getUrl());
-          return new JetOutputFormat<Long, ResultPageView>(e.getTimestamp(), resultPageView);
+          resultPageView.setIp(e.getValue().getIp());
+          resultPageView.setTimestamp(e.getValue().getTimestamp());
+          resultPageView.setUrl(e.getValue().getUrl());
+          return new JetOutputFormat<Long, ResultPageView>(e.getValue().getTimestamp(), resultPageView);
         })
         .drainTo(jetEngine.createDataSink(dataStoreOut));
 
@@ -111,7 +111,7 @@ public class JetTest {
     Pattern delimiter = Pattern.compile("\\W+");
     Pipeline p = Pipeline.create();
     p.drawFrom(jetEngine.createDataSource(query))
-        .flatMap(e -> traverseArray(delimiter.split(e.getUrl().toString().toLowerCase())))
+        .flatMap(e -> traverseArray(delimiter.split(e.getValue().getUrl().toString().toLowerCase())))
         .filter(word -> !word.isEmpty())
         .groupingKey(wholeItem())
         .aggregate(counting())
