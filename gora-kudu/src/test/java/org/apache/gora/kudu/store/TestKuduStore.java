@@ -85,36 +85,7 @@ public class TestKuduStore extends DataStoreTestBase {
   public void testGetWebPageDefaultFields() throws Exception {
   }
 
-  @Test
-  @Ignore
-  @Override
-  public void testGetNonExisting() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testQuery() throws Exception {
-    super.testQuery();
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testQueryStartKey() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testQueryEndKey() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testQueryKeyRange() throws Exception {
-  }
+ 
 
   @Test
   @Ignore
@@ -132,12 +103,6 @@ public class TestKuduStore extends DataStoreTestBase {
   @Ignore
   @Override
   public void testQueryWebPageQueryEmptyResults() throws Exception {
-  }
-
-  @Test
-  @Override
-  public void testDelete() throws Exception {
-    //super.testDelete();
   }
 
   @Test
@@ -182,34 +147,5 @@ public class TestKuduStore extends DataStoreTestBase {
   public void testResultSizeKeyRange() throws Exception {
   }
 
-  @Test
-  @Ignore
-  @Override
-  public void testResultSizeWithLimit() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testResultSizeStartKeyWithLimit() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testResultSizeEndKeyWithLimit() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testResultSizeKeyRangeWithLimit() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testObjectFieldValue() throws Exception {
-  }
 
 }

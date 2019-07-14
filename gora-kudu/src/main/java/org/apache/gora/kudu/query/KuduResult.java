@@ -43,21 +43,16 @@ public class KuduResult<K, T extends PersistentBase> extends ResultBase<K, T> {
   @Override
   protected boolean nextInner() throws IOException {
     boolean more = false;
-    if (resultIt == null) {
-      more = result.hasMoreRows();
-      if (more) {
-        resultIt = result.nextRows();
-        more = resultIt.hasNext();
-      }
-    } else {
-      more = resultIt.hasNext();
-      if (!more) {
-        more = result.hasMoreRows();
-        if (more) {
-          resultIt = result.nextRows();
-          more = resultIt.hasNext();
+    if (this.resultIt == null || !this.resultIt.hasNext()) {
+      while (this.result.hasMoreRows()) {
+        RowResultIterator nextRows = this.result.nextRows();
+        if (nextRows.hasNext()) {
+          resultIt = nextRows;
+          more = true;
         }
       }
+    } else {
+      more = true;
     }
     if (more) {
       RowResult next = resultIt.next();

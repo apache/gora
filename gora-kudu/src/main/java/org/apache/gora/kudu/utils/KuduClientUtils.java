@@ -23,9 +23,12 @@ import java.util.List;
 import org.apache.gora.kudu.mapping.Column;
 import org.apache.kudu.ColumnSchema;
 import org.apache.kudu.Type;
+import org.apache.kudu.client.KuduException;
 import org.apache.kudu.client.KuduPredicate;
+import org.apache.kudu.client.KuduScanner;
 import org.apache.kudu.client.PartialRow;
 import org.apache.kudu.client.RowResult;
+import org.apache.kudu.client.RowResultIterator;
 
 public class KuduClientUtils {
 
@@ -227,5 +230,17 @@ public class KuduClientUtils {
         throw new AssertionError(column.getType().name());
     }
     return predList;
+  }
+
+  public static RowResult waitFirstResult(KuduScanner scanner) throws KuduException {
+    RowResult result = null;
+    while (scanner.hasMoreRows()) {
+      RowResultIterator nextRows = scanner.nextRows();
+      if (nextRows.hasNext()) {
+        result = nextRows.next();
+        break;
+      }
+    }
+    return result;
   }
 }

@@ -31,6 +31,8 @@ public class KuduParameters {
   private Long defaultSocketReadTimeoutMs;
   private Boolean clientStatistics;
   private Integer workerCount;
+  private String flushMode;
+  private Integer flushInterval;
 
   public KuduParameters(String masterAddresses) {
     this.masterAddresses = masterAddresses;
@@ -132,6 +134,36 @@ public class KuduParameters {
     this.workerCount = workerCount;
   }
 
+  public String getFlushMode() {
+    return flushMode;
+  }
+
+  /**
+   * Set the new flush mode for this session.
+   *
+   * @see
+   * https://kudu.apache.org/apidocs/org/apache/kudu/client/SessionConfiguration.FlushMode.html
+   *
+   * @param flushMode flush mode
+   */
+  public void setFlushMode(String flushMode) {
+    this.flushMode = flushMode;
+  }
+
+  public Integer getFlushInterval() {
+    return flushInterval;
+  }
+
+  /**
+   * Set the flush interval, which will be used for the next scheduling
+   * decision.
+   *
+   * @param flushInterval interval in milliseconds.
+   */
+  public void setFlushInterval(Integer flushInterval) {
+    this.flushInterval = flushInterval;
+  }
+
   /**
    * Reads Kudu parameters from a properties list
    *
@@ -170,6 +202,14 @@ public class KuduParameters {
     aProperty = properties.getProperty(KuduBackendConstants.PROP_WORKERCOUNT);
     if (aProperty != null) {
       kuduParameters.setWorkerCount(Integer.parseInt(aProperty));
+    }
+    aProperty = properties.getProperty(KuduBackendConstants.PROP_FLUSHMODE);
+    if (aProperty != null) {
+      kuduParameters.setFlushMode(aProperty);
+    }
+    aProperty = properties.getProperty(KuduBackendConstants.PROP_FLUSHINTERVAL);
+    if (aProperty != null) {
+      kuduParameters.setFlushInterval(Integer.parseInt(aProperty));
     }
     return kuduParameters;
   }

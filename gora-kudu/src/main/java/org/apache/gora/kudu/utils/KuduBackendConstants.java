@@ -37,6 +37,8 @@ public class KuduBackendConstants {
   public static final String PROP_DEFAULTSOCKETREADTIMEOUTMS = "gora.datastore.kudu.defaultSocketReadTimeoutMs";
   public static final String PROP_CLIENTSTATISTICS = "gora.datastore.kudu.clientStatistics";
   public static final String PROP_WORKERCOUNT = "gora.datastore.kudu.workerCount";
+  public static final String PROP_FLUSHMODE = "gora.datastore.kudu.flushMode";
+  public static final String PROP_FLUSHINTERVAL = "gora.datastore.kudu.flushInterval";
   public static final String AS_PROP_OVERRIDING = "gora.kudu.override.hadoop.configuration";
 
 }

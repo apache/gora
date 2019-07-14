@@ -63,6 +63,8 @@ import org.apache.kudu.client.OperationResponse;
 import org.apache.kudu.client.PartialRow;
 import org.apache.kudu.client.RowResult;
 import org.apache.kudu.client.RowResultIterator;
+import org.apache.kudu.client.SessionConfiguration;
+import org.apache.kudu.client.Upsert;
 import org.apache.kudu.util.DecimalUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,6 +128,13 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       }
       client = kuduClientBuilder.build();
       session = client.newSession();
+      if (kuduParameters.getFlushMode() != null) {
+        session.setFlushMode(SessionConfiguration.FlushMode.valueOf(kuduParameters.getFlushMode()));
+      }
+      if (kuduParameters.getFlushInterval() != null) {
+        session.setFlushInterval(kuduParameters.getFlushInterval());
+      }
+
       LOG.info("Kudu store was successfully initialized");
       if (!schemaExists()) {
         createSchema();
@@ -230,9 +239,9 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       scannerBuilder.setProjectedColumnIndexes(new ArrayList<>());
       scannerBuilder.addPredicate(KuduClientUtils.createEqualPredicate(column, key));
       KuduScanner build = scannerBuilder.build();
-      boolean hasMoreRows = build.hasMoreRows();
-      RowResultIterator nextRows = build.nextRows();
-      return hasMoreRows && nextRows.hasNext();
+      RowResult waitFirstResult = KuduClientUtils.waitFirstResult(build);
+      build.close();
+      return waitFirstResult != null;
     } catch (Exception e) {
       throw new GoraException(e);
     }
@@ -252,16 +261,10 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       scannerBuilder.setProjectedColumnNames(dbFields);
       scannerBuilder.addPredicate(KuduClientUtils.createEqualPredicate(column, key));
       KuduScanner build = scannerBuilder.build();
-      boolean data = build.hasMoreRows();
-      RowResultIterator nextRows = build.nextRows();
-      data = nextRows.hasNext();
+      RowResult waitGetOneOrZero = KuduClientUtils.waitFirstResult(build);
       T resp = null;
-      if (data) {
-        RowResult next = nextRows.next();
-        resp = newInstance(next, fields);
-        if (nextRows.hasNext()) {
-          LOG.warn("Multiple results for primary key {} in the schema {}, ignoring additional rows.", key, kuduMapping.getTableName());
-        }
+      if (waitGetOneOrZero != null) {
+        resp = newInstance(waitGetOneOrZero, fields);
       }
       build.close();
       return resp;
@@ -275,8 +278,8 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
     try {
       if (obj.isDirty()) {
         Column pkc = kuduMapping.getPrimaryKey().get(0);
-        Insert insert = table.newInsert();
-        PartialRow row = insert.getRow();
+        Upsert upsert = table.newUpsert();
+        PartialRow row = upsert.getRow();
         KuduClientUtils.addObjectRow(row, pkc, key);
         Schema schema = obj.getSchema();
         List<Schema.Field> fields = schema.getFields();
@@ -289,7 +292,7 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
             KuduClientUtils.addObjectRow(row, mappedColumn, serializedObj);
           }
         }
-        session.apply(insert);
+        session.apply(upsert);
       } else {
         LOG.info("Ignored putting object {} in the store as it is neither "
             + "new, neither dirty.", new Object[]{obj});
