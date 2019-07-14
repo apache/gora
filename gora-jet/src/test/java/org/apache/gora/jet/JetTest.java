@@ -49,7 +49,7 @@ public class JetTest {
     query.setEndKey(55L);
 
     JetEngine<Long, Pageview, Long, ResultPageView> jetEngine = new JetEngine<>();
-    BatchSource<JetOutputFormat<Long, Pageview>> fileSource = jetEngine.createDataSource(query);
+    BatchSource<JetInputOutputFormat<Long, Pageview>> fileSource = jetEngine.createDataSource(dataStore, query);
     Pipeline p = Pipeline.create();
     p.drawFrom(fileSource)
         .filter(item -> item.getValue().getIp().toString().equals("88.240.129.183"))
@@ -58,7 +58,7 @@ public class JetTest {
           resultPageView.setIp(e.getValue().getIp());
           resultPageView.setTimestamp(e.getValue().getTimestamp());
           resultPageView.setUrl(e.getValue().getUrl());
-          return new JetOutputFormat<Long, ResultPageView>(e.getValue().getTimestamp(), resultPageView);
+          return new JetInputOutputFormat<Long, ResultPageView>(e.getValue().getTimestamp(), resultPageView);
         })
         .drainTo(jetEngine.createDataSink(dataStoreOut));
 
@@ -110,7 +110,7 @@ public class JetTest {
 
     Pattern delimiter = Pattern.compile("\\W+");
     Pipeline p = Pipeline.create();
-    p.drawFrom(jetEngine.createDataSource(query))
+    p.drawFrom(jetEngine.createDataSource(dataStoreOut, query))
         .flatMap(e -> traverseArray(delimiter.split(e.getValue().getUrl().toString().toLowerCase())))
         .filter(word -> !word.isEmpty())
         .groupingKey(wholeItem())

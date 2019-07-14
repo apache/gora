@@ -6,7 +6,7 @@ import com.hazelcast.jet.core.ProcessorMetaSupplier;
 import com.hazelcast.jet.core.ProcessorSupplier;
 import com.hazelcast.nio.Address;
 import org.apache.gora.persistency.impl.PersistentBase;
-import org.apache.gora.query.Query;
+import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Result;
 
 import javax.annotation.Nonnull;
@@ -22,21 +22,8 @@ import static java.util.stream.IntStream.range;
 
 public class JetSource<KeyIn, ValueIn extends PersistentBase> implements ProcessorMetaSupplier {
 
-  private transient int totalParallelism;
+  private int totalParallelism;
   private transient int localParallelism;
-  private List<JetOutputFormat<KeyIn, ValueIn>> allResultsList = new ArrayList<>();
-
-  JetSource(Query<KeyIn, ValueIn> query) {
-    try {
-      Result<KeyIn, ValueIn> result = query.execute();
-      while (result.next()) {
-        allResultsList.add(new JetOutputFormat<>(result.getKey(), result.get()));
-      }
-
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
 
   @Override
   public void init(@Nonnull Context context) {
@@ -53,35 +40,45 @@ public class JetSource<KeyIn, ValueIn extends PersistentBase> implements Process
       //globalIndexBase is the first processor index in a certain Jet-Cluster member
       int globalIndexBase = localParallelism * i;
 
-      int partionSize = (allResultsList.size() / totalParallelism) + 1;
       // processorCount will be equal to localParallelism:
       ProcessorSupplier supplier = processorCount ->
           range(globalIndexBase, globalIndexBase + processorCount)
               .mapToObj(globalIndex ->
-                  new GoraJetProcessor<KeyIn, ValueIn>(getPartionedData(globalIndex * partionSize,
-                      (globalIndex + 1) * partionSize))
+                  new GoraJetProcessor<KeyIn, ValueIn>(getPartionedData(globalIndex))
               ).collect(toList());
       map.put(addresses.get(i), supplier);
     }
     return map::get;
   }
 
-  List<JetOutputFormat<KeyIn, ValueIn>> getPartionedData(int start, int end) {
-    if (end > allResultsList.size())
-      end = allResultsList.size();
-    List<JetOutputFormat<KeyIn, ValueIn>> resultsList = new ArrayList<>();
-    for (int i = start; i < end; i++) {
-      resultsList.add(allResultsList.get(i));
+  List<JetInputOutputFormat<KeyIn, ValueIn>> getPartionedData(int globalIndex) {
+    try {
+      List<PartitionQuery<KeyIn, ValueIn>> partitionQueries = JetEngine.dataInStore.getPartitions(JetEngine.query);
+      List<JetInputOutputFormat<KeyIn, ValueIn>> resultsList = new ArrayList<>();
+      int i = 1;
+      int partitionNo = globalIndex;
+      while (partitionNo < partitionQueries.size()) {
+        Result<KeyIn, ValueIn> result = null;
+        result = partitionQueries.get(partitionNo).execute();
+        while (result.next()) {
+          resultsList.add(new JetInputOutputFormat<>(result.getKey(), result.get()));
+        }
+        partitionNo = (i * totalParallelism) + globalIndex;
+        i++;
+      }
+      return resultsList;
+    } catch (Exception e) {
+      e.printStackTrace();
     }
-    return resultsList;
+    return null;
   }
 }
 
 class GoraJetProcessor<KeyIn, ValueIn extends PersistentBase> extends AbstractProcessor {
 
-  private final Traverser<JetOutputFormat<KeyIn, ValueIn>> traverser;
+  private final Traverser<JetInputOutputFormat<KeyIn, ValueIn>> traverser;
 
-  GoraJetProcessor(List<JetOutputFormat<KeyIn, ValueIn>> list) {
+  GoraJetProcessor(List<JetInputOutputFormat<KeyIn, ValueIn>> list) {
     this.traverser = traverseIterable(list);
   }
 

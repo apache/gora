@@ -2,13 +2,11 @@ package org.apache.gora.jet;
 
 import org.apache.gora.persistency.impl.PersistentBase;
 
-import java.io.Serializable;
-
-public class JetOutputFormat<KeyOut, ValueOut extends PersistentBase> implements Serializable {
+public class JetInputOutputFormat<KeyOut, ValueOut extends PersistentBase> {
   public KeyOut key;
   public ValueOut value;
 
-  public JetOutputFormat(KeyOut key, ValueOut value) {
+  public JetInputOutputFormat(KeyOut key, ValueOut value) {
     this.key = key;
     this.value = value;
   }

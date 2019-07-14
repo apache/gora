@@ -54,8 +54,8 @@ class SinkProcessor<KeyOut, ValueOut extends PersistentBase> extends AbstractPro
 
   @Override
   protected boolean tryProcess(int ordinal, Object item) throws Exception {
-    JetEngine.dataOutStore.put(((JetOutputFormat<KeyOut, ValueOut>) item).getKey(),
-        ((JetOutputFormat<KeyOut, ValueOut>) item).getValue());
+    JetEngine.dataOutStore.put(((JetInputOutputFormat<KeyOut, ValueOut>) item).getKey(),
+        ((JetInputOutputFormat<KeyOut, ValueOut>) item).getValue());
     return true;
   }
 
