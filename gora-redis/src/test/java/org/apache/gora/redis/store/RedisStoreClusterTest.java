@@ -55,61 +55,6 @@ public class RedisStoreClusterTest extends DataStoreTestBase {
     super.testSchemaExists();
   }
 
-//  @Test
-//  @Override
-//  public void testExists() throws Exception {
-//    super.testExists();
-//  }
-//
-//  @Test
-//  @Ignore
-//  @Override
-//  public void testPut() throws Exception {
-//
-//  }
-//
-  @Test
-  @Ignore
-  @Override
-  public void testDelete() throws Exception {
-  }
-//
-//  @Test
-//  @Ignore
-//  @Override
-//  public void testGet() throws Exception {
-//
-//  }
-//
-//  @Test
-//  @Override
-//  public void testBenchamarkExists() throws Exception {
-//    try{
-//      super.testBenchamarkExists();
-//    }catch (Exception e ){
-//      e.printStackTrace();
-//    }
-//  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testNewInstance() throws Exception {
-
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testCreateSchema() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testAutoCreateSchema() throws Exception {
-  }
-
   @Test
   @Ignore
   @Override
@@ -203,12 +148,6 @@ public class RedisStoreClusterTest extends DataStoreTestBase {
   @Test
   @Ignore
   @Override
-  public void testQuery() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
   public void testQueryStartKey() throws Exception {
   }
 
@@ -258,54 +197,6 @@ public class RedisStoreClusterTest extends DataStoreTestBase {
   @Ignore
   @Override
   public void testGetPartitions() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testResultSize() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testResultSizeStartKey() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testResultSizeEndKey() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testResultSizeKeyRange() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testResultSizeWithLimit() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testResultSizeStartKeyWithLimit() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testResultSizeEndKeyWithLimit() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testResultSizeKeyRangeWithLimit() throws Exception {
   }
 
 }

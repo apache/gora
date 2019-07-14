@@ -18,6 +18,7 @@ package org.apache.gora.redis.query;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Iterator;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.ResultBase;
@@ -31,9 +32,8 @@ import org.redisson.api.RedissonClient;
  */
 public class RedisResult<K, T extends PersistentBase> extends ResultBase<K, T> {
 
-  private RedissonClient connection;
-  private Collection<String> range;
-  private String[] fields;
+  private Iterator<String> range;
+  private int size;
 
   /**
    * Gets the data store used
@@ -47,12 +47,10 @@ public class RedisResult<K, T extends PersistentBase> extends ResultBase<K, T> {
    * @param query
    * @param scanner
    */
-  public RedisResult(DataStore<K, T> dataStore, Query<K, T> query, RedissonClient con, Collection<String> rg, String[] fls) {//, Scanner scanner) {
+  public RedisResult(DataStore<K, T> dataStore, Query<K, T> query, Collection<String> rg) {//, Scanner scanner) {
     super(dataStore, query);
-
-    this.connection = con;
-    this.range = rg;
-    this.fields = fls;
+    this.size = rg.size();
+    this.range = rg.iterator();
   }
 
   /**
@@ -76,27 +74,29 @@ public class RedisResult<K, T extends PersistentBase> extends ResultBase<K, T> {
    */
   @Override
   protected boolean nextInner() throws IOException {
-    return true;
+    if (range == null) {
+      return false;
+    }
+    boolean next = range.hasNext();
+    if (next) {
+      String nextkey = range.next();
+      key = (K) nextkey;
+      persistent = ((RedisStore<K, T>) getDataStore()).get(key, query.getFields());
+    }
+
+    return next;
   }
 
   @Override
   public int size() {
-    return this.range.size();
+    return this.size;
   }
 
-  public RedissonClient getConnection() {
-    return connection;
-  }
-
-  public void setConnection(RedissonClient connection) {
-    this.connection = connection;
-  }
-
-  public Collection<String> getRange() {
+  public Iterator<String> getRange() {
     return range;
   }
 
-  public void setRange(Collection<String> range) {
+  public void setRange(Iterator<String> range) {
     this.range = range;
   }
 

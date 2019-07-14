@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.avro.Schema;
@@ -328,31 +329,43 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
             Object fieldValue = handler.serializeFieldValue(field.schema(), obj.get(field.pos()));
             if (fieldValue != null) {
               map.fastPutAsync(mapping.getFields().get(field.name()), fieldValue);
+            } else {
+              map.fastRemoveAsync(mapping.getFields().get(field.name()));
             }
           }
         } else {
           for (Schema.Field field : fields) {
             Object fieldValue = obj.get(field.pos());
-            if (fieldValue != null) {
-              String redisField = mapping.getFields().get(field.name());
-              String redisType = mapping.getTypes().get(field.name());
-              switch (redisType) {
-                case "String":
+            String redisField = mapping.getFields().get(field.name());
+            String redisType = mapping.getTypes().get(field.name());
+            switch (redisType) {
+              case "String":
+                RBucketAsync<Object> bucket = batchInstance.getBucket(generateKeyString(redisField, key));
+                if (fieldValue != null) {
                   fieldValue = handler.serializeFieldValue(field.schema(), fieldValue);
-                  RBucketAsync<Object> bucket = batchInstance.getBucket(generateKeyString(redisField, key));
                   bucket.setAsync(fieldValue);
-                  break;
-                case "List":
-                  List<Object> list = handler.serializeFieldList(schema, fieldValue);
-                  RListAsync<Object> rlist = batchInstance.getList(generateKeyString(redisField, key));
+                } else {
+                  bucket.deleteAsync();
+                }
+                break;
+              case "List":
+                RListAsync<Object> rlist = batchInstance.getList(generateKeyString(redisField, key));
+                if (fieldValue != null) {
+                  List<Object> list = handler.serializeFieldList(field.schema(), fieldValue);
                   rlist.addAllAsync(list);
-                  break;
-                case "Map":
-                  Map<Object, Object> mp = handler.serializeFieldMap(schema, fieldValue);
-                  RMapAsync<Object, Object> map = batchInstance.getMap(generateKeyString(redisField, key));
+                } else {
+                  rlist.deleteAsync();
+                }
+                break;
+              case "Hash":
+                RMapAsync<Object, Object> map = batchInstance.getMap(generateKeyString(redisField, key));
+                if (fieldValue != null) {
+                  Map<Object, Object> mp = handler.serializeFieldMap(field.schema(), fieldValue);
                   map.putAllAsync(mp);
-                  break;
-              }
+                } else {
+                  map.deleteAsync();
+                }
+                break;
             }
           }
         }
@@ -397,20 +410,20 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
    */
   @Override
   public Result<K, T> execute(Query<K, T> query) throws GoraException {
-    String[] fields = getFieldsToQuery(query.getFields());
     RLexSortedSet index = redisInstance.getLexSortedSet(generateIndexKey());
     Collection<String> range;
+    int limit = query.getLimit() > -1 ? (int) query.getLimit() : Integer.MAX_VALUE;
     if (query.getStartKey() != null && query.getEndKey() != null) {
-      range = index.range(query.getStartKey().toString(), true, query.getEndKey().toString(), true, 0, (int) query.getLimit());
+      range = index.range(query.getStartKey().toString(), true, query.getEndKey().toString(), true, 0, limit);
     } else if (query.getStartKey() != null && query.getEndKey() == null) {
-      range = index.range(query.getStartKey().toString(), true, null, true, 0, (int) query.getLimit());
+      range = index.rangeTail(query.getStartKey().toString(), true, 0, limit);
     } else if (query.getStartKey() == null && query.getEndKey() != null) {
-      range = index.range(null, true, query.getEndKey().toString(), true, 0, (int) query.getLimit());
+      range = index.rangeHead(query.getEndKey().toString(), true, 0, limit);
     } else {
-      range = index.range(null, true, null, true, 0, (int) query.getLimit());
+      range = index.stream().limit(limit).collect(Collectors.toList());
     }
-    RedisResult<K, T> igniteResult = new RedisResult<>(this, query, redisInstance, range, fields);
-    return igniteResult;
+    RedisResult<K, T> redisResult = new RedisResult<>(this, query, range);
+    return redisResult;
   }
 
   @Override
