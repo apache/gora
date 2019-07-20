@@ -49,10 +49,8 @@ import org.apache.gora.persistency.Persistent;
 import org.apache.gora.query.impl.PartitionQueryImpl;
 import org.apache.gora.util.IOUtils;
 import org.apache.kudu.Type;
-import org.apache.kudu.client.AsyncKuduScanner;
 import org.apache.kudu.client.CreateTableOptions;
 import org.apache.kudu.client.Delete;
-import org.apache.kudu.client.Insert;
 import org.apache.kudu.client.KuduClient;
 import org.apache.kudu.client.KuduException;
 import org.apache.kudu.client.KuduPredicate;
@@ -64,6 +62,7 @@ import org.apache.kudu.client.PartialRow;
 import org.apache.kudu.client.RowResult;
 import org.apache.kudu.client.RowResultIterator;
 import org.apache.kudu.client.SessionConfiguration;
+import org.apache.kudu.client.Update;
 import org.apache.kudu.client.Upsert;
 import org.apache.kudu.util.DecimalUtil;
 import org.slf4j.Logger;
@@ -290,6 +289,8 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
             Schema fieldSchema = field.schema();
             Object serializedObj = serializeFieldValue(fieldSchema, fieldValue);
             KuduClientUtils.addObjectRow(row, mappedColumn, serializedObj);
+          }else{
+            row.setNull(mappedColumn.getName());
           }
         }
         session.apply(upsert);
@@ -318,7 +319,47 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
 
   @Override
   public long deleteByQuery(Query<K, T> query) throws GoraException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    try {
+      long count = 0;
+      Column pkc = kuduMapping.getPrimaryKey().get(0);
+      ColumnSchema column = table.getSchema().getColumn(pkc.getName());
+      KuduScanner.KuduScannerBuilder scannerBuilder = client.newScannerBuilder(table);
+      if (query.getLimit() != -1) {
+        scannerBuilder.limit(query.getLimit());
+      }
+      List<String> dbFields = new ArrayList<>();
+      dbFields.add(pkc.getName());
+      scannerBuilder.setProjectedColumnNames(dbFields);
+      List<KuduPredicate> rangePredicates = KuduClientUtils.createRangePredicate(column, query.getStartKey(), query.getEndKey());
+      for (KuduPredicate predicate : rangePredicates) {
+        scannerBuilder.addPredicate(predicate);
+      }
+      scannerBuilder.addPredicate(KuduPredicate.newIsNotNullPredicate(column));
+      KuduScanner build = scannerBuilder.build();
+      while (build.hasMoreRows()) {
+        RowResultIterator nextRows = build.nextRows();
+        for (RowResult it : nextRows) {
+          count++;
+          K key = (K) KuduClientUtils.getObjectRow(it, pkc);
+          if (query.getFields() != null && query.getFields().length < kuduMapping.getFields().size()) {
+            Update updateOp = table.newUpdate();
+            PartialRow row = updateOp.getRow();
+            String[] avFields = getFieldsToQuery(query.getFields());
+            KuduClientUtils.addObjectRow(row, pkc, key);
+            for (String af : avFields) {
+              row.setNull(kuduMapping.getFields().get(af).getName());
+            }
+            session.apply(updateOp);
+          } else {
+            delete(key);
+          }
+        }
+      }
+      build.close();
+      return count;
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
   }
 
   @Override
@@ -359,10 +400,21 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
   @Override
   public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query) throws IOException {
     List<PartitionQuery<K, T>> partitions = new ArrayList<>();
-    PartitionQueryImpl<K, T> partitionQuery = new PartitionQueryImpl<>(
-        query);
-    partitionQuery.setConf(getConf());
-    partitions.add(partitionQuery);
+    if (kuduMapping.getRangePartitions().isEmpty()) {
+      PartitionQueryImpl<K, T> partitionQuery = new PartitionQueryImpl<>(
+          query);
+      partitionQuery.setConf(getConf());
+      partitions.add(partitionQuery);
+    } else {
+      for (Pair<String, String> rang : kuduMapping.getRangePartitions()) {
+        PartitionQueryImpl<K, T> partitionQuery = new PartitionQueryImpl<>(
+            query, rang.getKey().isEmpty() ? null : (K) rang.getKey(),
+            rang.getValue().isEmpty() ? null : (K) rang.getValue());
+        partitionQuery.setConf(getConf());
+        partitions.add(partitionQuery);
+
+      }
+    }
     return partitions;
   }
 

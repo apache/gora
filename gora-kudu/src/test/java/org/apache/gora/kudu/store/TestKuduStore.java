@@ -34,118 +34,28 @@ public class TestKuduStore extends DataStoreTestBase {
   @Test
   @Ignore
   @Override
-  public void testUpdate() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testEmptyUpdate() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testGetRecursive() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testGetDoubleRecursive() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testGetNested() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testGet3UnionField() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testGetWithFields() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testGetWebPage() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testGetWebPageDefaultFields() throws Exception {
-  }
-
- 
-
-  @Test
-  @Ignore
-  @Override
-  public void testQueryWebPageSingleKey() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testQueryWebPageSingleKeyDefaultFields() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testQueryWebPageQueryEmptyResults() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testDeleteByQuery() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testDeleteByQueryFields() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testGetPartitions() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
   public void testResultSize() throws Exception {
+    //Kudu uses a scanner for querying. It is not possible to calculate the size of the result set without iterating it.
   }
 
   @Test
   @Ignore
   @Override
   public void testResultSizeStartKey() throws Exception {
+    //Kudu uses a scanner for querying. It is not possible to calculate the size of the result set without iterating it.
   }
 
   @Test
   @Ignore
   @Override
   public void testResultSizeEndKey() throws Exception {
+    //Kudu uses a scanner for querying. It is not possible to calculate the size of the result set without iterating it.
   }
 
   @Test
   @Ignore
   @Override
   public void testResultSizeKeyRange() throws Exception {
+    //Kudu uses a scanner for querying. It is not possible to calculate the size of the result set without iterating it.
   }
-
-
 }
