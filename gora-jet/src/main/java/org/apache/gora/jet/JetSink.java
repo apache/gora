@@ -33,6 +33,9 @@ import java.util.function.Function;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 
+/**
+ * jet-sink implementation.
+ */
 public class JetSink<KeyOut, ValueOut extends PersistentBase> implements ProcessorMetaSupplier {
 
   private transient int localParallelism;

@@ -25,6 +25,9 @@ import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.store.DataStore;
 
+/**
+ * Core class which handles Gora - Jet Engine integration.
+ */
 public class JetEngine<KeyIn, ValueIn extends PersistentBase, KeyOut, ValueOut extends PersistentBase> {
   public static DataStore dataOutStore;
   public static DataStore dataInStore;

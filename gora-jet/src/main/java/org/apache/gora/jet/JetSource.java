@@ -37,6 +37,9 @@ import static com.hazelcast.jet.Traversers.traverseIterable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 
+/**
+ * jet-source implementation.
+ */
 public class JetSource<KeyIn, ValueIn extends PersistentBase> implements ProcessorMetaSupplier {
 
   private int totalParallelism;

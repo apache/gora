@@ -19,6 +19,10 @@ package org.apache.gora.jet;
 
 import org.apache.gora.persistency.impl.PersistentBase;
 
+/**
+ * Wrapper class which will be used to fetch data from data stores to Gora-
+ * jet-source and to write data into data stores through Gora-jet-sink.
+ */
 public class JetInputOutputFormat<KeyOut, ValueOut extends PersistentBase> {
   public KeyOut key;
   public ValueOut value;

@@ -38,6 +38,9 @@ import static com.hazelcast.jet.Traversers.traverseArray;
 import static com.hazelcast.jet.aggregate.AggregateOperations.counting;
 import static com.hazelcast.jet.function.Functions.wholeItem;
 
+/**
+ * Test case for jet sink and source connectors.
+ */
 public class JetTest {
 
   private static DataStore<Long, Pageview> dataStore;
