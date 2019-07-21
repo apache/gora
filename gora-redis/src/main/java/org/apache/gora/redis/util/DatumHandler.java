@@ -111,6 +111,13 @@ public class DatumHandler<T extends PersistentBase> {
   public Map<Object, Object> serializeFieldMap(Schema fieldSchema, Object fieldValue) {
     Map<Object, Object> map = new HashMap();
     switch (fieldSchema.getType()) {
+      case UNION:
+        for (Schema sc : fieldSchema.getTypes()) {
+          if (sc.getType() == Schema.Type.MAP) {
+            map = serializeFieldMap(sc, fieldValue);
+          }
+        }
+        break;
       case MAP:
         Map<CharSequence, ?> mp = (Map<CharSequence, ?>) fieldValue;
         for (Entry<CharSequence, ?> e : mp.entrySet()) {
@@ -145,7 +152,7 @@ public class DatumHandler<T extends PersistentBase> {
 
   @SuppressWarnings("unchecked")
   public Object deserializeFieldValue(Schema.Field field, Schema fieldSchema,
-          Object redisValue, T persistent) throws IOException {
+      Object redisValue, T persistent) throws IOException {
     Object fieldValue = null;
     switch (fieldSchema.getType()) {
       case MAP:
@@ -153,7 +160,7 @@ public class DatumHandler<T extends PersistentBase> {
       case RECORD:
         @SuppressWarnings("rawtypes") SpecificDatumReader reader = getDatumReader(fieldSchema);
         fieldValue = IOUtils.deserialize((byte[]) redisValue, reader,
-                persistent.get(field.pos()));
+            persistent.get(field.pos()));
         break;
       case ENUM:
         fieldValue = AvroUtils.getEnumValue(fieldSchema, redisValue.toString());
@@ -174,7 +181,7 @@ public class DatumHandler<T extends PersistentBase> {
         } else {
           reader = getDatumReader(fieldSchema);
           fieldValue = IOUtils.deserialize((byte[]) redisValue, reader,
-                  persistent.get(field.pos()));
+              persistent.get(field.pos()));
         }
         break;
       default:
@@ -185,9 +192,16 @@ public class DatumHandler<T extends PersistentBase> {
 
   @SuppressWarnings("unchecked")
   public Object deserializeFieldMap(Schema.Field field, Schema fieldSchema,
-          RMap<Object, Object> redisMap, T persistent) throws IOException {
+      RMap<Object, Object> redisMap, T persistent) throws IOException {
     Map<Utf8, Object> fieldValue = new HashMap<>();
     switch (fieldSchema.getType()) {
+      case UNION:
+        for (Schema sc : fieldSchema.getTypes()) {
+          if (sc.getType() == Schema.Type.MAP) {
+            return deserializeFieldMap(field, sc, redisMap, persistent);
+          }
+        }
+        break;
       case MAP:
         for (Entry<Object, Object> aEntry : redisMap.entrySet()) {
           String key = aEntry.getKey().toString();
@@ -203,7 +217,7 @@ public class DatumHandler<T extends PersistentBase> {
 
   @SuppressWarnings("unchecked")
   public Object deserializeFieldList(Schema.Field field, Schema fieldSchema,
-          RList<Object> redisList, T persistent) throws IOException {
+      RList<Object> redisList, T persistent) throws IOException {
     List<Object> fieldValue = new ArrayList<>();
     switch (fieldSchema.getType()) {
       case ARRAY:

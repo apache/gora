@@ -88,18 +88,6 @@ public class RedisStoreClusterTest extends DataStoreTestBase {
   @Test
   @Ignore
   @Override
-  public void testUpdate() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testEmptyUpdate() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
   public void testGetRecursive() throws Exception {
   }
 
@@ -148,24 +136,6 @@ public class RedisStoreClusterTest extends DataStoreTestBase {
   @Test
   @Ignore
   @Override
-  public void testQueryStartKey() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testQueryEndKey() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testQueryKeyRange() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
   public void testQueryWebPageSingleKey() throws Exception {
   }
 
@@ -179,18 +149,6 @@ public class RedisStoreClusterTest extends DataStoreTestBase {
   @Ignore
   @Override
   public void testQueryWebPageQueryEmptyResults() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testDeleteByQuery() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testDeleteByQueryFields() throws Exception {
   }
 
   @Test

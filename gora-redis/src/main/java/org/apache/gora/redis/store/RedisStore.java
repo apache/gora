@@ -209,13 +209,9 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
   public void createSchema() throws GoraException {
   }
 
-  /**
-   * Redis, being a schemaless database does not support explicit schema
-   * creation. When the records are added to the database, the schema is created
-   * on the fly. Thus, schema operations are unavailable in gora-redis module.
-   */
   @Override
   public void deleteSchema() throws GoraException {
+    redisInstance.getKeys().deleteByPattern(mapping.getPrefix() + ".*");
   }
 
   /**
@@ -341,29 +337,26 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
             switch (redisType) {
               case "String":
                 RBucketAsync<Object> bucket = batchInstance.getBucket(generateKeyString(redisField, key));
+                bucket.deleteAsync();
                 if (fieldValue != null) {
                   fieldValue = handler.serializeFieldValue(field.schema(), fieldValue);
                   bucket.setAsync(fieldValue);
-                } else {
-                  bucket.deleteAsync();
                 }
                 break;
               case "List":
                 RListAsync<Object> rlist = batchInstance.getList(generateKeyString(redisField, key));
+                rlist.deleteAsync();
                 if (fieldValue != null) {
                   List<Object> list = handler.serializeFieldList(field.schema(), fieldValue);
                   rlist.addAllAsync(list);
-                } else {
-                  rlist.deleteAsync();
                 }
                 break;
               case "Hash":
                 RMapAsync<Object, Object> map = batchInstance.getMap(generateKeyString(redisField, key));
+                map.deleteAsync();
                 if (fieldValue != null) {
                   Map<Object, Object> mp = handler.serializeFieldMap(field.schema(), fieldValue);
                   map.putAllAsync(mp);
-                } else {
-                  map.deleteAsync();
                 }
                 break;
             }
@@ -402,7 +395,56 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
 
   @Override
   public long deleteByQuery(Query<K, T> query) throws GoraException {
-    return 0;
+    Collection<String> range = runQuery(query);
+    RBatch batchInstance = redisInstance.createBatch();
+    RLexSortedSetAsync secundaryIndex = batchInstance.getLexSortedSet(generateIndexKey());
+    if (query.getFields() != null && query.getFields().length < mapping.getFields().size()) {
+      List<String> dbFields = new ArrayList<>();
+      List<String> dbTypes = new ArrayList<>();
+      for (String af : query.getFields()) {
+        dbFields.add(mapping.getFields().get(af));
+        dbTypes.add(mapping.getTypes().get(af));
+      }
+      for (String key : range) {
+        if (mode == StorageMode.HASH) {
+          RMapAsync<Object, Object> map = batchInstance.getMap(generateKeyHash(key));
+          for (String field : dbFields) {
+            map.removeAsync(field);
+          }
+        } else {
+          for (int i = 0; i < dbFields.size(); i++) {
+            String field = dbFields.get(i);
+            String type = dbTypes.get(i);
+            switch (type) {
+              case "String":
+                RBucketAsync<Object> bucket = batchInstance.getBucket(generateKeyString(field, key));
+                bucket.deleteAsync();
+                break;
+              case "List":
+                RListAsync<Object> rlist = batchInstance.getList(generateKeyString(field, key));
+                rlist.deleteAsync();
+                break;
+              case "Hash":
+                RMapAsync<Object, Object> map = batchInstance.getMap(generateKeyString(field, key));
+                map.deleteAsync();
+                break;
+            }
+          }
+        }
+      }
+    } else {
+      for (String key : range) {
+        secundaryIndex.removeAsync(key);
+        if (mode == StorageMode.HASH) {
+          RMapAsync<Object, Object> map = batchInstance.getMap(generateKeyHash(key));
+          map.deleteAsync();
+        } else {
+          redisInstance.getKeys().deleteByPattern(generateKeyStringBase(key) + "*");
+        }
+      }
+    }
+    batchInstance.execute();
+    return range.size();
   }
 
   /**
@@ -410,18 +452,7 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
    */
   @Override
   public Result<K, T> execute(Query<K, T> query) throws GoraException {
-    RLexSortedSet index = redisInstance.getLexSortedSet(generateIndexKey());
-    Collection<String> range;
-    int limit = query.getLimit() > -1 ? (int) query.getLimit() : Integer.MAX_VALUE;
-    if (query.getStartKey() != null && query.getEndKey() != null) {
-      range = index.range(query.getStartKey().toString(), true, query.getEndKey().toString(), true, 0, limit);
-    } else if (query.getStartKey() != null && query.getEndKey() == null) {
-      range = index.rangeTail(query.getStartKey().toString(), true, 0, limit);
-    } else if (query.getStartKey() == null && query.getEndKey() != null) {
-      range = index.rangeHead(query.getEndKey().toString(), true, 0, limit);
-    } else {
-      range = index.stream().limit(limit).collect(Collectors.toList());
-    }
+    Collection<String> range = runQuery(query);
     RedisResult<K, T> redisResult = new RedisResult<>(this, query, range);
     return redisResult;
   }
@@ -460,5 +491,21 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       Iterator<String> respKeys = redisInstance.getKeys().getKeysByPattern(generateKeyStringBase(key) + "*", 1).iterator();
       return respKeys.hasNext();
     }
+  }
+
+  private Collection<String> runQuery(Query<K, T> query) {
+    RLexSortedSet index = redisInstance.getLexSortedSet(generateIndexKey());
+    Collection<String> range;
+    int limit = query.getLimit() > -1 ? (int) query.getLimit() : Integer.MAX_VALUE;
+    if (query.getStartKey() != null && query.getEndKey() != null) {
+      range = index.range(query.getStartKey().toString(), true, query.getEndKey().toString(), true, 0, limit);
+    } else if (query.getStartKey() != null && query.getEndKey() == null) {
+      range = index.rangeTail(query.getStartKey().toString(), true, 0, limit);
+    } else if (query.getStartKey() == null && query.getEndKey() != null) {
+      range = index.rangeHead(query.getEndKey().toString(), true, 0, limit);
+    } else {
+      range = index.stream().limit(limit).collect(Collectors.toList());
+    }
+    return range;
   }
 }
