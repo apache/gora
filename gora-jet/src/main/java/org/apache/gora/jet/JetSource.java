@@ -85,9 +85,8 @@ public class JetSource<KeyIn, ValueIn extends PersistentBase> implements Process
       }
       return resultsList;
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new RuntimeException(e);
     }
-    return null;
   }
 }
 

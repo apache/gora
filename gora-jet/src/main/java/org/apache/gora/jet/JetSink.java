@@ -81,7 +81,7 @@ class SinkProcessor<KeyOut, ValueOut extends PersistentBase> extends AbstractPro
     try {
       JetEngine.dataOutStore.flush();
     } catch (GoraException e) {
-      e.printStackTrace();
+      throw new RuntimeException(e);
     }
   }
 }
