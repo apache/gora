@@ -19,7 +19,6 @@ package org.apache.gora.kudu.mapping;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javafx.util.Pair;
 
 /**
  * Mapping definitions for Kudu.
@@ -30,7 +29,7 @@ public class KuduMapping {
   private Map<String, Column> fields;
   private List<Column> primaryKey;
   private int hashBuckets;
-  private List<Pair<String, String>> rangePartitions;
+  private List<Map.Entry<String, String>> rangePartitions;
 
   /**
    * Empty constructor for the KuduMapping class
@@ -116,7 +115,7 @@ public class KuduMapping {
    *
    * @return list of range partitions (Pair lower and upper bounds)
    */
-  public List<Pair<String, String>> getRangePartitions() {
+  public List<Map.Entry<String, String>> getRangePartitions() {
     return rangePartitions;
   }
 
@@ -126,7 +125,7 @@ public class KuduMapping {
    * @param rangePartitions list of range partitions (Pair lower and upper
    * bounds)
    */
-  public void setRangePartitions(List<Pair<String, String>> rangePartitions) {
+  public void setRangePartitions(List<Map.Entry<String, String>> rangePartitions) {
     this.rangePartitions = rangePartitions;
   }
 

@@ -19,11 +19,11 @@ package org.apache.gora.kudu.mapping;
 import com.google.inject.ConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javafx.util.Pair;
 import org.apache.gora.kudu.store.KuduStore;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.util.GoraException;
@@ -39,13 +39,13 @@ import org.slf4j.LoggerFactory;
  * Builder for Mapping definitions of Kudu.
  */
 public class KuduMappingBuilder<K, T extends PersistentBase> {
-  
+
   private static final Logger LOG = LoggerFactory.getLogger(KuduMappingBuilder.class);
   /**
    * Mapping instance being built
    */
   private KuduMapping kuduMapping;
-  
+
   private final KuduStore<K, T> dataStore;
 
   /**
@@ -128,13 +128,13 @@ public class KuduMappingBuilder<K, T extends PersistentBase> {
                 int numBuckets = Integer.parseInt(hashPartition.getAttributeValue("numBuckets"));
                 kuduMapping.setHashBuckets(numBuckets);
               }
-              List<Pair<String, String>> ranges = new ArrayList();
+              List<Map.Entry<String, String>> ranges = new ArrayList();
               @SuppressWarnings("unchecked")
               List<Element> rangePartitions = tableElement.getChildren("rangePartition");
               for (Element rangePartition : rangePartitions) {
                 String lower = rangePartition.getAttributeValue("lower");
                 String upper = rangePartition.getAttributeValue("upper");
-                ranges.add(new Pair<>(lower, upper));
+                ranges.add(new AbstractMap.SimpleEntry<>(lower, upper));
               }
               kuduMapping.setRangePartitions(ranges);
             }

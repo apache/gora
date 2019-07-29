@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-import javafx.util.Pair;
 import org.apache.gora.kudu.mapping.Column;
 import org.apache.gora.kudu.mapping.KuduMapping;
 import org.apache.gora.kudu.mapping.KuduMappingBuilder;
@@ -190,7 +189,7 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       }
       if (!kuduMapping.getRangePartitions().isEmpty()) {
         cto.setRangePartitionColumns(keys);
-        for (Pair<String, String> range : kuduMapping.getRangePartitions()) {
+        for (Map.Entry<String, String> range : kuduMapping.getRangePartitions()) {
           PartialRow lowerPar = sch.newPartialRow();
           PartialRow upperPar = sch.newPartialRow();
           for (String ky : keys) {
@@ -289,7 +288,7 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
             Schema fieldSchema = field.schema();
             Object serializedObj = serializeFieldValue(fieldSchema, fieldValue);
             KuduClientUtils.addObjectRow(row, mappedColumn, serializedObj);
-          }else{
+          } else {
             row.setNull(mappedColumn.getName());
           }
         }
@@ -406,7 +405,7 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       partitionQuery.setConf(getConf());
       partitions.add(partitionQuery);
     } else {
-      for (Pair<String, String> rang : kuduMapping.getRangePartitions()) {
+      for (Map.Entry<String, String> rang : kuduMapping.getRangePartitions()) {
         PartitionQueryImpl<K, T> partitionQuery = new PartitionQueryImpl<>(
             query, rang.getKey().isEmpty() ? null : (K) rang.getKey(),
             rang.getValue().isEmpty() ? null : (K) rang.getValue());
