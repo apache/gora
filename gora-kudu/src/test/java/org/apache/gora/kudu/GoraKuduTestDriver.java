@@ -19,6 +19,7 @@ package org.apache.gora.kudu;
 
 import org.apache.gora.GoraTestDriver;
 import org.apache.gora.kudu.store.KuduStore;
+import org.apache.gora.kudu.utils.KuduBackendConstants;
 import org.apache.kudu.test.KuduTestHarness;
 
 /**
@@ -37,7 +38,7 @@ public class GoraKuduTestDriver extends GoraTestDriver {
   @Override
   public void setUpClass() throws Exception {
     harness.before();
-    conf.set("gora.datastore.kudu.masterAddresses", harness.getMasterAddressesAsString());
+    conf.set(KuduBackendConstants.PROP_MASTERADDRESSES, harness.getMasterAddressesAsString());
   }
 
   @Override

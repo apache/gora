@@ -25,7 +25,7 @@ public class KuduBackendConstants {
   /*
   * Default configurations for Kudu
    */
-  public static final String DEFAULT_KUDU_MASTERS = "localhost:123";
+  public static final String DEFAULT_KUDU_MASTERS = "localhost:7051";
 
   /**
    * List of keys used in the configuration file of Kudu
