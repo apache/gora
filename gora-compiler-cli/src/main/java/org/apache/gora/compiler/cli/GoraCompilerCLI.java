@@ -103,16 +103,22 @@ public class GoraCompilerCLI {
   }
 
   private static void printHelp() {
-    LOG.info("Usage: gora-compiler ( -h | --help ) | (<input> [<input>...] <output> [-license <id>])");
-    LOG.error("License header options include;\n" +
-              "\t\t  ASLv2   (Apache Software License v2.0) \n" +
-              "\t\t  AGPLv3  (GNU Affero General Public License) \n" +
-              "\t\t  CDDLv1  (Common Development and Distribution License v1.0) \n" +
-              "\t\t  FDLv13  (GNU Free Documentation License v1.3) \n" +
-              "\t\t  GPLv1   (GNU General Public License v1.0) \n" +
-              "\t\t  GPLv2   (GNU General Public License v2.0) \n" +
-              "\t\t  GPLv3   (GNU General Public License v3.0) \n" +
-              "\t\t  LGPLv21 (GNU Lesser General Public License v2.1) \n" +
-              "\t\t  LGPLv3  (GNU Lesser General Public License v2.1)");
+    LOG.info("Usage: GoraCompiler <schema file> <output dir> [-license <id>]" + System.lineSeparator() +
+            "   <schema file>     - individual avsc file to be compiled or a directory path containing avsc files" +
+            System.lineSeparator() +
+            "   <output dir>      - output directory for generated Java files" + System.lineSeparator() +
+            "   [-license <id>]   - the preferred license header to add to the generated Java file." +
+            System.lineSeparator() +
+            "Current License header options include;" + System.lineSeparator() +
+            "\t\t  ASLv2   (Apache Software License v2.0)" + System.lineSeparator() +
+            "\t\t  AGPLv3  (GNU Affero General Public License)" + System.lineSeparator() +
+            "\t\t  CDDLv1  (Common Development and Distribution License v1.0)" + System.lineSeparator() +
+            "\t\t  FDLv13  (GNU Free Documentation License v1.3)" + System.lineSeparator() +
+            "\t\t  GPLv1   (GNU General Public License v1.0)" + System.lineSeparator() +
+            "\t\t  GPLv2   (GNU General Public License v2.0)" + System.lineSeparator() +
+            "\t\t  GPLv3   (GNU General Public License v3.0)" + System.lineSeparator() +
+            "\t\t  LGPLv21 (GNU Lesser General Public License v2.1)" + System.lineSeparator() +
+            "\t\t  LGPLv3  (GNU Lesser General Public License v2.1)"
+    );
   }
 }
