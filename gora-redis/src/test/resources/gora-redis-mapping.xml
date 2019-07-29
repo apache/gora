@@ -19,21 +19,21 @@
 
 <gora-otd>
   <class name="org.apache.gora.examples.generated.Employee" keyClass="java.lang.String" prefix="employee" database="0" >
-    <field name="ssn" column="ssn" type="String"/>
-    <field name="name" column="name" type="String"/>
-    <field name="dateOfBirth" column="dateOfBirth" type="String"/>
-    <field name="salary" column="salary" type="String"/>
-    <field name="boss" column="boss" type="String"/>
-    <field name="webpage" column="webpage" type="String"/>
+    <field name="ssn" column="ssn" type="STRING"/>
+    <field name="name" column="name" type="STRING"/>
+    <field name="dateOfBirth" column="dateOfBirth" type="STRING"/>
+    <field name="salary" column="salary" type="STRING"/>
+    <field name="boss" column="boss" type="STRING"/>
+    <field name="webpage" column="webpage" type="STRING"/>
   </class>
   <class name="org.apache.gora.examples.generated.WebPage" keyClass="java.lang.String" prefix="webpage" database="1" >
-    <field name="url" column="url" type="String"/>
-    <field name="content" column="content" type="String"/>
-    <field name="parsedContent" column="parsedContent" type="List"/>
-    <field name="outlinks" column="outlinks" type="Hash"/>
-    <field name="headers" column="headers" type="Hash"/>     
-    <field name="metadata" column="metadata" type="String"/>
-    <field name="byteData" column="byteData" type="Hash"/>
-    <field name="stringData" column="stringData" type="Hash"/>
+    <field name="url" column="url" type="STRING"/>
+    <field name="content" column="content" type="STRING"/>
+    <field name="parsedContent" column="parsedContent" type="LIST"/>
+    <field name="outlinks" column="outlinks" type="HASH"/>
+    <field name="headers" column="headers" type="HASH"/>     
+    <field name="metadata" column="metadata" type="STRING"/>
+    <field name="byteData" column="byteData" type="HASH"/>
+    <field name="stringData" column="stringData" type="HASH"/>
   </class>
 </gora-otd>

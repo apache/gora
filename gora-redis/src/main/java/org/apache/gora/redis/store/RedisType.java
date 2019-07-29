@@ -16,48 +16,9 @@
  */
 package org.apache.gora.redis.store;
 
-import java.util.Map;
-
 /**
- * Mapping definitions for Redis.
+ * Supported data types for Redis.
  */
-public class RedisMapping {
-
-  private int datebase;
-  private String prefix;
-  private Map<String, String> fields;
-  private Map<String, RedisType> types;
-
-  public int getDatebase() {
-    return datebase;
-  }
-
-  public void setDatebase(int datebase) {
-    this.datebase = datebase;
-  }
-
-  public String getPrefix() {
-    return prefix;
-  }
-
-  public void setPrefix(String prefix) {
-    this.prefix = prefix;
-  }
-
-  public Map<String, String> getFields() {
-    return fields;
-  }
-
-  public void setFields(Map<String, String> fields) {
-    this.fields = fields;
-  }
-
-  public Map<String, RedisType> getTypes() {
-    return types;
-  }
-
-  public void setTypes(Map<String, RedisType> types) {
-    this.types = types;
-  }
-
+public enum RedisType {
+  STRING, LIST, HASH
 }

@@ -71,6 +71,14 @@ import org.w3c.dom.NodeList;
  */
 public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
+  //Redis constants
+  private static final String FIELD_SEPARATOR = ".";
+  private static final String WILDCARD = "*";
+  private static final String INDEX = "index";
+  private static final String START_TAG = "{";
+  private static final String END_TAG = "}";
+  private static final String PREFIX = "redis://";
+
   protected static final String MOCK_PROPERTY = "redis.mock";
   protected static final String INSTANCE_NAME_PROPERTY = "redis.instance";
   protected static final String ZOOKEEPERS_NAME_PROPERTY = "redis.zookeepers";
@@ -121,7 +129,7 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       //Override address in tests
       String[] hosts = getConf().get("gora.datastore.redis.address", properties.getProperty("gora.datastore.redis.address")).split(",");
       for (int i = 0; i < hosts.length; i++) {
-        hosts[i] = "redis://" + hosts[i];
+        hosts[i] = PREFIX + hosts[i];
       }
       switch (mode) {
         case SINGLE:
@@ -169,14 +177,14 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
           mapping.setPrefix(classElement.getAttribute("prefix"));
           NodeList elementsByTagName = classElement.getElementsByTagName("field");
           Map<String, String> mapFields = new HashMap<>();
-          Map<String, String> mapTypes = new HashMap<>();
+          Map<String, RedisType> mapTypes = new HashMap<>();
           for (int j = 0; j < elementsByTagName.getLength(); j++) {
             Element item = (Element) elementsByTagName.item(j);
             String name = item.getAttribute("name");
             String column = item.getAttribute("column");
             String type = item.getAttribute("type");
             mapFields.put(name, column);
-            mapTypes.put(name, type);
+            mapTypes.put(name, RedisType.valueOf(type));
           }
           mapping.setTypes(mapTypes);
           mapping.setFields(mapFields);
@@ -211,7 +219,7 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
 
   @Override
   public void deleteSchema() throws GoraException {
-    redisInstance.getKeys().deleteByPattern(mapping.getPrefix() + ".*");
+    redisInstance.getKeys().deleteByPattern(mapping.getPrefix() + FIELD_SEPARATOR + WILDCARD);
   }
 
   /**
@@ -227,7 +235,7 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
   }
 
   private String generateKeyHash(Object baseKey) {
-    return mapping.getPrefix() + ".{" + baseKey + "}";
+    return mapping.getPrefix() + FIELD_SEPARATOR + START_TAG + baseKey + END_TAG;
   }
 
   private String generateKeyString(String field, Object baseKey) {
@@ -235,11 +243,11 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
   }
 
   private String generateKeyStringBase(Object baseKey) {
-    return mapping.getPrefix() + ".{" + baseKey + "}" + ".";
+    return mapping.getPrefix() + FIELD_SEPARATOR + START_TAG + baseKey + END_TAG + FIELD_SEPARATOR;
   }
 
   private String generateIndexKey() {
-    return mapping.getPrefix() + ".index";
+    return mapping.getPrefix() + FIELD_SEPARATOR + INDEX;
   }
 
   public T newInstanceFromString(K key, String[] fields) throws GoraException, IOException {
@@ -249,18 +257,18 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     for (String f : fields) {
       Schema.Field field = fieldMap.get(f);
       String redisField = mapping.getFields().get(field.name());
-      String redisType = mapping.getTypes().get(field.name());
+      RedisType redisType = mapping.getTypes().get(field.name());
       Object redisVal = null;
       switch (redisType) {
-        case "String":
+        case STRING:
           RBucket<Object> bucket = redisInstance.getBucket(generateKeyString(redisField, key));
           redisVal = bucket.isExists() ? handler.deserializeFieldValue(field, field.schema(), bucket.get(), persistent) : null;
           break;
-        case "List":
+        case LIST:
           RList<Object> list = redisInstance.getList(generateKeyString(redisField, key));
           redisVal = list.isExists() ? handler.deserializeFieldList(field, field.schema(), list, persistent) : null;
           break;
-        case "Hash":
+        case HASH:
           RMap<Object, Object> map = redisInstance.getMap(generateKeyString(redisField, key));
           redisVal = map.isExists() ? handler.deserializeFieldMap(field, field.schema(), map, persistent) : null;
           break;
@@ -294,7 +302,7 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
   @Override
   public T get(K key, String[] fields) throws GoraException {
     try {
-      if (mode == StorageMode.HASH) {
+      if (mode == StorageMode.SINGLEKEY) {
         RMap<String, Object> map = redisInstance.getMap(generateKeyHash(key));
         if (!map.isEmpty()) {
           return newInstanceFromHash(map, fields);
@@ -319,7 +327,7 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
         //update secundary index
         RLexSortedSetAsync secundaryIndex = batchInstance.getLexSortedSet(generateIndexKey());
         secundaryIndex.addAsync(key.toString());
-        if (mode == StorageMode.HASH) {
+        if (mode == StorageMode.SINGLEKEY) {
           RMapAsync<Object, Object> map = batchInstance.getMap(generateKeyHash(key));
           for (Schema.Field field : fields) {
             Object fieldValue = handler.serializeFieldValue(field.schema(), obj.get(field.pos()));
@@ -333,9 +341,9 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
           for (Schema.Field field : fields) {
             Object fieldValue = obj.get(field.pos());
             String redisField = mapping.getFields().get(field.name());
-            String redisType = mapping.getTypes().get(field.name());
+            RedisType redisType = mapping.getTypes().get(field.name());
             switch (redisType) {
-              case "String":
+              case STRING:
                 RBucketAsync<Object> bucket = batchInstance.getBucket(generateKeyString(redisField, key));
                 bucket.deleteAsync();
                 if (fieldValue != null) {
@@ -343,7 +351,7 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
                   bucket.setAsync(fieldValue);
                 }
                 break;
-              case "List":
+              case LIST:
                 RListAsync<Object> rlist = batchInstance.getList(generateKeyString(redisField, key));
                 rlist.deleteAsync();
                 if (fieldValue != null) {
@@ -351,7 +359,7 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
                   rlist.addAllAsync(list);
                 }
                 break;
-              case "Hash":
+              case HASH:
                 RMapAsync<Object, Object> map = batchInstance.getMap(generateKeyString(redisField, key));
                 map.deleteAsync();
                 if (fieldValue != null) {
@@ -379,14 +387,14 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       //update secundary index
       RLexSortedSetAsync secundaryIndex = batchInstance.getLexSortedSet(generateIndexKey());
       secundaryIndex.removeAsync(key.toString());
-      if (mode == StorageMode.HASH) {
+      if (mode == StorageMode.SINGLEKEY) {
         RMapAsync<Object, Object> map = batchInstance.getMap(generateKeyHash(key));
         RFuture<Boolean> deleteAsync = map.deleteAsync();
         batchInstance.execute();
         return deleteAsync.get();
       } else {
         batchInstance.execute();
-        return redisInstance.getKeys().deleteByPattern(generateKeyStringBase(key) + "*") > 0;
+        return redisInstance.getKeys().deleteByPattern(generateKeyStringBase(key) + WILDCARD) > 0;
       }
     } catch (Exception ex) {
       throw new GoraException(ex);
@@ -400,13 +408,13 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     RLexSortedSetAsync secundaryIndex = batchInstance.getLexSortedSet(generateIndexKey());
     if (query.getFields() != null && query.getFields().length < mapping.getFields().size()) {
       List<String> dbFields = new ArrayList<>();
-      List<String> dbTypes = new ArrayList<>();
+      List<RedisType> dbTypes = new ArrayList<>();
       for (String af : query.getFields()) {
         dbFields.add(mapping.getFields().get(af));
         dbTypes.add(mapping.getTypes().get(af));
       }
       for (String key : range) {
-        if (mode == StorageMode.HASH) {
+        if (mode == StorageMode.SINGLEKEY) {
           RMapAsync<Object, Object> map = batchInstance.getMap(generateKeyHash(key));
           for (String field : dbFields) {
             map.removeAsync(field);
@@ -414,17 +422,17 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
         } else {
           for (int i = 0; i < dbFields.size(); i++) {
             String field = dbFields.get(i);
-            String type = dbTypes.get(i);
+            RedisType type = dbTypes.get(i);
             switch (type) {
-              case "String":
+              case STRING:
                 RBucketAsync<Object> bucket = batchInstance.getBucket(generateKeyString(field, key));
                 bucket.deleteAsync();
                 break;
-              case "List":
+              case LIST:
                 RListAsync<Object> rlist = batchInstance.getList(generateKeyString(field, key));
                 rlist.deleteAsync();
                 break;
-              case "Hash":
+              case HASH:
                 RMapAsync<Object, Object> map = batchInstance.getMap(generateKeyString(field, key));
                 map.deleteAsync();
                 break;
@@ -435,11 +443,11 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     } else {
       for (String key : range) {
         secundaryIndex.removeAsync(key);
-        if (mode == StorageMode.HASH) {
+        if (mode == StorageMode.SINGLEKEY) {
           RMapAsync<Object, Object> map = batchInstance.getMap(generateKeyHash(key));
           map.deleteAsync();
         } else {
-          redisInstance.getKeys().deleteByPattern(generateKeyStringBase(key) + "*");
+          redisInstance.getKeys().deleteByPattern(generateKeyStringBase(key) + WILDCARD);
         }
       }
     }
@@ -485,10 +493,10 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
 
   @Override
   public boolean exists(K key) throws GoraException {
-    if (mode == StorageMode.HASH) {
+    if (mode == StorageMode.SINGLEKEY) {
       return redisInstance.getKeys().countExists(generateKeyHash(key)) != 0;
     } else {
-      Iterator<String> respKeys = redisInstance.getKeys().getKeysByPattern(generateKeyStringBase(key) + "*", 1).iterator();
+      Iterator<String> respKeys = redisInstance.getKeys().getKeysByPattern(generateKeyStringBase(key) + WILDCARD, 1).iterator();
       return respKeys.hasNext();
     }
   }

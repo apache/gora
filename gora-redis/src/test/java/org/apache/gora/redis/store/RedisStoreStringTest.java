@@ -30,7 +30,7 @@ import org.junit.Test;
 public class RedisStoreStringTest extends DataStoreTestBase {
 
   static {
-    setTestDriver(new GoraRedisTestDriver(StorageMode.STRING, ServerMode.SINGLE));
+    setTestDriver(new GoraRedisTestDriver(StorageMode.MULTIKEY, ServerMode.SINGLE));
   }
 
   // Unsupported functionality due to the limitations in Redis java client
@@ -53,109 +53,6 @@ public class RedisStoreStringTest extends DataStoreTestBase {
   @Override
   public void testSchemaExists() throws Exception {
     super.testSchemaExists();
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testPutNested() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testPutArray() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testPutBytes() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testPutMap() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testPutMixedMaps() throws Exception {
-  }
-
-
-  @Test
-  @Ignore
-  @Override
-  public void testGetRecursive() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testGetDoubleRecursive() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testGetNested() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testGet3UnionField() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testGetWithFields() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testGetWebPage() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testGetWebPageDefaultFields() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testGetNonExisting() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testQueryWebPageSingleKey() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testQueryWebPageSingleKeyDefaultFields() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testQueryWebPageQueryEmptyResults() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  @Override
-  public void testGetPartitions() throws Exception {
   }
 
 }
