@@ -83,59 +83,11 @@
             <artifactId>gora-hbase</artifactId>
         </dependency>
 
-        <!--<dependency>-->
-        <!--<groupId>org.apache.gora</groupId>-->
-        <!--<artifactId>gora-jcache</artifactId>-->
-        <!--</dependency>-->
-
-        <dependency>
-            <groupId>org.apache.gora</groupId>
-            <artifactId>gora-couchdb</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.gora</groupId>
-            <artifactId>gora-cassandra</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.gora</groupId>
-            <artifactId>gora-solr</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.gora</groupId>
-            <artifactId>gora-aerospike</artifactId>
-        </dependency>
-        <!-- Hadoop Dependencies -->
-        <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-client</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.avro</groupId>
-            <artifactId>avro</artifactId>
-        </dependency>
-
-
-
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-        </dependency>
-
-        <!-- Hadoop Dependencies -->
+        <!-- jet Dependencies -->
         <dependency>
             <groupId>com.hazelcast.jet</groupId>
             <artifactId>hazelcast-jet</artifactId>
             <version>3.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.pig</groupId>
-            <artifactId>pig</artifactId>
-            <classifier>h2</classifier>
         </dependency>
 
         <!-- Logging Dependencies -->
@@ -150,6 +102,31 @@
             </exclusions>
         </dependency>
 
+        <!-- Testing Dependencies -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-common</artifactId>
+            <version>2.5.2</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-minicluster</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.hbase</groupId>
+            <artifactId>hbase-testing-util</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     
 </project>

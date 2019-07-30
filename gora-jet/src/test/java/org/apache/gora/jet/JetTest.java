@@ -26,10 +26,12 @@ import com.hazelcast.jet.pipeline.Sinks;
 import org.apache.gora.jet.generated.Pageview;
 import org.apache.gora.jet.generated.ResultPageView;
 import org.apache.gora.query.Query;
+import org.apache.gora.query.Result;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.util.GoraException;
-import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.HBaseTestingUtility;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.regex.Pattern;
@@ -37,6 +39,7 @@ import java.util.regex.Pattern;
 import static com.hazelcast.jet.Traversers.traverseArray;
 import static com.hazelcast.jet.aggregate.AggregateOperations.counting;
 import static com.hazelcast.jet.function.Functions.wholeItem;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test case for jet sink and source connectors.
@@ -47,19 +50,54 @@ public class JetTest {
   private static DataStore<Long, ResultPageView> dataStoreOut;
   static Query<Long, Pageview> query = null;
 
-  @Test
-  public void testNewJetSource() {
+  private static HBaseTestingUtility utility;
 
-    Configuration conf =  new Configuration();
+  @BeforeClass
+  public static void insertData() throws Exception {
+    utility = new HBaseTestingUtility();
+    utility.startMiniCluster();
+    try {
+      dataStoreOut = DataStoreFactory.getDataStore(Long.class, ResultPageView.class, utility.getConfiguration());
+    } catch (GoraException e) {
+      e.printStackTrace();
+    }
+
+    ResultPageView resultPageView = new ResultPageView();
+    resultPageView.setIp("88.240.129.183");
+    resultPageView.setTimestamp(123L);
+    resultPageView.setUrl("I am the the one");
+
+    ResultPageView resultPageView1 = new ResultPageView();
+    resultPageView1.setIp("87.240.129.170");
+    resultPageView1.setTimestamp(124L);
+    resultPageView1.setUrl("How are you");
+
+    ResultPageView resultPageView2 = new ResultPageView();
+    resultPageView1.setIp("88.240.129.183");
+    resultPageView1.setTimestamp(124L);
+    resultPageView1.setUrl("This is the jet engine");
 
     try {
-      dataStore = DataStoreFactory.getDataStore(Long.class, Pageview.class, conf);
+      dataStoreOut.put(1L,resultPageView);
+      dataStoreOut.put(2L,resultPageView1);
+      dataStoreOut.put(3L,resultPageView2);
+      dataStoreOut.flush();
+    } catch (GoraException e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Test
+  public void testNewJetSource() throws Exception {
+
+    try {
+      dataStore = DataStoreFactory.getDataStore(Long.class, Pageview.class, utility.getConfiguration());
     } catch (GoraException e) {
       e.printStackTrace();
     }
 
     try {
-      dataStoreOut = DataStoreFactory.getDataStore(Long.class, ResultPageView.class, conf);
+      dataStoreOut = DataStoreFactory.getDataStore(Long.class, ResultPageView.class, utility.getConfiguration());
     } catch (GoraException e) {
       e.printStackTrace();
     }
@@ -89,39 +127,23 @@ public class JetTest {
     } finally {
       Jet.shutdownAll();
     }
-  }
 
-  @Test
-  public void insertData() {
-    try {
-      dataStoreOut = DataStoreFactory.getDataStore(Long.class, ResultPageView.class, new Configuration());
-    } catch (GoraException e) {
-      e.printStackTrace();
+    Query<Long, ResultPageView> query = dataStoreOut.newQuery();
+    Result<Long, ResultPageView> result = query.execute();
+    int noOfOutputRecords = 0;
+    String ip = "";
+    while (result.next()) {
+      noOfOutputRecords++;
+      ip = result.get().getIp().toString();
+      assertEquals("88.240.129.183", ip);
     }
-
-    ResultPageView resultPageView = new ResultPageView();
-    resultPageView.setIp("123");
-    resultPageView.setTimestamp(123L);
-    resultPageView.setUrl("I am the the one");
-
-    ResultPageView resultPageView1 = new ResultPageView();
-    resultPageView1.setIp("123");
-    resultPageView1.setTimestamp(123L);
-    resultPageView1.setUrl("How are you");
-
-    try {
-      dataStoreOut.put(1L,resultPageView);
-      dataStoreOut.put(2L,resultPageView1);
-      dataStoreOut.flush();
-    } catch (GoraException e) {
-      e.printStackTrace();
-    }
+    assertEquals(2, noOfOutputRecords);
   }
 
   @Test
   public void jetWordCount() {
     try {
-      dataStoreOut = DataStoreFactory.getDataStore(Long.class, ResultPageView.class, new Configuration());
+      dataStoreOut = DataStoreFactory.getDataStore(Long.class, ResultPageView.class, utility.getConfiguration());
     } catch (GoraException e) {
       e.printStackTrace();
     }
@@ -138,13 +160,9 @@ public class JetTest {
         .drainTo(Sinks.map("COUNTS"));
     JetInstance jet =  Jet.newJetInstance();;
     try {
-      System.out.print("\nCounting words... ");
       jet.newJob(p).join();
       IMap<String, Long> counts = jet.getMap("COUNTS");
-      if (counts.get("the") != 2) {
-        throw new AssertionError("Wrong count of 'the'");
-      }
-      System.out.println("Count of 'the' is valid");
+      assertEquals(3L, (long)counts.get("the"));
     } finally {
       Jet.shutdownAll();
     }
