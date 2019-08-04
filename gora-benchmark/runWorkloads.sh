@@ -41,6 +41,13 @@ then
    echo -e "drop '$table'" | hbase shell -n
    echo -e "Creating Users table with 200 regions: 200 Regions is recommended by YCSB" | tee -a $outputfile
    echo -e "create '$table', 'info', {SPLITS => (1..200).map {|i| \"user#{1000+i*(9999-1000)/200}\"}}" | hbase shell -n
+    if [ $2 = "gora" ]
+   then
+     ./gora-bench.sh load -threads 15 -s -p fieldcount=20 -p recordcount=$insertfactor -p operationcount=$i -P workloads/workloada
+   elif [ $2 = "ycsb" ]
+   then
+      ../../ycsb/bin/ycsb.sh load hbase20 -p columnfamily=info -threads 15 -s -p fieldcount=20 -p recordcount=$insertfactor -p operationcount=$i -P workloads/workloada
+   fi
 for i in {100000..5000000..100000}
 do
    #Insert only workload, uncomment this block of code. I will improve this later.

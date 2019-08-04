@@ -3,10 +3,8 @@ package org.apache.gora.benchmark;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -30,47 +28,98 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.SchemaBuilder.FieldAssembler;
+import org.apache.gora.compiler.GoraCompiler;
+import org.apache.gora.compiler.utils.LicenseHeaders;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.apache.gora.compiler.GoraCompiler;
-import org.apache.gora.compiler.utils.*;
 
 import com.yahoo.ycsb.ByteIterator;
 
+// TODO: Auto-generated Javadoc
 /**
- * @author sc306avroWriter.print("");
- *
+ * The Class GoraBenchmarkUtils.
  */
 public class GoraBenchmarkUtils {
+  
+  /** The Constant AVRO_PATH. */
   private static final String AVRO_PATH = "src/main/avro";
+  
+  /** The Constant AVRO_FILE. */
   private static final String AVRO_FILE = "user.json";
+  
+  /** The field prefix. */
   private static String FIELD_PREFIX = "field";
+  
+  /** The Constant USER_ID_VALUE. */
   private static final String USER_ID_VALUE = "userId";
+  
+  /** The Constant AVRO_FULL_PATH. */
   private static final String AVRO_FULL_PATH = AVRO_PATH + "/" + AVRO_FILE;
+  
+  /** The Constant NULL. */
   private static final String NULL = "null";
+  
+  /** The Constant RECORD. */
   private static final String RECORD = "User";
+  
+  /** The Constant NAMESPACE_VALUE. */
   private static final String NAMESPACE_VALUE = "generated";
+  
+  /** The Constant NAMESPACE_KEY. */
   private static final String NAMESPACE_KEY = "namespace";
+  
+  /** The Constant NAME_KEY. */
   private static final String NAME_KEY = "name";
+  
+  /** The Constant MONGODB. */
   private static final String MONGODB = "mongodb";
+  
+  /** The Constant COUCHDB. */
   private static final String COUCHDB = "couchdb";
+  
+  /** The Constant HBASE. */
   private static final String HBASE = "hbase";
+  
+  /** The Constant KEYCLASS. */
   private static final String KEYCLASS = "java.lang.String";
+  
+  /** The db mapping path. */
   private static String DB_MAPPING_PATH = "src/main/resources";
+  
+  /** The Constant MONGO_MAPPING_FILE. */
   private static final String MONGO_MAPPING_FILE = "gora-mongodb-mapping.xml";
+  
+  /** The Constant HBASE_MAPPING_FILE. */
   private static final String HBASE_MAPPING_FILE = "gora-hbase-mapping.xml";
+  
+  /** The Constant COUCHDB_MAPPING_FILE. */
   private static final String COUCHDB_MAPPING_FILE = "gora-couchdb-mapping.xml";
   
+  /** The Constant BEAN_DESTINATION_DIR. */
   private static final File BEAN_DESTINATION_DIR = new File("src/main/java/");
+  
+  /** The Constant DEFAULT_DATA_STORE_KEY. */
   private static final String DEFAULT_DATA_STORE_KEY = "gora.datastore.default";
   
-  //MongoDB Settings
   
-  //HBase Settings
+  private static final String GORA_ROOT_ELEMENT = "gora-otd";
+  
+  private static final Logger LOG = LoggerFactory.getLogger(GoraBenchmarkUtils.class);
+  
+  
 
+  /**
+   * Checks if is field updatable.
+   *
+   * @param field the field
+   * @param values the values
+   * @return true, if is field updatable
+   */
   public static boolean isFieldUpdatable(String field, HashMap<String, ByteIterator> values) {
     if (values.get(field) == null) {
       return false;
@@ -79,10 +128,9 @@ public class GoraBenchmarkUtils {
   }
 
   /**
-   * Generate schema file. This is prerequisite for performance benchmarking
-   * 
-   * @param numberOfFields,
-   *          the number of fields in an object.
+   * Generate avro schema based on the number of fields. supplied when running the benchmark. These files are json files
+   *
+   * @param numberOfFields the number of fields
    */
   public void generateAvroSchema(int numberOfFields) {
     try {
@@ -107,8 +155,9 @@ public class GoraBenchmarkUtils {
   }
 
   /**
-   * @param numberOfFields
-   * @param dbName
+   * Generate database mapping file. Each database has its own mapping syntax. These files are xml files
+   *
+   * @param dbName the db name
    */
   @SuppressWarnings("unchecked")
   public void generateMappingFile(String dbName) {
@@ -119,7 +168,7 @@ public class GoraBenchmarkUtils {
       documentBuilderFactory = DocumentBuilderFactory.newInstance();
       Document mappingDocument = docBuilder.newDocument();
 
-      Element rootNode = mappingDocument.createElement("gora-otd");
+      Element rootNode = mappingDocument.createElement(GORA_ROOT_ELEMENT);
       mappingDocument.appendChild(rootNode);
       //System.out.println(AVRO_FULL_PATH);
       JSONObject jsonObject = generateJSONObject(AVRO_FULL_PATH);
@@ -165,7 +214,9 @@ public class GoraBenchmarkUtils {
   }
   
   /**
-   * @return
+   * Gets the input files.
+   *
+   * @return the input files
    */
   public File[] getInputFiles() {
     File inputDir = new File(AVRO_PATH);
@@ -178,7 +229,7 @@ public class GoraBenchmarkUtils {
   }
   
   /**
-   * 
+   * Generate data beans.
    */
   public void generateDataBeans() {
     LicenseHeaders licenseHeader = new LicenseHeaders("ASLv2");
@@ -192,8 +243,10 @@ public class GoraBenchmarkUtils {
   }
 
   /**
-   * @param fileName
-   * @return
+   * Generate JSON object.
+   *
+   * @param fileName the file name
+   * @return the JSON object
    */
   public JSONObject generateJSONObject(String fileName) {
     JSONObject jsonObject = new JSONObject();
@@ -208,12 +261,14 @@ public class GoraBenchmarkUtils {
   }
 
   /**
-   * @param keysmillis
-   * @param db
-   * @param mappingDocument
-   * @param rootNode
-   * @param fullNameSpace
-   * @param jsonObject
+   * Builds the mapping document.
+   *
+   * @param keys the keys
+   * @param db the db
+   * @param mappingDocument the mapping document
+   * @param rootNode the root node
+   * @param fullNameSpace the full name space
+   * @param jsonObject the json object
    */
   public void buildMappingDocument(Iterator<String> keys, String db, Document mappingDocument, Element rootNode,
       String fullNameSpace, JSONObject jsonObject) {
@@ -370,6 +425,12 @@ public class GoraBenchmarkUtils {
     }
   }
   
+  /**
+   * Gets the data store.
+   *
+   * @param p the p
+   * @return the data store
+   */
   public String getDataStore(Properties p) {
     String defaultDataStore = p.getProperty(DEFAULT_DATA_STORE_KEY);
     String dataStore = "hbase";

@@ -43,11 +43,12 @@ import generated.User;
 
 
 /**
+ * The Class GoraBenchmarkClient.
+ *
  * @author sc306
  * This class extends the Yahoo! Cloud Service Benchmark benchmark {@link #com.yahoo.ycsb.DB DB} class to provide functionality 
  * for {@link #insert(String, String, HashMap) insert}, {@link #read(String, String, Set, HashMap) read}, {@link #scan(String, String, int, Set, Vector) scan}
  * and {@link #update(String, String, HashMap) update} methods as per Apache Gora implementation.
- *
  */
 public class GoraBenchmarkClient extends DB {
   
@@ -77,9 +78,9 @@ public class GoraBenchmarkClient extends DB {
   public GoraBenchmarkClient() {}
  
 
-  /* (non-Javadoc)
-   * @see com.yahoo.ycsb.DB#init()
-   */
+ /***
+  * Initialisation method. This method is called once for each database instance. 
+  */
   public void init() throws DBException {
     try {
       
@@ -125,9 +126,9 @@ public class GoraBenchmarkClient extends DB {
   /**
    * Delete a record from the database.
    *
-   * @param table The name of the table
-   * @param key The recordallSetMethods key of the record to delete.
-   * @return The result of the operation.
+   * @param table The name of the table to delete the data from
+   * @param key The key of the record to delete.
+   * @return Status of the operation failed or success.
    */
   @Override
   public int delete(String table, String key) {
@@ -198,6 +199,9 @@ public class GoraBenchmarkClient extends DB {
     return SUCCESS;
   }
 
+  /* (non-Javadoc)
+   * @see com.yahoo.ycsb.DB#scan(java.lang.String, java.lang.String, int, java.util.Set, java.util.Vector)
+   */
   @Override
   /**
    * Perform a range scan for a set of records in the database. Each field/value pair from the result will be stored
@@ -205,7 +209,7 @@ public class GoraBenchmarkClient extends DB {
    *
    * @param table The name of the table
    * @param startkey The record key of the first record to read.
-   * @param recordcount The number of records to read
+   * @param recordCount The number of records to read
    * @param fields The list of fields to read, or null for all of them
    * @param result A Vector of HashMaps, where each HashMap is a set field/value pairs for one record
    * @return The result of the operation.
@@ -218,12 +222,11 @@ public class GoraBenchmarkClient extends DB {
       goraQuery.setLimit(recordCount);
       Result<String, User> resultSet = goraQuery.execute();
       while(resultSet.next()) {
-        User user = resultSet.get();
         HashMap<String, ByteIterator> hm = new HashMap<>();
         for (int i = 0; i < fieldCount; i++) {
           String field = FIELDS[i+1];
           int fieldIndex = i + 1;
-          String value = user.get(fieldIndex).toString();
+          String value = resultSet.get().get(fieldIndex).toString();
           hm.put(field, new StringByteIterator(value));
         }
         result.add(hm);
@@ -235,7 +238,7 @@ public class GoraBenchmarkClient extends DB {
     return SUCCESS;
   }
   
-  /**arbitarly
+  /**
    * Update a record in the database. Any field/value pairs in the specified values HashMap will be written into the
    * record with the specified record key, overwriting any existing values with the same field name.
    *

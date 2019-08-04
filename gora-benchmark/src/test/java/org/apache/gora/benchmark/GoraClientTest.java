@@ -23,19 +23,39 @@ import com.yahoo.ycsb.workloads.CoreWorkload;
 
 import generated.User;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class GoraClientTest.
+ */
 public class GoraClientTest {
   
 
+  /** The Constant TABLE. */
   private static final String TABLE = "users";
+  
+  /** The client. */
   private GoraBenchmarkClient client;
+  
+  /** The data to insert. */
   private static HashMap<String, ByteIterator> DATA_TO_INSERT;
+  
+  /** The data to update. */
   private static HashMap<String, ByteIterator> DATA_TO_UPDATE;
+  
+  /** The data stores. */
   private static List<String> dataStores = new ArrayList<String>();
   
+  /** The Constant NUMBER_OF_FIELDS. */
   private static final int NUMBER_OF_FIELDS = 10;
   
+  /** The bmutils. */
   private GoraBenchmarkUtils bmutils = new GoraBenchmarkUtils();
   
+  /**
+   * Sets the up.
+   *
+   * @throws Exception the exception
+   */
   //Setup is executed before each test. Use @BeforeClass if you want to execute a code block just once.
   @Before
   public void setUp() throws Exception {
@@ -45,7 +65,7 @@ public class GoraClientTest {
     //for(String dataStore: dataStores) {
       //bmutils.generateMappingFile(dataStore);
     //}
-    //bmutils.generateDataBeans();testInsert
+    //bmutils.generateDataBeans();
     DATA_TO_INSERT = new HashMap<>();
     DATA_TO_UPDATE = new HashMap<>();
     for(int i=0; i < NUMBER_OF_FIELDS; i++) {
@@ -61,6 +81,11 @@ public class GoraClientTest {
     client.init();
   }
   
+  /**
+   * Clean up.
+   *
+   * @throws Exception the exception
+   */
   @After
   public void cleanUp() throws Exception{
     if(client != null)
@@ -68,17 +93,32 @@ public class GoraClientTest {
     client = null;
   }
   
+  /**
+   * Read record.
+   *
+   * @param key the key
+   * @return the user
+   * @throws GoraException the gora exception
+   */
   private User readRecord(String key) throws GoraException {
     User u = client.dataStore.get(key);
     return u;
   }
   
+  /**
+   * Test client initialisation.
+   */
   @Test
   public void testClientInitialisation() {
     assertNotNull(client.dataStore);
   }
   
 
+  /**
+   * Test insert.
+   *
+   * @throws GoraException the gora exception
+   */
   @Test
   public void testInsert() throws GoraException{ 
     int result1 = client.insert(TABLE, "key1", DATA_TO_INSERT);
@@ -90,6 +130,9 @@ public class GoraClientTest {
   }
   
   
+  /**
+   * Test read.
+   */
   @Test
   public void   testRead() {
     HashMap<String, ByteIterator> results = new HashMap<>();
@@ -102,6 +145,9 @@ public class GoraClientTest {
     assertEquals(DATA_TO_INSERT.get("field0").toString(), "value0");
   }
   
+  /**
+   * Test scan.
+   */
   @Test
   public void testScan(){
     Vector<HashMap<String, ByteIterator>> results = new Vector<HashMap<String, ByteIterator>>();
@@ -112,6 +158,11 @@ public class GoraClientTest {
     assertEquals(results.size(),2);
   }
   
+  /**
+   * Test update.
+   *
+   * @throws GoraException the gora exception
+   */
   @Test
   public void testUpdate() throws GoraException{
     int result = client.update(TABLE, "key1", DATA_TO_UPDATE);
@@ -124,21 +175,27 @@ public class GoraClientTest {
     //Read Record from 
   }
   
+  /**
+   * Testgenearate mapping file.
+   */
   @Test
   public void testgenearateMappingFile() {
     bmutils.generateMappingFile("mongodb");
   }
   
+  /**
+   * Testgenerate avro schema.
+   */
   @Test
   public void testgenerateAvroSchema() {
     bmutils.generateAvroSchema(NUMBER_OF_FIELDS);
   }
   
+  /**
+   * Test generate data beans.
+   */
   @Test
   public void testGenerateDataBeans() {
     bmutils.generateDataBeans();
   }
- 
- 
-
 }
