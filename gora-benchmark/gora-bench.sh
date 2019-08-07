@@ -64,13 +64,8 @@ IFS=$SAVEIFS
 CLASSPATH=${CLASSPATH}:target/classes/
 CLASSPATH=${CLASSPATH}:target/test-classes/
 
-#CLASSPATH=${CLASSPATH}:conf
-#CLASSPATH=${CLASSPATH}:conf
-
 # Get the rest of the arguments
 YCSB_ARGS=$(echo "$@" | cut -d' ' -f2-)
-
-#echo $YCSB_ARGS
 
 # Print details to standard output
 echo "$JAVA_HOME/bin/java $JAVA_OPTS -classpath $CLASSPATH $YCSB_CLASS $YCSB_COMMAND -db $DB_CLASS $YCSB_ARGS"

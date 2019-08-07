@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <gora-otd>
-  <class keyClass="java.lang.String" name="generated.User" table="users">
+  <class keyClass="java.lang.String" name="org.apache.gora.benchmark.generated.User" table="users">
     <field name="userId"/>
     <field name="field0"/>
     <field name="field1"/>

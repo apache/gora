@@ -14,14 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#Check if number of commanline arguments is right
+#Check if number of commandline arguments is right
 threadcount=15
 if [ $# -ne 3 ]
 then
     echo "Error: Usage: $0 hbase|mongodb gora|ycsb workloadfile"
     exit;
 fi
-#Log output file
+#Output file log
 outputfile="$3-$2-$1.log"
 insertfactor=5000000
 if [ $2 = "ycsb" ]

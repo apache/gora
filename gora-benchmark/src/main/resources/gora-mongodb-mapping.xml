@@ -1,6 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<gora-otd>
-  <class document="users" keyClass="java.lang.String" name="generated.User">
+<!--/**
+ *Licensed to the Apache Software Foundation (ASF) under one
+ *or more contributor license agreements.  See the NOTICE file
+ *distributed with this work for additional information
+ *regarding copyright ownership.  The ASF licenses this file
+ *to you under the Apache License, Version 2.0 (the"
+ *License"); you may not use this file except in compliance
+ *with the License.  You may obtain a copy of the License at
+ *
+  * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ *Unless required by applicable law or agreed to in writing, software
+ *distributed under the License is distributed on an "AS IS" BASIS,
+ *WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *See the License for the specific language governing permissions and
+ *limitations under the License.
+ */
+--><gora-otd>
+  <class document="users" keyClass="java.lang.String" name="org.apache.gora.benchmark.generated.User">
     <field docfield="userId" name="userId" type="string"/>
     <field docfield="field0" name="field0" type="string"/>
     <field docfield="field1" name="field1" type="string"/>
@@ -12,15 +29,5 @@
     <field docfield="field7" name="field7" type="string"/>
     <field docfield="field8" name="field8" type="string"/>
     <field docfield="field9" name="field9" type="string"/>
-    <field docfield="field10" name="field10" type="string"/>
-    <field docfield="field11" name="field11" type="string"/>
-    <field docfield="field12" name="field12" type="string"/>
-    <field docfield="field13" name="field13" type="string"/>
-    <field docfield="field14" name="field14" type="string"/>
-    <field docfield="field15" name="field15" type="string"/>
-    <field docfield="field16" name="field16" type="string"/>
-    <field docfield="field17" name="field17" type="string"/>
-    <field docfield="field18" name="field18" type="string"/>
-    <field docfield="field19" name="field19" type="string"/>
   </class>
 </gora-otd>

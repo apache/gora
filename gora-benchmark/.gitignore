@@ -2,3 +2,10 @@ bin
 target
 lib
 bmstuff
+workloads/*.swp
+*.swp
+pom.xml
+runWorkloads.sh
+setupgoramongo.js
+setupycsbmongo.js
+

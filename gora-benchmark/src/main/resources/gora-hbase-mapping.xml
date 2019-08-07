@@ -3,7 +3,7 @@
   <table name="users">
     <family name="info"/>
   </table>
-  <class keyClass="java.lang.String" name="generated.User" table="users">
+  <class keyClass="java.lang.String" name="org.apache.gora.benchmark.generated.User" table="users">
     <field family="info" name="userId" qualifier="userId"/>
     <field family="info" name="field0" qualifier="field0"/>
     <field family="info" name="field1" qualifier="field1"/>
