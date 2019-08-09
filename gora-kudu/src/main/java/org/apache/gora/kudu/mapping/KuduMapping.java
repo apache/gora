@@ -26,6 +26,7 @@ import java.util.Map;
 public class KuduMapping {
 
   private String tableName;
+  private int numReplicas;
   private Map<String, Column> fields;
   private List<Column> primaryKey;
   private int hashBuckets;
@@ -127,6 +128,24 @@ public class KuduMapping {
    */
   public void setRangePartitions(List<Map.Entry<String, String>> rangePartitions) {
     this.rangePartitions = rangePartitions;
+  }
+
+  /**
+   * Returns the number of replicas for the table
+   *
+   * @return number of replicas
+   */
+  public int getNumReplicas() {
+    return numReplicas;
+  }
+
+  /**
+   * Sets the number of replicas for the table
+   *
+   * @param numReplicas number of replicas
+   */
+  public void setNumReplicas(int numReplicas) {
+    this.numReplicas = numReplicas;
   }
 
 }

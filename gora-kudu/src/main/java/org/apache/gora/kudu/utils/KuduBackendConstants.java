@@ -22,6 +22,9 @@ package org.apache.gora.kudu.utils;
  */
 public class KuduBackendConstants {
 
+  private KuduBackendConstants() {
+  }
+
   /*
   * Default configurations for Kudu
    */

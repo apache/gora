@@ -19,6 +19,7 @@ package org.apache.gora.kudu.mapping;
 import com.google.inject.ConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.invoke.MethodHandles;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,13 +40,13 @@ import org.slf4j.LoggerFactory;
  * Builder for Mapping definitions of Kudu.
  */
 public class KuduMappingBuilder<K, T extends PersistentBase> {
-
-  private static final Logger LOG = LoggerFactory.getLogger(KuduMappingBuilder.class);
+  
+  private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   /**
    * Mapping instance being built
    */
   private KuduMapping kuduMapping;
-
+  
   private final KuduStore<K, T> dataStore;
 
   /**
@@ -101,8 +102,10 @@ public class KuduMappingBuilder<K, T extends PersistentBase> {
             && classElement.getAttributeValue("name").equals(
                 dataStore.getPersistentClass().getCanonicalName())) {
           final String tableNameFromMapping = classElement.getAttributeValue("table");
+          final String tablenumReplicasMapping = classElement.getAttributeValue("numReplicas");
           String tableName = dataStore.getSchemaName(tableNameFromMapping, dataStore.getPersistentClass());
           kuduMapping.setTableName(tableName);
+          kuduMapping.setNumReplicas(Integer.parseInt(tablenumReplicasMapping));
           @SuppressWarnings("unchecked")
           List<Element> tables = document.getRootElement().getChildren("table");
           for (Element tableElement : tables) {
@@ -128,7 +131,7 @@ public class KuduMappingBuilder<K, T extends PersistentBase> {
                 int numBuckets = Integer.parseInt(hashPartition.getAttributeValue("numBuckets"));
                 kuduMapping.setHashBuckets(numBuckets);
               }
-              List<Map.Entry<String, String>> ranges = new ArrayList();
+              List<Map.Entry<String, String>> ranges = new ArrayList<>();
               @SuppressWarnings("unchecked")
               List<Element> rangePartitions = tableElement.getChildren("rangePartition");
               for (Element rangePartition : rangePartitions) {

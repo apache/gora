@@ -24,7 +24,7 @@
     <hashPartition numBuckets="8"/>
   </table>
   
-  <class name="org.apache.gora.examples.generated.Employee" keyClass="java.lang.String" table="Employee">
+  <class name="org.apache.gora.examples.generated.Employee" keyClass="java.lang.String" table="Employee" numReplicas="1">
     <field name="ssn" column="ssn" type="STRING"/>
     <field name="value" column="value" type="STRING"/>
     <field name="name" column="name" type="STRING"/>
@@ -40,7 +40,7 @@
     <rangePartition lower="1000" upper =""/>
   </table>
   
-  <class name="org.apache.gora.examples.generated.WebPage" keyClass="java.lang.String" table="WebPage">
+  <class name="org.apache.gora.examples.generated.WebPage" keyClass="java.lang.String" table="WebPage" numReplicas="1">
     <field name="url" column="url" type="STRING"/>
     <field name="content" column="content" type="BINARY"/>
     <field name="parsedContent" column="parsedContent" type="BINARY"/>

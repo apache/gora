@@ -19,6 +19,7 @@ package org.apache.gora.kudu.store;
 import org.apache.gora.kudu.query.KuduResult;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -75,11 +76,10 @@ import org.slf4j.LoggerFactory;
  */
 public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
-  private static final Logger LOG = LoggerFactory.getLogger(KuduStore.class);
+  private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String PARSE_MAPPING_FILE_KEY = "gora.kudu.mapping.file";
   private static final String DEFAULT_MAPPING_FILE = "gora-kudu-mapping.xml";
   private static final String XML_MAPPING_DEFINITION = "gora.mapping";
-  private KuduParameters kuduParameters;
   private KuduMapping kuduMapping;
   private KuduClient client;
   private KuduSession session;
@@ -92,11 +92,11 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
   public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) throws GoraException {
     try {
       super.initialize(keyClass, persistentClass, properties);
-      KuduMappingBuilder<K, T> builder = new KuduMappingBuilder<K, T>(this);
+      KuduMappingBuilder<K, T> builder = new KuduMappingBuilder<>(this);
       InputStream mappingStream;
       if (properties.containsKey(XML_MAPPING_DEFINITION)) {
         if (LOG.isTraceEnabled()) {
-          LOG.trace(XML_MAPPING_DEFINITION + " = " + properties.getProperty(XML_MAPPING_DEFINITION));
+          LOG.trace("{} = {}", XML_MAPPING_DEFINITION, properties.getProperty(XML_MAPPING_DEFINITION));
         }
         mappingStream = org.apache.commons.io.IOUtils.toInputStream(properties.getProperty(XML_MAPPING_DEFINITION), (Charset) null);
       } else {
@@ -104,7 +104,7 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       }
       builder.readMappingFile(mappingStream);
       kuduMapping = builder.getKuduMapping();
-      kuduParameters = KuduParameters.load(properties, getConf());
+      KuduParameters kuduParameters = KuduParameters.load(properties, getConf());
       KuduClient.KuduClientBuilder kuduClientBuilder = new KuduClient.KuduClientBuilder(kuduParameters.getMasterAddresses());
       if (kuduParameters.getBossCount() != null) {
         kuduClientBuilder.bossCount(kuduParameters.getBossCount());
@@ -140,7 +140,6 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
         table = client.openTable(kuduMapping.getTableName());
       }
     } catch (Exception ex) {
-      LOG.error("Error while initializing Kudu store", ex);
       throw new GoraException(ex);
     }
   }
@@ -184,6 +183,7 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       }
       org.apache.kudu.Schema sch = new org.apache.kudu.Schema(columns);
       CreateTableOptions cto = new CreateTableOptions();
+      cto.setNumReplicas(kuduMapping.getNumReplicas());
       if (kuduMapping.getHashBuckets() > 0) {
         cto.addHashPartitions(keys, kuduMapping.getHashBuckets());
       }
@@ -283,13 +283,17 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
         List<Schema.Field> fields = schema.getFields();
         for (Schema.Field field : fields) {
           Column mappedColumn = kuduMapping.getFields().get(field.name());
-          Object fieldValue = obj.get(field.pos());
-          if (mappedColumn != null && fieldValue != null) {
-            Schema fieldSchema = field.schema();
-            Object serializedObj = serializeFieldValue(fieldSchema, fieldValue);
-            KuduClientUtils.addObjectRow(row, mappedColumn, serializedObj);
+          if (mappedColumn != null) {
+            Object fieldValue = obj.get(field.pos());
+            if (fieldValue != null) {
+              Schema fieldSchema = field.schema();
+              Object serializedObj = serializeFieldValue(fieldSchema, fieldValue);
+              KuduClientUtils.addObjectRow(row, mappedColumn, serializedObj);
+            } else {
+              row.setNull(mappedColumn.getName());
+            }
           } else {
-            row.setNull(mappedColumn.getName());
+            throw new GoraException("Unmapped field : " + field.name());
           }
         }
         session.apply(upsert);
@@ -382,8 +386,7 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       }
       scannerBuilder.addPredicate(KuduPredicate.newIsNotNullPredicate(column));
       KuduScanner build = scannerBuilder.build();
-      KuduResult<K, T> kuduResult = new KuduResult<>(this, query, build);
-      return kuduResult;
+      return new KuduResult<>(this, query, build);
     } catch (Exception e) {
       throw new GoraException(e);
     }
@@ -437,7 +440,7 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
     }
   }
 
-  public T newInstance(RowResult next, String[] fields) throws GoraException, IOException {
+  public T newInstance(RowResult next, String[] fields) throws IOException {
     fields = getFieldsToQuery(fields);
     T persistent = newPersistent();
     for (String f : fields) {
@@ -549,8 +552,6 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       case FLOAT:
       case DOUBLE:
       case BOOLEAN:
-        output = fieldValue;
-        break;
       case NULL:
         break;
       default:
@@ -636,11 +637,9 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
 
   @SuppressWarnings("rawtypes")
   private SpecificDatumWriter getDatumWriter(Schema fieldSchema) {
-    SpecificDatumWriter writer = writerMap.get(fieldSchema);
-    if (writer == null) {
-      writer = new SpecificDatumWriter(fieldSchema);// ignore dirty bits
-      writerMap.put(fieldSchema, writer);
-    }
+    SpecificDatumWriter writer = writerMap.computeIfAbsent(fieldSchema, (t) -> {
+      return new SpecificDatumWriter(t);// ignore dirty bits
+    });
     return writer;
   }
 

@@ -32,6 +32,9 @@ import org.apache.kudu.client.RowResultIterator;
 
 public class KuduClientUtils {
 
+  private KuduClientUtils() {
+  }
+
   public static Object getObjectRow(RowResult row, Column column) {
     Type type = column.getDataType().getType();
     Object res;
