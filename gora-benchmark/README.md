@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-This guidline outlines the process of compiling and running Gora Benchmark Module
+This guideline outlines the process of compiling and running Gora Benchmark Module
 
 Prerequisite
 Install and setup the required database to test. Currently, the benchmark is tested on MongoDB, HBase and CouchDB.
