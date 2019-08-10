@@ -719,23 +719,32 @@
             </executions>
           </plugin>
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <version>${maven-gpg-plugin.version}</version>
+            <groupId>net.nicoulaj.maven.plugins</groupId>
+            <artifactId>checksum-maven-plugin</artifactId>
+            <version>${checksum-maven-plugin.version}</version>
             <executions>
               <execution>
-                <id>sign-artifacts</id>
-                <phase>verify</phase>
+                <id>source-release-checksum</id>
                 <goals>
-                  <goal>sign</goal>
+                  <goal>files</goal>
                 </goals>
               </execution>
             </executions>
-          </plugin>
-          <plugin>
-            <groupId>net.ju-n.maven.plugins</groupId>
-            <artifactId>checksum-maven-plugin</artifactId>
-            <version>${checksum-maven-plugin.version}</version>
+            <configuration>
+              <algorithms>
+                <algorithm>SHA-512</algorithm>
+              </algorithms>
+              <fileSets>
+                <fileSet>
+                  <directory>${project.build.directory}</directory>
+                  <includes>
+                    <include>apache-gora-${project.version}-src.zip</include>
+                    <include>apache-gora-${project.version}-src.tar.gz</include>
+                  </includes>
+                </fileSet>
+              </fileSets>
+              <failIfNoFiles>false</failIfNoFiles>
+            </configuration>
           </plugin>
         </plugins>
       </build>
@@ -770,7 +779,7 @@
     <!-- Dependencies -->
     <osgi.version>4.2.0</osgi.version>
     <!-- Avro Dependencies -->
-    <avro.version>1.8.1</avro.version>
+    <avro.version>1.8.2</avro.version>
     <!--     <jackson.version>1.6.9</jackson.version> -->
     <!-- Hadoop Dependencies -->
     <hadoop-2.version>2.5.2</hadoop-2.version>
@@ -836,9 +845,9 @@
     <maven-javadoc-plugin.version>2.8.1</maven-javadoc-plugin.version>
     <maven-gpg-plugin.version>1.4</maven-gpg-plugin.version>
     <apache-rat-plugin.version>0.8</apache-rat-plugin.version>
-    <maven-assembly-plugin.version>2.2.2</maven-assembly-plugin.version>
+    <maven-assembly-plugin.version>2.5.4</maven-assembly-plugin.version>
     <maven-deploy-plugin.version>2.5</maven-deploy-plugin.version>
-    <checksum-maven-plugin.version>1.0.1</checksum-maven-plugin.version>
+    <checksum-maven-plugin.version>1.7</checksum-maven-plugin.version>
     <maven-clean-plugin.version>2.5</maven-clean-plugin.version>
 
     <!-- Pig Dependencies -->

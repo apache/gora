@@ -144,7 +144,12 @@ public class MockDataStore extends DataStoreBase<String, MockPersistent> {
   @Override
   public void setPersistentClass(Class<MockPersistent> persistentClass) {
   }
-  
+
+  @Override
+  public boolean exists(String key) throws GoraException {
+    return false;
+  }
+
   public static class MockResult<K, T extends PersistentBase> extends ResultBase<K, T> {
     
     public MockResult(DataStore<K, T> dataStore, Query<K, T> query) {

@@ -644,6 +644,19 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
   }
 
   @Override
+  public boolean exists(K key) throws GoraException {
+    try {
+      Scanner scanner = new IsolatedScanner(conn.createScanner(mapping.tableName, Authorizations.EMPTY));
+      Range rowRange = new Range(new Text(toBytes(key)));
+      scanner.setRange(rowRange);
+      scanner.clearColumns();
+      return scanner.iterator().hasNext();
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
+  }
+
+  @Override
   public T get(K key, String[] fields) throws GoraException {
     try {
       // TODO make isolated scanner optional?

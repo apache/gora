@@ -315,6 +315,24 @@ class CassandraQueryFactory {
   }
 
   /**
+   * This method returns CQL Select query to check if a key exists. This method
+   * is used for Avro Serialization refer:
+   * http://docs.datastax.com/en/cql/3.3/cql/cql_reference/cqlSelect.html
+   *
+   * @param mapping Cassandra Mapping {@link CassandraMapping}
+   * @param keyFields key fields
+   * @return CQL Query
+   */
+  static String getCheckExistsQuery(CassandraMapping mapping, List<String> keyFields) {
+    Select select = QueryBuilder.select().countAll().from(mapping.getKeySpace().getName(), mapping.getCoreName());
+    if (Boolean.parseBoolean(mapping.getProperty("allowFiltering"))) {
+      select.allowFiltering();
+    }
+    String[] columnNames = getColumnNames(mapping, keyFields);
+    return processKeys(columnNames, select);
+  }
+
+  /**
    * This method returns CQL Select query to retrieve data from the table with given fields.
    * This method is used for Native Serialization
    * refer: http://docs.datastax.com/en/cql/3.3/cql/cql_reference/cqlSelect.html

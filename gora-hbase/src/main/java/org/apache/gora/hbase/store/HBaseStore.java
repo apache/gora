@@ -279,6 +279,18 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     }
   }
 
+  @Override
+  public boolean exists(K key) throws GoraException {
+    try {
+      Get get = new Get(toBytes(key));
+      return table.exists(get);
+    } catch (GoraException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
+  }
+
   /**
    * {@inheritDoc} Serializes the Persistent data and saves in HBase. Topmost
    * fields of the record are persisted in "raw" format (not avro serialized).

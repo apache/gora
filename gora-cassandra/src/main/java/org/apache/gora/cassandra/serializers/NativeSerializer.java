@@ -258,4 +258,5 @@ class NativeSerializer<K, T extends Persistent> extends CassandraSerializer {
     }
     return key;
   }
+
 }
