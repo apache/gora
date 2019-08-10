@@ -37,5 +37,5 @@ insertproportion=0
 requestdistribution=zipfian
 
 key.class=java.lang.String
-persistent.class=generated.User
+persistent.class=org.apache.gora.benchmark.generated.User
 
