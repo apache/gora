@@ -32,6 +32,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.yahoo.ycsb.ByteIterator;
+import com.yahoo.ycsb.Status;
 import com.yahoo.ycsb.StringByteIterator;
 import com.yahoo.ycsb.workloads.CoreWorkload;
 
@@ -116,12 +117,12 @@ public class GoraClientTest {
    */
   @Test
   public void testInsert() throws GoraException {
-    int result1 = client.insert(TABLE, "key1", DATA_TO_INSERT);
-    int result2 = client.insert(TABLE, "key2", DATA_TO_INSERT);
-    int result3 = client.insert(TABLE, "key3", DATA_TO_INSERT);
-    assertEquals(0, result1);
-    assertEquals(0, result2);
-    assertEquals(0, result3);
+    Status result1 = client.insert(TABLE, "key1", DATA_TO_INSERT);
+    Status result2 = client.insert(TABLE, "key2", DATA_TO_INSERT);
+    Status result3 = client.insert(TABLE, "key3", DATA_TO_INSERT);
+    assertEquals(Status.OK, result1);
+    assertEquals(Status.OK, result2);
+    assertEquals(Status.OK, result3);
   }
 
   /**
@@ -132,8 +133,8 @@ public class GoraClientTest {
     HashMap<String, ByteIterator> results = new HashMap<>();
     Set<String> fields = new HashSet<>();// this could be null as well
     // fields.add("field0");
-    int result = client.read(TABLE, "key1", fields, results);
-    assertEquals(0, result);
+    Status result = client.read(TABLE, "key1", fields, results);
+    assertEquals(Status.OK, result);
     assertEquals(DATA_TO_INSERT.size(), results.size());
     assertEquals(DATA_TO_INSERT.get("field0").toString(), results.get("field0").toString());
     assertEquals(DATA_TO_INSERT.get("field0").toString(), "value0");
@@ -146,8 +147,8 @@ public class GoraClientTest {
   public void testScan() {
     Vector<HashMap<String, ByteIterator>> results = new Vector<HashMap<String, ByteIterator>>();
     Set<String> fields = new HashSet<>();
-    int result = client.scan(TABLE, "key1", 2, fields, results);
-    assertEquals(result, 0);
+    Status result = client.scan(TABLE, "key1", 2, fields, results);
+    assertEquals(result, Status.OK);
     assertEquals(results.size(), 2);
   }
 
@@ -159,9 +160,9 @@ public class GoraClientTest {
    */
   @Test
   public void testUpdate() throws GoraException {
-    int result = client.update(TABLE, "key1", DATA_TO_UPDATE);
-    assertEquals(result, 0);
-    if (result == 0) {
+    Status result = client.update(TABLE, "key1", DATA_TO_UPDATE);
+    assertEquals(result, Status.OK);
+    if (result == Status.OK) {
       client.dataStore.flush();
       User u = readRecord("key1");
       assertEquals("updated0", u.getField0().toString());

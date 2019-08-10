@@ -84,7 +84,7 @@
     <dependency>
       <groupId>com.yahoo.ycsb</groupId>
       <artifactId>core</artifactId>
-      <version>0.1.4</version>
+      <version>0.15.0</version>
     </dependency>
 
     <dependency>

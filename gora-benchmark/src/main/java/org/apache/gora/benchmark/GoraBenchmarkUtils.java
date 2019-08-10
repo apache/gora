@@ -26,9 +26,9 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -118,7 +118,7 @@ public class GoraBenchmarkUtils {
    * 
    * @return true, if is field updatable
    */
-  public static boolean isFieldUpdatable(String field, HashMap<String, ByteIterator> values) {
+  public static boolean isFieldUpdatable(String field, Map<String, ByteIterator> values) {
     if (values.get(field) == null) {
       return false;
     }
@@ -147,7 +147,9 @@ public class GoraBenchmarkUtils {
       avroWriter.write(avroSchema.toString(4));
       avroWriter.close();
     } catch (FileNotFoundException e) {
+      LOG.info(e.getMessage(), e);
     } catch (IOException e) {
+      LOG.info(e.getMessage(), e);
     }
   }
 
@@ -206,8 +208,11 @@ public class GoraBenchmarkUtils {
       StreamResult consoleResult = new StreamResult(new StringWriter());
       transformer.transform(source, consoleResult);
     } catch (ParserConfigurationException e) {
+      LOG.info(e.getMessage(), e);
     } catch (TransformerConfigurationException e) {
+      LOG.info(e.getMessage(), e);
     } catch (TransformerException e) {
+      LOG.info(e.getMessage(), e);
     }
   }
 
@@ -235,6 +240,7 @@ public class GoraBenchmarkUtils {
     try {
       GoraCompiler.compileSchema(inputFiles, BEAN_DESTINATION_DIR, licenseHeader);
     } catch (IOException e) {
+      LOG.info(e.getMessage(), e);
     }
   }
 
@@ -251,6 +257,7 @@ public class GoraBenchmarkUtils {
       String jsonString = new String(Files.readAllBytes(Paths.get(fileName)), StandardCharsets.UTF_8);
       jsonObject = new JSONObject(jsonString);
     } catch (IOException e) {
+      LOG.info(e.getMessage(), e);
     }
     return jsonObject;
   }

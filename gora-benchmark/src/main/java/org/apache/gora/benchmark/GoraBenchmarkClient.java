@@ -20,6 +20,7 @@ package org.apache.gora.benchmark;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
@@ -34,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import com.yahoo.ycsb.ByteIterator;
 import com.yahoo.ycsb.DB;
 import com.yahoo.ycsb.DBException;
+import com.yahoo.ycsb.Status;
 import com.yahoo.ycsb.StringByteIterator;
 import com.yahoo.ycsb.workloads.CoreWorkload;
 import org.apache.gora.benchmark.generated.User;
@@ -51,8 +53,6 @@ import org.apache.gora.benchmark.generated.User;
  */
 public class GoraBenchmarkClient extends DB {
   private static final Logger LOG = LoggerFactory.getLogger(GoraBenchmarkClient.class);
-  private static final int SUCCESS = 0;
-  private static final int FAILED = 1;
   private static final String FIELDS[] = User._ALL_FIELDS;
   private static volatile boolean executed;
   public static int fieldCount;
@@ -90,6 +90,7 @@ public class GoraBenchmarkClient extends DB {
         goraBenchmarkUtils.generateDataBeans();
       }
     } catch (GoraException e) {
+      LOG.info("There is a problem in initialising the DataStore \n"+e.getMessage());
     }
   }
 
@@ -116,13 +117,13 @@ public class GoraBenchmarkClient extends DB {
    * @return Status of the operation failed or success.
    */
   @Override
-  public int delete(String table, String key) {
+  public Status delete(String table, String key) {
     try {
       dataStore.delete(key);
     } catch (Exception e) {
-      return FAILED;
+      return Status.ERROR;
     }
-    return SUCCESS;
+    return Status.OK;
   }
 
   /**
@@ -140,7 +141,7 @@ public class GoraBenchmarkClient extends DB {
    * @return The result of the operation.
    */
   @Override
-  public int insert(String table, String key, HashMap<String, ByteIterator> values) {
+  public Status insert(String table, String key, Map<String, ByteIterator> values) {
     try {
       user.setUserId(key);
       for (int i = 0; i < fieldCount; i++) {
@@ -152,9 +153,10 @@ public class GoraBenchmarkClient extends DB {
       }
       dataStore.put(key, user);
     } catch (Exception e) {
-      return FAILED;
+      LOG.info("There is a problem inserting data \n"+ e.getMessage(), e);
+      return Status.ERROR;
     }
-    return SUCCESS;
+    return Status.OK;
   }
 
   /**
@@ -172,7 +174,7 @@ public class GoraBenchmarkClient extends DB {
    * @return The result of the operation.
    */
   @Override
-  public int read(String table, String key, Set<String> fields, HashMap<String, ByteIterator> result) {
+  public Status read(String table, String key, Set<String> fields, Map<String, ByteIterator> result) {
     try {
       // Check for null is necessary.
       User user = (fields == null || fields.size() == 0) ? dataStore.get(key)
@@ -184,9 +186,10 @@ public class GoraBenchmarkClient extends DB {
         result.put(field, new StringByteIterator(value));
       }
     } catch (Exception e) {
-      return FAILED;
+      LOG.info("There is a problem in reading data from the table \n"+e.getMessage(), e);
+      return Status.ERROR;
     }
-    return SUCCESS;
+    return Status.OK;
   }
 
   /**
@@ -207,7 +210,7 @@ public class GoraBenchmarkClient extends DB {
    * @return The result of the operation.
    */
   @Override
-  public int scan(String table, String startKey, int recordCount, Set<String> fields,
+  public Status scan(String table, String startKey, int recordCount, Set<String> fields,
       Vector<HashMap<String, ByteIterator>> result) {
     try {
       Query<String, User> goraQuery = dataStore.newQuery();
@@ -225,9 +228,10 @@ public class GoraBenchmarkClient extends DB {
         result.add(hm);
       }
     } catch (Exception e) {
-      return FAILED;
+      LOG.info("There is a problem in scanning data from the table \n"+e.getMessage(), e);
+      return Status.ERROR;
     }
-    return SUCCESS;
+    return Status.OK;
   }
 
   /**
@@ -244,7 +248,7 @@ public class GoraBenchmarkClient extends DB {
    * @return The result of the operation.
    */
   @Override
-  public int update(String table, String key, HashMap<String, ByteIterator> values) {
+  public Status update(String table, String key, Map<String, ByteIterator> values) {
     try {
       // We first get the database object to update
       User user = dataStore.get(key);
@@ -259,8 +263,9 @@ public class GoraBenchmarkClient extends DB {
       }
       dataStore.put(user.getUserId().toString(), user);
     } catch (Exception e) {
-      return FAILED;
+      LOG.info("There is a problem updating the records \n"+e.getMessage(), e);
+      return Status.ERROR;
     }
-    return SUCCESS;
+    return Status.OK;
   }
 }
