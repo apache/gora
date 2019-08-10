@@ -35,7 +35,7 @@
     <name>Apache Gora :: Pig</name>
     <url>http://gora.apache.org</url>
     <description>Pig -> Gora -> DataStore connector.</description>
-    <inceptionYear>2018</inceptionYear>
+    <inceptionYear>2010</inceptionYear>
     <organization>
         <name>The Apache Software Foundation</name>
         <url>http://www.apache.org/</url>
