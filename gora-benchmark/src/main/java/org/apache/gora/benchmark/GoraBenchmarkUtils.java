@@ -169,12 +169,6 @@ public class GoraBenchmarkUtils {
       documentBuilderFactory = DocumentBuilderFactory.newInstance();
       Document mappingDocument = docBuilder.newDocument();
       Element rootNode = mappingDocument.createElement(GORA_ROOT_ELEMENT);
-       
-      
-      
-//      Element element = doc.getDocumentElement();
-//      Comment comment = doc.createComment("This is a comment");
-//      element.getParentNode().insertBefore(comment, element);
       
       mappingDocument.appendChild(rootNode);
       JSONObject jsonObject = generateJSONObject(AVRO_FULL_PATH);
@@ -184,6 +178,7 @@ public class GoraBenchmarkUtils {
       String fullNameSpace = nameSpace + "." + dataBean;
       buildMappingDocument(keys, dbName, mappingDocument, rootNode, fullNameSpace, jsonObject);
       
+      //Start building the comment node
       Element commentElement = mappingDocument.getDocumentElement();
       String license = new LicenseHeaders("ASLv2").getLicense();
       Comment licenseHeader = mappingDocument.createComment(license);
