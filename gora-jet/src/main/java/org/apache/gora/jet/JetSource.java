@@ -64,14 +64,15 @@ public class JetSource<KeyIn, ValueIn extends PersistentBase> implements Process
       ProcessorSupplier supplier = processorCount ->
           range(globalIndexBase, globalIndexBase + processorCount)
               .mapToObj(globalIndex ->
-                  new GoraJetProcessor<KeyIn, ValueIn>(getPartionedData(globalIndex))
+                  new GoraJetProcessor<KeyIn, ValueIn>(getPartitionedData(globalIndex))
               ).collect(toList());
       map.put(addresses.get(i), supplier);
     }
     return map::get;
   }
 
-  List<JetInputOutputFormat<KeyIn, ValueIn>> getPartionedData(int globalIndex) {
+  @SuppressWarnings("unchecked")
+  private List<JetInputOutputFormat<KeyIn, ValueIn>> getPartitionedData(int globalIndex) {
     try {
       List<PartitionQuery<KeyIn, ValueIn>> partitionQueries = JetEngine.dataInStore.getPartitions(JetEngine.query);
       List<JetInputOutputFormat<KeyIn, ValueIn>> resultsList = new ArrayList<>();

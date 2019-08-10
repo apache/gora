@@ -24,8 +24,8 @@ import org.apache.gora.persistency.impl.PersistentBase;
  * jet-source and to write data into data stores through Gora-jet-sink.
  */
 public class JetInputOutputFormat<KeyOut, ValueOut extends PersistentBase> {
-  public KeyOut key;
-  public ValueOut value;
+  KeyOut key;
+  ValueOut value;
 
   public JetInputOutputFormat(KeyOut key, ValueOut value) {
     this.key = key;

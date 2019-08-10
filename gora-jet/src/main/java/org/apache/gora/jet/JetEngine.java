@@ -29,9 +29,9 @@ import org.apache.gora.store.DataStore;
  * Core class which handles Gora - Jet Engine integration.
  */
 public class JetEngine<KeyIn, ValueIn extends PersistentBase, KeyOut, ValueOut extends PersistentBase> {
-  public static DataStore dataOutStore;
-  public static DataStore dataInStore;
-  public static Query query;
+  static DataStore dataOutStore;
+  static DataStore dataInStore;
+  static Query query;
 
   public BatchSource<JetInputOutputFormat<KeyIn, ValueIn>> createDataSource(DataStore<KeyIn, ValueIn> dataOutStore) {
     return createDataSource(dataOutStore, dataOutStore.newQuery());
@@ -41,15 +41,11 @@ public class JetEngine<KeyIn, ValueIn extends PersistentBase, KeyOut, ValueOut e
                                                                             Query<KeyIn, ValueIn> query) {
     JetEngine.dataInStore = dataOutStore;
     JetEngine.query = query;
-    BatchSource<JetInputOutputFormat<KeyIn, ValueIn>> source = Sources.batchFromProcessor("gora-jet-source",
-        new JetSource<KeyIn, ValueIn>());
-    return source;
+    return Sources.batchFromProcessor("gora-jet-source", new JetSource<KeyIn, ValueIn>());
   }
 
   public Sink<JetInputOutputFormat<KeyOut, ValueOut>> createDataSink(DataStore<KeyOut, ValueOut> dataOutStore) {
     JetEngine.dataOutStore = dataOutStore;
-    Sink<JetInputOutputFormat<KeyOut, ValueOut>> sink = Sinks.fromProcessor("gora-jet-sink",
-        new JetSink<KeyOut, ValueOut>());
-    return sink;
+    return Sinks.fromProcessor("gora-jet-sink", new JetSink<KeyOut, ValueOut>());
   }
 }

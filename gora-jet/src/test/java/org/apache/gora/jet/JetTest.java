@@ -46,9 +46,8 @@ import static org.junit.Assert.assertEquals;
  */
 public class JetTest {
 
-  private static DataStore<Long, Pageview> dataStore;
   private static DataStore<Long, ResultPageView> dataStoreOut;
-  static Query<Long, Pageview> query = null;
+  private static Query<Long, Pageview> query = null;
 
   private static HBaseTestingUtility utility;
 
@@ -84,16 +83,18 @@ public class JetTest {
   @Test
   public void testNewJetSource() throws Exception {
 
-    dataStore = DataStoreFactory.getDataStore(Long.class, Pageview.class, utility.getConfiguration());
+    DataStore<Long, Pageview> dataStoreIn;
+
+    dataStoreIn = DataStoreFactory.getDataStore(Long.class, Pageview.class, utility.getConfiguration());
 
     dataStoreOut = DataStoreFactory.getDataStore(Long.class, ResultPageView.class, utility.getConfiguration());
 
-    query = dataStore.newQuery();
+    query = dataStoreIn.newQuery();
     query.setStartKey(0L);
     query.setEndKey(55L);
 
     JetEngine<Long, Pageview, Long, ResultPageView> jetEngine = new JetEngine<>();
-    BatchSource<JetInputOutputFormat<Long, Pageview>> fileSource = jetEngine.createDataSource(dataStore, query);
+    BatchSource<JetInputOutputFormat<Long, Pageview>> fileSource = jetEngine.createDataSource(dataStoreIn, query);
     Pipeline p = Pipeline.create();
     p.drawFrom(fileSource)
         .filter(item -> item.getValue().getIp().toString().equals("88.240.129.183"))
