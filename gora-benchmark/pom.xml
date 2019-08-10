@@ -97,8 +97,6 @@
     <dependency>
       <groupId>org.apache.gora</groupId>
       <artifactId>gora-mongodb</artifactId>
-      <scope>compile</scope>
-      <version>0.9-SNAPSHOT </version>
     </dependency>
 
     <dependency>
