@@ -23,17 +23,17 @@ import java.util.Map;
  */
 public class RedisMapping {
 
-  private int datebase;
+  private int database;
   private String prefix;
   private Map<String, String> fields;
   private Map<String, RedisType> types;
 
-  public int getDatebase() {
-    return datebase;
+  public int getDatabase() {
+    return database;
   }
 
-  public void setDatebase(int datebase) {
-    this.datebase = datebase;
+  public void setDatabase(int datebase) {
+    this.database = datebase;
   }
 
   public String getPrefix() {

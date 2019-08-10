@@ -24,7 +24,6 @@ import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.ResultBase;
 import org.apache.gora.redis.store.RedisStore;
 import org.apache.gora.store.DataStore;
-import org.redisson.api.RedissonClient;
 
 /**
  * Redis specific implementation of the {@link org.apache.gora.query.Result}
@@ -33,11 +32,14 @@ import org.redisson.api.RedissonClient;
 public class RedisResult<K, T extends PersistentBase> extends ResultBase<K, T> {
 
   private Iterator<String> range;
-  private int size;
+  private final int size;
 
   /**
    * Gets the data store used
+   *
+   * @return
    */
+  @Override
   public RedisStore<K, T> getDataStore() {
     return (RedisStore<K, T>) super.getDataStore();
   }
@@ -45,7 +47,7 @@ public class RedisResult<K, T extends PersistentBase> extends ResultBase<K, T> {
   /**
    * @param dataStore
    * @param query
-   * @param scanner
+   * @param rg
    */
   public RedisResult(DataStore<K, T> dataStore, Query<K, T> query, Collection<String> rg) {//, Scanner scanner) {
     super(dataStore, query);
@@ -55,6 +57,9 @@ public class RedisResult<K, T extends PersistentBase> extends ResultBase<K, T> {
 
   /**
    * Gets the items reading progress
+   *
+   * @return
+   * @throws java.io.IOException
    */
   @Override
   public float getProgress() throws IOException {
@@ -71,6 +76,9 @@ public class RedisResult<K, T extends PersistentBase> extends ResultBase<K, T> {
 
   /**
    * Gets the next item
+   *
+   * @return
+   * @throws java.io.IOException
    */
   @Override
   protected boolean nextInner() throws IOException {

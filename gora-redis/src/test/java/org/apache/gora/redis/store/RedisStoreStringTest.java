@@ -33,7 +33,7 @@ public class RedisStoreStringTest extends DataStoreTestBase {
     setTestDriver(new GoraRedisTestDriver(StorageMode.MULTIKEY, ServerMode.SINGLE));
   }
 
-  // Unsupported functionality due to the limitations in Redis java client
+  // Unsupported functionality due to the limitations in Redis
   @Test
   @Ignore("Explicit schema creation related functionality is not supported in Redis")
   @Override

@@ -34,7 +34,7 @@ import org.testcontainers.containers.FixedHostPortGenericContainer;
 public class GoraRedisTestDriver extends GoraTestDriver {
 
   private static final String DOCKER_CONTAINER_NAME = "grokzen/redis-cluster:latest";
-  private FixedHostPortGenericContainer redisContainer = ((FixedHostPortGenericContainer) new FixedHostPortGenericContainer(DOCKER_CONTAINER_NAME)
+  private final FixedHostPortGenericContainer redisContainer = ((FixedHostPortGenericContainer) new FixedHostPortGenericContainer(DOCKER_CONTAINER_NAME)
       .waitingFor(new RedisStartupLogWaitStrategy())
       .withStartupTimeout(Duration.ofMinutes(3))
       .withEnv("STANDALONE", "true")
@@ -50,8 +50,8 @@ public class GoraRedisTestDriver extends GoraTestDriver {
       .withFixedExposedPort(5000, 5000)
       .withFixedExposedPort(5001, 5001)
       .withFixedExposedPort(5002, 5002);
-  private StorageMode storageMode;
-  private ServerMode serverMode;
+  private final StorageMode storageMode;
+  private final ServerMode serverMode;
 
   public GoraRedisTestDriver(StorageMode storageMode, ServerMode serverMode) {
     super(RedisStore.class);

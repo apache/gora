@@ -27,9 +27,8 @@ import org.testcontainers.containers.output.WaitingConsumer;
 
 public class RedisStartupLogWaitStrategy extends GenericContainer.AbstractWaitStrategy {
 
-  private static final String regEx = ".*Background AOF rewrite finished successfully.*";
-
-  private int times = 3;
+  private static final String REGEX = ".*Background AOF rewrite finished successfully.*";
+  private final int times = 3;
 
   @Override
   protected void waitUntilReady() {
@@ -37,7 +36,7 @@ public class RedisStartupLogWaitStrategy extends GenericContainer.AbstractWaitSt
     this.container.followOutput(waitingConsumer);
     Predicate waitPredicate = (outputFrame) -> {
       String trimmedFrameText = ((OutputFrame) outputFrame).getUtf8String().replaceFirst("\n$", "");
-      return trimmedFrameText.matches(regEx);
+      return trimmedFrameText.matches(REGEX);
     };
 
     try {
@@ -45,7 +44,7 @@ public class RedisStartupLogWaitStrategy extends GenericContainer.AbstractWaitSt
           this.times);
     } catch (TimeoutException var4) {
       throw new ContainerLaunchException(
-          "Timed out waiting for log output matching Redis server startup Log  \'" + regEx
+          "Timed out waiting for log output matching Redis server startup Log  \'" + REGEX
           + "\'");
     }
   }

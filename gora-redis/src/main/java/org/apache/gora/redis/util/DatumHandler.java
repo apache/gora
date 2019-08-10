@@ -17,6 +17,7 @@
 package org.apache.gora.redis.util;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,7 +42,7 @@ import org.slf4j.LoggerFactory;
 
 public class DatumHandler<T extends PersistentBase> {
 
-  public static final Logger LOG = LoggerFactory.getLogger(DatumHandler.class);
+  public static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private final ConcurrentHashMap<Schema, SpecificDatumReader<?>> readerMap = new ConcurrentHashMap<>();
   private final ConcurrentHashMap<Schema, SpecificDatumWriter<?>> writerMap = new ConcurrentHashMap<>();
@@ -135,19 +136,18 @@ public class DatumHandler<T extends PersistentBase> {
 
   @SuppressWarnings("unchecked")
   public List<Object> serializeFieldList(Schema fieldSchema, Object fieldValue) {
-    List<Object> sFL = new ArrayList();
+    List<Object> serializedList = new ArrayList();
     switch (fieldSchema.getType()) {
       case ARRAY:
-        List<?> ls = (List<?>) fieldValue;
-        for (Object lsValue : ls) {
-          Object lsValue_ = serializeFieldValue(fieldSchema.getElementType(), lsValue);
-          sFL.add(lsValue_);
-        }
+        List<?> rawdataList = (List<?>) fieldValue;
+        rawdataList.stream().map((lsValue) -> serializeFieldValue(fieldSchema.getElementType(), lsValue)).forEachOrdered((lsValue_) -> {
+          serializedList.add(lsValue_);
+        });
         break;
       default:
         throw new AssertionError(fieldSchema.getType().name());
     }
-    return sFL;
+    return serializedList;
   }
 
   @SuppressWarnings("unchecked")
@@ -237,7 +237,7 @@ public class DatumHandler<T extends PersistentBase> {
     SpecificDatumReader<?> reader = readerMap.get(fieldSchema);
     if (reader == null) {
       reader = new SpecificDatumReader(fieldSchema);// ignore dirty bits
-      SpecificDatumReader localReader = null;
+      SpecificDatumReader localReader;
       if ((localReader = readerMap.putIfAbsent(fieldSchema, reader)) != null) {
         reader = localReader;
       }
@@ -256,10 +256,8 @@ public class DatumHandler<T extends PersistentBase> {
   }
 
   private boolean isNullable(Schema unionSchema) {
-    for (Schema innerSchema : unionSchema.getTypes()) {
-      if (innerSchema.getType().equals(Schema.Type.NULL)) {
-        return true;
-      }
+    if (unionSchema.getTypes().stream().anyMatch((innerSchema) -> (innerSchema.getType().equals(Schema.Type.NULL)))) {
+      return true;
     }
     return false;
   }

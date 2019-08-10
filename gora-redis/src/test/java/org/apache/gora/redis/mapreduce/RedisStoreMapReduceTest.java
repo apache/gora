@@ -31,9 +31,9 @@ import org.junit.Before;
 /**
  * Executes tests for MR jobs over Redis dataStore.
  */
-public class RedisStoreMapReduceTest extends DataStoreMapReduceTestBase{
+public class RedisStoreMapReduceTest extends DataStoreMapReduceTestBase {
 
-  private GoraRedisTestDriver driver;
+  private final GoraRedisTestDriver driver;
 
   public RedisStoreMapReduceTest() throws IOException {
     super();

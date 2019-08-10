@@ -33,7 +33,7 @@ public class RedisStoreClusterTest extends DataStoreTestBase {
     setTestDriver(new GoraRedisTestDriver(StorageMode.SINGLEKEY, ServerMode.CLUSTER));
   }
 
-  // Unsupported functionality due to the limitations in Aerospike java client
+  // Unsupported functionality due to the limitations in Redis
   @Test
   @Ignore("Explicit schema creation related functionality is not supported in Redis")
   @Override
