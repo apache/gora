@@ -382,7 +382,7 @@
             </execution>
           </executions>
           <configuration>
-            <tarLongFileMode>posix</tarLongFileMode>
+            <tarLongFileMode>gnu</tarLongFileMode>
             <finalName>${assembly.finalName}</finalName>
             <descriptors>
               <descriptor>sources-dist/src/main/assembly/src.xml</descriptor>
@@ -771,6 +771,7 @@
     <module>gora-solr</module>
     <module>gora-aerospike</module>
     <module>gora-ignite</module>
+    <module>gora-redis</module>
     <module>gora-tutorial</module>
     <module>sources-dist</module>
   </modules>
@@ -795,6 +796,8 @@
     <!-- Ignite Dependencies -->
     <ignite.version>2.6.0</ignite.version>
     <sqlbuilder.version>2.1.7</sqlbuilder.version>
+    <!-- Redis Dependencies -->
+    <redisson.version>3.11.0</redisson.version>
     <!-- Solr Dependencies -->
     <lucene-solr.version>8.0.0</lucene-solr.version>
     <solr-solrj.version>8.0.0</solr-solrj.version>
@@ -845,7 +848,7 @@
     <maven-javadoc-plugin.version>2.8.1</maven-javadoc-plugin.version>
     <maven-gpg-plugin.version>1.4</maven-gpg-plugin.version>
     <apache-rat-plugin.version>0.8</apache-rat-plugin.version>
-    <maven-assembly-plugin.version>3.1.1</maven-assembly-plugin.version>
+    <maven-assembly-plugin.version>2.5.4</maven-assembly-plugin.version>
     <maven-deploy-plugin.version>2.5</maven-deploy-plugin.version>
     <checksum-maven-plugin.version>1.7</checksum-maven-plugin.version>
     <maven-clean-plugin.version>2.5</maven-clean-plugin.version>
@@ -1061,7 +1064,37 @@
         <version>${flink.version}</version>
         <scope>compile</scope>
       </dependency>
-
+      
+      <!-- Redis DataStore dependencies -->
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-redis</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-redis</artifactId>
+        <version>${project.version}</version>
+        <type>test-jar</type>
+      </dependency>
+      <dependency>
+        <groupId>org.redisson</groupId>
+        <artifactId>redisson-all</artifactId>
+        <version>${redisson.version}</version>
+      </dependency>  
+      <dependency>
+        <groupId>org.apache.spark</groupId>
+        <artifactId>spark-core_2.11</artifactId>
+        <version>${spark.version}</version>
+        <scope>provided</scope>
+        <exclusions>
+          <exclusion>
+            <groupId>org.eclipse.jetty.orbit</groupId>
+            <artifactId>javax.servlet</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      
       <!--Hadoop dependencies -->
       <dependency>
         <groupId>org.apache.hadoop</groupId>
