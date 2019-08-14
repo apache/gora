@@ -774,6 +774,7 @@
     <module>gora-hive</module>
     <module>gora-tutorial</module>
     <module>sources-dist</module>
+    <module>gora-hive</module>
   </modules>
 
   <properties>

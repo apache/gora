@@ -71,6 +71,7 @@ public class HiveMappingBuilder<K, T> {
     HiveMapping mapping = new HiveMapping();
     final Class<T> persistentClass = (Class<T>) dataStore.getPersistentClass();
     final Class<K> keyClass = (Class<K>) dataStore.getKeyClass();
+
     final SAXBuilder saxBuilder = new SAXBuilder();
     final InputStream is = getClass().getClassLoader().getResourceAsStream(filename);
     if (is == null) {
