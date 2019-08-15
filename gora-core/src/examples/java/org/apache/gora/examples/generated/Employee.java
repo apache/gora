@@ -710,6 +710,29 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
     }
 
         /**
+     * Gets the value of the 'value' field.
+         */
+    public java.lang.CharSequence getValue() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+
+    /**
+     * Sets the value of the 'value' field.
+         * @param value the value to set.
+     */
+    public void setValue(java.lang.CharSequence value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+  
+    /**
+     * Checks the dirty status of the 'value' field. A field is dirty if it represents a change that has not yet been written to the database.
+         * @param value the value to set.
+     */
+    public boolean isValueDirty() {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+
+        /**
      * Gets the value of the 'webpage' field.
          */
     public org.apache.gora.examples.generated.WebPage getWebpage() {
