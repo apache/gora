@@ -77,7 +77,7 @@ public class HiveStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
     LOG.debug("Initializing Hive store");
     super.initialize(keyClass, persistentClass, properties);
     hiveStoreParameters = HiveStoreParameters.load(properties);
-    mapping = new HiveMappingBuilder(this)
+    mapping = new HiveMappingBuilder<Object, Object>(this)
         .readMappingFile(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE));
     try {
       dataContext = new HiveDataContext(hiveStoreParameters);
@@ -186,7 +186,7 @@ public class HiveStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
   @Override
   public Result<K, T> execute(Query<K, T> query) throws GoraException {
     String[] fields = query.getFields();
-    SatisfiedSelectBuilder builder;
+    SatisfiedSelectBuilder<?> builder;
     if (fields == null || fields.length == 0) {
       builder = dataContext.query().from(getSchemaTable()).selectAll();
     } else {

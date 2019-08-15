@@ -48,9 +48,9 @@ public class HiveResultParser {
 
   private static final Logger LOG = LoggerFactory.getLogger((MethodHandles.lookup().lookupClass()));
 
-  private HiveStore hiveStore;
+  private HiveStore<?, ?> hiveStore;
 
-  public HiveResultParser(HiveStore hiveStore) {
+  public HiveResultParser(HiveStore<?, ?> hiveStore) {
     this.hiveStore = hiveStore;
   }
 
