@@ -53,9 +53,9 @@ public class HiveMappingBuilder<K, T> {
   private static final String TABLE_ATTRIBUTE = "table";
   private static final String NAME_ATTRIBUTE = "name";
 
-  private HiveStore dataStore;
+  private HiveStore<?, ?> dataStore;
 
-  public HiveMappingBuilder(HiveStore dataStore) {
+  public HiveMappingBuilder(HiveStore<K, ?> dataStore) {
     this.dataStore = dataStore;
   }
 
@@ -69,8 +69,8 @@ public class HiveMappingBuilder<K, T> {
   @SuppressWarnings("unchecked")
   public HiveMapping readMappingFile(String filename) throws GoraException {
     HiveMapping mapping = new HiveMapping();
-    final Class<T> persistentClass = dataStore.getPersistentClass();
-    final Class<K> keyClass = dataStore.getKeyClass();
+    final Class<T> persistentClass = (Class<T>) dataStore.getPersistentClass();
+    final Class<K> keyClass = (Class<K>) dataStore.getKeyClass();
     final SAXBuilder saxBuilder = new SAXBuilder();
     final InputStream is = getClass().getClassLoader().getResourceAsStream(filename);
     if (is == null) {

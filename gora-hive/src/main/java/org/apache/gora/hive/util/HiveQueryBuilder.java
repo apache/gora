@@ -49,7 +49,7 @@ public class HiveQueryBuilder {
 
   private static final Logger LOG = LoggerFactory.getLogger((MethodHandles.lookup().lookupClass()));
 
-  private HiveStore hiveStore;
+  private HiveStore<?, ?> hiveStore;
   private HiveMapping hiveMapping;
 
   /**
@@ -63,7 +63,7 @@ public class HiveQueryBuilder {
   private static final char SPACE_SYMBOL = ' ';
   private static final char PERIOD_SYMBOL = '.';
 
-  public HiveQueryBuilder(HiveStore hiveStore, HiveMapping hiveMapping) {
+  public HiveQueryBuilder(HiveStore<?, ?> hiveStore, HiveMapping hiveMapping) {
     this.hiveStore = hiveStore;
     this.hiveMapping = hiveMapping;
   }
@@ -172,7 +172,7 @@ public class HiveQueryBuilder {
    * @throws GoraException throws if the schema generation is failed
    */
   private Schema createAvroSchema(Map<String, Field> fieldMap) throws GoraException {
-    Class persistentClass = hiveStore.getPersistentClass();
+    Class<?> persistentClass = hiveStore.getPersistentClass();
     Schema avroSchema = Schema.createRecord(persistentClass.getSimpleName(), null,
         persistentClass.getPackage().getName(), false);
     List<Field> avroFieldList = new ArrayList<>();
