@@ -104,7 +104,7 @@ public class DataStoreTestUtil {
     return employee;
   }
 
-  private static <K> WebPage createWebPage() {
+  public static <K> WebPage createWebPage() {
     WebPage webpage = WebPage.newBuilder().build();
     webpage.setUrl(new Utf8("url.."));
     webpage.setContent(ByteBuffer.wrap("test content".getBytes(Charset.defaultCharset())));
@@ -337,7 +337,7 @@ public class DataStoreTestUtil {
    * @param employee
    * @param after
    */
-  private static void assertEqualEmployeeObjects(Employee employee, Employee after) {
+  public static void assertEqualEmployeeObjects(Employee employee, Employee after) {
     //for (int i = 1; i < employee.SCHEMA$.getFields().size(); i++) {
     //  for (int j = 1; j < after.SCHEMA$.getFields().size(); j++) {
     //    assertEquals(employee.SCHEMA$.getFields().get(i), after.SCHEMA$.getFields().get(j));
@@ -387,7 +387,7 @@ public class DataStoreTestUtil {
    * @param beforeWebPage
    * @param afterWebPage
    */
-  private static void assertEqualWebPageObjects(WebPage beforeWebPage, WebPage afterWebPage) {
+  public static void assertEqualWebPageObjects(WebPage beforeWebPage, WebPage afterWebPage) {
     //check url field
     CharSequence beforeUrl = beforeWebPage.getUrl();
     CharSequence afterUrl = afterWebPage.getUrl();
@@ -423,7 +423,7 @@ public class DataStoreTestUtil {
    * @param beforeMetadata
    * @param afterMetadata
    */
-  private static void assertEqualMetadataObjects(Metadata beforeMetadata, Metadata afterMetadata) {
+  public static void assertEqualMetadataObjects(Metadata beforeMetadata, Metadata afterMetadata) {
     //check version field
     int beforeVersion = beforeMetadata.getVersion();
     int afterVersion = afterMetadata.getVersion();
@@ -763,7 +763,7 @@ public class DataStoreTestUtil {
         " actual=" + CONTENTS[i] + " i=" + i
         , Arrays.equals( toByteArray(page.getContent() )
         , CONTENTS[i].getBytes(Charset.defaultCharset())));
-    
+
       List<CharSequence> parsedContent = page.getParsedContent();
       assertNotNull(parsedContent);
       assertTrue(parsedContent.size() > 0);
