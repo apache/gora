@@ -15,7 +15,11 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 -->
+<<<<<<< HEAD
 <!-- Hive Test Server Configurations -->
+=======
+<!-- Hive Embedded Server Configurations -->
+>>>>>>> Configure hive embedded server for testing
 <configuration>
   <property>
     <name>hive.metastore.schema.verification</name>
@@ -30,6 +34,13 @@
     <value>false</value>
   </property>
   <property>
+<<<<<<< HEAD
+=======
+    <name>hive.server2.webui.use.ssl</name>
+    <value>false</value>
+  </property>
+  <property>
+>>>>>>> Configure hive embedded server for testing
     <name>javax.jdo.option.ConnectionURL</name>
     <value>jdbc:derby:;databaseName=target/metastore_db;create=true</value>
   </property>
