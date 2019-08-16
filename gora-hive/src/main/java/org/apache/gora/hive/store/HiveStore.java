@@ -77,7 +77,7 @@ public class HiveStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
     LOG.debug("Initializing Hive store");
     super.initialize(keyClass, persistentClass, properties);
     hiveStoreParameters = HiveStoreParameters.load(properties);
-    mapping = new HiveMappingBuilder<Object, Object>(this)
+    mapping = new HiveMappingBuilder<Object, Object>((HiveStore<Object, ?>) this)
         .readMappingFile(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE));
     try {
       dataContext = new HiveDataContext(hiveStoreParameters);
