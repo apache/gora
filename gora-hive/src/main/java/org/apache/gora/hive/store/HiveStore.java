@@ -146,9 +146,10 @@ public class HiveStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
   }
 
   /**
-   * Put an persistent object into the hive store
-   * Though we use a key value, currently hive does not validate integrity constraints and
-   * Hive jdbc driver doesn't support update queries on a particular key
+   * Put an persistent object into the hive store Though we use a key value, currently hive does not
+   * validate integrity constraints and Hive server may not support update queries on a particular
+   * key
+   *
    * @param key the key of the object.
    * @param obj the Persistent object.
    * @throws GoraException throws if putting object is failed
@@ -168,19 +169,47 @@ public class HiveStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
     }
   }
 
+  /**
+   * This deletes a record from the hive store for the supplied key. But, delete queries do not
+   * support in all hive servers and they require some specific server configurations.
+   *
+   * @param key the key of the deleting entry.
+   */
   @Override
   public boolean delete(K key) throws GoraException {
     Table table = getSchemaTable();
-
     DeleteFrom delete = new DeleteFrom(table).where(HiveMapping.DEFAULT_KEY_NAME).eq(key);
     dataContext.executeUpdate(delete);
     return true;
   }
 
+  /**
+   * This deletes all the matching records from hive store. But, delete queries do not support in
+   * all hive servers and they require some specific server configurations.
+   *
+   * @param query matching records to this query will be deleted.
+   * @return number of deleted entires. -1 if all entries were deleted
+   */
   @Override
-  public long deleteByQuery(Query<K, T> query) {
-    throw new UnsupportedOperationException(
-        "Currently hive jdbc driver doesn't support delete query");
+  public long deleteByQuery(Query<K, T> query) throws GoraException {
+    if (query.getKey() == null && query.getStartKey() == null && query.getEndKey() == null) {
+      deleteSchema();
+      createSchema();
+      return -1;
+    } else {
+      try {
+        int deleteCount = 0;
+        Result<K, T> result = query.execute();
+        while (result.next()) {
+          if (this.delete(result.getKey())) {
+            deleteCount++;
+          }
+        }
+        return deleteCount;
+      } catch (Exception e) {
+        throw new GoraException(e);
+      }
+    }
   }
 
   @Override
@@ -311,22 +340,24 @@ public class HiveStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
 
   /**
    * Read the key value from a given data row
+   *
    * @param row Resulted data row
    * @return value of the key field
    * @throws GoraException throws if reading of the key value is failed
    */
   @SuppressWarnings("unchecked")
-  public K readKey(Row row) throws GoraException{
+  public K readKey(Row row) throws GoraException {
     if (row == null || row.size() == 0) {
       LOG.error("Data set is empty");
       return null;
     }
     Column keyColumn = getSchemaTable().getColumnByName(HiveMapping.DEFAULT_KEY_NAME);
-    return (K)row.getValue(keyColumn);
+    return (K) row.getValue(keyColumn);
   }
 
   /**
    * Execute a select query based on key value
+   *
    * @param key key value
    * @param fields filed names to be selected
    * @return Resulted data set

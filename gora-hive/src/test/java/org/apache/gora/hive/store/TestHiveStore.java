@@ -37,8 +37,8 @@ import org.apache.gora.util.StringUtils;
 import org.junit.Ignore;
 
 /**
- * HiveStore Tests extending {@link DataStoreTestBase}
- * which run the base JUnit test suite for Gora.
+ * HiveStore Tests extending {@link DataStoreTestBase} which run the base JUnit test suite for
+ * Gora.
  */
 public class TestHiveStore extends DataStoreTestBase {
 
@@ -107,7 +107,7 @@ public class TestHiveStore extends DataStoreTestBase {
     WebPage webpage = new BeanFactoryImpl<>(String.class, WebPage.class).newPersistent();
     webpage.setUrl(new Utf8("url.."));
     webpage.setContent(ByteBuffer.wrap("test content".getBytes(Charset.defaultCharset())));
-    webpage.setParsedContent(new ArrayList<CharSequence>());
+    webpage.setParsedContent(new ArrayList<>());
 
     Metadata metadata = new BeanFactoryImpl<>(String.class, Metadata.class).newPersistent();
     webpage.setMetadata(metadata);
@@ -121,34 +121,34 @@ public class TestHiveStore extends DataStoreTestBase {
     DataStoreTestUtil.assertEqualWebPageObjects(webpage, after.getWebpage());
   }
 
-  @Ignore("Hive jdbc driver doesn't support deleting and updating entries")
+  @Ignore("Hive embedded server doesn't support deleting and updating entries")
   @Override
   public void testExists() throws Exception {
-    //Hive jdbc driver doesn't support deleting and updating entries
+    //Hive embedded server doesn't support deleting and updating entries
   }
 
-  @Ignore("Hive jdbc driver doesn't support deleting and updating entries")
+  @Ignore("Hive embedded server doesn't support deleting and updating entries")
   @Override
   public void testDelete() throws Exception {
-    //Hive jdbc driver doesn't support deleting and updating entries
+    //Hive embedded server doesn't support deleting and updating entries
   }
 
-  @Ignore("Hive jdbc driver doesn't support deleting and updating entries")
+  @Ignore("Hive embedded server doesn't support deleting and updating entries")
   @Override
   public void testDeleteByQuery() throws Exception {
-    //Hive jdbc driver doesn't support deleting and updating entries
+    //Hive embedded server doesn't support deleting and updating entries
   }
 
-  @Ignore("Hive jdbc driver doesn't support deleting and updating entries")
+  @Ignore("Hive embedded server doesn't support deleting and updating entries")
   @Override
   public void testDeleteByQueryFields() throws Exception {
-    //Hive jdbc driver doesn't support deleting and updating entries
+    //Hive embedded server doesn't support deleting and updating entries
   }
 
-  @Ignore("Hive jdbc driver doesn't support deleting and updating entries")
+  @Ignore("Hive embedded server doesn't support deleting and updating entries")
   @Override
   public void testUpdate() throws Exception {
-    //Hive jdbc driver doesn't support deleting and updating entries
+    //Hive embedded server doesn't support deleting and updating entries
   }
 
   @Ignore("Hive datastore doesn't support recursive records")
