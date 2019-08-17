@@ -67,7 +67,6 @@
         <includes>
           <include>**/*</include>
         </includes>
-        <!--targetPath>${project.basedir}/target/classes/</targetPath -->
       </testResource>
     </testResources>
     <plugins>

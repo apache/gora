@@ -28,13 +28,21 @@ import static org.apache.gora.dynamodb.store.DynamoDBUtils.REGION_PROP;
 import static org.apache.gora.dynamodb.store.DynamoDBUtils.SERIALIZATION_TYPE;
 import static org.apache.gora.dynamodb.store.DynamoDBUtils.SLEEP_DELETE_TIME;
 import static org.apache.gora.dynamodb.store.DynamoDBUtils.WAIT_TIME;
+import static org.apache.gora.dynamodb.store.DynamoDBUtils.WS_PROVIDER;
 
+import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.gora.dynamodb.query.DynamoDBKey;
+import org.apache.gora.dynamodb.query.DynamoDBQuery;
+import org.apache.gora.dynamodb.query.DynamoDBResult;
 import org.apache.gora.dynamodb.store.DynamoDBMapping.DynamoDBMappingBuilder;
 import org.apache.gora.persistency.BeanFactory;
 import org.apache.gora.persistency.ws.impl.PersistentWSBase;
@@ -52,6 +60,8 @@ import org.jdom.input.SAXBuilder;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.PropertiesCredentials;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.dynamodbv2.model.DeleteTableRequest;
 import com.amazonaws.services.dynamodbv2.model.DeleteTableResult;
 import com.amazonaws.services.dynamodbv2.model.DescribeTableRequest;
@@ -68,8 +78,9 @@ import com.amazonaws.services.dynamodbv2.model.TableDescription;
  */
 public class DynamoDBStore<K, T extends PersistentWSBase> extends WSDataStoreBase<K, T> {
 
-  /** Handler for different serialization modes. */
-  private IDynamoDB<K, T> dynamoDbStore;
+  /** Method's names for getting range and hash keys. */
+  private static final String GET_RANGE_KEY_METHOD = "getRangeKey";
+  private static final String GET_HASH_KEY_METHOD = "getHashKey";
 
   /** Helper to write useful information into the logs. */
   public static final Logger LOG = LoggerFactory.getLogger(DynamoDBStore.class);
@@ -99,9 +110,7 @@ public class DynamoDBStore<K, T extends PersistentWSBase> extends WSDataStoreBas
   private String preferredSchema;
 
   @Override
-  public void close() {
-    dynamoDbStore.close();
-  }
+  public void close() {}
 
   /**
    * Creates the table within the data store for a preferred schema or for a
@@ -109,17 +118,105 @@ public class DynamoDBStore<K, T extends PersistentWSBase> extends WSDataStoreBas
    */
   @Override
   public void createSchema() throws GoraException {
-    dynamoDbStore.createSchema();
+    LOG.info("Creating Native DynamoDB Schemas.");
+    if (getDynamoDbMapping().getTables().isEmpty()) {
+      throw new GoraException("There are not tables defined.");
+    }
+    try {
+      if (getPreferredSchema() == null) {
+        LOG.debug("Creating schemas.");
+        // read the mapping object
+        for (String tableName : getDynamoDbMapping()
+                .getTables().keySet())
+          DynamoDBUtils.executeCreateTableRequest(
+                  getDynamoDbClient(), tableName,
+                  getTableKeySchema(tableName),
+                  getTableAttributes(tableName),
+                  getTableProvisionedThroughput(tableName));
+        LOG.debug("tables created successfully.");
+      } else {
+        String tableName = getPreferredSchema();
+        LOG.debug("Creating schema " + tableName);
+        DynamoDBUtils.executeCreateTableRequest(
+                getDynamoDbClient(), tableName,
+                getTableKeySchema(tableName),
+                getTableAttributes(tableName),
+                getTableProvisionedThroughput(tableName));
+      }
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
   }
 
   @Override
   public boolean delete(K key) throws GoraException {
-    return dynamoDbStore.delete(key);
+    try {
+      T object = null;
+      Object rangeKey = null, hashKey = null;
+      DynamoDBMapper mapper = new DynamoDBMapper(
+              getDynamoDbClient());
+      for (Method met : key.getClass().getDeclaredMethods()) {
+        if (met.getName().equals(GET_RANGE_KEY_METHOD)) {
+          Object[] params = null;
+          rangeKey = met.invoke(key, params);
+          break;
+        }
+      }
+      for (Method met : key.getClass().getDeclaredMethods()) {
+        if (met.getName().equals(GET_HASH_KEY_METHOD)) {
+          Object[] params = null;
+          hashKey = met.invoke(key, params);
+          break;
+        }
+      }
+      if (hashKey == null)
+        object = (T) mapper.load(persistentClass, key);
+      if (rangeKey == null)
+        object = (T) mapper.load(persistentClass, hashKey);
+      else
+        object = (T) mapper.load(persistentClass, hashKey, rangeKey);
+
+      if (object == null)
+        return false;
+
+      // setting key for dynamodbMapper
+      mapper.delete(object);
+      return true;
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
   }
 
   @Override
   public long deleteByQuery(Query<K, T> query) throws GoraException {
-    return dynamoDbStore.deleteByQuery(query);
+    // TODO verify whether or not we are deleting a whole row
+    // String[] fields = getFieldsToQuery(query.getFields());
+    // find whether all fields are queried, which means that complete
+    // rows will be deleted
+    // boolean isAllFields = Arrays.equals(fields
+    // , getBeanFactory().getCachedPersistent().getFields());
+    ArrayList<T> deletes = null ;
+    try {
+      Result<K, T> result = execute(query);
+      deletes = new ArrayList<T>();
+      while (result.next()) {
+        T resultObj = result.get();
+        deletes.add(resultObj);
+
+        @SuppressWarnings("rawtypes")
+        DynamoDBKey dKey = new DynamoDBKey();
+
+        dKey.setHashKey(getHashFromObj(resultObj));
+
+        dKey.setRangeKey(getRangeKeyFromObj(resultObj));
+        delete((K) dKey);
+      }
+    } catch (GoraException e) {
+      throw e ; // If it is a GoraException we assume it is already logged
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
+    return deletes.size();
   }
 
   @Override
@@ -146,46 +243,88 @@ public class DynamoDBStore<K, T extends PersistentWSBase> extends WSDataStoreBas
 
   @Override
   public Result<K, T> execute(Query<K, T> query) throws GoraException {
-    return dynamoDbStore.execute(query);
+    try {
+      DynamoDBQuery<K, T> dynamoDBQuery = buildDynamoDBQuery(query);
+      DynamoDBMapper mapper = new DynamoDBMapper(
+              getDynamoDbClient());
+      List<T> objList = null;
+      if (DynamoDBQuery.getType().equals(DynamoDBQuery.RANGE_QUERY))
+        objList = mapper.scan(persistentClass,
+                (DynamoDBScanExpression) dynamoDBQuery.getQueryExpression());
+      if (DynamoDBQuery.getType().equals(DynamoDBQuery.SCAN_QUERY))
+        objList = mapper.scan(persistentClass,
+                (DynamoDBScanExpression) dynamoDBQuery.getQueryExpression());
+      return new DynamoDBResult<K, T>(this, query, objList);
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
   }
 
   @Override
   public void flush() throws GoraException {
-    dynamoDbStore.flush();
+    LOG.info("DynamoDBNativeStore puts and gets directly into the datastore");
   }
 
   @Override
   public T get(K key) throws GoraException {
-    return dynamoDbStore.get(key);
+    T object = null;
+    try {
+      Object rangeKey;
+      rangeKey = getRangeKeyFromKey(key);
+      Object hashKey = getHashFromKey(key);
+      if (hashKey != null) {
+        DynamoDBMapper mapper = new DynamoDBMapper(
+                getDynamoDbClient());
+        if (rangeKey != null)
+          object = mapper.load(persistentClass, hashKey, rangeKey);
+        else
+          object = mapper.load(persistentClass, hashKey);
+        return object;
+
+      } else {
+        throw new GoraException("Error while retrieving keys from object: "
+                + key.toString());
+      }
+    } catch (GoraException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
   }
 
   @Override
   public T get(K key, String[] fields) throws GoraException {
-    return dynamoDbStore.get(key, fields);
+    DynamoDBQuery<K,T> query = new DynamoDBQuery<K,T>();
+    query.setDataStore(this); //query.setKeyRange(key, key);
+    query.setFields(fields); //query.setLimit(1);
+    Result<K,T> result = execute(query); 
+    boolean hasResult = false;
+    try {
+      hasResult = result.next();
+    } catch (Exception e) {
+      throw new GoraException(e);
+    } 
+    return hasResult ? result.get() : null;
   }
 
   @Override
   public BeanFactory<K, T> getBeanFactory() {
-    // TODO Auto-generated method stub
     return null;
   }
 
   @Override
   public Class<K> getKeyClass() {
-    // TODO Auto-generated method stub
     return null;
   }
 
   @Override
   public List<PartitionQuery<K, T>> getPartitions(Query<K, T> arg0)
-      throws IOException {
-    // TODO Auto-generated method stub
+          throws IOException {
     return null;
   }
 
   @Override
   public Class<T> getPersistentClass() {
-    // TODO Auto-generated method stub
     return null;
   }
 
@@ -205,19 +344,42 @@ public class DynamoDBStore<K, T extends PersistentWSBase> extends WSDataStoreBas
    */
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass,
-      Properties properties) throws GoraException {
+          Properties properties) throws GoraException {
     try {
       LOG.debug("Initializing DynamoDB store");
       setDynamoDBProperties(properties);
-
-      dynamoDbStore = DynamoDBFactory.buildDynamoDBStore(getSerializationType());
-      dynamoDbStore.setDynamoDBStoreHandler(this);
-      dynamoDbStore.initialize(keyClass, persistentClass, properties);
+      super.initialize(keyClass, persistentClass, properties);
+      setWsProvider(WS_PROVIDER);
+      if (autoCreateSchema) {
+        createSchema();
+      }
     } catch (GoraException e) {
       throw e;
     } catch (Exception e) {
       throw new GoraException(e);
     }
+  }
+
+  /**
+   * Builds a DynamoDB query from a generic Query object
+   * 
+   * @param query
+   *          Generic query object
+   * @return DynamoDBQuery
+   */
+  private DynamoDBQuery<K, T> buildDynamoDBQuery(Query<K, T> query) {
+    if (getSchemaName() == null)
+      throw new IllegalStateException("There is not a preferred schema set.");
+
+    DynamoDBQuery<K, T> dynamoDBQuery = new DynamoDBQuery<K, T>();
+    dynamoDBQuery.setKeySchema(getDynamoDbMapping()
+            .getKeySchema(getSchemaName()));
+    dynamoDBQuery.setKeyItems(getDynamoDbMapping().getItems(getSchemaName()));
+    dynamoDBQuery.setQuery(query);
+    dynamoDBQuery.setConsistencyReadLevel(getConsistencyReads());
+    dynamoDBQuery.buildExpression();
+
+    return dynamoDBQuery;
   }
 
   private void setDynamoDBProperties(Properties properties) throws IOException {
@@ -232,22 +394,52 @@ public class DynamoDBStore<K, T extends PersistentWSBase> extends WSDataStoreBas
 
   @Override
   public K newKey() throws GoraException {
-    return dynamoDbStore.newKey();
+    return null;
   }
 
   @Override
   public T newPersistent() throws GoraException {
-    return dynamoDbStore.newPersistent();
+    T obj = null;
+    try {
+      obj = persistentClass.getDeclaredConstructor().newInstance();
+    } catch (InstantiationException e) {
+      LOG.error("Error instantiating " + persistentClass.getCanonicalName(), e);
+      throw new GoraException(e);
+    } catch (IllegalAccessException e) {
+      LOG.error("Error instantiating " + persistentClass.getCanonicalName(),e );
+      throw new GoraException(e);
+    } catch (NoSuchMethodException | InvocationTargetException | IllegalArgumentException | SecurityException e) {
+      LOG.error("Error instantiating " + persistentClass.getCanonicalName(),e );
+      throw new GoraException(e);
+    }
+    return obj;
   }
 
   @Override
   public Query<K, T> newQuery() {
-    return dynamoDbStore.newQuery();
+    Query<K, T> query = new DynamoDBQuery<K, T>(this);
+    // query.setFields(getFieldsToQuery(null));
+    return query;
   }
 
   @Override
   public void put(K key, T value) throws GoraException {
-    dynamoDbStore.put(key, value);
+    try {
+      Object hashKey = getHashKey(key, value);
+      Object rangeKey = getRangeKey(key, value);
+      if (hashKey != null) {
+        DynamoDBMapper mapper = new DynamoDBMapper(getDynamoDbClient());
+        if (rangeKey != null) {
+          mapper.load(persistentClass, hashKey, rangeKey);
+        } else {
+          mapper.load(persistentClass, hashKey);
+        }
+        mapper.save(value);
+      } else
+        throw new GoraException("No HashKey found in Key nor in Object.");
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
   }
 
   /**
@@ -285,22 +477,20 @@ public class DynamoDBStore<K, T extends PersistentWSBase> extends WSDataStoreBas
 
   @Override
   public void setBeanFactory(BeanFactory<K, T> arg0) {
-    // TODO Auto-generated method stub
   }
 
   @Override
   public void setKeyClass(Class<K> arg0) {
-    dynamoDbStore.setKeyClass(arg0);
+    setKeyClass(arg0);
   }
 
   @Override
   public void setPersistentClass(Class<T> arg0) {
-    dynamoDbStore.setPersistentClass(arg0);
+    setPersistentClass(arg0);
   }
 
   @Override
   public void truncateSchema() throws GoraException {
-    // TODO Auto-generated method stub
   }
 
   /** 
@@ -318,10 +508,10 @@ public class DynamoDBStore<K, T extends PersistentWSBase> extends WSDataStoreBas
     try {
       SAXBuilder builder = new SAXBuilder();
       Document doc = builder.build(getClass().getClassLoader()
-          .getResourceAsStream(MAPPING_FILE));
+              .getResourceAsStream(MAPPING_FILE));
       if (doc == null || doc.getRootElement() == null)
         throw new GoraException("Unable to load " + MAPPING_FILE
-            + ". Please check its existance!");
+                + ". Please check its existance!");
 
       Element root = doc.getRootElement();
       List<Element> tableElements = root.getChildren("table");
@@ -330,12 +520,12 @@ public class DynamoDBStore<K, T extends PersistentWSBase> extends WSDataStoreBas
 
         String tableName = tableElement.getAttributeValue("name");
         long readCapacUnits = Long.parseLong(tableElement
-            .getAttributeValue("readcunit"));
+                .getAttributeValue("readcunit"));
         long writeCapacUnits = Long.parseLong(tableElement
-            .getAttributeValue("writecunit"));
+                .getAttributeValue("writecunit"));
 
         mappingBuilder.setProvisionedThroughput(tableName, readCapacUnits,
-            writeCapacUnits);
+                writeCapacUnits);
         LOG.debug("Basic table properties have been set: Name, and Provisioned throughput.");
 
         // Retrieving attributes
@@ -374,9 +564,9 @@ public class DynamoDBStore<K, T extends PersistentWSBase> extends WSDataStoreBas
   public void executeDeleteTableRequest(String pTableName) {
     try {
       DeleteTableRequest deleteTableRequest = new DeleteTableRequest()
-          .withTableName(pTableName);
+              .withTableName(pTableName);
       DeleteTableResult result = getDynamoDBClient().deleteTable(
-          deleteTableRequest);
+              deleteTableRequest);
       waitForTableToBeDeleted(pTableName);
       LOG.debug("Schema: " + result.getTableDescription()
       + " deleted successfully.");
@@ -404,9 +594,9 @@ public class DynamoDBStore<K, T extends PersistentWSBase> extends WSDataStoreBas
       }
       try {
         DescribeTableRequest request = new DescribeTableRequest()
-            .withTableName(pTableName);
+                .withTableName(pTableName);
         TableDescription tableDescription = getDynamoDBClient().describeTable(
-            request).getTable();
+                request).getTable();
         String tableStatus = tableDescription.getTableStatus();
         LOG.debug(pTableName + " - current state: " + tableStatus);
       } catch (AmazonServiceException ase) {
@@ -428,9 +618,9 @@ public class DynamoDBStore<K, T extends PersistentWSBase> extends WSDataStoreBas
     TableDescription tableDescription = null;
     try {
       DescribeTableRequest describeTableRequest = new DescribeTableRequest()
-          .withTableName(tableName);
+              .withTableName(tableName);
       tableDescription = getDynamoDBClient()
-          .describeTable(describeTableRequest).getTable();
+              .describeTable(describeTableRequest).getTable();
     } catch (ResourceNotFoundException e) {
       LOG.error("Error while getting table schema: " + tableName);
       return tableDescription;
@@ -480,38 +670,19 @@ public class DynamoDBStore<K, T extends PersistentWSBase> extends WSDataStoreBas
     return false;
   }
 
-
-  /**
-   * Set DynamoDBStore to be used.
-   * 
-   * @param iDynamoDB
-   */
-  public void setDynamoDbStore(IDynamoDB<K, T> iDynamoDB) {
-    this.dynamoDbStore = iDynamoDB;
-  }
-
   /**
    * @param serializationType
    *          the serializationType to set
    */
   private void setSerializationType(String serializationType) {
     if (serializationType == null || serializationType.isEmpty()
-        || serializationType.equals(DynamoDBUtils.AVRO_SERIALIZATION)) {
+            || serializationType.equals(DynamoDBUtils.AVRO_SERIALIZATION)) {
       LOG.warn("Using AVRO serialization.");
       this.serializationType = DynamoDBUtils.DynamoDBType.AVRO;
     } else {
       LOG.warn("Using DynamoDB serialization.");
       this.serializationType = DynamoDBUtils.DynamoDBType.DYNAMO;
     }
-  }
-
-  /**
-   * Gets serialization type used inside DynamoDB module.
-   * 
-   * @return
-   */
-  private DynamoDBUtils.DynamoDBType getSerializationType() {
-    return serializationType;
   }
 
   /**
@@ -586,6 +757,162 @@ public class DynamoDBStore<K, T extends PersistentWSBase> extends WSDataStoreBas
 
   @Override
   public boolean exists(K key) throws GoraException {
-    return dynamoDbStore.exists(key);
+    return exists(key);
   }
+
+
+  private Object getHashKey(K key, T obj) throws IllegalArgumentException,
+  IllegalAccessException, InvocationTargetException {
+    // try to get the hashKey from 'key'
+    Object hashKey = getHashFromKey(key);
+    // if the key does not have these attributes then try to get them from the
+    // object
+    if (hashKey == null)
+      hashKey = getHashFromObj(obj);
+    // if no key has been found, then we try with the key
+    if (hashKey == null)
+      hashKey = key;
+    return hashKey;
+  }
+
+  /**
+   * Gets a hash key from a key of type K
+   * 
+   * @param obj
+   *          Object from which we will get a hash key
+   * @return
+   * @throws IllegalArgumentException
+   * @throws IllegalAccessException
+   * @throws InvocationTargetException
+   */
+  private Object getHashFromKey(K obj) throws IllegalArgumentException,
+  IllegalAccessException, InvocationTargetException {
+    Object hashKey = null;
+    // check if it is a DynamoDBKey
+    if (obj instanceof DynamoDBKey) {
+      hashKey = ((DynamoDBKey<?, ?>) obj).getHashKey();
+    } else {
+      // maybe the class has the method defined
+      for (Method met : obj.getClass().getDeclaredMethods()) {
+        if (met.getName().equals(GET_HASH_KEY_METHOD)) {
+          Object[] params = null;
+          hashKey = met.invoke(obj, params);
+          break;
+        }
+      }
+    }
+    return hashKey;
+  }
+
+  /**
+   * Gets a hash key from an object of type T
+   * @param <R>
+   * 
+   * @param obj
+   *          Object from which we will get a hash key
+   * @return
+   * @throws IllegalArgumentException
+   * @throws IllegalAccessException
+   * @throws InvocationTargetException
+   */
+  private <R> Object getHashFromObj(R obj) throws IllegalArgumentException,
+  IllegalAccessException, InvocationTargetException {
+    Object hashKey = null;
+    // check if it is a DynamoDBKey
+    if (obj instanceof DynamoDBKey) {
+      hashKey = ((DynamoDBKey) obj).getHashKey();
+    } else {
+      // maybe the class has the method defined
+      for (Method met : obj.getClass().getDeclaredMethods()) {
+        if (met.getName().equals(GET_HASH_KEY_METHOD)) {
+          Object[] params = null;
+          hashKey = met.invoke(obj, params);
+          break;
+        }
+      }
+    }
+    return hashKey;
+  }
+
+  private Object getRangeKey(K key, T obj) throws IllegalArgumentException,
+  IllegalAccessException, InvocationTargetException {
+    Object rangeKey = getRangeKeyFromKey(key);
+    if (rangeKey == null)
+      rangeKey = getRangeKeyFromObj(obj);
+    return rangeKey;
+  }
+
+  /**
+   * Gets a range key from a key obj. This verifies if it is using a
+   * {@link DynamoDBKey}
+   * 
+   * @param obj
+   *          Object from which a range key will be extracted
+   * @return
+   * @throws IllegalArgumentException
+   * @throws IllegalAccessException
+   * @throws InvocationTargetException
+   */
+  private Object getRangeKeyFromKey(K obj) throws IllegalArgumentException,
+  IllegalAccessException, InvocationTargetException {
+    Object rangeKey = null;
+    // check if it is a DynamoDBKey
+    if (obj instanceof DynamoDBKey) {
+      rangeKey = ((DynamoDBKey<?, ?>) obj).getRangeKey();
+    } else {
+      // maybe the class has the method defined
+      for (Method met : obj.getClass().getDeclaredMethods()) {
+        if (met.getName().equals(GET_RANGE_KEY_METHOD)) {
+          Object[] params = null;
+          rangeKey = met.invoke(obj, params);
+          break;
+        }
+      }
+    }
+    return rangeKey;
+  }
+
+  /**
+   * Gets a range key from an object T
+   * @param <R>
+   * 
+   * @param obj
+   *          Object from which a range key will be extracted
+   * @return
+   * @throws IllegalArgumentException
+   * @throws IllegalAccessException
+   * @throws InvocationTargetException
+   */
+  private <R> Object getRangeKeyFromObj(R obj) throws IllegalArgumentException,
+  IllegalAccessException, InvocationTargetException {
+    Object rangeKey = null;
+    // check if it is a DynamoDBKey
+    if (obj instanceof DynamoDBKey) {
+      rangeKey = ((DynamoDBKey<?, ?>) obj).getRangeKey();
+    } else {
+      // maybe the class has the method defined
+      for (Method met : obj.getClass().getDeclaredMethods()) {
+        if (met.getName().equals(GET_RANGE_KEY_METHOD)) {
+          Object[] params = null;
+          rangeKey = met.invoke(obj, params);
+          break;
+        }
+      }
+    }
+    return rangeKey;
+  }
+
+  @Override
+  public String getProvider() {
+    return null;
+  }
+
+  @Override
+  public void setProvider(String arg0) {}
+
+  @Override
+  public void write(DataOutput out) throws IOException {}
+
+  @Override
+  public void readFields(DataInput in) throws IOException {}
 }

@@ -800,7 +800,7 @@
     <solr-solrj.version>8.0.0</solr-solrj.version>
     <jetty.version>9.4.14.v20181114</jetty.version>
     <tika.version>1.12</tika.version>
-    <httpcomponents.version>4.5.6</httpcomponents.version>
+    <httpcomponents.version>4.5.9</httpcomponents.version>
     <commons-io.version>2.5</commons-io.version>
     <restlet.version>2.3.1</restlet.version>
     <!-- Flink Dependencies -->
@@ -1022,6 +1022,10 @@
             <groupId>org.eclipse.jetty.orbit</groupId>
             <artifactId>javax.servlet</artifactId>
           </exclusion>
+          <exclusion>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+          </exclusion>
         </exclusions>
       </dependency>
 
@@ -1068,6 +1072,12 @@
         <artifactId>hadoop-client</artifactId>
         <version>${hadoop-2.version}</version>
         <optional>true</optional>
+        <exclusions>
+          <exclusion>
+            <groupId>commons-httpclient</groupId>
+            <artifactId>commons-httpclient</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
 
       <dependency>

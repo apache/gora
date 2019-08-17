@@ -41,10 +41,10 @@ import com.amazonaws.services.dynamodbv2.model.ComparisonOperator;
 /**
  * Test case for DynamoDBStore.
  */
-public class TestDynamoDBNativeStore extends WSDataStoreTestBase {
+public class TestDynamoDBStore extends WSDataStoreTestBase {
 
   public static final Logger log = LoggerFactory
-      .getLogger(TestDynamoDBNativeStore.class);
+      .getLogger(TestDynamoDBStore.class);
 
   static {
     setTestDriver(new GoraDynamoDBTestDriver());

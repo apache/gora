@@ -53,19 +53,11 @@
     <testOutputDirectory>target/test-classes</testOutputDirectory>
     <testSourceDirectory>src/test/java</testSourceDirectory>
     <sourceDirectory>src/main/java</sourceDirectory>
-    <resources>
-      <resource>
-        <directory>${basedir}/src/main/resources</directory>
-      </resource>
-      <resource>
-        <directory>${basedir}/conf</directory>
-      </resource>
-    </resources>
     <testResources>
       <testResource>
-        <directory>src/test/conf/</directory>
+        <directory>${project.basedir}/src/test/conf</directory>
         <includes>
-          <include>**</include>
+          <include>**/*</include>
         </includes>
       </testResource>
     </testResources>

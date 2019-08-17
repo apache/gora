@@ -13,7 +13,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 
 @DynamoDBTable(tableName = "Person")
-public class Person implements Persistent {
+public class Person extends org.apache.gora.persistency.ws.impl.PersistentWSBase implements Persistent {
     private double ssn;
 
     @DynamoDBHashKey(attributeName="ssn") 
@@ -25,6 +25,11 @@ public class Person implements Persistent {
     @DynamoDBRangeKey(attributeName="date") 
     public String getRangeKey() { return date; } 
     public void setRangeKey(String pDate){  this.date = pDate; }
+
+    private String firstName;
+    @DynamoDBAttribute(attributeName = "FirstName")
+    public String getFirstName() {  return firstName;  }
+    public void setFirstName(String pFirstName) {  this.firstName = pFirstName;  }
 
     private String lastName;
     @DynamoDBAttribute(attributeName = "LastName")
@@ -40,11 +45,6 @@ public class Person implements Persistent {
     @DynamoDBAttribute(attributeName = "Salary")
     public double getSalary() {  return salary;  }
     public void setSalary(double pSalary) {  this.salary = pSalary;  }
-
-    private String firstName;
-    @DynamoDBAttribute(attributeName = "FirstName")
-    public String getFirstName() {  return firstName;  }
-    public void setFirstName(String pFirstName) {  this.firstName = pFirstName;  }
 
 
     public void setNew(boolean pNew){}
