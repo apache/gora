@@ -17,7 +17,6 @@
  */
 package org.apache.gora.dynamodb.store;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -28,10 +27,14 @@ import org.slf4j.LoggerFactory;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.PropertiesCredentials;
+import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsyncClient;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsyncClientBuilder;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreamsAsyncClientBuilder;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreamsClientBuilder;
 import com.amazonaws.services.dynamodbv2.model.AttributeDefinition;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
 import com.amazonaws.services.dynamodbv2.model.DescribeTableRequest;
@@ -72,6 +75,9 @@ public class DynamoDBUtils {
   /** Parameter to decide where the data store will make its computations */
   public static final String ENDPOINT_PROP = "gora.dynamodb.endpoint";
 
+  /** Parameter to decide which AWS region to use */
+  public static final String REGION_PROP = "gora.dynamodb.region";
+
   /** Parameter to decide which schema will be used */
   public static final String PREF_SCH_NAME = "preferred.schema.name";
 
@@ -93,6 +99,8 @@ public class DynamoDBUtils {
   /** DynamoDB client types. */
   public static final String SYNC_CLIENT_PROP = "sync";
   public static final String ASYNC_CLIENT_PROP = "async";
+  public static final String STREAMS_CLIENT_PROP = "streams";
+  public static final String STREAMS_ASYNC_CLIENT_PROP = "streamsasync";
 
   /** The mapping file to create the tables from. */
   public static final String MAPPING_FILE = "gora-dynamodb-mapping.xml";
@@ -112,11 +120,40 @@ public class DynamoDBUtils {
    * @return
    */
   public static AmazonDynamoDB getClient(String clientType,
-      AWSCredentials credentials) {
+          AWSCredentials credentials, String endpoint, String region) {
     if (clientType.equals(SYNC_CLIENT_PROP))
-      return new AmazonDynamoDBClient(credentials);
+      return AmazonDynamoDBClientBuilder
+              .standard()
+              .withEndpointConfiguration(
+                      new AwsClientBuilder.EndpointConfiguration(endpoint, region))
+              .withCredentials(
+                      new AWSStaticCredentialsProvider(credentials))
+              .build();
     if (clientType.equals(ASYNC_CLIENT_PROP))
-      return new AmazonDynamoDBAsyncClient(credentials);
+      return AmazonDynamoDBAsyncClientBuilder
+              .standard()
+              .withEndpointConfiguration(
+                      new AwsClientBuilder.EndpointConfiguration(endpoint, region))
+              .withCredentials(
+                      new AWSStaticCredentialsProvider(credentials))
+              .build();
+    if (clientType.equals(STREAMS_CLIENT_PROP))
+      return (AmazonDynamoDB) AmazonDynamoDBStreamsClientBuilder
+              .standard()
+              .withEndpointConfiguration(
+                      new AwsClientBuilder.EndpointConfiguration(endpoint, region))
+              .withCredentials(
+                      new AWSStaticCredentialsProvider(
+                              credentials))
+              .build();
+    if (clientType.equals(STREAMS_ASYNC_CLIENT_PROP))
+      return (AmazonDynamoDB) AmazonDynamoDBStreamsAsyncClientBuilder
+              .standard()
+              .withEndpointConfiguration(
+                      new AwsClientBuilder.EndpointConfiguration(endpoint, region))
+              .withCredentials(
+                      new AWSStaticCredentialsProvider(credentials))
+              .build();
     return null;
   }
 
@@ -130,7 +167,7 @@ public class DynamoDBUtils {
     PropertiesCredentials awsCredentials = null;
     try {
       InputStream awsCredInpStr = clazz.getClassLoader().getResourceAsStream(
-          AWS_CREDENTIALS_PROPERTIES);
+              AWS_CREDENTIALS_PROPERTIES);
       if (awsCredInpStr == null)
         LOG.error("AWS Credentials File was not found on the classpath!");
       awsCredentials = new PropertiesCredentials(awsCredInpStr);
@@ -151,9 +188,9 @@ public class DynamoDBUtils {
    * @param proThrou
    */
   public static void executeCreateTableRequest(AmazonDynamoDB awsClient, String tableName,
-      ArrayList<KeySchemaElement> keySchema, Map<String, String> attrs, ProvisionedThroughput proThrou) {
+          ArrayList<KeySchemaElement> keySchema, Map<String, String> attrs, ProvisionedThroughput proThrou) {
     CreateTableRequest createTableRequest = buildCreateTableRequest(tableName,
-        keySchema, proThrou, attrs);
+            keySchema, proThrou, attrs);
     // use the client to perform the request
     try {
       awsClient.createTable(createTableRequest).getTableDescription();
@@ -176,7 +213,7 @@ public class DynamoDBUtils {
    * @return
    */
   public static CreateTableRequest buildCreateTableRequest(String tableName,
-      ArrayList<KeySchemaElement> keySchema, ProvisionedThroughput proThrou, Map<String, String> attrs) {
+          ArrayList<KeySchemaElement> keySchema, ProvisionedThroughput proThrou, Map<String, String> attrs) {
     CreateTableRequest createTableRequest = new CreateTableRequest();
     createTableRequest.setTableName(tableName);
     createTableRequest.setKeySchema(keySchema);
@@ -199,7 +236,7 @@ public class DynamoDBUtils {
    * @param tableName
    */
   public static void waitForTableToBecomeAvailable(AmazonDynamoDB awsClient,
-      String tableName) {
+          String tableName) {
     LOG.debug("Waiting for {} to become available", tableName);
     long startTime = System.currentTimeMillis();
     long endTime = startTime + WAIT_TIME;
@@ -210,9 +247,9 @@ public class DynamoDBUtils {
       }
       try {
         DescribeTableRequest request = new DescribeTableRequest()
-            .withTableName(tableName);
+                .withTableName(tableName);
         TableDescription tableDescription = awsClient.describeTable(request)
-            .getTable();
+                .getTable();
         String tableStatus = tableDescription.getTableStatus();
         LOG.debug("{} - current state: {}", tableName, tableStatus);
         if (tableStatus.equals(TableStatus.ACTIVE.toString()))

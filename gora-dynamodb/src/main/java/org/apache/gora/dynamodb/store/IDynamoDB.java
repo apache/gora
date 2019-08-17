@@ -17,16 +17,16 @@
  */
 package org.apache.gora.dynamodb.store;
 
-import org.apache.gora.persistency.Persistent;
-import org.apache.gora.store.DataStore;
+import org.apache.gora.persistency.ws.impl.PersistentWSBase;
+import org.apache.gora.store.ws.impl.WSDataStoreBase;
 
-public interface IDynamoDB<K, T extends Persistent> extends DataStore<K, T> {
+public interface IDynamoDB<K, T extends PersistentWSBase> extends WSDataStoreBase<K, T> {
 
   /**
    * Sets the handler to the main DynamoDB
    *
    * @param dynamoHandler handler to main DynamoDB
    */
-  public abstract void setDynamoDBStoreHandler(DynamoDBStore<K, T> dynamoHandler);
+  public abstract void setDynamoDBStoreHandler(DynamoDBStore dynamoHandler);
 
 }

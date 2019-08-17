@@ -113,10 +113,10 @@ public class GoraDynamoDBTestDriver extends GoraTestDriver {
    */
   @SuppressWarnings("unchecked")
   protected DataStore<DynamoDBKey, Person> createDataStore()
-      throws IOException {
+          throws IOException {
     if (personStore == null)
       personStore = WSDataStoreFactory.createDataStore(DynamoDBStore.class,
-          DynamoDBKey.class, Person.class, auth);
+              DynamoDBKey.class, Person.class, auth);
     return personStore;
   }
 
@@ -125,10 +125,10 @@ public class GoraDynamoDBTestDriver extends GoraTestDriver {
    */
   @SuppressWarnings("unchecked")
   public <K, T extends Persistent> DataStore<K, T> createDataStore(
-      Class<K> keyClass, Class<T> persistentClass) throws GoraException {
+          Class<K> keyClass, Class<T> persistentClass) throws GoraException {
     personStore = (DynamoDBStore<DynamoDBKey, Person>) WSDataStoreFactory
-        .createDataStore((Class<? extends DataStore<K, T>>) dataStoreClass,
-            keyClass, persistentClass, auth);
+            .createDataStore((Class<? extends DataStore<K, T>>) dataStoreClass,
+                    keyClass, persistentClass, auth);
     dataStores.add(personStore);
     return (DataStore<K, T>) personStore;
   }
@@ -195,9 +195,9 @@ public class GoraDynamoDBTestDriver extends GoraTestDriver {
 
     try{
       DescribeTableRequest describeTableRequest = new DescribeTableRequest()
-          .withTableName(tableName);
+              .withTableName(tableName);
       tableDescription = dynamoDBClient.describeTable(describeTableRequest)
-          .getTable();
+              .getTable();
     }
     catch(ResourceNotFoundException e){
       tableDescription = null;

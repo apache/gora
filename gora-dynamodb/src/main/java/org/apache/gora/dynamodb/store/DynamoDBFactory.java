@@ -24,9 +24,7 @@ import org.slf4j.LoggerFactory;
 
 public class DynamoDBFactory {
 
-  /** Helper to write useful information into the logs. */
-  public static final Logger LOG = LoggerFactory
-      .getLogger(DynamoDBFactory.class);
+  public static final Logger LOG = LoggerFactory.getLogger(DynamoDBFactory.class);
 
   @SuppressWarnings("unchecked")
   public static <K, T extends Persistent> IDynamoDB<K, T> buildDynamoDBStore(

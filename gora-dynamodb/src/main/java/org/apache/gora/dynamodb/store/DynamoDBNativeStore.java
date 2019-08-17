@@ -54,7 +54,7 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
       .getLogger(DynamoDBNativeStore.class);
 
   /** Handler to {@link DynamoDBStore} so common methods can be accessed. */
-  private DynamoDBStore<K, T> dynamoDBStoreHandler;
+  private DynamoDBStore dynamoDBStoreHandler;
 
   /**
    * Deletes items using a specific query
@@ -383,7 +383,7 @@ public class DynamoDBNativeStore<K, T extends Persistent> extends
    * .gora.dynamodb.store.DynamoDBStore)
    */
   @Override
-  public void setDynamoDBStoreHandler(DynamoDBStore<K, T> dynamoHandler) {
+  public void setDynamoDBStoreHandler(DynamoDBStore dynamoHandler) {
     this.dynamoDBStoreHandler = dynamoHandler;
   }
 

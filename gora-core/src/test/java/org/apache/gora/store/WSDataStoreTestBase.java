@@ -32,29 +32,27 @@ import static org.junit.Assert.assertTrue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.gora.GoraTestDriver;
-import org.apache.gora.persistency.Persistent;
 
 /**
  * A base class for {@link DataStore} tests. This is just a convenience
  * class, which actually only uses {@link DataStoreTestUtil} methods to
  * run the tests. Not all test cases can extend this class (like TestHBaseStore),
  * so all test logic should reside in DataStoreTestUtil class.
- * 
  */
-public abstract class WSDataStoreTestBase<K, T extends Persistent> {
+public abstract class WSDataStoreTestBase {
 
   public static final Logger log = LoggerFactory.getLogger(WSDataStoreTestBase.class);
 
   protected static GoraTestDriver testDriver;
 
-  protected DataStore<K, T> dataStore;
+  protected DataStore dataStore;
   
   private static boolean setUpClassCalled = false;
   
-  public Class<K> persistentKeyClass;
-  public Class<T> persistentValClass;
+  public Class persistentKeyClass;
+  public Class persistentValClass;
 
-  protected abstract DataStore<K,T> createDataStore();
+  protected abstract DataStore createDataStore();
   
   /** junit annoyingly forces BeforeClass to be static, so this method
    * should be called from a static block
@@ -63,11 +61,11 @@ public abstract class WSDataStoreTestBase<K, T extends Persistent> {
     testDriver = driver;
   }
 
-  public void setPersistentKeyClass(Class<K> pKeyClass){
+  public void setPersistentKeyClass(Class pKeyClass){
 	  persistentKeyClass = pKeyClass;
   }
   
-  public void setPersistentValClass(Class<T> pValClass){
+  public void setPersistentValClass(Class pValClass){
 	  persistentValClass = pValClass;
   }
   

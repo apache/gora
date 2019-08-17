@@ -25,14 +25,15 @@ import java.util.Map;
 
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.impl.PersistentBase;
+import org.apache.gora.persistency.ws.impl.PersistentWSBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.store.impl.DataStoreBase;
+import org.apache.gora.store.ws.impl.WSDataStoreBase;
 import org.apache.gora.util.GoraException;
 
-public class DynamoDBAvroStore<K, T extends PersistentBase> extends
-DataStoreBase<K, T> implements IDynamoDB<K, T> {
+public class DynamoDBAvroStore<K, T extends PersistentWSBase> extends WSDataStoreBase<K, T> implements IDynamoDB<K, T> {
 
   /**
    * The values are Avro fields pending to be stored.
@@ -44,6 +45,7 @@ DataStoreBase<K, T> implements IDynamoDB<K, T> {
   private Map<K, T> buffer = Collections
       .synchronizedMap(new LinkedHashMap<K, T>());
 
+  @SuppressWarnings("unused")
   private DynamoDBStore<K, ? extends Persistent> dynamoDBStoreHandler;
 
   /**

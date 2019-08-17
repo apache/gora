@@ -24,6 +24,7 @@ import static org.apache.gora.dynamodb.store.DynamoDBUtils.CONSISTENCY_READS_TRU
 import static org.apache.gora.dynamodb.store.DynamoDBUtils.ENDPOINT_PROP;
 import static org.apache.gora.dynamodb.store.DynamoDBUtils.MAPPING_FILE;
 import static org.apache.gora.dynamodb.store.DynamoDBUtils.PREF_SCH_NAME;
+import static org.apache.gora.dynamodb.store.DynamoDBUtils.REGION_PROP;
 import static org.apache.gora.dynamodb.store.DynamoDBUtils.SERIALIZATION_TYPE;
 import static org.apache.gora.dynamodb.store.DynamoDBUtils.SLEEP_DELETE_TIME;
 import static org.apache.gora.dynamodb.store.DynamoDBUtils.WAIT_TIME;
@@ -36,11 +37,11 @@ import java.util.Properties;
 
 import org.apache.gora.dynamodb.store.DynamoDBMapping.DynamoDBMappingBuilder;
 import org.apache.gora.persistency.BeanFactory;
-import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.ws.impl.PersistentWSBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
-import org.apache.gora.store.DataStore;
+import org.apache.gora.store.ws.impl.WSDataStoreBase;
 import org.apache.gora.util.GoraException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +66,7 @@ import com.amazonaws.services.dynamodbv2.model.TableDescription;
  * @param <K>
  * @param <T>
  */
-public class DynamoDBStore<K, T extends Persistent> implements DataStore<K, T> {
+public class DynamoDBStore<K, T extends PersistentWSBase> extends WSDataStoreBase<K, T> {
 
   /** Handler for different serialization modes. */
   private IDynamoDB<K, T> dynamoDbStore;
@@ -223,9 +224,8 @@ public class DynamoDBStore<K, T extends Persistent> implements DataStore<K, T> {
     setSerializationType(properties.getProperty(SERIALIZATION_TYPE));
     PropertiesCredentials creds = DynamoDBUtils.getCredentials(this.getClass());
     setPreferredSchema(properties.getProperty(PREF_SCH_NAME));
-    setDynamoDBClient(DynamoDBUtils.getClient(
-        properties.getProperty(CLI_TYP_PROP), creds));
-    getDynamoDBClient().setEndpoint(properties.getProperty(ENDPOINT_PROP));
+    setDynamoDBClient(DynamoDBUtils.getClient(properties.getProperty(CLI_TYP_PROP), creds, 
+            properties.getProperty(ENDPOINT_PROP), properties.getProperty(REGION_PROP)));
     setDynamoDbMapping(readMapping());
     setConsistency(properties.getProperty(CONSISTENCY_READS));
   }

@@ -41,8 +41,7 @@ import com.amazonaws.services.dynamodbv2.model.ComparisonOperator;
 /**
  * Test case for DynamoDBStore.
  */
-public class TestDynamoDBNativeStore extends
-WSDataStoreTestBase<DynamoDBKey, Person> {
+public class TestDynamoDBNativeStore extends WSDataStoreTestBase {
 
   public static final Logger log = LoggerFactory
       .getLogger(TestDynamoDBNativeStore.class);
@@ -302,7 +301,7 @@ WSDataStoreTestBase<DynamoDBKey, Person> {
           "Inca", "Atahualpa", "Peru", "Brazil", "Ecuador");
       dataStore.put(dKey, p1);
       // get item
-      Person p2 = dataStore.get(dKey);
+      Person p2 = (Person) dataStore.get(dKey);
       printPersonInfo(p2);
     } catch (Exception e) {
       log.error("error in test method: testGetDataStore.", e.getMessage());
