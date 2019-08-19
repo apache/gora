@@ -53,59 +53,16 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 import com.yahoo.ycsb.ByteIterator;
 
 /**
- * The Class GoraBenchmarkUtils has some utilities that dynamically generate files needed to for gora.
- * It generate the following files. 
- * a. Database Mapping File
- * b. Avro Files
- * c. Data Beans
+ * The Class GoraBenchmarkUtils has some utilities that dynamically generate
+ * files needed to for gora. It generate the following files. a. Database
+ * Mapping File b. Avro Files c. Data Beans
  */
 public class GoraBenchmarkUtils {
-  /** The Constant AVRO_PATH. */
-  private static final String AVRO_PATH = "src/main/avro";
-  /** The Constant AVRO_FILE. */
-  private static final String AVRO_FILE = "user.json";
-  /** The field prefix. */
-  private static String FIELD_PREFIX = "field";
-  /** The Constant USER_ID_VALUE. */
-  private static final String USER_ID_VALUE = "userId";
-  /** The Constant AVRO_FULL_PATH. */
-  private static final String AVRO_FULL_PATH = AVRO_PATH + "/" + AVRO_FILE;
-  /** The Constant NULL. */
-  private static final String NULL = "null";
-  /** The Constant RECORD. */
-  private static final String RECORD = "User";
-  /** The Constant NAMESPACE_VALUE. */
-  private static final String NAMESPACE_VALUE = "org.apache.gora.benchmark.generated";
-  /** The Constant NAMESPACE_KEY. */
-  private static final String NAMESPACE_KEY = "namespace";
-  /** The Constant NAME_KEY. */
-  private static final String NAME_KEY = "name";
-  /** The Constant MONGODB. */
-  private static final String MONGODB = "mongodb";
-  /** The Constant COUCHDB. */
-  private static final String COUCHDB = "couchdb";
-  /** The Constant HBASE. */
-  private static final String HBASE = "hbase";
-  /** The Constant KEYCLASS. */
-  private static final String KEYCLASS = "java.lang.String";
-  /** The db mapping path. */
-  private static String DB_MAPPING_PATH = "src/main/resources";
-  /** The Constant MONGO_MAPPING_FILE. */
-  private static final String MONGO_MAPPING_FILE = "gora-mongodb-mapping.xml";
-  /** The Constant HBASE_MAPPING_FILE. */
-  private static final String HBASE_MAPPING_FILE = "gora-hbase-mapping.xml";
-  /** The Constant COUCHDB_MAPPING_FILE. */
-  private static final String COUCHDB_MAPPING_FILE = "gora-couchdb-mapping.xml";
-  /** The Constant BEAN_DESTINATION_DIR. */
-  private static final File BEAN_DESTINATION_DIR = new File("src/main/java/");
-  /** The Constant DEFAULT_DATA_STORE_KEY. */
-  private static final String DEFAULT_DATA_STORE_KEY = "gora.datastore.default";
-  private static final String GORA_ROOT_ELEMENT = "gora-otd";
+
   private static final Logger LOG = LoggerFactory.getLogger(GoraBenchmarkUtils.class);
 
   /**
@@ -132,13 +89,14 @@ public class GoraBenchmarkUtils {
    * @param numberOfFields
    *          the number of fields
    */
-  public void generateAvroSchema(int numberOfFields) {
+  public static void generateAvroSchema(int numberOfFields) {
     try {
-      File avroFile = new File(AVRO_FULL_PATH);
-      FieldAssembler<Schema> fieldAssembler = SchemaBuilder.record(RECORD).namespace(NAMESPACE_VALUE).fields();
-      fieldAssembler.name(USER_ID_VALUE).type().stringType().stringDefault(NULL);
-      for (int i = 0; i < numberOfFields; i++) {
-        fieldAssembler.name(FIELD_PREFIX + i).type().stringType().stringDefault(NULL);
+      File avroFile = new File(Constants.AVRO_FULL_PATH);
+      FieldAssembler<Schema> fieldAssembler = SchemaBuilder.record(Constants.RECORD)
+          .namespace(Constants.NAMESPACE_VALUE).fields();
+      fieldAssembler.name(Constants.USER_ID_VALUE).type().stringType().stringDefault(Constants.NULL);
+      for (int fieldCount = 0; fieldCount < numberOfFields; fieldCount++) {
+        fieldAssembler.name(Constants.FIELD_PREFIX + fieldCount).type().stringType().stringDefault(Constants.NULL);
       }
       Schema sc = fieldAssembler.endRecord();
       String schemaString = sc.toString();
@@ -147,43 +105,43 @@ public class GoraBenchmarkUtils {
       avroWriter.write(avroSchema.toString(4));
       avroWriter.close();
     } catch (FileNotFoundException e) {
-      LOG.info(e.getMessage(), e);
+      LOG.info("Cannot find file " + Constants.AVRO_FULL_PATH, e.getMessage(), e);
     } catch (IOException e) {
-      LOG.info(e.getMessage(), e);
+      LOG.info("There is a problem generating avro schema", e.getMessage(), e);
     }
   }
 
   /**
    * Generate database mapping file. Each database has its own mapping syntax.
-   * These files are xml files
+   * These files generated are xml files
    *
    * @param dbName
    *          the db name
    */
   @SuppressWarnings("unchecked")
-  public void generateMappingFile(String dbName) {
+  public static void generateMappingFile(String dbName) {
     DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
     DocumentBuilder docBuilder;
     try {
       docBuilder = documentBuilderFactory.newDocumentBuilder();
-      documentBuilderFactory = DocumentBuilderFactory.newInstance();
       Document mappingDocument = docBuilder.newDocument();
-      Element rootNode = mappingDocument.createElement(GORA_ROOT_ELEMENT);
-      
+      Element rootNode = mappingDocument.createElement(Constants.GORA_ROOT_ELEMENT);
+
       mappingDocument.appendChild(rootNode);
-      JSONObject jsonObject = generateJSONObject(AVRO_FULL_PATH);
+      JSONObject jsonObject = generateJSONObject(Constants.AVRO_FULL_PATH);
       Iterator<String> keys = jsonObject.keys();
-      String nameSpace = jsonObject.getString(NAMESPACE_KEY);
-      String dataBean = jsonObject.getString(NAME_KEY);
+      String nameSpace = jsonObject.getString(Constants.NAMESPACE_KEY);
+      String dataBean = jsonObject.getString(Constants.NAME_KEY);
       String fullNameSpace = nameSpace + "." + dataBean;
-      buildMappingDocument(keys, dbName, mappingDocument, rootNode, fullNameSpace, jsonObject);
-      
-      //Start building the comment node
+      Element mappingClass = mappingDocument.createElement(Constants.CLASS);
+      buildMappingDocument(keys, dbName, mappingDocument, rootNode, fullNameSpace, jsonObject, mappingClass);
+
+      // Start building the comment node
       Element commentElement = mappingDocument.getDocumentElement();
-      String license = new LicenseHeaders("ASLv2").getLicense();
+      String license = new LicenseHeaders(Constants.ASLV2).getLicense();
       Comment licenseHeader = mappingDocument.createComment(license);
       commentElement.getParentNode().insertBefore(licenseHeader, commentElement);
-      
+
       // write the content into xml file
       TransformerFactory transformerFactory = TransformerFactory.newInstance();
       Transformer transformer = transformerFactory.newTransformer();
@@ -191,23 +149,23 @@ public class GoraBenchmarkUtils {
       transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
       DOMSource source = new DOMSource(mappingDocument);
       StreamResult result = null;
-      if (dbName.equals(MONGODB)) {
-        result = new StreamResult(new File(DB_MAPPING_PATH + "/" + MONGO_MAPPING_FILE));
-      } else if (dbName.equals(HBASE)) {
-        result = new StreamResult(new File(DB_MAPPING_PATH + "/" + HBASE_MAPPING_FILE));
-      } else if (dbName.equals(COUCHDB)) {
-        result = new StreamResult(new File(DB_MAPPING_PATH + "/" + COUCHDB_MAPPING_FILE));
+      if (dbName.equals(Constants.MONGODB)) {
+        result = new StreamResult(new File(Constants.DB_MAPPING_PATH + "/" + Constants.MONGO_MAPPING_FILE));
+      } else if (dbName.equals(Constants.HBASE)) {
+        result = new StreamResult(new File(Constants.DB_MAPPING_PATH + "/" + Constants.HBASE_MAPPING_FILE));
+      } else if (dbName.equals(Constants.COUCHDB)) {
+        result = new StreamResult(new File(Constants.DB_MAPPING_PATH + "/" + Constants.COUCHDB_MAPPING_FILE));
       }
       transformer.transform(source, result);
       // Output to console for testing
       StreamResult consoleResult = new StreamResult(new StringWriter());
       transformer.transform(source, consoleResult);
     } catch (ParserConfigurationException e) {
-      LOG.info(e.getMessage(), e);
+      LOG.info("There is a parsing the document\n {}", e.getMessage(), e);
     } catch (TransformerConfigurationException e) {
-      LOG.info(e.getMessage(), e);
+      LOG.info("There is a problem transforming the document \n {}", e.getMessage(), e);
     } catch (TransformerException e) {
-      LOG.info(e.getMessage(), e);
+      LOG.info("There is a problem in transformation\n {}", e.getMessage(), e);
     }
   }
 
@@ -216,8 +174,8 @@ public class GoraBenchmarkUtils {
    *
    * @return the input files
    */
-  public File[] getInputFiles() {
-    File inputDir = new File(AVRO_PATH);
+  public static File[] getInputFiles() {
+    File inputDir = new File(Constants.AVRO_PATH);
     File[] inputFiles = null;
     if (inputDir.isDirectory()) {
       if (inputDir.length() > 0)
@@ -229,13 +187,13 @@ public class GoraBenchmarkUtils {
   /**
    * Generate data beans.
    */
-  public void generateDataBeans() {
+  public static void generateDataBeans() {
     LicenseHeaders licenseHeader = new LicenseHeaders("ASLv2");
     File[] inputFiles = getInputFiles();
     try {
-      GoraCompiler.compileSchema(inputFiles, BEAN_DESTINATION_DIR, licenseHeader);
+      GoraCompiler.compileSchema(inputFiles, Constants.BEAN_DESTINATION_DIR, licenseHeader);
     } catch (IOException e) {
-      LOG.info(e.getMessage(), e);
+      LOG.info("There is a problem generating Data Beans \n {}", e.getMessage(), e);
     }
   }
 
@@ -246,13 +204,13 @@ public class GoraBenchmarkUtils {
    *          the file name
    * @return the JSON object
    */
-  public JSONObject generateJSONObject(String fileName) {
+  public static JSONObject generateJSONObject(String fileName) {
     JSONObject jsonObject = new JSONObject();
     try {
       String jsonString = new String(Files.readAllBytes(Paths.get(fileName)), StandardCharsets.UTF_8);
       jsonObject = new JSONObject(jsonString);
     } catch (IOException e) {
-      LOG.info(e.getMessage(), e);
+      LOG.info("There is a problem generating JSON object\n {}", e.getMessage(), e);
     }
     return jsonObject;
   }
@@ -273,33 +231,21 @@ public class GoraBenchmarkUtils {
    * @param jsonObject
    *          the json object
    */
-  public void buildMappingDocument(Iterator<String> keys, String db, Document mappingDocument, Element rootNode,
-      String fullNameSpace, JSONObject jsonObject) {
+  public static void buildMappingDocument(Iterator<String> keys, String db, Document mappingDocument, Element rootNode,
+      String fullNameSpace, JSONObject jsonObject, Element mappingClass) {
+
     switch (db) {
-    case COUCHDB: {
-      Element mappingClass = mappingDocument.createElement("class");
-      rootNode.appendChild(mappingClass);
-      // setting attribute to element
-      Attr beanName = mappingDocument.createAttribute("name");
-      beanName.setValue(fullNameSpace);
-      mappingClass.setAttributeNode(beanName);
-      // setting attribute to element
-      Attr keyClass = mappingDocument.createAttribute("keyClass");
-      keyClass.setValue(KEYCLASS);
-      mappingClass.setAttributeNode(keyClass);
-      // setting attribute to element
-      Attr table = mappingDocument.createAttribute("table");
-      table.setValue("users");
-      mappingClass.setAttributeNode(table);
+    case Constants.COUCHDB: {
+      setMappingRootNode(mappingClass, mappingDocument, rootNode, fullNameSpace, Constants.COUCHDB);
       while (keys.hasNext()) {
         String currentKey = keys.next();
         if (jsonObject.get(currentKey) instanceof JSONArray) {
           JSONArray mappingFields = jsonObject.getJSONArray(currentKey);
           for (int i = 0; i < mappingFields.length(); i++) {
             JSONObject currentObj = mappingFields.getJSONObject(i);
-            Element fields = mappingDocument.createElement("field");
-            Attr name = mappingDocument.createAttribute("name");
-            name.setValue(currentObj.getString("name"));
+            Element fields = mappingDocument.createElement(Constants.FIELD);
+            Attr name = mappingDocument.createAttribute(Constants.NAME_KEY);
+            name.setValue(currentObj.getString(Constants.NAME_KEY));
             fields.setAttributeNode(name);
             mappingClass.appendChild(fields);
           }
@@ -307,38 +253,25 @@ public class GoraBenchmarkUtils {
       }
     }
       break;
-    case MONGODB: {
-      Element mappingClass = mappingDocument.createElement("class");
-      rootNode.appendChild(mappingClass);
-      // setting attribute to element
-      Attr beanName = mappingDocument.createAttribute("name");
-      beanName.setValue(fullNameSpace);
-      mappingClass.setAttributeNode(beanName);
-      // setting attribute to element
-      Attr keyClass = mappingDocument.createAttribute("keyClass");
-      keyClass.setValue(KEYCLASS);
-      mappingClass.setAttributeNode(keyClass);
-      // setting attribute to element
-      Attr collection = mappingDocument.createAttribute("document");
-      collection.setValue("users");
-      mappingClass.setAttributeNode(collection);
+    case Constants.MONGODB: {
+      setMappingRootNode(mappingClass, mappingDocument, rootNode, fullNameSpace, Constants.MONGODB);
       while (keys.hasNext()) {
         String currentKey = keys.next();
         if (jsonObject.get(currentKey) instanceof JSONArray) {
           JSONArray mappingFields = jsonObject.getJSONArray(currentKey);
           for (int i = 0; i < mappingFields.length(); i++) {
             JSONObject currentObj = mappingFields.getJSONObject(i);
-            Element fields = mappingDocument.createElement("field");
-            Attr name = mappingDocument.createAttribute("name");
-            name.setValue(currentObj.getString("name"));
+            Element fields = mappingDocument.createElement(Constants.FIELD);
+            Attr name = mappingDocument.createAttribute(Constants.NAME_KEY);
+            name.setValue(currentObj.getString(Constants.NAME_KEY));
             fields.setAttributeNode(name);
             // mappingClass.appendChild(fields);
-            Attr docfield = mappingDocument.createAttribute("docfield");
-            docfield.setValue(currentObj.getString("name"));
+            Attr docfield = mappingDocument.createAttribute(Constants.DOCFIELD);
+            docfield.setValue(currentObj.getString(Constants.NAME_KEY));
             fields.setAttributeNode(docfield);
             // mappingClass.appendChild(fields);
-            Attr type = mappingDocument.createAttribute("type");
-            type.setValue(currentObj.getString("type"));
+            Attr type = mappingDocument.createAttribute(Constants.TYPE);
+            type.setValue(currentObj.getString(Constants.TYPE));
             fields.setAttributeNode(type);
             mappingClass.appendChild(fields);
           }
@@ -346,32 +279,32 @@ public class GoraBenchmarkUtils {
       }
     }
       break;
-    case HBASE: {
-      Element mappingDescription = mappingDocument.createElement("table");
+    case Constants.HBASE: {
+      Element mappingDescription = mappingDocument.createElement(Constants.TABLE);
       rootNode.appendChild(mappingDescription);
       // setting attribute to element
-      Attr tableAttribute = mappingDocument.createAttribute("name");
-      tableAttribute.setValue(jsonObject.getString("name").toLowerCase(Locale.ROOT) + "s");
+      Attr tableAttribute = mappingDocument.createAttribute(Constants.NAME_KEY);
+      tableAttribute.setValue(jsonObject.getString(Constants.NAME_KEY).toLowerCase(Locale.ROOT) + "s");
       mappingDescription.setAttributeNode(tableAttribute);
-      Element familyName = mappingDocument.createElement("family");
+      Element familyName = mappingDocument.createElement(Constants.FAMILY);
       mappingDescription.appendChild(familyName);
       // setting attribute to element
-      Attr familyAttribute = mappingDocument.createAttribute("name");
-      familyAttribute.setValue("info");
+      Attr familyAttribute = mappingDocument.createAttribute(Constants.NAME_KEY);
+      familyAttribute.setValue(Constants.INFO);
       familyName.setAttributeNode(familyAttribute);
-      Element mappingClass = mappingDocument.createElement("class");
+      mappingClass = mappingDocument.createElement(Constants.CLASS);
       rootNode.appendChild(mappingClass);
       // setting attribute to element
-      Attr beanName = mappingDocument.createAttribute("name");
+      Attr beanName = mappingDocument.createAttribute(Constants.NAME_KEY);
       beanName.setValue(fullNameSpace);
       mappingClass.setAttributeNode(beanName);
       // setting attribute to element.getJSONArray("type").getString(0)
-      Attr keyClass = mappingDocument.createAttribute("keyClass");
-      keyClass.setValue(KEYCLASS);
+      Attr keyClass = mappingDocument.createAttribute(Constants.KEYCLASS_ATT);
+      keyClass.setValue(Constants.KEYCLASS);
       mappingClass.setAttributeNode(keyClass);
       // setting attribute to elementC:\\cars.xml
-      Attr table = mappingDocument.createAttribute("table");
-      table.setValue("users");
+      Attr table = mappingDocument.createAttribute(Constants.TABLE);
+      table.setValue(Constants.USERS);
       mappingClass.setAttributeNode(table);
       while (keys.hasNext()) {
         String currentKey = keys.next();
@@ -379,15 +312,15 @@ public class GoraBenchmarkUtils {
           JSONArray mappingFields = jsonObject.getJSONArray(currentKey);
           for (int i = 0; i < mappingFields.length(); i++) {
             JSONObject currentObj = mappingFields.getJSONObject(i);
-            Element fields = mappingDocument.createElement("field");
-            Attr name = mappingDocument.createAttribute("name");
-            name.setValue(currentObj.getString("name"));
+            Element fields = mappingDocument.createElement(Constants.FIELD);
+            Attr name = mappingDocument.createAttribute(Constants.NAME_KEY);
+            name.setValue(currentObj.getString(Constants.NAME_KEY));
             fields.setAttributeNode(name);
-            Attr docfield = mappingDocument.createAttribute("qualifier");
-            docfield.setValue(currentObj.getString("name"));
+            Attr docfield = mappingDocument.createAttribute(Constants.QUALIFIER);
+            docfield.setValue(currentObj.getString(Constants.NAME_KEY));
             fields.setAttributeNode(docfield);
-            Attr type = mappingDocument.createAttribute("family");
-            type.setValue("info");
+            Attr type = mappingDocument.createAttribute(Constants.FAMILY);
+            type.setValue(Constants.INFO);
             fields.setAttributeNode(type);
             mappingClass.appendChild(fields);
           }
@@ -407,22 +340,60 @@ public class GoraBenchmarkUtils {
    *          the p
    * @return the data store
    */
-  public String getDataStore(Properties p) {
-    String defaultDataStore = p.getProperty(DEFAULT_DATA_STORE_KEY);
-    String dataStore = "hbase";
+  public static String getDataStore(Properties properties) {
+    String defaultDataStore = properties.getProperty(Constants.DEFAULT_DATA_STORE_KEY);
+    String dataStore = Constants.HBASE;
     switch (defaultDataStore) {
-    case "org.apache.gora.mongodb.store.MongoStore":
-      dataStore = MONGODB;
+    case Constants.MONGODB_CLASS:
+      dataStore = Constants.MONGODB;
       break;
-    case "org.apache.gora.mongodb.store.HBaseStore":
-      dataStore = HBASE;
+    case Constants.HBASEDB_CLASS:
+      dataStore = Constants.HBASE;
       break;
-    case "org.apache.gora.couchdb.store.CouchDBStore":
-      dataStore = COUCHDB;
+    case Constants.COUCHDB_CLASS:
+      dataStore = Constants.COUCHDB;
       break;
     default:
       break;
     }
     return dataStore;
   }
+
+  /**
+   * Sets the mapping root node. //MongoDB
+   * <class keyClass="java.lang.String" name=
+   * "org.apache.gora.benchmark.generated.User" document="users"> //CouchDB
+   * <class keyClass="java.lang.String" name=
+   * "org.apache.gora.benchmark.generated.User" table="users">
+   *
+   * @param mappingDocument
+   *          the entire mapping documentmappingClass
+   * @param rootNode
+   *          the node we are setting, top most node
+   * @param fullNameSpace
+   *          namespace of object
+   */
+  public static void setMappingRootNode(Element mappingClass, Document mappingDocument, Element rootNode,
+      String fullNameSpace, String dataStore) {
+    rootNode.appendChild(mappingClass);
+    // setting attribute to element
+    Attr beanName = mappingDocument.createAttribute(Constants.NAME_KEY);
+    beanName.setValue(fullNameSpace);
+    mappingClass.setAttributeNode(beanName);
+    // setting attribute to element
+    Attr keyClass = mappingDocument.createAttribute(Constants.KEYCLASS_ATT);
+    keyClass.setValue(Constants.KEYCLASS);
+    mappingClass.setAttributeNode(keyClass);
+    // setting attribute to element
+    if (dataStore == Constants.MONGODB) {
+      Attr collection = mappingDocument.createAttribute(Constants.DOCUMENT);
+      collection.setValue(Constants.USERS);
+      mappingClass.setAttributeNode(collection);
+    } else if (dataStore == Constants.COUCHDB) {
+      Attr table = mappingDocument.createAttribute(Constants.TABLE);
+      table.setValue(Constants.USERS);
+      mappingClass.setAttributeNode(table);
+    }
+  }
+
 }

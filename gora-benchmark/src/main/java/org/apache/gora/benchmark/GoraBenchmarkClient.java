@@ -32,6 +32,8 @@ import org.apache.gora.util.GoraException;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.aerospike.client.Log;
 import com.yahoo.ycsb.ByteIterator;
 import com.yahoo.ycsb.DB;
 import com.yahoo.ycsb.DBException;
@@ -55,42 +57,44 @@ public class GoraBenchmarkClient extends DB {
   private static final Logger LOG = LoggerFactory.getLogger(GoraBenchmarkClient.class);
   private static final String FIELDS[] = User._ALL_FIELDS;
   private static volatile boolean executed;
-  public static int fieldCount;
+  private static int totalFieldCount;
   /** This is only for set to array conversion in {@link read()} method */
   private String[] DUMMY_ARRAY = new String[0];
-  DataStore<String, User> dataStore;
-  GoraBenchmarkUtils goraBenchmarkUtils = new GoraBenchmarkUtils();
-  User user = new User();
+  private DataStore<String, User> dataStore;
+  private User user = new User();
   private Properties prop;
 
   public GoraBenchmarkClient() {
   }
 
-  /***
-   * Initialisation method. This method is called once for each database
+  /**
+   * * Initialisation method. This method is called once for each database
    * instance.
+   *
+   * @throws DBException
+   *           the DB exception
    */
   public void init() throws DBException {
     try {
       // Get YCSB properties
       prop = getProperties();
-      fieldCount = Integer
+      totalFieldCount = Integer
           .parseInt(prop.getProperty(CoreWorkload.FIELD_COUNT_PROPERTY, CoreWorkload.FIELD_COUNT_PROPERTY_DEFAULT));
       String keyClass = prop.getProperty("key.class", "java.lang.String");
       String persistentClass = prop.getProperty("persistent.class", "org.apache.gora.benchmark.generated.User");
-      Properties p = DataStoreFactory.createProps();
-      dataStore = DataStoreFactory.getDataStore(keyClass, persistentClass, p, new Configuration());
+      Properties properties = DataStoreFactory.createProps();
+      dataStore = DataStoreFactory.getDataStore(keyClass, persistentClass, properties, new Configuration());
       synchronized (GoraBenchmarkClient.class) {
         if (executed)
           return;
         executed = true;
-        goraBenchmarkUtils.generateAvroSchema(fieldCount);
-        String dataStoreName = goraBenchmarkUtils.getDataStore(p);
-        goraBenchmarkUtils.generateMappingFile(dataStoreName);
-        goraBenchmarkUtils.generateDataBeans();
+        GoraBenchmarkUtils.generateAvroSchema(totalFieldCount);
+        String dataStoreName = GoraBenchmarkUtils.getDataStore(properties);
+        GoraBenchmarkUtils.generateMappingFile(dataStoreName);
+        GoraBenchmarkUtils.generateDataBeans();
       }
     } catch (GoraException e) {
-      LOG.info("There is a problem in initialising the DataStore \n"+e.getMessage());
+      LOG.info("There is a problem in initialising the DataStore \n {}", e.getMessage(), e);
     }
   }
 
@@ -99,12 +103,13 @@ public class GoraBenchmarkClient extends DB {
    * 
    * It is very important to close the datastore properly, otherwise some data
    * loss might occur.
+   *
+   * @throws DBException
+   *           the DB exception
    */
   public void cleanup() throws DBException {
-    synchronized (GoraBenchmarkClient.class) {
-      if (dataStore != null)
-        dataStore.close();
-    }
+    if (dataStore != null)
+      dataStore.close();
   }
 
   /**
@@ -121,6 +126,7 @@ public class GoraBenchmarkClient extends DB {
     try {
       dataStore.delete(key);
     } catch (Exception e) {
+      LOG.info("There is a problem deleting record\n {}", e.getMessage(), e);
       return Status.ERROR;
     }
     return Status.OK;
@@ -144,16 +150,16 @@ public class GoraBenchmarkClient extends DB {
   public Status insert(String table, String key, Map<String, ByteIterator> values) {
     try {
       user.setUserId(key);
-      for (int i = 0; i < fieldCount; i++) {
-        String field = FIELDS[i + 1];
-        int fieldIndex = i + 1;
+      for (int fieldCount = 0; fieldCount < totalFieldCount; fieldCount++) {
+        String field = FIELDS[fieldCount + 1];
+        int fieldIndex = fieldCount + 1;
         String fieldValue = values.get(field).toString();
         user.put(fieldIndex, fieldValue);
         user.setDirty(fieldIndex);
       }
       dataStore.put(key, user);
     } catch (Exception e) {
-      LOG.info("There is a problem inserting data \n"+ e.getMessage(), e);
+      LOG.info("There is a problem inserting data \n {}", e.getMessage(), e);
       return Status.ERROR;
     }
     return Status.OK;
@@ -179,14 +185,14 @@ public class GoraBenchmarkClient extends DB {
       // Check for null is necessary.
       User user = (fields == null || fields.size() == 0) ? dataStore.get(key)
           : dataStore.get(key, fields.toArray(DUMMY_ARRAY));
-      for (int i = 0; i < fieldCount; i++) {
-        String field = FIELDS[i + 1];
-        int fieldIndex = i + 1;
+      for (int fieldCount = 0; fieldCount < totalFieldCount; fieldCount++) {
+        String field = FIELDS[fieldCount + 1];
+        int fieldIndex = fieldCount + 1;
         String value = user.get(fieldIndex).toString();
         result.put(field, new StringByteIterator(value));
       }
     } catch (Exception e) {
-      LOG.info("There is a problem in reading data from the table \n"+e.getMessage(), e);
+      LOG.info("There is a problem in reading data from the table \n {}", e.getMessage(), e);
       return Status.ERROR;
     }
     return Status.OK;
@@ -218,17 +224,17 @@ public class GoraBenchmarkClient extends DB {
       goraQuery.setLimit(recordCount);
       Result<String, User> resultSet = goraQuery.execute();
       while (resultSet.next()) {
-        HashMap<String, ByteIterator> hm = new HashMap<>();
-        for (int i = 0; i < fieldCount; i++) {
-          String field = FIELDS[i + 1];
-          int fieldIndex = i + 1;
+        HashMap<String, ByteIterator> resultsMap = new HashMap<>();
+        for (int fieldCount = 0; fieldCount < totalFieldCount; fieldCount++) {
+          String field = FIELDS[fieldCount + 1];
+          int fieldIndex = fieldCount + 1;
           String value = resultSet.get().get(fieldIndex).toString();
-          hm.put(field, new StringByteIterator(value));
+          resultsMap.put(field, new StringByteIterator(value));
         }
-        result.add(hm);
+        result.add(resultsMap);
       }
     } catch (Exception e) {
-      LOG.info("There is a problem in scanning data from the table \n"+e.getMessage(), e);
+      LOG.info("There is a problem in scanning data from the table \n {}", e.getMessage(), e);
       return Status.ERROR;
     }
     return Status.OK;
@@ -255,7 +261,8 @@ public class GoraBenchmarkClient extends DB {
       List<String> allFields = Arrays.asList(FIELDS);
       for (String field : values.keySet()) {
         if (GoraBenchmarkUtils.isFieldUpdatable(field, values)) {
-          // Get the index of the field from the global fields array and call the right method
+          // Get the index of the field from the global fields array and call
+          // the right method
           int indexOfFieldInArray = allFields.indexOf(field);
           user.put(indexOfFieldInArray, values.get(field).toString());
           user.setDirty(indexOfFieldInArray);
@@ -263,9 +270,18 @@ public class GoraBenchmarkClient extends DB {
       }
       dataStore.put(user.getUserId().toString(), user);
     } catch (Exception e) {
-      LOG.info("There is a problem updating the records \n"+e.getMessage(), e);
+      LOG.info("There is a problem updating the records \n {}", e.getMessage(), e);
       return Status.ERROR;
     }
     return Status.OK;
+  }
+
+  /**
+   * Gets the data store.
+   *
+   * @return the data store
+   */
+  public DataStore<String, User> getDataStore() {
+    return this.dataStore;
   }
 }
