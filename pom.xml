@@ -839,7 +839,7 @@
     <test.container.version>1.4.2</test.container.version>
     
     <!-- gora-benchmark and version dependencies -->
-    <ycsb.version>0.15.0</ycsb.version>
+    <ycsb.version>0.17.0-SNAPSHOT</ycsb.version>
     <datafactory.version>0.8</datafactory.version>
     
 
