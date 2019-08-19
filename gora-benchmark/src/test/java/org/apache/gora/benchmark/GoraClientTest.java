@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
+
 import org.apache.gora.benchmark.generated.User;
 import org.apache.gora.util.GoraException;
 import org.junit.After;
@@ -232,7 +233,7 @@ public class GoraClientTest {
    */
   @Test
   public void testgenearateMappingFile() {
-    GoraBenchmarkUtils.generateMappingFile(Constants.HBASE);
+    GoraBenchmarkUtils.generateMappingFile(Constants.COUCHDB);
   }
 
   /**
