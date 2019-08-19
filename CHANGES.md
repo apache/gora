@@ -1,5 +1,68 @@
  CHANGES.txt
  ===========
+ 
+ # Apache Gora 0.9 Release - 12/08/19 (dd/mm/yyyy)
+ Release report - https://s.apache.org/0.9GoraReleaseNotes
+  
+ Bug
+  
+     [GORA-208] - Implement consistent use of DataStoreFactory across Gora modules
+     [GORA-225] - Various Issues with MemStore
+     [GORA-373] - Failing TestQueryBase with JDK8
+     [GORA-421] - PersistentBase#setDirty() does not set dirty
+     [GORA-476] - Nutch 2.X GeneratorJob creates NullPointerException when using DataFileAvroStore
+     [GORA-500] - Bug in org.apache.gora.solr.store.SolrStore#getDatumWriter & #getDatumReader
+     [GORA-503] - Field index 0 is always considered as clean even if it is dirty
+     [GORA-508] - Website title cut off issue
+     [GORA-526] - Potential null dereference in AvroSerializer#analyzePersistent
+     [GORA-545] - Boxing/unboxing to parse a primitive is suboptimal
+     [GORA-560] - Fix build failure due java docs
+     [GORA-611] - Fix intermittent test failures with HBase module
+     [GORA-612] - Fix Flink word count tests after merging PR for GORA-565
+     [GORA-617] - Fix Inception Year at Gora Pig Module
+     [GORA-619] - Remove duplicated properties in gora-tutorial gora.properties
+     [GORA-620] - Migrate HBase auto flush parameter name in Pig Module
+     [GORA-621] - Remove log4j 2 transitive dependencies inheriting from solr-core dependency
+     [GORA-622] - maven-assemly-plugin complains that group id is too big and fails build on macOS Mojave 10.14.6 (18G87)
+   
+ New Feature
+ 
+     [GORA-109] - Pig Adapter for Gora
+     [GORA-266] - Lucene datastore for Gora
+     [GORA-411] - Add exists(key) to DataStore interface
+     [GORA-444] - Add #size() to Result API
+     [GORA-481] - Using Docker For Unit Testing
+     [GORA-535] - Add a data store for Apache Ignite
+     [GORA-540] - Update Gora documentation for the Ignite backend
+     [GORA-548] - Introduce Apache Flink Execution Engine for Gora
+  
+ Improvement
+ 
+     [GORA-393] - bin/compile-examples.sh should do a touch on source files before compiling
+     [GORA-456] - No help when GoraCompilerCli is invoked without parameters
+     [GORA-528] - Add Support for Spark 2.2.1
+     [GORA-529] - Remove org/apache/gora/avro/mapreduce/FsInput.java
+     [GORA-530] - Reinstate exception throwing at Query#execute()
+     [GORA-531] - Upgrade HBase to 1.2.6
+     [GORA-534] - Prepare gora-hbase for HBase 2.0 release
+     [GORA-547] - Upgrade Aerospike datastore to client 4.2.2
+     [GORA-554] - Upgrade Solr dependency to latest
+     [GORA-555] - Improve Lucene query implementation with NumericRangeQuery
+     [GORA-564] - Remove deprecated method usages of HBase module after upgrading to 2
+     [GORA-565] - Enable Spark in Unit Tests
+     [GORA-613] - Remove deprecated method usages Flink Module
+     [GORA-614] - JCache datastore should be able to work with any JCache provider available in classpath
+     [GORA-615] - Update gora-tutorial pom to include mongodb
+     [GORA-616] - Multiple slf4j conflict issue
+     [GORA-618] - Fix gpg-maven-plugin and checksum-maven-plugin issues for the release
+  
+ Task
+ 
+     [GORA-536] - Avoid calling Class#newInstance
+     [GORA-543] - Upgrade Apache parent POM to version 21
+     [GORA-549] - Remove PersistentBase extending java.io.Externalizable
+     [GORA-550] - Update POM for the move to gitbox
+     [GORA-610] - Upgrade Apache Avro from 1.8.1-->1.8.2
 
 # Apache Gora 0.8 Release - 15/09/17 (dd/mm/yyyy)
 Release report - https://s.apache.org/3YdY
