@@ -21,6 +21,7 @@
         <field name="name" docfield="name" type="string"/>
         <field name="dateOfBirth" docfield="dateOfBirth" type="int64"/>
         <field name="ssn" docfield="ssn" type="string"/>
+        <field name="value" docfield="value" type="string"/>
         <field name="salary" docfield="salary" type="int32"/>
         <field name="boss" docfield="boss" type="document"/>
         <field name="webpage" docfield="webpage" type="document"/>

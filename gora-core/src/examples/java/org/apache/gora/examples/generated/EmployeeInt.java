@@ -77,7 +77,7 @@ public class EmployeeInt extends org.apache.gora.persistency.impl.PersistentBase
   // Used by DatumWriter.  Applications should not call. 
   public java.lang.Object get(int field$) {
     switch (field$) {
-    case 0: return ssn;
+    case 0: return this.ssn;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -86,7 +86,7 @@ public class EmployeeInt extends org.apache.gora.persistency.impl.PersistentBase
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: ssn = (java.lang.Integer)(value); break;
+    case 0: this.ssn = (java.lang.Integer)(value); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }

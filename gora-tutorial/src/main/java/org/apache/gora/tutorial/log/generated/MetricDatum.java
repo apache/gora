@@ -83,9 +83,9 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
   // Used by DatumWriter.  Applications should not call. 
   public java.lang.Object get(int field$) {
     switch (field$) {
-    case 0: return metricDimension;
-    case 1: return timestamp;
-    case 2: return metric;
+    case 0: return this.metricDimension;
+    case 1: return this.timestamp;
+    case 2: return this.metric;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -94,9 +94,9 @@ public class MetricDatum extends org.apache.gora.persistency.impl.PersistentBase
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: metricDimension = (java.lang.CharSequence)(value); break;
-    case 1: timestamp = (java.lang.Long)(value); break;
-    case 2: metric = (java.lang.Long)(value); break;
+    case 0: this.metricDimension = (java.lang.CharSequence)(value); break;
+    case 1: this.timestamp = (java.lang.Long)(value); break;
+    case 2: this.metric = (java.lang.Long)(value); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }

@@ -18,8 +18,8 @@
 package org.apache.gora.examples.generated;  
 
 public class Employee extends org.apache.gora.persistency.impl.PersistentBase implements org.apache.avro.specific.SpecificRecord, org.apache.gora.persistency.Persistent {
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Employee\",\"namespace\":\"org.apache.gora.examples.generated\",\"fields\":[{\"name\":\"name\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"dateOfBirth\",\"type\":\"long\",\"default\":0},{\"name\":\"ssn\",\"type\":\"string\",\"default\":\"\"},{\"name\":\"salary\",\"type\":\"int\",\"default\":0},{\"name\":\"boss\",\"type\":[\"null\",\"Employee\",\"string\"],\"default\":null},{\"name\":\"webpage\",\"type\":[\"null\",{\"type\":\"record\",\"name\":\"WebPage\",\"fields\":[{\"name\":\"url\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"content\",\"type\":[\"null\",\"bytes\"],\"default\":null},{\"name\":\"parsedContent\",\"type\":{\"type\":\"array\",\"items\":\"string\"},\"default\":{}},{\"name\":\"outlinks\",\"type\":{\"type\":\"map\",\"values\":[\"null\",\"string\"]},\"default\":{}},{\"name\":\"headers\",\"type\":[\"null\",{\"type\":\"map\",\"values\":[\"null\",\"string\"]}],\"default\":null},{\"name\":\"metadata\",\"type\":{\"type\":\"record\",\"name\":\"Metadata\",\"fields\":[{\"name\":\"version\",\"type\":\"int\",\"default\":0},{\"name\":\"data\",\"type\":{\"type\":\"map\",\"values\":\"string\"},\"default\":{}}]},\"default\":null},{\"name\":\"byteData\",\"type\":{\"type\":\"map\",\"values\":\"bytes\"},\"default\":{}},{\"name\":\"stringData\",\"type\":{\"type\":\"map\",\"values\":\"string\"},\"default\":{}}]}],\"default\":null}],\"default\":null}");
-  private static final long serialVersionUID = -333122997722160004L;
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Employee\",\"namespace\":\"org.apache.gora.examples.generated\",\"fields\":[{\"name\":\"name\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"dateOfBirth\",\"type\":\"long\",\"default\":0},{\"name\":\"ssn\",\"type\":\"string\",\"default\":\"\"},{\"name\":\"salary\",\"type\":\"int\",\"default\":0},{\"name\":\"boss\",\"type\":[\"null\",\"Employee\",\"string\"],\"default\":null},{\"name\":\"value\",\"type\":\"string\",\"default\":\"\"},{\"name\":\"webpage\",\"type\":[\"null\",{\"type\":\"record\",\"name\":\"WebPage\",\"fields\":[{\"name\":\"url\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"content\",\"type\":[\"null\",\"bytes\"],\"default\":null},{\"name\":\"parsedContent\",\"type\":{\"type\":\"array\",\"items\":\"string\"},\"default\":{}},{\"name\":\"outlinks\",\"type\":{\"type\":\"map\",\"values\":[\"null\",\"string\"]},\"default\":{}},{\"name\":\"headers\",\"type\":[\"null\",{\"type\":\"map\",\"values\":[\"null\",\"string\"]}],\"default\":null},{\"name\":\"metadata\",\"type\":{\"type\":\"record\",\"name\":\"Metadata\",\"fields\":[{\"name\":\"version\",\"type\":\"int\",\"default\":0},{\"name\":\"data\",\"type\":{\"type\":\"map\",\"values\":\"string\"},\"default\":{}}]},\"default\":null},{\"name\":\"byteData\",\"type\":{\"type\":\"map\",\"values\":\"bytes\"},\"default\":{}},{\"name\":\"stringData\",\"type\":{\"type\":\"map\",\"values\":\"string\"},\"default\":{}}]}],\"default\":null}],\"default\":null}");
+  private static final long serialVersionUID = -3912735665682783747L;
   /** Enum containing all data bean's fields. */
   public static enum Field {
     NAME(0, "name"),
@@ -27,7 +27,8 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
     SSN(2, "ssn"),
     SALARY(3, "salary"),
     BOSS(4, "boss"),
-    WEBPAGE(5, "webpage"),
+    VALUE(5, "value"),
+    WEBPAGE(6, "webpage"),
     ;
     /**
      * Field's index.
@@ -71,6 +72,7 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
   "ssn",
   "salary",
   "boss",
+  "value",
   "webpage",
   };
 
@@ -87,17 +89,19 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
   private java.lang.CharSequence ssn;
   private int salary;
   private java.lang.Object boss;
+  private java.lang.CharSequence value;
   private org.apache.gora.examples.generated.WebPage webpage;
   public org.apache.avro.Schema getSchema() { return SCHEMA$; }
   // Used by DatumWriter.  Applications should not call. 
   public java.lang.Object get(int field$) {
     switch (field$) {
-    case 0: return name;
-    case 1: return dateOfBirth;
-    case 2: return ssn;
-    case 3: return salary;
-    case 4: return boss;
-    case 5: return webpage;
+    case 0: return this.name;
+    case 1: return this.dateOfBirth;
+    case 2: return this.ssn;
+    case 3: return this.salary;
+    case 4: return this.boss;
+    case 5: return this.value;
+    case 6: return this.webpage;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -106,12 +110,13 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: name = (java.lang.CharSequence)(value); break;
-    case 1: dateOfBirth = (java.lang.Long)(value); break;
-    case 2: ssn = (java.lang.CharSequence)(value); break;
-    case 3: salary = (java.lang.Integer)(value); break;
-    case 4: boss = (java.lang.Object)(value); break;
-    case 5: webpage = (org.apache.gora.examples.generated.WebPage)(value); break;
+    case 0: this.name = (java.lang.CharSequence)(value); break;
+    case 1: this.dateOfBirth = (java.lang.Long)(value); break;
+    case 2: this.ssn = (java.lang.CharSequence)(value); break;
+    case 3: this.salary = (java.lang.Integer)(value); break;
+    case 4: this.boss = (java.lang.Object)(value); break;
+    case 5: this.value = (java.lang.CharSequence)(value); break;
+    case 6: this.webpage = (org.apache.gora.examples.generated.WebPage)(value); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -237,6 +242,30 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
   }
 
   /**
+   * Gets the value of the 'value' field.
+   */
+  public java.lang.CharSequence getValue() {
+    return value;
+  }
+
+  /**
+   * Sets the value of the 'value' field.
+   * @param value the value to set.
+   */
+  public void setValue(java.lang.CharSequence value) {
+    this.value = value;
+    setDirty(5);
+  }
+  
+  /**
+   * Checks the dirty status of the 'value' field. A field is dirty if it represents a change that has not yet been written to the database.
+   * @param value the value to set.
+   */
+  public boolean isValueDirty() {
+    return isDirty(5);
+  }
+
+  /**
    * Gets the value of the 'webpage' field.
    */
   public org.apache.gora.examples.generated.WebPage getWebpage() {
@@ -249,7 +278,7 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
    */
   public void setWebpage(org.apache.gora.examples.generated.WebPage value) {
     this.webpage = value;
-    setDirty(5);
+    setDirty(6);
   }
   
   /**
@@ -257,7 +286,7 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
    * @param value the value to set.
    */
   public boolean isWebpageDirty() {
-    return isDirty(5);
+    return isDirty(6);
   }
 
   /** Creates a new Employee RecordBuilder */
@@ -314,6 +343,7 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
     private java.lang.CharSequence ssn;
     private int salary;
     private java.lang.Object boss;
+    private java.lang.CharSequence value;
     private org.apache.gora.examples.generated.WebPage webpage;
 
     /** Creates a new Builder */
@@ -349,9 +379,13 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
         this.boss = (java.lang.Object) data().deepCopy(fields()[4].schema(), other.boss);
         fieldSetFlags()[4] = true;
       }
-      if (isValidValue(fields()[5], other.webpage)) {
-        this.webpage = (org.apache.gora.examples.generated.WebPage) data().deepCopy(fields()[5].schema(), other.webpage);
+      if (isValidValue(fields()[5], other.value)) {
+        this.value = (java.lang.CharSequence) data().deepCopy(fields()[5].schema(), other.value);
         fieldSetFlags()[5] = true;
+      }
+      if (isValidValue(fields()[6], other.webpage)) {
+        this.webpage = (org.apache.gora.examples.generated.WebPage) data().deepCopy(fields()[6].schema(), other.webpage);
+        fieldSetFlags()[6] = true;
       }
     }
 
@@ -478,6 +512,31 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
       return this;
     }
     
+    /** Gets the value of the 'value' field */
+    public java.lang.CharSequence getValue() {
+      return value;
+    }
+    
+    /** Sets the value of the 'value' field */
+    public org.apache.gora.examples.generated.Employee.Builder setValue(java.lang.CharSequence value) {
+      validate(fields()[5], value);
+      this.value = value;
+      fieldSetFlags()[5] = true;
+      return this; 
+    }
+    
+    /** Checks whether the 'value' field has been set */
+    public boolean hasValue() {
+      return fieldSetFlags()[5];
+    }
+    
+    /** Clears the value of the 'value' field */
+    public org.apache.gora.examples.generated.Employee.Builder clearValue() {
+      value = null;
+      fieldSetFlags()[5] = false;
+      return this;
+    }
+    
     /** Gets the value of the 'webpage' field */
     public org.apache.gora.examples.generated.WebPage getWebpage() {
       return webpage;
@@ -485,21 +544,21 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
     
     /** Sets the value of the 'webpage' field */
     public org.apache.gora.examples.generated.Employee.Builder setWebpage(org.apache.gora.examples.generated.WebPage value) {
-      validate(fields()[5], value);
+      validate(fields()[6], value);
       this.webpage = value;
-      fieldSetFlags()[5] = true;
+      fieldSetFlags()[6] = true;
       return this; 
     }
     
     /** Checks whether the 'webpage' field has been set */
     public boolean hasWebpage() {
-      return fieldSetFlags()[5];
+      return fieldSetFlags()[6];
     }
     
     /** Clears the value of the 'webpage' field */
     public org.apache.gora.examples.generated.Employee.Builder clearWebpage() {
       webpage = null;
-      fieldSetFlags()[5] = false;
+      fieldSetFlags()[6] = false;
       return this;
     }
     
@@ -512,7 +571,8 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
         record.ssn = fieldSetFlags()[2] ? this.ssn : (java.lang.CharSequence) defaultValue(fields()[2]);
         record.salary = fieldSetFlags()[3] ? this.salary : (java.lang.Integer) defaultValue(fields()[3]);
         record.boss = fieldSetFlags()[4] ? this.boss : (java.lang.Object) defaultValue(fields()[4]);
-        record.webpage = fieldSetFlags()[5] ? this.webpage : (org.apache.gora.examples.generated.WebPage) defaultValue(fields()[5]);
+        record.value = fieldSetFlags()[5] ? this.value : (java.lang.CharSequence) defaultValue(fields()[5]);
+        record.webpage = fieldSetFlags()[6] ? this.webpage : (org.apache.gora.examples.generated.WebPage) defaultValue(fields()[6]);
         return record;
       } catch (Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);
@@ -646,6 +706,29 @@ public class Employee extends org.apache.gora.persistency.impl.PersistentBase im
          * @param value the value to set.
      */
     public boolean isBossDirty() {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+
+        /**
+     * Gets the value of the 'value' field.
+         */
+    public java.lang.CharSequence getValue() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+
+    /**
+     * Sets the value of the 'value' field.
+         * @param value the value to set.
+     */
+    public void setValue(java.lang.CharSequence value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+  
+    /**
+     * Checks the dirty status of the 'value' field. A field is dirty if it represents a change that has not yet been written to the database.
+         * @param value the value to set.
+     */
+    public boolean isValueDirty() {
       throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
     }
 
