@@ -1713,13 +1713,6 @@
 
       <!-- Hive DataStore dependencies -->
       <dependency>
-        <groupId>org.apache.hadoop</groupId>
-        <artifactId>hadoop-common</artifactId>
-        <version>${hadoop-common.version}</version>
-        <scope>compile</scope>
-      </dependency>
-
-      <dependency>
         <groupId>org.apache.hive</groupId>
         <artifactId>hive-jdbc</artifactId>
         <version>${hive.version}</version>

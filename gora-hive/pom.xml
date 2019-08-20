@@ -183,17 +183,18 @@
       <artifactId>hadoop-minicluster</artifactId>
     </dependency>
 
+    <!-- 2.6 version of hadoop-common is defined only for gora-hive
+    as it creates some backward compatibility issues by defining in parent-->
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-common</artifactId>
-      <scope>compile</scope>
+      <version>${hadoop-common.version}</version>
     </dependency>
 
     <!-- Hive Dependencies -->
     <dependency>
       <groupId>org.apache.hive</groupId>
       <artifactId>hive-jdbc</artifactId>
-      <scope>compile</scope>
       <exclusions>
         <exclusion>
           <groupId>org.apache.logging.log4j</groupId>
