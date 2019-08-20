@@ -16,6 +16,6 @@
  * limitations under the License.
  */
 /**
- * This class contains Hive test driver implementation classes
+ * This package contains Hive test driver implementation classes
  */
 package org.apache.gora.hive;

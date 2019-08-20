@@ -15,7 +15,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 -->
-<!-- Hive Embedded Server Configurations -->
+<!-- Hive Test Server Configurations -->
 <configuration>
   <property>
     <name>hive.metastore.schema.verification</name>
@@ -27,10 +27,6 @@
   </property>
   <property>
     <name>hive.security.authorization.enabled</name>
-    <value>false</value>
-  </property>
-  <property>
-    <name>hive.server2.webui.use.ssl</name>
     <value>false</value>
   </property>
   <property>
@@ -70,10 +66,6 @@
     <value>none</value>
   </property>
   <property>
-    <name>datanucleus.identifierFactory</name>
-    <value>datanucleus1</value>
-  </property>
-  <property>
     <name>datanucleus.rdbms.useLegacyNativeValueStrategy</name>
     <value>true</value>
     <description/>
@@ -85,5 +77,9 @@
   <property>
     <name>hive.metastore.warehouse.dir</name>
     <value>file://${user.dir}/target/hive</value>
+  </property>
+  <property>
+    <name>hive.strict.checks.bucketing</name>
+    <value>false</value>
   </property>
 </configuration>

@@ -15,35 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.apache.gora.hive;
-
-import org.apache.gora.GoraTestDriver;
-import org.apache.gora.hive.store.HiveStore;
-import org.apache.gora.hive.util.HiveTestServer;
-
-public class GoraHiveTestDriver extends GoraTestDriver {
-
-  private HiveTestServer testServer;
-
-  public GoraHiveTestDriver() {
-    super(HiveStore.class);
-  }
-
-  @Override
-  public void setUpClass() throws Exception {
-    log.info("setting up hive test driver");
-    if (testServer == null) {
-      testServer = new HiveTestServer();
-    }
-    testServer.start();
-  }
-
-  @Override
-  public void tearDownClass() throws Exception {
-    log.info("tearing down hive test driver");
-    if (testServer != null) {
-      testServer.stop();
-    }
-  }
-}
+/**
+ * This package contains Hive test server implementation
+ */
+package org.apache.gora.hive.util;

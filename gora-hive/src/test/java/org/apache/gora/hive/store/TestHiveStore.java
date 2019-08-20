@@ -121,34 +121,34 @@ public class TestHiveStore extends DataStoreTestBase {
     DataStoreTestUtil.assertEqualWebPageObjects(webpage, after.getWebpage());
   }
 
-  @Ignore("Hive embedded server doesn't support deleting and updating entries")
+  @Ignore("Hive test server doesn't support deleting and updating entries")
   @Override
   public void testExists() throws Exception {
-    //Hive embedded server doesn't support deleting and updating entries
+    //Hive test server doesn't support deleting and updating entries
   }
 
-  @Ignore("Hive embedded server doesn't support deleting and updating entries")
+  @Ignore("Hive test server doesn't support deleting and updating entries")
   @Override
   public void testDelete() throws Exception {
-    //Hive embedded server doesn't support deleting and updating entries
+    //Hive test server doesn't support deleting and updating entries
   }
 
-  @Ignore("Hive embedded server doesn't support deleting and updating entries")
+  @Ignore("Hive test server doesn't support deleting and updating entries")
   @Override
   public void testDeleteByQuery() throws Exception {
-    //Hive embedded server doesn't support deleting and updating entries
+    //Hive test server doesn't support deleting and updating entries
   }
 
-  @Ignore("Hive embedded server doesn't support deleting and updating entries")
+  @Ignore("Hive test server doesn't support deleting and updating entries")
   @Override
   public void testDeleteByQueryFields() throws Exception {
-    //Hive embedded server doesn't support deleting and updating entries
+    //Hive test server doesn't support deleting and updating entries
   }
 
-  @Ignore("Hive embedded server doesn't support deleting and updating entries")
+  @Ignore("Hive test server doesn't support deleting and updating entries")
   @Override
   public void testUpdate() throws Exception {
-    //Hive embedded server doesn't support deleting and updating entries
+    //Hive test server doesn't support deleting and updating entries
   }
 
   @Ignore("Hive datastore doesn't support recursive records")
