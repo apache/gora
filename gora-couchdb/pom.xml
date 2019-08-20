@@ -89,6 +89,7 @@
     </testResources>
     <plugins>
       <plugin>
+<<<<<<< HEAD:gora-couchdb/pom.xml
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>2.4.2</version>
@@ -97,6 +98,8 @@
         </configuration>
       </plugin>
       <plugin>
+=======
+>>>>>>> Remove gora-hive test profile:gora-hive/pom.xml
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
         <version>${build-helper-maven-plugin.version}</version>
