@@ -174,12 +174,14 @@
       <scope>compile</scope>
     </dependency>
 
+    <!-- 2.6 version of hadoop-common is defined only for gora-hive
+    as it creates some backward compatibility issues by defining in parent-->
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-common</artifactId>
-      <scope>compile</scope>
+      <version>${hadoop-common.version}</version>
     </dependency>
 
     <!-- Logging Dependencies -->
