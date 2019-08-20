@@ -19,7 +19,9 @@ package org.apache.gora.benchmark;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -229,27 +231,49 @@ public class GoraClientTest {
   }
 
   /**
-   * Test mapping file generation.
+   * Test mapping file generation by checking whether the file exists in the
+   * expected location
    */
   @Test
   public void testgenearateMappingFile() {
+    GoraBenchmarkUtils.generateMappingFile(Constants.MONGODB);
+    GoraBenchmarkUtils.generateMappingFile(Constants.HBASE);
     GoraBenchmarkUtils.generateMappingFile(Constants.COUCHDB);
+    assertTrue("Failed", fileExists(Constants.DB_MAPPING_PATH + "/" + Constants.MONGO_MAPPING_FILE));
+    assertTrue("Failed", fileExists(Constants.DB_MAPPING_PATH + "/" + Constants.COUCHDB_MAPPING_FILE));
+    assertTrue("Failed", fileExists(Constants.DB_MAPPING_PATH + "/" + Constants.HBASE_MAPPING_FILE));
   }
 
   /**
-   * Test AVRO schema schema generation.
+   * Test AVRO schema schema generation by checking whether the file exists in
+   * the expected location
    */
   @Test
   public void testgenerateAvroSchema() {
     GoraBenchmarkUtils.generateAvroSchema(Constants.TEST_NUMBER_OF_FIELDS);
+    assertTrue("Failed", fileExists(Constants.AVRO_FULL_PATH));
   }
 
   /**
-   * Test generate data beans.
+   * Test data beans generation by checking whether the file exists in the
+   * expected location
    */
   @Test
   public void testGenerateDataBeans() {
     GoraBenchmarkUtils.generateDataBeans();
+    assertTrue("Failed", fileExists(Constants.DATA_BEANS_PATH + "/-" + Constants.DATA_BEAN_DEFAULT_FILE));
+  }
+
+  /**
+   * Check whether a file exists in a specific path.
+   *
+   * @param path
+   *          the path
+   * @return true, if successful
+   */
+  public boolean fileExists(String path) {
+    File file = new File(path);
+    return file.exists();
   }
 
 }

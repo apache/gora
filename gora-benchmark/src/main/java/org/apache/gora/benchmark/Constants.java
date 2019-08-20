@@ -50,6 +50,8 @@ public final class Constants {
   public static final String KEYCLASS = "java.lang.String";
   /** The db mapping path. */
   public static String DB_MAPPING_PATH = "src/main/resources";
+  public static String DATA_BEANS_PATH = "src/main/java/org/apache/gora/benchmark/generated/";
+  public static String DATA_BEAN_DEFAULT_FILE = "User.java";
   /** The Constant MONGO_MAPPING_FILE. */
   public static final String MONGO_MAPPING_FILE = "gora-mongodb-mapping.xml";
   /** The Constant HBASE_MAPPING_FILE. */

@@ -60,7 +60,7 @@ public class GoraBenchmarkClient extends DB {
   private static int totalFieldCount;
   /** This is only for set to array conversion in {@link read()} method */
   private String[] DUMMY_ARRAY = new String[0];
-  private DataStore<String, User> dataStore;
+  private static DataStore<String, User> dataStore;
   private User user = new User();
   private Properties prop;
 
@@ -69,29 +69,28 @@ public class GoraBenchmarkClient extends DB {
 
   /**
    * * Initialisation method. This method is called once for each database
-   * instance.
+   * instance. There is one database instance for each client thread.
    *
    * @throws DBException
    *           the DB exception
    */
   public void init() throws DBException {
     try {
-      // Get YCSB properties
-      prop = getProperties();
-      totalFieldCount = Integer
-          .parseInt(prop.getProperty(CoreWorkload.FIELD_COUNT_PROPERTY, CoreWorkload.FIELD_COUNT_PROPERTY_DEFAULT));
-      String keyClass = prop.getProperty("key.class", "java.lang.String");
-      String persistentClass = prop.getProperty("persistent.class", "org.apache.gora.benchmark.generated.User");
-      Properties properties = DataStoreFactory.createProps();
-      dataStore = DataStoreFactory.getDataStore(keyClass, persistentClass, properties, new Configuration());
       synchronized (GoraBenchmarkClient.class) {
-        if (executed)
-          return;
-        executed = true;
-        GoraBenchmarkUtils.generateAvroSchema(totalFieldCount);
-        String dataStoreName = GoraBenchmarkUtils.getDataStore(properties);
-        GoraBenchmarkUtils.generateMappingFile(dataStoreName);
-        GoraBenchmarkUtils.generateDataBeans();
+        prop = getProperties();
+        totalFieldCount = Integer
+            .parseInt(prop.getProperty(CoreWorkload.FIELD_COUNT_PROPERTY, CoreWorkload.FIELD_COUNT_PROPERTY_DEFAULT));
+        Properties properties = DataStoreFactory.createProps();
+        if (!executed) {
+          executed = true;
+          GoraBenchmarkUtils.generateAvroSchema(totalFieldCount);
+          String dataStoreName = GoraBenchmarkUtils.getDataStore(properties);
+          GoraBenchmarkUtils.generateMappingFile(dataStoreName);
+          GoraBenchmarkUtils.generateDataBeans();
+        }
+        String keyClass = prop.getProperty("key.class", "java.lang.String");
+        String persistentClass = prop.getProperty("persistent.class", "org.apache.gora.benchmark.generated.User");
+        dataStore = DataStoreFactory.getDataStore(keyClass, persistentClass, properties, new Configuration());
       }
     } catch (GoraException e) {
       LOG.info("There is a problem in initialising the DataStore \n {}", e.getMessage(), e);
