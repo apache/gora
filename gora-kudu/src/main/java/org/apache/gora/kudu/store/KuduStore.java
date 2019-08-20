@@ -279,8 +279,8 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
         Upsert upsert = table.newUpsert();
         PartialRow row = upsert.getRow();
         KuduClientUtils.addObjectRow(row, pkc, key);
-        Schema schema = obj.getSchema();
-        List<Schema.Field> fields = schema.getFields();
+        Schema schemaObj = obj.getSchema();
+        List<Schema.Field> fields = schemaObj.getFields();
         for (Schema.Field field : fields) {
           Column mappedColumn = kuduMapping.getFields().get(field.name());
           if (mappedColumn != null) {
@@ -443,16 +443,16 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
   public T newInstance(RowResult next, String[] fields) throws IOException {
     fields = getFieldsToQuery(fields);
     T persistent = newPersistent();
-    for (String f : fields) {
-      Schema.Field field = fieldMap.get(f);
+    for (String objField : fields) {
+      Schema.Field field = fieldMap.get(objField);
       Schema fieldSchema = field.schema();
-      Column column = kuduMapping.getFields().get(f);
+      Column column = kuduMapping.getFields().get(objField);
       if (next.isNull(column.getName())) {
         continue;
       }
       Object fieldValue = KuduClientUtils.getObjectRow(next, column);
-      Object v = deserializeFieldValue(field, fieldSchema, fieldValue, persistent);
-      persistent.put(field.pos(), v);
+      Object obtainedValue = deserializeFieldValue(field, fieldSchema, fieldValue, persistent);
+      persistent.put(field.pos(), obtainedValue);
       persistent.setDirty(field.pos());
     }
     return persistent;
@@ -627,7 +627,7 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
     SpecificDatumReader<?> reader = readerMap.get(fieldSchema);
     if (reader == null) {
       reader = new SpecificDatumReader(fieldSchema);// ignore dirty bits
-      SpecificDatumReader localReader = null;
+      SpecificDatumReader localReader;
       if ((localReader = readerMap.putIfAbsent(fieldSchema, reader)) != null) {
         reader = localReader;
       }

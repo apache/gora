@@ -32,7 +32,7 @@ import org.apache.kudu.client.RowResultIterator;
  */
 public class KuduResult<K, T extends PersistentBase> extends ResultBase<K, T> {
 
-  private KuduScanner result;
+  private final KuduScanner result;
   private RowResultIterator resultIt;
 
   public KuduResult(DataStore<K, T> dataStore, Query<K, T> query, KuduScanner result) {
