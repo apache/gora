@@ -521,7 +521,7 @@
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>${maven-javadoc-plugin.version}</version>
           <configuration>
-            <excludePackageNames>org.apache.gora.tutorial.log.generated;org.apache.gora.goraci.generated</excludePackageNames>
+            <excludePackageNames>org.apache.gora.tutorial.log.generated;org.apache.gora.goraci.generated;org.apache.gora.benchmark.generated;</excludePackageNames>
           </configuration>
           <executions>
             <execution>

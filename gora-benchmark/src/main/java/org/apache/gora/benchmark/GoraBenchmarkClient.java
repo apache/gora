@@ -45,13 +45,13 @@ import org.apache.gora.benchmark.generated.User;
 /**
  * The Class GoraBenchmarkClient
  *
- * @author sc306 This class extends the Yahoo! Cloud Service Benchmark benchmark
- *         {@link #com.yahoo.ycsb.DB DB} class to provide functionality for
- *         {@link #insert(String, String, HashMap) insert},
- *         {@link #read(String, String, Set, HashMap) read},
- *         {@link #scan(String, String, int, Set, Vector) scan} and
- *         {@link #update(String, String, HashMap) update} methods as per Apache
- *         Gora implementation.
+ * @author sc306 This class extends the Yahoo! Cloud Service Benchmark DB class to
+ *         provide functionality for and methods as per Apache Gora
+ *         implementation.
+ *         {@link #insert(String, String, Map)},
+ *         {@link #read(String, String, Set, Map)},
+ *         {@link #scan(String, String, int, Set, Vector)}
+ *         {@link #update(String, String, Map)}
  */
 public class GoraBenchmarkClient extends DB {
   private static final Logger LOG = LoggerFactory.getLogger(GoraBenchmarkClient.class);
@@ -201,16 +201,11 @@ public class GoraBenchmarkClient extends DB {
    * Perform a range scan for a set of records in the database. Each field/value
    * pair from the result will be stored in a HashMap.
    *
-   * @param table
-   *          The name of the table
-   * @param startkey
-   *          The record key of the first record to read.
-   * @param recordCount
-   *          The number of records to read
-   * @param fields
-   *          The list of fields to read, or null for all of them
-   * @param result
-   *          A Vector of HashMaps, where each HashMap is a set field/value
+   * @param table          The name of the table
+   * @param startKey the start key
+   * @param recordCount          The number of records to read
+   * @param fields          The list of fields to read, or null for all of them
+   * @param result          A Vector of HashMaps, where each HashMap is a set field/value
    *          pairs for one record
    * @return The result of the operation.
    */

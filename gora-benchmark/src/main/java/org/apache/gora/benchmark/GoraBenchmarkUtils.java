@@ -216,20 +216,14 @@ public class GoraBenchmarkUtils {
   }
 
   /**
-   * Builds the mapping document.
-   *
-   * @param keys
-   *          the keys
-   * @param db
-   *          the db
-   * @param mappingDocument
-   *          the mapping document
-   * @param rootNode
-   *          the root node
-   * @param fullNameSpace
-   *          the full name space
-   * @param jsonObject
-   *          the json object
+   * Builds the mapping document for a particular data store.
+   * @param keys  The keys of the mapping file
+   * @param db    The datastore to build the mapping file for
+   * @param mappingDocument   The name of the mapping document
+   * @param rootNode          The root node of the mapping document
+   * @param fullNameSpace     The full name space of the persistent object
+   * @param jsonObject        The json object of the avro schema
+   * @param mappingClass      The mapping class element
    */
   public static void buildMappingDocument(Iterator<String> keys, String db, Document mappingDocument, Element rootNode,
       String fullNameSpace, JSONObject jsonObject, Element mappingClass) {
@@ -334,10 +328,9 @@ public class GoraBenchmarkUtils {
   }
 
   /**
-   * Gets the data store.
+   * Gets the data store to benchmark.
    *
-   * @param p
-   *          the p
+   * @param properties the properties
    * @return the data store
    */
   public static String getDataStore(Properties properties) {
@@ -361,17 +354,16 @@ public class GoraBenchmarkUtils {
 
   /**
    * Sets the mapping root node. //MongoDB
-   * <class keyClass="java.lang.String" name=
-   * "org.apache.gora.benchmark.generated.User" document="users"> //CouchDB
-   * <class keyClass="java.lang.String" name=
-   * "org.apache.gora.benchmark.generated.User" table="users">
+   * class keyClass="java.lang.String" name=
+   * "org.apache.gora.benchmark.generated.User" document="users" //CouchDB
+   * class keyClass="java.lang.String" name=
+   * "org.apache.gora.benchmark.generated.User" table="users"
    *
-   * @param mappingDocument
-   *          the entire mapping documentmappingClass
-   * @param rootNode
-   *          the node we are setting, top most node
-   * @param fullNameSpace
-   *          namespace of object
+   * @param mappingClass the mapping class
+   * @param mappingDocument          the entire mapping documentmappingClass
+   * @param rootNode          the node we are setting, top most node
+   * @param fullNameSpace          name clearspace of data bean
+   * @param dataStore the data store
    */
   public static void setMappingRootNode(Element mappingClass, Document mappingDocument, Element rootNode,
       String fullNameSpace, String dataStore) {
