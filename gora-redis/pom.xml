@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache.gora</groupId>
     <artifactId>gora</artifactId>
-    <version>0.9-SNAPSHOT</version>
+    <version>1.0-SNAPSHOT</version>
     <relativePath>../</relativePath>
   </parent>
   <artifactId>gora-redis</artifactId>
@@ -53,7 +53,25 @@
     <osgi.import>*</osgi.import>
     <osgi.export>org.apache.gora.redis*;version="${project.version}";-noimport:=true</osgi.export>
   </properties>
-
+  
+  <profiles>
+    <profile>
+      <id>redis-with-test</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>2.4.2</version>
+            <configuration>
+              <skipTests>false</skipTests>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+  
   <build>
     <directory>target</directory>
     <outputDirectory>target/classes</outputDirectory>
@@ -71,6 +89,14 @@
       </testResource>
     </testResources>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.4.2</version>
+        <configuration>
+          <skipTests>true</skipTests>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
@@ -110,40 +136,17 @@
     <dependency>
       <groupId>org.redisson</groupId>
       <artifactId>redisson-all</artifactId>
-    </dependency>  
-    <dependency>
-      <groupId>com.fasterxml.jackson.dataformat</groupId>
-      <artifactId>jackson-dataformat-avro</artifactId>
-      <version>2.7.9</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-all</artifactId>
       <version>4.1.36.Final</version>
       <scope>compile</scope>
-    </dependency>
-
-    <!--    <dependency>
-            <groupId>org.apache.redis</groupId>
-            <artifactId>redis-minicluster</artifactId>
-            <version>${redis.version}</version>
-            <scope>test</scope>
-    </dependency>-->
-
+    </dependency>  
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
     </dependency>
-
-    <dependency>
-      <!-- Redis mini was trying to load the Shell, which failed with the version of jline in the parent pom -->
-      <groupId>jline</groupId>
-      <artifactId>jline</artifactId>
-      <version>2.11</version>
-      <scope>test</scope>
-    </dependency>
-
     <dependency>
       <groupId>org.apache.zookeeper</groupId>
       <artifactId>zookeeper</artifactId>

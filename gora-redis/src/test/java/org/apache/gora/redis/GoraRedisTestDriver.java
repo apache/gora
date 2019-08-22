@@ -25,31 +25,17 @@ import org.apache.gora.redis.util.RedisStartupLogWaitStrategy;
 import org.apache.gora.redis.util.ServerMode;
 import org.apache.gora.redis.util.StorageMode;
 import org.testcontainers.containers.FixedHostPortGenericContainer;
+import org.testcontainers.containers.GenericContainer;
 
 /**
  * Helper class to execute tests in a embedded instance of Redis.
  *
- * @author Xavier Sumba
  */
 public class GoraRedisTestDriver extends GoraTestDriver {
 
-  private static final String DOCKER_CONTAINER_NAME = "grokzen/redis-cluster:latest";
-  private final FixedHostPortGenericContainer redisContainer = ((FixedHostPortGenericContainer) new FixedHostPortGenericContainer(DOCKER_CONTAINER_NAME)
-      .waitingFor(new RedisStartupLogWaitStrategy())
-      .withStartupTimeout(Duration.ofMinutes(3))
-      .withEnv("STANDALONE", "true")
-      .withEnv("SENTINEL", "true"))
-      .withFixedExposedPort(7000, 7000)
-      .withFixedExposedPort(7001, 7001)
-      .withFixedExposedPort(7002, 7002)
-      .withFixedExposedPort(7003, 7003)
-      .withFixedExposedPort(7004, 7004)
-      .withFixedExposedPort(7005, 7005)
-      .withFixedExposedPort(7006, 7006)
-      .withFixedExposedPort(7007, 7007)
-      .withFixedExposedPort(5000, 5000)
-      .withFixedExposedPort(5001, 5001)
-      .withFixedExposedPort(5002, 5002);
+  private static final String DOCKER_IMAGE = "grokzen/redis-cluster:latest";
+  private final FixedHostPortGenericContainer redisContainer;
+
   private final StorageMode storageMode;
   private final ServerMode serverMode;
 
@@ -57,6 +43,24 @@ public class GoraRedisTestDriver extends GoraTestDriver {
     super(RedisStore.class);
     this.storageMode = storageMode;
     this.serverMode = serverMode;
+    GenericContainer container = new FixedHostPortGenericContainer(DOCKER_IMAGE)
+        .withFixedExposedPort(7000, 7000)
+        .withFixedExposedPort(7001, 7001)
+        .withFixedExposedPort(7002, 7002)
+        .withFixedExposedPort(7003, 7003)
+        .withFixedExposedPort(7004, 7004)
+        .withFixedExposedPort(7005, 7005)
+        .withFixedExposedPort(7006, 7006)
+        .withFixedExposedPort(7007, 7007)
+        .withFixedExposedPort(5000, 5000)
+        .withFixedExposedPort(5001, 5001)
+        .withFixedExposedPort(5002, 5002)
+        .waitingFor(new RedisStartupLogWaitStrategy())
+        .withStartupTimeout(Duration.ofMinutes(3))
+        .withEnv("STANDALONE", "true")
+        .withEnv("SENTINEL", "true");
+    redisContainer = (FixedHostPortGenericContainer) container;
+
   }
 
   @Override
@@ -65,7 +69,13 @@ public class GoraRedisTestDriver extends GoraTestDriver {
     log.info("Setting up Redis test driver");
     conf.set("gora.datastore.redis.storage", storageMode.name());
     conf.set("gora.datastore.redis.mode", serverMode.name());
-    String bridgeIpAddress = redisContainer.getContainerInfo().getNetworkSettings().getNetworks().values().iterator().next().getIpAddress();
+    String bridgeIpAddress = redisContainer.getContainerInfo()
+        .getNetworkSettings()
+        .getNetworks()
+        .values()
+        .iterator()
+        .next()
+        .getIpAddress();
     switch (serverMode) {
       case SINGLE:
         conf.set("gora.datastore.redis.address", bridgeIpAddress + ":" + 7006);

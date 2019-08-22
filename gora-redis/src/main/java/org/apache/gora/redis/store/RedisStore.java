@@ -22,14 +22,11 @@ import java.lang.invoke.MethodHandles;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.avro.Schema;
 import org.apache.commons.io.IOUtils;
 import org.apache.gora.persistency.impl.PersistentBase;
@@ -40,6 +37,17 @@ import org.apache.gora.query.impl.PartitionQueryImpl;
 import org.apache.gora.redis.query.RedisQuery;
 import org.apache.gora.redis.query.RedisResult;
 import org.apache.gora.redis.util.DatumHandler;
+import static org.apache.gora.redis.util.RedisStoreConstants.PREFIX;
+import static org.apache.gora.redis.util.RedisStoreConstants.END_TAG;
+import static org.apache.gora.redis.util.RedisStoreConstants.FIELD_SEPARATOR;
+import static org.apache.gora.redis.util.RedisStoreConstants.GORA_REDIS_ADDRESS;
+import static org.apache.gora.redis.util.RedisStoreConstants.GORA_REDIS_MASTERNAME;
+import static org.apache.gora.redis.util.RedisStoreConstants.GORA_REDIS_MODE;
+import static org.apache.gora.redis.util.RedisStoreConstants.GORA_REDIS_READMODE;
+import static org.apache.gora.redis.util.RedisStoreConstants.GORA_REDIS_STORAGE;
+import static org.apache.gora.redis.util.RedisStoreConstants.INDEX;
+import static org.apache.gora.redis.util.RedisStoreConstants.START_TAG;
+import static org.apache.gora.redis.util.RedisStoreConstants.WILDCARD;
 import org.apache.gora.redis.util.ServerMode;
 import org.apache.gora.redis.util.StorageMode;
 import org.apache.gora.store.impl.DataStoreBase;
@@ -55,14 +63,14 @@ import org.redisson.api.RList;
 import org.redisson.api.RListAsync;
 import org.redisson.api.RMap;
 import org.redisson.api.RMapAsync;
+import org.redisson.api.RScoredSortedSet;
+import org.redisson.api.RScoredSortedSetAsync;
 import org.redisson.api.RedissonClient;
+import org.redisson.client.protocol.ScoredEntry;
 import org.redisson.config.Config;
 import org.redisson.config.ReadMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 /**
  * Implementation of a Redis data store to be used by gora.
@@ -71,22 +79,14 @@ import org.w3c.dom.NodeList;
  * @param <T> class to be persisted within the store
  */
 public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
-
-  //Redis constants
-  private static final String FIELD_SEPARATOR = ".";
-  private static final String WILDCARD = "*";
-  private static final String INDEX = "index";
-  private static final String START_TAG = "{";
-  private static final String END_TAG = "}";
-  private static final String PREFIX = "redis://";
-
+  
   protected static final String PARSE_MAPPING_FILE_KEY = "gora.redis.mapping.file";
   protected static final String DEFAULT_MAPPING_FILE = "gora-redis-mapping.xml";
   protected static final String XML_MAPPING_DEFINITION = "gora.mapping";
   private RedissonClient redisInstance;
   private RedisMapping mapping;
   public static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-
+  
   private static final DatumHandler handler = new DatumHandler();
   private StorageMode mode;
 
@@ -96,16 +96,16 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
    * the call to {@link org.apache.gora.store.DataStoreFactory#createDataStore}
    * is made.
    *
-   * @param keyClass
-   * @param persistentClass
-   * @param properties
-   * @throws org.apache.gora.util.GoraException
+   * @param keyClass Gora's key class
+   * @param persistentClass Persistent class
+   * @param properties Configurations for the data store
+   * @throws org.apache.gora.util.GoraException Unexpected exception during initialization
    */
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) throws GoraException {
     try {
       super.initialize(keyClass, persistentClass, properties);
-
+      
       InputStream mappingStream;
       if (properties.containsKey(XML_MAPPING_DEFINITION)) {
         if (LOG.isTraceEnabled()) {
@@ -115,39 +115,40 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       } else {
         mappingStream = getClass().getClassLoader().getResourceAsStream(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE));
       }
-      mapping = readMapping(mappingStream);
+      RedisMappingBuilder mappingBuilder = new RedisMappingBuilder(this);
+      mapping = mappingBuilder.readMapping(mappingStream);
       Config config = new Config();
-      String storage = getConf().get("gora.datastore.redis.storage", properties.getProperty("gora.datastore.redis.storage"));
+      String storage = getConf().get(GORA_REDIS_STORAGE, properties.getProperty(GORA_REDIS_STORAGE));
       mode = StorageMode.valueOf(storage);
-      String modeString = getConf().get("gora.datastore.redis.mode", properties.getProperty("gora.datastore.redis.mode"));
+      String modeString = getConf().get(GORA_REDIS_MODE, properties.getProperty(GORA_REDIS_MODE));
       ServerMode connectionMode = ServerMode.valueOf(modeString);
-      String name = getConf().get("gora.datastore.redis.masterName", properties.getProperty("gora.datastore.redis.masterName"));
-      String readm = getConf().get("gora.datastore.redis.readMode", properties.getProperty("gora.datastore.redis.readMode"));
+      String name = getConf().get(GORA_REDIS_MASTERNAME, properties.getProperty(GORA_REDIS_MASTERNAME));
+      String readm = getConf().get(GORA_REDIS_READMODE, properties.getProperty(GORA_REDIS_READMODE));
       //Override address in tests
-      String[] hosts = getConf().get("gora.datastore.redis.address", properties.getProperty("gora.datastore.redis.address")).split(",");
-      for (int i = 0; i < hosts.length; i++) {
-        hosts[i] = PREFIX + hosts[i];
+      String[] hosts = getConf().get(GORA_REDIS_ADDRESS, properties.getProperty(GORA_REDIS_ADDRESS)).split(",");
+      for (int indexHosts = 0; indexHosts < hosts.length; indexHosts++) {
+        hosts[indexHosts] = PREFIX + hosts[indexHosts];
       }
       switch (connectionMode) {
         case SINGLE:
           config.useSingleServer()
-              .setAddress(hosts[0])
-              .setDatabase(mapping.getDatabase());
+                  .setAddress(hosts[0])
+                  .setDatabase(mapping.getDatabase());
           break;
         case CLUSTER:
           config.useClusterServers()
-              .addNodeAddress(hosts);
+                  .addNodeAddress(hosts);
           break;
         case REPLICATED:
           config.useReplicatedServers()
-              .addNodeAddress(hosts)
-              .setDatabase(mapping.getDatabase());
+                  .addNodeAddress(hosts)
+                  .setDatabase(mapping.getDatabase());
           break;
         case SENTINEL:
           config.useSentinelServers()
-              .setMasterName(name)
-              .setReadMode(ReadMode.valueOf(readm))
-              .addSentinelAddress(hosts);
+                  .setMasterName(name)
+                  .setReadMode(ReadMode.valueOf(readm))
+                  .addSentinelAddress(hosts);
           break;
         default:
           throw new AssertionError(connectionMode.name());
@@ -158,40 +159,6 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       }
     } catch (IOException ex) {
       throw new GoraException(ex);
-    }
-  }
-
-  protected RedisMapping readMapping(InputStream inputStream) throws IOException {
-    try {
-      RedisMapping redisMapping = new RedisMapping();
-      DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-      Document dom = db.parse(inputStream);
-      Element root = dom.getDocumentElement();
-      NodeList nl = root.getElementsByTagName("class");
-      for (int i = 0; i < nl.getLength(); i++) {
-        Element classElement = (Element) nl.item(i);
-        if (classElement.getAttribute("keyClass").equals(keyClass.getCanonicalName())
-            && classElement.getAttribute("name").equals(persistentClass.getCanonicalName())) {
-          redisMapping.setDatabase(Integer.parseInt(classElement.getAttribute("database")));
-          redisMapping.setPrefix(classElement.getAttribute("prefix"));
-          NodeList elementsByTagName = classElement.getElementsByTagName("field");
-          Map<String, String> mapFields = new HashMap<>();
-          Map<String, RedisType> mapTypes = new HashMap<>();
-          for (int j = 0; j < elementsByTagName.getLength(); j++) {
-            Element item = (Element) elementsByTagName.item(j);
-            String name = item.getAttribute("name");
-            String column = item.getAttribute("column");
-            String type = item.getAttribute("type");
-            mapFields.put(name, column);
-            mapTypes.put(name, RedisType.valueOf(type));
-          }
-          redisMapping.setTypes(mapTypes);
-          redisMapping.setFields(mapFields);
-        }
-      }
-      return redisMapping;
-    } catch (Exception ex) {
-      throw new IOException(ex);
     }
   }
 
@@ -212,12 +179,12 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
    * creation. When the records are added to the database, the schema is created
    * on the fly. Thus, schema operations are unavailable in gora-redis module.
    *
-   * @throws org.apache.gora.util.GoraException
+   * @throws org.apache.gora.util.GoraException Unexpected exception.
    */
   @Override
   public void createSchema() throws GoraException {
   }
-
+  
   @Override
   public void deleteSchema() throws GoraException {
     redisInstance.getKeys().deleteByPattern(mapping.getPrefix() + FIELD_SEPARATOR + WILDCARD);
@@ -229,29 +196,29 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
    * on the fly. Thus, schema operations are unavailable in gora-redis module.
    *
    * @return true
-   * @throws org.apache.gora.util.GoraException
+   * @throws org.apache.gora.util.GoraException Unexpected exception.
    */
   @Override
   public boolean schemaExists() throws GoraException {
     return true;
   }
-
-  private String generateKeyHash(Object baseKey) {
+  
+  private String generateKeyHash(K baseKey) {
     return mapping.getPrefix() + FIELD_SEPARATOR + START_TAG + baseKey + END_TAG;
   }
-
-  private String generateKeyString(String field, Object baseKey) {
+  
+  private String generateKeyString(String field, K baseKey) {
     return generateKeyStringBase(baseKey) + field;
   }
-
-  private String generateKeyStringBase(Object baseKey) {
+  
+  private String generateKeyStringBase(K baseKey) {
     return mapping.getPrefix() + FIELD_SEPARATOR + START_TAG + baseKey + END_TAG + FIELD_SEPARATOR;
   }
-
+  
   private String generateIndexKey() {
     return mapping.getPrefix() + FIELD_SEPARATOR + INDEX;
   }
-
+  
   public T newInstanceFromString(K key, String[] fields) throws GoraException, IOException {
     fields = getFieldsToQuery(fields);
     T persistent = newPersistent();
@@ -286,7 +253,7 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     }
     return countRetrieved > 0 ? persistent : null;
   }
-
+  
   public T newInstanceFromHash(RMap<String, Object> map, String[] fields) throws GoraException, IOException {
     fields = getFieldsToQuery(fields);
     T persistent = newPersistent();
@@ -302,7 +269,7 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     }
     return persistent;
   }
-
+  
   @Override
   public T get(K key, String[] fields) throws GoraException {
     try {
@@ -320,7 +287,7 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       throw new GoraException(ex);
     }
   }
-
+  
   @Override
   public void put(K key, T obj) throws GoraException {
     try {
@@ -329,8 +296,13 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
         List<Schema.Field> fields = objectSchema.getFields();
         RBatch batchInstance = redisInstance.createBatch();
         //update secundary index
-        RLexSortedSetAsync secundaryIndex = batchInstance.getLexSortedSet(generateIndexKey());
-        secundaryIndex.addAsync(key.toString());
+        if (isNumericKey()) {
+          RScoredSortedSetAsync<Object> secundaryIndex = batchInstance.getScoredSortedSet(generateIndexKey());
+          secundaryIndex.addAsync(obtainDoubleValue(key), key);
+        } else {
+          RLexSortedSetAsync secundaryIndex = batchInstance.getLexSortedSet(generateIndexKey());
+          secundaryIndex.addAsync(key.toString());
+        }
         if (mode == StorageMode.SINGLEKEY) {
           RMapAsync<Object, Object> map = batchInstance.getMap(generateKeyHash(key));
           fields.forEach((field) -> {
@@ -379,20 +351,25 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
         batchInstance.execute();
       } else {
         LOG.info("Ignored putting object {} in the store as it is neither "
-            + "new, neither dirty.", new Object[]{obj});
+                + "new, neither dirty.", new Object[]{obj});
       }
     } catch (Exception e) {
       throw new GoraException(e);
     }
   }
-
+  
   @Override
   public boolean delete(K key) throws GoraException {
     try {
       RBatch batchInstance = redisInstance.createBatch();
       //update secundary index
-      RLexSortedSetAsync secundaryIndex = batchInstance.getLexSortedSet(generateIndexKey());
-      secundaryIndex.removeAsync(key.toString());
+      if (isNumericKey()) {
+        RScoredSortedSetAsync<Object> secundaryIndex = batchInstance.getScoredSortedSet(generateIndexKey());
+        secundaryIndex.removeAsync(key);
+      } else {
+        RLexSortedSetAsync secundaryIndex = batchInstance.getLexSortedSet(generateIndexKey());
+        secundaryIndex.removeAsync(key.toString());
+      }
       if (mode == StorageMode.SINGLEKEY) {
         RMapAsync<Object, Object> map = batchInstance.getMap(generateKeyHash(key));
         RFuture<Boolean> deleteAsync = map.deleteAsync();
@@ -406,10 +383,10 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       throw new GoraException(ex);
     }
   }
-
+  
   @Override
   public long deleteByQuery(Query<K, T> query) throws GoraException {
-    Collection<String> range = runQuery(query);
+    Collection<K> range = runQuery(query);
     RBatch batchInstance = redisInstance.createBatch();
     RLexSortedSetAsync secundaryIndex = batchInstance.getLexSortedSet(generateIndexKey());
     if (query.getFields() != null && query.getFields().length < mapping.getFields().size()) {
@@ -419,16 +396,16 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
         dbFields.add(mapping.getFields().get(af));
         dbTypes.add(mapping.getTypes().get(af));
       }
-      for (String key : range) {
+      for (K key : range) {
         if (mode == StorageMode.SINGLEKEY) {
           RMapAsync<Object, Object> map = batchInstance.getMap(generateKeyHash(key));
           dbFields.forEach((field) -> {
             map.removeAsync(field);
           });
         } else {
-          for (int i = 0; i < dbFields.size(); i++) {
-            String field = dbFields.get(i);
-            RedisType type = dbTypes.get(i);
+          for (int indexField = 0; indexField < dbFields.size(); indexField++) {
+            String field = dbFields.get(indexField);
+            RedisType type = dbTypes.get(indexField);
             switch (type) {
               case STRING:
                 RBucketAsync<Object> bucket = batchInstance.getBucket(generateKeyString(field, key));
@@ -468,41 +445,41 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
   /**
    * Execute the query and return the result.
    *
-   * @param query
-   * @return
-   * @throws org.apache.gora.util.GoraException
+   * @param query Query sent to Redis
+   * @return Query result
+   * @throws org.apache.gora.util.GoraException  Unexpected exception in querying process.
    */
   @Override
   public Result<K, T> execute(Query<K, T> query) throws GoraException {
     return new RedisResult<>(this, query, runQuery(query));
   }
-
+  
   @Override
   public Query<K, T> newQuery() {
     RedisQuery<K, T> query = new RedisQuery<>(this);
     query.setFields(getFieldsToQuery(null));
     return query;
   }
-
+  
   @Override
   public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query) throws GoraException {
     List<PartitionQuery<K, T>> partitions = new ArrayList<>();
     PartitionQueryImpl<K, T> partitionQuery = new PartitionQueryImpl<>(
-        query);
+            query);
     partitionQuery.setConf(getConf());
     partitions.add(partitionQuery);
     return partitions;
   }
-
+  
   @Override
   public void flush() throws GoraException {
   }
-
+  
   @Override
   public void close() {
     redisInstance.shutdown();
   }
-
+  
   @Override
   public boolean exists(K key) throws GoraException {
     if (mode == StorageMode.SINGLEKEY) {
@@ -512,20 +489,52 @@ public class RedisStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       return respKeys.hasNext();
     }
   }
-
-  private Collection<String> runQuery(Query<K, T> query) {
-    RLexSortedSet index = redisInstance.getLexSortedSet(generateIndexKey());
-    Collection<String> range;
-    int limit = query.getLimit() > -1 ? (int) query.getLimit() : Integer.MAX_VALUE;
-    if (query.getStartKey() != null && query.getEndKey() != null) {
-      range = index.range(query.getStartKey().toString(), true, query.getEndKey().toString(), true, 0, limit);
-    } else if (query.getStartKey() != null && query.getEndKey() == null) {
-      range = index.rangeTail(query.getStartKey().toString(), true, 0, limit);
-    } else if (query.getStartKey() == null && query.getEndKey() != null) {
-      range = index.rangeHead(query.getEndKey().toString(), true, 0, limit);
+  
+  private Collection<K> runQuery(Query<K, T> query) {
+    Collection<K> range;
+    if (isNumericKey()) {
+      RScoredSortedSet<Object> index = redisInstance.getScoredSortedSet(generateIndexKey());
+      Collection<ScoredEntry<Object>> rangeResponse;
+      int limit = query.getLimit() > -1 ? (int) query.getLimit() : Integer.MAX_VALUE;
+      if (query.getStartKey() != null && query.getEndKey() != null) {
+        rangeResponse = index.entryRange(obtainDoubleValue(query.getStartKey()), true, obtainDoubleValue(query.getEndKey()), true, 0, limit);
+      } else if (query.getStartKey() != null && query.getEndKey() == null) {
+        rangeResponse = index.entryRange(obtainDoubleValue(query.getStartKey()), true, Double.MAX_VALUE, true, 0, limit);
+      } else if (query.getStartKey() == null && query.getEndKey() != null) {
+        rangeResponse = index.entryRange(Double.MIN_VALUE, true, obtainDoubleValue(query.getEndKey()), true, 0, limit);
+      } else {
+        rangeResponse = index.entryRange(Double.MIN_VALUE, true, Double.MAX_VALUE, true, 0, limit);
+      }
+      range = new ArrayList<>();
+      for (ScoredEntry<Object> indexVal : rangeResponse) {
+        range.add((K) indexVal.getValue());
+      }
     } else {
-      range = index.stream().limit(limit).collect(Collectors.toList());
+      RLexSortedSet index = redisInstance.getLexSortedSet(generateIndexKey());
+      Collection<String> rangeResponse;
+      int limit = query.getLimit() > -1 ? (int) query.getLimit() : Integer.MAX_VALUE;
+      if (query.getStartKey() != null && query.getEndKey() != null) {
+        rangeResponse = index.range(query.getStartKey().toString(), true, query.getEndKey().toString(), true, 0, limit);
+      } else if (query.getStartKey() != null && query.getEndKey() == null) {
+        rangeResponse = index.rangeTail(query.getStartKey().toString(), true, 0, limit);
+      } else if (query.getStartKey() == null && query.getEndKey() != null) {
+        rangeResponse = index.rangeHead(query.getEndKey().toString(), true, 0, limit);
+      } else {
+        rangeResponse = index.stream().limit(limit).collect(Collectors.toList());
+      }
+      range = new ArrayList<>();
+      for (String indexVal : rangeResponse) {
+        range.add((K) indexVal);
+      }
     }
     return range;
+  }
+  
+  private boolean isNumericKey() {
+    return Number.class.isAssignableFrom(keyClass);
+  }
+  
+  private double obtainDoubleValue(K key) {
+    return Double.parseDouble(key.toString());
   }
 }

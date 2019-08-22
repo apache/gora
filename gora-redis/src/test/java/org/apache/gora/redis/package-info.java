@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 /**
- * Tests for <code>gora-redis</code> including
- * the test driver for {@link org.apache.gora.redis.store.RedisStoreTest}
+ * Tests for <code>gora-redis</code> including the test driver for
+ * {@link org.apache.gora.redis.store.RedisStoreTest}
  */
 package org.apache.gora.redis;

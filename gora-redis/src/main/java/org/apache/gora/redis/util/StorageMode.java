@@ -16,6 +16,19 @@
  */
 package org.apache.gora.redis.util;
 
+/**
+ * Storage mode of Objects for gora-redis
+ *
+ * More details in:
+ * https://cwiki.apache.org/confluence/display/GORA/Redis+backend+documentation
+ */
 public enum StorageMode {
-  SINGLEKEY, MULTIKEY
+  /**
+   * The records are stored in a single hash in redis.
+   */
+  SINGLEKEY,
+  /**
+   * The records are stored in multiple keys.
+   */
+  MULTIKEY
 }

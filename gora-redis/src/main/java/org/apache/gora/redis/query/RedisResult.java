@@ -31,35 +31,27 @@ import org.apache.gora.store.DataStore;
  */
 public class RedisResult<K, T extends PersistentBase> extends ResultBase<K, T> {
 
-  private Iterator<String> range;
+  private Iterator<K> range;
   private final int size;
 
   /**
-   * Gets the data store used
+   * Constructor of RedisResult
    *
-   * @return
+   * @param dataStore Query's data store
+   * @param query Query
+   * @param idsRange Collection of found keys
    */
-  @Override
-  public RedisStore<K, T> getDataStore() {
-    return (RedisStore<K, T>) super.getDataStore();
-  }
-
-  /**
-   * @param dataStore
-   * @param query
-   * @param rg
-   */
-  public RedisResult(DataStore<K, T> dataStore, Query<K, T> query, Collection<String> rg) {//, Scanner scanner) {
+  public RedisResult(DataStore<K, T> dataStore, Query<K, T> query, Collection<K> idsRange) {
     super(dataStore, query);
-    this.size = rg.size();
-    this.range = rg.iterator();
+    this.size = idsRange.size();
+    this.range = idsRange.iterator();
   }
 
   /**
    * Gets the items reading progress
    *
-   * @return
-   * @throws java.io.IOException
+   * @return a float value representing progress of the job
+   * @throws java.io.IOException if there is an error obtaining progress
    */
   @Override
   public float getProgress() throws IOException {
@@ -70,15 +62,12 @@ public class RedisResult<K, T extends PersistentBase> extends ResultBase<K, T> {
     }
   }
 
-  @Override
-  public void close() throws IOException {
-  }
-
   /**
    * Gets the next item
    *
-   * @return
-   * @throws java.io.IOException
+   * @return true if another result exists
+   * @throws java.io.IOException if for some reason we reach a result which does
+   * not exist
    */
   @Override
   protected boolean nextInner() throws IOException {
@@ -87,8 +76,7 @@ public class RedisResult<K, T extends PersistentBase> extends ResultBase<K, T> {
     }
     boolean next = range.hasNext();
     if (next) {
-      String nextkey = range.next();
-      key = (K) nextkey;
+      key = (K) range.next();
       persistent = ((RedisStore<K, T>) getDataStore()).get(key, query.getFields());
     }
 
@@ -98,14 +86,6 @@ public class RedisResult<K, T extends PersistentBase> extends ResultBase<K, T> {
   @Override
   public int size() {
     return this.size;
-  }
-
-  public Iterator<String> getRange() {
-    return range;
-  }
-
-  public void setRange(Iterator<String> range) {
-    this.range = range;
   }
 
 }

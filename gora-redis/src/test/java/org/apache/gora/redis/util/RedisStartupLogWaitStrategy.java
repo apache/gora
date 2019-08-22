@@ -25,6 +25,9 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.OutputFrame;
 import org.testcontainers.containers.output.WaitingConsumer;
 
+/**
+ * Utility class for detecting when the docker container is ready.
+ */
 public class RedisStartupLogWaitStrategy extends GenericContainer.AbstractWaitStrategy {
 
   private static final String REGEX = ".*Background AOF rewrite finished successfully.*";

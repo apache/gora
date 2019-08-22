@@ -40,6 +40,9 @@ import org.redisson.api.RMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Utility class for serialization and deserialization of values from redis.
+ */
 public class DatumHandler<T extends PersistentBase> {
 
   public static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -50,6 +53,13 @@ public class DatumHandler<T extends PersistentBase> {
   public DatumHandler() {
   }
 
+  /**
+   * Serialize an object
+   *
+   * @param fieldSchema The avro schema to be used.
+   * @param fieldValue The object to be serialized.
+   * @return Serialized object.
+   */
   @SuppressWarnings("unchecked")
   public Object serializeFieldValue(Schema fieldSchema, Object fieldValue) {
     Object output = fieldValue;
@@ -108,6 +118,13 @@ public class DatumHandler<T extends PersistentBase> {
     return output;
   }
 
+  /**
+   * Serialize an object as a Map
+   *
+   * @param fieldSchema The avro schema to be used.
+   * @param fieldValue The object to be serialized.
+   * @return Serialized object as a map.
+   */
   @SuppressWarnings("unchecked")
   public Map<Object, Object> serializeFieldMap(Schema fieldSchema, Object fieldValue) {
     Map<Object, Object> map = new HashMap();
@@ -134,6 +151,13 @@ public class DatumHandler<T extends PersistentBase> {
     return map;
   }
 
+  /**
+   * Serialize an object as a List
+   *
+   * @param fieldSchema The avro schema to be used.
+   * @param fieldValue The object to be serialized.
+   * @return Serialized object as a List.
+   */
   @SuppressWarnings("unchecked")
   public List<Object> serializeFieldList(Schema fieldSchema, Object fieldValue) {
     List<Object> serializedList = new ArrayList();
@@ -150,6 +174,16 @@ public class DatumHandler<T extends PersistentBase> {
     return serializedList;
   }
 
+  /**
+   * Deserialize an object into a gora bean using avro
+   *
+   * @param field The field schema.
+   * @param fieldSchema The object schema.
+   * @param redisValue Object from redis.
+   * @param persistent Persistent object
+   * @return Deserialized object
+   * @throws java.io.IOException Deserialization exception
+   */
   @SuppressWarnings("unchecked")
   public Object deserializeFieldValue(Schema.Field field, Schema fieldSchema,
       Object redisValue, T persistent) throws IOException {
@@ -190,6 +224,16 @@ public class DatumHandler<T extends PersistentBase> {
     return fieldValue;
   }
 
+  /**
+   * Deserialize an Map into a gora bean using avro
+   *
+   * @param field The field schema.
+   * @param fieldSchema The object schema.
+   * @param redisMap Map from redis.
+   * @param persistent Persistent object
+   * @return Deserialized object
+   * @throws java.io.IOException Deserialization exception
+   */
   @SuppressWarnings("unchecked")
   public Object deserializeFieldMap(Schema.Field field, Schema fieldSchema,
       RMap<Object, Object> redisMap, T persistent) throws IOException {
@@ -215,6 +259,16 @@ public class DatumHandler<T extends PersistentBase> {
     return new DirtyMapWrapper<>(fieldValue);
   }
 
+  /**
+   * Deserialize an List into a gora bean using avro
+   *
+   * @param field The field schema.
+   * @param fieldSchema The object schema.
+   * @param redisList List from redis.
+   * @param persistent Persistent object
+   * @return Deserialized object
+   * @throws java.io.IOException Deserialization exception
+   */
   @SuppressWarnings("unchecked")
   public Object deserializeFieldList(Schema.Field field, Schema fieldSchema,
       RList<Object> redisList, T persistent) throws IOException {
@@ -232,11 +286,17 @@ public class DatumHandler<T extends PersistentBase> {
     return new DirtyListWrapper<>(fieldValue);
   }
 
+  /**
+   * Gets the Datum reader for a Schema
+   *
+   * @param fieldSchema The avro schema to be used
+   * @return SpecificDatumReader for the schema
+   */
   @SuppressWarnings("rawtypes")
   private SpecificDatumReader getDatumReader(Schema fieldSchema) {
     SpecificDatumReader<?> reader = readerMap.get(fieldSchema);
     if (reader == null) {
-      reader = new SpecificDatumReader(fieldSchema);// ignore dirty bits
+      reader = new SpecificDatumReader(fieldSchema);
       SpecificDatumReader localReader;
       if ((localReader = readerMap.putIfAbsent(fieldSchema, reader)) != null) {
         reader = localReader;
@@ -245,16 +305,28 @@ public class DatumHandler<T extends PersistentBase> {
     return reader;
   }
 
+  /**
+   * Gets the Datum writer for a Schema
+   *
+   * @param fieldSchema The avro schema to be used
+   * @return SpecificDatumWriter for the schema
+   */
   @SuppressWarnings("rawtypes")
   private SpecificDatumWriter getDatumWriter(Schema fieldSchema) {
     SpecificDatumWriter writer = writerMap.get(fieldSchema);
     if (writer == null) {
-      writer = new SpecificDatumWriter(fieldSchema);// ignore dirty bits
+      writer = new SpecificDatumWriter(fieldSchema);
       writerMap.put(fieldSchema, writer);
     }
     return writer;
   }
 
+  /**
+   * Verify if a schema is Nullable
+   *
+   * @param unionSchema The schema to be verified
+   * @return result
+   */
   private boolean isNullable(Schema unionSchema) {
     if (unionSchema.getTypes().stream().anyMatch((innerSchema) -> (innerSchema.getType().equals(Schema.Type.NULL)))) {
       return true;

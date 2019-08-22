@@ -18,7 +18,22 @@ package org.apache.gora.redis.store;
 
 /**
  * Supported data types for Redis.
+ *
+ * Refer to: https://redis.io/topics/data-types
  */
 public enum RedisType {
-  STRING, LIST, HASH
+  /**
+   * Strings are the most basic kind of Redis value. Redis Strings are binary
+   * safe, this means that a Redis string can contain any kind of data.
+   */
+  STRING,
+  /**
+   * Redis Lists are simply lists of strings, sorted by insertion order.
+   */
+  LIST,
+  /**
+   * Redis Hashes are maps between string fields and string values, so they are
+   * the perfect data type to represent objects.
+   */
+  HASH
 }

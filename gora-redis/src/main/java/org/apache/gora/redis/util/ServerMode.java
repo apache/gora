@@ -16,6 +16,26 @@
  */
 package org.apache.gora.redis.util;
 
+/**
+ * Connection mode to the Redis Server
+ *
+ * More details in : https://github.com/redisson/redisson/wiki/2.-Configuration
+ */
 public enum ServerMode {
-  SINGLE, CLUSTER, REPLICATED, SENTINEL
+  /**
+   * Redis single server configuration.
+   */
+  SINGLE,
+  /**
+   * Redis server cluster configuration.
+   */
+  CLUSTER,
+  /**
+   * Redis replicated mode configuration.
+   */
+  REPLICATED,
+  /**
+   * Redis server sentinel configuration.
+   */
+  SENTINEL
 }

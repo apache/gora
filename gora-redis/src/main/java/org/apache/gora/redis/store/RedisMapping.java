@@ -28,34 +28,74 @@ public class RedisMapping {
   private Map<String, String> fields;
   private Map<String, RedisType> types;
 
+  /**
+   * Gets database number
+   *
+   * @return database number
+   */
   public int getDatabase() {
     return database;
   }
 
+  /**
+   * Sets database number
+   *
+   * @param datebase database number
+   */
   public void setDatabase(int datebase) {
     this.database = datebase;
   }
 
+  /**
+   * Gets key prefix
+   *
+   * @return prefix
+   */
   public String getPrefix() {
     return prefix;
   }
 
+  /**
+   * Sets key prefix
+   *
+   * @param prefix String prefix for the creation of redis keys.
+   */
   public void setPrefix(String prefix) {
     this.prefix = prefix;
   }
 
+  /**
+   * Gets mapped fields
+   *
+   * @return mapped fields
+   */
   public Map<String, String> getFields() {
     return fields;
   }
 
+  /**
+   * Sets mapped fields
+   *
+   * @param fields mapped fields
+   */
   public void setFields(Map<String, String> fields) {
     this.fields = fields;
   }
 
+  /**
+   * Gets types mapping
+   *
+   * @return Types mapping
+   */
   public Map<String, RedisType> getTypes() {
     return types;
   }
 
+  /**
+   * Sets types mapping
+   *
+   * @param types Types mapping
+   */
   public void setTypes(Map<String, RedisType> types) {
     this.types = types;
   }

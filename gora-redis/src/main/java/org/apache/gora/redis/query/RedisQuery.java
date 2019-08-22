@@ -21,9 +21,10 @@ import org.apache.gora.query.impl.QueryBase;
 import org.apache.gora.store.DataStore;
 
 /**
- *  Redis specific implementation of the {@link org.apache.gora.query.Query} interface.
+ * Redis specific implementation of the {@link org.apache.gora.query.Query}
+ * interface.
  */
-public class RedisQuery<K,T extends PersistentBase> extends QueryBase<K,T> {
+public class RedisQuery<K, T extends PersistentBase> extends QueryBase<K, T> {
 
   /**
    * Constructor for the query
@@ -38,8 +39,8 @@ public class RedisQuery<K,T extends PersistentBase> extends QueryBase<K,T> {
    * @param dataStore Data store used
    *
    */
-  public RedisQuery(DataStore<K,T> dataStore) {
+  public RedisQuery(DataStore<K, T> dataStore) {
     super(dataStore);
   }
-  
+
 }
