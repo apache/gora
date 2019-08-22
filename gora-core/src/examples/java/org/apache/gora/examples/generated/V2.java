@@ -65,7 +65,7 @@ public class V2 extends org.apache.gora.persistency.impl.PersistentBase implemen
   // Used by DatumWriter.  Applications should not call. 
   public java.lang.Object get(int field$) {
     switch (field$) {
-    case 0: return v3;
+    case 0: return this.v3;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -74,7 +74,7 @@ public class V2 extends org.apache.gora.persistency.impl.PersistentBase implemen
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: v3 = (java.lang.Integer)(value); break;
+    case 0: this.v3 = (java.lang.Integer)(value); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -210,7 +210,7 @@ public class V2 extends org.apache.gora.persistency.impl.PersistentBase implemen
   }
   
   public V2.Tombstone getTombstone(){
-  	return TOMBSTONE;
+    return TOMBSTONE;
   }
 
   public V2 newInstance(){
@@ -221,32 +221,32 @@ public class V2 extends org.apache.gora.persistency.impl.PersistentBase implemen
   
   public static final class Tombstone extends V2 implements org.apache.gora.persistency.Tombstone {
   
-      private Tombstone() { }
+    private Tombstone() { }
   
-	  		  /**
-	   * Gets the value of the 'v3' field.
-		   */
-	  public java.lang.Integer getV3() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'v3' field.
-		   * @param value the value to set.
-	   */
-	  public void setV3(java.lang.Integer value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'v3' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
-	   */
-	  public boolean isV3Dirty() {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-		  
+      /**
+     * Gets the value of the 'v3' field.
+         */
+    public java.lang.Integer getV3() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+
+    /**
+     * Sets the value of the 'v3' field.
+         * @param value the value to set.
+     */
+    public void setV3(java.lang.Integer value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+  
+    /**
+     * Checks the dirty status of the 'v3' field. A field is dirty if it represents a change that has not yet been written to the database.
+         * @param value the value to set.
+     */
+    public boolean isV3Dirty() {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+
+    
   }
 
   private static final org.apache.avro.io.DatumWriter

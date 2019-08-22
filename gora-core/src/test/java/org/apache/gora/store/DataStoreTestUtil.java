@@ -101,6 +101,7 @@ public class DataStoreTestUtil {
     employee.setDateOfBirth( System.currentTimeMillis() - 20L *  YEAR_IN_MS );
     employee.setSalary(100000);
     employee.setSsn(new Utf8("101010101010"));
+    employee.setValue(new Utf8("random value"));
     return employee;
   }
 
@@ -490,6 +491,7 @@ public class DataStoreTestUtil {
     for (int i = 0; i < 5; i++) {
       Employee employee = Employee.newBuilder().build();
       employee.setName(new Utf8("John Doe " + i));
+      employee.setValue(new Utf8("value " + i));
       employee.setDateOfBirth(now - 20L *  YEAR_IN_MS);
       employee.setSalary(100000);
       employee.setSsn(new Utf8(Long.toString(ssn + i)));
@@ -501,6 +503,7 @@ public class DataStoreTestUtil {
     for (int i = 0; i < 1; i++) {
       Employee employee = Employee.newBuilder().build();
       employee.setName(new Utf8("John Doe " + (i + 5)));
+      employee.setValue(new Utf8("value " + (i + 5)));
       employee.setDateOfBirth(now - 18L * YEAR_IN_MS);
       employee.setSalary(120000);
       employee.setSsn(new Utf8(Long.toString(ssn + i)));
@@ -514,6 +517,7 @@ public class DataStoreTestUtil {
       Employee employee = dataStore.get(key);
       assertEquals(now - 18L * YEAR_IN_MS, employee.getDateOfBirth().longValue()); 
       assertEquals("John Doe " + (i + 5), employee.getName().toString());
+      assertEquals("value " + (i + 5), employee.getValue().toString());
       assertEquals(120000, employee.getSalary().intValue()); 
     }
   }
@@ -1338,5 +1342,16 @@ public class DataStoreTestUtil {
   public static void testResultSizeWebPagesKeyRangeWithLimit(DataStore<String, WebPage> store)
     throws Exception {
     testResultSize(store, true, true, true);
+  }
+
+  public static void testObjectFieldValue(DataStore<String, Employee> store)
+      throws Exception {
+    store.createSchema();
+    Employee employee = DataStoreTestUtil.createEmployee();
+    String uuid = UUID.randomUUID().toString();
+    store.put(uuid, employee);
+    store.flush();
+    Employee returnedEmployee = store.get(uuid);
+    assertEquals(returnedEmployee.getValue(), new Utf8("random value"));
   }
 }
