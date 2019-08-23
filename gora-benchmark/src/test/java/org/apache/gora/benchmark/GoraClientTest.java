@@ -78,7 +78,7 @@ public class GoraClientTest {
   private void setupMongoDBCluster() {
     MongodStarter starter = MongodStarter.getDefaultInstance();
     String bindIp = Constants.LOCALHOST;
-    int port = Constants.MONGO_EMBED_DEFAULT_PORT;
+    int port = Constants.MONGO_DEFAULT_PORT;
     IMongodConfig mongodConfig = null;
     try {
       mongodConfig = new MongodConfigBuilder().version(Version.Main.PRODUCTION)
@@ -126,7 +126,7 @@ public class GoraClientTest {
     //Setup and start embedded MongoDB, make sure local mongodb is not running.
     Properties dataStoreProperties = DataStoreFactory.createProps();
     String dataStoreToTest = GoraBenchmarkUtils.getDataStore(dataStoreProperties);
-    if (!isMongoDBSetupDone&& dataStoreToTest == Constants.MONGODB) {
+    if (!isMongoDBSetupDone && dataStoreToTest == Constants.MONGODB) {
       setupMongoDBCluster();
       isMongoDBSetupDone = true;
     }
@@ -238,8 +238,8 @@ public class GoraClientTest {
     Vector<HashMap<String, ByteIterator>> results = new Vector<HashMap<String, ByteIterator>>();
     Set<String> fields = new HashSet<>();
     Status result = benchmarkClient.scan(Constants.TEST_TABLE, Constants.TEST_KEY_1, 2, fields, results);
-    assertEquals(result, Status.OK);
-    assertEquals(results.size(), 2);
+    assertEquals(Status.OK, result);
+    assertEquals(2, results.size());
   }
 
   /**
@@ -256,7 +256,7 @@ public class GoraClientTest {
     if (result == Status.OK) {
       benchmarkClient.getDataStore().flush();
       User u = readRecord(Constants.TEST_KEY_1);
-      assertEquals(u.getField0().toString(), Constants.TEST_UPDATED_0);
+      assertEquals(Constants.TEST_UPDATED_0, u.getField0().toString());
     }
   }
 

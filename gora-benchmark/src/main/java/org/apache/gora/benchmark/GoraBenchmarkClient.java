@@ -88,8 +88,8 @@ public class GoraBenchmarkClient extends DB {
           GoraBenchmarkUtils.generateMappingFile(dataStoreName);
           GoraBenchmarkUtils.generateDataBeans();
         }
-        String keyClass = prop.getProperty("key.class", "java.lang.String");
-        String persistentClass = prop.getProperty("persistent.class", "org.apache.gora.benchmark.generated.User");
+        String keyClass = prop.getProperty(Constants.KEY_CLASS_KEY, Constants.KEY_CLASS_VALUE);
+        String persistentClass = prop.getProperty(Constants.PERSISTENCE_CLASS_KEY, Constants.PERSISTENCE_CLASS_VALUE);
         dataStore = DataStoreFactory.getDataStore(keyClass, persistentClass, properties, new Configuration());
       }
     } catch (GoraException e) {

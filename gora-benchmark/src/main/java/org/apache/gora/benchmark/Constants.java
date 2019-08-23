@@ -104,7 +104,6 @@ public final class Constants {
 
   public static final String LOCALHOST = "localhost";
   public static final int MONGO_DEFAULT_PORT = 27017;
-  public static final int MONGO_EMBED_DEFAULT_PORT = 27018;
 
   /**
    * Avoid Instantiating a new BenchmarkConstant.
