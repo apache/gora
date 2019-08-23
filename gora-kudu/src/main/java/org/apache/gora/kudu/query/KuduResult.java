@@ -40,28 +40,34 @@ public class KuduResult<K, T extends PersistentBase> extends ResultBase<K, T> {
     this.result = result;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   protected boolean nextInner() throws IOException {
-    boolean more = false;
+    boolean hasMoreRecords = false;
     if (this.resultIt == null || !this.resultIt.hasNext()) {
       while (this.result.hasMoreRows()) {
         RowResultIterator nextRows = this.result.nextRows();
         if (nextRows.hasNext()) {
           resultIt = nextRows;
-          more = true;
+          hasMoreRecords = true;
         }
       }
     } else {
-      more = true;
+      hasMoreRecords = true;
     }
-    if (more) {
+    if (hasMoreRecords) {
       RowResult next = resultIt.next();
       key = ((KuduStore<K, T>) getDataStore()).extractKey(next);
       persistent = ((KuduStore<K, T>) getDataStore()).newInstance(next, getQuery().getFields());
     }
-    return more;
+    return hasMoreRecords;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public float getProgress() throws IOException, InterruptedException {
     if (this.limit != -1) {
@@ -71,11 +77,17 @@ public class KuduResult<K, T extends PersistentBase> extends ResultBase<K, T> {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public int size() {
     return (int) this.limit;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public void close() throws IOException {
     if (result != null) {

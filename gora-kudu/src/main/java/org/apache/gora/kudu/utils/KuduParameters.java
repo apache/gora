@@ -38,18 +38,13 @@ public class KuduParameters {
     this.masterAddresses = masterAddresses;
   }
 
+  /**
+   * Gets a list of masters
+   *
+   * @return comma-separated list of "host:port" pairs of the masters
+   */
   public String getMasterAddresses() {
     return masterAddresses;
-  }
-
-  /**
-   * Set list of masters
-   *
-   * @param masterAddresses comma-separated list of "host:port" pairs of the
-   * masters
-   */
-  public void setMasterAddresses(String masterAddresses) {
-    this.masterAddresses = masterAddresses;
   }
 
   public Integer getBossCount() {
@@ -60,7 +55,7 @@ public class KuduParameters {
    * Set the maximum number of boss threads. Optional. If not provided, 1 is
    * used.
    *
-   * @param bossCount
+   * @param bossCount number of boss threads
    */
   public void setBossCount(Integer bossCount) {
     this.bossCount = bossCount;
@@ -128,7 +123,7 @@ public class KuduParameters {
    * Set the maximum number of worker threads. Optional. If not provided, (2 *
    * the number of available processors) is used.
    *
-   * @param workerCount
+   * @param workerCount number of worker threads
    */
   public void setWorkerCount(Integer workerCount) {
     this.workerCount = workerCount;
@@ -142,7 +137,8 @@ public class KuduParameters {
    * Set the new flush mode for this session.
    *
    * @see
-   * https://kudu.apache.org/apidocs/org/apache/kudu/client/SessionConfiguration.FlushMode.html
+   * <a href="https://kudu.apache.org/apidocs/org/apache/kudu/client/SessionConfiguration.FlushMode.html">https://kudu.apache.org/apidocs/org/apache/kudu/client/SessionConfiguration.FlushMode.html</a>
+   *
    *
    * @param flushMode flush mode
    */

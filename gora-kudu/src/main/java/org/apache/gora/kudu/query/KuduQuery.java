@@ -26,10 +26,19 @@ import org.apache.gora.store.DataStore;
  */
 public class KuduQuery<K, T extends PersistentBase> extends QueryBase<K, T> {
 
+  /**
+   * Constructor for the query
+   *
+   * @param dataStore Data store used
+   *
+   */
   public KuduQuery(DataStore<K, T> dataStore) {
     super(dataStore);
   }
 
+  /**
+   * Constructor for the query
+   */
   public KuduQuery() {
     super(null);
   }

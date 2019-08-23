@@ -1689,16 +1689,16 @@
 
       <!-- Pig -->
       <dependency>
-        <groupId>org.apache.pig</groupId>
-        <artifactId>pig</artifactId>
-        <classifier>h2</classifier>
-        <version>${pig.version}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.apache.avro</groupId>
-            <artifactId>avro</artifactId>
-          </exclusion>
-        </exclusions>
+          <groupId>org.apache.pig</groupId>
+          <artifactId>pig</artifactId>
+          <classifier>h2</classifier>
+          <version>${pig.version}</version>
+          <exclusions>
+              <exclusion>
+                  <groupId>org.apache.avro</groupId>
+                  <artifactId>avro</artifactId>
+              </exclusion>
+          </exclusions>
       </dependency>
 
       <!--Aerospike Dependency -->

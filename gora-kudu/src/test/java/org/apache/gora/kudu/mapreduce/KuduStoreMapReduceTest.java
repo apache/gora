@@ -18,8 +18,6 @@
 package org.apache.gora.kudu.mapreduce;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.kudu.GoraKuduTestDriver;
 import org.apache.gora.kudu.utils.KuduBackendConstants;
@@ -29,7 +27,6 @@ import org.apache.gora.store.DataStoreFactory;
 import org.apache.hadoop.mapred.JobConf;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Executes tests for MR jobs over Kudu dataStore.

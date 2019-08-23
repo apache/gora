@@ -166,9 +166,9 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
     try {
       List<ColumnSchema> columns = new ArrayList<>();
       List<String> keys = new ArrayList<>();
-      for (Column pk : kuduMapping.getPrimaryKey()) {
-        columns.add(new ColumnSchema.ColumnSchemaBuilder(pk.getName(), pk.getDataType().getType()).key(true).build());
-        keys.add(pk.getName());
+      for (Column primaryKey : kuduMapping.getPrimaryKey()) {
+        columns.add(new ColumnSchema.ColumnSchemaBuilder(primaryKey.getName(), primaryKey.getDataType().getType()).key(true).build());
+        keys.add(primaryKey.getName());
       }
       for (Map.Entry<String, Column> clt : kuduMapping.getFields().entrySet()) {
         Column aColumn = clt.getValue();
@@ -232,11 +232,9 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
   public boolean exists(K key) throws GoraException {
     try {
       ColumnSchema column = table.getSchema().getColumn(kuduMapping.getPrimaryKey().get(0).getName());
-      KuduScanner.KuduScannerBuilder scannerBuilder = client.newScannerBuilder(table);
-      scannerBuilder.limit(1);
-      scannerBuilder.setProjectedColumnIndexes(new ArrayList<>());
-      scannerBuilder.addPredicate(KuduClientUtils.createEqualPredicate(column, key));
-      KuduScanner build = scannerBuilder.build();
+      ArrayList<KuduPredicate> equalPredicate = new ArrayList<>();
+      equalPredicate.add(KuduClientUtils.createEqualPredicate(column, key));
+      KuduScanner build = createScanner(equalPredicate, new ArrayList<>(), 1);
       RowResult waitFirstResult = KuduClientUtils.waitFirstResult(build);
       build.close();
       return waitFirstResult != null;
@@ -254,11 +252,9 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
     }
     try {
       ColumnSchema column = table.getSchema().getColumn(kuduMapping.getPrimaryKey().get(0).getName());
-      KuduScanner.KuduScannerBuilder scannerBuilder = client.newScannerBuilder(table);
-      scannerBuilder.limit(1);
-      scannerBuilder.setProjectedColumnNames(dbFields);
-      scannerBuilder.addPredicate(KuduClientUtils.createEqualPredicate(column, key));
-      KuduScanner build = scannerBuilder.build();
+      ArrayList<KuduPredicate> equalPredicate = new ArrayList<>();
+      equalPredicate.add(KuduClientUtils.createEqualPredicate(column, key));
+      KuduScanner build = createScanner(equalPredicate, dbFields, 1);
       RowResult waitGetOneOrZero = KuduClientUtils.waitFirstResult(build);
       T resp = null;
       if (waitGetOneOrZero != null) {
@@ -326,19 +322,11 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       long count = 0;
       Column pkc = kuduMapping.getPrimaryKey().get(0);
       ColumnSchema column = table.getSchema().getColumn(pkc.getName());
-      KuduScanner.KuduScannerBuilder scannerBuilder = client.newScannerBuilder(table);
-      if (query.getLimit() != -1) {
-        scannerBuilder.limit(query.getLimit());
-      }
       List<String> dbFields = new ArrayList<>();
       dbFields.add(pkc.getName());
-      scannerBuilder.setProjectedColumnNames(dbFields);
       List<KuduPredicate> rangePredicates = KuduClientUtils.createRangePredicate(column, query.getStartKey(), query.getEndKey());
-      for (KuduPredicate predicate : rangePredicates) {
-        scannerBuilder.addPredicate(predicate);
-      }
-      scannerBuilder.addPredicate(KuduPredicate.newIsNotNullPredicate(column));
-      KuduScanner build = scannerBuilder.build();
+      rangePredicates.add(KuduPredicate.newIsNotNullPredicate(column));
+      KuduScanner build = createScanner(rangePredicates, dbFields, query.getLimit());
       while (build.hasMoreRows()) {
         RowResultIterator nextRows = build.nextRows();
         for (RowResult it : nextRows) {
@@ -375,17 +363,9 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
     try {
       ColumnSchema column = table.getSchema().getColumn(kuduMapping.getPrimaryKey().get(0).getName());
       dbFields.add(kuduMapping.getPrimaryKey().get(0).getName());
-      KuduScanner.KuduScannerBuilder scannerBuilder = client.newScannerBuilder(table);
-      if (query.getLimit() != -1) {
-        scannerBuilder.limit(query.getLimit());
-      }
-      scannerBuilder.setProjectedColumnNames(dbFields);
       List<KuduPredicate> rangePredicates = KuduClientUtils.createRangePredicate(column, query.getStartKey(), query.getEndKey());
-      for (KuduPredicate predicate : rangePredicates) {
-        scannerBuilder.addPredicate(predicate);
-      }
-      scannerBuilder.addPredicate(KuduPredicate.newIsNotNullPredicate(column));
-      KuduScanner build = scannerBuilder.build();
+      rangePredicates.add(KuduPredicate.newIsNotNullPredicate(column));
+      KuduScanner build = createScanner(rangePredicates, dbFields, query.getLimit());
       return new KuduResult<>(this, query, build);
     } catch (Exception e) {
       throw new GoraException(e);
@@ -650,5 +630,17 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
       }
     }
     return false;
+  }
+
+  private KuduScanner createScanner(List<KuduPredicate> predicates, List<String> projColumns, long limit) {
+    KuduScanner.KuduScannerBuilder scannerBuilder = client.newScannerBuilder(table);
+    if (limit != -1) {
+      scannerBuilder.limit(limit);
+    }
+    scannerBuilder.setProjectedColumnNames(projColumns);
+    for (KuduPredicate predicate : predicates) {
+      scannerBuilder.addPredicate(predicate);
+    }
+    return scannerBuilder.build();
   }
 }

@@ -18,6 +18,9 @@ package org.apache.gora.kudu.mapping;
 
 import org.apache.kudu.Type;
 
+/**
+ * Column definition for the kudu table.
+ */
 public class Column {
 
   private String name;
@@ -44,30 +47,12 @@ public class Column {
   }
 
   /**
-   * Sets the column's name
-   *
-   * @param name Column's name
-   */
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  /**
    * Returns the column's data-type
    *
    * @return Column's data-type
    */
   public FieldType getDataType() {
     return dataType;
-  }
-
-  /**
-   * Sets the column's data-type
-   *
-   * @param dataType Column's data-type
-   */
-  public void setDataType(FieldType dataType) {
-    this.dataType = dataType;
   }
 
   /**
@@ -113,15 +98,6 @@ public class Column {
     }
 
     /**
-     * Sets the decimal precision
-     *
-     * @param precision Decimal column precision
-     */
-    public void setPrecision(int precision) {
-      this.precision = precision;
-    }
-
-    /**
      * Returns the scale of a Decimal type
      *
      * @return Decimal column scale
@@ -131,30 +107,12 @@ public class Column {
     }
 
     /**
-     * Sets the decimal scale
-     *
-     * @param scale Decimal column scale
-     */
-    public void setScale(int scale) {
-      this.scale = scale;
-    }
-
-    /**
      * Returns the kudu type of the column
      *
      * @return Kudu type
      */
     public Type getType() {
       return type;
-    }
-
-    /**
-     * Sets the kudu type of the column
-     *
-     * @param type Kudu type
-     */
-    public void setType(Type type) {
-      this.type = type;
     }
 
   }

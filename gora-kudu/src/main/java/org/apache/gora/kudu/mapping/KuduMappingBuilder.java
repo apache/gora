@@ -40,13 +40,13 @@ import org.slf4j.LoggerFactory;
  * Builder for Mapping definitions of Kudu.
  */
 public class KuduMappingBuilder<K, T extends PersistentBase> {
-  
+
   private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   /**
    * Mapping instance being built
    */
   private KuduMapping kuduMapping;
-  
+
   private final KuduStore<K, T> dataStore;
 
   /**
@@ -69,18 +69,10 @@ public class KuduMappingBuilder<K, T extends PersistentBase> {
   }
 
   /**
-   * Sets the Kudu Mapping
-   *
-   * @param kuduMapping Kudu Mapping instance
-   */
-  public void setKuduMapping(KuduMapping kuduMapping) {
-    this.kuduMapping = kuduMapping;
-  }
-
-  /**
    * Reads Kudu mappings from file
    *
    * @param inputStream Mapping input stream
+   * @throws org.apache.gora.util.GoraException Error reading mapping file
    */
   public void readMappingFile(InputStream inputStream) throws GoraException {
     try {
@@ -111,21 +103,21 @@ public class KuduMappingBuilder<K, T extends PersistentBase> {
           for (Element tableElement : tables) {
             if (tableElement.getAttributeValue("name").equals(tableNameFromMapping)) {
               @SuppressWarnings("unchecked")
-              List<Element> prColumns = tableElement.getChildren("primaryKey");
-              List<Column> prFields = new ArrayList<>();
-              for (Element aPrimaryKey : prColumns) {
-                String name = aPrimaryKey.getAttributeValue("column");
-                String type = aPrimaryKey.getAttributeValue("type");
-                Type aDataType = Type.valueOf(type);
+              List<Element> pkColumns = tableElement.getChildren("primaryKey");
+              List<Column> pkFields = new ArrayList<>();
+              for (Element aPrimaryKey : pkColumns) {
+                String columnName = aPrimaryKey.getAttributeValue("column");
+                String columnType = aPrimaryKey.getAttributeValue("type");
+                Type aDataType = Type.valueOf(columnType);
                 if (aDataType == Type.DECIMAL) {
                   int precision = Integer.parseInt(aPrimaryKey.getAttributeValue("precision"));
                   int scale = Integer.parseInt(aPrimaryKey.getAttributeValue("scale"));
-                  prFields.add(new Column(name, new Column.FieldType(precision, scale)));
+                  pkFields.add(new Column(columnName, new Column.FieldType(precision, scale)));
                 } else {
-                  prFields.add(new Column(name, new Column.FieldType(aDataType)));
+                  pkFields.add(new Column(columnName, new Column.FieldType(aDataType)));
                 }
               }
-              kuduMapping.setPrimaryKey(prFields);
+              kuduMapping.setPrimaryKey(pkFields);
               Element hashPartition = tableElement.getChild("hashPartition");
               if (hashPartition != null) {
                 int numBuckets = Integer.parseInt(hashPartition.getAttributeValue("numBuckets"));
@@ -144,7 +136,7 @@ public class KuduMappingBuilder<K, T extends PersistentBase> {
           }
           @SuppressWarnings("unchecked")
           List<Element> fields = classElement.getChildren("field");
-          Map<String, Column> mp = new HashMap<>();
+          Map<String, Column> fieldsMappings = new HashMap<>();
           for (Element field : fields) {
             String fieldName = field.getAttributeValue("name");
             String columnName = field.getAttributeValue("column");
@@ -153,12 +145,12 @@ public class KuduMappingBuilder<K, T extends PersistentBase> {
             if (aDataType == Type.DECIMAL) {
               int precision = Integer.parseInt(field.getAttributeValue("precision"));
               int scale = Integer.parseInt(field.getAttributeValue("scale"));
-              mp.put(fieldName, new Column(columnName, new Column.FieldType(precision, scale)));
+              fieldsMappings.put(fieldName, new Column(columnName, new Column.FieldType(precision, scale)));
             } else {
-              mp.put(fieldName, new Column(columnName, new Column.FieldType(aDataType)));
+              fieldsMappings.put(fieldName, new Column(columnName, new Column.FieldType(aDataType)));
             }
           }
-          kuduMapping.setFields(mp);
+          kuduMapping.setFields(fieldsMappings);
           break;
         }
       }
