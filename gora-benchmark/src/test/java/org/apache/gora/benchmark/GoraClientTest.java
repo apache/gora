@@ -30,7 +30,9 @@ import java.util.Set;
 import java.util.Vector;
 
 import org.apache.gora.benchmark.generated.User;
+import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.util.GoraException;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,6 +41,7 @@ import org.slf4j.LoggerFactory;
 
 import com.mongodb.MongoClient;
 import com.yahoo.ycsb.ByteIterator;
+import com.yahoo.ycsb.NumericByteIterator;
 import com.yahoo.ycsb.Status;
 import com.yahoo.ycsb.StringByteIterator;
 import com.yahoo.ycsb.workloads.CoreWorkload;
@@ -61,6 +64,7 @@ public class GoraClientTest {
   private GoraBenchmarkClient benchmarkClient;
   private static HashMap<String, ByteIterator> DATA_TO_INSERT;
   private static HashMap<String, ByteIterator> DATA_TO_UPDATE;
+  private static HashMap<String, ByteIterator> INTEGER_DATA;
   private MongodExecutable mongodExecutable;
   private MongodProcess mongodProcess;
   private MongoClient mongoClient;
@@ -74,7 +78,7 @@ public class GoraClientTest {
   private void setupMongoDBCluster() {
     MongodStarter starter = MongodStarter.getDefaultInstance();
     String bindIp = Constants.LOCALHOST;
-    int port = Constants.MONGO_DEFAULT_PORT;
+    int port = Constants.MONGO_EMBED_DEFAULT_PORT;
     IMongodConfig mongodConfig = null;
     try {
       mongodConfig = new MongodConfigBuilder().version(Version.Main.PRODUCTION)
@@ -107,22 +111,28 @@ public class GoraClientTest {
    */
   @Before
   public void setUp() throws Exception {
-    if (!isMongoDBSetupDone) {
-      setupMongoDBCluster();
-      isMongoDBSetupDone = true;
-    }
     DATA_TO_INSERT = new HashMap<>();
     DATA_TO_UPDATE = new HashMap<>();
+    INTEGER_DATA = new HashMap<>();
     for (int count = 0; count < Constants.TEST_NUMBER_OF_FIELDS; count++) {
       DATA_TO_INSERT.put(Constants.FIELD_PREFIX + count, new StringByteIterator(Constants.TEST_VALUE + count));
       DATA_TO_UPDATE.put(Constants.FIELD_PREFIX + count, new StringByteIterator(Constants.TEST_UPDATED + count));
+      INTEGER_DATA.put(Constants.FIELD_PREFIX+count, new StringByteIterator(count+""));
     }
-    Properties p = new Properties();
-    p.setProperty(Constants.KEY_CLASS_KEY, Constants.KEY_CLASS_VALUE);
-    p.setProperty(Constants.PERSISTENCE_CLASS_KEY, Constants.PERSISTENCE_CLASS_VALUE);
-    p.setProperty(CoreWorkload.FIELD_COUNT_PROPERTY, Constants.TEST_NUMBER_OF_FIELDS + "");
+    Properties properties = new Properties();
+    properties.setProperty(Constants.KEY_CLASS_KEY, Constants.KEY_CLASS_VALUE);
+    properties.setProperty(Constants.PERSISTENCE_CLASS_KEY, Constants.PERSISTENCE_CLASS_VALUE);
+    properties.setProperty(CoreWorkload.FIELD_COUNT_PROPERTY, Constants.TEST_NUMBER_OF_FIELDS + "");
+    //Setup and start embedded MongoDB, make sure local mongodb is not running.
+    Properties dataStoreProperties = DataStoreFactory.createProps();
+    String dataStoreToTest = GoraBenchmarkUtils.getDataStore(dataStoreProperties);
+    if (!isMongoDBSetupDone&& dataStoreToTest == Constants.MONGODB) {
+      setupMongoDBCluster();
+      isMongoDBSetupDone = true;
+    }
+    
     benchmarkClient = new GoraBenchmarkClient();
-    benchmarkClient.setProperties(p);
+    benchmarkClient.setProperties(properties);
     benchmarkClient.init();
   }
 
@@ -157,6 +167,26 @@ public class GoraClientTest {
     benchmarkClient.insert(Constants.TEST_TABLE, Constants.TEST_KEY_1, DATA_TO_INSERT);
     benchmarkClient.insert(Constants.TEST_TABLE, Constants.TEST_KEY_2, DATA_TO_INSERT);
     benchmarkClient.insert(Constants.TEST_TABLE, Constants.TEST_KEY_3, DATA_TO_INSERT);
+  }
+
+  @Test
+  public void testCorrectness() {
+    Status result = benchmarkClient.insert(Constants.TEST_TABLE, Constants.TEST_KEY_4, INTEGER_DATA);
+    assertEquals(result, Status.OK);
+    try {
+      User user = readRecord(Constants.TEST_KEY_4);
+      assertEquals(190, sum(user));
+    } catch (GoraException e) {
+      LOG.info("There is a problem reading record from the datastore", e.getMessage(), e);
+    }
+  }
+  
+  public int sum(User user) {
+    int sum = 0;
+    for (int fieldValue = 1; fieldValue < user.getFieldsCount(); fieldValue++) {
+      sum+=Integer.parseInt(user.get(fieldValue).toString());
+    }
+    return sum;
   }
 
   /**
@@ -196,7 +226,7 @@ public class GoraClientTest {
     assertEquals(Status.OK, result);
     assertEquals(DATA_TO_INSERT.size(), results.size());
     assertEquals(DATA_TO_INSERT.get(Constants.TEST_FIELD_0).toString(), results.get(Constants.TEST_FIELD_0).toString());
-    assertEquals(DATA_TO_INSERT.get(Constants.TEST_FIELD_0).toString(), Constants.TEST_VALUE_0);
+    assertEquals(Constants.TEST_VALUE_0, results.get(Constants.TEST_FIELD_0).toString());
   }
 
   /**
@@ -226,7 +256,7 @@ public class GoraClientTest {
     if (result == Status.OK) {
       benchmarkClient.getDataStore().flush();
       User u = readRecord(Constants.TEST_KEY_1);
-      assertEquals(Constants.TEST_UPDATED_0, u.getField0().toString());
+      assertEquals(u.getField0().toString(), Constants.TEST_UPDATED_0);
     }
   }
 
@@ -261,7 +291,7 @@ public class GoraClientTest {
   @Test
   public void testGenerateDataBeans() {
     GoraBenchmarkUtils.generateDataBeans();
-    assertTrue("Failed", fileExists(Constants.DATA_BEANS_PATH + "/-" + Constants.DATA_BEAN_DEFAULT_FILE));
+    assertTrue("Failed", fileExists(Constants.DATA_BEANS_PATH + "/" + Constants.DATA_BEAN_DEFAULT_FILE));
   }
 
   /**

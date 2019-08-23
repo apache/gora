@@ -95,6 +95,7 @@ public final class Constants {
   public static final String TEST_KEY_1 = "key1";
   public static final String TEST_KEY_2 = "key2";
   public static final String TEST_KEY_3 = "key3";
+  public static final String TEST_KEY_4 = "key4";
   public static final String TEST_FIELD_0 = "field0";
   public static final String TEST_VALUE_0 = "value0";
   public static final String TEST_VALUE = "value";
@@ -103,6 +104,7 @@ public final class Constants {
 
   public static final String LOCALHOST = "localhost";
   public static final int MONGO_DEFAULT_PORT = 27017;
+  public static final int MONGO_EMBED_DEFAULT_PORT = 27018;
 
   /**
    * Avoid Instantiating a new BenchmarkConstant.
