@@ -22,9 +22,9 @@ This guide will take you through compiling and running the gora-benchmark module
 # Prerequisite
 1. Install and setup the required database to test. Currently, the benchmark is tested on 
 
-  1. MongoDB
-  2. HBase
-  3. CouchDB.
+   1. MongoDB
+   2. HBase
+   3. CouchDB.
 
 2. Install maven
 
@@ -46,11 +46,11 @@ This guide will take you through compiling and running the gora-benchmark module
 
 5. Load the database
 
-... ./bin/gora-bench.sh load -threads 15 -s -p fieldcount=20 -p recordcount=1000 -p operationcount=1000 -P workloads/workloada
+     ./bin/gora-bench.sh load -threads 15 -s -p fieldcount=20 -p recordcount=1000 -p operationcount=1000 -P workloads/workloada
 
 6. Run the workload
 
-... ./bin/gora-bench.sh run -threads 15 -s -p readallfields=true -p measurementtype=timeseries -p timeseries.granularity=2000 -p operationcount=1000 -P workloads/workloadb
+     ./bin/gora-bench.sh run -threads 15 -s -p readallfields=true -p measurementtype=timeseries -p timeseries.granularity=2000 -p operationcount=1000 -P workloads/workloadb
 
 
 More details about the parameters and their usage can be found in the links below.  
