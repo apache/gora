@@ -790,9 +790,9 @@
     <module>gora-solr</module>
     <module>gora-aerospike</module>
     <module>gora-ignite</module>
+    <module>gora-jet</module>
     <module>gora-tutorial</module>
     <module>sources-dist</module>
-    <module>gora-jet</module>
   </modules>
 
   <properties>
