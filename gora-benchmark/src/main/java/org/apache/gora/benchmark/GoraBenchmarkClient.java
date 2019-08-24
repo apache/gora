@@ -32,8 +32,6 @@ import org.apache.gora.util.GoraException;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.aerospike.client.Log;
 import com.yahoo.ycsb.ByteIterator;
 import com.yahoo.ycsb.DB;
 import com.yahoo.ycsb.DBException;
@@ -43,15 +41,12 @@ import com.yahoo.ycsb.workloads.CoreWorkload;
 import org.apache.gora.benchmark.generated.User;
 
 /**
- * The Class GoraBenchmarkClient
- *
- * @author sc306 This class extends the Yahoo! Cloud Service Benchmark DB class to
- *         provide functionality for and methods as per Apache Gora
- *         implementation.
- *         {@link #insert(String, String, Map)},
- *         {@link #read(String, String, Set, Map)},
- *         {@link #scan(String, String, int, Set, Vector)}
- *         {@link #update(String, String, Map)}
+ * This class extends the Yahoo! Cloud Service Benchmark DB class to provide
+ * functionality for the DB class as per Apache Gora implementation. The following method are implemented
+ * {@link #insert(String, String, Map)},
+ * {@link #read(String, String, Set, Map)},
+ * {@link #scan(String, String, int, Set, Vector)}
+ * {@link #update(String, String, Map)}
  */
 public class GoraBenchmarkClient extends DB {
   private static final Logger LOG = LoggerFactory.getLogger(GoraBenchmarkClient.class);
@@ -68,11 +63,10 @@ public class GoraBenchmarkClient extends DB {
   }
 
   /**
-   * * Initialisation method. This method is called once for each database
+   * Initialisation method. This method is called once for each database
    * instance. There is one database instance for each client thread.
    *
-   * @throws DBException
-   *           the DB exception
+   * @throws DBException the DB exception
    */
   public void init() throws DBException {
     try {
@@ -103,8 +97,7 @@ public class GoraBenchmarkClient extends DB {
    * It is very important to close the datastore properly, otherwise some data
    * loss might occur.
    *
-   * @throws DBException
-   *           the DB exception
+   * @throws DBException the DB exception
    */
   public void cleanup() throws DBException {
     if (dataStore != null)
@@ -114,10 +107,8 @@ public class GoraBenchmarkClient extends DB {
   /**
    * Delete a record from the database.
    *
-   * @param table
-   *          The name of the table to delete the data from
-   * @param key
-   *          The key of the record to delete.
+   * @param table The name of the table to delete the data from
+   * @param key The key of the record to delete.
    * @return Status of the operation failed or success.
    */
   @Override
@@ -136,13 +127,9 @@ public class GoraBenchmarkClient extends DB {
    * specified values HashMap will be written into the record with the specified
    * record key.
    *
-   * @param table
-   *          The name of the table"field"+i
-   * @param key
-   *          The record key of the record to insert.
-   * @param values
-   *          A HashMap of field/value pairs to insert in the record. Each
-   *          HashMap will have a
+   * @param table The name of the table"field"+i
+   * @param key The record key of the record to insert.
+   * @param values A HashMap of field/value pairs to insert in the record. Each HashMap will have a
    * @return The result of the operation.
    */
   @Override
@@ -168,14 +155,10 @@ public class GoraBenchmarkClient extends DB {
    * Read a record from the database. Each field/value pair from the result will
    * be stored in a HashMap.
    *
-   * @param table
-   *          The name of the table
-   * @param key
-   *          The record key of the record to read.
-   * @param fields
-   *          The list of fields to read, or null for all of them
-   * @param result
-   *          A HashMap oftestInsert field/value pairs for the result
+   * @param table The name of the table
+   * @param key The record key of the record to read.
+   * @param fields The list of fields to read, or null for all of them
+   * @param result A HashMap oftestInsert field/value pairs for the result
    * @return The result of the operation.
    */
   @Override
@@ -201,12 +184,11 @@ public class GoraBenchmarkClient extends DB {
    * Perform a range scan for a set of records in the database. Each field/value
    * pair from the result will be stored in a HashMap.
    *
-   * @param table          The name of the table
+   * @param table The name of the table
    * @param startKey the start key
-   * @param recordCount          The number of records to read
-   * @param fields          The list of fields to read, or null for all of them
-   * @param result          A Vector of HashMaps, where each HashMap is a set field/value
-   *          pairs for one record
+   * @param recordCount The number of records to read
+   * @param fields The list of fields to read, or null for all of them
+   * @param result A Vector of HashMaps, where each HashMap is a set field/value pairs for one record
    * @return The result of the operation.
    */
   @Override
@@ -239,12 +221,9 @@ public class GoraBenchmarkClient extends DB {
    * values HashMap will be written into the record with the specified record
    * key, overwriting any existing values with the same field name.
    *
-   * @param table
-   *          The name of the table
-   * @param key
-   *          The record key of the record to write.
-   * @param values
-   *          A HashMap of field/value pairs to update in the record
+   * @param table The name of the table
+   * @param key The record key of the record to write.
+   * @param values A HashMap of field/value pairs to update in the record
    * @return The result of the operation.
    */
   @Override
@@ -269,13 +248,5 @@ public class GoraBenchmarkClient extends DB {
     }
     return Status.OK;
   }
-
-  /**
-   * Gets the data store.
-   *
-   * @return the data store
-   */
-  public DataStore<String, User> getDataStore() {
-    return this.dataStore;
-  }
+  
 }
