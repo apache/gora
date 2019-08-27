@@ -31,9 +31,9 @@
   <packaging>pom</packaging>
   <version>1.0-SNAPSHOT</version>
   <name>Apache Gora</name>
-  <description>The Apache Gora open source framework provides an in-memory data model and 
-    persistence for big data. Gora supports persisting to column stores, key value stores, 
-    document stores and RDBMSs, and analyzing the data with extensive Apache Hadoop MapReduce 
+  <description>The Apache Gora open source framework provides an in-memory data model and
+    persistence for big data. Gora supports persisting to column stores, key value stores,
+    document stores and RDBMSs, and analyzing the data with extensive Apache Hadoop MapReduce
     support. </description>
   <url>http://gora.apache.org</url>
   <inceptionYear>2010</inceptionYear>
@@ -771,6 +771,7 @@
     <module>gora-solr</module>
     <module>gora-aerospike</module>
     <module>gora-ignite</module>
+    <module>gora-hive</module>
     <module>gora-tutorial</module>
     <module>sources-dist</module>
   </modules>
@@ -827,6 +828,12 @@
     <orientdb.version>2.2.22</orientdb.version>
     <orientqb.version>0.2.0</orientqb.version>
 
+    <!-- HiveStore Dependencies -->
+    <metamodel.version>5.3.0</metamodel.version>
+    <json.version>20180813</json.version>
+    <hive.version>2.3.5</hive.version>
+    <hadoop-common.version>2.6.0</hadoop-common.version>
+
     <!-- Testing Dependencies -->
     <junit.version>4.10</junit.version>
     <test.container.version>1.4.2</test.container.version>
@@ -854,6 +861,7 @@
     <pig.version>0.16.0</pig.version>
 
     <!-- General Properties -->
+    <!--suppress UnresolvedMavenProperty -->
     <implementation.build>${scmBranch}@r${buildNumber}</implementation.build>
     <javac.src.version>1.8</javac.src.version>
     <javac.target.version>1.8</javac.target.version>
@@ -955,6 +963,11 @@
       <dependency>
         <groupId>org.apache.gora</groupId>
         <artifactId>gora-dynamodb</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-hive</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -1696,6 +1709,62 @@
         <groupId>org.apache.ignite</groupId>
         <artifactId>ignite-core</artifactId>
         <version>${ignite.version}</version>
+      </dependency>
+
+      <!-- Hive DataStore dependencies -->
+      <dependency>
+        <groupId>org.apache.hive</groupId>
+        <artifactId>hive-jdbc</artifactId>
+        <version>${hive.version}</version>
+        <scope>compile</scope>
+        <exclusions>
+          <exclusion>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.hive</groupId>
+        <artifactId>hive-service</artifactId>
+        <version>${hive.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.hive</groupId>
+        <artifactId>hive-exec</artifactId>
+        <version>${hive.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.metamodel</groupId>
+        <artifactId>MetaModel-jdbc</artifactId>
+        <version>${metamodel.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.metamodel</groupId>
+        <artifactId>MetaModel-core</artifactId>
+        <version>${metamodel.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.json</groupId>
+        <artifactId>json</artifactId>
+        <version>${json.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
