@@ -83,9 +83,9 @@ public class CINode extends org.apache.gora.persistency.impl.PersistentBase impl
   // Used by DatumWriter.  Applications should not call. 
   public java.lang.Object get(int field$) {
     switch (field$) {
-    case 0: return prev;
-    case 1: return client;
-    case 2: return count;
+    case 0: return this.prev;
+    case 1: return this.client;
+    case 2: return this.count;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -94,9 +94,9 @@ public class CINode extends org.apache.gora.persistency.impl.PersistentBase impl
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: prev = (java.lang.Long)(value); break;
-    case 1: client = (java.lang.CharSequence)(value); break;
-    case 2: count = (java.lang.Long)(value); break;
+    case 0: this.prev = (java.lang.Long)(value); break;
+    case 1: this.client = (java.lang.CharSequence)(value); break;
+    case 2: this.count = (java.lang.Long)(value); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }

@@ -418,4 +418,11 @@ public abstract class DataStoreTestBase {
     log.info("test method: testResultSizeKeyRangeWithLimit");
     DataStoreTestUtil.testResultSizeWebPagesKeyRangeWithLimit(webPageStore);
   }
+  
+  @Test
+  public void testObjectFieldValue() throws Exception {
+    //GORA-538
+    log.info("test method: testObjectFieldValue");
+    DataStoreTestUtil.testObjectFieldValue(employeeStore);
+  }
 }

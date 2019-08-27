@@ -23,6 +23,7 @@
     <field name="name"/>
     <field name="dateOfBirth"/>
     <field name="ssn"/>
+    <field name="value"/>
     <field name="salary"/>
     <field name="boss"/>
     <field name="webpage"/>

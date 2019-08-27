@@ -98,14 +98,14 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
   // Used by DatumWriter.  Applications should not call. 
   public java.lang.Object get(int field$) {
     switch (field$) {
-    case 0: return url;
-    case 1: return content;
-    case 2: return parsedContent;
-    case 3: return outlinks;
-    case 4: return headers;
-    case 5: return metadata;
-    case 6: return byteData;
-    case 7: return stringData;
+    case 0: return this.url;
+    case 1: return this.content;
+    case 2: return this.parsedContent;
+    case 3: return this.outlinks;
+    case 4: return this.headers;
+    case 5: return this.metadata;
+    case 6: return this.byteData;
+    case 7: return this.stringData;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -114,14 +114,14 @@ public class WebPage extends org.apache.gora.persistency.impl.PersistentBase imp
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: url = (java.lang.CharSequence)(value); break;
-    case 1: content = (java.nio.ByteBuffer)(value); break;
-    case 2: parsedContent = (java.util.List<java.lang.CharSequence>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyListWrapper((java.util.List)value)); break;
-    case 3: outlinks = (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)value)); break;
-    case 4: headers = (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>)(value); break;
-    case 5: metadata = (org.apache.gora.examples.generated.Metadata)(value); break;
-    case 6: byteData = (java.util.Map<java.lang.CharSequence,java.nio.ByteBuffer>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)value)); break;
-    case 7: stringData = (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)value)); break;
+    case 0: this.url = (java.lang.CharSequence)(value); break;
+    case 1: this.content = (java.nio.ByteBuffer)(value); break;
+    case 2: this.parsedContent = (java.util.List<java.lang.CharSequence>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyListWrapper((java.util.List)value)); break;
+    case 3: this.outlinks = (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)value)); break;
+    case 4: this.headers = (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>)(value); break;
+    case 5: this.metadata = (org.apache.gora.examples.generated.Metadata)(value); break;
+    case 6: this.byteData = (java.util.Map<java.lang.CharSequence,java.nio.ByteBuffer>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)value)); break;
+    case 7: this.stringData = (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)value)); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }

@@ -65,7 +65,7 @@ public class V2 extends org.apache.gora.persistency.impl.PersistentBase implemen
   // Used by DatumWriter.  Applications should not call. 
   public java.lang.Object get(int field$) {
     switch (field$) {
-    case 0: return v3;
+    case 0: return this.v3;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -74,7 +74,7 @@ public class V2 extends org.apache.gora.persistency.impl.PersistentBase implemen
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: v3 = (java.lang.Integer)(value); break;
+    case 0: this.v3 = (java.lang.Integer)(value); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }

@@ -68,8 +68,8 @@ public class Metadata extends org.apache.gora.persistency.impl.PersistentBase im
   // Used by DatumWriter.  Applications should not call. 
   public java.lang.Object get(int field$) {
     switch (field$) {
-    case 0: return version;
-    case 1: return data;
+    case 0: return this.version;
+    case 1: return this.data;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -78,8 +78,8 @@ public class Metadata extends org.apache.gora.persistency.impl.PersistentBase im
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: version = (java.lang.Integer)(value); break;
-    case 1: data = (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)value)); break;
+    case 0: this.version = (java.lang.Integer)(value); break;
+    case 1: this.data = (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)value)); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
