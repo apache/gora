@@ -24,6 +24,7 @@
     <field name="ssn"/>
     <field name="salary"/>
     <field name="webpage"/>
+    <field name="value"/>
   </class>
 
   <class name="org.apache.gora.examples.generated.WebPage" keyClass="java.lang.String" tableName="WebPage">
