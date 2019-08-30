@@ -83,9 +83,9 @@ public class CINode extends org.apache.gora.persistency.impl.PersistentBase impl
   // Used by DatumWriter.  Applications should not call. 
   public java.lang.Object get(int field$) {
     switch (field$) {
-    case 0: return prev;
-    case 1: return client;
-    case 2: return count;
+    case 0: return this.prev;
+    case 1: return this.client;
+    case 2: return this.count;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -94,9 +94,9 @@ public class CINode extends org.apache.gora.persistency.impl.PersistentBase impl
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: prev = (java.lang.Long)(value); break;
-    case 1: client = (java.lang.CharSequence)(value); break;
-    case 2: count = (java.lang.Long)(value); break;
+    case 0: this.prev = (java.lang.Long)(value); break;
+    case 1: this.client = (java.lang.CharSequence)(value); break;
+    case 2: this.count = (java.lang.Long)(value); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -341,7 +341,7 @@ public class CINode extends org.apache.gora.persistency.impl.PersistentBase impl
   }
   
   public CINode.Tombstone getTombstone(){
-  	return TOMBSTONE;
+    return TOMBSTONE;
   }
 
   public CINode newInstance(){
@@ -352,78 +352,78 @@ public class CINode extends org.apache.gora.persistency.impl.PersistentBase impl
   
   public static final class Tombstone extends CINode implements org.apache.gora.persistency.Tombstone {
   
-      private Tombstone() { }
+    private Tombstone() { }
   
-	  		  /**
-	   * Gets the value of the 'prev' field.
-		   */
-	  public java.lang.Long getPrev() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'prev' field.
-		   * @param value the value to set.
-	   */
-	  public void setPrev(java.lang.Long value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'prev' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
-	   */
-	  public boolean isPrevDirty() {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-				  /**
-	   * Gets the value of the 'client' field.
-		   */
-	  public java.lang.CharSequence getClient() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'client' field.
-		   * @param value the value to set.
-	   */
-	  public void setClient(java.lang.CharSequence value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'client' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
-	   */
-	  public boolean isClientDirty() {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-				  /**
-	   * Gets the value of the 'count' field.
-		   */
-	  public java.lang.Long getCount() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'count' field.
-		   * @param value the value to set.
-	   */
-	  public void setCount(java.lang.Long value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'count' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
-	   */
-	  public boolean isCountDirty() {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-		  
+      /**
+     * Gets the value of the 'prev' field.
+         */
+    public java.lang.Long getPrev() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+
+    /**
+     * Sets the value of the 'prev' field.
+         * @param value the value to set.
+     */
+    public void setPrev(java.lang.Long value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+  
+    /**
+     * Checks the dirty status of the 'prev' field. A field is dirty if it represents a change that has not yet been written to the database.
+         * @param value the value to set.
+     */
+    public boolean isPrevDirty() {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+
+        /**
+     * Gets the value of the 'client' field.
+         */
+    public java.lang.CharSequence getClient() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+
+    /**
+     * Sets the value of the 'client' field.
+         * @param value the value to set.
+     */
+    public void setClient(java.lang.CharSequence value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+  
+    /**
+     * Checks the dirty status of the 'client' field. A field is dirty if it represents a change that has not yet been written to the database.
+         * @param value the value to set.
+     */
+    public boolean isClientDirty() {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+
+        /**
+     * Gets the value of the 'count' field.
+         */
+    public java.lang.Long getCount() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+
+    /**
+     * Sets the value of the 'count' field.
+         * @param value the value to set.
+     */
+    public void setCount(java.lang.Long value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+  
+    /**
+     * Checks the dirty status of the 'count' field. A field is dirty if it represents a change that has not yet been written to the database.
+         * @param value the value to set.
+     */
+    public boolean isCountDirty() {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+
+    
   }
 
   private static final org.apache.avro.io.DatumWriter

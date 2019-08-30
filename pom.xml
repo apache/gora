@@ -29,11 +29,11 @@
   <groupId>org.apache.gora</groupId>
   <artifactId>gora</artifactId>
   <packaging>pom</packaging>
-  <version>0.9-SNAPSHOT</version>
+  <version>1.0-SNAPSHOT</version>
   <name>Apache Gora</name>
-  <description>The Apache Gora open source framework provides an in-memory data model and 
-    persistence for big data. Gora supports persisting to column stores, key value stores, 
-    document stores and RDBMSs, and analyzing the data with extensive Apache Hadoop MapReduce 
+  <description>The Apache Gora open source framework provides an in-memory data model and
+    persistence for big data. Gora supports persisting to column stores, key value stores,
+    document stores and RDBMSs, and analyzing the data with extensive Apache Hadoop MapReduce
     support. </description>
   <url>http://gora.apache.org</url>
   <inceptionYear>2010</inceptionYear>
@@ -382,7 +382,7 @@
             </execution>
           </executions>
           <configuration>
-            <tarLongFileMode>gnu</tarLongFileMode>
+            <tarLongFileMode>posix</tarLongFileMode>
             <finalName>${assembly.finalName}</finalName>
             <descriptors>
               <descriptor>sources-dist/src/main/assembly/src.xml</descriptor>
@@ -719,20 +719,6 @@
             </executions>
           </plugin>
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <version>${maven-gpg-plugin.version}</version>
-            <executions>
-              <execution>
-                <id>sign-artifacts</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
             <groupId>net.nicoulaj.maven.plugins</groupId>
             <artifactId>checksum-maven-plugin</artifactId>
             <version>${checksum-maven-plugin.version}</version>
@@ -746,19 +732,14 @@
             </executions>
             <configuration>
               <algorithms>
-                <algorithm>MD5</algorithm>
-                <algorithm>SHA-1</algorithm>
                 <algorithm>SHA-512</algorithm>
               </algorithms>
-              <csvSummary>false</csvSummary>
               <fileSets>
                 <fileSet>
                   <directory>${project.build.directory}</directory>
                   <includes>
-                    <include>*.zip</include>
-                    <include>*.tar.gz</include>
-                    <include>*.jar</include>
-                    <include>*.pom</include>
+                    <include>apache-gora-${project.version}-src.zip</include>
+                    <include>apache-gora-${project.version}-src.tar.gz</include>
                   </includes>
                 </fileSet>
               </fileSets>
@@ -790,6 +771,7 @@
     <module>gora-solr</module>
     <module>gora-aerospike</module>
     <module>gora-ignite</module>
+    <module>gora-hive</module>
     <module>gora-jet</module>
     <module>gora-tutorial</module>
     <module>sources-dist</module>
@@ -848,6 +830,12 @@
     <orientdb.version>2.2.22</orientdb.version>
     <orientqb.version>0.2.0</orientqb.version>
 
+    <!-- HiveStore Dependencies -->
+    <metamodel.version>5.3.0</metamodel.version>
+    <json.version>20180813</json.version>
+    <hive.version>2.3.5</hive.version>
+    <hadoop-common.version>2.6.0</hadoop-common.version>
+
     <!-- Testing Dependencies -->
     <junit.version>4.10</junit.version>
     <test.container.version>1.4.2</test.container.version>
@@ -866,7 +854,7 @@
     <maven-javadoc-plugin.version>2.8.1</maven-javadoc-plugin.version>
     <maven-gpg-plugin.version>1.4</maven-gpg-plugin.version>
     <apache-rat-plugin.version>0.8</apache-rat-plugin.version>
-    <maven-assembly-plugin.version>2.5.4</maven-assembly-plugin.version>
+    <maven-assembly-plugin.version>3.1.1</maven-assembly-plugin.version>
     <maven-deploy-plugin.version>2.5</maven-deploy-plugin.version>
     <checksum-maven-plugin.version>1.7</checksum-maven-plugin.version>
     <maven-clean-plugin.version>2.5</maven-clean-plugin.version>
@@ -875,6 +863,7 @@
     <pig.version>0.16.0</pig.version>
 
     <!-- General Properties -->
+    <!--suppress UnresolvedMavenProperty -->
     <implementation.build>${scmBranch}@r${buildNumber}</implementation.build>
     <javac.src.version>1.8</javac.src.version>
     <javac.target.version>1.8</javac.target.version>
@@ -986,6 +975,11 @@
       </dependency>
       <dependency>
         <groupId>org.apache.gora</groupId>
+        <artifactId>gora-hive</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.gora</groupId>
         <artifactId>gora-dynamodb</artifactId>
         <version>${project.version}</version>
         <type>test-jar</type>
@@ -1011,6 +1005,11 @@
         <artifactId>gora-lucene</artifactId>
         <version>${project.version}</version>
         <type>test-jar</type>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-mongodb</artifactId>
+        <version>${project.version}</version>
       </dependency>
 
       <!--Ignite DataStore dependencies -->
@@ -1724,6 +1723,62 @@
         <groupId>org.apache.ignite</groupId>
         <artifactId>ignite-core</artifactId>
         <version>${ignite.version}</version>
+      </dependency>
+
+      <!-- Hive DataStore dependencies -->
+      <dependency>
+        <groupId>org.apache.hive</groupId>
+        <artifactId>hive-jdbc</artifactId>
+        <version>${hive.version}</version>
+        <scope>compile</scope>
+        <exclusions>
+          <exclusion>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.hive</groupId>
+        <artifactId>hive-service</artifactId>
+        <version>${hive.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.hive</groupId>
+        <artifactId>hive-exec</artifactId>
+        <version>${hive.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.metamodel</groupId>
+        <artifactId>MetaModel-jdbc</artifactId>
+        <version>${metamodel.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.metamodel</groupId>
+        <artifactId>MetaModel-core</artifactId>
+        <version>${metamodel.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.json</groupId>
+        <artifactId>json</artifactId>
+        <version>${json.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
