@@ -16,7 +16,6 @@
  */
 package org.apache.gora.kudu.mapping;
 
-import com.google.inject.ConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
@@ -88,11 +87,14 @@ public class KuduMappingBuilder<K, T extends PersistentBase> {
       }
       @SuppressWarnings("unchecked")
       List<Element> classes = document.getRootElement().getChildren("class");
+      boolean keyClassMatches = false;
       for (Element classElement : classes) {
         if (classElement.getAttributeValue("keyClass").equals(
             dataStore.getKeyClass().getCanonicalName())
             && classElement.getAttributeValue("name").equals(
                 dataStore.getPersistentClass().getCanonicalName())) {
+          keyClassMatches = true;
+          LOG.debug("Keyclass and nameclass match.");
           final String tableNameFromMapping = classElement.getAttributeValue("table");
           final String tablenumReplicasMapping = classElement.getAttributeValue("numReplicas");
           String tableName = dataStore.getSchemaName(tableNameFromMapping, dataStore.getPersistentClass());
@@ -154,7 +156,10 @@ public class KuduMappingBuilder<K, T extends PersistentBase> {
           break;
         }
       }
-    } catch (IOException | JDOMException | ConfigurationException e) {
+      if (!keyClassMatches) {
+        throw new GoraException("gora-kudu-mapping does not include the name and keyClass in the databean.");
+      }
+    } catch (IOException | JDOMException e) {
       throw new GoraException(e);
     }
     LOG.info("Gora Kudu mapping file was read successfully.");

@@ -55,7 +55,7 @@ public class KuduStoreMapReduceTest extends DataStoreMapReduceTestBase {
   }
 
   @Override
-  protected DataStore<String, WebPage> createWebPageDataStore() throws IOException {
+  protected DataStore<String, WebPage> createWebPageDataStore() {
     try {
       return DataStoreFactory.getDataStore(String.class, WebPage.class, driver.getConfiguration());
     } catch (Exception e) {
