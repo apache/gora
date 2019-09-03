@@ -771,6 +771,7 @@
     <module>gora-solr</module>
     <module>gora-aerospike</module>
     <module>gora-ignite</module>
+    <module>gora-kudu</module>
     <module>gora-hive</module>
     <module>gora-tutorial</module>
     <module>sources-dist</module>
@@ -796,6 +797,8 @@
     <!-- Ignite Dependencies -->
     <ignite.version>2.6.0</ignite.version>
     <sqlbuilder.version>2.1.7</sqlbuilder.version>
+    <!-- Kudu Dependencies -->
+    <kudu.version>1.9.0</kudu.version>
     <!-- Solr Dependencies -->
     <lucene-solr.version>8.0.0</lucene-solr.version>
     <solr-solrj.version>8.0.0</solr-solrj.version>
@@ -989,6 +992,17 @@
       </dependency>
       <dependency>
         <groupId>org.apache.gora</groupId>
+        <artifactId>gora-kudu</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-kudu</artifactId>
+        <version>${project.version}</version>
+        <type>test-jar</type>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.gora</groupId>
         <artifactId>gora-lucene</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -1003,6 +1017,26 @@
         <artifactId>gora-mongodb</artifactId>
         <version>${project.version}</version>
       </dependency>
+      
+      <!--Kudu DataStore dependencies -->
+      <dependency>
+        <groupId>org.apache.kudu</groupId>
+        <artifactId>kudu-binary</artifactId>
+        <version>${kudu.version}</version>
+        <classifier>${os.detected.classifier}</classifier>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.kudu</groupId>
+        <artifactId>kudu-test-utils</artifactId>
+        <version>${kudu.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.kudu</groupId>
+        <artifactId>kudu-client</artifactId>
+        <version>${kudu.version}</version>
+      </dependency>
+
 
       <!--Ignite DataStore dependencies -->
 
