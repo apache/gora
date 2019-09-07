@@ -81,8 +81,8 @@ public class ImmutableFields extends org.apache.gora.persistency.impl.Persistent
   // Used by DatumWriter.  Applications should not call. 
   public java.lang.Object get(int field$) {
     switch (field$) {
-    case 0: return v1;
-    case 1: return v2;
+    case 0: return this.v1;
+    case 1: return this.v2;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -91,8 +91,8 @@ public class ImmutableFields extends org.apache.gora.persistency.impl.Persistent
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: v1 = (java.lang.Integer)(value); break;
-    case 1: v2 = (org.apache.gora.examples.generated.V2)(value); break;
+    case 0: this.v1 = (java.lang.Integer)(value); break;
+    case 1: this.v2 = (org.apache.gora.examples.generated.V2)(value); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -283,7 +283,7 @@ public class ImmutableFields extends org.apache.gora.persistency.impl.Persistent
   }
   
   public ImmutableFields.Tombstone getTombstone(){
-  	return TOMBSTONE;
+    return TOMBSTONE;
   }
 
   public ImmutableFields newInstance(){
@@ -294,55 +294,55 @@ public class ImmutableFields extends org.apache.gora.persistency.impl.Persistent
   
   public static final class Tombstone extends ImmutableFields implements org.apache.gora.persistency.Tombstone {
   
-      private Tombstone() { }
+    private Tombstone() { }
   
-	  		  /**
-	   * Gets the value of the 'v1' field.
-		   */
-	  public java.lang.Integer getV1() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'v1' field.
-		   * @param value the value to set.
-	   */
-	  public void setV1(java.lang.Integer value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'v1' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
-	   */
-	  public boolean isV1Dirty() {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-				  /**
-	   * Gets the value of the 'v2' field.
-		   */
-	  public org.apache.gora.examples.generated.V2 getV2() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'v2' field.
-		   * @param value the value to set.
-	   */
-	  public void setV2(org.apache.gora.examples.generated.V2 value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'v2' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
-	   */
-	  public boolean isV2Dirty() {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-		  
+      /**
+     * Gets the value of the 'v1' field.
+         */
+    public java.lang.Integer getV1() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+
+    /**
+     * Sets the value of the 'v1' field.
+         * @param value the value to set.
+     */
+    public void setV1(java.lang.Integer value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+  
+    /**
+     * Checks the dirty status of the 'v1' field. A field is dirty if it represents a change that has not yet been written to the database.
+         * @param value the value to set.
+     */
+    public boolean isV1Dirty() {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+
+        /**
+     * Gets the value of the 'v2' field.
+         */
+    public org.apache.gora.examples.generated.V2 getV2() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+
+    /**
+     * Sets the value of the 'v2' field.
+         * @param value the value to set.
+     */
+    public void setV2(org.apache.gora.examples.generated.V2 value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+  
+    /**
+     * Checks the dirty status of the 'v2' field. A field is dirty if it represents a change that has not yet been written to the database.
+         * @param value the value to set.
+     */
+    public boolean isV2Dirty() {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+
+    
   }
 
   private static final org.apache.avro.io.DatumWriter

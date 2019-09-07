@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache.gora</groupId>
     <artifactId>gora</artifactId>
-    <version>0.9-SNAPSHOT</version>
+    <version>1.0-SNAPSHOT</version>
     <relativePath>../</relativePath>
   </parent>
   <artifactId>gora-tutorial</artifactId>
@@ -127,12 +127,6 @@
     <dependency>
       <groupId>org.apache.gora</groupId>
       <artifactId>gora-solr</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-slf4j-impl</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <dependency>
@@ -143,6 +137,11 @@
     <dependency>
       <groupId>org.apache.gora</groupId>
       <artifactId>gora-mongodb</artifactId>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.apache.gora</groupId>
+      <artifactId>gora-kudu</artifactId>
     </dependency>
     
     <!-- Hadoop Dependencies -->
