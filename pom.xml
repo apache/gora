@@ -773,7 +773,7 @@
     <module>gora-ignite</module>
     <module>gora-tutorial</module>
     <module>sources-dist</module>
-    <module>gora-benchmark</module>
+<!--     <module>gora-benchmark</module> -->
   </modules>
 
   <properties>
