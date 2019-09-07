@@ -288,6 +288,15 @@
         <role>PMC Member</role>
       </roles>
     </developer>
+    <developer>
+      <id>chanakadkb</id>
+      <name>Chanaka Balasooriya</name>
+      <email>chanakadkb [at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
   </developers>
 
   <mailingLists>
