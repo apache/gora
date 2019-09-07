@@ -26,6 +26,7 @@
   <class name="org.apache.gora.examples.generated.Employee" keyClass="java.lang.String">
     <primarykey column="ssn"/>
     <field name="ssn" column="ssn"/>
+    <field name="value" column="value"/>
     <field name="name" column="name"/>
     <field name="dateOfBirth" column="dateOfBirth"/>
     <field name="salary" column="salary"/>

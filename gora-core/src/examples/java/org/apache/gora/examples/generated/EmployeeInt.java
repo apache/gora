@@ -77,7 +77,7 @@ public class EmployeeInt extends org.apache.gora.persistency.impl.PersistentBase
   // Used by DatumWriter.  Applications should not call. 
   public java.lang.Object get(int field$) {
     switch (field$) {
-    case 0: return ssn;
+    case 0: return this.ssn;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -86,7 +86,7 @@ public class EmployeeInt extends org.apache.gora.persistency.impl.PersistentBase
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: ssn = (java.lang.Integer)(value); break;
+    case 0: this.ssn = (java.lang.Integer)(value); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -222,7 +222,7 @@ public class EmployeeInt extends org.apache.gora.persistency.impl.PersistentBase
   }
   
   public EmployeeInt.Tombstone getTombstone(){
-  	return TOMBSTONE;
+    return TOMBSTONE;
   }
 
   public EmployeeInt newInstance(){
@@ -233,32 +233,32 @@ public class EmployeeInt extends org.apache.gora.persistency.impl.PersistentBase
   
   public static final class Tombstone extends EmployeeInt implements org.apache.gora.persistency.Tombstone {
   
-      private Tombstone() { }
+    private Tombstone() { }
   
-	  		  /**
-	   * Gets the value of the 'ssn' field.
-		   */
-	  public java.lang.Integer getSsn() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'ssn' field.
-		   * @param value the value to set.
-	   */
-	  public void setSsn(java.lang.Integer value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'ssn' field. A field is dirty if it represents a change that has not yet been written to the database.
-		   * @param value the value to set.
-	   */
-	  public boolean isSsnDirty() {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-		  
+      /**
+     * Gets the value of the 'ssn' field.
+         */
+    public java.lang.Integer getSsn() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+
+    /**
+     * Sets the value of the 'ssn' field.
+         * @param value the value to set.
+     */
+    public void setSsn(java.lang.Integer value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+  
+    /**
+     * Checks the dirty status of the 'ssn' field. A field is dirty if it represents a change that has not yet been written to the database.
+         * @param value the value to set.
+     */
+    public boolean isSsnDirty() {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+
+    
   }
 
   private static final org.apache.avro.io.DatumWriter

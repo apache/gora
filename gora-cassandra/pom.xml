@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.apache.gora</groupId>
         <artifactId>gora</artifactId>
-        <version>0.9-SNAPSHOT</version>
+        <version>1.0-SNAPSHOT</version>
         <relativePath>../</relativePath>
     </parent>
     <artifactId>gora-cassandra</artifactId>
@@ -78,9 +78,9 @@
                 <version>${build-helper-maven-plugin.version}</version>
                 <executions>
                     <execution>
-                        <phase>generate-sources</phase>
+                        <phase>generate-test-sources</phase>
                         <goals>
-                            <goal>add-source</goal>
+                            <goal>add-test-source</goal>
                         </goals>
                         <configuration>
                             <sources>

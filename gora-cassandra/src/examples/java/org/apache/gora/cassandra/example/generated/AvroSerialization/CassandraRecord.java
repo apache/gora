@@ -114,19 +114,19 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   // Used by DatumWriter.  Applications should not call. 
   public java.lang.Object get(int field$) {
     switch (field$) {
-    case 0: return dataString;
-    case 1: return dataInt;
-    case 2: return dataLong;
-    case 3: return dataDouble;
-    case 4: return dataBytes;
-    case 5: return arrayInt;
-    case 6: return arrayString;
-    case 7: return arrayLong;
-    case 8: return arrayDouble;
-    case 9: return mapInt;
-    case 10: return mapString;
-    case 11: return mapLong;
-    case 12: return mapDouble;
+    case 0: return this.dataString;
+    case 1: return this.dataInt;
+    case 2: return this.dataLong;
+    case 3: return this.dataDouble;
+    case 4: return this.dataBytes;
+    case 5: return this.arrayInt;
+    case 6: return this.arrayString;
+    case 7: return this.arrayLong;
+    case 8: return this.arrayDouble;
+    case 9: return this.mapInt;
+    case 10: return this.mapString;
+    case 11: return this.mapLong;
+    case 12: return this.mapDouble;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -135,19 +135,19 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   @SuppressWarnings(value="unchecked")
   public void put(int field$, java.lang.Object value) {
     switch (field$) {
-    case 0: dataString = (java.lang.CharSequence)(value); break;
-    case 1: dataInt = (java.lang.Integer)(value); break;
-    case 2: dataLong = (java.lang.Long)(value); break;
-    case 3: dataDouble = (java.lang.Double)(value); break;
-    case 4: dataBytes = (java.nio.ByteBuffer)(value); break;
-    case 5: arrayInt = (java.util.List<java.lang.Integer>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyListWrapper((java.util.List)value)); break;
-    case 6: arrayString = (java.util.List<java.lang.CharSequence>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyListWrapper((java.util.List)value)); break;
-    case 7: arrayLong = (java.util.List<java.lang.Long>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyListWrapper((java.util.List)value)); break;
-    case 8: arrayDouble = (java.util.List<java.lang.Double>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyListWrapper((java.util.List)value)); break;
-    case 9: mapInt = (java.util.Map<java.lang.CharSequence,java.lang.Integer>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)value)); break;
-    case 10: mapString = (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)value)); break;
-    case 11: mapLong = (java.util.Map<java.lang.CharSequence,java.lang.Long>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)value)); break;
-    case 12: mapDouble = (java.util.Map<java.lang.CharSequence,java.lang.Double>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)value)); break;
+    case 0: this.dataString = (java.lang.CharSequence)(value); break;
+    case 1: this.dataInt = (java.lang.Integer)(value); break;
+    case 2: this.dataLong = (java.lang.Long)(value); break;
+    case 3: this.dataDouble = (java.lang.Double)(value); break;
+    case 4: this.dataBytes = (java.nio.ByteBuffer)(value); break;
+    case 5: this.arrayInt = (java.util.List<java.lang.Integer>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyListWrapper((java.util.List)value)); break;
+    case 6: this.arrayString = (java.util.List<java.lang.CharSequence>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyListWrapper((java.util.List)value)); break;
+    case 7: this.arrayLong = (java.util.List<java.lang.Long>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyListWrapper((java.util.List)value)); break;
+    case 8: this.arrayDouble = (java.util.List<java.lang.Double>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyListWrapper((java.util.List)value)); break;
+    case 9: this.mapInt = (java.util.Map<java.lang.CharSequence,java.lang.Integer>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)value)); break;
+    case 10: this.mapString = (java.util.Map<java.lang.CharSequence,java.lang.CharSequence>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)value)); break;
+    case 11: this.mapLong = (java.util.Map<java.lang.CharSequence,java.lang.Long>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)value)); break;
+    case 12: this.mapDouble = (java.util.Map<java.lang.CharSequence,java.lang.Double>)((value instanceof org.apache.gora.persistency.Dirtyable) ? value : new org.apache.gora.persistency.impl.DirtyMapWrapper((java.util.Map)value)); break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -170,6 +170,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   
   /**
    * Checks the dirty status of the 'dataString' field. A field is dirty if it represents a change that has not yet been written to the database.
+   * @param value the value to set.
    */
   public boolean isDataStringDirty() {
     return isDirty(0);
@@ -193,6 +194,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   
   /**
    * Checks the dirty status of the 'dataInt' field. A field is dirty if it represents a change that has not yet been written to the database.
+   * @param value the value to set.
    */
   public boolean isDataIntDirty() {
     return isDirty(1);
@@ -216,6 +218,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   
   /**
    * Checks the dirty status of the 'dataLong' field. A field is dirty if it represents a change that has not yet been written to the database.
+   * @param value the value to set.
    */
   public boolean isDataLongDirty() {
     return isDirty(2);
@@ -239,6 +242,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   
   /**
    * Checks the dirty status of the 'dataDouble' field. A field is dirty if it represents a change that has not yet been written to the database.
+   * @param value the value to set.
    */
   public boolean isDataDoubleDirty() {
     return isDirty(3);
@@ -262,6 +266,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   
   /**
    * Checks the dirty status of the 'dataBytes' field. A field is dirty if it represents a change that has not yet been written to the database.
+   * @param value the value to set.
    */
   public boolean isDataBytesDirty() {
     return isDirty(4);
@@ -285,6 +290,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   
   /**
    * Checks the dirty status of the 'arrayInt' field. A field is dirty if it represents a change that has not yet been written to the database.
+   * @param value the value to set.
    */
   public boolean isArrayIntDirty() {
     return isDirty(5);
@@ -308,6 +314,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   
   /**
    * Checks the dirty status of the 'arrayString' field. A field is dirty if it represents a change that has not yet been written to the database.
+   * @param value the value to set.
    */
   public boolean isArrayStringDirty() {
     return isDirty(6);
@@ -331,6 +338,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   
   /**
    * Checks the dirty status of the 'arrayLong' field. A field is dirty if it represents a change that has not yet been written to the database.
+   * @param value the value to set.
    */
   public boolean isArrayLongDirty() {
     return isDirty(7);
@@ -354,6 +362,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   
   /**
    * Checks the dirty status of the 'arrayDouble' field. A field is dirty if it represents a change that has not yet been written to the database.
+   * @param value the value to set.
    */
   public boolean isArrayDoubleDirty() {
     return isDirty(8);
@@ -377,6 +386,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   
   /**
    * Checks the dirty status of the 'mapInt' field. A field is dirty if it represents a change that has not yet been written to the database.
+   * @param value the value to set.
    */
   public boolean isMapIntDirty() {
     return isDirty(9);
@@ -400,6 +410,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   
   /**
    * Checks the dirty status of the 'mapString' field. A field is dirty if it represents a change that has not yet been written to the database.
+   * @param value the value to set.
    */
   public boolean isMapStringDirty() {
     return isDirty(10);
@@ -423,6 +434,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   
   /**
    * Checks the dirty status of the 'mapLong' field. A field is dirty if it represents a change that has not yet been written to the database.
+   * @param value the value to set.
    */
   public boolean isMapLongDirty() {
     return isDirty(11);
@@ -446,6 +458,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   
   /**
    * Checks the dirty status of the 'mapDouble' field. A field is dirty if it represents a change that has not yet been written to the database.
+   * @param value the value to set.
    */
   public boolean isMapDoubleDirty() {
     return isDirty(12);
@@ -930,7 +943,7 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   }
   
   public CassandraRecord.Tombstone getTombstone(){
-  	return TOMBSTONE;
+    return TOMBSTONE;
   }
 
   public CassandraRecord newInstance(){
@@ -941,295 +954,308 @@ public class CassandraRecord extends org.apache.gora.persistency.impl.Persistent
   
   public static final class Tombstone extends CassandraRecord implements org.apache.gora.persistency.Tombstone {
   
-      private Tombstone() { }
+    private Tombstone() { }
   
-	  		  /**
-	   * Gets the value of the 'dataString' field.
-		   */
-	  public java.lang.CharSequence getDataString() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'dataString' field.
-		   * @param value the value to set.
-	   */
-	  public void setDataString(java.lang.CharSequence value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'dataString' field. A field is dirty if it represents a change that has not yet been written to the database.
-	   */
-	  public boolean isDataStringDirty() {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-				  /**
-	   * Gets the value of the 'dataInt' field.
-		   */
-	  public java.lang.Integer getDataInt() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'dataInt' field.
-		   * @param value the value to set.
-	   */
-	  public void setDataInt(java.lang.Integer value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'dataInt' field. A field is dirty if it represents a change that has not yet been written to the database.
-	   */
-	  public boolean isDataIntDirty() {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-				  /**
-	   * Gets the value of the 'dataLong' field.
-		   */
-	  public java.lang.Long getDataLong() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'dataLong' field.
-		   * @param value the value to set.
-	   */
-	  public void setDataLong(java.lang.Long value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'dataLong' field. A field is dirty if it represents a change that has not yet been written to the database.
-	   */
-	  public boolean isDataLongDirty() {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-				  /**
-	   * Gets the value of the 'dataDouble' field.
-		   */
-	  public java.lang.Double getDataDouble() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'dataDouble' field.
-		   * @param value the value to set.
-	   */
-	  public void setDataDouble(java.lang.Double value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'dataDouble' field. A field is dirty if it represents a change that has not yet been written to the database.
-	   */
-	  public boolean isDataDoubleDirty() {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-				  /**
-	   * Gets the value of the 'dataBytes' field.
-		   */
-	  public java.nio.ByteBuffer getDataBytes() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'dataBytes' field.
-		   * @param value the value to set.
-	   */
-	  public void setDataBytes(java.nio.ByteBuffer value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'dataBytes' field. A field is dirty if it represents a change that has not yet been written to the database.
-	   */
-	  public boolean isDataBytesDirty() {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-				  /**
-	   * Gets the value of the 'arrayInt' field.
-		   */
-	  public java.util.List<java.lang.Integer> getArrayInt() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'arrayInt' field.
-		   * @param value the value to set.
-	   */
-	  public void setArrayInt(java.util.List<java.lang.Integer> value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'arrayInt' field. A field is dirty if it represents a change that has not yet been written to the database.
-	   */
-	  public boolean isArrayIntDirty() {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-				  /**
-	   * Gets the value of the 'arrayString' field.
-		   */
-	  public java.util.List<java.lang.CharSequence> getArrayString() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'arrayString' field.
-		   * @param value the value to set.
-	   */
-	  public void setArrayString(java.util.List<java.lang.CharSequence> value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'arrayString' field. A field is dirty if it represents a change that has not yet been written to the database.
-	   */
-	  public boolean isArrayStringDirty() {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-				  /**
-	   * Gets the value of the 'arrayLong' field.
-		   */
-	  public java.util.List<java.lang.Long> getArrayLong() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'arrayLong' field.
-		   * @param value the value to set.
-	   */
-	  public void setArrayLong(java.util.List<java.lang.Long> value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'arrayLong' field. A field is dirty if it represents a change that has not yet been written to the database.
-	   */
-	  public boolean isArrayLongDirty() {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-				  /**
-	   * Gets the value of the 'arrayDouble' field.
-		   */
-	  public java.util.List<java.lang.Double> getArrayDouble() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'arrayDouble' field.
-		   * @param value the value to set.
-	   */
-	  public void setArrayDouble(java.util.List<java.lang.Double> value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'arrayDouble' field. A field is dirty if it represents a change that has not yet been written to the database.
-	   */
-	  public boolean isArrayDoubleDirty() {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-				  /**
-	   * Gets the value of the 'mapInt' field.
-		   */
-	  public java.util.Map<java.lang.CharSequence,java.lang.Integer> getMapInt() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'mapInt' field.
-		   * @param value the value to set.
-	   */
-	  public void setMapInt(java.util.Map<java.lang.CharSequence,java.lang.Integer> value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'mapInt' field. A field is dirty if it represents a change that has not yet been written to the database.
-	   */
-	  public boolean isMapIntDirty() {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-				  /**
-	   * Gets the value of the 'mapString' field.
-		   */
-	  public java.util.Map<java.lang.CharSequence,java.lang.CharSequence> getMapString() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'mapString' field.
-		   * @param value the value to set.
-	   */
-	  public void setMapString(java.util.Map<java.lang.CharSequence,java.lang.CharSequence> value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'mapString' field. A field is dirty if it represents a change that has not yet been written to the database.
-	   */
-	  public boolean isMapStringDirty() {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-				  /**
-	   * Gets the value of the 'mapLong' field.
-		   */
-	  public java.util.Map<java.lang.CharSequence,java.lang.Long> getMapLong() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'mapLong' field.
-		   * @param value the value to set.
-	   */
-	  public void setMapLong(java.util.Map<java.lang.CharSequence,java.lang.Long> value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'mapLong' field. A field is dirty if it represents a change that has not yet been written to the database.
-	   */
-	  public boolean isMapLongDirty() {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-				  /**
-	   * Gets the value of the 'mapDouble' field.
-		   */
-	  public java.util.Map<java.lang.CharSequence,java.lang.Double> getMapDouble() {
-	    throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
-	  }
-	
-	  /**
-	   * Sets the value of the 'mapDouble' field.
-		   * @param value the value to set.
-	   */
-	  public void setMapDouble(java.util.Map<java.lang.CharSequence,java.lang.Double> value) {
-	    throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
-	  }
-	  
-	  /**
-	   * Checks the dirty status of the 'mapDouble' field. A field is dirty if it represents a change that has not yet been written to the database.
-	   */
-	  public boolean isMapDoubleDirty() {
-	    throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
-	  }
-	
-		  
+      /**
+     * Gets the value of the 'dataString' field.
+         */
+    public java.lang.CharSequence getDataString() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+
+    /**
+     * Sets the value of the 'dataString' field.
+         * @param value the value to set.
+     */
+    public void setDataString(java.lang.CharSequence value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+  
+    /**
+     * Checks the dirty status of the 'dataString' field. A field is dirty if it represents a change that has not yet been written to the database.
+         * @param value the value to set.
+     */
+    public boolean isDataStringDirty() {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+
+        /**
+     * Gets the value of the 'dataInt' field.
+         */
+    public java.lang.Integer getDataInt() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+
+    /**
+     * Sets the value of the 'dataInt' field.
+         * @param value the value to set.
+     */
+    public void setDataInt(java.lang.Integer value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+  
+    /**
+     * Checks the dirty status of the 'dataInt' field. A field is dirty if it represents a change that has not yet been written to the database.
+         * @param value the value to set.
+     */
+    public boolean isDataIntDirty() {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+
+        /**
+     * Gets the value of the 'dataLong' field.
+         */
+    public java.lang.Long getDataLong() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+
+    /**
+     * Sets the value of the 'dataLong' field.
+         * @param value the value to set.
+     */
+    public void setDataLong(java.lang.Long value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+  
+    /**
+     * Checks the dirty status of the 'dataLong' field. A field is dirty if it represents a change that has not yet been written to the database.
+         * @param value the value to set.
+     */
+    public boolean isDataLongDirty() {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+
+        /**
+     * Gets the value of the 'dataDouble' field.
+         */
+    public java.lang.Double getDataDouble() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+
+    /**
+     * Sets the value of the 'dataDouble' field.
+         * @param value the value to set.
+     */
+    public void setDataDouble(java.lang.Double value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+  
+    /**
+     * Checks the dirty status of the 'dataDouble' field. A field is dirty if it represents a change that has not yet been written to the database.
+         * @param value the value to set.
+     */
+    public boolean isDataDoubleDirty() {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+
+        /**
+     * Gets the value of the 'dataBytes' field.
+         */
+    public java.nio.ByteBuffer getDataBytes() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+
+    /**
+     * Sets the value of the 'dataBytes' field.
+         * @param value the value to set.
+     */
+    public void setDataBytes(java.nio.ByteBuffer value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+  
+    /**
+     * Checks the dirty status of the 'dataBytes' field. A field is dirty if it represents a change that has not yet been written to the database.
+         * @param value the value to set.
+     */
+    public boolean isDataBytesDirty() {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+
+        /**
+     * Gets the value of the 'arrayInt' field.
+         */
+    public java.util.List<java.lang.Integer> getArrayInt() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+
+    /**
+     * Sets the value of the 'arrayInt' field.
+         * @param value the value to set.
+     */
+    public void setArrayInt(java.util.List<java.lang.Integer> value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+  
+    /**
+     * Checks the dirty status of the 'arrayInt' field. A field is dirty if it represents a change that has not yet been written to the database.
+         * @param value the value to set.
+     */
+    public boolean isArrayIntDirty() {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+
+        /**
+     * Gets the value of the 'arrayString' field.
+         */
+    public java.util.List<java.lang.CharSequence> getArrayString() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+
+    /**
+     * Sets the value of the 'arrayString' field.
+         * @param value the value to set.
+     */
+    public void setArrayString(java.util.List<java.lang.CharSequence> value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+  
+    /**
+     * Checks the dirty status of the 'arrayString' field. A field is dirty if it represents a change that has not yet been written to the database.
+         * @param value the value to set.
+     */
+    public boolean isArrayStringDirty() {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+
+        /**
+     * Gets the value of the 'arrayLong' field.
+         */
+    public java.util.List<java.lang.Long> getArrayLong() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+
+    /**
+     * Sets the value of the 'arrayLong' field.
+         * @param value the value to set.
+     */
+    public void setArrayLong(java.util.List<java.lang.Long> value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+  
+    /**
+     * Checks the dirty status of the 'arrayLong' field. A field is dirty if it represents a change that has not yet been written to the database.
+         * @param value the value to set.
+     */
+    public boolean isArrayLongDirty() {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+
+        /**
+     * Gets the value of the 'arrayDouble' field.
+         */
+    public java.util.List<java.lang.Double> getArrayDouble() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+
+    /**
+     * Sets the value of the 'arrayDouble' field.
+         * @param value the value to set.
+     */
+    public void setArrayDouble(java.util.List<java.lang.Double> value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+  
+    /**
+     * Checks the dirty status of the 'arrayDouble' field. A field is dirty if it represents a change that has not yet been written to the database.
+         * @param value the value to set.
+     */
+    public boolean isArrayDoubleDirty() {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+
+        /**
+     * Gets the value of the 'mapInt' field.
+         */
+    public java.util.Map<java.lang.CharSequence,java.lang.Integer> getMapInt() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+
+    /**
+     * Sets the value of the 'mapInt' field.
+         * @param value the value to set.
+     */
+    public void setMapInt(java.util.Map<java.lang.CharSequence,java.lang.Integer> value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+  
+    /**
+     * Checks the dirty status of the 'mapInt' field. A field is dirty if it represents a change that has not yet been written to the database.
+         * @param value the value to set.
+     */
+    public boolean isMapIntDirty() {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+
+        /**
+     * Gets the value of the 'mapString' field.
+         */
+    public java.util.Map<java.lang.CharSequence,java.lang.CharSequence> getMapString() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+
+    /**
+     * Sets the value of the 'mapString' field.
+         * @param value the value to set.
+     */
+    public void setMapString(java.util.Map<java.lang.CharSequence,java.lang.CharSequence> value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+  
+    /**
+     * Checks the dirty status of the 'mapString' field. A field is dirty if it represents a change that has not yet been written to the database.
+         * @param value the value to set.
+     */
+    public boolean isMapStringDirty() {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+
+        /**
+     * Gets the value of the 'mapLong' field.
+         */
+    public java.util.Map<java.lang.CharSequence,java.lang.Long> getMapLong() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+
+    /**
+     * Sets the value of the 'mapLong' field.
+         * @param value the value to set.
+     */
+    public void setMapLong(java.util.Map<java.lang.CharSequence,java.lang.Long> value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+  
+    /**
+     * Checks the dirty status of the 'mapLong' field. A field is dirty if it represents a change that has not yet been written to the database.
+         * @param value the value to set.
+     */
+    public boolean isMapLongDirty() {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+
+        /**
+     * Gets the value of the 'mapDouble' field.
+         */
+    public java.util.Map<java.lang.CharSequence,java.lang.Double> getMapDouble() {
+      throw new java.lang.UnsupportedOperationException("Get is not supported on tombstones");
+    }
+
+    /**
+     * Sets the value of the 'mapDouble' field.
+         * @param value the value to set.
+     */
+    public void setMapDouble(java.util.Map<java.lang.CharSequence,java.lang.Double> value) {
+      throw new java.lang.UnsupportedOperationException("Set is not supported on tombstones");
+    }
+  
+    /**
+     * Checks the dirty status of the 'mapDouble' field. A field is dirty if it represents a change that has not yet been written to the database.
+         * @param value the value to set.
+     */
+    public boolean isMapDoubleDirty() {
+      throw new java.lang.UnsupportedOperationException("IsDirty is not supported on tombstones");
+    }
+
+    
   }
 
   private static final org.apache.avro.io.DatumWriter
