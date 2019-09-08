@@ -530,7 +530,7 @@
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>${maven-javadoc-plugin.version}</version>
           <configuration>
-            <excludePackageNames>org.apache.gora.tutorial.log.generated;org.apache.gora.goraci.generated</excludePackageNames>
+            <excludePackageNames>org.apache.gora.tutorial.log.generated;org.apache.gora.goraci.generated;org.apache.gora.benchmark.generated;</excludePackageNames>
           </configuration>
           <executions>
             <execution>
@@ -784,6 +784,7 @@
     <module>gora-hive</module>
     <module>gora-tutorial</module>
     <module>sources-dist</module>
+<!--     <module>gora-benchmark</module> -->
   </modules>
 
   <properties>
@@ -840,6 +841,13 @@
     <orientdb.version>2.2.22</orientdb.version>
     <orientqb.version>0.2.0</orientqb.version>
 
+    
+    <!-- CouchDB Dependencies -->
+    <couchdb.version>1.4.2</couchdb.version>
+    
+    <!-- MongoDB Dependencies -->
+    <mongo.embed.version>2.0.0</mongo.embed.version>
+
     <!-- HiveStore Dependencies -->
     <metamodel.version>5.3.0</metamodel.version>
     <json.version>20180813</json.version>
@@ -849,6 +857,11 @@
     <!-- Testing Dependencies -->
     <junit.version>4.10</junit.version>
     <test.container.version>1.4.2</test.container.version>
+    
+    <!-- gora-benchmark and version dependencies -->
+    <ycsb.version>0.17.0-SNAPSHOT</ycsb.version>
+    <datafactory.version>0.8</datafactory.version>
+    
 
     <!-- Maven Plugin Dependencies -->
     <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
@@ -1716,6 +1729,13 @@
         <artifactId>aerospike-client</artifactId>
         <version>${aerospike.version}</version>
       </dependency>
+      
+      <!-- CouchDB Dependency -->
+      <dependency>
+        <groupId>org.ektorp</groupId>
+        <artifactId>org.ektorp</artifactId>
+        <version>${couchdb.version}</version>
+      </dependency>
 
       <!-- Testing Dependencies -->
       <dependency>
@@ -1740,6 +1760,26 @@
         <groupId>org.testcontainers</groupId>
         <artifactId>testcontainers</artifactId>
         <version>${test.container.version}</version>
+      </dependency>
+      
+      <!-- Gora Benchmark Dependencies -->
+      <dependency>
+        <groupId>com.yahoo.ycsb</groupId>
+        <artifactId>core</artifactId>
+        <version>${ycsb.version}</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>de.flapdoodle.embed</groupId>
+        <artifactId>de.flapdoodle.embed.mongo</artifactId>
+        <version>${mongo.embed.version}</version>
+        <scope>test</scope>
+      </dependency>
+      
+      <dependency>
+        <groupId>org.fluttercode.datafactory</groupId>
+        <artifactId>datafactory</artifactId>
+        <version>${datafactory.version}</version>
       </dependency>
 
       <!-- Testing Dependencies for Ignite-->

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--/**
+ *Licensed to the Apache Software Foundation (ASF) under one
+ *or more contributor license agreements.  See the NOTICE file
+ *distributed with this work for additional information
+ *regarding copyright ownership.  The ASF licenses this file
+ *to you under the Apache License, Version 2.0 (the"
+ *License"); you may not use this file except in compliance
+ *with the License.  You may obtain a copy of the License at
+ *
+  * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ *Unless required by applicable law or agreed to in writing, software
+ *distributed under the License is distributed on an "AS IS" BASIS,
+ *WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *See the License for the specific language governing permissions and
+ *limitations under the License.
+ */
+--><gora-otd>
+  <table name="users">
+    <family name="info"/>
+  </table>
+  <class keyClass="java.lang.String" name="org.apache.gora.benchmark.generated.User" table="users">
+    <field family="info" name="userId" qualifier="userId"/>
+    <field family="info" name="field0" qualifier="field0"/>
+    <field family="info" name="field1" qualifier="field1"/>
+    <field family="info" name="field2" qualifier="field2"/>
+    <field family="info" name="field3" qualifier="field3"/>
+    <field family="info" name="field4" qualifier="field4"/>
+    <field family="info" name="field5" qualifier="field5"/>
+    <field family="info" name="field6" qualifier="field6"/>
+    <field family="info" name="field7" qualifier="field7"/>
+    <field family="info" name="field8" qualifier="field8"/>
+    <field family="info" name="field9" qualifier="field9"/>
+    <field family="info" name="field10" qualifier="field10"/>
+    <field family="info" name="field11" qualifier="field11"/>
+    <field family="info" name="field12" qualifier="field12"/>
+    <field family="info" name="field13" qualifier="field13"/>
+    <field family="info" name="field14" qualifier="field14"/>
+    <field family="info" name="field15" qualifier="field15"/>
+    <field family="info" name="field16" qualifier="field16"/>
+    <field family="info" name="field17" qualifier="field17"/>
+    <field family="info" name="field18" qualifier="field18"/>
+    <field family="info" name="field19" qualifier="field19"/>
+  </class>
+</gora-otd>
