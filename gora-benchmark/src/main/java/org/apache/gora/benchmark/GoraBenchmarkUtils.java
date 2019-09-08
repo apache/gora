@@ -333,23 +333,23 @@ public class GoraBenchmarkUtils {
    * @param properties the properties
    * @return the data store
    */
-  public static String getDataStore(Properties properties) {
+  public static String getDataBase(Properties properties) {
     String defaultDataStore = properties.getProperty(Constants.DEFAULT_DATA_STORE_KEY);
-    String dataStore = Constants.HBASE;
+    String dataBase = Constants.HBASE;
     switch (defaultDataStore) {
     case Constants.MONGODB_CLASS:
-      dataStore = Constants.MONGODB;
+      dataBase = Constants.MONGODB;
       break;
     case Constants.HBASEDB_CLASS:
-      dataStore = Constants.HBASE;
+      dataBase = Constants.HBASE;
       break;
     case Constants.COUCHDB_CLASS:
-      dataStore = Constants.COUCHDB;
+      dataBase = Constants.COUCHDB;
       break;
     default:
       break;
     }
-    return dataStore;
+    return dataBase;
   }
 
   /**

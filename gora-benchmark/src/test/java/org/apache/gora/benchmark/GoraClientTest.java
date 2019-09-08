@@ -125,7 +125,7 @@ public class GoraClientTest {
     properties.setProperty(CoreWorkload.FIELD_COUNT_PROPERTY, Constants.TEST_NUMBER_OF_FIELDS + "");
     //Setup and start embedded MongoDB, make sure local mongodb is not running.
     Properties dataStoreProperties = DataStoreFactory.createProps();
-    String dataStoreToTest = GoraBenchmarkUtils.getDataStore(dataStoreProperties);
+    String dataStoreToTest = GoraBenchmarkUtils.getDataBase(dataStoreProperties);
     if (!isMongoDBSetupDone && dataStoreToTest == Constants.MONGODB) {
       setupMongoDBCluster();
       isMongoDBSetupDone = true;

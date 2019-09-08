@@ -32,6 +32,7 @@ import org.apache.gora.util.GoraException;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.yahoo.ycsb.ByteIterator;
 import com.yahoo.ycsb.DB;
 import com.yahoo.ycsb.DBException;
@@ -78,7 +79,7 @@ public class GoraBenchmarkClient extends DB {
         if (!executed) {
           executed = true;
           GoraBenchmarkUtils.generateAvroSchema(totalFieldCount);
-          String dataStoreName = GoraBenchmarkUtils.getDataStore(properties);
+          String dataStoreName = GoraBenchmarkUtils.getDataBase(properties);
           GoraBenchmarkUtils.generateMappingFile(dataStoreName);
           GoraBenchmarkUtils.generateDataBeans();
         }
@@ -247,6 +248,10 @@ public class GoraBenchmarkClient extends DB {
       return Status.ERROR;
     }
     return Status.OK;
+  }
+  
+  public DataStore<String, User> getDataStore() {
+    return dataStore;
   }
   
 }
