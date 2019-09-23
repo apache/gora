@@ -18,6 +18,7 @@
 
 package org.apache.gora.flink;
 
+import org.apache.flink.api.common.typeutils.TypeSerializerSnapshot;
 import org.apache.flink.api.common.typeutils.base.ByteValueSerializer;
 import org.apache.flink.api.common.typeutils.base.TypeSerializerSingleton;
 import org.apache.flink.api.java.typeutils.runtime.DataInputViewStream;
@@ -77,6 +78,7 @@ public class PersistentTypeSerializer<T extends PersistentBase> extends TypeSeri
     }
   }
 
+  @SuppressWarnings("unchecked")
   public T deserialize(DataInputView source) throws IOException {
     PersistentDeserializer deserializer = new PersistentDeserializer(persistentClass, false);
     DataInputViewStream inViewWrapper = new DataInputViewStream(source);
@@ -89,6 +91,7 @@ public class PersistentTypeSerializer<T extends PersistentBase> extends TypeSeri
     }
   }
 
+  @SuppressWarnings("unchecked")
   public T deserialize(T reuse, DataInputView source) throws IOException {
     PersistentDeserializer deserializer = new PersistentDeserializer(persistentClass, true);
     DataInputViewStream inViewWrapper = new DataInputViewStream(source);
@@ -111,7 +114,12 @@ public class PersistentTypeSerializer<T extends PersistentBase> extends TypeSeri
   }
 
   protected boolean isCompatibleSerializationFormatIdentifier(String identifier) {
-    return super.isCompatibleSerializationFormatIdentifier(identifier) ||
-            identifier.equals(ByteValueSerializer.class.getCanonicalName());
+    return identifier.equals(ByteValueSerializer.class.getCanonicalName());
+  }
+
+  @Override
+  public TypeSerializerSnapshot<T> snapshotConfiguration() {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

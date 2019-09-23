@@ -17,10 +17,10 @@
           "fields" : [
             {"name": "url", "type": ["null","string"], "default":null},
             {"name": "content", "type": ["null","bytes"],"default":null},
-            {"name": "parsedContent", "type": {"type":"array", "items": "string"},"default":{}},
+            {"name": "parsedContent", "type": {"type":"array", "items": "string"},"default":[]},
             {"name": "outlinks", "type": {"type":"map", "values":["null", "string"]},"default":{}},
             {"name": "headers", "type": ["null", {"type": "map", "values": ["null", "string"]}],"default":null},
-            {"name": "metadata", "default":null, "type": {
+            {"name": "metadata", "default":{}, "type": {
               "name": "Metadata",
               "type": "record",
               "namespace": "org.apache.gora.examples.generated",

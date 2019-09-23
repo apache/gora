@@ -50,7 +50,7 @@
   <properties>
     <osgi.import>*</osgi.import>
     <osgi.export>org.apache.gora.infinispan*;version="${project.version}";-noimport:=true</osgi.export>
-    <infinispan.version>7.2.5.Final</infinispan.version>
+    <infinispan.version>10.0.0.CR2</infinispan.version>
     <infinispan.avro.version>1.0</infinispan.avro.version>
     <infinispan.avro.server.client.version>1.0.Final</infinispan.avro.server.client.version>
   </properties>

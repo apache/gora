@@ -12,7 +12,7 @@
       "fields": [
         {"name": "v3", "type": "int","default":0}
       ]
-    },"null"], "default":null
+    },"null"], "default":{}
     }
   ]
 }

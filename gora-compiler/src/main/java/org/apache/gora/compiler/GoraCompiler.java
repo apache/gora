@@ -36,8 +36,8 @@ import org.apache.avro.Schema.Type;
 import org.apache.avro.SchemaNormalization;
 import org.apache.avro.compiler.specific.SpecificCompiler;
 import org.apache.gora.compiler.utils.LicenseHeaders;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -305,7 +305,7 @@ public class GoraCompiler extends SpecificCompiler {
       // recursively add dirty support
       Field newField = new Field(originalField.name(),
         getSchemaWithDirtySupport(originalField.schema(),queue),
-        originalField.doc(), originalField.defaultValue(),
+        originalField.doc(), originalField.defaultVal(),
         originalField.order());
       newFields.add(newField);
     }
