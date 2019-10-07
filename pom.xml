@@ -1014,17 +1014,6 @@
       </dependency>
       <dependency>
         <groupId>org.apache.gora</groupId>
-        <artifactId>gora-redis</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.gora</groupId>
-        <artifactId>gora-redis</artifactId>
-        <version>${project.version}</version>
-        <type>test-jar</type>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.gora</groupId>
         <artifactId>gora-kudu</artifactId>
         <version>${project.version}</version>
       </dependency>
