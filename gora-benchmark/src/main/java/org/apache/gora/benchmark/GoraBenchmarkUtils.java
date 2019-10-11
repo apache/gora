@@ -54,7 +54,7 @@ import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.yahoo.ycsb.ByteIterator;
+import site.ycsb.ByteIterator;
 
 /**
  * The Class GoraBenchmarkUtils has some utilities that dynamically generate

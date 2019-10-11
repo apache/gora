@@ -33,12 +33,13 @@ import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.yahoo.ycsb.ByteIterator;
-import com.yahoo.ycsb.DB;
-import com.yahoo.ycsb.DBException;
-import com.yahoo.ycsb.Status;
-import com.yahoo.ycsb.StringByteIterator;
-import com.yahoo.ycsb.workloads.CoreWorkload;
+import site.ycsb.ByteIterator;
+import site.ycsb.DB;
+import site.ycsb.DBException;
+import site.ycsb.Status;
+import site.ycsb.StringByteIterator;
+import site.ycsb.workloads.CoreWorkload;
+
 import org.apache.gora.benchmark.generated.User;
 
 /**
