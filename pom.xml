@@ -288,6 +288,15 @@
         <role>PMC Member</role>
       </roles>
     </developer>
+     <developer>
+      <id>sheriffo</id>
+      <name>Sheriffo Ceesay</name>
+      <email>sheriffo [at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
   </developers>
 
   <mailingLists>
@@ -850,7 +859,7 @@
     <test.container.version>1.4.2</test.container.version>
     
     <!-- gora-benchmark and version dependencies -->
-    <ycsb.version>0.17.0-SNAPSHOT</ycsb.version>
+    <site.ycsb.version>0.17.0</site.ycsb.version>
     <datafactory.version>0.8</datafactory.version>
     
 
@@ -1755,9 +1764,9 @@
       
       <!-- Gora Benchmark Dependencies -->
       <dependency>
-        <groupId>com.yahoo.ycsb</groupId>
+        <groupId>site.ycsb</groupId>
         <artifactId>core</artifactId>
-        <version>${ycsb.version}</version>
+        <version>${site.ycsb.version}</version>
       </dependency>
       
       <dependency>

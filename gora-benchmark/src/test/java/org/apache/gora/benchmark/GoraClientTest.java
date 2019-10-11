@@ -32,7 +32,6 @@ import java.util.Vector;
 import org.apache.gora.benchmark.generated.User;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.util.GoraException;
-import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,11 +39,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.mongodb.MongoClient;
-import com.yahoo.ycsb.ByteIterator;
-import com.yahoo.ycsb.NumericByteIterator;
-import com.yahoo.ycsb.Status;
-import com.yahoo.ycsb.StringByteIterator;
-import com.yahoo.ycsb.workloads.CoreWorkload;
 
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodProcess;
@@ -54,6 +48,10 @@ import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
 import de.flapdoodle.embed.mongo.config.Net;
 import de.flapdoodle.embed.mongo.distribution.Version;
 import de.flapdoodle.embed.process.runtime.Network;
+import site.ycsb.ByteIterator;
+import site.ycsb.Status;
+import site.ycsb.StringByteIterator;
+import site.ycsb.workloads.CoreWorkload;
 
 /**
  * The Class GoraClientTest.

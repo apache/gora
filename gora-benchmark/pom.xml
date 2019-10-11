@@ -80,9 +80,9 @@
     </plugins>
   </build>
   <dependencies>
-
+    
     <dependency>
-      <groupId>com.yahoo.ycsb</groupId>
+      <groupId>site.ycsb</groupId>
       <artifactId>core</artifactId>
     </dependency>
 
