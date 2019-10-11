@@ -288,17 +288,19 @@
         <role>PMC Member</role>
       </roles>
     </developer>
-<<<<<<< HEAD
-     <developer>
-      <id>sheriffo</id>
-      <name>Sheriffo Ceesay</name>
-      <email>sheriffo [at] apache [dot] org</email>
-=======
     <developer>
       <id>chanakadkb</id>
       <name>Chanaka Balasooriya</name>
       <email>chanakadkb [at] apache [dot] org</email>
->>>>>>> upstream/master
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>sheriffo</id>
+      <name>Sheriffo Ceesay</name>
+      <email>sheriffo [at] apache [dot] org</email>
       <roles>
         <role>Committer</role>
         <role>PMC Member</role>
