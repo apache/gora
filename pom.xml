@@ -772,7 +772,7 @@
     <module>gora-aerospike</module>
     <module>gora-ignite</module>
     <module>gora-redis</module>
-    <module>gora-hive</module
+    <module>gora-hive</module>
     <module>gora-tutorial</module>
     <module>sources-dist</module>
   </modules>
