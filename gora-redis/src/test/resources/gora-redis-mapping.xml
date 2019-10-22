@@ -25,6 +25,7 @@
     <field name="salary" column="salary" type="STRING"/>
     <field name="boss" column="boss" type="STRING"/>
     <field name="webpage" column="webpage" type="STRING"/>
+    <field name="value" column="value" type="STRING"/>
   </class>
   <class name="org.apache.gora.examples.generated.WebPage" keyClass="java.lang.String" prefix="webpage" database="1" >
     <field name="url" column="url" type="STRING"/>
