@@ -443,7 +443,7 @@
             </dependency>
           </dependencies>
         </plugin>
-        <!--This plugin's configuration is used to store Eclipse m2e settings 
+        <!--This plugin's configuration is used to store Eclipse m2e settings
         only. It has no influence on the Maven build itself. -->
         <plugin>
           <groupId>org.eclipse.m2e</groupId>
@@ -657,7 +657,7 @@
       <id>release</id>
       <build>
         <plugins>
-          <!-- <plugin> <groupId>org.apache.rat</groupId> <artifactId>apache-rat-plugin</artifactId> 
+          <!-- <plugin> <groupId>org.apache.rat</groupId> <artifactId>apache-rat-plugin</artifactId>
           <version>${apache-rat-plugin.version}</version> <executions> <execution>
           <id>rat-verify</id> <phase>test</phase> <goals> <goal>check</goal> </goals>
           </execution> </executions> <configuration> <licenses> <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
@@ -782,6 +782,7 @@
     <module>gora-ignite</module>
     <module>gora-kudu</module>
     <module>gora-hive</module>
+    <module>gora-redis</module>
     <module>gora-tutorial</module>
     <module>sources-dist</module>
 <!--     <module>gora-benchmark</module> -->
@@ -807,6 +808,8 @@
     <!-- Ignite Dependencies -->
     <ignite.version>2.6.0</ignite.version>
     <sqlbuilder.version>2.1.7</sqlbuilder.version>
+    <!-- Redis Dependencies -->
+    <redisson.version>3.11.0</redisson.version>
     <!-- Kudu Dependencies -->
     <kudu.version>1.9.0</kudu.version>
     <!-- Solr Dependencies -->
@@ -841,10 +844,10 @@
     <orientdb.version>2.2.22</orientdb.version>
     <orientqb.version>0.2.0</orientqb.version>
 
-    
+
     <!-- CouchDB Dependencies -->
     <couchdb.version>1.4.2</couchdb.version>
-    
+
     <!-- MongoDB Dependencies -->
     <mongo.embed.version>2.0.0</mongo.embed.version>
 
@@ -857,11 +860,11 @@
     <!-- Testing Dependencies -->
     <junit.version>4.10</junit.version>
     <test.container.version>1.4.2</test.container.version>
-    
+
     <!-- gora-benchmark and version dependencies -->
     <ycsb.version>0.17.0-SNAPSHOT</ycsb.version>
     <datafactory.version>0.8</datafactory.version>
-    
+
 
     <!-- Maven Plugin Dependencies -->
     <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
@@ -1039,7 +1042,7 @@
         <artifactId>gora-mongodb</artifactId>
         <version>${project.version}</version>
       </dependency>
-      
+
       <!--Kudu DataStore dependencies -->
       <dependency>
         <groupId>org.apache.kudu</groupId>
@@ -1129,6 +1132,24 @@
         <artifactId>flink-clients_2.11</artifactId>
         <version>${flink.version}</version>
         <scope>compile</scope>
+      </dependency>
+
+      <!-- Redis DataStore dependencies -->
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-redis</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-redis</artifactId>
+        <version>${project.version}</version>
+        <type>test-jar</type>
+      </dependency>
+      <dependency>
+        <groupId>org.redisson</groupId>
+        <artifactId>redisson-all</artifactId>
+        <version>${redisson.version}</version>
       </dependency>
 
       <!--Hadoop dependencies -->
@@ -1729,7 +1750,7 @@
         <artifactId>aerospike-client</artifactId>
         <version>${aerospike.version}</version>
       </dependency>
-      
+
       <!-- CouchDB Dependency -->
       <dependency>
         <groupId>org.ektorp</groupId>
@@ -1761,21 +1782,21 @@
         <artifactId>testcontainers</artifactId>
         <version>${test.container.version}</version>
       </dependency>
-      
+
       <!-- Gora Benchmark Dependencies -->
       <dependency>
         <groupId>com.yahoo.ycsb</groupId>
         <artifactId>core</artifactId>
         <version>${ycsb.version}</version>
       </dependency>
-      
+
       <dependency>
         <groupId>de.flapdoodle.embed</groupId>
         <artifactId>de.flapdoodle.embed.mongo</artifactId>
         <version>${mongo.embed.version}</version>
         <scope>test</scope>
       </dependency>
-      
+
       <dependency>
         <groupId>org.fluttercode.datafactory</groupId>
         <artifactId>datafactory</artifactId>
