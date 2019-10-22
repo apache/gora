@@ -31,6 +31,9 @@ import org.junit.Ignore;
 
 /**
  * Executes tests for MR jobs over Redis dataStore.
+ *
+ * Mapreduce tests are disable due to failure which only occur in Maven environment.
+ * Test passes in local IDE environment.
  */
 @Ignore
 public class RedisStoreMapReduceTest extends DataStoreMapReduceTestBase {
