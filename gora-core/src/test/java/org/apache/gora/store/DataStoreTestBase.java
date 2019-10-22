@@ -221,8 +221,8 @@ public abstract class DataStoreTestBase {
   }
 
   @Test
-  public void testBenchamarkExists() throws Exception {
-    log.info("test method: testBenchamarkExists");
+  public void testBenchmarkExists() throws Exception {
+    log.info("test method: testBenchmarkExists");
     DataStoreTestUtil.testBenchmarkGetExists(employeeStore);
   }
 

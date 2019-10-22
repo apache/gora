@@ -1,0 +1,112 @@
+{
+    "name": "User",
+    "namespace": "org.apache.gora.benchmark.generated",
+    "type": "record",
+    "fields": [
+        {
+            "default": "null",
+            "name": "userId",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field0",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field1",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field2",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field3",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field4",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field5",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field6",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field7",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field8",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field9",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field10",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field11",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field12",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field13",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field14",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field15",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field16",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field17",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field18",
+            "type": "string"
+        },
+        {
+            "default": "null",
+            "name": "field19",
+            "type": "string"
+        }
+    ]
+}
