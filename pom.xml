@@ -792,8 +792,8 @@
     <module>gora-kudu</module>
     <module>gora-hive</module>
     <module>gora-tutorial</module>
+    <module>gora-benchmark</module>
     <module>sources-dist</module>
-<!--     <module>gora-benchmark</module> -->
   </modules>
 
   <properties>
