@@ -27,10 +27,12 @@ import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 
 /**
  * Executes tests for MR jobs over Redis dataStore.
  */
+@Ignore
 public class RedisStoreMapReduceTest extends DataStoreMapReduceTestBase {
 
   private final GoraRedisTestDriver driver;
