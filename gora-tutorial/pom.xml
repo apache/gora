@@ -138,7 +138,12 @@
       <groupId>org.apache.gora</groupId>
       <artifactId>gora-mongodb</artifactId>
     </dependency>
-    
+
+    <dependency>
+      <groupId>org.apache.gora</groupId>
+      <artifactId>gora-ignite</artifactId>
+    </dependency>
+        
     <dependency>
       <groupId>org.apache.gora</groupId>
       <artifactId>gora-kudu</artifactId>
