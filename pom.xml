@@ -142,6 +142,15 @@
       </roles>
     </developer>
     <developer>
+      <id>jhnmora000</id>
+      <name>John Mora</name>
+      <email>jhnmora000[at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
       <id>jnioche</id>
       <name>Julien Nioche</name>
       <email>jnioche[at] apache [dot] org</email>
