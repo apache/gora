@@ -18,19 +18,22 @@
 
 package org.apache.gora.store.ws.impl;
 
+import java.io.Closeable;
 import java.util.Properties;
 
-import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.ws.impl.PersistentWSBase;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
+import org.apache.gora.store.WebServiceBackedDataStore;
 import org.apache.gora.util.GoraException;
 import org.apache.gora.util.StringUtils;
+import org.apache.hadoop.io.Writable;
 
 /**
  * A Base class for persistent objects{@link DataStore}s.
  */
-public abstract class WSDataStoreBase<K, T extends Persistent>
-implements DataStore<K, T>{
+public abstract class WSDataStoreBase<K, T extends PersistentWSBase> 
+implements WebServiceBackedDataStore<K, T>, Writable, Closeable {
 	
   /**
    * Class of the key to be used

@@ -33,7 +33,7 @@ import org.apache.gora.util.ReflectionUtils;
 /**
  * A Factory for Web-based {@link DataStore}s. DataStoreFactory instances are thread-safe.
  */
-public class WSDataStoreFactory{
+public class WSDataStoreFactory {
 
   public static final Logger log = LoggerFactory.getLogger(WSDataStoreFactory.class);
 
@@ -149,7 +149,7 @@ public class WSDataStoreFactory{
       D dataStore =
         ReflectionUtils.newInstance(dataStoreClass);
       if ( auth != null) {
-        ((WSDataStoreBase<K, Persistent>)dataStore).setConf(auth);
+        ((WSDataStoreBase) dataStore).setConf(auth);
       }
       initializeDataStore(dataStore, keyClass, persistent, properties);
       return dataStore;

@@ -94,7 +94,7 @@ public class GoraDynamoDBCompiler {
       setHeaders(packageName);
       line(0, "");
       line(0, "@DynamoDBTable(tableName = \"" + pTableName + "\")");
-      line(0, "public class " + pTableName + " implements Persistent {");
+      line(0, "public class " + pTableName + " extends org.apache.gora.persistency.ws.impl.PersistentWSBase implements Persistent {");
       for (KeySchemaElement pKeySchema : arrayList) {
         setKeyAttributes(pKeySchema, map.get(pKeySchema.getAttributeName()), 2);
         setKeyMethods(pKeySchema, map.get(pKeySchema.getAttributeName()), 2);
@@ -259,6 +259,7 @@ public class GoraDynamoDBCompiler {
     line(0, "import java.util.List;");
     line(0, "import java.util.Set;");
     line(0, "");
+    line(0, "import org.apache.avro.Schema;");
     line(0, "import org.apache.avro.Schema.Field;");
     line(0, "import org.apache.gora.persistency.Persistent;");
     line(0, "import org.apache.gora.persistency.Tombstone;");
@@ -307,6 +308,9 @@ public class GoraDynamoDBCompiler {
     line(pIden, "public List<Field> getUnmanagedFields() { return null; }");
     line(pIden, "@Override");
     line(pIden, "public Persistent newInstance() { return new " + tabName + "(); }");
+    line(pIden, "@Override");
+    line(pIden, "public Schema getSchema() { return null; }");
+    
   }
 
   /**

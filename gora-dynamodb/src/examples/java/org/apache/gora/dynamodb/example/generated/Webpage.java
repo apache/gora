@@ -1,43 +1,44 @@
 package org.apache.gora.dynamodb.example.generated;
 
 import java.util.List;
+import java.util.Set;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.Tombstone;
-
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 
 @DynamoDBTable(tableName = "Webpage")
-public class Webpage implements Persistent {
+public class Webpage extends org.apache.gora.persistency.ws.impl.PersistentWSBase implements Persistent {
     private String id;
 
     @DynamoDBHashKey(attributeName="id") 
     public String getHashKey() {  return id; } 
     public void setHashKey(String pId){  this.id = pId; }
 
-    private String content;
-    @DynamoDBAttribute(attributeName = "Content")
-    public String getContent() {  return content;  }
-    public void setContent(String pContent) {  this.content = pContent;  }
-
     private String common;
     @DynamoDBAttribute(attributeName = "Common")
     public String getCommon() {  return common;  }
     public void setCommon(String pCommon) {  this.common = pCommon;  }
+
+    private String parsedContent;
+    @DynamoDBAttribute(attributeName = "ParsedContent")
+    public String getParsedContent() {  return parsedContent;  }
+    public void setParsedContent(String pParsedContent) {  this.parsedContent = pParsedContent;  }
 
     private String outlinks;
     @DynamoDBAttribute(attributeName = "Outlinks")
     public String getOutlinks() {  return outlinks;  }
     public void setOutlinks(String pOutlinks) {  this.outlinks = pOutlinks;  }
 
-    private String parsedContent;
-    @DynamoDBAttribute(attributeName = "ParsedContent")
-    public String getParsedContent() {  return parsedContent;  }
-    public void setParsedContent(String pParsedContent) {  this.parsedContent = pParsedContent;  }
+    private String content;
+    @DynamoDBAttribute(attributeName = "Content")
+    public String getContent() {  return content;  }
+    public void setContent(String pContent) {  this.content = pContent;  }
 
 
     public void setNew(boolean pNew){}

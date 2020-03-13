@@ -159,6 +159,7 @@ public class DynamoDBMapping {
      */
     public void setProvisionedThroughput(String tableName, long readCapUnits,
         long writeCapUnits) {
+      @SuppressWarnings("unused")
       ProvisionedThroughput ptDesc = new ProvisionedThroughput()
           .withReadCapacityUnits(readCapUnits).withWriteCapacityUnits(
               writeCapUnits);

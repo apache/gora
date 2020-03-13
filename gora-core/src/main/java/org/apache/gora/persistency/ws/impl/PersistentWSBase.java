@@ -28,7 +28,7 @@ import org.apache.gora.persistency.Persistent;
  * Base class implementing common functionality for Web services
  * backed persistent classes.
  */
-public abstract class PersistentWSBase implements Persistent  {
+public abstract class PersistentWSBase implements Persistent {
 
   /**
    * Maps keys to their own classes
