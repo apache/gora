@@ -2,7 +2,7 @@
 
 <img src="http://gora.apache.org/resources/img/powered-by-gora.png" align="right" width="300" />
 
-[![CI](https://github.com/apache/gora/workflows/CI/badge.svg?branch=master)](https://github.com/apache/gora/actions?query=workflow%3ACI)
+[![build](https://github.com/apache/gora/workflows/build/badge.svg?branch=master)](https://github.com/apache/gora/actions?query=workflow%3Abuild)
 [![license](https://img.shields.io/github/license/apache/gora.svg?maxAge=2592000?style=plastic)](http://www.apache.org/licenses/LICENSE-2.0)
 [![Jenkins](https://img.shields.io/jenkins/s/https/builds.apache.org/gora-trunk.svg?maxAge=2592000?style=plastic)](https://builds.apache.org/job/gora-trunk/)
 [![Jenkins tests](https://img.shields.io/jenkins/t/https/builds.apache.org/gora-trunk.svg?maxAge=2592000?style=plastic)](https://builds.apache.org/job/gora-trunk)
