@@ -142,6 +142,15 @@
       </roles>
     </developer>
     <developer>
+      <id>jhnmora000</id>
+      <name>John Mora</name>
+      <email>jhnmora000[at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
       <id>jnioche</id>
       <name>Julien Nioche</name>
       <email>jnioche[at] apache [dot] org</email>
@@ -283,6 +292,24 @@
       <id>talat</id>
       <name>Talat UYARER</name>
       <email>talat [at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>chanakadkb</id>
+      <name>Chanaka Balasooriya</name>
+      <email>chanakadkb [at] apache [dot] org</email>
+      <roles>
+        <role>Committer</role>
+        <role>PMC Member</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>sheriffo</id>
+      <name>Sheriffo Ceesay</name>
+      <email>sheriffo [at] apache [dot] org</email>
       <roles>
         <role>Committer</role>
         <role>PMC Member</role>
@@ -434,7 +461,7 @@
             </dependency>
           </dependencies>
         </plugin>
-        <!--This plugin's configuration is used to store Eclipse m2e settings 
+        <!--This plugin's configuration is used to store Eclipse m2e settings
         only. It has no influence on the Maven build itself. -->
         <plugin>
           <groupId>org.eclipse.m2e</groupId>
@@ -521,7 +548,7 @@
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>${maven-javadoc-plugin.version}</version>
           <configuration>
-            <excludePackageNames>org.apache.gora.tutorial.log.generated;org.apache.gora.goraci.generated</excludePackageNames>
+            <excludePackageNames>org.apache.gora.tutorial.log.generated;org.apache.gora.goraci.generated;org.apache.gora.benchmark.generated;</excludePackageNames>
           </configuration>
           <executions>
             <execution>
@@ -648,7 +675,7 @@
       <id>release</id>
       <build>
         <plugins>
-          <!-- <plugin> <groupId>org.apache.rat</groupId> <artifactId>apache-rat-plugin</artifactId> 
+          <!-- <plugin> <groupId>org.apache.rat</groupId> <artifactId>apache-rat-plugin</artifactId>
           <version>${apache-rat-plugin.version}</version> <executions> <execution>
           <id>rat-verify</id> <phase>test</phase> <goals> <goal>check</goal> </goals>
           </execution> </executions> <configuration> <licenses> <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
@@ -771,9 +798,12 @@
     <module>gora-solr</module>
     <module>gora-aerospike</module>
     <module>gora-ignite</module>
+    <module>gora-kudu</module>
     <module>gora-hive</module>
+    <module>gora-redis</module>
     <module>gora-jet</module>
     <module>gora-tutorial</module>
+    <module>gora-benchmark</module>
     <module>sources-dist</module>
   </modules>
 
@@ -797,6 +827,10 @@
     <!-- Ignite Dependencies -->
     <ignite.version>2.6.0</ignite.version>
     <sqlbuilder.version>2.1.7</sqlbuilder.version>
+    <!-- Redis Dependencies -->
+    <redisson.version>3.11.0</redisson.version>
+    <!-- Kudu Dependencies -->
+    <kudu.version>1.9.0</kudu.version>
     <!-- Solr Dependencies -->
     <lucene-solr.version>8.0.0</lucene-solr.version>
     <solr-solrj.version>8.0.0</solr-solrj.version>
@@ -830,6 +864,13 @@
     <orientdb.version>2.2.22</orientdb.version>
     <orientqb.version>0.2.0</orientqb.version>
 
+
+    <!-- CouchDB Dependencies -->
+    <couchdb.version>1.4.2</couchdb.version>
+
+    <!-- MongoDB Dependencies -->
+    <mongo.embed.version>2.0.0</mongo.embed.version>
+
     <!-- HiveStore Dependencies -->
     <metamodel.version>5.3.0</metamodel.version>
     <json.version>20180813</json.version>
@@ -839,6 +880,11 @@
     <!-- Testing Dependencies -->
     <junit.version>4.10</junit.version>
     <test.container.version>1.4.2</test.container.version>
+
+    <!-- gora-benchmark and version dependencies -->
+    <site.ycsb.version>0.17.0</site.ycsb.version>
+    <datafactory.version>0.8</datafactory.version>
+
 
     <!-- Maven Plugin Dependencies -->
     <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
@@ -997,6 +1043,17 @@
       </dependency>
       <dependency>
         <groupId>org.apache.gora</groupId>
+        <artifactId>gora-kudu</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-kudu</artifactId>
+        <version>${project.version}</version>
+        <type>test-jar</type>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.gora</groupId>
         <artifactId>gora-lucene</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -1011,6 +1068,26 @@
         <artifactId>gora-mongodb</artifactId>
         <version>${project.version}</version>
       </dependency>
+
+      <!--Kudu DataStore dependencies -->
+      <dependency>
+        <groupId>org.apache.kudu</groupId>
+        <artifactId>kudu-binary</artifactId>
+        <version>${kudu.version}</version>
+        <classifier>${os.detected.classifier}</classifier>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.kudu</groupId>
+        <artifactId>kudu-test-utils</artifactId>
+        <version>${kudu.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.kudu</groupId>
+        <artifactId>kudu-client</artifactId>
+        <version>${kudu.version}</version>
+      </dependency>
+
 
       <!--Ignite DataStore dependencies -->
 
@@ -1081,6 +1158,24 @@
         <artifactId>flink-clients_2.11</artifactId>
         <version>${flink.version}</version>
         <scope>compile</scope>
+      </dependency>
+
+      <!-- Redis DataStore dependencies -->
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-redis</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-redis</artifactId>
+        <version>${project.version}</version>
+        <type>test-jar</type>
+      </dependency>
+      <dependency>
+        <groupId>org.redisson</groupId>
+        <artifactId>redisson-all</artifactId>
+        <version>${redisson.version}</version>
       </dependency>
 
       <!--Hadoop dependencies -->
@@ -1688,6 +1783,13 @@
         <version>${aerospike.version}</version>
       </dependency>
 
+      <!-- CouchDB Dependency -->
+      <dependency>
+        <groupId>org.ektorp</groupId>
+        <artifactId>org.ektorp</artifactId>
+        <version>${couchdb.version}</version>
+      </dependency>
+
       <!-- Testing Dependencies -->
       <dependency>
         <groupId>org.apache.hadoop</groupId>
@@ -1711,6 +1813,26 @@
         <groupId>org.testcontainers</groupId>
         <artifactId>testcontainers</artifactId>
         <version>${test.container.version}</version>
+      </dependency>
+
+      <!-- Gora Benchmark Dependencies -->
+      <dependency>
+        <groupId>site.ycsb</groupId>
+        <artifactId>core</artifactId>
+        <version>${site.ycsb.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>de.flapdoodle.embed</groupId>
+        <artifactId>de.flapdoodle.embed.mongo</artifactId>
+        <version>${mongo.embed.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.fluttercode.datafactory</groupId>
+        <artifactId>datafactory</artifactId>
+        <version>${datafactory.version}</version>
       </dependency>
 
       <!-- Testing Dependencies for Ignite-->
