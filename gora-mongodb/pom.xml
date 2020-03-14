@@ -107,6 +107,12 @@
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <scope>test</scope>
+    </dependency>
     <!-- END of Gora Internal Dependencies -->
 
     <!-- MongoDB Dependencies -->

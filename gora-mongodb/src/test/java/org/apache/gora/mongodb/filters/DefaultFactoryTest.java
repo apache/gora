@@ -27,6 +27,7 @@ import org.apache.gora.filter.MapFieldValueFilter;
 import org.apache.gora.filter.SingleFieldValueFilter;
 import org.apache.gora.mongodb.store.MongoStore;
 import org.apache.hadoop.conf.Configuration;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -56,8 +57,8 @@ public class DefaultFactoryTest {
     filter.setFilterIfMissing(true);
 
     DBObject dbObject = filterFactory.createFilter(filter, store);
-    assertEquals("{ \"url\" : { \"$ne\" : \"http://www.example.com\"}}",
-        dbObject.toString());
+    assertEquals(new JSONObject("{ \"url\" : { \"$ne\" : \"http://www.example.com\"}}").toString(),
+            new JSONObject(dbObject.toString()).toString());
   }
 
   @Test
@@ -67,9 +68,8 @@ public class DefaultFactoryTest {
     filter.setFilterIfMissing(false); // include doc with missing field
 
     DBObject dbObject = filterFactory.createFilter(filter, store);
-    assertEquals(
-        "{ \"$or\" : [ { \"url\" : { \"$exists\" : false}} , { \"url\" : \"http://www.example.com\"}]}",
-        dbObject.toString());
+    assertEquals(new JSONObject("{ \"$or\" : [ { \"url\" : { \"$exists\" : false}} , " +
+                    "{ \"url\" : \"http://www.example.com\"}]}").toString(), new JSONObject(dbObject.toString()).toString());
   }
 
   @Test
@@ -79,8 +79,8 @@ public class DefaultFactoryTest {
     filter.setFilterIfMissing(true);
 
     DBObject dbObject = filterFactory.createFilter(filter, store);
-    assertEquals("{ \"h.C·T\" : { \"$ne\" : \"text/html\"}}",
-        dbObject.toString());
+    assertEquals(new JSONObject("{ \"h.C·T\" : { \"$ne\" : \"text/html\"}}").toString(),
+            new JSONObject(dbObject.toString()).toString());
   }
 
   @Test
@@ -90,9 +90,8 @@ public class DefaultFactoryTest {
     filter.setFilterIfMissing(false); // include doc with missing field
 
     DBObject dbObject = filterFactory.createFilter(filter, store);
-    assertEquals(
-        "{ \"$or\" : [ { \"h.C·T\" : { \"$exists\" : false}} , { \"h.C·T\" : \"text/html\"}]}",
-        dbObject.toString());
+    assertEquals(new JSONObject("{ \"$or\" : [ { \"h.C·T\" : { \"$exists\" : false}} , " +
+                    "{ \"h.C·T\" : \"text/html\"}]}").toString(), new JSONObject(dbObject.toString()).toString());
   }
 
   @Test
@@ -100,7 +99,7 @@ public class DefaultFactoryTest {
     FilterList<String, WebPage> filter = new FilterList<>();
 
     DBObject dbObject = filterFactory.createFilter(filter, store);
-    assertEquals("{ }", dbObject.toString());
+    assertEquals(new JSONObject("{ }").toString(), new JSONObject(dbObject.toString()).toString());
   }
 
   @Test
@@ -116,9 +115,8 @@ public class DefaultFactoryTest {
     filter.addFilter(urlFilter);
 
     DBObject dbObject = filterFactory.createFilter(filter, store);
-    assertEquals(
-        "{ \"h.C·T\" : \"text/html\" , \"url\" : \"http://www.example.com\"}",
-        dbObject.toString());
+    assertEquals(new JSONObject("{ \"h.C·T\" : \"text/html\" , \"url\" : \"http://www.example.com\"}").toString(),
+            new JSONObject(dbObject.toString()).toString());
   }
 
   /**
@@ -134,8 +132,8 @@ public class DefaultFactoryTest {
     filter.setFilterIfMissing(true);
 
     DBObject dbObject = filterFactory.createFilter(filter, store);
-    assertEquals("{ \"url\" : \"http://www.example.com\"}",
-            dbObject.toString());
+    assertEquals(new JSONObject("{ \"url\" : \"http://www.example.com\"}").toString(),
+            new JSONObject(dbObject.toString()).toString());
   }
 
   private MapFieldValueFilter<String, WebPage> createHeadersFilter() {
