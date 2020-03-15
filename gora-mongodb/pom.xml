@@ -52,7 +52,6 @@
   <properties>
     <osgi.import>*</osgi.import>
     <osgi.export>org.apache.gora.mongodb*;version="${project.version}";-noimport:=true</osgi.export>
-    <mongo.driver.version>3.5.0</mongo.driver.version>
     <mongo.embed.version>2.0.0</mongo.embed.version>
   </properties>
 
@@ -108,13 +107,18 @@
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <scope>test</scope>
+    </dependency>
     <!-- END of Gora Internal Dependencies -->
 
     <!-- MongoDB Dependencies -->
     <dependency>
       <groupId>org.mongodb</groupId>
       <artifactId>mongo-java-driver</artifactId>
-      <version>${mongo.driver.version}</version>
       <scope>compile</scope>
     </dependency>
 
