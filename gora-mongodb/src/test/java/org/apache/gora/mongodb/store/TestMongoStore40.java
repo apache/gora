@@ -21,11 +21,11 @@ import de.flapdoodle.embed.mongo.distribution.Version;
 import org.apache.gora.mongodb.GoraMongodbTestDriver;
 
 /**
- * Perform {@link TestMongoStore} tests on MongoDB 2.6.x server.
+ * Perform {@link TestMongoStore} tests on MongoDB 4.0.x server.
  */
-public class TestMongoStore26 extends TestMongoStore {
+public class TestMongoStore40 extends TestMongoStore {
 
   static {
-    setTestDriver(new GoraMongodbTestDriver(Version.Main.V2_6));
+    setTestDriver(new GoraMongodbTestDriver(Version.Main.V4_0));
   }
 }

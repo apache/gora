@@ -52,7 +52,7 @@
   <properties>
     <osgi.import>*</osgi.import>
     <osgi.export>org.apache.gora.mongodb*;version="${project.version}";-noimport:=true</osgi.export>
-    <mongo.embed.version>2.0.0</mongo.embed.version>
+    <mongo.embed.version>2.2.0</mongo.embed.version>
   </properties>
 
   <build>
