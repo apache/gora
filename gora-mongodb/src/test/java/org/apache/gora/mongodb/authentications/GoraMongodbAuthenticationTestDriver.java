@@ -17,91 +17,55 @@
  */
 package org.apache.gora.mongodb.authentications;
 
-import de.flapdoodle.embed.mongo.*;
-import de.flapdoodle.embed.mongo.config.*;
-import de.flapdoodle.embed.mongo.distribution.Version;
-import de.flapdoodle.embed.process.config.IRuntimeConfig;
-import de.flapdoodle.embed.process.config.io.ProcessOutput;
-import de.flapdoodle.embed.process.io.IStreamProcessor;
-import de.flapdoodle.embed.process.io.LogWatchStreamProcessor;
-import de.flapdoodle.embed.process.io.NamedOutputStreamProcessor;
-import de.flapdoodle.embed.process.runtime.Network;
+import com.mongodb.ServerAddress;
 import org.apache.gora.GoraTestDriver;
+import org.apache.gora.mongodb.MongoContainer;
 import org.apache.gora.mongodb.store.MongoStore;
 import org.apache.gora.mongodb.store.MongoStoreParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.Container;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Collections;
-import java.util.HashSet;
+import java.time.Duration;
 
-import static de.flapdoodle.embed.process.io.Processors.console;
-import static de.flapdoodle.embed.process.io.Processors.namedConsole;
-import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * Driver to set up an embedded MongoDB database instance for use in our  * unit tests.
  * This class is specially written to automate authentication mechanisms.
- * We use embedded mongodb which is available from
- * https://github.com/flapdoodle-oss/embedmongo.flapdoodle.de
  */
 class GoraMongodbAuthenticationTestDriver extends GoraTestDriver {
     private static final Logger log = LoggerFactory.getLogger(GoraMongodbAuthenticationTestDriver.class);
-    private static final int INIT_TIMEOUT_MS = 30000;
-    private static final String USER_ADDED_TOKEN = "Successfully added user";
-    private ThreadLocal<Boolean> started = new ThreadLocal<>();
-    private int port;
-    private MongodExecutable _mongodExe;
-    private MongodProcess _mongod;
-    private MongodStarter runtime;
-    private IMongodConfig mongodConfig;
-    private String adminUsername = "madhawa";
-    private String adminPassword = "123";
-    private Version.Main useVersion;
-    private String authMechanisms;
-    private boolean auth = false;
+    private MongoContainer _container;
+    private final String adminUsername = "madhawa";
+    private final String adminPassword = "123";
+    private final String useVersion;
+    private final String authMechanisms;
 
-    GoraMongodbAuthenticationTestDriver(String authMechanisms, Version.Main useVersion) throws IOException {
+    GoraMongodbAuthenticationTestDriver(String authMechanisms, String useVersion) {
         super(MongoStore.class);
         this.authMechanisms = authMechanisms;
         this.useVersion = useVersion;
-        started.set(false);
-        if (!this.authMechanisms.equals("MONGODB-CR")) {
-            auth = true;
-        }
-
     }
 
     private void doStart() throws Exception {
-        IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder()
-                .defaultsWithLogger(Command.MongoD, log)
-                .processOutput(ProcessOutput.getDefaultInstanceSilent())
-                .build();
-        runtime = MongodStarter.getInstance(runtimeConfig);
         try {
-            log.info("Starting the mongo server without authentications");
+            log.info("Starting the embedded Mongodb server");
             startWithAuth();
-            log.info("Adding admin user");
-            addAdmin();
-            if (this.authMechanisms.equals("SCRAM-SHA-1")) {
+            if (authMechanisms.equals("SCRAM-SHA-1")) {
                 setSCRAM_SHA_1Credentials();
-            }
-            if (this.authMechanisms.equals("MONGODB-CR")) {
-                setMongoDB_CRCredentials();
-                tearDownClass();
-                auth = true;
-                startWithAuth();
-                addAdmin();
             }
             // Store Mongo server "host:port" in Hadoop configuration
             // so that MongoStore will be able to get it latter
-            conf.set(MongoStoreParameters.PROP_MONGO_SERVERS, "127.0.0.1:" + port);
+            ServerAddress address = _container.getServerAddress();
+            int port = address.getPort();
+            String host = address.getHost();
+            String mongoServersProp = String.format("%s:%d", host, port);
+
+            conf.set(MongoStoreParameters.PROP_MONGO_SERVERS, mongoServersProp);
             conf.set(MongoStoreParameters.PROP_MONGO_DB, "admin");
-            conf.set(MongoStoreParameters.PROP_MONGO_AUTHENTICATION_TYPE, this.authMechanisms);
+            conf.set(MongoStoreParameters.PROP_MONGO_AUTHENTICATION_TYPE, authMechanisms);
             conf.set(MongoStoreParameters.PROP_MONGO_LOGIN, adminUsername);
             conf.set(MongoStoreParameters.PROP_MONGO_SECRET, adminPassword);
         } catch (Exception e) {
@@ -112,11 +76,8 @@ class GoraMongodbAuthenticationTestDriver extends GoraTestDriver {
 
     private void startWithAuth() throws IOException {
         try {
-            if(!started.get()) {
-                prepareExecutable();
-                _mongod = _mongodExe.start();
-                started.set(true);
-            }
+            prepareExecutable();
+            _container.start();
         } catch (Exception e) {
             log.error("Error starting embedded Mongodb server... tearing down test driver.");
             tearDownClass();
@@ -124,96 +85,51 @@ class GoraMongodbAuthenticationTestDriver extends GoraTestDriver {
     }
 
     private void prepareExecutable() throws IOException {
-        final MongoCmdOptionsBuilder cmdBuilder = new MongoCmdOptionsBuilder();
-        cmdBuilder.enableAuth(auth);
-        final IMongoCmdOptions cmdOptions = cmdBuilder.build();
-        MongodConfigBuilder builder = new MongodConfigBuilder()
-                .version(useVersion)
-                .cmdOptions(cmdOptions)
-                .net(new Net(port, Network.localhostIsIPv6()));
-        if (auth) {
-            builder.setParameter("authenticationMechanisms", authMechanisms);
-        }
+        _container = new MongoContainer(useVersion);
+        // https://hub.docker.com/_/mongo
+        // These variables, used in conjunction, create a new user and set that user's password.
+        // This user is created in the admin authentication database
+        // and given the role of root, which is a "superuser" role.
+        _container.withEnv("MONGO_INITDB_ROOT_USERNAME", adminUsername);
+        _container.withEnv("MONGO_INITDB_ROOT_PASSWORD", adminPassword);
 
-        mongodConfig = builder.build();
-        _mongodExe = runtime.prepare(mongodConfig);
-    }
+        // To enable authentication, MongoDB will have to restart itself
+        // so wait for at least 5 sec
+        _container.withMinimumRunningDuration(Duration.ofSeconds(5));
 
-    private void addAdmin() throws IOException, InterruptedException {
-        final String scriptText = "db.createUser(\n" +
-                "  {\n" +
-                "    user: \"madhawa\",\n" +
-                "    pwd: \"123\",\n" +
-                "    roles: [ { role: \"root\", db: \"admin\" } ]\n" +
-                "  }\n" +
-                ");";
-        runScriptAndWait(scriptText, USER_ADDED_TOKEN, new String[]{"couldn't add user", "failed to load", "login failed"}, "admin", null, null);
-    }
-
-    private void setMongoDB_CRCredentials() throws Exception {
-        final String scriptText1 = "var schema = db.system.version.findOne({\"_id\" : \"authSchema\"});\nschema.currentVersion = 3;\ndb.system.version.save(schema);\n";
-      //  final String scriptText1 = "db.system.version.remove({});\ndb.system.version.insert({ \"_id\" : \"authSchema\", \"currentVersion\" : 3 });";
-        runScriptAndWait(scriptText1, "Successfully added authSchema", null, "admin", adminUsername, adminPassword);
+        // https://docs.mongodb.com/manual/tutorial/enable-authentication/
+        // https://docs.mongodb.com/manual/reference/parameters/#param.authenticationMechanisms
+        _container.withCommand("--auth", "--setParameter", "authenticationMechanisms=" + authMechanisms);
     }
 
     private void setSCRAM_SHA_1Credentials() throws Exception {
         final String scriptText1 = "db.adminCommand({authSchemaUpgrade: 1});\n";
-        runScriptAndWait(scriptText1, "Successfully added authSchema", null, "admin", adminUsername, adminPassword);
+        runScriptAndWait(scriptText1, "admin", adminUsername, adminPassword);
     }
 
-    private void runScriptAndWait(String scriptText, String token, String[] failures, String dbName, String username, String password) throws IOException {
-        IStreamProcessor mongoOutput;
-        if (!isEmpty(token)) {
-            mongoOutput = new LogWatchStreamProcessor(
-                    token,
-                    (failures != null) ? new HashSet<>(asList(failures)) : Collections.emptySet(),
-                    namedConsole("[mongo shell output]"));
-        } else {
-            mongoOutput = new NamedOutputStreamProcessor("[mongo shell output]", console());
-        }
-        IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder()
-                .defaults(Command.Mongo)
-                .processOutput(new ProcessOutput(
-                        mongoOutput,
-                        namedConsole("[mongo shell error]"),
-                        console()))
-                .build();
-        MongoShellStarter starter = MongoShellStarter.getInstance(runtimeConfig);
-
-        final File scriptFile = writeTmpScriptFile(scriptText);
-        final MongoShellConfigBuilder builder = new MongoShellConfigBuilder();
-        if (!isEmpty(dbName)) {
-            builder.dbName(dbName);
-        }
+    private void runScriptAndWait(String scriptText, String dbName, String username, String password)
+            throws InterruptedException, IOException {
+        final StringBuilder builder = new StringBuilder("mongo --quiet");
         if (!isEmpty(username)) {
-            builder.username(username);
+            builder.append(" --username ").append(username);
         }
         if (!isEmpty(password)) {
-            builder.password(password);
+            builder.append(" --password ").append(password);
         }
-        starter.prepare(builder
-                .scriptName(scriptFile.getAbsolutePath())
-                .version(mongodConfig.version())
-                .net(mongodConfig.net())
-                .build()).start();
-        if (mongoOutput instanceof LogWatchStreamProcessor) {
-            ((LogWatchStreamProcessor) mongoOutput).waitForResult(INIT_TIMEOUT_MS);
+        if (!isEmpty(dbName)) {
+            builder.append(" ").append(dbName);
         }
-    }
+        builder.append(" --eval '").append(scriptText).append("'");
 
-    private File writeTmpScriptFile(String scriptText) throws IOException {
-        File scriptFile = File.createTempFile("tempfile", ".js");
-        scriptFile.deleteOnExit();
-        PrintWriter writer = new PrintWriter(scriptFile, "UTF-8");
-        writer.write(scriptText);
-        writer.close();
-        return scriptFile;
+        Container.ExecResult res = _container.execInContainer("/bin/bash", "-c", builder.toString());
+        if (!isEmpty(res.getStderr())) {
+            log.error("Unable to run script on Mongodb server {}: {}", scriptText, res.getStderr());
+            throw new IOException(res.getStderr());
+        }
     }
 
     @Override
     public void setUpClass() throws Exception {
-        port = Network.getFreeServerPort();
-        log.info("Starting embedded Mongodb server on {} port.", port);
         doStart();
     }
 
@@ -223,12 +139,6 @@ class GoraMongodbAuthenticationTestDriver extends GoraTestDriver {
     @Override
     public void tearDownClass() {
         log.info("Shutting down mongodb server...");
-        if(started.get()) {
-            _mongod.stop();
-            _mongodExe.stop();
-            started.set(false);
-        }
+        _container.stop();
     }
-
-
 }

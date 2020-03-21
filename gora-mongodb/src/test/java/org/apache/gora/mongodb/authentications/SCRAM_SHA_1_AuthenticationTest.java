@@ -17,20 +17,15 @@
  */
 package org.apache.gora.mongodb.authentications;
 
-import de.flapdoodle.embed.mongo.distribution.Version;
 import org.apache.gora.mongodb.store.TestMongoStore;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-
 /**
- * Perform {@link TestMongoStore} tests on MongoDB 3.2.x server with SCRAM-SHA-1 Authentication mechanism
+ * Perform {@link TestMongoStore} tests on MongoDB 3.6.x server with SCRAM-SHA-1 Authentication mechanism
  */
 public class SCRAM_SHA_1_AuthenticationTest extends TestMongoStore {
   static {
     try {
-      setTestDriver(new GoraMongodbAuthenticationTestDriver("SCRAM-SHA-1", Version.Main.V3_4));
+      setTestDriver(new GoraMongodbAuthenticationTestDriver("SCRAM-SHA-1", "3.6"));
     } catch (Exception e) {
       log.error("MongoDb Test Driver initialization failed. "+ e.getMessage());
     }
