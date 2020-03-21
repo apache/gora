@@ -57,8 +57,7 @@ public class GoraMongodbTestDriver extends GoraTestDriver {
 
     // Store Mongo server "host:port" in Hadoop configuration
     // so that MongoStore will be able to get it latter
-    String mongoServersProp = String.format("%s:%d", host, port);
-    conf.set(MongoStoreParameters.PROP_MONGO_SERVERS, mongoServersProp);
+    conf.set(MongoStoreParameters.PROP_MONGO_SERVERS, host + ":" + port);
 
     log.info("Starting embedded Mongodb server on {} port.", port);
     try {

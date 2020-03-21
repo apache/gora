@@ -61,9 +61,8 @@ class GoraMongodbAuthenticationTestDriver extends GoraTestDriver {
             ServerAddress address = _container.getServerAddress();
             int port = address.getPort();
             String host = address.getHost();
-            String mongoServersProp = String.format("%s:%d", host, port);
 
-            conf.set(MongoStoreParameters.PROP_MONGO_SERVERS, mongoServersProp);
+            conf.set(MongoStoreParameters.PROP_MONGO_SERVERS, host + ":" + port);
             conf.set(MongoStoreParameters.PROP_MONGO_DB, "admin");
             conf.set(MongoStoreParameters.PROP_MONGO_AUTHENTICATION_TYPE, authMechanisms);
             conf.set(MongoStoreParameters.PROP_MONGO_LOGIN, adminUsername);
