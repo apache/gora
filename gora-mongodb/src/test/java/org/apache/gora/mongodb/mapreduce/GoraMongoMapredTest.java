@@ -19,14 +19,20 @@ package org.apache.gora.mongodb.mapreduce;
 
 import org.apache.gora.GoraTestDriver;
 import org.apache.gora.mongodb.GoraMongodbTestDriver;
+import org.apache.gora.mongodb.MongoContainer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.ClassRule;
 
 /**
  * Created by drazzib on 24/05/14.
  */
 public class GoraMongoMapredTest {
-    protected static GoraTestDriver testDriver = new GoraMongodbTestDriver();
+
+    @ClassRule
+    public final static MongoContainer container = new MongoContainer("3.6");
+
+    protected static GoraTestDriver testDriver = new GoraMongodbTestDriver(container);
 
     @BeforeClass
     public static void setUpClass() throws Exception {
