@@ -1060,6 +1060,12 @@
         <artifactId>gora-mongodb</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-mongodb</artifactId>
+        <version>${project.version}</version>
+        <type>test-jar</type>
+      </dependency>
 
       <!--Kudu DataStore dependencies -->
       <dependency>

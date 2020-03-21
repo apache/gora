@@ -187,6 +187,13 @@
       <scope>test</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.apache.gora</groupId>
+      <artifactId>gora-mongodb</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+
     <!-- Apache CouchDB java client -->
     <dependency>
       <groupId>org.ektorp</groupId>

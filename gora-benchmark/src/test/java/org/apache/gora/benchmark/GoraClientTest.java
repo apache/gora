@@ -17,19 +17,9 @@
  */
 package org.apache.gora.benchmark;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Properties;
-import java.util.Set;
-import java.util.Vector;
-
+import com.mongodb.ServerAddress;
 import org.apache.gora.benchmark.generated.User;
+import org.apache.gora.mongodb.MongoContainer;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.util.GoraException;
 import org.junit.After;
@@ -37,21 +27,18 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.mongodb.MongoClient;
-
-import de.flapdoodle.embed.mongo.MongodExecutable;
-import de.flapdoodle.embed.mongo.MongodProcess;
-import de.flapdoodle.embed.mongo.MongodStarter;
-import de.flapdoodle.embed.mongo.config.IMongodConfig;
-import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
-import de.flapdoodle.embed.mongo.config.Net;
-import de.flapdoodle.embed.mongo.distribution.Version;
-import de.flapdoodle.embed.process.runtime.Network;
 import site.ycsb.ByteIterator;
 import site.ycsb.Status;
 import site.ycsb.StringByteIterator;
 import site.ycsb.workloads.CoreWorkload;
+
+import java.io.File;
+import java.util.*;
+
+import static org.apache.gora.mongodb.MongoContainer.MONGO_PORT;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * The Class GoraClientTest.
@@ -63,9 +50,6 @@ public class GoraClientTest {
   private static HashMap<String, ByteIterator> DATA_TO_INSERT;
   private static HashMap<String, ByteIterator> DATA_TO_UPDATE;
   private static HashMap<String, ByteIterator> INTEGER_DATA;
-  private MongodExecutable mongodExecutable;
-  private MongodProcess mongodProcess;
-  private MongoClient mongoClient;
   private static boolean isMongoDBSetupDone = false;
 
   /**
@@ -74,28 +58,15 @@ public class GoraClientTest {
    * {@link setUp() class} which is executed testUpdate after each test.
    */
   private void setupMongoDBCluster() {
-    MongodStarter starter = MongodStarter.getDefaultInstance();
-    String bindIp = Constants.LOCALHOST;
-    int port = Constants.MONGO_DEFAULT_PORT;
-    IMongodConfig mongodConfig = null;
     try {
-      mongodConfig = new MongodConfigBuilder().version(Version.Main.PRODUCTION)
-          .net(new Net(bindIp, port, Network.localhostIsIPv6())).build();
-    } catch (IOException e) {
-      LOG.info("There is a problem in configuring MongoDB", e.getMessage(), e);
+      MongoContainer mongo = new MongoContainer("3.6")
+              .withFixedExposedPort(MONGO_PORT, MONGO_PORT);
+      mongo.start();
+      ServerAddress address = mongo.getServerAddress();
+      LOG.info("Started MongoDB Server on " + address.getHost() + ":" + address.getPort());
+    } catch (Exception e) {
+      LOG.info("Cannot Start MongoDB Server {}", e.getMessage(), e);
     }
-    this.mongodExecutable = starter.prepare(mongodConfig);
-    try {
-      LOG.info("Starting MongDB Server on port " + bindIp + ":" + port);
-      this.mongodProcess = mongodExecutable.start();
-    } catch (IOException e) {
-      LOG.info("Cannot Start MongDB Server on port " + bindIp + ":" + port, e.getMessage(), e);
-      this.mongodProcess.stop();
-      this.mongodExecutable.stop();
-      if (this.mongoClient != null)
-        this.mongoClient.close();
-    }
-    this.mongoClient = new MongoClient(bindIp, port);
   }
 
   /**
