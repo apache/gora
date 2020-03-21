@@ -867,7 +867,6 @@
     <couchdb.version>1.4.2</couchdb.version>
 
     <!-- MongoDB Dependencies -->
-    <mongo.embed.version>2.0.0</mongo.embed.version>
     <mongo.driver.version>3.12.2</mongo.driver.version>
 
     <!-- HiveStore Dependencies -->
@@ -1810,13 +1809,6 @@
       </dependency>
 
       <!-- Gora MongoDB Dependencies -->
-      <dependency>
-        <groupId>de.flapdoodle.embed</groupId>
-        <artifactId>de.flapdoodle.embed.mongo</artifactId>
-        <version>${mongo.embed.version}</version>
-        <scope>test</scope>
-      </dependency>
-
       <dependency>
         <groupId>org.mongodb</groupId>
         <artifactId>mongo-java-driver</artifactId>

@@ -52,7 +52,6 @@
   <properties>
     <osgi.import>*</osgi.import>
     <osgi.export>org.apache.gora.mongodb*;version="${project.version}";-noimport:=true</osgi.export>
-    <mongo.embed.version>2.2.0</mongo.embed.version>
   </properties>
 
   <build>
@@ -179,9 +178,8 @@
     </dependency>
 
     <dependency>
-      <groupId>de.flapdoodle.embed</groupId>
-      <artifactId>de.flapdoodle.embed.mongo</artifactId>
-      <version>${mongo.embed.version}</version>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>testcontainers</artifactId>
       <scope>test</scope>
     </dependency>
     <!-- END of Testing Dependencies -->
