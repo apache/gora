@@ -801,6 +801,7 @@
     <module>gora-kudu</module>
     <module>gora-hive</module>
     <module>gora-redis</module>
+    <module>gora-jet</module>
     <module>gora-tutorial</module>
     <module>gora-benchmark</module>
     <module>sources-dist</module>
@@ -856,7 +857,8 @@
 
     <!-- JCache Dependencies -->
     <jsr107.api.version>1.0.0</jsr107.api.version>
-    <hazelcast.version>3.6.4</hazelcast.version>
+    <hazelcast.version>3.12.2</hazelcast.version>
+    <hazelcast.jet.version>3.1</hazelcast.jet.version>
 
     <!-- OrientDB Dependencies -->
     <orientdb.version>2.2.22</orientdb.version>
@@ -968,6 +970,12 @@
       <dependency>
         <groupId>org.apache.gora</groupId>
         <artifactId>gora-compiler-cli</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-jet</artifactId>
         <version>${project.version}</version>
       </dependency>
 
@@ -1761,6 +1769,12 @@
                   <artifactId>avro</artifactId>
               </exclusion>
           </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>com.hazelcast.jet</groupId>
+        <artifactId>hazelcast-jet</artifactId>
+        <version>${hazelcast.jet.version}</version>
       </dependency>
 
       <!--Aerospike Dependency -->

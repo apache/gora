@@ -105,6 +105,11 @@
 
     <dependency>
       <groupId>org.apache.gora</groupId>
+      <artifactId>gora-jet</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.gora</groupId>
       <artifactId>gora-jcache</artifactId>
     </dependency>
 
