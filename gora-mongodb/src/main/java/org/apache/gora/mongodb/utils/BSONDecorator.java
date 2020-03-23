@@ -17,35 +17,34 @@
  */
 package org.apache.gora.mongodb.utils;
 
-import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 import org.apache.avro.util.Utf8;
-import org.bson.BSONObject;
+import org.bson.Document;
+import org.bson.types.Binary;
 
 import java.nio.ByteBuffer;
 import java.util.Date;
+import java.util.List;
 
 /**
- * Utility class to build {@link DBObject} used by MongoDB in an easy way by
+ * Utility class to build {@link Document} used by MongoDB in an easy way by
  * directly specifying the fully qualified names of fields.
  *
  * @author Fabien Poulard fpoulard@dictanova.com
  */
 public class BSONDecorator {
 
-  final private DBObject myBson;
+  final private Document myBson;
 
-  public BSONDecorator(final DBObject obj) {
+  public BSONDecorator(final Document obj) {
     myBson = obj;
   }
 
   /**
-   * Access the decorated {@link BSONObject}.
+   * Access the decorated {@link Document}.
    *
-   * @return the decorated {@link DBObject} in its actual state
+   * @return the decorated {@link Document} in its actual state
    */
-  public DBObject asDBObject() {
+  public Document asDocument() {
     return myBson;
   }
 
@@ -56,45 +55,45 @@ public class BSONDecorator {
    *
    * @param fieldName fully qualified name of the field
    * @return true if the field and all its parents exists in the decorated
-   * {@link DBObject}, false otherwise
+   * {@link Document}, false otherwise
    */
   public boolean containsField(String fieldName) {
     // Prepare for in depth setting
     String[] fields = fieldName.split("\\.");
     int i = 0;
-    DBObject intermediate = myBson;
+    Document intermediate = myBson;
 
     // Set intermediate parents
     while (i < (fields.length - 1)) {
-      if (!intermediate.containsField(fields[i]))
+      if (!intermediate.containsKey(fields[i]))
         return false;
-      intermediate = (DBObject) intermediate.get(fields[i]);
+      intermediate = (Document) intermediate.get(fields[i]);
       i++;
     }
 
     // Check final field
-    return intermediate.containsField(fields[fields.length - 1]);
+    return intermediate.containsKey(fields[fields.length - 1]);
   }
 
   /**
-   * Access field as a {@link BasicDBObject}.
+   * Access field as a {@link Document}.
    *
    * @param fieldName fully qualified name of the field to be accessed
-   * @return value of the field as a {@link BasicDBObject}
+   * @return value of the field as a {@link Document}
    */
-  public BasicDBObject getDBObject(String fieldName) {
-    return (BasicDBObject) getFieldParent(fieldName)
+  public Document getDBObject(String fieldName) {
+    return (Document) getFieldParent(fieldName)
             .get(getLeafName(fieldName));
   }
 
   /**
-   * Access field as a {@link BasicDBList}.
+   * Access field as a {@link List<Document>}.
    *
    * @param fieldName fully qualified name of the field to be accessed
-   * @return value of the field as a {@link BasicDBList}
+   * @return value of the field as a {@link List<Document>}
    */
-  public BasicDBList getDBList(String fieldName) {
-    return (BasicDBList) getFieldParent(fieldName).get(getLeafName(fieldName));
+  public List<Document> getDBList(String fieldName) {
+    return (List<Document>) getFieldParent(fieldName).get(getLeafName(fieldName));
   }
 
   /**
@@ -104,9 +103,9 @@ public class BSONDecorator {
    * @return value of the field as a boolean
    */
   public Boolean getBoolean(String fieldName) {
-    BasicDBObject parent = getFieldParent(fieldName);
+    Document parent = getFieldParent(fieldName);
     String lf = getLeafName(fieldName);
-    return parent.containsField(lf) ? parent.getBoolean(lf) : null;
+    return parent.containsKey(lf) ? parent.getBoolean(lf) : null;
   }
 
   /**
@@ -116,9 +115,9 @@ public class BSONDecorator {
    * @return value of the field as a double
    */
   public Double getDouble(String fieldName) {
-    BasicDBObject parent = getFieldParent(fieldName);
+    Document parent = getFieldParent(fieldName);
     String lf = getLeafName(fieldName);
-    return parent.containsField(lf) ? parent.getDouble(lf) : null;
+    return parent.containsKey(lf) ? parent.getDouble(lf) : null;
   }
 
   /**
@@ -128,9 +127,9 @@ public class BSONDecorator {
    * @return value of the field as a double
    */
   public Integer getInt(String fieldName) {
-    BasicDBObject parent = getFieldParent(fieldName);
+    Document parent = getFieldParent(fieldName);
     String lf = getLeafName(fieldName);
-    return parent.containsField(lf) && parent.get(lf) != null ? parent.getInt(lf) : null;
+    return parent.containsKey(lf) && parent.get(lf) != null ? parent.getInteger(lf) : null;
   }
 
   /**
@@ -140,9 +139,9 @@ public class BSONDecorator {
    * @return value of the field as a double
    */
   public Long getLong(String fieldName) {
-    BasicDBObject parent = getFieldParent(fieldName);
+    Document parent = getFieldParent(fieldName);
     String lf = getLeafName(fieldName);
-    return parent.containsField(lf) ? parent.getLong(lf) : null;
+    return parent.containsKey(lf) ? parent.getLong(lf) : null;
   }
 
   /**
@@ -152,7 +151,7 @@ public class BSONDecorator {
    * @return value of the field as a date
    */
   public Date getDate(String fieldName) {
-    BasicDBObject parent = getFieldParent(fieldName);
+    Document parent = getFieldParent(fieldName);
     String lf = getLeafName(fieldName);
     return parent.getDate(lf);
   }
@@ -164,7 +163,7 @@ public class BSONDecorator {
    * @return value of the field as a {@link Utf8} string
    */
   public Utf8 getUtf8String(String fieldName) {
-    BasicDBObject parent = getFieldParent(fieldName);
+    Document parent = getFieldParent(fieldName);
     String value = parent.getString(getLeafName(fieldName));
     return (value != null) ? new Utf8(value) : null;
   }
@@ -179,6 +178,8 @@ public class BSONDecorator {
     Object o = get(fieldName);
     if (o == null)
       return null;
+    else if (o instanceof Binary)
+      return ByteBuffer.wrap(((Binary) o).getData());
     else if (o instanceof byte[])
       return ByteBuffer.wrap((byte[]) o);
     else
@@ -192,19 +193,19 @@ public class BSONDecorator {
    * @return value of the field
    */
   public Object get(String fieldName) {
-    BasicDBObject parent = getFieldParent(fieldName);
+    Document parent = getFieldParent(fieldName);
     return parent.get(getLeafName(fieldName));
   }
 
   /**
    * Set field. Create the intermediate levels if necessary as
-   * {@link BasicDBObject} fields.
+   * {@link Document} fields.
    *
    * @param fieldName fully qualified name of the field to be accessed
    * @param value     value of the field
    */
   public void put(String fieldName, Object value) {
-    BasicDBObject parent = getFieldParent(fieldName, true);
+    Document parent = getFieldParent(fieldName, true);
     parent.put(getLeafName(fieldName), value);
   }
 
@@ -218,27 +219,27 @@ public class BSONDecorator {
    * @return the parent of the field
    * @throws IllegalAccessError if the field does not exist
    */
-  private BasicDBObject getFieldParent(String fieldName, boolean createIfMissing) {
+  private Document getFieldParent(String fieldName, boolean createIfMissing) {
     String[] fields = fieldName.split("\\.");
     int i = 0;
-    BasicDBObject intermediate = (BasicDBObject) myBson;
+    Document intermediate = myBson;
 
     // Set intermediate parents
     while (i < (fields.length - 1)) {
-      if (!intermediate.containsField(fields[i]))
+      if (!intermediate.containsKey(fields[i]))
         if (createIfMissing)
-          intermediate.put(fields[i], new BasicDBObject());
+          intermediate.put(fields[i], new Document());
         else
           throw new IllegalAccessError("The field '" + fieldName
                   + "' does not exist: '" + fields[i] + "' is missing.");
-      intermediate = (BasicDBObject) intermediate.get(fields[i]);
+      intermediate = (Document) intermediate.get(fields[i]);
       i++;
     }
 
     return intermediate;
   }
 
-  private BasicDBObject getFieldParent(String fieldName) {
+  private Document getFieldParent(String fieldName) {
     return getFieldParent(fieldName, false);
   }
 
