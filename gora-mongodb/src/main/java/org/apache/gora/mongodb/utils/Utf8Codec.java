@@ -17,40 +17,30 @@
  */
 package org.apache.gora.mongodb.utils;
 
-import java.nio.ByteBuffer;
-
 import org.apache.avro.util.Utf8;
-
-import com.mongodb.DBEncoder;
-import com.mongodb.DBEncoderFactory;
-import com.mongodb.DefaultDBEncoder;
+import org.bson.BsonReader;
+import org.bson.BsonWriter;
+import org.bson.codecs.Codec;
+import org.bson.codecs.DecoderContext;
+import org.bson.codecs.EncoderContext;
 
 /**
- * BSON encoder for BSONObject instances.
+ * BSON encoder for {@link Utf8} instances.
  */
-public class GoraDBEncoder extends DefaultDBEncoder {
-
-  public static DBEncoderFactory FACTORY = new DefaultFactory();
-
-  @Override
-  protected boolean putSpecial(String name, Object val) {
-    if (val instanceof Utf8) {
-      putString(name, val.toString());
-      return true;
-    } else if (val instanceof ByteBuffer) {
-      putBinary(name, ((ByteBuffer) val).array());
-      return true;
-    } else {
-      return super.putSpecial(name, val);
-    }
-  }
-
-  static class DefaultFactory implements DBEncoderFactory {
+public class Utf8Codec implements Codec<Utf8> {
 
     @Override
-    public DBEncoder create() {
-      return new GoraDBEncoder();
+    public Utf8 decode(BsonReader reader, DecoderContext decoderContext) {
+        return new Utf8(reader.readString());
     }
-  }
 
+    @Override
+    public void encode(BsonWriter writer, Utf8 value, EncoderContext encoderContext) {
+        writer.writeString(value.toString());
+    }
+
+    @Override
+    public Class<Utf8> getEncoderClass() {
+        return Utf8.class;
+    }
 }
