@@ -17,8 +17,7 @@
  */
 package org.apache.gora.mongodb.filters;
 
-import static org.junit.Assert.assertEquals;
-
+import com.mongodb.MongoClient;
 import org.apache.avro.util.Utf8;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.filter.FilterList;
@@ -27,11 +26,13 @@ import org.apache.gora.filter.MapFieldValueFilter;
 import org.apache.gora.filter.SingleFieldValueFilter;
 import org.apache.gora.mongodb.store.MongoStore;
 import org.apache.hadoop.conf.Configuration;
+import org.bson.BsonDocument;
+import org.bson.conversions.Bson;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.mongodb.DBObject;
+import static org.junit.Assert.assertEquals;
 
 public class DefaultFactoryTest {
 
@@ -56,9 +57,9 @@ public class DefaultFactoryTest {
     filter.setFilterOp(FilterOp.NOT_EQUALS);
     filter.setFilterIfMissing(true);
 
-    DBObject dbObject = filterFactory.createFilter(filter, store);
+    Bson dbObject = filterFactory.createFilter(filter, store);
     assertEquals(new JSONObject("{ \"url\" : { \"$ne\" : \"http://www.example.com\"}}").toString(),
-            new JSONObject(dbObject.toString()).toString());
+            new JSONObject(asJson(dbObject)).toString());
   }
 
   @Test
@@ -67,9 +68,9 @@ public class DefaultFactoryTest {
     filter.setFilterOp(FilterOp.EQUALS);
     filter.setFilterIfMissing(false); // include doc with missing field
 
-    DBObject dbObject = filterFactory.createFilter(filter, store);
+    Bson dbObject = filterFactory.createFilter(filter, store);
     assertEquals(new JSONObject("{ \"$or\" : [ { \"url\" : { \"$exists\" : false}} , " +
-                    "{ \"url\" : \"http://www.example.com\"}]}").toString(), new JSONObject(dbObject.toString()).toString());
+                    "{ \"url\" : \"http://www.example.com\"}]}").toString(), new JSONObject(asJson(dbObject)).toString());
   }
 
   @Test
@@ -78,9 +79,9 @@ public class DefaultFactoryTest {
     filter.setFilterOp(FilterOp.NOT_EQUALS);
     filter.setFilterIfMissing(true);
 
-    DBObject dbObject = filterFactory.createFilter(filter, store);
+    Bson dbObject = filterFactory.createFilter(filter, store);
     assertEquals(new JSONObject("{ \"h.C·T\" : { \"$ne\" : \"text/html\"}}").toString(),
-            new JSONObject(dbObject.toString()).toString());
+            new JSONObject(asJson(dbObject)).toString());
   }
 
   @Test
@@ -89,17 +90,17 @@ public class DefaultFactoryTest {
     filter.setFilterOp(FilterOp.EQUALS);
     filter.setFilterIfMissing(false); // include doc with missing field
 
-    DBObject dbObject = filterFactory.createFilter(filter, store);
+    Bson dbObject = filterFactory.createFilter(filter, store);
     assertEquals(new JSONObject("{ \"$or\" : [ { \"h.C·T\" : { \"$exists\" : false}} , " +
-                    "{ \"h.C·T\" : \"text/html\"}]}").toString(), new JSONObject(dbObject.toString()).toString());
+                    "{ \"h.C·T\" : \"text/html\"}]}").toString(), new JSONObject(asJson(dbObject)).toString());
   }
 
   @Test
   public void testCreateFilter_list_empty() throws Exception {
     FilterList<String, WebPage> filter = new FilterList<>();
 
-    DBObject dbObject = filterFactory.createFilter(filter, store);
-    assertEquals(new JSONObject("{ }").toString(), new JSONObject(dbObject.toString()).toString());
+    Bson dbObject = filterFactory.createFilter(filter, store);
+    assertEquals(new JSONObject("{ }").toString(), new JSONObject(asJson(dbObject)).toString());
   }
 
   @Test
@@ -114,9 +115,9 @@ public class DefaultFactoryTest {
     urlFilter.setFilterOp(FilterOp.EQUALS);
     filter.addFilter(urlFilter);
 
-    DBObject dbObject = filterFactory.createFilter(filter, store);
+    Bson dbObject = filterFactory.createFilter(filter, store);
     assertEquals(new JSONObject("{ \"h.C·T\" : \"text/html\" , \"url\" : \"http://www.example.com\"}").toString(),
-            new JSONObject(dbObject.toString()).toString());
+            new JSONObject(asJson(dbObject)).toString());
   }
 
   /**
@@ -131,9 +132,9 @@ public class DefaultFactoryTest {
     filter.getOperands().add(new Utf8("http://www.example.com"));
     filter.setFilterIfMissing(true);
 
-    DBObject dbObject = filterFactory.createFilter(filter, store);
+    Bson dbObject = filterFactory.createFilter(filter, store);
     assertEquals(new JSONObject("{ \"url\" : \"http://www.example.com\"}").toString(),
-            new JSONObject(dbObject.toString()).toString());
+            new JSONObject(asJson(dbObject)).toString());
   }
 
   private MapFieldValueFilter<String, WebPage> createHeadersFilter() {
@@ -150,4 +151,10 @@ public class DefaultFactoryTest {
     filter.getOperands().add("http://www.example.com");
     return filter;
   }
+
+  private static String asJson(Bson bson) {
+    BsonDocument bsonDocument = bson.toBsonDocument(BsonDocument.class, MongoClient.getDefaultCodecRegistry());
+    return bsonDocument.toString();
+  }
+
 }

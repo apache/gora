@@ -17,19 +17,21 @@
  */
 package org.apache.gora.mongodb.filters;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.gora.filter.*;
 import org.apache.gora.mongodb.store.MongoMapping;
 import org.apache.gora.mongodb.store.MongoStore;
 import org.apache.gora.persistency.impl.PersistentBase;
+import org.bson.Document;
+import org.bson.conversions.Bson;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
-import com.mongodb.QueryBuilder;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static com.mongodb.client.model.Filters.*;
 
 public class DefaultFactory<K, T extends PersistentBase> extends
     BaseFactory<K, T> {
@@ -45,8 +47,8 @@ public class DefaultFactory<K, T extends PersistentBase> extends
   }
 
   @Override
-  public DBObject createFilter(final Filter<K, T> filter,
-      final MongoStore<K, T> store) {
+  public Bson createFilter(final Filter<K, T> filter,
+                           final MongoStore<K, T> store) {
 
     if (filter instanceof FilterList) {
       FilterList<K, T> filterList = (FilterList<K, T>) filter;
@@ -64,19 +66,17 @@ public class DefaultFactory<K, T extends PersistentBase> extends
     }
   }
 
-  protected DBObject transformListFilter(final FilterList<K, T> filterList,
-      final MongoStore<K, T> store) {
-    BasicDBObject query = new BasicDBObject();
-    for (Filter<K, T> filter : filterList.getFilters()) {
-      boolean succeeded = getFilterUtil().setFilter(query, filter, store);
-      if (!succeeded) {
-        return null;
-      }
-    }
-    return query;
+  protected Bson transformListFilter(final FilterList<K, T> filterList,
+                                     final MongoStore<K, T> store) {
+    List<Bson> filters = filterList.getFilters().stream()
+            .map(filter -> getFilterUtil().setFilter(filter, store))
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .collect(Collectors.toList());
+    return filters.isEmpty() ? new Document() : and(filters);
   }
 
-  protected DBObject transformFieldFilter(
+  protected Bson transformFieldFilter(
       final SingleFieldValueFilter<K, T> fieldFilter,
       final MongoStore<K, T> store) {
     MongoMapping mapping = store.getMapping();
@@ -85,17 +85,16 @@ public class DefaultFactory<K, T extends PersistentBase> extends
     FilterOp filterOp = fieldFilter.getFilterOp();
     List<Object> operands = fieldFilter.getOperands();
 
-    QueryBuilder builder = QueryBuilder.start(dbFieldName);
-    builder = appendToBuilder(builder, filterOp, operands);
+    Bson filter = appendToBuilder(dbFieldName, filterOp, operands);
     if (!fieldFilter.isFilterIfMissing()) {
       // If false, the find query will pass if the column is not found.
-      DBObject notExist = QueryBuilder.start(dbFieldName).exists(false).get();
-      builder = QueryBuilder.start().or(notExist, builder.get());
+      Bson notExist = exists(dbFieldName, false);
+      filter = or(notExist, filter);
     }
-    return builder.get();
+    return filter;
   }
 
-  protected DBObject transformMapFilter(
+  protected Bson transformMapFilter(
       final MapFieldValueFilter<K, T> mapFilter, final MongoStore<K, T> store) {
     MongoMapping mapping = store.getMapping();
     String dbFieldName = mapping.getDocumentField(mapFilter.getFieldName())
@@ -104,51 +103,43 @@ public class DefaultFactory<K, T extends PersistentBase> extends
     FilterOp filterOp = mapFilter.getFilterOp();
     List<Object> operands = mapFilter.getOperands();
 
-    QueryBuilder builder = QueryBuilder.start(dbFieldName);
-    builder = appendToBuilder(builder, filterOp, operands);
+    Bson filter = appendToBuilder(dbFieldName, filterOp, operands);
     if (!mapFilter.isFilterIfMissing()) {
       // If false, the find query will pass if the column is not found.
-      DBObject notExist = QueryBuilder.start(dbFieldName).exists(false).get();
-      builder = QueryBuilder.start().or(notExist, builder.get());
+      Bson notExist = exists(dbFieldName, false);
+      filter = or(notExist, filter);
     }
-    return builder.get();
+    return filter;
   }
 
-  protected QueryBuilder appendToBuilder(final QueryBuilder builder,
+  protected Bson appendToBuilder(final String dbFieldName,
       final FilterOp filterOp, final List<Object> rawOperands) {
     List<String> operands = convertOperandsToString(rawOperands);
     switch (filterOp) {
     case EQUALS:
       if (operands.size() == 1) {
-        builder.is(operands.iterator().next());
+        return eq(dbFieldName, operands.iterator().next());
       } else {
-        builder.in(operands);
+        return in(dbFieldName, operands);
       }
-      break;
     case NOT_EQUALS:
       if (operands.size() == 1) {
-        builder.notEquals(operands.iterator().next());
+        return ne(dbFieldName, operands.iterator().next());
       } else {
-        builder.notIn(operands);
+        return nin(dbFieldName, operands);
       }
-      break;
     case LESS:
-      builder.lessThan(operands);
-      break;
+      return lt(dbFieldName, operands);
     case LESS_OR_EQUAL:
-      builder.lessThanEquals(operands);
-      break;
+      return lte(dbFieldName, operands);
     case GREATER:
-      builder.greaterThan(operands);
-      break;
+      return gt(dbFieldName, operands);
     case GREATER_OR_EQUAL:
-      builder.greaterThanEquals(operands);
-      break;
+      return gte(dbFieldName, operands);
     default:
       throw new IllegalArgumentException(filterOp
           + " no MongoDB equivalent yet");
     }
-    return builder;
   }
 
   /**
