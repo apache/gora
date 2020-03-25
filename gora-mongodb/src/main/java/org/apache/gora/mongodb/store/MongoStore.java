@@ -19,10 +19,7 @@ package org.apache.gora.mongodb.store;
 
 import com.google.common.base.Splitter;
 import com.mongodb.*;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.MongoIterable;
+import com.mongodb.client.*;
 import com.mongodb.client.model.CountOptions;
 import com.mongodb.client.model.CreateCollectionOptions;
 import com.mongodb.client.model.UpdateOptions;
@@ -93,7 +90,7 @@ DataStoreBase<K, T> {
   /**
    * MongoDB client
    */
-  private static ConcurrentHashMap<String, MongoClient> mapsOfClients = new ConcurrentHashMap<>();
+  private static ConcurrentHashMap<String, com.mongodb.client.MongoClient> mapsOfClients = new ConcurrentHashMap<>();
 
   private MongoDatabase mongoClientDB;
 
@@ -151,27 +148,25 @@ DataStoreBase<K, T> {
    *
    * @param params This value should specify the host:port (at least one) for
    *               connecting to remote MongoDB.
-   * @return a {@link Mongo} instance connected to the server
-   * @throws UnknownHostException
+   * @return a {@link com.mongodb.client.MongoClient} instance connected to the server
    */
-  private MongoClient getClient(MongoStoreParameters params)
-      throws UnknownHostException {
+  private com.mongodb.client.MongoClient getClient(MongoStoreParameters params) {
 
     // Utf8 serialization!
     CodecRegistry codecRegistry = CodecRegistries.fromRegistries(
-            MongoClient.getDefaultCodecRegistry(),
+            MongoClientSettings.getDefaultCodecRegistry(),
             CodecRegistries.fromCodecs(new Utf8Codec())
     );
     // Configure options
-    MongoClientOptions.Builder optBuilder = new MongoClientOptions.Builder();
-    optBuilder.codecRegistry(codecRegistry);
+    MongoClientSettings.Builder settings = MongoClientSettings.builder();
+    settings.codecRegistry(codecRegistry);
     if (params.getReadPreference() != null) {
-      optBuilder.readPreference(ReadPreference.valueOf(params.getReadPreference()));
+      settings.readPreference(ReadPreference.valueOf(params.getReadPreference()));
     }
     if (params.getWriteConcern() != null) {
-      optBuilder.writeConcern(WriteConcern.valueOf(params.getWriteConcern()));
+      settings.writeConcern(WriteConcern.valueOf(params.getWriteConcern()));
     }
-    MongoClientOptions options = optBuilder.build();
+
 
     // Build server address
     List<ServerAddress> seeds = new ArrayList<>();
@@ -191,14 +186,15 @@ DataStoreBase<K, T> {
         }
       }
     }
+    settings.applyToClusterSettings(builder -> builder.hosts(seeds));
 
     // If configuration contains a login + secret, try to authenticated with DB
     if (params.getLogin() != null && params.getSecret() != null) {
       MongoCredential credential = createCredential(params.getAuthenticationType(), params.getLogin(), params.getDbname(), params.getSecret());
-      return new MongoClient(seeds, credential, options);
-    } else {
-      return new MongoClient(seeds, options);
+      settings.credential(credential);
     }
+
+    return MongoClients.create(settings.build());
   }
 
   /**
