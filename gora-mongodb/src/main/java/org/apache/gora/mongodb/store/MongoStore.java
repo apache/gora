@@ -321,15 +321,7 @@ DataStoreBase<K, T> {
    */
   @Override
   public void flush() throws GoraException {
-    try {
-      for (MongoClient client : mapsOfClients.values()) {
-        client.fsync(false);
-        LOG.debug("Forced synced of database for Mongo instance {}.",
-            new Object[] { client });
-      }
-    } catch (Exception e) {
-      throw new GoraException(e);
-    }
+    // no-op
   }
 
   /**
