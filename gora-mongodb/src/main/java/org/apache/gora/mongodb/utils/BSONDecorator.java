@@ -87,10 +87,10 @@ public class BSONDecorator {
   }
 
   /**
-   * Access field as a {@link List<Document>}.
+   * Access field as a collection of {@link Document}.
    *
    * @param fieldName fully qualified name of the field to be accessed
-   * @return value of the field as a {@link List<Document>}
+   * @return value of the field as a collection of {@link Document}
    */
   public List<Document> getDBList(String fieldName) {
     return (List<Document>) getFieldParent(fieldName).get(getLeafName(fieldName));
