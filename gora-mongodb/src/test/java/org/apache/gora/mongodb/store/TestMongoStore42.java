@@ -22,12 +22,12 @@ import org.apache.gora.mongodb.MongoContainer;
 import org.junit.ClassRule;
 
 /**
- * Perform {@link TestMongoStore} tests on MongoDB 3.4.x server.
+ * Perform {@link TestMongoStore} tests on MongoDB 4.2.x server.
  */
-public class TestMongoStore34 extends TestMongoStore {
+public class TestMongoStore42 extends TestMongoStore {
 
   @ClassRule
-  public final static MongoContainer container = new MongoContainer("3.4");
+  public final static MongoContainer container = new MongoContainer("4.2");
 
   static {
     setTestDriver(new GoraMongodbTestDriver(container));

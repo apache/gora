@@ -17,21 +17,19 @@
  */
 package org.apache.gora.mongodb.authentications;
 
-import de.flapdoodle.embed.mongo.distribution.Version;
-import org.apache.gora.mongodb.GoraMongodbTestDriver;
 import org.apache.gora.mongodb.store.TestMongoStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Perform {@link TestMongoStore} tests on MongoDB 3.2.x server with Plain Authentication mechanism.
+ * Perform {@link TestMongoStore} tests on MongoDB 3.6.x server with Plain Authentication mechanism.
  */
 public class PLAIN_AuthenticationTest extends TestMongoStore {
   private static Logger log = LoggerFactory
           .getLogger(PLAIN_AuthenticationTest.class);
   static {
     try {
-      setTestDriver(new GoraMongodbAuthenticationTestDriver("PLAIN", Version.Main.V3_4));
+      setTestDriver(new GoraMongodbAuthenticationTestDriver("PLAIN", "3.6"));
     } catch (Exception e) {
       log.error("MongoDb Test Driver initialization failed. "+ e.getMessage());
     }

@@ -175,14 +175,21 @@
     </dependency>
 
     <dependency>
-      <groupId>de.flapdoodle.embed</groupId>
-      <artifactId>de.flapdoodle.embed.mongo</artifactId>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>testcontainers</artifactId>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.apache.gora</groupId>
       <artifactId>gora-core</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.gora</groupId>
+      <artifactId>gora-mongodb</artifactId>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>

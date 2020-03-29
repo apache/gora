@@ -17,15 +17,19 @@
  */
 package org.apache.gora.mongodb.store;
 
-import de.flapdoodle.embed.mongo.distribution.Version;
 import org.apache.gora.mongodb.GoraMongodbTestDriver;
+import org.apache.gora.mongodb.MongoContainer;
+import org.junit.ClassRule;
 
 /**
  * Perform {@link TestMongoStore} tests on MongoDB 3.6.x server.
  */
 public class TestMongoStore36 extends TestMongoStore {
 
+  @ClassRule
+  public final static MongoContainer container = new MongoContainer("3.6");
+
   static {
-    setTestDriver(new GoraMongodbTestDriver(Version.Main.V3_6));
+    setTestDriver(new GoraMongodbTestDriver(container));
   }
 }
