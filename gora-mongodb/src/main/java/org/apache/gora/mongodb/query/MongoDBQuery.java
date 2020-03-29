@@ -17,14 +17,24 @@
  */
 package org.apache.gora.mongodb.query;
 
+import com.mongodb.client.model.Projections;
 import org.apache.gora.mongodb.store.MongoMapping;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.QueryBase;
 import org.apache.gora.store.DataStore;
+import org.bson.Document;
+import org.bson.conversions.Bson;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.gte;
+import static com.mongodb.client.model.Filters.lte;
 
 /**
  * MongoDB specific implementation of the {@link Query} interface.
@@ -44,40 +54,37 @@ public class MongoDBQuery<K, T extends PersistentBase> extends QueryBase<K, T> {
   /**
    * Compute the query itself. Only make use of the keys for querying.
    * 
-   * @return a {@link DBObject} corresponding to the query
+   * @return a {@link Document} corresponding to the query
    */
-  public static DBObject toDBQuery(Query<?, ?> query) {
-    BasicDBObject q = new BasicDBObject();
+  public static Bson toDBQuery(Query<?, ?> query) {
+
     if ((query.getStartKey() != null) && (query.getEndKey() != null)
         && query.getStartKey().equals(query.getEndKey())) {
-      q.put("_id", query.getStartKey());
+      return eq("_id", query.getStartKey());
     } else {
-      if (query.getStartKey() != null)
-        q.put("_id", new BasicDBObject("$gte", query.getStartKey()));
-      if (query.getEndKey() != null)
-        q.put("_id", new BasicDBObject("$lte", query.getEndKey()));
+      List<Bson> filters = new ArrayList<>();
+      if (query.getStartKey() != null) {
+        filters.add(gte("_id", query.getStartKey()));
+      }
+      if (query.getEndKey() != null) {
+        filters.add(lte("_id", query.getEndKey()));
+      }
+      return filters.isEmpty() ? new Document() : and(filters);
     }
-
-    return q;
   }
 
   /**
    * Compute the projection of the query, that is the fields that will be
    * retrieved from the database.
    * 
-   * @return a {@link DBObject} corresponding to the list of field to be
+   * @return a {@link Document} corresponding to the list of field to be
    *         retrieved with the associated boolean
    */
-  public static DBObject toProjection(String[] fields, MongoMapping mapping) {
-    BasicDBObject proj = new BasicDBObject();
-
-    for (String k : fields) {
-      String dbFieldName = mapping.getDocumentField(k);
-      if (dbFieldName != null && dbFieldName.length() > 0) {
-        proj.put(dbFieldName, true);
-      }
-    }
-
-    return proj;
+  public static Bson toProjection(String[] fields, MongoMapping mapping) {
+    List<String> dbFields = Stream.of(fields)
+            .map(mapping::getDocumentField)
+            .filter(dbField -> dbField != null && !dbField.isEmpty())
+            .collect(Collectors.toList());
+    return Projections.include(dbFields);
   }
 }

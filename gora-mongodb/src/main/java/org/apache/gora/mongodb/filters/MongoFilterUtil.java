@@ -17,9 +17,6 @@
  */
 package org.apache.gora.mongodb.filters;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.gora.filter.Filter;
@@ -28,8 +25,11 @@ import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.util.GoraException;
 import org.apache.gora.util.ReflectionUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.bson.conversions.Bson;
 
-import com.mongodb.DBObject;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Manage creation of filtering {@link org.apache.gora.query.Query} using
@@ -40,8 +40,7 @@ import com.mongodb.DBObject;
  * </p>
  * 
  * @author Damien Raude-Morvan draudemorvan@dictanova.com
- * @see #setFilter(com.mongodb.DBObject, org.apache.gora.filter.Filter,
- *      org.apache.gora.mongodb.store.MongoStore)
+ * @see #setFilter(Filter, MongoStore)
  */
 public class MongoFilterUtil<K, T extends PersistentBase> {
 
@@ -87,32 +86,29 @@ public class MongoFilterUtil<K, T extends PersistentBase> {
   /**
    * Set a filter on the <tt>query</tt>. It translates a Gora filter to a
    * MongoDB filter.
-   * 
-   * @param query
-   *          The Mongo Query
+   *
    * @param filter
    *          The Gora filter.
    * @param store
    *          The MongoStore.
    * @return if remote filter is successfully applied.
    */
-  public boolean setFilter(final DBObject query, final Filter<K, T> filter,
-      final MongoStore<K, T> store) {
+  public Optional<Bson> setFilter(final Filter<K, T> filter,
+                                  final MongoStore<K, T> store) {
 
     FilterFactory<K, T> factory = getFactory(filter);
     if (factory == null) {
       LOG.warn("MongoDB remote filter factory not yet implemented for "
           + filter.getClass().getCanonicalName());
-      return false;
+      return Optional.empty();
     } else {
-      DBObject mongoFilter = factory.createFilter(filter, store);
+      Bson mongoFilter = factory.createFilter(filter, store);
       if (mongoFilter == null) {
         LOG.warn("MongoDB remote filter not yet implemented for "
             + filter.getClass().getCanonicalName());
-        return false;
+        return Optional.empty();
       } else {
-        query.putAll(mongoFilter);
-        return true;
+        return Optional.of(mongoFilter);
       }
     }
   }

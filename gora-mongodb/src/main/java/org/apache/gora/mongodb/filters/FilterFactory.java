@@ -17,13 +17,12 @@
  */
 package org.apache.gora.mongodb.filters;
 
-import java.util.List;
-
 import org.apache.gora.filter.Filter;
 import org.apache.gora.mongodb.store.MongoStore;
 import org.apache.gora.persistency.impl.PersistentBase;
+import org.bson.conversions.Bson;
 
-import com.mongodb.DBObject;
+import java.util.List;
 
 /**
  * Describe factory which create remote filter for MongoDB.
@@ -38,5 +37,5 @@ public interface FilterFactory<K, T extends PersistentBase> {
 
   List<String> getSupportedFilters();
 
-  DBObject createFilter(Filter<K, T> filter, MongoStore<K, T> store);
+  Bson createFilter(Filter<K, T> filter, MongoStore<K, T> store);
 }

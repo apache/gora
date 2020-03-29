@@ -17,16 +17,15 @@
  */
 package org.apache.gora.mongodb.query;
 
-import java.io.IOException;
-
+import com.mongodb.client.MongoCursor;
 import org.apache.gora.mongodb.store.MongoStore;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.ResultBase;
 import org.apache.gora.store.DataStore;
+import org.bson.Document;
 
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
+import java.io.IOException;
 
 /**
  * MongoDB specific implementation of the {@link org.apache.gora.query.Result}
@@ -41,15 +40,17 @@ public class MongoDBResult<K, T extends PersistentBase> extends
   /**
    * Reference to the cursor pointing to the results
    */
-  private DBCursor cursor;
-  private int size;
+  private MongoCursor<Document> cursor;
+  private long size;
 
-  public MongoDBResult(DataStore<K, T> dataStore, Query<K, T> query) {
+  public MongoDBResult(DataStore<K, T> dataStore, Query<K, T> query, MongoCursor<Document> cursor, long size) {
     super(dataStore, query);
+    this.cursor = cursor;
+    this.size = size;
   }
 
   @Override
-  public float getProgress() throws IOException {
+  public float getProgress() {
     if (cursor == null) {
       return 0;
     } else if (size == 0) {
@@ -60,7 +61,7 @@ public class MongoDBResult<K, T extends PersistentBase> extends
   }
 
   @Override
-  public void close() throws IOException {
+  public void close() {
     if (cursor != null) {
       cursor.close();
     }
@@ -72,27 +73,15 @@ public class MongoDBResult<K, T extends PersistentBase> extends
       return false;
     }
 
-    DBObject obj = cursor.next();
+    Document obj = cursor.next();
     key = (K) obj.get("_id");
     persistent = ((MongoStore<K, T>) getDataStore()).newInstance(obj,
             getQuery().getFields());
     return persistent != null;
   }
 
-  /**
-   * Save the reference to the cursor that holds the actual results.
-   *
-   * @param cursor
-   *          {@link DBCursor} obtained from a query execution and that holds
-   *          the actual results
-   */
-  public void setCursor(DBCursor cursor) {
-    this.cursor = cursor;
-    this.size = cursor.size();
-  }
-
   @Override
   public int size() {
-    return size;
+    return (int) size;
   }
 }

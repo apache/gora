@@ -17,7 +17,6 @@
  */
 package org.apache.gora.mongodb.store;
 
-import com.mongodb.DB;
 import org.apache.hadoop.conf.Configuration;
 
 import java.util.Properties;
@@ -92,14 +91,14 @@ public class MongoStoreParameters {
   private final String writeConcern;
 
   /**
-   * @param mappingFile
-   * @param servers
+   * @param mappingFile    Configuration file for mapping.
+   * @param servers        Collection of seeds servers.
    * @param dbname         Name of database to connect to.
    * @param authenticationType Authentication type to login
-   * @param login          Optionnal login for remote database.
+   * @param login          Optional login for remote database.
    * @param secret         Optional secret for remote database.
-   * @param readPreference
-   * @param writeConcern   @return a {@link DB} instance from <tt>mongoClient</tt> or null if
+   * @param readPreference Optional {@link com.mongodb.ReadPreference}.
+   * @param writeConcern   Optional {@link com.mongodb.WriteConcern}.
    */
   private MongoStoreParameters(String mappingFile, String servers, String dbname, String authenticationType, String login, String secret, String readPreference, String writeConcern) {
     this.mappingFile = mappingFile;

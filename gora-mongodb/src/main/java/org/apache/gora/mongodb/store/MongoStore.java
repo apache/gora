@@ -17,31 +17,13 @@
  */
 package org.apache.gora.mongodb.store;
 
-import static com.mongodb.AuthenticationMechanism.GSSAPI;
-import static com.mongodb.AuthenticationMechanism.MONGODB_CR;
-import static com.mongodb.AuthenticationMechanism.MONGODB_X509;
-import static com.mongodb.AuthenticationMechanism.PLAIN;
-import static com.mongodb.AuthenticationMechanism.SCRAM_SHA_1;
-
-import java.io.IOException;
-import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.TimeZone;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.xml.bind.DatatypeConverter;
-
+import com.google.common.base.Splitter;
+import com.mongodb.*;
+import com.mongodb.client.*;
+import com.mongodb.client.model.CountOptions;
+import com.mongodb.client.model.CreateCollectionOptions;
+import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.result.DeleteResult;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
@@ -52,7 +34,7 @@ import org.apache.gora.mongodb.query.MongoDBQuery;
 import org.apache.gora.mongodb.query.MongoDBResult;
 import org.apache.gora.mongodb.store.MongoMapping.DocumentFieldType;
 import org.apache.gora.mongodb.utils.BSONDecorator;
-import org.apache.gora.mongodb.utils.GoraDBEncoder;
+import org.apache.gora.mongodb.utils.Utf8Codec;
 import org.apache.gora.persistency.impl.BeanFactoryImpl;
 import org.apache.gora.persistency.impl.DirtyListWrapper;
 import org.apache.gora.persistency.impl.DirtyMapWrapper;
@@ -65,26 +47,25 @@ import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.AvroUtils;
 import org.apache.gora.util.ClassLoadingUtils;
 import org.apache.gora.util.GoraException;
+import org.bson.Document;
+import org.bson.codecs.configuration.CodecRegistries;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Splitter;
-import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.Bytes;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.Mongo;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientOptions;
-import com.mongodb.MongoCredential;
-import com.mongodb.ReadPreference;
-import com.mongodb.ServerAddress;
-import com.mongodb.WriteConcern;
-import com.mongodb.WriteResult;
+import javax.xml.bind.DatatypeConverter;
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.StreamSupport;
+
+import static com.mongodb.AuthenticationMechanism.*;
+import static com.mongodb.client.model.Filters.and;
 
 /**
  * Implementation of a MongoDB data store to be used by gora.
@@ -109,11 +90,11 @@ DataStoreBase<K, T> {
   /**
    * MongoDB client
    */
-  private static ConcurrentHashMap<String, MongoClient> mapsOfClients = new ConcurrentHashMap<>();
+  private static ConcurrentHashMap<String, com.mongodb.client.MongoClient> mapsOfClients = new ConcurrentHashMap<>();
 
-  private DB mongoClientDB;
+  private MongoDatabase mongoClientDB;
 
-  private DBCollection mongoClientColl;
+  private MongoCollection<Document> mongoClientColl;
 
   /**
    * Mapping definition for MongoDB
@@ -167,47 +148,53 @@ DataStoreBase<K, T> {
    *
    * @param params This value should specify the host:port (at least one) for
    *               connecting to remote MongoDB.
-   * @return a {@link Mongo} instance connected to the server
-   * @throws UnknownHostException
+   * @return a {@link com.mongodb.client.MongoClient} instance connected to the server
    */
-  private MongoClient getClient(MongoStoreParameters params)
-      throws UnknownHostException {
+  private com.mongodb.client.MongoClient getClient(MongoStoreParameters params) {
+
+    // Utf8 serialization!
+    CodecRegistry codecRegistry = CodecRegistries.fromRegistries(
+            MongoClientSettings.getDefaultCodecRegistry(),
+            CodecRegistries.fromCodecs(new Utf8Codec())
+    );
     // Configure options
-    MongoClientOptions.Builder optBuilder = new MongoClientOptions.Builder()
-        .dbEncoderFactory(GoraDBEncoder.FACTORY); // Utf8 serialization!
+    MongoClientSettings.Builder settings = MongoClientSettings.builder();
+    settings.codecRegistry(codecRegistry);
     if (params.getReadPreference() != null) {
-      optBuilder.readPreference(ReadPreference.valueOf(params.getReadPreference()));
+      settings.readPreference(ReadPreference.valueOf(params.getReadPreference()));
     }
     if (params.getWriteConcern() != null) {
-      optBuilder.writeConcern(WriteConcern.valueOf(params.getWriteConcern()));
+      settings.writeConcern(WriteConcern.valueOf(params.getWriteConcern()));
     }
-    // If configuration contains a login + secret, try to authenticated with DB
-    List<MongoCredential> credentials = new ArrayList<>();
-    if (params.getLogin() != null && params.getSecret() != null) {
-      credentials.add(createCredential(params.getAuthenticationType(), params.getLogin(), params.getDbname(), params.getSecret()));
-    }
+
+
     // Build server address
-    List<ServerAddress> addrs = new ArrayList<>();
+    List<ServerAddress> seeds = new ArrayList<>();
     Iterable<String> serversArray = Splitter.on(",").split(params.getServers());
-    if (serversArray != null) {
-      for (String server : serversArray) {
-        Iterator<String> paramsIterator = Splitter.on(":").trimResults().split(server).iterator();
-        if (!paramsIterator.hasNext()) {
-          // No server, use default
-          addrs.add(new ServerAddress());
+    for (String server : serversArray) {
+      Iterator<String> paramsIterator = Splitter.on(":").trimResults().split(server).iterator();
+      if (!paramsIterator.hasNext()) {
+        // No server, use default
+        seeds.add(new ServerAddress());
+      } else {
+        String host = paramsIterator.next();
+        if (paramsIterator.hasNext()) {
+          String port = paramsIterator.next();
+          seeds.add(new ServerAddress(host, Integer.parseInt(port)));
         } else {
-          String host = paramsIterator.next();
-          if (paramsIterator.hasNext()) {
-            String port = paramsIterator.next();
-            addrs.add(new ServerAddress(host, Integer.parseInt(port)));
-          } else {
-            addrs.add(new ServerAddress(host));
-          }
+          seeds.add(new ServerAddress(host));
         }
       }
     }
-    // Connect to the Mongo server
-    return new MongoClient(addrs, credentials, optBuilder.build());
+    settings.applyToClusterSettings(builder -> builder.hosts(seeds));
+
+    // If configuration contains a login + secret, try to authenticated with DB
+    if (params.getLogin() != null && params.getSecret() != null) {
+      MongoCredential credential = createCredential(params.getAuthenticationType(), params.getLogin(), params.getDbname(), params.getSecret());
+      settings.credential(credential);
+    }
+
+    return MongoClients.create(settings.build());
   }
 
   /**
@@ -226,8 +213,8 @@ DataStoreBase<K, T> {
       credential = MongoCredential.createPlainCredential(username, database, password.toCharArray());
     } else if (SCRAM_SHA_1.getMechanismName().equals(authenticationType)) {
       credential = MongoCredential.createScramSha1Credential(username, database, password.toCharArray());
-    } else if (MONGODB_CR.getMechanismName().equals(authenticationType)) {
-      credential = MongoCredential.createMongoCRCredential(username, database, password.toCharArray());
+    } else if (SCRAM_SHA_256.getMechanismName().equals(authenticationType)) {
+      credential = MongoCredential.createScramSha256Credential(username, database, password.toCharArray());
     } else if (GSSAPI.getMechanismName().equals(authenticationType)) {
       credential = MongoCredential.createGSSAPICredential(username);
     } else if (MONGODB_X509.getMechanismName().equals(authenticationType)) {
@@ -241,13 +228,12 @@ DataStoreBase<K, T> {
   /**
    * Get reference to Mongo DB, using credentials if not null.
    */
-  private DB getDB(MongoStoreParameters parameters) throws UnknownHostException {
+  private MongoDatabase getDB(MongoStoreParameters parameters) throws UnknownHostException {
 
     // Get reference to Mongo DB
     if (!mapsOfClients.containsKey(parameters.getServers()))
       mapsOfClients.put(parameters.getServers(), getClient(parameters));
-    DB db = mapsOfClients.get(parameters.getServers()).getDB(parameters.getDbname());
-    return db;
+    return mapsOfClients.get(parameters.getServers()).getDatabase(parameters.getDbname());
   }
 
   public MongoMapping getMapping() {
@@ -282,14 +268,13 @@ DataStoreBase<K, T> {
     
     try {
       // If initialized create the collection
-      mongoClientColl = mongoClientDB.createCollection(
-          mapping.getCollectionName(), new BasicDBObject()); // send a DBObject to
-      // force creation
-      // otherwise creation is deferred
-      mongoClientColl.setDBEncoderFactory(GoraDBEncoder.FACTORY);
+      CreateCollectionOptions opts = new CreateCollectionOptions();
+      String name = mapping.getCollectionName();
+      mongoClientDB.createCollection(name, opts);
+      mongoClientColl = mongoClientDB.getCollection(name);
   
-      LOG.debug("Collection {} has been created for Mongo instance {}.",
-          new Object[] { mapping.getCollectionName(), mongoClientDB.getMongo() });
+      LOG.debug("Collection {} has been created for Mongo database {}.",
+          new Object[] {name, mongoClientDB.getName() });
     } catch (Exception e) {
       throw new GoraException(e);
     }
@@ -309,8 +294,8 @@ DataStoreBase<K, T> {
       mongoClientColl.drop();
   
       LOG.debug(
-          "Collection {} has been dropped for Mongo instance {}.",
-          new Object[] { mongoClientColl.getFullName(), mongoClientDB.getMongo() });
+          "Collection {} has been dropped.",
+          new Object[] { mongoClientColl.getNamespace().getFullName() });
     } catch (Exception e) {
       throw new GoraException(e);
     }
@@ -322,7 +307,10 @@ DataStoreBase<K, T> {
   @Override
   public boolean schemaExists() throws GoraException {
     try {
-      return mongoClientDB.collectionExists(mapping.getCollectionName());
+      MongoIterable<String> names = mongoClientDB.listCollectionNames();
+      String name = mapping.getCollectionName();
+      return StreamSupport.stream(names.spliterator(), false)
+              .anyMatch(name::equals);
     } catch (Exception e) {
       throw new GoraException(e);
     }
@@ -333,15 +321,7 @@ DataStoreBase<K, T> {
    */
   @Override
   public void flush() throws GoraException {
-    try {
-      for (MongoClient client : mapsOfClients.values()) {
-        client.fsync(false);
-        LOG.debug("Forced synced of database for Mongo instance {}.",
-            new Object[] { client });
-      }
-    } catch (Exception e) {
-      throw new GoraException(e);
-    }
+    // no-op
   }
 
   /**
@@ -364,8 +344,8 @@ DataStoreBase<K, T> {
     try {
       String[] dbFields = getFieldsToQuery(fields);
       // Prepare the MongoDB query
-      BasicDBObject q = new BasicDBObject("_id", key);
-      BasicDBObject proj = new BasicDBObject();
+      Document q = new Document("_id", key);
+      Document proj = new Document();
       for (String field : dbFields) {
         String docf = mapping.getDocumentField(field);
         if (docf != null) {
@@ -373,9 +353,9 @@ DataStoreBase<K, T> {
         }
       }
       // Execute the query
-      DBObject res = mongoClientColl.findOne(q, proj);
+      FindIterable<Document> res = mongoClientColl.find(q).projection(proj);
       // Build the corresponding persistent
-      return newInstance(res, dbFields);
+      return newInstance(res.first(), dbFields);
     } catch (Exception e) {
       throw new GoraException(e);
     }
@@ -385,11 +365,10 @@ DataStoreBase<K, T> {
   public boolean exists(final K key) throws GoraException {
     try {
       // Prepare the MongoDB query
-      BasicDBObject q = new BasicDBObject("_id", key);
-      BasicDBObject proj = new BasicDBObject();
+      Document q = new Document("_id", key);
       // Execute the query
-      DBObject res = mongoClientColl.findOne(q, proj);
-      return res != null;
+      long res = mongoClientColl.countDocuments(q);
+      return res > 0;
     } catch (Exception e) {
       throw new GoraException(e);
     }
@@ -429,24 +408,24 @@ DataStoreBase<K, T> {
    */
   private void performPut(final K key, final T obj) {
     // Build the query to select the object to be updated
-    DBObject qSel = new BasicDBObject("_id", key);
+    Document qSel = new Document("_id", key);
 
     // Build the update query
-    BasicDBObject qUpdate = new BasicDBObject();
+    Document qUpdate = new Document();
 
-    BasicDBObject qUpdateSet = newUpdateSetInstance(obj);
+    Document qUpdateSet = newUpdateSetInstance(obj);
     if (qUpdateSet.size() > 0) {
       qUpdate.put("$set", qUpdateSet);
     }
 
-    BasicDBObject qUpdateUnset = newUpdateUnsetInstance(obj);
+    Document qUpdateUnset = newUpdateUnsetInstance(obj);
     if (qUpdateUnset.size() > 0) {
       qUpdate.put("$unset", qUpdateUnset);
     }
 
     // Execute the update (if there is at least one $set ot $unset
     if (!qUpdate.isEmpty()) {
-      mongoClientColl.update(qSel, qUpdate, true, false);
+      mongoClientColl.updateOne(qSel, qUpdate, new UpdateOptions().upsert(true));
       obj.clearDirty();
     } else {
       LOG.debug("No update to perform, skip {}", key);
@@ -456,9 +435,9 @@ DataStoreBase<K, T> {
   @Override
   public boolean delete(final K key) throws GoraException {
     try {
-      DBObject removeKey = new BasicDBObject("_id", key);
-      WriteResult writeResult = mongoClientColl.remove(removeKey);
-      return writeResult != null && writeResult.getN() > 0;
+      Document removeKey = new Document("_id", key);
+      DeleteResult writeResult = mongoClientColl.deleteOne(removeKey);
+      return writeResult.getDeletedCount() > 0;
     } catch (Exception e) {
       throw new GoraException(e);
     }
@@ -468,12 +447,9 @@ DataStoreBase<K, T> {
   public long deleteByQuery(final Query<K, T> query) throws GoraException {
     try {
       // Build the actual MongoDB query
-      DBObject q = MongoDBQuery.toDBQuery(query);
-      WriteResult writeResult = mongoClientColl.remove(q);
-      if (writeResult != null) {
-        return writeResult.getN();
-      }
-      return 0;
+      Bson q = MongoDBQuery.toDBQuery(query);
+      DeleteResult writeResult = mongoClientColl.deleteMany(q);
+      return writeResult.getDeletedCount();
     } catch (Exception e) {
       throw new GoraException(e);
     }
@@ -487,29 +463,32 @@ DataStoreBase<K, T> {
     try {
       String[] fields = getFieldsToQuery(query.getFields());
       // Build the actual MongoDB query
-      DBObject q = MongoDBQuery.toDBQuery(query);
-      DBObject p = MongoDBQuery.toProjection(fields, mapping);
+      Bson q = MongoDBQuery.toDBQuery(query);
+      Bson p = MongoDBQuery.toProjection(fields, mapping);
   
       if (query.getFilter() != null) {
-        boolean succeeded = filterUtil.setFilter(q, query.getFilter(), this);
-        if (succeeded) {
+        Optional<Bson> filter = filterUtil.setFilter(query.getFilter(), this);
+        if (!filter.isPresent()) {
           // don't need local filter
           query.setLocalFilterEnabled(false);
+        } else {
+          q = and(q, filter.get());
         }
       }
   
       // Execute the query on the collection
-      DBCursor cursor = mongoClientColl.find(q, p);
-      if (query.getLimit() > 0)
-        cursor = cursor.limit((int) query.getLimit());
-      cursor.batchSize(100);
-      cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
-  
+      FindIterable<Document> iterable = mongoClientColl.find(q).projection(p);
+      CountOptions countOptions = new CountOptions();
+      if (query.getLimit() > 0) {
+        iterable.limit((int) query.getLimit());
+        countOptions.limit((int) query.getLimit());
+      }
+      iterable.batchSize(100);
+      iterable.noCursorTimeout(true);
+
       // Build the result
-      MongoDBResult<K, T> mongoResult = new MongoDBResult<>(this, query);
-      mongoResult.setCursor(cursor);
-  
-      return mongoResult;
+      long size = mongoClientColl.countDocuments(q, countOptions);
+      return new MongoDBResult<>(this, query, iterable.cursor(), size);
     } catch(Exception e) {
       throw new GoraException(e);
     }
@@ -545,18 +524,18 @@ DataStoreBase<K, T> {
   // //////////////////////////////////////////////////////// DESERIALIZATION
 
   /**
-   * Build a new instance of the persisted class from the {@link DBObject}
+   * Build a new instance of the persisted class from the {@link Document}
    * retrieved from the database.
    * 
    * @param obj
-   *          the {@link DBObject} that results from the query to the database
+   *          the {@link Document} that results from the query to the database
    * @param fields
    *          the list of fields to be mapped to the persistence class instance
    * @return a persistence class instance which content was deserialized from
-   *         the {@link DBObject}
+   *         the {@link Document}
    * @throws GoraException 
    */
-  public T newInstance(final DBObject obj, final String[] fields) throws GoraException {
+  public T newInstance(final Document obj, final String[] fields) throws GoraException {
     if (obj == null)
       return null;
     BSONDecorator easybson = new BSONDecorator(obj);
@@ -578,7 +557,7 @@ DataStoreBase<K, T> {
       LOG.debug(
           "Load from DBObject (MAIN), field:{}, schemaType:{}, docField:{}, storeType:{}",
           new Object[] { field.name(), fieldSchema.getType(), docf, storeType });
-      Object result = fromDBObject(fieldSchema, storeType, field, docf,
+      Object result = fromDocument(fieldSchema, storeType, field, docf,
           easybson);
       persistent.put(field.pos(), result);
     }
@@ -586,9 +565,9 @@ DataStoreBase<K, T> {
     return persistent;
   }
 
-  private Object fromDBObject(final Schema fieldSchema,
-      final DocumentFieldType storeType, final Field field, final String docf,
-      final BSONDecorator easybson) throws GoraException {
+  private Object fromDocument(final Schema fieldSchema,
+                              final DocumentFieldType storeType, final Field field, final String docf,
+                              final BSONDecorator easybson) throws GoraException {
     Object result = null;
     switch (fieldSchema.getType()) {
     case MAP:
@@ -598,7 +577,7 @@ DataStoreBase<K, T> {
       result = fromMongoList(docf, fieldSchema, easybson, field);
       break;
     case RECORD:
-      DBObject rec = easybson.getDBObject(docf);
+      Document rec = easybson.getDBObject(docf);
       if (rec == null) {
         result = null;
         break;
@@ -660,7 +639,7 @@ DataStoreBase<K, T> {
           "Load from DBObject (UNION), schemaType:{}, docField:{}, storeType:{}",
           new Object[] { innerSchema.getType(), docf, storeType });
       // Deserialize as if schema was ["type"]
-      result = fromDBObject(innerSchema, storeType, field, docf, easybson);
+      result = fromDocument(innerSchema, storeType, field, docf, easybson);
     } else {
       throw new IllegalStateException(
           "MongoStore doesn't support 3 types union field yet. Please update your mapping");
@@ -670,7 +649,7 @@ DataStoreBase<K, T> {
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
   private Object fromMongoRecord(final Schema fieldSchema, final String docf,
-      final DBObject rec) throws GoraException {
+      final Document rec) throws GoraException {
     Object result;
     BSONDecorator innerBson = new BSONDecorator(rec);
     Class<?> clazz = null;
@@ -692,7 +671,7 @@ DataStoreBase<K, T> {
                   innerStoreType });
           record.put(
               recField.pos(),
-              fromDBObject(innerSchema, innerStoreType, recField, innerDocField,
+              fromDocument(innerSchema, innerStoreType, recField, innerDocField,
                   innerBson));
     }
     result = record;
@@ -701,7 +680,7 @@ DataStoreBase<K, T> {
 
   /* pp */ Object fromMongoList(final String docf, final Schema fieldSchema,
       final BSONDecorator easybson, final Field f) throws GoraException {
-    List<Object> list = easybson.getDBList(docf);
+    List<Document> list = easybson.getDBList(docf);
     List<Object> rlist = new ArrayList<>();
     if (list == null) {
       return new DirtyListWrapper(rlist);
@@ -710,8 +689,8 @@ DataStoreBase<K, T> {
 
     for (Object item : list) {
       DocumentFieldType storeType = mapping.getDocumentFieldType(docf);
-      Object o = fromDBObject(fieldSchema.getElementType(), storeType, f,
-          "item", new BSONDecorator(new BasicDBObject("item", item)));
+      Object o = fromDocument(fieldSchema.getElementType(), storeType, f,
+          "item", new BSONDecorator(new Document("item", item)));
       rlist.add(o);
     }
     return new DirtyListWrapper<>(rlist);
@@ -719,7 +698,7 @@ DataStoreBase<K, T> {
 
   /* pp */ Object fromMongoMap(final String docf, final Schema fieldSchema,
       final BSONDecorator easybson, final Field f) throws GoraException {
-    BasicDBObject map = easybson.getDBObject(docf);
+    Document map = easybson.getDBObject(docf);
     Map<Utf8, Object> rmap = new HashMap<>();
     if (map == null) {
       return new DirtyMapWrapper(rmap);
@@ -729,7 +708,7 @@ DataStoreBase<K, T> {
       String decodedMapKey = decodeFieldKey(mapKey);
 
       DocumentFieldType storeType = mapping.getDocumentFieldType(docf);
-      Object o = fromDBObject(fieldSchema.getValueType(), storeType, f, mapKey,
+      Object o = fromDocument(fieldSchema.getValueType(), storeType, f, mapKey,
           new BSONDecorator(map));
       rmap.put(new Utf8(decodedMapKey), o);
     }
@@ -767,20 +746,20 @@ DataStoreBase<K, T> {
   // ////////////////////////////////////////////////////////// SERIALIZATION
 
   /**
-   * Build a new instance of {@link DBObject} from the persistence class
-   * instance in parameter. Limit the {@link DBObject} to the fields that are
+   * Build a new instance of {@link Document} from the persistence class
+   * instance in parameter. Limit the {@link Document} to the fields that are
    * dirty and not null, that is the fields that will need to be updated in the
    * store.
    * 
    * @param persistent
    *          a persistence class instance which content is to be serialized as
-   *          a {@link DBObject} for use as parameter of a $set operator
-   * @return a {@link DBObject} which content corresponds to the fields that
+   *          a {@link Document} for use as parameter of a $set operator
+   * @return a {@link Document} which content corresponds to the fields that
    *         have to be updated... and formatted to be passed in parameter of a
    *         $set operator
    */
-  private BasicDBObject newUpdateSetInstance(final T persistent) {
-    BasicDBObject result = new BasicDBObject();
+  private Document newUpdateSetInstance(final T persistent) {
+    Document result = new Document();
     for (Field f : persistent.getSchema().getFields()) {
       if (persistent.isDirty(f.pos()) && (persistent.get(f.pos()) != null)) {
         String docf = mapping.getDocumentField(f.name());
@@ -789,7 +768,7 @@ DataStoreBase<K, T> {
         LOG.debug(
             "Transform value to DBObject (MAIN), docField:{}, schemaType:{}, storeType:{}",
             new Object[] { docf, f.schema().getType(), storeType });
-        Object o = toDBObject(docf, f.schema(), f.schema().getType(),
+        Object o = toDocument(docf, f.schema(), f.schema().getType(),
             storeType, value);
         result.put(docf, o);
       }
@@ -798,20 +777,20 @@ DataStoreBase<K, T> {
   }
 
   /**
-   * Build a new instance of {@link DBObject} from the persistence class
-   * instance in parameter. Limit the {@link DBObject} to the fields that are
+   * Build a new instance of {@link Document} from the persistence class
+   * instance in parameter. Limit the {@link Document} to the fields that are
    * dirty and null, that is the fields that will need to be updated in the
    * store by being removed.
    * 
    * @param persistent
    *          a persistence class instance which content is to be serialized as
-   *          a {@link DBObject} for use as parameter of a $set operator
-   * @return a {@link DBObject} which content corresponds to the fields that
+   *          a {@link Document} for use as parameter of a $set operator
+   * @return a {@link Document} which content corresponds to the fields that
    *         have to be updated... and formated to be passed in parameter of a
    *         $unset operator
    */
-  private BasicDBObject newUpdateUnsetInstance(final T persistent) {
-    BasicDBObject result = new BasicDBObject();
+  private Document newUpdateUnsetInstance(final T persistent) {
+    Document result = new Document();
     for (Field f : persistent.getSchema().getFields()) {
       if (persistent.isDirty(f.pos()) && (persistent.get(f.pos()) == null)) {
         String docf = mapping.getDocumentField(f.name());
@@ -820,7 +799,7 @@ DataStoreBase<K, T> {
         LOG.debug(
             "Transform value to DBObject (MAIN), docField:{}, schemaType:{}, storeType:{}",
             new Object[] { docf, f.schema().getType(), storeType });
-        Object o = toDBObject(docf, f.schema(), f.schema().getType(),
+        Object o = toDocument(docf, f.schema(), f.schema().getType(),
             storeType, value);
         result.put(docf, o);
       }
@@ -829,9 +808,9 @@ DataStoreBase<K, T> {
   }
 
   @SuppressWarnings("unchecked")
-  private Object toDBObject(final String docf, final Schema fieldSchema,
-      final Type fieldType, final DocumentFieldType storeType,
-      final Object value) {
+  private Object toDocument(final String docf, final Schema fieldSchema,
+                            final Type fieldType, final DocumentFieldType storeType,
+                            final Object value) {
     Object result = null;
     switch (fieldType) {
     case MAP:
@@ -910,7 +889,7 @@ DataStoreBase<K, T> {
           "Transform value to DBObject (UNION), schemaType:{}, type1:{}, storeType:{}",
           new Object[] { innerSchema.getType(), type1, storeType });
       // Deserialize as if schema was ["type"]
-      result = toDBObject(docf, innerSchema, type1, storeType, value);
+      result = toDocument(docf, innerSchema, type1, storeType, value);
     } else {
       throw new IllegalStateException(
           "MongoStore doesn't support 3 types union field yet. Please update your mapping");
@@ -918,9 +897,9 @@ DataStoreBase<K, T> {
     return result;
   }
 
-  private BasicDBObject recordToMongo(final String docf,
+  private Document recordToMongo(final String docf,
       final Schema fieldSchema, final Object value) {
-    BasicDBObject record = new BasicDBObject();
+    Document record = new Document();
     for (Field member : fieldSchema.getFields()) {
       Object innerValue = ((PersistentBase) value).get(member.pos());
       String innerDoc = mapping.getDocumentField(member.name());
@@ -932,7 +911,7 @@ DataStoreBase<K, T> {
               innerStoreType });
       record.put(
           member.name(),
-          toDBObject(docf, member.schema(), innerType, innerStoreType,
+          toDocument(docf, member.schema(), innerType, innerStoreType,
               innerValue));
     }
     return record;
@@ -991,13 +970,13 @@ DataStoreBase<K, T> {
    *          the Java Map that must be serialized into a MongoDB object
    * @param fieldType
    *          type of the values within the map
-   * @return a {@link BasicDBObject} version of the {@link Map} that can be
+   * @return a {@link Document} version of the {@link Map} that can be
    *         safely serialized into MongoDB.
    */
-  private BasicDBObject mapToMongo(final String docf,
+  private Document mapToMongo(final String docf,
       final Map<CharSequence, ?> value, final Schema fieldSchema,
       final Type fieldType) {
-    BasicDBObject map = new BasicDBObject();
+    Document map = new Document();
     // Handle null case
     if (value == null)
       return map;
@@ -1009,7 +988,7 @@ DataStoreBase<K, T> {
       Object mapValue = e.getValue();
 
       DocumentFieldType storeType = mapping.getDocumentFieldType(docf);
-      Object result = toDBObject(docf, fieldSchema, fieldType, storeType,
+      Object result = toDocument(docf, fieldSchema, fieldType, storeType,
           mapValue);
       map.put(encodedMapKey, result);
     }
@@ -1038,7 +1017,7 @@ DataStoreBase<K, T> {
     // Handle regular cases
     for (Object item : array) {
       DocumentFieldType storeType = mapping.getDocumentFieldType(docf);
-      Object result = toDBObject(docf, fieldSchema, fieldType, storeType, item);
+      Object result = toDocument(docf, fieldSchema, fieldType, storeType, item);
       list.add(result);
     }
 

@@ -17,28 +17,27 @@
  */
 package org.apache.gora.mongodb.utils;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.BasicDBObjectBuilder;
-import com.mongodb.DBObject;
+import org.bson.Document;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class TestBSONDecorator {
 
   @Test
   public void testContainsField() {
     // Init the object used for testing
-    DBObject dbo1 = BasicDBObjectBuilder
-            .start()
-            .add("root0", "value")
-            .add("root1", new BasicDBObject("leaf1", 1))
-            .add("root2",
-                    new BasicDBObject("parent1", new BasicDBObject("leaf2", "test")))
-            .get();
+    Document dbo1 = new Document();
+    dbo1.put("root0", "value");
+    dbo1.put("root1", new Document("leaf1", 1));
+    dbo1.put("root2",
+                    new Document("parent1", new Document("leaf2", "test")));
     BSONDecorator dboc = new BSONDecorator(dbo1);
 
     // Root level field, does exist
@@ -66,15 +65,14 @@ public class TestBSONDecorator {
   @Test
   public void testBinaryField() {
     // Init the object used for testing
-    DBObject dbo1 = BasicDBObjectBuilder
-            .start()
-            .add("root0", "value")
-            .add("root1", new BasicDBObject("leaf1", "abcdefgh".getBytes(Charset.defaultCharset())))
-            .add(
+    Document dbo1 = new Document();
+    dbo1.put("root0", "value");
+    dbo1.put("root1", new Document("leaf1", "abcdefgh".getBytes(Charset.defaultCharset())));
+    dbo1.put(
                     "root2",
-                    new BasicDBObject("parent1", new BasicDBObject("leaf2", "test"
-                            .getBytes(Charset.defaultCharset()))))
-            .add("root3", ByteBuffer.wrap("test2".getBytes(Charset.defaultCharset()))).get();
+                    new Document("parent1", new Document("leaf2", "test"
+                            .getBytes(Charset.defaultCharset()))));
+    dbo1.put("root3", ByteBuffer.wrap("test2".getBytes(Charset.defaultCharset())));
     BSONDecorator dboc = new BSONDecorator(dbo1);
 
     // Access first bytes field
@@ -95,10 +93,8 @@ public class TestBSONDecorator {
   @Test
   public void testNullStringField() {
     // Init the object used for testing
-    DBObject dbo1 = BasicDBObjectBuilder
-            .start()
-            .add("key1", null)
-            .get();
+    Document dbo1 = new Document();
+    dbo1.put("key1", null);
     BSONDecorator dboc = new BSONDecorator(dbo1);
 
     assertTrue(dboc.containsField("key1"));
@@ -109,7 +105,7 @@ public class TestBSONDecorator {
 
   @Test
   public void testNullFields() {
-    BSONDecorator dboc = new BSONDecorator(new BasicDBObject());
+    BSONDecorator dboc = new BSONDecorator(new Document());
 
     assertNull(dboc.getInt("key1"));
     assertNull(dboc.getLong("key1"));

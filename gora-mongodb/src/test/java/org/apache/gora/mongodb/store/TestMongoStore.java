@@ -17,23 +17,21 @@
  */
 package org.apache.gora.mongodb.store;
 
-import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
 import org.apache.avro.util.Utf8;
-import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.mongodb.GoraMongodbTestDriver;
 import org.apache.gora.mongodb.utils.BSONDecorator;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
-import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreTestBase;
 import org.apache.gora.util.GoraException;
+import org.bson.Document;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
@@ -87,7 +85,7 @@ public abstract class TestMongoStore extends DataStoreTestBase {
   @Test
   public void testFromMongoList_null() throws Exception {
     MongoStore store = new MongoStore();
-    BasicDBObject noField = new BasicDBObject();
+    Document noField = new Document();
     String field = "myField";
     Object item = store.fromMongoList(field, null, new BSONDecorator(noField),
             null);
@@ -98,7 +96,7 @@ public abstract class TestMongoStore extends DataStoreTestBase {
   public void testFromMongoList_empty() throws Exception {
     MongoStore store = new MongoStore();
     String field = "myField";
-    BasicDBObject emptyField = new BasicDBObject(field, new BasicDBList());
+    Document emptyField = new Document(field, new ArrayList<Document>());
     Object item = store.fromMongoList(field, null,
             new BSONDecorator(emptyField), null);
     assertNotNull(item);
@@ -107,7 +105,7 @@ public abstract class TestMongoStore extends DataStoreTestBase {
   @Test
   public void testFromMongoMap_null() throws Exception {
     MongoStore store = new MongoStore();
-    BasicDBObject noField = new BasicDBObject();
+    Document noField = new Document();
     String field = "myField";
     Object item = store.fromMongoMap(field, null, new BSONDecorator(noField),
             null);
@@ -118,7 +116,7 @@ public abstract class TestMongoStore extends DataStoreTestBase {
   public void testFromMongoMap_empty() throws Exception {
     MongoStore store = new MongoStore();
     String field = "myField";
-    BasicDBObject emptyField = new BasicDBObject(field, new BasicDBObject());
+    Document emptyField = new Document(field, new Document());
     Object item = store.fromMongoMap(field, null,
             new BSONDecorator(emptyField), null);
     assertNotNull(item);
