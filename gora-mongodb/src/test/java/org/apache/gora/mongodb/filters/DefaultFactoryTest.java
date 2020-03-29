@@ -17,7 +17,7 @@
  */
 package org.apache.gora.mongodb.filters;
 
-import com.mongodb.MongoClient;
+import com.mongodb.MongoClientSettings;
 import org.apache.avro.util.Utf8;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.filter.FilterList;
@@ -153,7 +153,7 @@ public class DefaultFactoryTest {
   }
 
   private static String asJson(Bson bson) {
-    BsonDocument bsonDocument = bson.toBsonDocument(BsonDocument.class, MongoClient.getDefaultCodecRegistry());
+    BsonDocument bsonDocument = bson.toBsonDocument(BsonDocument.class, MongoClientSettings.getDefaultCodecRegistry());
     return bsonDocument.toString();
   }
 

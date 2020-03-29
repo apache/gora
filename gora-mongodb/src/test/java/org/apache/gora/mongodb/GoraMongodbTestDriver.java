@@ -17,7 +17,6 @@
  */
 package org.apache.gora.mongodb;
 
-import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
 import org.apache.gora.GoraTestDriver;
@@ -58,14 +57,6 @@ public class GoraMongodbTestDriver extends GoraTestDriver {
     // Store Mongo server "host:port" in Hadoop configuration
     // so that MongoStore will be able to get it latter
     conf.set(MongoStoreParameters.PROP_MONGO_SERVERS, host + ":" + port);
-
-    log.info("Starting embedded Mongodb server on {} port.", port);
-    try {
-      _mongo = new MongoClient(address);
-    } catch (Exception e) {
-      log.error("Error starting embedded Mongodb server... tearing down test driver.");
-      tearDownClass();
-    }
   }
 
   /**
@@ -75,10 +66,6 @@ public class GoraMongodbTestDriver extends GoraTestDriver {
   public void tearDownClass() {
     log.info("Shutting down mongodb server...");
     _container.stop();
-  }
-
-  public Mongo getMongo() {
-    return _mongo;
   }
 
 }
