@@ -48,7 +48,8 @@ public class TestCouchDBStore extends DataStoreTestBase {
    * JUnit integration testing with Docker and Testcontainers
    */
   @ClassRule
-  public static GenericContainer CouchDB_CONTAINER = new GenericContainer(DOCKER_CONTAINER_NAME);
+  public static GenericContainer CouchDB_CONTAINER = new GenericContainer(DOCKER_CONTAINER_NAME)
+          .withExposedPorts(5984);
 
   static {
     try {
