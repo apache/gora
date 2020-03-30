@@ -43,7 +43,7 @@ import static org.junit.Assert.*;
  */
 public class TestCouchDBStore extends DataStoreTestBase {
 
-  private static final String DOCKER_CONTAINER_NAME = "klaemo/couchdb:1.6.1";
+  private static final String DOCKER_CONTAINER_NAME = "couchdb:1.6";
   /**
    * JUnit integration testing with Docker and Testcontainers
    */
