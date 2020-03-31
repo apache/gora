@@ -832,7 +832,7 @@
     <!-- Kudu Dependencies -->
     <kudu.version>1.9.0</kudu.version>
     <!-- Solr Dependencies -->
-    <lucene-solr.version>8.0.0</lucene-solr.version>
+    <lucene-solr.version>8.5.0</lucene-solr.version>
     <solr-solrj.version>8.5.0</solr-solrj.version>
     <jetty.version>9.4.27.v20200227</jetty.version>
     <tika.version>1.12</tika.version>
