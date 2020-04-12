@@ -20,16 +20,15 @@ import org.apache.avro.util.Utf8;
 import org.apache.gora.couchdb.GoraCouchDBTestDriver;
 import org.apache.gora.couchdb.query.CouchDBResult;
 import org.apache.gora.examples.WebPageDataCreator;
-import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.query.Query;
-import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreTestBase;
 import org.apache.gora.util.GoraException;
 import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.Wait;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -49,7 +48,8 @@ public class TestCouchDBStore extends DataStoreTestBase {
    */
   @ClassRule
   public static GenericContainer CouchDB_CONTAINER = new GenericContainer(DOCKER_CONTAINER_NAME)
-          .withExposedPorts(5984);
+          .withExposedPorts(5984)
+          .waitingFor(Wait.forHttp("/"));
 
   static {
     try {
