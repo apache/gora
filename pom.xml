@@ -822,7 +822,7 @@
     <!-- Amazon Dependencies -->
     <amazon.version>1.10.55</amazon.version>
     <!-- Cassandra Dependencies -->
-    <cassandra-driver.version>3.3.0</cassandra-driver.version>
+    <cassandra-driver.version>3.9.0</cassandra-driver.version>
     <cassandra.version>3.11.0</cassandra.version>
     <!-- Ignite Dependencies -->
     <ignite.version>2.6.0</ignite.version>
