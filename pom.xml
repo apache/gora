@@ -869,7 +869,7 @@
     <couchdb.version>1.4.2</couchdb.version>
 
     <!-- MongoDB Dependencies -->
-    <mongo.driver.version>3.12.2</mongo.driver.version>
+    <mongo.driver.version>3.12.4</mongo.driver.version>
 
     <!-- HiveStore Dependencies -->
     <metamodel.version>5.3.0</metamodel.version>
