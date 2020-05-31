@@ -17,13 +17,12 @@
 package org.apache.gora.couchdb.store;
 
 import org.apache.avro.util.Utf8;
+import org.apache.gora.couchdb.CouchDBStartupLogWaitStrategy;
 import org.apache.gora.couchdb.GoraCouchDBTestDriver;
 import org.apache.gora.couchdb.query.CouchDBResult;
 import org.apache.gora.examples.WebPageDataCreator;
-import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.query.Query;
-import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreTestBase;
 import org.apache.gora.util.GoraException;
 import org.junit.ClassRule;
@@ -34,6 +33,7 @@ import org.testcontainers.containers.GenericContainer;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.time.Duration;
 
 import static org.junit.Assert.*;
 
@@ -43,12 +43,16 @@ import static org.junit.Assert.*;
  */
 public class TestCouchDBStore extends DataStoreTestBase {
 
-  private static final String DOCKER_CONTAINER_NAME = "klaemo/couchdb:1.6.1";
+  private static final String DOCKER_CONTAINER_NAME = "couchdb:1.6.1";
+
   /**
    * JUnit integration testing with Docker and Testcontainers
    */
   @ClassRule
-  public static GenericContainer CouchDB_CONTAINER = new GenericContainer(DOCKER_CONTAINER_NAME);
+  public static GenericContainer CouchDB_CONTAINER = new GenericContainer(DOCKER_CONTAINER_NAME)
+          .withExposedPorts(5984)
+          .waitingFor(new CouchDBStartupLogWaitStrategy())
+          .withStartupTimeout(Duration.ofSeconds(240));
 
   static {
     try {
