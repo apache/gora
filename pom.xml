@@ -833,10 +833,10 @@
     <kudu.version>1.9.0</kudu.version>
     <!-- Solr Dependencies -->
     <lucene-solr.version>8.5.0</lucene-solr.version>
-    <solr-solrj.version>8.0.0</solr-solrj.version>
-    <jetty.version>9.4.14.v20181114</jetty.version>
+    <solr-solrj.version>8.5.0</solr-solrj.version>
+    <jetty.version>9.4.27.v20200227</jetty.version>
     <tika.version>1.12</tika.version>
-    <httpcomponents.version>4.5.6</httpcomponents.version>
+    <httpcomponents.version>4.5.10</httpcomponents.version>
     <commons-io.version>2.5</commons-io.version>
     <restlet.version>2.3.1</restlet.version>
     <!-- Flink Dependencies -->
