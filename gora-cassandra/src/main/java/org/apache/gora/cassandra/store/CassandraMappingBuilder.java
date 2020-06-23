@@ -22,6 +22,7 @@ import org.apache.gora.cassandra.bean.Field;
 import org.apache.gora.cassandra.bean.KeySpace;
 import org.apache.gora.cassandra.bean.PartitionKeyField;
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.store.DataStore;
 import org.jdom.Attribute;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -43,7 +44,7 @@ public class CassandraMappingBuilder<K, T extends Persistent> {
 
   private static final Logger LOG = LoggerFactory.getLogger(CassandraMappingBuilder.class);
 
-  private CassandraStore dataStore;
+  private DataStore dataStore;
 
   public CassandraMappingBuilder() {
   }
@@ -53,7 +54,7 @@ public class CassandraMappingBuilder<K, T extends Persistent> {
    *
    * @param store Cassandra Store
    */
-  CassandraMappingBuilder(final CassandraStore<K, T> store) {
+  public CassandraMappingBuilder(final DataStore<K, T> store) {
     this.dataStore = store;
   }
 
@@ -117,7 +118,7 @@ public class CassandraMappingBuilder<K, T extends Persistent> {
    * @throws IOException
    */
   @SuppressWarnings("all")
-  CassandraMapping readMapping(String filename) throws Exception {
+  public CassandraMapping readMapping(String filename) throws Exception {
     CassandraMapping cassandraMapping = new CassandraMapping();
     Class keyClass = dataStore.getKeyClass();
     Class persistentClass = dataStore.getPersistentClass();

@@ -1,0 +1,107 @@
+{
+  "type": "record",
+  "name": "ScyllaDBRecord",
+  "default": null,
+  "namespace": "org.apache.gora.scylladb.example.generated.AvroSerialization",
+  "doc": "This object created to used as Persistent Object to test cassandra data store",
+  "fields": [
+    {
+      "name": "dataString",
+      "type": "string",
+      "default": ""
+    },
+    {
+      "name": "dataInt",
+      "type": "int",
+      "default": 0
+    },
+    {
+      "name": "dataLong",
+      "type": [
+        "null",
+        "long"
+      ],
+      "default": null
+    },
+    {
+      "name": "dataDouble",
+      "type": [
+        "null",
+        "double"
+      ],
+      "default": null
+    },
+    {
+      "name": "dataBytes",
+      "type": [
+        "null",
+        "bytes"
+      ],
+      "default": null
+    },
+    {
+      "name": "arrayInt",
+      "type": {
+        "type": "array",
+        "items": "int"
+      },
+      "default": null
+    },
+    {
+      "name": "arrayString",
+      "type": {
+        "type": "array",
+        "items": "string"
+      },
+      "default": null
+    },
+    {
+      "name": "arrayLong",
+      "type": {
+        "type": "array",
+        "items": "long"
+      },
+      "default": null
+    },
+    {
+      "name": "arrayDouble",
+      "type": {
+        "type": "array",
+        "items": "double"
+      },
+      "default": null
+    },
+    {
+      "name": "mapInt",
+      "type": {
+        "type": "map",
+        "values": "int"
+      },
+      "default": {}
+    },
+    {
+      "name": "mapString",
+      "type": {
+        "type": "map",
+        "values": "string"
+      },
+      "default": {}
+    },
+    {
+      "name": "mapLong",
+      "type": {
+        "type": "map",
+        "values": "long"
+      },
+      "default": {}
+    },
+    {
+      "name": "mapDouble",
+      "type": {
+        "type": "map",
+        "values": "double"
+      },
+      "default": {}
+    }
+  ]
+}
