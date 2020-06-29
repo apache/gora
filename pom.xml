@@ -802,6 +802,7 @@
     <module>gora-hive</module>
     <module>gora-redis</module>
     <module>gora-jet</module>
+    <module>gora-rethinkdb</module>
     <module>gora-tutorial</module>
     <module>gora-benchmark</module>
     <module>sources-dist</module>
@@ -863,6 +864,9 @@
     <!-- OrientDB Dependencies -->
     <orientdb.version>2.2.22</orientdb.version>
     <orientqb.version>0.2.0</orientqb.version>
+
+    <!-- RethinkDB Dependencies -->
+    <rethinkdb.version>2.4.4</rethinkdb.version>
 
 
     <!-- CouchDB Dependencies -->
@@ -1729,6 +1733,13 @@
         <groupId>javax.cache</groupId>
         <artifactId>cache-api</artifactId>
         <version>${jsr107.api.version}</version>
+      </dependency>
+
+      <!-- RethinkDB Dependencies -->
+      <dependency>
+        <groupId>com.rethinkdb</groupId>
+        <artifactId>rethinkdb-driver</artifactId>
+        <version>${rethinkdb.version}</version>
       </dependency>
 
       <!-- OrientDB Dependencies -->
