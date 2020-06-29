@@ -46,15 +46,14 @@ public class RethinkDBGoraDataStoreTest extends DataStoreTestBase {
   private static final String DOCKER_CONTAINER_NAME = "rethinkdb:2.3.6";
 
   @ClassRule
-  public static GenericContainer arangodbContainer = new FixedHostPortGenericContainer(DOCKER_CONTAINER_NAME)
+  public static GenericContainer rethinkdbContainer = new FixedHostPortGenericContainer(DOCKER_CONTAINER_NAME)
           .withFixedExposedPort(28015, 28015)
           .waitingFor(new RethinkDBStartupWaitStrategy())
-          .withStartupTimeout(Duration.ofSeconds(10))
-          .withPrivilegedMode(true);
+          .withStartupTimeout(Duration.ofSeconds(10));
 
   @BeforeClass
   public static void setUpClass() throws Exception {
-    setTestDriver(new RethinkDBTestDriver(arangodbContainer));
+    setTestDriver(new RethinkDBTestDriver(rethinkdbContainer));
     DataStoreTestBase.setUpClass();
   }
 

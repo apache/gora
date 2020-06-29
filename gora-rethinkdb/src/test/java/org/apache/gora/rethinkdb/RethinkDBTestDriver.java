@@ -37,11 +37,11 @@ public class RethinkDBTestDriver extends GoraTestDriver {
 
   private static Logger log = LoggerFactory.getLogger(RethinkDBTestDriver.class);
 
-  private GenericContainer arangodbContainer;
+  private GenericContainer rethinkdbContainer;
 
-  public RethinkDBTestDriver(GenericContainer arangodbContainer) {
+  public RethinkDBTestDriver(GenericContainer rethinkdbContainer) {
     super(RethinkDBStore.class);
-    this.arangodbContainer = arangodbContainer;
+    this.rethinkdbContainer = rethinkdbContainer;
   }
 
 
@@ -58,7 +58,7 @@ public class RethinkDBTestDriver extends GoraTestDriver {
     log.info("Setting up RethinkDB test driver");
     conf.set(RethinkDBStoreParameters.RETHINK_DB_SERVER_HOST, "localhost");
     conf.set(RethinkDBStoreParameters.RETHINK_DB_SERVER_PORT,
-            arangodbContainer.getMappedPort(28015).toString());
+            rethinkdbContainer.getMappedPort(28015).toString());
     log.info("RethinkDB Embedded Server started successfully.");
   }
 
