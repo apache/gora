@@ -18,17 +18,14 @@
 
 package org.apache.gora.rethinkdb.store;
 
-
 import org.apache.gora.rethinkdb.RethinkDBTestDriver;
 import org.apache.gora.store.DataStoreTestBase;
-import org.apache.gora.store.DataStoreTestUtil;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Ignore;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.FixedHostPortGenericContainer;
@@ -70,13 +67,6 @@ public class RethinkDBGoraDataStoreTest extends DataStoreTestBase {
   @After
   public void tearDown() throws Exception {
     super.tearDown();
-  }
-
-  @Override
-  @Test
-  public void testGet() throws Exception {
-    log.info("test method: testGet");
-    DataStoreTestUtil.testGetEmployee(this.employeeStore);
   }
 
   @Ignore("3 types union field is not supported by OrientDBStore.")

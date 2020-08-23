@@ -24,11 +24,13 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.List;
 import java.util.ArrayList;
 
 import com.rethinkdb.RethinkDB;
+import com.rethinkdb.gen.ast.ReqlExpr;
 import com.rethinkdb.model.MapObject;
 import com.rethinkdb.net.Connection;
 import org.apache.avro.Schema;
@@ -42,6 +44,7 @@ import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.query.impl.PartitionQueryImpl;
+import org.apache.gora.rethinkdb.query.RethinkDBResult;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.AvroUtils;
 import org.apache.gora.util.ClassLoadingUtils;
@@ -176,7 +179,7 @@ public class RethinkDBStore<K, T extends PersistentBase> extends DataStoreBase<K
     try {
       boolean isExists = r.db(rethinkDBStoreParameters.getDatabaseName())
               .table(rethinkDBMapping.getDocumentClass())
-              .get(key)
+              .getAll(key)
               .count()
               .run(connection, Boolean.class)
               .first();
@@ -256,7 +259,43 @@ public class RethinkDBStore<K, T extends PersistentBase> extends DataStoreBase<K
    */
   @Override
   public long deleteByQuery(Query<K, T> query) throws GoraException {
-    return 0L;
+    if (query.getFields() == null || (query.getFields().length == getFields().length)) {
+      String[] fields = getFieldsToQuery(query.getFields());
+      RethinkDBQuery dataStoreQuery = ((RethinkDBQuery) query);
+      dataStoreQuery.populateRethinkDBQuery(rethinkDBMapping, rethinkDBStoreParameters, fields, getFields());
+      ReqlExpr reqlExpr = dataStoreQuery.getRethinkDBDbQuery();
+      MapObject<String, Object> document = reqlExpr.delete().run(connection, MapObject.class).first();
+      int deleteCount = Integer.valueOf(document.get("deleted").toString());
+      if (deleteCount > 0) {
+        return deleteCount;
+      } else {
+        return 0;
+      }
+    } else {
+      RethinkDBQuery<K, T> dataStoreQuery = new RethinkDBQuery<>(this);
+      dataStoreQuery.setStartKey(query.getStartKey());
+      dataStoreQuery.setEndKey(query.getEndKey());
+      dataStoreQuery.populateRethinkDBQuery(rethinkDBMapping, rethinkDBStoreParameters,
+              getFieldsToQuery(null), getFields());
+      ReqlExpr reqlExpr = dataStoreQuery.getRethinkDBDbQuery();
+      String[] projection = new String[query.getFields().length];
+      int counter = 0;
+      for (String k : query.getFields()) {
+        String dbFieldName = rethinkDBMapping.getDocumentField(k);
+        if (dbFieldName != null && dbFieldName.length() > 0) {
+          projection[counter] = dbFieldName;
+          counter++;
+        }
+      }
+      MapObject<String, Object> document = reqlExpr.replace(row -> row.without(projection))
+              .run(connection, MapObject.class).first();
+      int replacedCount = Integer.valueOf(document.get("replaced").toString());
+      if (replacedCount > 0) {
+        return replacedCount;
+      } else {
+        return 0;
+      }
+    }
   }
 
   /**
@@ -264,8 +303,18 @@ public class RethinkDBStore<K, T extends PersistentBase> extends DataStoreBase<K
    */
   @Override
   public Result<K, T> execute(Query<K, T> query) throws GoraException {
+    String[] fields = getFieldsToQuery(query.getFields());
+    RethinkDBQuery dataStoreQuery;
+    if (query instanceof RethinkDBQuery) {
+      dataStoreQuery = ((RethinkDBQuery) query);
+    } else {
+      dataStoreQuery = (RethinkDBQuery) ((PartitionQueryImpl<K, T>) query).getBaseQuery();
+    }
+    dataStoreQuery.populateRethinkDBQuery(rethinkDBMapping, rethinkDBStoreParameters, fields, getFields());
     try {
-      return null;
+      ReqlExpr reqlExpr = dataStoreQuery.getRethinkDBDbQuery();
+      com.rethinkdb.net.Result<MapObject> result = reqlExpr.run(connection, MapObject.class);
+      return new RethinkDBResult<>(this, query, result);
     } catch (Exception e) {
       throw new GoraException(e);
     }
@@ -542,7 +591,8 @@ public class RethinkDBStore<K, T extends PersistentBase> extends DataStoreBase<K
         result = convertDocFieldToAvroList(docf, fieldSchema, obj, field, storeType);
         break;
       case RECORD:
-        MapObject<String, Object> record = (MapObject<String, Object>) obj.get(docf);
+        MapObject<String, Object> record = (MapObject<String, Object>)
+                decorateMapToODoc((Map<String, Object>) obj.get(docf));
         if (record == null) {
           result = null;
           break;
@@ -655,7 +705,8 @@ public class RethinkDBStore<K, T extends PersistentBase> extends DataStoreBase<K
                                            final Schema.Field f,
                                            final RethinkDBMapping.DocumentFieldType storeType) throws GoraException {
 
-    if (storeType == RethinkDBMapping.DocumentFieldType.LIST) {
+    if (storeType == RethinkDBMapping.DocumentFieldType.LIST
+            || storeType == null) {
       List<Object> list = (List<Object>) doc.get(docf);
       List<Object> rlist = new ArrayList<>();
       if (list == null) {
@@ -692,7 +743,8 @@ public class RethinkDBStore<K, T extends PersistentBase> extends DataStoreBase<K
       }
       return new DirtyMapWrapper<>(rmap);
     } else {
-      MapObject<String, Object> innerDoc = (MapObject<String, Object>) doc.get(docf);
+      MapObject<String, Object> innerDoc = (MapObject<String, Object>)
+              decorateMapToODoc((Map<String, Object>) doc.get(docf));
       Map<Utf8, Object> rmap = new HashMap<>();
       if (innerDoc == null) {
         return new DirtyMapWrapper(rmap);
@@ -709,6 +761,9 @@ public class RethinkDBStore<K, T extends PersistentBase> extends DataStoreBase<K
   }
 
   private MapObject<String, Object> decorateMapToODoc(Map<String, Object> map) {
+    if (Objects.isNull(map)) {
+      return null;
+    }
     MapObject<String, Object> doc = new MapObject();
     for (Map.Entry entry : map.entrySet()) {
       doc.put(entry.getKey().toString(), entry.getValue());

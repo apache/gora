@@ -19,7 +19,9 @@
 package org.apache.gora.rethinkdb.query;
 
 import java.io.IOException;
+import java.util.Iterator;
 
+import com.rethinkdb.model.MapObject;
 import org.apache.gora.rethinkdb.store.RethinkDBStore;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
@@ -30,15 +32,25 @@ import org.slf4j.LoggerFactory;
 
 /**
  * RethinkDB specific implementation of the {@link org.apache.gora.query.Result} interface.
- *
  */
 public class RethinkDBResult<K, T extends PersistentBase> extends ResultBase<K, T> {
 
+  private com.rethinkdb.net.Result<MapObject> resultSet;
   private int size;
+  private Iterator<MapObject> resultSetIterator;
   private static final Logger log = LoggerFactory.getLogger(RethinkDBResult.class);
 
   public RethinkDBResult(DataStore<K, T> dataStore, Query<K, T> query) {
     super(dataStore, query);
+  }
+
+  public RethinkDBResult(DataStore<K, T> dataStore,
+                         Query<K, T> query,
+                         com.rethinkdb.net.Result<MapObject> resultSet) {
+    super(dataStore, query);
+    this.resultSet = resultSet;
+    this.resultSetIterator = resultSet.iterator();
+    this.size = resultSet.bufferedCount();
   }
 
   public RethinkDBStore<K, T> getDataStore() {
@@ -47,21 +59,38 @@ public class RethinkDBResult<K, T extends PersistentBase> extends ResultBase<K, 
 
   @Override
   public float getProgress() throws IOException {
-    return 0L;
+    if (resultSet == null) {
+      return 0;
+    } else if (size == 0) {
+      return 1;
+    } else {
+      return offset / (float) size;
+    }
   }
 
   @Override
   public void close() throws IOException {
+    resultSet.close();
   }
 
   @Override
   protected boolean nextInner() throws IOException {
-    return true;
+    if (!resultSetIterator.hasNext()) {
+      return false;
+    }
+
+    MapObject<String, Object> obj = resultSetIterator.next();
+    key = (K) obj.get("id");
+    persistent = ((RethinkDBStore<K, T>) getDataStore())
+            .convertRethinkDBDocToAvroBean(obj, getQuery().getFields());
+    return persistent != null;
   }
 
   @Override
   public int size() {
-    return 0;
+    int totalSize = size;
+    int intLimit = (int) this.limit;
+    return intLimit > 0 && totalSize > intLimit ? intLimit : totalSize;
   }
 
 }
