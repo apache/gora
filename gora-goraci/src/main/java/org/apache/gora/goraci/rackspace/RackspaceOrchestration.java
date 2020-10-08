@@ -26,7 +26,6 @@ import java.util.Set;
 import org.apache.gora.memory.store.MemStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.jclouds.ContextBuilder;
-import org.jclouds.chef.ChefContext;
 import org.jclouds.chef.config.ChefProperties;
 import org.jclouds.chef.domain.BootstrapConfig;
 import org.jclouds.chef.domain.CookbookVersion;
