@@ -106,7 +106,6 @@ public class SimulationDriver extends MultipleCacheManagersTest {
     // Create appropriate caches at each node.
     ConfigurationBuilder builder = hotRodCacheConfiguration(getDefaultClusteredCacheConfig(CacheMode.DIST_SYNC, false));
     builder.indexing()
-    .enable()
     .index(Index.LOCAL)
     .addProperty("default.directory_provider", "ram")
     .addProperty("hibernate.search.default.exclusive_index_use","true")

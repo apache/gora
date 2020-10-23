@@ -30,7 +30,6 @@ import com.datastax.driver.core.TypeCodec;
 import com.datastax.driver.core.policies.ConstantReconnectionPolicy;
 import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
 import com.datastax.driver.core.policies.DefaultRetryPolicy;
-import com.datastax.driver.core.policies.DowngradingConsistencyRetryPolicy;
 import com.datastax.driver.core.policies.ExponentialReconnectionPolicy;
 import com.datastax.driver.core.policies.FallthroughRetryPolicy;
 import com.datastax.driver.core.policies.LatencyAwarePolicy;
@@ -276,24 +275,12 @@ public class CassandraClient {
           break;
         case "DCAwareRoundRobinPolicy": {
           String dataCenter = properties.getProperty(CassandraStoreParameters.DATA_CENTER);
-          boolean allowRemoteDCsForLocalConsistencyLevel = Boolean.parseBoolean(
-                  properties.getProperty(CassandraStoreParameters.ALLOW_REMOTE_DCS_FOR_LOCAL_CONSISTENCY_LEVEL));
           if (dataCenter != null && !dataCenter.isEmpty()) {
-            if (allowRemoteDCsForLocalConsistencyLevel) {
-              builder = builder.withLoadBalancingPolicy(
-                      DCAwareRoundRobinPolicy.builder().withLocalDc(dataCenter)
-                              .allowRemoteDCsForLocalConsistencyLevel().build());
-            } else {
-              builder = builder.withLoadBalancingPolicy(
-                      DCAwareRoundRobinPolicy.builder().withLocalDc(dataCenter).build());
-            }
+            builder = builder.withLoadBalancingPolicy(
+                    DCAwareRoundRobinPolicy.builder().withLocalDc(dataCenter).build());
           } else {
-            if (allowRemoteDCsForLocalConsistencyLevel) {
-              builder = builder.withLoadBalancingPolicy(
-                      (DCAwareRoundRobinPolicy.builder().allowRemoteDCsForLocalConsistencyLevel().build()));
-            } else {
-              builder = builder.withLoadBalancingPolicy((DCAwareRoundRobinPolicy.builder().build()));
-            }
+            builder = builder.withLoadBalancingPolicy(
+                    (DCAwareRoundRobinPolicy.builder().build()));
           }
           break;
         }
@@ -302,25 +289,12 @@ public class CassandraClient {
           break;
         case "TokenAwareDCAwareRoundRobinPolicy": {
           String dataCenter = properties.getProperty(CassandraStoreParameters.DATA_CENTER);
-          boolean allowRemoteDCsForLocalConsistencyLevel = Boolean.parseBoolean(
-                  properties.getProperty(CassandraStoreParameters.ALLOW_REMOTE_DCS_FOR_LOCAL_CONSISTENCY_LEVEL));
           if (dataCenter != null && !dataCenter.isEmpty()) {
-            if (allowRemoteDCsForLocalConsistencyLevel) {
-              builder = builder.withLoadBalancingPolicy(new TokenAwarePolicy(
-                      DCAwareRoundRobinPolicy.builder().withLocalDc(dataCenter)
-                              .allowRemoteDCsForLocalConsistencyLevel().build()));
-            } else {
-              builder = builder.withLoadBalancingPolicy(new TokenAwarePolicy(
-                      DCAwareRoundRobinPolicy.builder().withLocalDc(dataCenter).build()));
-            }
+            builder = builder.withLoadBalancingPolicy(new TokenAwarePolicy(
+                    DCAwareRoundRobinPolicy.builder().withLocalDc(dataCenter).build()));
           } else {
-            if (allowRemoteDCsForLocalConsistencyLevel) {
-              builder = builder.withLoadBalancingPolicy(new TokenAwarePolicy(
-                      DCAwareRoundRobinPolicy.builder().allowRemoteDCsForLocalConsistencyLevel().build()));
-            } else {
-              builder = builder.withLoadBalancingPolicy(
-                      new TokenAwarePolicy(DCAwareRoundRobinPolicy.builder().build()));
-            }
+            builder = builder.withLoadBalancingPolicy(new TokenAwarePolicy(
+                    DCAwareRoundRobinPolicy.builder().build()));
           }
           break;
         }
@@ -429,17 +403,11 @@ public class CassandraClient {
         case "DefaultRetryPolicy":
           builder = builder.withRetryPolicy(DefaultRetryPolicy.INSTANCE);
           break;
-        case "DowngradingConsistencyRetryPolicy":
-          builder = builder.withRetryPolicy(DowngradingConsistencyRetryPolicy.INSTANCE);
-          break;
         case "FallthroughRetryPolicy":
           builder = builder.withRetryPolicy(FallthroughRetryPolicy.INSTANCE);
           break;
         case "LoggingDefaultRetryPolicy":
           builder = builder.withRetryPolicy(new LoggingRetryPolicy(DefaultRetryPolicy.INSTANCE));
-          break;
-        case "LoggingDowngradingConsistencyRetryPolicy":
-          builder = builder.withRetryPolicy(new LoggingRetryPolicy(DowngradingConsistencyRetryPolicy.INSTANCE));
           break;
         case "LoggingFallthroughRetryPolicy":
           builder = builder.withRetryPolicy(new LoggingRetryPolicy(FallthroughRetryPolicy.INSTANCE));

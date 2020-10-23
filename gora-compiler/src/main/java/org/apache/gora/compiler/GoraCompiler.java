@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.avro.JsonProperties;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
@@ -350,18 +351,16 @@ public class GoraCompiler extends SpecificCompiler {
     List<Field> newFields = new ArrayList<>();
     byte[] defaultDirtyBytesValue = new byte[getNumberOfBytesNeededForDirtyBits(originalSchema)];
     Arrays.fill(defaultDirtyBytesValue, (byte) 0);
-    JsonNode defaultDirtyJsonValue = JsonNodeFactory.instance
-      .binaryNode(defaultDirtyBytesValue);
     Field dirtyBits = new Field(DIRTY_BYTES_FIELD_NAME,
       Schema.create(Type.BYTES),
       "Bytes used to represent weather or not a field is dirty.",
-      defaultDirtyJsonValue);
+      defaultDirtyBytesValue);
     newFields.add(dirtyBits);
     for (Field originalField : originalFields) {
       // recursively add dirty support
       Field newField = new Field(originalField.name(),
         getSchemaWithDirtySupport(originalField.schema(),queue),
-        originalField.doc(), originalField.defaultValue(),
+        originalField.doc(), originalField.defaultVal(),
         originalField.order());
       newFields.add(newField);
     }
