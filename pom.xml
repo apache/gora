@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache</groupId>
     <artifactId>apache</artifactId>
-    <version>21</version>
+    <version>22</version>
   </parent>
 
   <groupId>org.apache.gora</groupId>
@@ -802,6 +802,7 @@
     <module>gora-hive</module>
     <module>gora-redis</module>
     <module>gora-jet</module>
+    <module>gora-rethinkdb</module>
     <module>gora-tutorial</module>
     <module>gora-benchmark</module>
     <module>sources-dist</module>
@@ -822,7 +823,7 @@
     <!-- Amazon Dependencies -->
     <amazon.version>1.10.55</amazon.version>
     <!-- Cassandra Dependencies -->
-    <cassandra-driver.version>3.3.0</cassandra-driver.version>
+    <cassandra-driver.version>3.9.0</cassandra-driver.version>
     <cassandra.version>3.11.0</cassandra.version>
     <!-- Ignite Dependencies -->
     <ignite.version>2.6.0</ignite.version>
@@ -832,7 +833,7 @@
     <!-- Kudu Dependencies -->
     <kudu.version>1.9.0</kudu.version>
     <!-- Solr Dependencies -->
-    <lucene-solr.version>8.0.0</lucene-solr.version>
+    <lucene-solr.version>8.5.0</lucene-solr.version>
     <solr-solrj.version>8.0.0</solr-solrj.version>
     <jetty.version>9.4.14.v20181114</jetty.version>
     <tika.version>1.12</tika.version>
@@ -864,17 +865,20 @@
     <orientdb.version>2.2.22</orientdb.version>
     <orientqb.version>0.2.0</orientqb.version>
 
+    <!-- RethinkDB Dependencies -->
+    <rethinkdb.version>2.4.4</rethinkdb.version>
+
 
     <!-- CouchDB Dependencies -->
-    <couchdb.version>1.4.2</couchdb.version>
+    <couchdb.version>1.5.0</couchdb.version>
 
     <!-- MongoDB Dependencies -->
-    <mongo.driver.version>3.12.2</mongo.driver.version>
+    <mongo.driver.version>3.12.4</mongo.driver.version>
 
     <!-- HiveStore Dependencies -->
     <metamodel.version>5.3.0</metamodel.version>
     <json.version>20180813</json.version>
-    <hive.version>2.3.5</hive.version>
+    <hive.version>2.3.7</hive.version>
     <hadoop-common.version>2.6.0</hadoop-common.version>
 
     <!-- Testing Dependencies -->
@@ -1729,6 +1733,13 @@
         <groupId>javax.cache</groupId>
         <artifactId>cache-api</artifactId>
         <version>${jsr107.api.version}</version>
+      </dependency>
+
+      <!-- RethinkDB Dependencies -->
+      <dependency>
+        <groupId>com.rethinkdb</groupId>
+        <artifactId>rethinkdb-driver</artifactId>
+        <version>${rethinkdb.version}</version>
       </dependency>
 
       <!-- OrientDB Dependencies -->

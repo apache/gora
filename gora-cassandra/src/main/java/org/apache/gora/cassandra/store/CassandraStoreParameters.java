@@ -154,8 +154,8 @@ public class CassandraStoreParameters {
   public static final String EXPONENTIAL_RECONNECTION_POLICY_MAX_DELAY = "gora.cassandrastore.exponentialReconnectionPolicyMaxDelay";
   /**
    * Property pointing to set the retry policy.
-   * "DefaultRetryPolicy", "DowngradingConsistencyRetryPolicy", "FallthroughRetryPolicy",
-   * "LoggingDefaultRetryPolicy", "LoggingDowngradingConsistencyRetryPolicy", "LoggingFallthroughRetryPolicy"
+   * "DefaultRetryPolicy", "FallthroughRetryPolicy",
+   * "LoggingDefaultRetryPolicy", "LoggingFallthroughRetryPolicy"
    */
   public static final String RETRY_POLICY = "gora.cassandrastore.retryPolicy";
   /**
@@ -208,11 +208,6 @@ public class CassandraStoreParameters {
    * string
    */
   public static final String DATA_CENTER = "gora.cassandrastore.dataCenter";
-  /**
-   * Property pointing to enable/disable remote data centers for local consistency level.
-   * string
-   */
-  public static final String ALLOW_REMOTE_DCS_FOR_LOCAL_CONSISTENCY_LEVEL = "gora.cassandrastore.allowRemoteDCsForLocalConsistencyLevel";
   /**
    * Property pointing to use Native Cassandra Native Serialization.
    * avro/ native

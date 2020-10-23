@@ -318,9 +318,9 @@ public class Generator extends Configured implements Tool {
 
   public int run(int numMappers, long numNodes, boolean concurrent) throws Exception {
     LOG.info("Running Generator with numMappers={}, numNodes={}", numMappers, numNodes);
-    
-    Job job = new Job(getConf());
-    
+
+    Job job = Job.getInstance(getConf());
+
     job.setJobName("Link Generator");
     job.setNumReduceTasks(0);
     job.setJarByClass(getClass());
