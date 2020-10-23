@@ -34,4 +34,4 @@ jobs:
       with:
         java-version: ${{ matrix.java }}
     - name: mvn sourcecheck
-      run: mvn clean install
+      run: mvn --no-transfer-progress --batch-mode clean install
