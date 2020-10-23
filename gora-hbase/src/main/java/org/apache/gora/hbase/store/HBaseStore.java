@@ -22,8 +22,10 @@ import static org.apache.gora.hbase.util.HBaseByteInterface.toBytes;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URLClassLoader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -41,6 +43,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.util.Utf8;
+import org.apache.commons.io.IOUtils;
 import org.apache.gora.hbase.query.HBaseGetResult;
 import org.apache.gora.hbase.query.HBaseQuery;
 import org.apache.gora.hbase.query.HBaseScannerResult;
@@ -137,16 +140,28 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     try {
       this.conf = HBaseConfiguration.create(getConf());
 
-      String mappingFile = DataStoreFactory.getMappingFile(properties, this,
-              DEFAULT_MAPPING_FILE);
+      InputStream mappingInputStream;
 
-      // if there is no mapping.file property in gora.properties, then check
-      // configurations for mapping.file key
-      if (mappingFile.equals(DEFAULT_MAPPING_FILE)) {
-        mappingFile = getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE);
+      // If there is a mapping definition in the Properties, use it.
+      if (properties.containsKey(XML_MAPPING_DEFINITION)) {
+        if (LOG.isTraceEnabled()) LOG.trace(XML_MAPPING_DEFINITION + " = " + properties.getProperty(XML_MAPPING_DEFINITION));
+        mappingInputStream = IOUtils.toInputStream(properties.getProperty(XML_MAPPING_DEFINITION), (Charset)null);
       }
-      
-      mapping = readMapping(mappingFile);
+      // Otherwise use the configuration from de default file gora-hbase-mapping.xml or whatever
+      // configured in the key "gora.hbase.mapping.file"
+      else {
+        String mappingFile = DataStoreFactory.getMappingFile(properties, this,
+                DEFAULT_MAPPING_FILE);
+
+        // if there is no mapping.file property in gora.properties, then check
+        // configurations for mapping.file key
+        if (mappingFile.equals(DEFAULT_MAPPING_FILE)) {
+          mappingFile = getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE);
+        }
+        mappingInputStream = getClass().getClassLoader().getResourceAsStream(mappingFile);
+      }
+
+      mapping = readMapping(mappingInputStream);
       filterUtil = new HBaseFilterUtil<>(this.conf);
     } catch (FileNotFoundException ex) {
       throw new GoraException("Mapping file '" + getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE) + "' not found.",ex);
@@ -813,14 +828,13 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
   }
 
   @SuppressWarnings("unchecked")
-  private HBaseMapping readMapping(String filename) throws IOException {
+  private HBaseMapping readMapping(InputStream mappingStream) throws IOException {
 
     HBaseMappingBuilder mappingBuilder = new HBaseMappingBuilder();
 
     try {
       SAXBuilder builder = new SAXBuilder();
-      Document doc = builder.build(getClass().getClassLoader()
-              .getResourceAsStream(filename));
+      Document doc = builder.build(mappingStream);
       Element root = doc.getRootElement();
 
       List<Element> tableElements = root.getChildren("table");
@@ -887,7 +901,7 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       LOG.error("Error while trying to read the mapping file {}. "
               + "Expected to be in the classpath "
               + "(ClassLoader#getResource(java.lang.String)).",
-              filename) ;
+              mappingStream) ;
       LOG.error("Actual classpath = {}", Arrays.asList(
           ((URLClassLoader) getClass().getClassLoader()).getURLs()));
       throw ex ;
