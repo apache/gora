@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:element name="gora-otd" type="lucene-mapping"/>
+    <xs:complexType name="lucene-mapping">
+        <xs:sequence>
+            <xs:element name="class" type="class-mapping" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="class-mapping">
+        <xs:sequence>
+            <xs:element name="primarykey" type="primarykey-mapping"/>
+            <xs:element name="field" type="field-mapping" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="name" type="nameClass-types" use="required"/> 
+        <xs:attribute name="keyClass" type="keyClass-types" use="required"/>
+    </xs:complexType>
+    <xs:complexType name="primarykey-mapping">
+        <xs:attribute name="column" type="xs:string" use="required"/> 
+    </xs:complexType>
+    <xs:complexType name="field-mapping">
+        <xs:attribute name="name" type="fieldName-types" use="required"/> 
+        <xs:attribute name="column" type="xs:string" use="required"/> 
+    </xs:complexType>
+    
+    <xs:simpleType name="keyClass-types">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="java.lang.String"/>
+            <xs:enumeration value="java.lang.Integer"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="nameClass-types">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="([\p{L}_$][\p{L}\p{N}_$]*\.)*[\p{L}_$][\p{L}\p{N}_$]*"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="fieldName-types">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[a-zA-Z][a-zA-Z0-9]*"/>
+        </xs:restriction>
+    </xs:simpleType>
+</xs:schema> 
