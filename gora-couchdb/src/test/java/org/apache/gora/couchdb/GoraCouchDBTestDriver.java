@@ -53,6 +53,7 @@ public class GoraCouchDBTestDriver extends GoraTestDriver {
   @Override
   public void setUpClass() {
     log.info("Setting up CouchDB Test Driver");
+    properties.put(CouchDBParameters.PROP_COUCHDB_SERVER, couchdbContainer.getContainerIpAddress());
     properties.put(CouchDBParameters.PROP_COUCHDB_PORT, couchdbContainer.getMappedPort(5984).toString());
   }
 
