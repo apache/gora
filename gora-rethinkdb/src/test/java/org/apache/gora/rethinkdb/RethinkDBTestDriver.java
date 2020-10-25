@@ -56,7 +56,7 @@ public class RethinkDBTestDriver extends GoraTestDriver {
   @Override
   public void setUpClass() throws Exception {
     log.info("Setting up RethinkDB test driver");
-    conf.set(RethinkDBStoreParameters.RETHINK_DB_SERVER_HOST, "localhost");
+    conf.set(RethinkDBStoreParameters.RETHINK_DB_SERVER_HOST, rethinkdbContainer.getContainerIpAddress());
     conf.set(RethinkDBStoreParameters.RETHINK_DB_SERVER_PORT,
             rethinkdbContainer.getMappedPort(28015).toString());
     log.info("RethinkDB Embedded Server started successfully.");
