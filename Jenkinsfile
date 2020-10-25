@@ -24,6 +24,7 @@ def JDK_NAME = env.JDK_NAME ?: 'jdk_1.8_latest'
 def MVN_NAME = env.MVN_NAME ?: 'maven_3_latest'
 
 // =================================================================
+// https://cwiki.apache.org/confluence/display/INFRA/Jenkins
 // https://cwiki.apache.org/confluence/display/INFRA/Multibranch+Pipeline+recipes
 // =================================================================
 
@@ -84,11 +85,11 @@ pipeline {
         
         stage('Test') {
             steps {
-                sh "mvn $MAVEN_CLI_OPTS -Dmaven.test.failure.ignore=true verify"
+                sh "mvn $MAVEN_CLI_OPTS verify"
             }
 
             post {
-                success {
+                always {
                     junit '**/target/surefire-reports/TEST-*.xml'
                 }
             }
