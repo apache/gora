@@ -17,7 +17,9 @@
 package org.apache.gora.ignite.store;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -65,6 +67,7 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
   private static final Logger LOG = LoggerFactory.getLogger(IgniteStore.class);
   private static final String PARSE_MAPPING_FILE_KEY = "gora.ignite.mapping.file";
   private static final String DEFAULT_MAPPING_FILE = "gora-ignite-mapping.xml";
+  private static final String XML_MAPPING_DEFINITION = "gora.mapping";
   private IgniteParameters igniteParameters;
   private IgniteMapping igniteMapping;
   private Connection connection;
@@ -76,7 +79,16 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
     try {
       super.initialize(keyClass, persistentClass, properties);
       IgniteMappingBuilder<K, T> builder = new IgniteMappingBuilder<K, T>(this);
-      builder.readMappingFile(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE));
+      InputStream mappingStream;
+      if (properties.containsKey(XML_MAPPING_DEFINITION)) {
+        if (LOG.isTraceEnabled()) {
+          LOG.trace("{} = {}", XML_MAPPING_DEFINITION, properties.getProperty(XML_MAPPING_DEFINITION));
+        }
+        mappingStream = org.apache.commons.io.IOUtils.toInputStream(properties.getProperty(XML_MAPPING_DEFINITION), (Charset) null);
+      } else {
+        mappingStream = getClass().getClassLoader().getResourceAsStream(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE));
+      }
+      builder.readMappingFile(mappingStream);
       igniteMapping = builder.getIgniteMapping();
       igniteParameters = IgniteParameters.load(properties);
       connection = acquireConnection();

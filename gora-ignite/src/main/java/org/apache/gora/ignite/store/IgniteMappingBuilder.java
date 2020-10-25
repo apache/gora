@@ -75,20 +75,19 @@ public class IgniteMappingBuilder<K, T extends PersistentBase> {
   /**
    * Reads Ignite mappings from file
    *
-   * @param mappingFile File name relative to the resource's classpath
+   * @param inputStream Input stream of the mapping
    */
-  public void readMappingFile(String mappingFile) {
+  public void readMappingFile(InputStream inputStream) {
     try {
       SAXBuilder saxBuilder = new SAXBuilder();
-      InputStream inputStream = getClass().getClassLoader().getResourceAsStream(mappingFile);
       if (inputStream == null) {
-        LOG.error("Mapping file '{}' could not be found!", mappingFile);
-        throw new IOException("Mapping file '" + mappingFile + "' could not be found!");
+        LOG.error("The mapping input stream is null!");
+        throw new IOException("The mapping input stream is null!");
       }
       Document document = saxBuilder.build(inputStream);
       if (document == null) {
-        LOG.error("Mapping file '{}' could not be found!", mappingFile);
-        throw new IOException("Mapping file '" + mappingFile + "' could not be found!");
+        LOG.error("The mapping document is null!");
+        throw new IOException("The mapping document is null!");
       }
       @SuppressWarnings("unchecked")
       List<Element> classes = document.getRootElement().getChildren("class");
