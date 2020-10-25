@@ -85,7 +85,9 @@ pipeline {
         
         stage('Test') {
             steps {
-                sh "mvn $MAVEN_CLI_OPTS verify"
+                // maven.test.failure.ignore in order to mark build as UNSTABLE
+                // instead of FAILED
+                sh "mvn $MAVEN_CLI_OPTS -Dmaven.test.failure.ignore=true verify"
             }
 
             post {
