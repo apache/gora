@@ -56,21 +56,15 @@ pipeline {
     
     environment {
         LANG = 'C.UTF-8'
-        MAVEN_CLI_OPTS = "--batch-mode --errors --fail-at-end --show-version"
+        // --batch-mode Run in non-interactive (batch) mode
+        // --error Produce execution error messages
+        // --fail-at-end Only fail the build afterwards; allow all non-impacted builds to continue
+        // --show-version Display version information WITHOUT stopping build
+        // --no-transfer-progress Do not display transfer progress when downloading or uploading
+        MAVEN_CLI_OPTS = "--batch-mode --errors --fail-at-end --show-version --no-transfer-progress"
     }
 
     stages {
-        stage ('Initialize') {
-            steps {
-                sh '''
-                echo "===== Env Details ====="
-                java -version
-                mvn -version
-                echo "======================="
-                '''
-            }
-        }
-        
         stage('Build') {
             steps {
                 sh "mvn $MAVEN_CLI_OPTS -DskipTests clean install"
@@ -85,9 +79,9 @@ pipeline {
         
         stage('Test') {
             steps {
-                // maven.test.failure.ignore in order to mark build as UNSTABLE
-                // instead of FAILED
-                sh "mvn $MAVEN_CLI_OPTS -Dmaven.test.failure.ignore=true verify"
+                warnError(message = "Failure during tests execution") {
+                    sh "mvn $MAVEN_CLI_OPTS verify"
+                }
             }
 
             post {
