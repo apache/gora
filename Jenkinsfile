@@ -79,7 +79,7 @@ pipeline {
         
         stage('Test') {
             steps {
-                warnError(message = "Failure during tests execution") {
+                warnError(message: "Failure during tests execution") {
                     sh "mvn $MAVEN_CLI_OPTS verify"
                 }
             }
