@@ -29,6 +29,7 @@ import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericArray;
 import org.apache.avro.util.Utf8;
+import org.apache.commons.io.IOUtils;
 import org.apache.gora.mongodb.filters.MongoFilterUtil;
 import org.apache.gora.mongodb.query.MongoDBQuery;
 import org.apache.gora.mongodb.query.MongoDBResult;
@@ -43,6 +44,7 @@ import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.query.impl.PartitionQueryImpl;
+import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.AvroUtils;
 import org.apache.gora.util.ClassLoadingUtils;
@@ -57,8 +59,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -86,6 +90,12 @@ DataStoreBase<K, T> {
    * Default value for mapping file
    */
   public static final String DEFAULT_MAPPING_FILE = "/gora-mongodb-mapping.xml";
+
+  /**
+   * Key at DataStore Properties (same as gora.properties) to hold a mapping loaded from memory, instead from filesystem like
+   * the one at PARSE_MAPPING_FILE_KEY. If this key is present, the mapping is loaded from the value instead of gora-mongodb-mapping.xml
+   */
+  public static final String XML_MAPPING_DEFINITION = "gora.mapping" ;
 
   /**
    * MongoDB client
@@ -125,7 +135,21 @@ DataStoreBase<K, T> {
       MongoMappingBuilder<K, T> builder = new MongoMappingBuilder<>(this);
       LOG.debug("Initializing Mongo store with mapping {}.",
           new Object[] { parameters.getMappingFile() });
-      builder.fromFile(parameters.getMappingFile());
+
+      InputStream mappingInputStream;
+
+      // If there is a mapping definition in the Properties, use it.
+      if (properties.containsKey(XML_MAPPING_DEFINITION)) {
+        if (LOG.isTraceEnabled()) LOG.trace(XML_MAPPING_DEFINITION + " = " + properties.getProperty(XML_MAPPING_DEFINITION));
+        mappingInputStream = IOUtils.toInputStream(properties.getProperty(XML_MAPPING_DEFINITION), (Charset)null);
+      }
+      // Otherwise use the mapping file from parameters.
+      else {
+        String mappingFile = parameters.getMappingFile();
+        mappingInputStream = getClass().getResourceAsStream(mappingFile);
+      }
+
+      builder.fromInputStream(mappingInputStream);
       mapping = builder.build();
 
       // Prepare MongoDB connection

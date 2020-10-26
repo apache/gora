@@ -79,22 +79,18 @@ public class MongoMappingBuilder<K, T extends PersistentBase> {
   }
 
   /**
-   * Load the {@link org.apache.gora.mongodb.store.MongoMapping} from a file
+   * Load the {@link org.apache.gora.mongodb.store.MongoMapping} from an input stream
    * passed in parameter.
    * 
-   * @param uri
-   *          path to the file holding the mapping
+   * @param is
+   *          input stream holding the mapping
    * @throws java.io.IOException
    */
-  protected void fromFile(String uri) throws IOException {
+  protected void fromInputStream(InputStream is) throws IOException {
     try {
       SAXBuilder saxBuilder = new SAXBuilder();
-      InputStream is = getClass().getResourceAsStream(uri);
       if (is == null) {
-        String msg = "Unable to load the mapping from resource '" + uri
-            + "' as it does not appear to exist! " + "Trying local file.";
-        MongoStore.LOG.warn(msg);
-        is = new FileInputStream(uri);
+        throw new IllegalArgumentException("The mapping input stream is null!");
       }
       Document doc = saxBuilder.build(is);
       Element root = doc.getRootElement();

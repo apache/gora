@@ -34,7 +34,7 @@ public class TestMongoMappingBuilder {
     store.setPersistentClass(WebPage.class);
     MongoMappingBuilder<String, WebPage> builder = new MongoMappingBuilder<>(
         store);
-    builder.fromFile("/multimapping.xml");
+    builder.fromInputStream(getClass().getResourceAsStream("/multimapping.xml"));
     MongoMapping mapping = builder.build();
 
     // Check collection name
