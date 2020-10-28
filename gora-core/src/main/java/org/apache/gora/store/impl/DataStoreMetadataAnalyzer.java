@@ -19,6 +19,7 @@ package org.apache.gora.store.impl;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.gora.util.GoraException;
 import org.apache.hadoop.conf.Configurable;
@@ -42,6 +43,11 @@ public abstract class DataStoreMetadataAnalyzer implements Configurable {
    * Configuration from Hadoop/HBase/...
    */
   protected Configuration conf;
+
+  /**
+   * Properties for the data store.
+   */
+  protected Properties properties;
   
   /**
    * After been set the configuratin, this method is called.
@@ -83,5 +89,13 @@ public abstract class DataStoreMetadataAnalyzer implements Configurable {
   @Override
   public Configuration getConf() {
     return conf;
+  }
+
+  public Properties getProperties() {
+    return properties;
+  }
+
+  public void setProperties(Properties properties) {
+    this.properties = properties;
   }
 }
