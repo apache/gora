@@ -174,7 +174,7 @@ DataStoreBase<K, T> {
    *               connecting to remote MongoDB.
    * @return a {@link com.mongodb.client.MongoClient} instance connected to the server
    */
-  private com.mongodb.client.MongoClient getClient(MongoStoreParameters params) {
+  public static com.mongodb.client.MongoClient getClient(MongoStoreParameters params) {
 
     // Utf8 serialization!
     CodecRegistry codecRegistry = CodecRegistries.fromRegistries(
@@ -231,7 +231,7 @@ DataStoreBase<K, T> {
    * @return Mongo Crendential
    * @see <a href="http://api.mongodb.com/java/current/com/mongodb/AuthenticationMechanism.html">AuthenticationMechanism in MongoDB Java Driver</a>
    */
-  private MongoCredential createCredential(String authenticationType, String username, String database, String password) {
+  private static MongoCredential createCredential(String authenticationType, String username, String database, String password) {
     MongoCredential credential = null;
     if (PLAIN.getMechanismName().equals(authenticationType)) {
       credential = MongoCredential.createPlainCredential(username, database, password.toCharArray());
