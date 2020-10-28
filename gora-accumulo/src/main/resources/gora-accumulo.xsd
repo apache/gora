@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <!--
+     Licensed to the Apache Software Foundation (ASF) under one or more
+     contributor license agreements.  See the NOTICE file distributed with
+     this work for additional information regarding copyright ownership.
+     The ASF licenses this file to You under the Apache License, Version 2.0
+     (the "License"); you may not use this file except in compliance with
+     the License.  You may obtain a copy of the License at
+         http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+  -->
+
+  <xs:element name="gora-otd" type="accumulo-mapping"/>
+  <xs:complexType name="accumulo-mapping">
+    <xs:sequence>
+      <xs:element name="table" type="table-mapping" maxOccurs="unbounded"/>
+      <xs:element name="class" type="class-mapping" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="class-mapping">
+    <xs:sequence>
+      <xs:element name="field" type="field-mapping" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="nameClass-types" use="required"/>
+    <xs:attribute name="keyClass" type="keyClass-types" use="required"/>
+    <xs:attribute name="table" type="tableClass-types"/>
+  </xs:complexType>
+  <xs:complexType name="table-mapping">
+    <xs:sequence>
+      <xs:element name="config" type="config-mapping"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="nameTable-types" use="required"/>
+  </xs:complexType>
+  <xs:complexType name="field-mapping">
+    <xs:attribute name="name" type="fieldName-types" use="required"/>
+    <xs:attribute name="family" type="xs:string" use="required"/>
+    <xs:attribute name="qualifier" type="typeName-types"/>
+  </xs:complexType>
+  <xs:simpleType name="nameClass-types">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="([\p{L}_$][\p{L}\p{N}_$]*\.)*[\p{L}_$][\p{L}\p{N}_$]*"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="keyClass-types">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="java.lang.String"/>
+      <xs:enumeration value="java.lang.Long"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="tableClass-types">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[A-Z][a-zA-Z0-9]*"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="fieldName-types">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[a-zA-Z][a-zA-Z0-9]*"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="typeName-types">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[a-zA-Z][a-zA-Z0-9]*"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <xs:complexType name="config-mapping">
+    <xs:attribute name="key" type="keyConfig-types" use="required"/>
+    <xs:attribute name="value" type="xs:string" use="required"/>
+  </xs:complexType>
+  <xs:simpleType name="nameTable-types">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[A-Z][a-zA-Z0-9]*"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="keyConfig-types">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="([\p{L}_$][\p{L}\p{N}_$]*\.)*[\p{L}_$][\p{L}\p{N}_$]*"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>

@@ -32,9 +32,12 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import javax.xml.XMLConstants;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.SchemaFactory;
 
 import org.apache.accumulo.core.client.AccumuloException;
 import org.apache.accumulo.core.client.AccumuloSecurityException;
@@ -124,6 +127,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
   protected static final String USERNAME_PROPERTY = "accumulo.user";
   protected static final String PASSWORD_PROPERTY = "accumulo.password";
   protected static final String DEFAULT_MAPPING_FILE = "gora-accumulo-mapping.xml";
+  private static final String XSD_MAPPING_FILE = "gora-accumulo.xsd";
 
   private final static String UNKOWN = "Unknown type ";
 
@@ -403,7 +407,9 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
     try {
 
       AccumuloMapping mapping = new AccumuloMapping();
-
+      javax.xml.validation.Schema newSchema = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
+        .newSchema(new StreamSource(getClass().getClassLoader().getResourceAsStream(XSD_MAPPING_FILE)));
+      newSchema.newValidator().validate(new StreamSource(getClass().getClassLoader().getResourceAsStream(filename)));
       DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
       Document dom = db.parse(getClass().getClassLoader().getResourceAsStream(filename));
 
