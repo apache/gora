@@ -29,6 +29,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 
+import java.util.Properties;
+
 /**
  * Driver to set up an embedded RethinkDB database instance for Gora
  * dataStore specific integration tests.
@@ -56,7 +58,7 @@ public class RethinkDBTestDriver extends GoraTestDriver {
   @Override
   public void setUpClass() throws Exception {
     log.info("Setting up RethinkDB test driver");
-    conf.set(RethinkDBStoreParameters.RETHINK_DB_SERVER_HOST, "localhost");
+    conf.set(RethinkDBStoreParameters.RETHINK_DB_SERVER_HOST, rethinkdbContainer.getContainerIpAddress());
     conf.set(RethinkDBStoreParameters.RETHINK_DB_SERVER_PORT,
             rethinkdbContainer.getMappedPort(28015).toString());
     log.info("RethinkDB Embedded Server started successfully.");
@@ -73,10 +75,15 @@ public class RethinkDBTestDriver extends GoraTestDriver {
   @Override
   public <K, T extends Persistent> DataStore<K, T> createDataStore(Class<K> keyClass,
                                                                    Class<T> persistentClass) throws GoraException {
-
+    // Override properties (reads from gora.properties) using test container configuration (defined in #setUpClass)
+    Properties props = DataStoreFactory.createProps();
+    props.setProperty(RethinkDBStoreParameters.RETHINK_DB_SERVER_HOST,
+            conf.get(RethinkDBStoreParameters.RETHINK_DB_SERVER_HOST));
+    props.setProperty(RethinkDBStoreParameters.RETHINK_DB_SERVER_PORT,
+            conf.get(RethinkDBStoreParameters.RETHINK_DB_SERVER_PORT));
     final DataStore<K, T> dataStore = DataStoreFactory
             .createDataStore((Class<? extends DataStore<K, T>>) dataStoreClass, keyClass,
-                    persistentClass, conf);
+                    persistentClass, conf, props);
     dataStores.add(dataStore);
     log.info("Datastore for {} was added.", persistentClass);
     return dataStore;

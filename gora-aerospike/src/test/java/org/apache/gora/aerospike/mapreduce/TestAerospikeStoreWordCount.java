@@ -52,7 +52,7 @@ public class TestAerospikeStoreWordCount {
   @Before
   public void setUp() throws Exception {
 
-    conf.set("gora.aerospikestore.server.ip", "localhost");
+    conf.set("gora.aerospikestore.server.ip", aerospikeContainer.getContainerIpAddress());
     conf.set("gora.aerospikestore.server.port", aerospikeContainer.getMappedPort(3000).toString());
 
     webPageStore = DataStoreFactory
