@@ -91,7 +91,7 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
       builder.readMappingFile(mappingStream);
       igniteMapping = builder.getIgniteMapping();
       igniteParameters = IgniteParameters.load(properties);
-      connection = acquireConnection();
+      connection = acquireConnection(this.igniteParameters);
       LOG.info("Ignite store was successfully initialized");
       if (!schemaExists()) {
         createSchema();
@@ -102,7 +102,7 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
     }
   }
 
-  private Connection acquireConnection() throws ClassNotFoundException, SQLException {
+  public static Connection acquireConnection(IgniteParameters igniteParameters) throws ClassNotFoundException, SQLException {
     Class.forName(IgniteBackendConstants.DRIVER_NAME);
     StringBuilder urlBuilder = new StringBuilder();
     urlBuilder.append(IgniteBackendConstants.JDBC_PREFIX);
