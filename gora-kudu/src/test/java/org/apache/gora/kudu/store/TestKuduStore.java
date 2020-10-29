@@ -17,8 +17,14 @@
  */
 package org.apache.gora.kudu.store;
 
+import com.google.common.collect.Lists;
+import java.util.HashMap;
+import java.util.List;
 import org.apache.gora.kudu.GoraKuduTestDriver;
+import org.apache.gora.store.DataStoreMetadataFactory;
 import org.apache.gora.store.DataStoreTestBase;
+import org.apache.gora.store.impl.DataStoreMetadataAnalyzer;
+import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -57,5 +63,25 @@ public class TestKuduStore extends DataStoreTestBase {
   @Override
   public void testResultSizeKeyRange() throws Exception {
     //Kudu uses a scanner for querying. It is not possible to calculate the size of the result set without iterating it.
+  }
+  
+  @Test
+  public void kuduStoreMetadataAnalyzerTest() throws Exception {
+    DataStoreMetadataAnalyzer createAnalyzer = DataStoreMetadataFactory.createAnalyzer(DataStoreTestBase.testDriver.getConfiguration());
+    Assert.assertEquals("Kudu Store Metadata Type", "KUDU", createAnalyzer.getType());
+    List<String> tablesNames = createAnalyzer.getTablesNames();
+    Assert.assertTrue("Kudu Store Metadata Table Names", tablesNames.equals(Lists.newArrayList("Employee", "WebPage")));
+    KuduTableMetadata tableInfo = (KuduTableMetadata) createAnalyzer.getTableInfo("Employee");
+    Assert.assertEquals("Kudu Store Metadata Table Primary Key", "pkssn", tableInfo.getPrimaryKey());
+    HashMap<String, String> hmap = new HashMap();
+    hmap.put("webpage", "binary");
+    hmap.put("boss", "binary");
+    hmap.put("salary", "int32");
+    hmap.put("dateOfBirth", "int64");
+    hmap.put("pkssn", "string");
+    hmap.put("value", "string");
+    hmap.put("name", "string");
+    hmap.put("ssn", "string");
+    Assert.assertTrue("Kudu Store Metadata Table Columns", tableInfo.getColumns().equals(hmap));
   }
 }
