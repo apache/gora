@@ -19,37 +19,61 @@ package org.apache.gora.mongodb.store;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.StringJoiner;
 
 /**
  * Class with the collection info returned by MongoStoreMetadataAnalyzer with the information
  * about a MongoStore collection.
- *
+ * <p>
  * - Collection document keys
  */
 public class MongoStoreCollectionMetadata {
 
-    List<String> collectionDocumentKeys = new ArrayList<>();
-    List<Class<?>> collectionDocumentTypes = new ArrayList<>();
+    private List<String> documentKeys = new ArrayList<>();
+    private List<Class<?>> documentTypes = new ArrayList<>();
 
     /**
      * Collection document keys present in a given collection at MongoStore
      */
-    public List<String> getCollectionDocumentKeys() {
-        return collectionDocumentKeys;
+    public List<String> getDocumentKeys() {
+        return documentKeys;
     }
 
-    public void setCollectionDocumentKeys(List<String> collectionDocumentKeys) {
-        this.collectionDocumentKeys = collectionDocumentKeys;
+    public void setDocumentKeys(List<String> documentKeys) {
+        this.documentKeys = documentKeys;
     }
 
     /**
      * Collection document types present in a given collection at MongoStore
      */
-    public List<Class<?>> getCollectionDocumentTypes() {
-        return collectionDocumentTypes;
+    public List<Class<?>> getDocumentTypes() {
+        return documentTypes;
     }
 
-    public void setCollectionDocumentTypes(List<Class<?>> collectionDocumentTypes) {
-        this.collectionDocumentTypes = collectionDocumentTypes;
+    public void setDocumentTypes(List<Class<?>> documentTypes) {
+        this.documentTypes = documentTypes;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MongoStoreCollectionMetadata that = (MongoStoreCollectionMetadata) o;
+        return documentKeys.equals(that.documentKeys) &&
+                documentTypes.equals(that.documentTypes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(documentKeys, documentTypes);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", MongoStoreCollectionMetadata.class.getSimpleName() + "[", "]")
+                .add("collectionDocumentKeys=" + documentKeys)
+                .add("collectionDocumentTypes=" + documentTypes)
+                .toString();
     }
 }

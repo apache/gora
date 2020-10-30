@@ -57,8 +57,8 @@ public class MongoStoreMetadataAnalyzer extends DataStoreMetadataAnalyzer {
     public MongoStoreCollectionMetadata getTableInfo(String tableName) {
         MongoStoreCollectionMetadata collectionMetadata = new MongoStoreCollectionMetadata();
         Document document = mongoDatabase.getCollection(tableName).find().first();
-        collectionMetadata.getCollectionDocumentKeys().addAll(document.keySet());
-        collectionMetadata.getCollectionDocumentTypes().addAll(document.values()
+        collectionMetadata.getDocumentKeys().addAll(document.keySet());
+        collectionMetadata.getDocumentTypes().addAll(document.values()
                 .stream().map(Object::getClass).collect(Collectors.toList()));
         return collectionMetadata;
     }
