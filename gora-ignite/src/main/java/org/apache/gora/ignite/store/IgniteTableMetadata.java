@@ -20,14 +20,25 @@ import java.util.Map;
 
 public class IgniteTableMetadata {
 
-  //Primary key
+  //Primary key Column
   private String primaryKey;
+  //Primary key type
+  private String primaryKeyType;
   //Pairs Column Name, Datatype
   private Map<String, String> columns;
 
-  public IgniteTableMetadata(String primaryKey, Map<String, String> columns) {
+  public IgniteTableMetadata(String primaryKey, String primaryKeyType, Map<String, String> columns) {
     this.primaryKey = primaryKey;
+    this.primaryKeyType = primaryKeyType;
     this.columns = columns;
+  }
+
+  public String getPrimaryKeyType() {
+    return primaryKeyType;
+  }
+
+  public void setPrimaryKeyType(String primaryKeyType) {
+    this.primaryKeyType = primaryKeyType;
   }
 
   public String getPrimaryKey() {

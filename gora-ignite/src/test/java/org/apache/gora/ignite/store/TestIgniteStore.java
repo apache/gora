@@ -41,13 +41,13 @@ public class TestIgniteStore extends DataStoreTestBase {
     Assert.assertEquals("Ignite Store Metadata Type", "IGNITE", createAnalyzer.getType());
     Assert.assertTrue("Ignite Store Metadata Table Names", createAnalyzer.getTablesNames().equals(Lists.newArrayList("WEBPAGE", "EMPLOYEE")));
     IgniteTableMetadata tableInfo = (IgniteTableMetadata) createAnalyzer.getTableInfo("EMPLOYEE");
-    Assert.assertEquals("Ignite Store Metadata Table Primary Key", "PKSSN", tableInfo.getPrimaryKey());
+    Assert.assertEquals("Ignite Store Metadata Table Primary Key Column", "PKSSN", tableInfo.getPrimaryKey());
+    Assert.assertEquals("Ignite Store Metadata Table Primary Key Type", "VARCHAR", tableInfo.getPrimaryKeyType());
     HashMap<String, String> hmap = new HashMap();
     hmap.put("WEBPAGE", "VARBINARY");
     hmap.put("BOSS", "VARBINARY");
     hmap.put("SALARY", "INTEGER");
     hmap.put("DATEOFBIRTH", "BIGINT");
-    hmap.put("PKSSN", "VARCHAR");
     hmap.put("VALUE", "VARCHAR");
     hmap.put("NAME", "VARCHAR");
     hmap.put("SSN", "VARCHAR");

@@ -70,12 +70,18 @@ public class IgniteStoreMetadataAnalyzer extends DataStoreMetadataAnalyzer {
   @Override
   public IgniteTableMetadata getTableInfo(String tableName) throws GoraException {
     HashMap<String, String> hmap = new HashMap();
+    String pkcl = "";
     String pkdt = "";
     try (Statement stmt = connection.createStatement()) {
       ResultSet executeQuery = stmt.executeQuery(IgniteSQLBuilder.createSelectAllColumnsOfTable(igniteParameters.getSchema(), tableName));
       while (executeQuery.next()) {
-        hmap.put(executeQuery.getString(1), executeQuery.getString(2));
-        pkdt = executeQuery.getBoolean(3) ? executeQuery.getString(1) : pkdt;
+        if (executeQuery.getBoolean(3)) {
+          pkcl = executeQuery.getString(1);
+          pkdt = executeQuery.getString(2);
+        } else {
+          hmap.put(executeQuery.getString(1), executeQuery.getString(2));
+        }
+
       }
       executeQuery.close();
     } catch (SQLException ex) {
@@ -87,7 +93,7 @@ public class IgniteStoreMetadataAnalyzer extends DataStoreMetadataAnalyzer {
      */
     hmap.remove("_KEY");
     hmap.remove("_VAL");
-    return new IgniteTableMetadata(pkdt, hmap);
+    return new IgniteTableMetadata(pkcl, pkdt, hmap);
   }
 
   @Override
