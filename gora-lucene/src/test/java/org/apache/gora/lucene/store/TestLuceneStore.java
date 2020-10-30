@@ -179,6 +179,7 @@ public class TestLuceneStore extends DataStoreTestBase {
   @Test(expected = GoraException.class)
   public void testXSDValidation() throws Exception {
     Properties properties = new Properties();
+    properties.setProperty("gora.xsd_validation", "true");
     properties.setProperty("gora.lucenestore.mapping.file", "gora-lucene-mapping-bad.xml");
     DataStoreTestBase.testDriver.createDataStore(String.class, EmployeeInt.class, properties);
   }
