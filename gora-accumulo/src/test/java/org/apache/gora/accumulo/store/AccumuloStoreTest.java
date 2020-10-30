@@ -17,9 +17,11 @@
 package org.apache.gora.accumulo.store;
 
 import java.io.IOException;
+import java.util.Properties;
 
 import org.apache.gora.accumulo.GoraAccumuloTestDriver;
 import org.apache.gora.examples.generated.Employee;
+import org.apache.gora.examples.generated.EmployeeInt;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
@@ -27,6 +29,7 @@ import org.apache.gora.store.DataStoreTestBase;
 import static org.apache.gora.store.DataStoreTestBase.log;
 import org.apache.gora.store.DataStoreTestUtil;
 import static org.apache.gora.store.DataStoreTestUtil.testResultSize;
+import org.apache.gora.util.GoraException;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -84,4 +87,18 @@ public class AccumuloStoreTest extends DataStoreTestBase {
   @Override
   public void testResultSizeKeyRange() throws Exception {
   }
+  
+  /**
+   * XSD Validation.
+   * 
+   * Validate bad formatted XML Mappings.
+   */
+  @Test(expected = GoraException.class)
+  public void testXSDValidation() throws Exception {
+    Properties properties = DataStoreFactory.createProps();
+    properties.setProperty("gora.xsd_validation", "true");
+    properties.setProperty("gora.accumulostore.mapping.file", "gora-accumulo-mapping-bad.xml");
+    DataStoreTestBase.testDriver.createDataStore(String.class, WebPage.class, properties);
+  }
+  
 }

@@ -128,6 +128,7 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
   protected static final String PASSWORD_PROPERTY = "accumulo.password";
   protected static final String DEFAULT_MAPPING_FILE = "gora-accumulo-mapping.xml";
   private static final String XSD_MAPPING_FILE = "gora-accumulo.xsd";
+  private static final String XSD_VALIDATION = "gora.xsd_validation";
 
   private final static String UNKOWN = "Unknown type ";
 
@@ -373,8 +374,8 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
       String mappingFile = DataStoreFactory.getMappingFile(properties, this, DEFAULT_MAPPING_FILE);
       String user = DataStoreFactory.findProperty(properties, this, USERNAME_PROPERTY, null);
       String password = DataStoreFactory.findProperty(properties, this, PASSWORD_PROPERTY, null);
-
-      mapping = readMapping(mappingFile);
+      String xsdval = properties.getProperty(XSD_VALIDATION, "false");
+      mapping = readMapping(mappingFile, Boolean.valueOf(xsdval));
 
       if (mapping.encoder == null || "".equals(mapping.encoder)) {
         encoder = new BinaryEncoder();
@@ -403,13 +404,15 @@ public class AccumuloStore<K,T extends PersistentBase> extends DataStoreBase<K,T
     }
   }
 
-  protected AccumuloMapping readMapping(String filename) throws IOException {
+  protected AccumuloMapping readMapping(String filename, boolean xsdValidation) throws IOException {
     try {
 
       AccumuloMapping mapping = new AccumuloMapping();
-      javax.xml.validation.Schema newSchema = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
-        .newSchema(new StreamSource(getClass().getClassLoader().getResourceAsStream(XSD_MAPPING_FILE)));
-      newSchema.newValidator().validate(new StreamSource(getClass().getClassLoader().getResourceAsStream(filename)));
+      if (xsdValidation) {
+        javax.xml.validation.Schema newSchema = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
+          .newSchema(new StreamSource(getClass().getClassLoader().getResourceAsStream(XSD_MAPPING_FILE)));
+        newSchema.newValidator().validate(new StreamSource(getClass().getClassLoader().getResourceAsStream(filename)));
+      }
       DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
       Document dom = db.parse(getClass().getClassLoader().getResourceAsStream(filename));
 
