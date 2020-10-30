@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.ColumnFamilyDescriptor;
@@ -199,5 +200,18 @@ public class HBaseMapping {
     }
     return strBuilder.toString() ;
   }
-  
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    HBaseMapping that = (HBaseMapping) o;
+    return Objects.equals(tableDescriptor, that.tableDescriptor) &&
+            Objects.equals(columnMap, that.columnMap);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(tableDescriptor, columnMap);
+  }
 }
