@@ -17,17 +17,27 @@
  */
 package org.apache.gora.mongodb.store;
 
+import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
+import org.apache.gora.mongodb.utils.Utf8Codec;
 import org.apache.gora.store.impl.DataStoreMetadataAnalyzer;
 import org.apache.gora.util.GoraException;
+import org.bson.BsonValue;
 import org.bson.Document;
+import org.bson.codecs.configuration.CodecRegistries;
+import org.bson.codecs.configuration.CodecRegistry;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class MongoStoreMetadataAnalyzer extends DataStoreMetadataAnalyzer {
+    private static CodecRegistry codecRegistry = CodecRegistries.fromRegistries(
+            MongoClientSettings.getDefaultCodecRegistry(),
+            CodecRegistries.fromCodecs(new Utf8Codec())
+    );
 
     private MongoDatabase mongoDatabase;
     private MongoClient mongoClient;
@@ -58,8 +68,9 @@ public class MongoStoreMetadataAnalyzer extends DataStoreMetadataAnalyzer {
         MongoStoreCollectionMetadata collectionMetadata = new MongoStoreCollectionMetadata();
         Document document = mongoDatabase.getCollection(tableName).find().first();
         collectionMetadata.getDocumentKeys().addAll(document.keySet());
-        collectionMetadata.getDocumentTypes().addAll(document.values()
-                .stream().map(Object::getClass).collect(Collectors.toList()));
+        Collection<BsonValue> values = document.toBsonDocument(null, codecRegistry).values();
+        collectionMetadata.getDocumentTypes()
+                .addAll(values.stream().map(bson -> bson.getBsonType().toString()).collect(Collectors.toList()));
         return collectionMetadata;
     }
 

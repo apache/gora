@@ -31,7 +31,7 @@ import java.util.StringJoiner;
 public class MongoStoreCollectionMetadata {
 
     private List<String> documentKeys = new ArrayList<>();
-    private List<Class<?>> documentTypes = new ArrayList<>();
+    private List<String> documentTypes = new ArrayList<>();
 
     /**
      * Collection document keys present in a given collection at MongoStore
@@ -47,11 +47,11 @@ public class MongoStoreCollectionMetadata {
     /**
      * Collection document types present in a given collection at MongoStore
      */
-    public List<Class<?>> getDocumentTypes() {
+    public List<String> getDocumentTypes() {
         return documentTypes;
     }
 
-    public void setDocumentTypes(List<Class<?>> documentTypes) {
+    public void setDocumentTypes(List<String> documentTypes) {
         this.documentTypes = documentTypes;
     }
 

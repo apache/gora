@@ -89,7 +89,7 @@ public class TestMongoStoreMetadataAnalyzer extends TestMongoStore {
         mongoDatabase.getCollection("frontier").insertOne(new Document(new HashMap<String, Object>() {
             {
                 put("name", "Kate");
-                put("dateOfBirth", 830563200);
+                put("dateOfBirth", 830563200L);
                 put("ssn", "078051120");
                 put("value", "varchar");
                 put("salary", 70000);
@@ -112,16 +112,16 @@ public class TestMongoStoreMetadataAnalyzer extends TestMongoStore {
             }
         };
 
-        List<Class<?>> expectedDocumentTypes = new ArrayList<Class<?>>() {
+        List<String> expectedDocumentTypes = new ArrayList<String>() {
             {
-                add(String.class);
-                add(Integer.class);
-                add(String.class);
-                add(String.class);
-                add(Integer.class);
-                add(String.class);
-                add(String.class);
-                add(ObjectId.class);
+                add("OBJECT_ID");
+                add("STRING");
+                add("STRING");
+                add("INT64");
+                add("STRING");
+                add("INT32");
+                add("STRING");
+                add("STRING");
             }
         };
 
