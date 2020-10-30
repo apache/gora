@@ -64,7 +64,7 @@ public class TestKuduStore extends DataStoreTestBase {
   public void testResultSizeKeyRange() throws Exception {
     //Kudu uses a scanner for querying. It is not possible to calculate the size of the result set without iterating it.
   }
-  
+
   @Test
   public void kuduStoreMetadataAnalyzerTest() throws Exception {
     DataStoreMetadataAnalyzer createAnalyzer = DataStoreMetadataFactory.createAnalyzer(DataStoreTestBase.testDriver.getConfiguration());
@@ -72,13 +72,13 @@ public class TestKuduStore extends DataStoreTestBase {
     List<String> tablesNames = createAnalyzer.getTablesNames();
     Assert.assertTrue("Kudu Store Metadata Table Names", tablesNames.equals(Lists.newArrayList("Employee", "WebPage")));
     KuduTableMetadata tableInfo = (KuduTableMetadata) createAnalyzer.getTableInfo("Employee");
-    Assert.assertEquals("Kudu Store Metadata Table Primary Key", "pkssn", tableInfo.getPrimaryKey());
+    Assert.assertEquals("Kudu Store Metadata Table Primary Key Column", "pkssn", tableInfo.getPrimaryKeyColumn());
+    Assert.assertEquals("Kudu Store Metadata Table Primary Key Type", "string", tableInfo.getPrimaryKeyType());
     HashMap<String, String> hmap = new HashMap();
     hmap.put("webpage", "binary");
     hmap.put("boss", "binary");
     hmap.put("salary", "int32");
     hmap.put("dateOfBirth", "int64");
-    hmap.put("pkssn", "string");
     hmap.put("value", "string");
     hmap.put("name", "string");
     hmap.put("ssn", "string");

@@ -20,22 +20,33 @@ import java.util.Map;
 
 public class KuduTableMetadata {
 
-  //Primary key
-  private String primaryKey;
+  //Primary key column
+  private String primaryKeyColumn;
+  //Primary key type
+  private String primaryKeyType;
   //Pairs Column Name, Datatype
   private Map<String, String> columns;
 
-  public KuduTableMetadata(String primaryKey, Map<String, String> columns) {
-    this.primaryKey = primaryKey;
+  public KuduTableMetadata(String primaryKeyColumn, String primaryKeyType, Map<String, String> columns) {
+    this.primaryKeyColumn = primaryKeyColumn;
+    this.primaryKeyType = primaryKeyType;
     this.columns = columns;
   }
 
-  public String getPrimaryKey() {
-    return primaryKey;
+  public String getPrimaryKeyColumn() {
+    return primaryKeyColumn;
   }
 
-  public void setPrimaryKey(String primaryKey) {
-    this.primaryKey = primaryKey;
+  public void setPrimaryKeyColumn(String primaryKeyColumn) {
+    this.primaryKeyColumn = primaryKeyColumn;
+  }
+
+  public String getPrimaryKeyType() {
+    return primaryKeyType;
+  }
+
+  public void setPrimaryKeyType(String primaryKeyType) {
+    this.primaryKeyType = primaryKeyType;
   }
 
   public Map<String, String> getColumns() {

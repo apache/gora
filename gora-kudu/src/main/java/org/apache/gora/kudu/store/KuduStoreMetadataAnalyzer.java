@@ -81,13 +81,16 @@ public class KuduStoreMetadataAnalyzer extends DataStoreMetadataAnalyzer {
       List<ColumnSchema> columns = openTable.getSchema().getColumns();
       HashMap<String, String> columnas = new HashMap();
       String pk = "";
+      String pkType = "";
       for (ColumnSchema esquema : columns) {
-        columnas.put(esquema.getName(), esquema.getType().getName());
         if (esquema.isKey()) {
           pk = esquema.getName();
+          pkType = esquema.getType().getName();
+        } else {
+          columnas.put(esquema.getName(), esquema.getType().getName());
         }
       }
-      return new KuduTableMetadata(pk, columnas);
+      return new KuduTableMetadata(pk, pkType, columnas);
     } catch (KuduException ex) {
       throw new GoraException(ex);
     }
