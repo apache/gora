@@ -828,7 +828,7 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
   }
 
   @SuppressWarnings("unchecked")
-  private HBaseMapping readMapping(InputStream mappingStream) throws IOException {
+  public HBaseMapping readMapping(InputStream mappingStream) throws IOException {
 
     HBaseMappingBuilder mappingBuilder = new HBaseMappingBuilder();
 
