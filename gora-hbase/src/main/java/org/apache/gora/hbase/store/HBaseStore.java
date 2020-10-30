@@ -898,10 +898,8 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
         throw new ConfigurationException("Gora-hbase-mapping does not include the name and keyClass in the databean.");
       }
     } catch (MalformedURLException ex) {
-      LOG.error("Error while trying to read the mapping file {}. "
-              + "Expected to be in the classpath "
-              + "(ClassLoader#getResource(java.lang.String)).",
-              mappingStream) ;
+      LOG.error("Error while trying to read the mapping. "
+              + "Mapping was not found.");
       LOG.error("Actual classpath = {}", Arrays.asList(
           ((URLClassLoader) getClass().getClassLoader()).getURLs()));
       throw ex ;
