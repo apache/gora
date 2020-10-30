@@ -75,7 +75,7 @@ public class KuduStoreMetadataAnalyzer extends DataStoreMetadataAnalyzer {
   }
 
   @Override
-  public Object getTableInfo(String tableName) throws GoraException {
+  public KuduTableMetadata getTableInfo(String tableName) throws GoraException {
     try {
       KuduTable openTable = client.openTable(tableName);
       List<ColumnSchema> columns = openTable.getSchema().getColumns();
