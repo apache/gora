@@ -21,9 +21,11 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import org.apache.gora.store.impl.DataStoreMetadataAnalyzer;
 import org.apache.gora.util.GoraException;
+import org.bson.Document;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MongoStoreMetadataAnalyzer extends DataStoreMetadataAnalyzer {
 
@@ -54,7 +56,10 @@ public class MongoStoreMetadataAnalyzer extends DataStoreMetadataAnalyzer {
     @Override
     public MongoStoreCollectionMetadata getTableInfo(String tableName) {
         MongoStoreCollectionMetadata collectionMetadata = new MongoStoreCollectionMetadata();
-        collectionMetadata.getCollectionDocumentKeys().addAll(mongoDatabase.getCollection(tableName).find().first().keySet());
+        Document document = mongoDatabase.getCollection(tableName).find().first();
+        collectionMetadata.getCollectionDocumentKeys().addAll(document.keySet());
+        collectionMetadata.getCollectionDocumentTypes().addAll(document.values()
+                .stream().map(Object::getClass).collect(Collectors.toList()));
         return collectionMetadata;
     }
 

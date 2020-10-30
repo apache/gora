@@ -29,6 +29,7 @@ import java.util.List;
 public class MongoStoreCollectionMetadata {
 
     List<String> collectionDocumentKeys = new ArrayList<>();
+    List<Class<?>> collectionDocumentTypes = new ArrayList<>();
 
     /**
      * Collection document keys present in a given collection at MongoStore
@@ -39,5 +40,16 @@ public class MongoStoreCollectionMetadata {
 
     public void setCollectionDocumentKeys(List<String> collectionDocumentKeys) {
         this.collectionDocumentKeys = collectionDocumentKeys;
+    }
+
+    /**
+     * Collection document types present in a given collection at MongoStore
+     */
+    public List<Class<?>> getCollectionDocumentTypes() {
+        return collectionDocumentTypes;
+    }
+
+    public void setCollectionDocumentTypes(List<Class<?>> collectionDocumentTypes) {
+        this.collectionDocumentTypes = collectionDocumentTypes;
     }
 }
