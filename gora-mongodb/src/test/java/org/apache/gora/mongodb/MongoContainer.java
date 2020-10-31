@@ -18,14 +18,14 @@
 package org.apache.gora.mongodb;
 
 import com.mongodb.ServerAddress;
-import org.testcontainers.containers.FixedHostPortGenericContainer;
+import org.testcontainers.containers.GenericContainer;
 
 /**
- * Use {@link FixedHostPortGenericContainer}
+ * Use {@link GenericContainer}
  * from <a href="https://www.testcontainers.org/">Testcontainers.org</a> project
  * to handle a MongoDB docker container.
  */
-public class MongoContainer extends FixedHostPortGenericContainer<MongoContainer> {
+public class MongoContainer extends GenericContainer<MongoContainer> {
 
     public static final int MONGO_PORT = 27017;
 

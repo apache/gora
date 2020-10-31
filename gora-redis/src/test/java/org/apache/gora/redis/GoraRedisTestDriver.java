@@ -24,7 +24,6 @@ import org.apache.gora.redis.store.RedisStore;
 import org.apache.gora.redis.util.RedisStartupLogWaitStrategy;
 import org.apache.gora.redis.util.ServerMode;
 import org.apache.gora.redis.util.StorageMode;
-import org.testcontainers.containers.FixedHostPortGenericContainer;
 import org.testcontainers.containers.GenericContainer;
 
 /**
@@ -34,7 +33,7 @@ import org.testcontainers.containers.GenericContainer;
 public class GoraRedisTestDriver extends GoraTestDriver {
 
   private static final String DOCKER_IMAGE = "grokzen/redis-cluster:latest";
-  private final FixedHostPortGenericContainer redisContainer;
+  private final GenericContainer redisContainer;
 
   private final StorageMode storageMode;
   private final ServerMode serverMode;
@@ -43,23 +42,12 @@ public class GoraRedisTestDriver extends GoraTestDriver {
     super(RedisStore.class);
     this.storageMode = storageMode;
     this.serverMode = serverMode;
-    GenericContainer container = new FixedHostPortGenericContainer(DOCKER_IMAGE)
-        .withFixedExposedPort(7000, 7000)
-        .withFixedExposedPort(7001, 7001)
-        .withFixedExposedPort(7002, 7002)
-        .withFixedExposedPort(7003, 7003)
-        .withFixedExposedPort(7004, 7004)
-        .withFixedExposedPort(7005, 7005)
-        .withFixedExposedPort(7006, 7006)
-        .withFixedExposedPort(7007, 7007)
-        .withFixedExposedPort(5000, 5000)
-        .withFixedExposedPort(5001, 5001)
-        .withFixedExposedPort(5002, 5002)
+    GenericContainer container = new GenericContainer(DOCKER_IMAGE)
         .waitingFor(new RedisStartupLogWaitStrategy())
         .withStartupTimeout(Duration.ofMinutes(3))
         .withEnv("STANDALONE", "true")
         .withEnv("SENTINEL", "true");
-    redisContainer = (FixedHostPortGenericContainer) container;
+    redisContainer = container;
 
   }
 
