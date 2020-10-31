@@ -18,12 +18,12 @@
 package org.apache.gora.mongodb;
 
 import com.mongodb.MongoClient;
-import com.mongodb.ServerAddress;
 import org.apache.gora.GoraTestDriver;
 import org.apache.gora.mongodb.store.MongoStore;
 import org.apache.gora.mongodb.store.MongoStoreParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.MongoDBContainer;
 
 /**
  * Driver to set up an embedded MongoDB database instance for use in our
@@ -34,13 +34,13 @@ public class GoraMongodbTestDriver extends GoraTestDriver {
   private static Logger log = LoggerFactory
           .getLogger(GoraMongodbTestDriver.class);
 
-  private MongoContainer _container;
+  private MongoDBContainer _container;
   private MongoClient _mongo;
 
   /**
    * Constructor for this class.
    */
-  public GoraMongodbTestDriver(MongoContainer startedContainer) {
+  public GoraMongodbTestDriver(MongoDBContainer startedContainer) {
     super(MongoStore.class);
     this._container = startedContainer;
   }
@@ -50,9 +50,8 @@ public class GoraMongodbTestDriver extends GoraTestDriver {
    */
   @Override
   public void setUpClass() {
-    ServerAddress address = _container.getServerAddress();
-    int port = address.getPort();
-    String host = address.getHost();
+    int port = _container.getMappedPort(27017);
+    String host = _container.getContainerIpAddress();
 
     // Store Mongo server "host:port" in Hadoop configuration
     // so that MongoStore will be able to get it latter

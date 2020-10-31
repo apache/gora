@@ -18,8 +18,9 @@
 package org.apache.gora.mongodb.store;
 
 import org.apache.gora.mongodb.GoraMongodbTestDriver;
-import org.apache.gora.mongodb.MongoContainer;
 import org.junit.ClassRule;
+import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.utility.DockerImageName;
 
 /**
  * Perform {@link TestMongoStore} tests on MongoDB 3.4.x server.
@@ -27,7 +28,7 @@ import org.junit.ClassRule;
 public class TestMongoStore34 extends TestMongoStore {
 
   @ClassRule
-  public final static MongoContainer container = new MongoContainer("3.4");
+  public final static MongoDBContainer container = new MongoDBContainer(DockerImageName.parse("mongo:3.4"));
 
   static {
     setTestDriver(new GoraMongodbTestDriver(container));

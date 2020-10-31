@@ -19,10 +19,11 @@ package org.apache.gora.mongodb.mapreduce;
 
 import org.apache.gora.GoraTestDriver;
 import org.apache.gora.mongodb.GoraMongodbTestDriver;
-import org.apache.gora.mongodb.MongoContainer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
+import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.utility.DockerImageName;
 
 /**
  * Created by drazzib on 24/05/14.
@@ -30,7 +31,7 @@ import org.junit.ClassRule;
 public class GoraMongoMapredTest {
 
     @ClassRule
-    public final static MongoContainer container = new MongoContainer("3.6");
+    public final static MongoDBContainer container = new MongoDBContainer(DockerImageName.parse("mongo:3.6"));
 
     protected static GoraTestDriver testDriver = new GoraMongodbTestDriver(container);
 

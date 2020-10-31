@@ -25,7 +25,7 @@ import org.apache.gora.mongodb.store.TestMongoStore;
 public class SCRAM_SHA_1_AuthenticationTest extends TestMongoStore {
   static {
     try {
-      setTestDriver(new GoraMongodbAuthenticationTestDriver("SCRAM-SHA-1", "3.6"));
+      setTestDriver(new GoraMongodbAuthenticationTestDriver("SCRAM-SHA-1", "mongo:3.6"));
     } catch (Exception e) {
       log.error("MongoDb Test Driver initialization failed. "+ e.getMessage());
     }

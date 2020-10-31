@@ -193,6 +193,14 @@
       <artifactId>testcontainers</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>mongodb</artifactId>
+      <version>${test.container.version}</version>
+      <scope>test</scope>
+    </dependency>
+
     <!-- END of Testing Dependencies -->
   </dependencies>
 

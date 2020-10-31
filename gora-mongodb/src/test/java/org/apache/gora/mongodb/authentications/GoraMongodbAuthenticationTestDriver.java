@@ -17,14 +17,14 @@
  */
 package org.apache.gora.mongodb.authentications;
 
-import com.mongodb.ServerAddress;
 import org.apache.gora.GoraTestDriver;
-import org.apache.gora.mongodb.MongoContainer;
 import org.apache.gora.mongodb.store.MongoStore;
 import org.apache.gora.mongodb.store.MongoStoreParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.Container;
+import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -37,16 +37,16 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
  */
 class GoraMongodbAuthenticationTestDriver extends GoraTestDriver {
     private static final Logger log = LoggerFactory.getLogger(GoraMongodbAuthenticationTestDriver.class);
-    private MongoContainer _container;
+    private MongoDBContainer _container;
     private final String adminUsername = "madhawa";
     private final String adminPassword = "123";
-    private final String useVersion;
+    private final DockerImageName useVersion;
     private final String authMechanisms;
 
     GoraMongodbAuthenticationTestDriver(String authMechanisms, String useVersion) {
         super(MongoStore.class);
         this.authMechanisms = authMechanisms;
-        this.useVersion = useVersion;
+        this.useVersion = DockerImageName.parse(useVersion);
     }
 
     private void doStart() throws Exception {
@@ -58,9 +58,8 @@ class GoraMongodbAuthenticationTestDriver extends GoraTestDriver {
             }
             // Store Mongo server "host:port" in Hadoop configuration
             // so that MongoStore will be able to get it latter
-            ServerAddress address = _container.getServerAddress();
-            int port = address.getPort();
-            String host = address.getHost();
+            int port = _container.getMappedPort(27017);
+            String host = _container.getContainerIpAddress();
 
             conf.set(MongoStoreParameters.PROP_MONGO_SERVERS, host + ":" + port);
             conf.set(MongoStoreParameters.PROP_MONGO_DB, "admin");
@@ -84,7 +83,7 @@ class GoraMongodbAuthenticationTestDriver extends GoraTestDriver {
     }
 
     private void prepareExecutable() throws IOException {
-        _container = new MongoContainer(useVersion);
+        _container = new MongoDBContainer(useVersion);
         // https://hub.docker.com/_/mongo
         // These variables, used in conjunction, create a new user and set that user's password.
         // This user is created in the admin authentication database

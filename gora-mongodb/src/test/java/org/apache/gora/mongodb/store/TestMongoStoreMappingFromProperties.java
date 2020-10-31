@@ -22,12 +22,13 @@ import com.mongodb.ServerAddress;
 import junit.framework.Assert;
 import org.apache.commons.io.IOUtils;
 import org.apache.gora.examples.generated.Employee;
-import org.apache.gora.mongodb.MongoContainer;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -37,12 +38,12 @@ import java.util.Properties;
  * Test case for loading mappings from properties
  */
 public class TestMongoStoreMappingFromProperties {
-    private MongoContainer _container;
+    private MongoDBContainer _container;
 
     @Before
     public void setUp() {
         // Container for MongoStore
-        this._container = new MongoContainer("4.2");
+        this._container = new MongoDBContainer(DockerImageName.parse("mongo:4.2"));
         _container.start();
     }
 
@@ -57,9 +58,8 @@ public class TestMongoStoreMappingFromProperties {
                 "</gora-otd>";
 
         // Initiate the MongoDB server on the default port
-        ServerAddress address = _container.getServerAddress();
-        int port = address.getPort();
-        String host = address.getHost();
+        int port = _container.getFirstMappedPort();
+        String host = _container.getContainerIpAddress();
 
         Properties prop = DataStoreFactory.createProps();
 
