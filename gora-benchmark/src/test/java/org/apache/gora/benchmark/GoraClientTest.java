@@ -35,7 +35,6 @@ import site.ycsb.workloads.CoreWorkload;
 import java.io.File;
 import java.util.*;
 
-import static org.apache.gora.mongodb.MongoContainer.MONGO_PORT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -51,6 +50,7 @@ public class GoraClientTest {
   private static HashMap<String, ByteIterator> DATA_TO_UPDATE;
   private static HashMap<String, ByteIterator> INTEGER_DATA;
   private static boolean isMongoDBSetupDone = false;
+  private static MongoContainer mongo;
 
   /**
    * Setup MongoDB embed cluster. This function will auto provision a MongoDB
@@ -59,11 +59,13 @@ public class GoraClientTest {
    */
   private void setupMongoDBCluster() {
     try {
-      MongoContainer mongo = new MongoContainer("3.6")
-              .withFixedExposedPort(MONGO_PORT, MONGO_PORT);
-      mongo.start();
+      if (!isMongoDBSetupDone) {
+        mongo = new MongoContainer("3.6");
+        mongo.start();
+      }
       ServerAddress address = mongo.getServerAddress();
       LOG.info("Started MongoDB Server on " + address.getHost() + ":" + address.getPort());
+      isMongoDBSetupDone = true;
     } catch (Exception e) {
       LOG.info("Cannot Start MongoDB Server {}", e.getMessage(), e);
     }
@@ -95,11 +97,12 @@ public class GoraClientTest {
     //Setup and start embedded MongoDB, make sure local mongodb is not running.
     Properties dataStoreProperties = DataStoreFactory.createProps();
     String dataStoreToTest = GoraBenchmarkUtils.getDataBase(dataStoreProperties);
-    if (!isMongoDBSetupDone && dataStoreToTest == Constants.MONGODB) {
+    if (Constants.MONGODB.equals(dataStoreToTest)) {
       setupMongoDBCluster();
-      isMongoDBSetupDone = true;
+      ServerAddress address = mongo.getServerAddress();
+      properties.setProperty("gora.mongodb.servers", address.getHost() + ":" + address.getPort());
     }
-    
+
     benchmarkClient = new GoraBenchmarkClient();
     benchmarkClient.setProperties(properties);
     benchmarkClient.init();
