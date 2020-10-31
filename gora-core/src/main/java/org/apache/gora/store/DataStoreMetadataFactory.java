@@ -91,6 +91,7 @@ public class DataStoreMetadataFactory {
     try {
       DataStoreMetadataAnalyzer metadataAnalyzer = (DataStoreMetadataAnalyzer) ReflectionUtils.newInstance(metadataAnalyzerClassName);
       metadataAnalyzer.setConf(configuration);
+      metadataAnalyzer.setProperties(properties);
       metadataAnalyzer.initialize();
       return metadataAnalyzer;
     } catch (ClassNotFoundException e) {

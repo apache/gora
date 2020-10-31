@@ -21,6 +21,7 @@ import static org.apache.gora.mongodb.store.MongoMapping.DocumentFieldType.*;
 
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
@@ -217,5 +218,21 @@ public class MongoMapping {
     LIST, // a list
     DOCUMENT, // a subdocument
     OBJECTID // ObjectId is a 12-byte BSON type
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    MongoMapping mapping = (MongoMapping) o;
+    return Objects.equals(collectionName, mapping.collectionName) &&
+            Objects.equals(classToDocument, mapping.classToDocument) &&
+            Objects.equals(documentToClass, mapping.documentToClass) &&
+            Objects.equals(documentFields, mapping.documentFields);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(collectionName, classToDocument, documentToClass, documentFields);
   }
 }
