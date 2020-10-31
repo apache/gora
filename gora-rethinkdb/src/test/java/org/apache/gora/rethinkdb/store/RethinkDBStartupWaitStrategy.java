@@ -18,35 +18,14 @@
 
 package org.apache.gora.rethinkdb.store;
 
-import org.testcontainers.containers.ContainerLaunchException;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.output.OutputFrame;
-import org.testcontainers.containers.output.WaitingConsumer;
+import org.testcontainers.containers.wait.strategy.LogMessageWaitStrategy;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.function.Predicate;
-
-public class RethinkDBStartupWaitStrategy extends GenericContainer.AbstractWaitStrategy {
+public class RethinkDBStartupWaitStrategy extends LogMessageWaitStrategy {
 
   private static final String regEx = "Server ready,.*";
 
-  private int times = 1;
-
-  protected void waitUntilReady() {
-    WaitingConsumer waitingConsumer = new WaitingConsumer();
-    this.container.followOutput(waitingConsumer);
-    Predicate waitPredicate = (outputFrame) -> {
-      String trimmedFrameText = ((OutputFrame) outputFrame).getUtf8String().replaceFirst("\n$", "");
-      return trimmedFrameText.matches(regEx);
-    };
-
-    try {
-      waitingConsumer.waitUntil(waitPredicate, this.startupTimeout.getSeconds(), TimeUnit.SECONDS,
-              this.times);
-    } catch (TimeoutException var4) {
-      throw new ContainerLaunchException(
-              "Timed out waiting for log output matching RethinkDB server startup Log  \'" + regEx + "\'");
-    }
+  public RethinkDBStartupWaitStrategy() {
+      withRegEx(regEx);
   }
+
 }

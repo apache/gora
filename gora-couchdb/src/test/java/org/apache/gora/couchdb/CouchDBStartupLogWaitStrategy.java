@@ -18,43 +18,19 @@
 
 package org.apache.gora.couchdb;
 
-import org.testcontainers.containers.ContainerLaunchException;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.output.OutputFrame;
-import org.testcontainers.containers.output.WaitingConsumer;
+import org.testcontainers.containers.wait.strategy.LogMessageWaitStrategy;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.function.Predicate;
 
 /**
  * Log based CouchDB server startup wait strategy to sync server
  * startup to test suit startup.
  */
-public class CouchDBStartupLogWaitStrategy extends GenericContainer.AbstractWaitStrategy {
+public class CouchDBStartupLogWaitStrategy extends LogMessageWaitStrategy {
 
   private static final String regEx = ".*Apache CouchDB has started. Time to relax..*";
 
-  private int times = 1;
-
-  protected void waitUntilReady() {
-    WaitingConsumer waitingConsumer = new WaitingConsumer();
-    this.container.followOutput(waitingConsumer);
-    Predicate waitPredicate = (outputFrame) -> {
-      String trimmedFrameText = ((OutputFrame) outputFrame)
-              .getUtf8String()
-              .replaceFirst("\n$", "");
-      return trimmedFrameText.matches(regEx);
-    };
-
-    try {
-      waitingConsumer.waitUntil(waitPredicate, this.startupTimeout.getSeconds(), TimeUnit.SECONDS,
-              this.times);
-    } catch (TimeoutException var4) {
-      throw new ContainerLaunchException(
-              "Timed out waiting for log output matching CouchDB server startup Log  \'" + regEx
-                      + "\'");
-    }
+  public CouchDBStartupLogWaitStrategy() {
+    withRegEx(regEx);
   }
 
 }
