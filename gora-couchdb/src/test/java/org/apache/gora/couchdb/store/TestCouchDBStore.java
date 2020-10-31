@@ -29,6 +29,7 @@ import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -49,7 +50,7 @@ public class TestCouchDBStore extends DataStoreTestBase {
    * JUnit integration testing with Docker and Testcontainers
    */
   @ClassRule
-  public static GenericContainer CouchDB_CONTAINER = new GenericContainer(DOCKER_CONTAINER_NAME)
+  public static GenericContainer CouchDB_CONTAINER = new GenericContainer(DockerImageName.parse(DOCKER_CONTAINER_NAME))
           .withExposedPorts(5984)
           .waitingFor(new CouchDBStartupLogWaitStrategy())
           .withStartupTimeout(Duration.ofSeconds(240));

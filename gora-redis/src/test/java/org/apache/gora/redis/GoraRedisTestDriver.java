@@ -25,6 +25,9 @@ import org.apache.gora.redis.util.RedisStartupLogWaitStrategy;
 import org.apache.gora.redis.util.ServerMode;
 import org.apache.gora.redis.util.StorageMode;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.utility.DockerImageName;
+
+import javax.print.Doc;
 
 /**
  * Helper class to execute tests in a embedded instance of Redis.
@@ -42,7 +45,7 @@ public class GoraRedisTestDriver extends GoraTestDriver {
     super(RedisStore.class);
     this.storageMode = storageMode;
     this.serverMode = serverMode;
-    GenericContainer container = new GenericContainer(DOCKER_IMAGE)
+    GenericContainer container = new GenericContainer(DockerImageName.parse(DOCKER_IMAGE))
         .waitingFor(new RedisStartupLogWaitStrategy())
         .withStartupTimeout(Duration.ofMinutes(3))
         .withEnv("STANDALONE", "true")

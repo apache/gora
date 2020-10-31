@@ -29,6 +29,7 @@ import org.junit.Ignore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import java.time.Duration;
 
@@ -42,7 +43,7 @@ public class RethinkDBGoraDataStoreTest extends DataStoreTestBase {
   private static final String DOCKER_CONTAINER_NAME = "rethinkdb:2.3.6";
 
   @ClassRule
-  public static GenericContainer rethinkdbContainer = new GenericContainer(DOCKER_CONTAINER_NAME)
+  public static GenericContainer rethinkdbContainer = new GenericContainer(DockerImageName.parse(DOCKER_CONTAINER_NAME))
           .waitingFor(new RethinkDBStartupWaitStrategy())
           .withStartupTimeout(Duration.ofSeconds(10));
 
