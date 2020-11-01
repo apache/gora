@@ -18,14 +18,12 @@
 
 package org.apache.gora.mongodb.store;
 
-import com.mongodb.ServerAddress;
 import junit.framework.Assert;
 import org.apache.commons.io.IOUtils;
 import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.utility.DockerImageName;
@@ -38,14 +36,9 @@ import java.util.Properties;
  * Test case for loading mappings from properties
  */
 public class TestMongoStoreMappingFromProperties {
-    private MongoDBContainer _container;
 
-    @Before
-    public void setUp() {
-        // Container for MongoStore
-        this._container = new MongoDBContainer(DockerImageName.parse("mongo:4.2"));
-        _container.start();
-    }
+    @ClassRule
+    public final static MongoDBContainer _container = new MongoDBContainer(DockerImageName.parse("mongo:4.2"));
 
     @Test
     public void testInitialize() throws IOException {
@@ -82,8 +75,4 @@ public class TestMongoStoreMappingFromProperties {
         Assert.assertEquals(expectedMapping, actualMapping);
     }
 
-    @After
-    public void tearDown() {
-        _container.stop();
-    }
 }
