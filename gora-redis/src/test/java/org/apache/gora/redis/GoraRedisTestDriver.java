@@ -45,7 +45,7 @@ public class GoraRedisTestDriver extends GoraTestDriver {
     super(RedisStore.class);
     this.storageMode = storageMode;
     this.serverMode = serverMode;
-    GenericContainer container = new GenericContainer(DockerImageName.parse(DOCKER_IMAGE))
+    GenericContainer container = new GenericContainer(DOCKER_IMAGE)
         .waitingFor(new RedisStartupLogWaitStrategy())
         .withStartupTimeout(Duration.ofMinutes(3))
         .withEnv("STANDALONE", "true")

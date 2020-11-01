@@ -23,7 +23,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.utility.DockerImageName;
 
 /**
  * Created by drazzib on 24/05/14.
@@ -31,7 +30,7 @@ import org.testcontainers.utility.DockerImageName;
 public class GoraMongoMapredTest {
 
     @ClassRule
-    public final static MongoDBContainer container = new MongoDBContainer(DockerImageName.parse("mongo:3.6"));
+    public final static MongoDBContainer container = new MongoDBContainer("mongo:3.6");
 
     protected static GoraTestDriver testDriver = new GoraMongodbTestDriver(container);
 

@@ -39,7 +39,7 @@ public class TestAerospikeStoreCountQuery {
   private static final String DOCKER_CONTAINER_NAME = "aerospike/aerospike-server:4.3.1.4";
 
   @ClassRule
-  public static GenericContainer aerospikeContainer = new GenericContainer(DockerImageName.parse(DOCKER_CONTAINER_NAME))
+  public static GenericContainer aerospikeContainer = new GenericContainer(DOCKER_CONTAINER_NAME)
           .withExposedPorts(3000).waitingFor(new AerospikeStartupLogWaitStrategy())
           .withStartupTimeout(Duration.ofSeconds(240));
 

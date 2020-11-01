@@ -26,7 +26,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.utility.DockerImageName;
 import site.ycsb.ByteIterator;
 import site.ycsb.Status;
 import site.ycsb.StringByteIterator;
@@ -60,7 +59,7 @@ public class GoraClientTest {
   private void setupMongoDBCluster() {
     try {
       if (!isMongoDBSetupDone) {
-        mongo = new MongoDBContainer(DockerImageName.parse("mongo:3.6"));
+        mongo = new MongoDBContainer("mongo:3.6");
         mongo.start();
       }
       LOG.info("Started MongoDB Server on " + mongo.getReplicaSetUrl());

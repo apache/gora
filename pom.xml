@@ -883,7 +883,7 @@
 
     <!-- Testing Dependencies -->
     <junit.version>4.10</junit.version>
-    <test.container.version>1.15.0-rc2</test.container.version>
+    <test.container.version>1.14.3</test.container.version>
 
     <!-- gora-benchmark and version dependencies -->
     <site.ycsb.version>0.17.0</site.ycsb.version>

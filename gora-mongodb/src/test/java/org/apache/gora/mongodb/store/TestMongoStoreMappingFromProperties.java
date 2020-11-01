@@ -26,7 +26,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -38,7 +37,7 @@ import java.util.Properties;
 public class TestMongoStoreMappingFromProperties {
 
     @ClassRule
-    public final static MongoDBContainer _container = new MongoDBContainer(DockerImageName.parse("mongo:4.2"));
+    public final static MongoDBContainer _container = new MongoDBContainer("mongo:4.2");
 
     @Test
     public void testInitialize() throws IOException {

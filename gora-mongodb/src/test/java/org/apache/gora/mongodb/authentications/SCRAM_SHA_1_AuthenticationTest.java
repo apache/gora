@@ -20,7 +20,6 @@ package org.apache.gora.mongodb.authentications;
 import org.apache.gora.mongodb.store.TestMongoStore;
 import org.junit.ClassRule;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.utility.DockerImageName;
 
 import static org.apache.gora.mongodb.authentications.GoraMongodbAuthenticationTestDriver.mongoContainer;
 
@@ -32,7 +31,7 @@ public class SCRAM_SHA_1_AuthenticationTest extends TestMongoStore {
     public static final String AUTH_MECHANISMS = "SCRAM-SHA-1";
 
     @ClassRule
-    public final static GenericContainer container = mongoContainer(AUTH_MECHANISMS, DockerImageName.parse("mongo:4.2"));
+    public final static GenericContainer container = mongoContainer(AUTH_MECHANISMS, "mongo:4.2");
 
     static {
         setTestDriver(new GoraMongodbAuthenticationTestDriver(AUTH_MECHANISMS, container));

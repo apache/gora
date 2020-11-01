@@ -59,7 +59,7 @@ class GoraMongodbAuthenticationTestDriver extends GoraTestDriver {
         conf.set(MongoStoreParameters.PROP_MONGO_SECRET, adminPassword);
     }
 
-    public static GenericContainer mongoContainer(String authMechanisms, DockerImageName useVersion) {
+    public static GenericContainer mongoContainer(String authMechanisms, String useVersion) {
         GenericContainer _container = new GenericContainer(useVersion).withExposedPorts(27017);
 
         // https://hub.docker.com/_/mongo

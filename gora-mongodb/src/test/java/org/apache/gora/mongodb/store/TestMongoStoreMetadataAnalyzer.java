@@ -32,7 +32,6 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.utility.DockerImageName;
 
 import java.util.*;
 
@@ -44,7 +43,7 @@ public class TestMongoStoreMetadataAnalyzer extends TestMongoStore {
     private MongoDatabase mongoDatabase;
 
     @ClassRule
-    public final static MongoDBContainer container = new MongoDBContainer(DockerImageName.parse("mongo:4.2"));
+    public final static MongoDBContainer container = new MongoDBContainer("mongo:4.2");
 
     static {
         setTestDriver(new GoraMongodbTestDriver(container));
