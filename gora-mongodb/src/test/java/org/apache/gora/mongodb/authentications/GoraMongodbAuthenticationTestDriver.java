@@ -70,9 +70,8 @@ class GoraMongodbAuthenticationTestDriver extends GoraTestDriver {
         _container.withEnv("MONGO_INITDB_ROOT_PASSWORD", adminPassword);
 
         // To enable authentication, MongoDB will have to restart itself
-        int restartCount = authMechanisms.equals("PLAIN") ? 1 : 2;
+        int restartCount = 2;
         _container.waitingFor(
-
                 Wait.forLogMessage("(?i).*waiting for connections.*", restartCount)
         );
 
@@ -88,7 +87,5 @@ class GoraMongodbAuthenticationTestDriver extends GoraTestDriver {
      */
     @Override
     public void tearDownClass() {
-        log.info("Shutting down mongodb server...");
-        _container.stop();
     }
 }

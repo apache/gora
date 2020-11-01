@@ -63,8 +63,6 @@ public class GoraMongodbTestDriver extends GoraTestDriver {
    */
   @Override
   public void tearDownClass() {
-    log.info("Shutting down mongodb server...");
-    _container.stop();
   }
 
 }
