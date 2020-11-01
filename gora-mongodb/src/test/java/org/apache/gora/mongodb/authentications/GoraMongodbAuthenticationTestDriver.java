@@ -22,14 +22,9 @@ import org.apache.gora.mongodb.store.MongoStore;
 import org.apache.gora.mongodb.store.MongoStoreParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.Container;
-import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
-
-import java.io.IOException;
-import java.time.Duration;
-
-import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * Driver to set up an embedded MongoDB database instance for use in our  * unit tests.
@@ -37,53 +32,36 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
  */
 class GoraMongodbAuthenticationTestDriver extends GoraTestDriver {
     private static final Logger log = LoggerFactory.getLogger(GoraMongodbAuthenticationTestDriver.class);
-    private MongoDBContainer _container;
-    private final String adminUsername = "madhawa";
-    private final String adminPassword = "123";
-    private final DockerImageName useVersion;
+    private GenericContainer _container;
+    private static final String adminUsername = "madhawa";
+    private static final String adminPassword = "123";
     private final String authMechanisms;
 
-    GoraMongodbAuthenticationTestDriver(String authMechanisms, String useVersion) {
+    GoraMongodbAuthenticationTestDriver(String authMechanisms, GenericContainer container) {
         super(MongoStore.class);
         this.authMechanisms = authMechanisms;
-        this.useVersion = DockerImageName.parse(useVersion);
+        this._container = container;
     }
 
-    private void doStart() throws Exception {
-        try {
-            log.info("Starting the embedded Mongodb server");
-            startWithAuth();
-            if (authMechanisms.equals("SCRAM-SHA-1")) {
-                setSCRAM_SHA_1Credentials();
-            }
-            // Store Mongo server "host:port" in Hadoop configuration
-            // so that MongoStore will be able to get it latter
-            int port = _container.getMappedPort(27017);
-            String host = _container.getContainerIpAddress();
+    @Override
+    public void setUpClass() throws Exception {
+        log.info("Starting the embedded Mongodb server");
 
-            conf.set(MongoStoreParameters.PROP_MONGO_SERVERS, host + ":" + port);
-            conf.set(MongoStoreParameters.PROP_MONGO_DB, "admin");
-            conf.set(MongoStoreParameters.PROP_MONGO_AUTHENTICATION_TYPE, authMechanisms);
-            conf.set(MongoStoreParameters.PROP_MONGO_LOGIN, adminUsername);
-            conf.set(MongoStoreParameters.PROP_MONGO_SECRET, adminPassword);
-        } catch (Exception e) {
-            log.error("Error starting embedded Mongodb server... tearing down test driver.");
-            tearDownClass();
-        }
+        // Store Mongo server "host:port" in Hadoop configuration
+        // so that MongoStore will be able to get it latter
+        int port = _container.getMappedPort(27017);
+        String host = _container.getContainerIpAddress();
+
+        conf.set(MongoStoreParameters.PROP_MONGO_SERVERS, host + ":" + port);
+        conf.set(MongoStoreParameters.PROP_MONGO_DB, "admin");
+        conf.set(MongoStoreParameters.PROP_MONGO_AUTHENTICATION_TYPE, authMechanisms);
+        conf.set(MongoStoreParameters.PROP_MONGO_LOGIN, adminUsername);
+        conf.set(MongoStoreParameters.PROP_MONGO_SECRET, adminPassword);
     }
 
-    private void startWithAuth() throws IOException {
-        try {
-            prepareExecutable();
-            _container.start();
-        } catch (Exception e) {
-            log.error("Error starting embedded Mongodb server... tearing down test driver.");
-            tearDownClass();
-        }
-    }
+    public static GenericContainer mongoContainer(String authMechanisms, DockerImageName useVersion) {
+        GenericContainer _container = new GenericContainer(useVersion).withExposedPorts(27017);
 
-    private void prepareExecutable() throws IOException {
-        _container = new MongoDBContainer(useVersion);
         // https://hub.docker.com/_/mongo
         // These variables, used in conjunction, create a new user and set that user's password.
         // This user is created in the admin authentication database
@@ -92,43 +70,17 @@ class GoraMongodbAuthenticationTestDriver extends GoraTestDriver {
         _container.withEnv("MONGO_INITDB_ROOT_PASSWORD", adminPassword);
 
         // To enable authentication, MongoDB will have to restart itself
-        // so wait for at least 5 sec
-        _container.withMinimumRunningDuration(Duration.ofSeconds(5));
+        int restartCount = authMechanisms.equals("PLAIN") ? 1 : 2;
+        _container.waitingFor(
+
+                Wait.forLogMessage("(?i).*waiting for connections.*", restartCount)
+        );
 
         // https://docs.mongodb.com/manual/tutorial/enable-authentication/
         // https://docs.mongodb.com/manual/reference/parameters/#param.authenticationMechanisms
         _container.withCommand("--auth", "--setParameter", "authenticationMechanisms=" + authMechanisms);
-    }
 
-    private void setSCRAM_SHA_1Credentials() throws Exception {
-        final String scriptText1 = "db.adminCommand({authSchemaUpgrade: 1});\n";
-        runScriptAndWait(scriptText1, "admin", adminUsername, adminPassword);
-    }
-
-    private void runScriptAndWait(String scriptText, String dbName, String username, String password)
-            throws InterruptedException, IOException {
-        final StringBuilder builder = new StringBuilder("mongo --quiet");
-        if (!isEmpty(username)) {
-            builder.append(" --username ").append(username);
-        }
-        if (!isEmpty(password)) {
-            builder.append(" --password ").append(password);
-        }
-        if (!isEmpty(dbName)) {
-            builder.append(" ").append(dbName);
-        }
-        builder.append(" --eval '").append(scriptText).append("'");
-
-        Container.ExecResult res = _container.execInContainer("/bin/bash", "-c", builder.toString());
-        if (!isEmpty(res.getStderr())) {
-            log.error("Unable to run script on Mongodb server {}: {}", scriptText, res.getStderr());
-            throw new IOException(res.getStderr());
-        }
-    }
-
-    @Override
-    public void setUpClass() throws Exception {
-        doStart();
+        return _container;
     }
 
     /**
