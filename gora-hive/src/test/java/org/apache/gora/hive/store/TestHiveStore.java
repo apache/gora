@@ -35,6 +35,7 @@ import org.apache.gora.store.DataStoreTestUtil;
 import org.apache.gora.util.GoraException;
 import org.apache.gora.util.StringUtils;
 import org.junit.Ignore;
+import org.junit.Test;
 
 /**
  * HiveStore Tests extending {@link DataStoreTestBase} which run the base JUnit test suite for
@@ -97,6 +98,13 @@ public class TestHiveStore extends DataStoreTestBase {
     employeeStore.flush();
     Employee after = employeeStore.get(ssn, null);
     DataStoreTestUtil.assertEqualEmployeeObjects(employee, after);
+  }
+
+  @Ignore("This test is taking too much time (> 20 min)")
+  @Override
+  public void testBenchmarkExists() throws Exception {
+    log.info("test method: testBenchmarkExists");
+    DataStoreTestUtil.testBenchmarkGetExists(employeeStore);
   }
 
   @Override
