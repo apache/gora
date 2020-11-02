@@ -622,7 +622,7 @@
           <argLine>-Xmx512m</argLine>
           <forkMode>always</forkMode>
           <testFailureIgnore>false</testFailureIgnore>
-          <forkedProcessTimeoutInSeconds>900</forkedProcessTimeoutInSeconds>
+          <forkedProcessTimeoutInSeconds>1200</forkedProcessTimeoutInSeconds>
         </configuration>
       </plugin>
       <plugin>
@@ -1829,14 +1829,10 @@
 
       <dependency>
         <groupId>org.testcontainers</groupId>
-        <artifactId>testcontainers</artifactId>
+        <artifactId>testcontainers-bom</artifactId>
         <version>${test.container.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.testcontainers</groupId>
-        <artifactId>mongodb</artifactId>
-        <version>${test.container.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
 
       <!-- Gora Benchmark Dependencies -->
