@@ -622,7 +622,7 @@
           <argLine>-Xmx512m</argLine>
           <forkMode>always</forkMode>
           <testFailureIgnore>false</testFailureIgnore>
-          <forkedProcessTimeoutInSeconds>1200</forkedProcessTimeoutInSeconds>
+          <forkedProcessTimeoutInSeconds>2400</forkedProcessTimeoutInSeconds>
         </configuration>
       </plugin>
       <plugin>

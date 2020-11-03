@@ -50,7 +50,7 @@ pipeline {
         // only keep the latest 10 builds
         buildDiscarder logRotator(numToKeepStr: '10')
         // cancel build if not complete within two hours of scheduling
-        timeout time: 2, unit: 'HOURS'
+        timeout time: 3, unit: 'HOURS'
         disableConcurrentBuilds()
     }
     
