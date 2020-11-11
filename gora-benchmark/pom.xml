@@ -188,9 +188,8 @@
     </dependency>
 
     <dependency>
-      <groupId>org.apache.gora</groupId>
-      <artifactId>gora-mongodb</artifactId>
-      <type>test-jar</type>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>mongodb</artifactId>
       <scope>test</scope>
     </dependency>
 
@@ -199,5 +198,6 @@
       <groupId>org.ektorp</groupId>
       <artifactId>org.ektorp</artifactId>
     </dependency>
+
   </dependencies>
 </project>

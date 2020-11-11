@@ -22,11 +22,10 @@ import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.mapreduce.MapReduceTestUtils;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.junit.Test;
-import org.junit.Before;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.ClassRule;
-
+import org.junit.Test;
 import org.testcontainers.containers.GenericContainer;
 
 import java.time.Duration;

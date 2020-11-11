@@ -622,6 +622,7 @@
           <argLine>-Xmx512m</argLine>
           <forkMode>always</forkMode>
           <testFailureIgnore>false</testFailureIgnore>
+          <forkedProcessTimeoutInSeconds>2400</forkedProcessTimeoutInSeconds>
         </configuration>
       </plugin>
       <plugin>
@@ -883,7 +884,7 @@
 
     <!-- Testing Dependencies -->
     <junit.version>4.10</junit.version>
-    <test.container.version>1.4.2</test.container.version>
+    <test.container.version>1.14.3</test.container.version>
 
     <!-- gora-benchmark and version dependencies -->
     <site.ycsb.version>0.17.0</site.ycsb.version>
@@ -1828,8 +1829,10 @@
 
       <dependency>
         <groupId>org.testcontainers</groupId>
-        <artifactId>testcontainers</artifactId>
+        <artifactId>testcontainers-bom</artifactId>
         <version>${test.container.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
 
       <!-- Gora Benchmark Dependencies -->

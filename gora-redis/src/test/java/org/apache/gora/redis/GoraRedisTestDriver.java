@@ -17,14 +17,15 @@
  */
 package org.apache.gora.redis;
 
-import java.io.IOException;
-import java.time.Duration;
 import org.apache.gora.GoraTestDriver;
 import org.apache.gora.redis.store.RedisStore;
 import org.apache.gora.redis.util.RedisStartupLogWaitStrategy;
 import org.apache.gora.redis.util.ServerMode;
 import org.apache.gora.redis.util.StorageMode;
 import org.testcontainers.containers.GenericContainer;
+
+import java.io.IOException;
+import java.time.Duration;
 
 /**
  * Helper class to execute tests in a embedded instance of Redis.

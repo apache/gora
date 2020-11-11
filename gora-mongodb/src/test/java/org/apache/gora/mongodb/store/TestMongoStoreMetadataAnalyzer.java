@@ -21,18 +21,17 @@ import com.google.common.collect.Sets;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import org.apache.gora.mongodb.GoraMongodbTestDriver;
-import org.apache.gora.mongodb.MongoContainer;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.DataStoreMetadataFactory;
 import org.apache.gora.store.impl.DataStoreMetadataAnalyzer;
 import org.apache.gora.util.GoraException;
 import org.apache.hadoop.conf.Configuration;
 import org.bson.Document;
-import org.bson.types.ObjectId;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
+import org.testcontainers.containers.MongoDBContainer;
 
 import java.util.*;
 
@@ -44,7 +43,7 @@ public class TestMongoStoreMetadataAnalyzer extends TestMongoStore {
     private MongoDatabase mongoDatabase;
 
     @ClassRule
-    public final static MongoContainer container = new MongoContainer("4.2");
+    public final static MongoDBContainer container = new MongoDBContainer("mongo:4.2");
 
     static {
         setTestDriver(new GoraMongodbTestDriver(container));

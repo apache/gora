@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,16 +18,22 @@
 package org.apache.gora.mongodb.authentications;
 
 import org.apache.gora.mongodb.store.TestMongoStore;
+import org.junit.ClassRule;
+import org.testcontainers.containers.GenericContainer;
+
+import static org.apache.gora.mongodb.authentications.GoraMongodbAuthenticationTestDriver.mongoContainer;
 
 /**
- * Perform {@link TestMongoStore} tests on MongoDB 3.6.x server with SCRAM-SHA-1 Authentication mechanism
+ * Perform {@link TestMongoStore} tests on MongoDB 4.2.x server with SCRAM-SHA-1 Authentication mechanism
  */
 public class SCRAM_SHA_1_AuthenticationTest extends TestMongoStore {
-  static {
-    try {
-      setTestDriver(new GoraMongodbAuthenticationTestDriver("SCRAM-SHA-1", "3.6"));
-    } catch (Exception e) {
-      log.error("MongoDb Test Driver initialization failed. "+ e.getMessage());
+
+    public static final String AUTH_MECHANISMS = "SCRAM-SHA-1";
+
+    @ClassRule
+    public final static GenericContainer container = mongoContainer(AUTH_MECHANISMS, "mongo:4.2");
+
+    static {
+        setTestDriver(new GoraMongodbAuthenticationTestDriver(AUTH_MECHANISMS, container));
     }
-  }
 }

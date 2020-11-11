@@ -35,6 +35,7 @@ import org.apache.gora.store.DataStoreTestUtil;
 import org.apache.gora.util.GoraException;
 import org.apache.gora.util.StringUtils;
 import org.junit.Ignore;
+import org.junit.Test;
 
 /**
  * HiveStore Tests extending {@link DataStoreTestBase} which run the base JUnit test suite for

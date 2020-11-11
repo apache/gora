@@ -17,38 +17,19 @@
  */
 package org.apache.gora.redis.util;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.function.Predicate;
-import org.testcontainers.containers.ContainerLaunchException;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.output.OutputFrame;
-import org.testcontainers.containers.output.WaitingConsumer;
+import org.testcontainers.containers.wait.strategy.LogMessageWaitStrategy;
 
 /**
  * Utility class for detecting when the docker container is ready.
  */
-public class RedisStartupLogWaitStrategy extends GenericContainer.AbstractWaitStrategy {
+public class RedisStartupLogWaitStrategy extends LogMessageWaitStrategy {
 
   private static final String REGEX = ".*Background AOF rewrite finished successfully.*";
   private final int times = 3;
 
-  @Override
-  protected void waitUntilReady() {
-    WaitingConsumer waitingConsumer = new WaitingConsumer();
-    this.container.followOutput(waitingConsumer);
-    Predicate waitPredicate = (outputFrame) -> {
-      String trimmedFrameText = ((OutputFrame) outputFrame).getUtf8String().replaceFirst("\n$", "");
-      return trimmedFrameText.matches(REGEX);
-    };
-
-    try {
-      waitingConsumer.waitUntil(waitPredicate, this.startupTimeout.getSeconds(), TimeUnit.SECONDS,
-          this.times);
-    } catch (TimeoutException var4) {
-      throw new ContainerLaunchException(
-          "Timed out waiting for log output matching Redis server startup Log  \'" + REGEX
-          + "\'");
-    }
+  public RedisStartupLogWaitStrategy() {
+    withRegEx(REGEX);
+    withTimes(times);
   }
+
 }

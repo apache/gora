@@ -18,36 +18,17 @@
 
 package org.apache.gora.aerospike.store;
 
-import org.testcontainers.containers.ContainerLaunchException;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.output.OutputFrame;
-import org.testcontainers.containers.output.WaitingConsumer;
+import org.testcontainers.containers.wait.strategy.LogMessageWaitStrategy;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.function.Predicate;
-
-public class AerospikeStartupLogWaitStrategy extends GenericContainer.AbstractWaitStrategy {
+public class AerospikeStartupLogWaitStrategy extends LogMessageWaitStrategy {
 
   private static final String regEx = ".*heartbeat-received: self 0 foreign 0.*";
 
   private int times = 2;
 
-  protected void waitUntilReady() {
-    WaitingConsumer waitingConsumer = new WaitingConsumer();
-    this.container.followOutput(waitingConsumer);
-    Predicate waitPredicate = (outputFrame) -> {
-      String trimmedFrameText = ((OutputFrame) outputFrame).getUtf8String().replaceFirst("\n$", "");
-      return trimmedFrameText.matches(regEx);
-    };
-
-    try {
-      waitingConsumer.waitUntil(waitPredicate, this.startupTimeout.getSeconds(), TimeUnit.SECONDS,
-              this.times);
-    } catch (TimeoutException var4) {
-      throw new ContainerLaunchException(
-              "Timed out waiting for log output matching Aerospike server startup Log  \'" + regEx
-                      + "\'");
-    }
+  public AerospikeStartupLogWaitStrategy() {
+          withRegEx(regEx);
+          withTimes(times);
   }
+
 }

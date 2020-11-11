@@ -17,9 +17,7 @@
  */
 package org.apache.gora.benchmark;
 
-import com.mongodb.ServerAddress;
 import org.apache.gora.benchmark.generated.User;
-import org.apache.gora.mongodb.MongoContainer;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.util.GoraException;
 import org.junit.After;
@@ -27,6 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.MongoDBContainer;
 import site.ycsb.ByteIterator;
 import site.ycsb.Status;
 import site.ycsb.StringByteIterator;
@@ -50,7 +49,7 @@ public class GoraClientTest {
   private static HashMap<String, ByteIterator> DATA_TO_UPDATE;
   private static HashMap<String, ByteIterator> INTEGER_DATA;
   private static boolean isMongoDBSetupDone = false;
-  private static MongoContainer mongo;
+  private static MongoDBContainer mongo;
 
   /**
    * Setup MongoDB embed cluster. This function will auto provision a MongoDB
@@ -60,11 +59,10 @@ public class GoraClientTest {
   private void setupMongoDBCluster() {
     try {
       if (!isMongoDBSetupDone) {
-        mongo = new MongoContainer("3.6");
+        mongo = new MongoDBContainer("mongo:3.6");
         mongo.start();
       }
-      ServerAddress address = mongo.getServerAddress();
-      LOG.info("Started MongoDB Server on " + address.getHost() + ":" + address.getPort());
+      LOG.info("Started MongoDB Server on " + mongo.getReplicaSetUrl());
       isMongoDBSetupDone = true;
     } catch (Exception e) {
       LOG.info("Cannot Start MongoDB Server {}", e.getMessage(), e);
@@ -99,8 +97,7 @@ public class GoraClientTest {
     String dataStoreToTest = GoraBenchmarkUtils.getDataBase(dataStoreProperties);
     if (Constants.MONGODB.equals(dataStoreToTest)) {
       setupMongoDBCluster();
-      ServerAddress address = mongo.getServerAddress();
-      properties.setProperty("gora.mongodb.servers", address.getHost() + ":" + address.getPort());
+      properties.setProperty("gora.mongodb.servers", mongo.getContainerIpAddress() + ":" + mongo.getFirstMappedPort());
     }
 
     benchmarkClient = new GoraBenchmarkClient();
