@@ -100,13 +100,6 @@ public class TestHiveStore extends DataStoreTestBase {
     DataStoreTestUtil.assertEqualEmployeeObjects(employee, after);
   }
 
-  @Ignore("This test is taking too much time (> 20 min)")
-  @Override
-  public void testBenchmarkExists() throws Exception {
-    log.info("test method: testBenchmarkExists");
-    DataStoreTestUtil.testBenchmarkGetExists(employeeStore);
-  }
-
   @Override
   public void testGetNested() throws Exception {
     //Overrides DataStoreTestBase.testGetNested to avoid recursive field "boss"
