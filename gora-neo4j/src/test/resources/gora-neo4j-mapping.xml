@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+       http://www.apache.org/licenses/LICENSE-2.0
+         Unless required by applicable law or agreed to in writing, software
+         distributed under the License is distributed on an "AS IS" BASIS,
+         WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+         See the License for the specific language governing permissions and
+         limitations under the License.
+-->
+
+<gora-otd>
+  <class name="org.apache.gora.examples.generated.Employee" keyClass="java.lang.String" label="Employee">
+    <nodeKey property="pkssn" type="VARCHAR" />
+    <field name="ssn" property="ssn" type="VARCHAR" unique="false" exists="false" index="false"/>
+    <field name="value" property="value" type="VARCHAR" unique="false" exists="false" index="false"/>
+    <field name="name" property="name" type="VARCHAR" unique="false" exists="false" index="false"/>
+    <field name="dateOfBirth" property="dateOfBirth" type="INTEGER" unique="false" exists="false" index="false"/>
+    <field name="salary" property="salary" type="INTEGER" unique="false" exists="false" index="false"/>
+    <field name="boss" property="boss" type="JAVA_OBJECT" unique="false" exists="false" index="false"/>
+    <field name="webpage" property="webpage" type="JAVA_OBJECT" unique="false" exists="false" index="false"/>
+  </class>
+</gora-otd>

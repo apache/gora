@@ -16,11 +16,19 @@
  */
 package org.apache.gora.neo4j.experimental;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Iterator;
+import java.util.Map;
+import org.apache.gora.neo4j.mapping.Neo4jMapping;
+import org.apache.gora.neo4j.mapping.Neo4jMappingBuilder;
+import org.apache.gora.neo4j.mapping.Property;
 import org.neo4j.cypherdsl.core.Cypher;
 import org.neo4j.cypherdsl.core.Node;
 import org.neo4j.cypherdsl.core.Statement;
@@ -28,7 +36,36 @@ import org.neo4j.cypherdsl.core.renderer.Renderer;
 
 public class experiment {
 
-  public static void main(String[] args) throws SQLException {
+  public static void main(String[] args) throws SQLException, IOException {
+
+    experiment experiment = new experiment();
+    experiment.testNeo4jMapping();
+
+  }
+
+  public void testNeo4jMapping() throws SQLException, IOException {
+
+    Neo4jMappingBuilder neo4jMappingBuilder = new Neo4jMappingBuilder(null);
+    String path = "src/test/resources/gora-neo4j-mapping.xml";
+
+    File file = new File(path);
+    FileInputStream fileInputStream = new FileInputStream(file);
+    Neo4jMapping readMapping = neo4jMappingBuilder.readMapping(fileInputStream);
+
+    System.out.println(readMapping.getLabel());
+    System.out.println(readMapping.getNodeKey().getName());
+    System.out.println(readMapping.getNodeKey().getSqltype());
+    for (Iterator<Map.Entry<String, Property>> it = readMapping.getProperties().entrySet().iterator(); it.hasNext();) {
+      Map.Entry<String, Property> next = it.next();
+      System.out.println(next.getKey());
+      System.out.println(next.getValue().getName());
+      System.out.println(next.getValue().getSqltype());
+
+    }
+
+  }
+
+  private static void testNeo4jCon() throws SQLException {
     try (Connection con = DriverManager.getConnection("jdbc:neo4j:bolt://localhost/?flatten=-1", "neo4j", "admin")) {
 
       //Insert 10 Persons
