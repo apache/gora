@@ -19,4 +19,29 @@
 
 <gora-otd>
 
+    <class name="org.apache.gora.examples.generated.Employee" keyClass="java.lang.String" index="frontier">
+        <field name="name" docfield="name" type="text"/>
+        <field name="dateOfBirth" docfield="dateOfBirth" type="long"/>
+        <field name="ssn" docfield="ssn" type="text"/>
+        <field name="value" docfield="value" type="text"/>
+        <field name="salary" docfield="salary" type="integer"/>
+        <field name="boss" docfield="boss" type="object"/>
+        <field name="webpage" docfield="webpage" type="object"/>
+    </class>
+
+    <class name="org.apache.gora.examples.generated.WebPage" keyClass="java.lang.String" index="webpage">
+        <field name="url" docfield="url" type="text"/>
+        <field name="content" docfield="content" type="binary"/>
+        <field name="parsedContent" docfield="pContent" type="text"/>
+        <field name="outlinks" docfield="links.out" type="object"/>
+        <field name="headers" docfield="headers" type="object"/>
+        <field name="metadata" docfield="metadata" type="object"/>
+        <field name="byteData" docfield="byteData" type="object"/>
+        <field name="stringData" docfield="stringData" type="object"/>
+    </class>
+
+    <class name="org.apache.gora.examples.generated.TokenDatum" keyClass="java.lang.String" index="TokenDatum">
+        <field name="count" docdocfield="count" type="integer"/>
+    </class>
+
 </gora-otd>
