@@ -19,15 +19,20 @@ package org.apache.gora.elasticsearch.store;
 
 import org.apache.gora.elasticsearch.mapping.ElasticsearchMapping;
 import org.apache.gora.elasticsearch.mapping.Field;
+import org.apache.gora.elasticsearch.utils.ElasticsearchParameters;
 import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.util.GoraException;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * Test case for ElasticsearchStore.
@@ -54,5 +59,37 @@ public class TestElasticsearchStore {
         Assert.assertEquals("frontier", store.getSchemaName());
         Assert.assertEquals("frontier", mapping.getIndexName());
         Assert.assertEquals(fields, mapping.getFields());
+    }
+
+    @Test
+    public void testLoadElasticsearchParameters() throws IOException {
+        Configuration conf = new Configuration();
+        Properties properties = new Properties();
+        properties.load(getClass().getClassLoader().getResourceAsStream("gora.properties"));
+
+        ElasticsearchParameters parameters = ElasticsearchParameters.load(properties, conf);
+
+        Assert.assertEquals("localhost", parameters.getHost());
+        Assert.assertEquals(9200, parameters.getPort());
+        Assert.assertEquals("username", parameters.getUsername());
+        Assert.assertEquals("password", parameters.getPassword());
+        Assert.assertEquals(120000, parameters.getSocketTimeout());
+    }
+
+    @Rule
+    public ExpectedException exceptionRule = ExpectedException.none();
+
+    @Test(expected = GoraException.class)
+    public void testAuthorization() throws IOException {
+        Configuration conf = new Configuration();
+        Properties properties = new Properties();
+        properties.setProperty("gora.datastore.elasticsearch.authorizationToken", "u6iuAxZ0RG1Kcm5jVFI4eU4tZU9aVFEwT2F3");
+        properties.load(getClass().getClassLoader().getResourceAsStream("gora.properties"));
+        ElasticsearchStore<String, Employee> store =
+                DataStoreFactory.createDataStore(ElasticsearchStore.class, String.class, Employee.class, conf);
+        store.initialize(String.class, Employee.class, properties);
+
+        exceptionRule.expect(IllegalArgumentException.class);
+        exceptionRule.expectMessage("Multiple authentication mechanisms were specified.");
     }
 }

@@ -18,14 +18,23 @@ package org.apache.gora.elasticsearch.store;
 
 import org.apache.gora.elasticsearch.mapping.ElasticsearchMapping;
 import org.apache.gora.elasticsearch.mapping.ElasticsearchMappingBuilder;
+import org.apache.gora.elasticsearch.utils.ElasticsearchParameters;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.GoraException;
+import org.apache.http.Header;
 import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.nio.reactor.IOReactorConfig;
+import org.apache.http.message.BasicHeader;
 import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +42,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.Properties;
 
@@ -63,6 +74,7 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
     public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) throws GoraException {
         try {
             LOG.debug("Initializing Elasticsearch store");
+            ElasticsearchParameters parameters = ElasticsearchParameters.load(properties, getConf());
             super.initialize(keyClass, persistentClass, properties);
             ElasticsearchMappingBuilder<K, T> builder = new ElasticsearchMappingBuilder<>(this);
             InputStream mappingStream;
@@ -76,12 +88,65 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
             }
             builder.readMappingFile(mappingStream);
             elasticsearchMapping = builder.getElasticsearchMapping();
-            client = new RestHighLevelClient(RestClient.builder(new HttpHost("localhost", 9200, "http")));
+            client = createClient(parameters);
             LOG.info("Elasticsearch store was successfully initialized.");
         } catch (Exception ex) {
             LOG.error("Error while initializing Elasticsearch store", ex);
             throw new GoraException(ex);
         }
+    }
+
+    private RestHighLevelClient createClient(ElasticsearchParameters parameters) {
+        RestClientBuilder clientBuilder = RestClient.builder(new HttpHost(parameters.getHost(), parameters.getPort()));
+
+        // Checking for authorization type.
+        boolean authorization = false;
+        if (parameters.getUsername() != null && parameters.getPassword() != null) {
+            final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+            credentialsProvider.setCredentials(AuthScope.ANY,
+                    new UsernamePasswordCredentials(parameters.getUsername(), parameters.getPassword()));
+            clientBuilder.setHttpClientConfigCallback(
+                    httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
+            authorization = true;
+        }
+        if (parameters.getAuthorizationToken() != null) {
+            if (authorization) {
+                throw new IllegalArgumentException("Multiple authentication mechanisms were specified.");
+            } else {
+                Header[] defaultHeaders = new Header[]{new BasicHeader("Authorization",
+                        parameters.getAuthorizationToken())};
+                clientBuilder.setDefaultHeaders(defaultHeaders);
+                authorization = true;
+            }
+        }
+        if (parameters.getApiKeyId() != null && parameters.getApiKeySecret() != null) {
+            if (authorization) {
+                throw new IllegalArgumentException("Multiple authentication mechanisms were specified.");
+            } else {
+                String apiKeyAuth = Base64.getEncoder()
+                        .encodeToString((parameters.getApiKeyId() + ":" + parameters.getApiKeySecret())
+                                .getBytes(StandardCharsets.UTF_8));
+                Header[] defaultHeaders = new Header[]{new BasicHeader("Authorization", "ApiKey " + apiKeyAuth)};
+                clientBuilder.setDefaultHeaders(defaultHeaders);
+            }
+        }
+
+        if (parameters.getConnectTimeout() != 0) {
+            clientBuilder.setRequestConfigCallback(requestConfigBuilder ->
+                    requestConfigBuilder.setConnectTimeout(parameters.getConnectTimeout()));
+        }
+
+        if (parameters.getSocketTimeout() != 0) {
+            clientBuilder.setRequestConfigCallback(requestConfigBuilder ->
+                    requestConfigBuilder.setSocketTimeout(parameters.getSocketTimeout()));
+        }
+
+        if (parameters.getIoThreadCount() != 0) {
+            clientBuilder.setHttpClientConfigCallback(httpClientBuilder ->
+                    httpClientBuilder.setDefaultIOReactorConfig(IOReactorConfig.custom()
+                            .setIoThreadCount(parameters.getIoThreadCount()).build()));
+        }
+        return new RestHighLevelClient(clientBuilder);
     }
 
     public ElasticsearchMapping getMapping() {
