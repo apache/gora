@@ -33,9 +33,14 @@ import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.nio.reactor.IOReactorConfig;
 import org.apache.http.message.BasicHeader;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.elasticsearch.action.admin.indices.flush.FlushRequest;
+import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.indices.CreateIndexRequest;
+import org.elasticsearch.client.indices.GetIndexRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -163,17 +168,38 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
 
     @Override
     public void createSchema() throws GoraException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        CreateIndexRequest request = new CreateIndexRequest(elasticsearchMapping.getIndexName());
+        try {
+            if (!client.indices().exists(
+                    new GetIndexRequest(elasticsearchMapping.getIndexName()), RequestOptions.DEFAULT)) {
+                client.indices().create(request, RequestOptions.DEFAULT);
+            }
+        } catch (IOException ex) {
+            throw new GoraException(ex);
+        }
     }
 
     @Override
     public void deleteSchema() throws GoraException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        DeleteIndexRequest request = new DeleteIndexRequest(elasticsearchMapping.getIndexName());
+        try {
+            if (client.indices().exists(
+                    new GetIndexRequest(elasticsearchMapping.getIndexName()), RequestOptions.DEFAULT)) {
+                client.indices().delete(request, RequestOptions.DEFAULT);
+            }
+        } catch (IOException ex) {
+            throw new GoraException(ex);
+        }
     }
 
     @Override
     public boolean schemaExists() throws GoraException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        try {
+            return client.indices().exists(
+                    new GetIndexRequest(elasticsearchMapping.getIndexName()), RequestOptions.DEFAULT);
+        } catch (IOException ex) {
+            throw new GoraException(ex);
+        }
     }
 
     @Override
@@ -218,7 +244,11 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
 
     @Override
     public void flush() throws GoraException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        try {
+            client.indices().flush(new FlushRequest(), RequestOptions.DEFAULT);
+        } catch (IOException ex) {
+            throw new GoraException(ex);
+        }
     }
 
     @Override
