@@ -17,13 +17,12 @@
  */
 package org.apache.gora.elasticsearch.store;
 
+import org.apache.gora.elasticsearch.GoraElasticsearchTestDriver;
 import org.apache.gora.elasticsearch.mapping.ElasticsearchMapping;
 import org.apache.gora.elasticsearch.mapping.Field;
 import org.apache.gora.elasticsearch.utils.ElasticsearchParameters;
-import org.apache.gora.examples.generated.Employee;
-import org.apache.gora.store.DataStoreFactory;
+import org.apache.gora.store.DataStoreTestBase;
 import org.apache.gora.util.GoraException;
-import org.apache.hadoop.conf.Configuration;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -35,14 +34,17 @@ import java.util.Properties;
 /**
  * Test case for ElasticsearchStore.
  */
-public class TestElasticsearchStore {
+public class TestElasticsearchStore extends DataStoreTestBase {
+
+    static {
+        setTestDriver(new GoraElasticsearchTestDriver());
+    }
 
     @Test
     public void testInitialize() throws GoraException {
-        Configuration conf = new Configuration();
-        ElasticsearchStore<String, Employee> store =
-                DataStoreFactory.createDataStore(ElasticsearchStore.class, String.class, Employee.class, conf);
-        ElasticsearchMapping mapping = store.getMapping();
+        log.info("test method: testInitialize");
+
+        ElasticsearchMapping mapping = ((ElasticsearchStore) employeeStore).getMapping();
 
         Map<String, Field> fields = new HashMap<String, Field>() {{
             put("name", new Field("name", new Field.FieldType(Field.DataType.TEXT)));
@@ -54,21 +56,21 @@ public class TestElasticsearchStore {
             put("webpage", new Field("webpage", new Field.FieldType(Field.DataType.OBJECT)));
         }};
 
-        Assert.assertEquals("frontier", store.getSchemaName());
+        Assert.assertEquals("frontier", employeeStore.getSchemaName());
         Assert.assertEquals("frontier", mapping.getIndexName());
         Assert.assertEquals(fields, mapping.getFields());
     }
 
     @Test
     public void testLoadElasticsearchParameters() throws IOException {
-        Configuration conf = new Configuration();
+        log.info("test method: testLoadElasticsearchParameters");
+
         Properties properties = new Properties();
         properties.load(getClass().getClassLoader().getResourceAsStream("gora.properties"));
 
-        ElasticsearchParameters parameters = ElasticsearchParameters.load(properties, conf);
+        ElasticsearchParameters parameters = ElasticsearchParameters.load(properties, testDriver.getConfiguration());
 
         Assert.assertEquals("localhost", parameters.getHost());
-        Assert.assertEquals(9200, parameters.getPort());
         Assert.assertEquals("BASIC", parameters.getAuthenticationMethod());
         Assert.assertEquals("username", parameters.getUsername());
         Assert.assertEquals("password", parameters.getPassword());
