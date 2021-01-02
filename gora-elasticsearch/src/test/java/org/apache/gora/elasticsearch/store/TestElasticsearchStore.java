@@ -25,9 +25,7 @@ import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.util.GoraException;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -71,25 +69,8 @@ public class TestElasticsearchStore {
 
         Assert.assertEquals("localhost", parameters.getHost());
         Assert.assertEquals(9200, parameters.getPort());
+        Assert.assertEquals("BASIC", parameters.getAuthenticationMethod());
         Assert.assertEquals("username", parameters.getUsername());
         Assert.assertEquals("password", parameters.getPassword());
-        Assert.assertEquals(120000, parameters.getSocketTimeout());
-    }
-
-    @Rule
-    public ExpectedException exceptionRule = ExpectedException.none();
-
-    @Test(expected = GoraException.class)
-    public void testAuthorization() throws IOException {
-        Configuration conf = new Configuration();
-        Properties properties = new Properties();
-        properties.setProperty("gora.datastore.elasticsearch.authorizationToken", "u6iuAxZ0RG1Kcm5jVFI4eU4tZU9aVFEwT2F3");
-        properties.load(getClass().getClassLoader().getResourceAsStream("gora.properties"));
-        ElasticsearchStore<String, Employee> store =
-                DataStoreFactory.createDataStore(ElasticsearchStore.class, String.class, Employee.class, conf);
-        store.initialize(String.class, Employee.class, properties);
-
-        exceptionRule.expect(IllegalArgumentException.class);
-        exceptionRule.expectMessage("Multiple authentication mechanisms were specified.");
     }
 }

@@ -29,6 +29,7 @@ public class ElasticsearchParameters {
     private String host;
     private int port;
     private String scheme;
+    private String authenticationMethod;
     private String username;
     private String password;
     private String authorizationToken;
@@ -65,6 +66,14 @@ public class ElasticsearchParameters {
 
     public void setScheme(String scheme) {
         this.scheme = scheme;
+    }
+
+    public String getAuthenticationMethod() {
+        return authenticationMethod;
+    }
+
+    public void setAuthenticationMethod(String authenticationMethod) {
+        this.authenticationMethod = authenticationMethod;
     }
 
     public String getUsername() {
@@ -154,6 +163,11 @@ public class ElasticsearchParameters {
         String schemeProperty = properties.getProperty(ElasticsearchConstants.PROP_SCHEME);
         if (schemeProperty != null) {
             elasticsearchParameters.setScheme(schemeProperty);
+        }
+
+        String authenticationMethodProperty = properties.getProperty(ElasticsearchConstants.PROP_AUTHENTICATIONMETHOD);
+        if (authenticationMethodProperty != null) {
+            elasticsearchParameters.setAuthenticationMethod(authenticationMethodProperty);
         }
 
         String usernameProperty = properties.getProperty(ElasticsearchConstants.PROP_USERNAME);

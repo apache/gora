@@ -99,36 +99,34 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
     private RestHighLevelClient createClient(ElasticsearchParameters parameters) {
         RestClientBuilder clientBuilder = RestClient.builder(new HttpHost(parameters.getHost(), parameters.getPort()));
 
-        // Checking for authorization type.
-        boolean authorization = false;
-        if (parameters.getUsername() != null && parameters.getPassword() != null) {
-            final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-            credentialsProvider.setCredentials(AuthScope.ANY,
-                    new UsernamePasswordCredentials(parameters.getUsername(), parameters.getPassword()));
-            clientBuilder.setHttpClientConfigCallback(
-                    httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
-            authorization = true;
-        }
-        if (parameters.getAuthorizationToken() != null) {
-            if (authorization) {
-                throw new IllegalArgumentException("Multiple authentication mechanisms were specified.");
-            } else {
-                Header[] defaultHeaders = new Header[]{new BasicHeader("Authorization",
-                        parameters.getAuthorizationToken())};
-                clientBuilder.setDefaultHeaders(defaultHeaders);
-                authorization = true;
-            }
-        }
-        if (parameters.getApiKeyId() != null && parameters.getApiKeySecret() != null) {
-            if (authorization) {
-                throw new IllegalArgumentException("Multiple authentication mechanisms were specified.");
-            } else {
-                String apiKeyAuth = Base64.getEncoder()
-                        .encodeToString((parameters.getApiKeyId() + ":" + parameters.getApiKeySecret())
-                                .getBytes(StandardCharsets.UTF_8));
-                Header[] defaultHeaders = new Header[]{new BasicHeader("Authorization", "ApiKey " + apiKeyAuth)};
-                clientBuilder.setDefaultHeaders(defaultHeaders);
-            }
+        // Choosing the authentication method.
+        switch (parameters.getAuthenticationMethod()) {
+            case "BASIC":
+                if (parameters.getUsername() != null && parameters.getPassword() != null) {
+                    final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+                    credentialsProvider.setCredentials(AuthScope.ANY,
+                            new UsernamePasswordCredentials(parameters.getUsername(), parameters.getPassword()));
+                    clientBuilder.setHttpClientConfigCallback(
+                            httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
+                }
+                break;
+            case "TOKEN":
+                if (parameters.getAuthorizationToken() != null) {
+                    Header[] defaultHeaders = new Header[]{new BasicHeader("Authorization",
+                            parameters.getAuthorizationToken())};
+                    clientBuilder.setDefaultHeaders(defaultHeaders);
+                }
+                break;
+            case "APIKEY":
+                if (parameters.getApiKeyId() != null && parameters.getApiKeySecret() != null) {
+                    String apiKeyAuth = Base64.getEncoder()
+                            .encodeToString((parameters.getApiKeyId() + ":" + parameters.getApiKeySecret())
+                                    .getBytes(StandardCharsets.UTF_8));
+                    Header[] defaultHeaders = new Header[]{new BasicHeader("Authorization", "ApiKey " + apiKeyAuth)};
+                    clientBuilder.setDefaultHeaders(defaultHeaders);
+
+                }
+                break;
         }
 
         if (parameters.getConnectTimeout() != 0) {

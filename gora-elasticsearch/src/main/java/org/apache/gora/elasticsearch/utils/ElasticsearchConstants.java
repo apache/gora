@@ -37,6 +37,7 @@ public class ElasticsearchConstants {
     public static final String PROP_HOST = "gora.datastore.elasticsearch.host";
     public static final String PROP_PORT = "gora.datastore.elasticsearch.port";
     public static final String PROP_SCHEME = "gora.datastore.elasticsearch.scheme";
+    public static final String PROP_AUTHENTICATIONMETHOD = "gora.datastore.elasticsearch.authenticationMethod";
     public static final String PROP_USERNAME = "gora.datastore.elasticsearch.username";
     public static final String PROP_PASSWORD = "gora.datastore.elasticsearch.password";
     public static final String PROP_AUTHORIZATIONTOKEN = "gora.datastore.elasticsearch.authorizationToken";
