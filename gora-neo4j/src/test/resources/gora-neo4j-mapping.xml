@@ -15,15 +15,29 @@
          limitations under the License.
 -->
 
-<gora-otd>
+<gora-otd xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+          xsi:noNamespaceSchemaLocation="gora-neo4j.xsd">
   <class name="org.apache.gora.examples.generated.Employee" keyClass="java.lang.String" label="Employee">
     <nodeKey property="pkssn" type="VARCHAR" />
-    <field name="ssn" property="ssn" type="VARCHAR" unique="false" exists="false" index="false"/>
-    <field name="value" property="value" type="VARCHAR" unique="false" exists="false" index="false"/>
-    <field name="name" property="name" type="VARCHAR" unique="false" exists="false" index="false"/>
-    <field name="dateOfBirth" property="dateOfBirth" type="INTEGER" unique="false" exists="false" index="false"/>
-    <field name="salary" property="salary" type="INTEGER" unique="false" exists="false" index="false"/>
-    <field name="boss" property="boss" type="JAVA_OBJECT" unique="false" exists="false" index="false"/>
-    <field name="webpage" property="webpage" type="JAVA_OBJECT" unique="false" exists="false" index="false"/>
+    <field name="ssn" property="ssn" type="VARCHAR" />
+    <field name="value" property="value" type="VARCHAR" />
+    <field name="name" property="name" type="VARCHAR" />
+    <field name="dateOfBirth" property="dateOfBirth" type="INTEGER" />
+    <field name="salary" property="salary" type="INTEGER" />
+    <field name="boss" property="boss" type="JAVA_OBJECT" />
+    <field name="webpage" property="webpage" type="JAVA_OBJECT" />
   </class>
+  
+  <class name="org.apache.gora.examples.generated.WebPage" keyClass="java.lang.String" label="Webpage">
+    <nodeKey property="pkurl" type="VARCHAR" />
+    <field name="url" property="url" type="VARCHAR" />
+    <field name="content" property="content" type="VARCHAR" />
+    <field name="parsedContent" property="parsedContent" type="ARRAY" />
+    <field name="outlinks" property="outlinks" type="JAVA_OBJECT" />
+    <field name="headers" property="headers" type="JAVA_OBJECT" />
+    <field name="metadata" property="metadata" type="VARCHAR" />
+    <field name="byteData" property="byteData" type="JAVA_OBJECT" />
+    <field name="stringData" property="stringData" type="JAVA_OBJECT" />
+  </class>
+
 </gora-otd>

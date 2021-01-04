@@ -27,4 +27,6 @@ public class Neo4jConstants {
   public static final String PROPERTY_USERNAME = "gora.datastore.neo4j.username";
   public static final String PROPERTY_PASSWORD = "gora.datastore.neo4j.password";
   public static final String PROPERTY_PROTOCOL = "gora.datastore.neo4j.protocol";
+  
+  public static final String DRIVER_NAME = "org.neo4j.jdbc.Driver";
 }

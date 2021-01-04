@@ -17,6 +17,7 @@
 package org.apache.gora.neo4j.store;
 
 import java.util.Properties;
+import org.apache.hadoop.conf.Configuration;
 
 /**
  * Parameters for Neo4j.
@@ -83,8 +84,12 @@ public class Neo4jParameters {
    * @param properties Properties list
    * @return Neo4j parameters instance
    */
-  public static Neo4jParameters load(Properties properties) {
-    return new Neo4jParameters(properties.getProperty(Neo4jConstants.PROPERTY_HOST), properties.getProperty(Neo4jConstants.PROPERTY_PORT), properties.getProperty(Neo4jConstants.PROPERTY_USERNAME), properties.getProperty(Neo4jConstants.PROPERTY_PASSWORD), properties.getProperty(Neo4jConstants.PROPERTY_PROTOCOL));
+  public static Neo4jParameters load(Properties properties, Configuration conf) {
+    return new Neo4jParameters(conf.get(Neo4jConstants.PROPERTY_HOST, properties.getProperty(Neo4jConstants.PROPERTY_HOST)),
+            conf.get(Neo4jConstants.PROPERTY_PORT, properties.getProperty(Neo4jConstants.PROPERTY_PORT)),
+            conf.get(Neo4jConstants.PROPERTY_USERNAME, properties.getProperty(Neo4jConstants.PROPERTY_USERNAME)),
+            conf.get(Neo4jConstants.PROPERTY_PASSWORD, properties.getProperty(Neo4jConstants.PROPERTY_PASSWORD)),
+            conf.get(Neo4jConstants.PROPERTY_PROTOCOL, properties.getProperty(Neo4jConstants.PROPERTY_PROTOCOL)));
   }
 
 }

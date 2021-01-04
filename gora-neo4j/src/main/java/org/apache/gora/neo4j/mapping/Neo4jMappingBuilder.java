@@ -19,10 +19,15 @@ package org.apache.gora.neo4j.mapping;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.SchemaFactory;
+import org.apache.commons.io.IOUtils;
 import org.apache.gora.neo4j.store.Neo4jStore;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.w3c.dom.Document;
@@ -34,6 +39,7 @@ import org.w3c.dom.NodeList;
  */
 public class Neo4jMappingBuilder<K, T extends PersistentBase> {
 
+  protected static final String XSD_MAPPING_FILE = "gora-neo4j.xsd";
   private final Neo4jStore<K, T> dataStore;
 
   public Neo4jMappingBuilder(Neo4jStore<K, T> dataStore) {
@@ -41,20 +47,22 @@ public class Neo4jMappingBuilder<K, T extends PersistentBase> {
   }
 
   private String getKeyClassCanonicalName() {
-    //return dataStore.getKeyClass().getCanonicalName();
-    return "java.lang.String";
+    return dataStore.getKeyClass().getCanonicalName();
   }
 
   private String getPersistentClassCanonicalName() {
-    //return dataStore.getKeyClass().getCanonicalName();
-    return "org.apache.gora.examples.generated.Employee";
+    return dataStore.getPersistentClass().getCanonicalName();
   }
 
   public Neo4jMapping readMapping(InputStream inputStream) throws IOException {
     try {
+      String mappingstream = IOUtils.toString(inputStream, Charset.defaultCharset());
       Neo4jMapping neo4jmapping = new Neo4jMapping();
+      javax.xml.validation.Schema newSchema = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
+              .newSchema(new StreamSource(getClass().getClassLoader().getResourceAsStream(XSD_MAPPING_FILE)));
+      newSchema.newValidator().validate(new StreamSource(IOUtils.toInputStream(mappingstream, Charset.defaultCharset())));
       DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-      Document dom = db.parse(inputStream);
+      Document dom = db.parse(IOUtils.toInputStream(mappingstream, Charset.defaultCharset()));
       Element root = dom.getDocumentElement();
       NodeList classesNodes = root.getElementsByTagName("class");
       for (int indexClasses = 0; indexClasses < classesNodes.getLength(); indexClasses++) {
