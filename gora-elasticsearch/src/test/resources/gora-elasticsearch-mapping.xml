@@ -17,7 +17,8 @@
    limitations under the License.
 -->
 
-<gora-otd>
+<gora-otd xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="gora-elasticsearch.xsd">
 
     <class name="org.apache.gora.examples.generated.Employee" keyClass="java.lang.String" index="frontier">
         <field name="name" docfield="name" type="text"/>
@@ -41,7 +42,7 @@
     </class>
 
     <class name="org.apache.gora.examples.generated.TokenDatum" keyClass="java.lang.String" index="TokenDatum">
-        <field name="count" docdocfield="count" type="integer"/>
+        <field name="count" docfield="count" type="integer"/>
     </class>
 
 </gora-otd>

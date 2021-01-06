@@ -26,10 +26,19 @@ import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
+import javax.xml.XMLConstants;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * Builder for Mapping definitions of Elasticsearch.
@@ -37,6 +46,11 @@ import java.util.*;
 public class ElasticsearchMappingBuilder<K, T extends PersistentBase> {
 
     private static final Logger LOG = LoggerFactory.getLogger(ElasticsearchMappingBuilder.class);
+
+    /**
+     * XSD validation file for the XML mapping.
+     */
+    private static final String XSD_MAPPING_FILE = "gora-elasticsearch.xsd";
 
     // Index description
     static final String ATT_NAME = "name";
@@ -101,6 +115,16 @@ public class ElasticsearchMappingBuilder<K, T extends PersistentBase> {
                 LOG.error("The mapping input stream is null!");
                 throw new GoraException("The mapping input stream is null!");
             }
+
+            // XSD validation for XML file
+            File schemaFile = new File(XSD_MAPPING_FILE);
+            Source xmlFile = new StreamSource(inputStream);
+            SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            Schema schema = schemaFactory.newSchema(schemaFile);
+            Validator validator = schema.newValidator();
+            validator.validate(xmlFile);
+            LOG.info(xmlFile.getSystemId() + " is valid.");
+
             Document document = saxBuilder.build(inputStream);
             if (document == null) {
                 LOG.error("The mapping document is null!");
@@ -122,7 +146,7 @@ public class ElasticsearchMappingBuilder<K, T extends PersistentBase> {
             }
 
 
-        } catch (IOException | JDOMException | ConfigurationException ex) {
+        } catch (IOException | JDOMException | ConfigurationException | SAXException ex) {
             throw new RuntimeException(ex);
         }
         LOG.info("Gora Elasticsearch mapping file was read successfully.");
