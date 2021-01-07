@@ -17,6 +17,7 @@
 package org.apache.gora.elasticsearch.mapping;
 
 import com.google.inject.ConfigurationException;
+import org.apache.commons.io.IOUtils;
 import org.apache.gora.elasticsearch.store.ElasticsearchStore;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.util.GoraException;
@@ -33,10 +34,9 @@ import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Locale;
 
@@ -116,16 +116,17 @@ public class ElasticsearchMappingBuilder<K, T extends PersistentBase> {
                 throw new GoraException("The mapping input stream is null!");
             }
 
-            // XSD validation for XML file
-            File schemaFile = new File(XSD_MAPPING_FILE);
-            Source xmlFile = new StreamSource(inputStream);
-            SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            Schema schema = schemaFactory.newSchema(schemaFile);
-            Validator validator = schema.newValidator();
-            validator.validate(xmlFile);
-            LOG.info(xmlFile.getSystemId() + " is valid.");
+            // Convert input stream to a string to use it a few times
+            String mappingStream = IOUtils.toString(inputStream, Charset.defaultCharset());
 
-            Document document = saxBuilder.build(inputStream);
+            // XSD validation for XML file
+            Source xmlSource = new StreamSource(IOUtils.toInputStream(mappingStream, Charset.defaultCharset()));
+            Schema schema = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
+                    .newSchema(new StreamSource(getClass().getClassLoader().getResourceAsStream(XSD_MAPPING_FILE)));
+            schema.newValidator().validate(xmlSource);
+            LOG.info(xmlSource.getSystemId() + " is valid.");
+
+            Document document = saxBuilder.build(IOUtils.toInputStream(mappingStream, Charset.defaultCharset()));
             if (document == null) {
                 LOG.error("The mapping document is null!");
                 throw new GoraException("The mapping document is null!");

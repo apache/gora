@@ -21,6 +21,7 @@ import org.apache.gora.elasticsearch.GoraElasticsearchTestDriver;
 import org.apache.gora.elasticsearch.mapping.ElasticsearchMapping;
 import org.apache.gora.elasticsearch.mapping.Field;
 import org.apache.gora.elasticsearch.utils.ElasticsearchParameters;
+import org.apache.gora.examples.generated.EmployeeInt;
 import org.apache.gora.store.DataStoreTestBase;
 import org.apache.gora.util.GoraException;
 import org.junit.Assert;
@@ -74,5 +75,14 @@ public class TestElasticsearchStore extends DataStoreTestBase {
         Assert.assertEquals("BASIC", parameters.getAuthenticationMethod());
         Assert.assertEquals("username", parameters.getUsername());
         Assert.assertEquals("password", parameters.getPassword());
+    }
+
+    @Test(expected = GoraException.class)
+    public void testInvalidXmlFile() throws Exception {
+        log.info("test method: testInvalidXmlFile");
+
+        Properties properties = new Properties();
+        properties.setProperty("gora.elasticsearch.mapping.file", "gora-elasticsearch-mapping-invalid.xml");
+        DataStoreTestBase.testDriver.createDataStore(String.class, EmployeeInt.class, properties);
     }
 }
