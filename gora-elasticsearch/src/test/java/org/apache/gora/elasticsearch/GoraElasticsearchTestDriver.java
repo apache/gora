@@ -37,7 +37,9 @@ public class GoraElasticsearchTestDriver extends GoraTestDriver {
      */
     public GoraElasticsearchTestDriver() {
         super(ElasticsearchStore.class);
-        elasticsearchContainer = new ElasticsearchContainer(DOCKER_IMAGE);
+        elasticsearchContainer = new ElasticsearchContainer(DOCKER_IMAGE)
+                .withEnv("ELASTIC_USERNAME", ElasticsearchConstants.PROP_USERNAME)
+                .withEnv("ELASTIC_PASSWORD", ElasticsearchConstants.PROP_PASSWORD);
     }
 
     /**
