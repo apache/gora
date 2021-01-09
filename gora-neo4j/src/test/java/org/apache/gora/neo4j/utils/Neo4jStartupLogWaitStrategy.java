@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.gora.neo4j;
+package org.apache.gora.neo4j.utils;
 
 import org.testcontainers.containers.wait.strategy.LogMessageWaitStrategy;
 

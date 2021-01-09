@@ -16,8 +16,11 @@
  */
 package org.apache.gora.neo4j.store;
 
+import java.util.Properties;
+import org.apache.gora.examples.generated.EmployeeInt;
 import org.apache.gora.neo4j.GoraNeo4jTestDriver;
 import org.apache.gora.store.DataStoreTestBase;
+import org.apache.gora.util.GoraException;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -236,4 +239,18 @@ public class Neo4jStoreTest extends DataStoreTestBase {
   @Ignore
   public void testObjectFieldValue() throws Exception {
   }
+
+  /**
+   * XSD Validation.
+   *
+   * Validate bad formatted XML Mappings.
+   */
+  @Test(expected = GoraException.class)
+  public void testXSDValidation() throws Exception {
+    Properties properties = new Properties();
+    properties.setProperty("gora.xsd_validation", "true");
+    properties.setProperty("gora.neo4j.mapping.file", "gora-neo4j-mapping-bad.xml");
+    DataStoreTestBase.testDriver.createDataStore(String.class, EmployeeInt.class, properties);
+  }
+
 }

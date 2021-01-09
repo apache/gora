@@ -27,10 +27,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Level;
 import org.apache.commons.io.IOUtils;
 import org.apache.gora.neo4j.mapping.Neo4jMapping;
 import org.apache.gora.neo4j.mapping.Neo4jMappingBuilder;
+import org.apache.gora.neo4j.utils.CypherDDL;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
@@ -38,6 +38,8 @@ import org.apache.gora.query.Result;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.GoraException;
 import org.neo4j.cypherdsl.core.Cypher;
+import org.neo4j.cypherdsl.core.Literal;
+import org.neo4j.cypherdsl.core.Node;
 import org.neo4j.cypherdsl.core.Statement;
 import org.neo4j.cypherdsl.core.renderer.Renderer;
 import org.slf4j.Logger;
@@ -54,6 +56,7 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
   protected static final String PARSE_MAPPING_FILE_KEY = "gora.neo4j.mapping.file";
   protected static final String DEFAULT_MAPPING_FILE = "gora-neo4j-mapping.xml";
   protected static final String XML_MAPPING_DEFINITION = "gora.mapping";
+  protected static final String XSD_VALIDATION = "gora.xsd_validation";
 
   public static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private Neo4jMapping neo4jMapping;
@@ -87,7 +90,7 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       }
 
       Neo4jMappingBuilder mappingBuilder = new Neo4jMappingBuilder(this);
-      neo4jMapping = mappingBuilder.readMapping(mappingStream);
+      neo4jMapping = mappingBuilder.readMapping(mappingStream, Boolean.valueOf(properties.getProperty(XSD_VALIDATION, "false")));
       Neo4jParameters load = Neo4jParameters.load(properties, getConf());
       connection = connectToServer(load);
       LOG.info("Neo4j store was successfully initialized");
@@ -138,9 +141,7 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     if (schemaExists()) {
       return;
     }
-    String create = "CREATE CONSTRAINT "
-            + "gora_unique_" + this.neo4jMapping.getLabel() + this.neo4jMapping.getNodeKey().getName()
-            + " ON (datastore:" + this.neo4jMapping.getLabel() + ") ASSERT datastore." + this.neo4jMapping.getNodeKey().getName() + " IS UNIQUE";
+    String create = CypherDDL.createNodeKeyConstraint(this.neo4jMapping.getLabel(), this.neo4jMapping.getNodeKey().getName());
     try (PreparedStatement stmt = this.connection.prepareStatement(create)) {
       stmt.execute();
     } catch (SQLException ex) {
@@ -157,8 +158,7 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     if (!schemaExists()) {
       return;
     }
-    String delete = "DROP CONSTRAINT "
-            + "gora_unique_" + this.neo4jMapping.getLabel() + this.neo4jMapping.getNodeKey().getName();
+    String delete = CypherDDL.dropNodeKeyConstraint(this.neo4jMapping.getLabel(), this.neo4jMapping.getNodeKey().getName());
     try (PreparedStatement stmt = this.connection.prepareStatement(delete)) {
       stmt.execute();
     } catch (SQLException ex) {
@@ -175,7 +175,7 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     try (PreparedStatement stmt = this.connection.prepareStatement(render)) {
       try (ResultSet rs = stmt.executeQuery()) {
         while (rs.next()) {
-          if (rs.getString("name").equals("gora_unique_" + this.neo4jMapping.getLabel() + this.neo4jMapping.getNodeKey().getName())) {
+          if (rs.getString("name").equals(CypherDDL.createNodeKeyConstraintName(this.neo4jMapping.getLabel(), this.neo4jMapping.getNodeKey().getName()))) {
             exits = true;
           }
         }
@@ -188,7 +188,22 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
 
   @Override
   public boolean exists(K key) throws GoraException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    boolean found = false;
+    Node named = Cypher.node(this.neo4jMapping.getLabel()).withProperties(this.neo4jMapping.getNodeKey().getName(), Cypher.literalOf(key)).named("r");
+    Literal<Boolean> literalTrue = Cypher.literalTrue();
+    Statement build = Cypher.match(named).returning(literalTrue).build();
+    Renderer defaultRenderer = Renderer.getDefaultRenderer();
+    String render = defaultRenderer.render(build);
+    try (PreparedStatement stmt = this.connection.prepareStatement(render)) {
+      try (ResultSet rs = stmt.executeQuery()) {
+        while (rs.next()) {
+          found = true;
+        }
+      }
+    } catch (SQLException ex) {
+      throw new GoraException(ex);
+    }
+    return found;
   }
 
   @Override
@@ -203,7 +218,17 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
 
   @Override
   public boolean delete(K key) throws GoraException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    boolean response = false;
+    Node named = Cypher.node(this.neo4jMapping.getLabel()).withProperties(this.neo4jMapping.getNodeKey().getName(), Cypher.literalOf(key)).named("r");
+    Statement build = Cypher.match(named).delete(named).build();
+    Renderer defaultRenderer = Renderer.getDefaultRenderer();
+    String render = defaultRenderer.render(build);
+    try (PreparedStatement stmt = this.connection.prepareStatement(render)) {
+      response = stmt.execute();
+    } catch (SQLException ex) {
+      throw new GoraException(ex);
+    }
+    return response;
   }
 
   @Override

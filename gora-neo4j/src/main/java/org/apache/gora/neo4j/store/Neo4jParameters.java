@@ -24,10 +24,25 @@ import org.apache.hadoop.conf.Configuration;
  */
 public class Neo4jParameters {
 
+  /**
+   * IP address or hostname of the neo4j server.
+   */
   private String host;
+  /**
+   * Port number of the neo4j server.
+   */
   private String port;
+  /**
+   * Username for the JDBC connection.
+   */
   private String username;
+  /**
+   * Password for the JDBC connection.
+   */
   private String password;
+  /**
+   * Access protocol used in the Neo4j JDBC Driver.
+   */
   private String protocol;
 
   public Neo4jParameters(String host, String port, String username, String password, String protocol) {
@@ -81,8 +96,9 @@ public class Neo4jParameters {
   /**
    * Reads parameters from a properties list
    *
-   * @param properties Properties list
-   * @return Neo4j parameters instance
+   * @param properties Properties list.
+   * @param conf Hadoop configuration.
+   * @return Neo4j parameters instance.
    */
   public static Neo4jParameters load(Properties properties, Configuration conf) {
     return new Neo4jParameters(conf.get(Neo4jConstants.PROPERTY_HOST, properties.getProperty(Neo4jConstants.PROPERTY_HOST)),

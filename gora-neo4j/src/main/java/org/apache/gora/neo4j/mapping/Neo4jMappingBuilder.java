@@ -54,13 +54,15 @@ public class Neo4jMappingBuilder<K, T extends PersistentBase> {
     return dataStore.getPersistentClass().getCanonicalName();
   }
 
-  public Neo4jMapping readMapping(InputStream inputStream) throws IOException {
+  public Neo4jMapping readMapping(InputStream inputStream, boolean xsdValidation) throws IOException {
     try {
       String mappingstream = IOUtils.toString(inputStream, Charset.defaultCharset());
       Neo4jMapping neo4jmapping = new Neo4jMapping();
-      javax.xml.validation.Schema newSchema = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
-              .newSchema(new StreamSource(getClass().getClassLoader().getResourceAsStream(XSD_MAPPING_FILE)));
-      newSchema.newValidator().validate(new StreamSource(IOUtils.toInputStream(mappingstream, Charset.defaultCharset())));
+      if (xsdValidation) {
+        javax.xml.validation.Schema newSchema = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
+                .newSchema(new StreamSource(getClass().getClassLoader().getResourceAsStream(XSD_MAPPING_FILE)));
+        newSchema.newValidator().validate(new StreamSource(IOUtils.toInputStream(mappingstream, Charset.defaultCharset())));
+      }
       DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
       Document dom = db.parse(IOUtils.toInputStream(mappingstream, Charset.defaultCharset()));
       Element root = dom.getDocumentElement();
@@ -77,10 +79,7 @@ public class Neo4jMappingBuilder<K, T extends PersistentBase> {
             String name = item.getAttribute("name");
             String column = item.getAttribute("property");
             String type = item.getAttribute("type");
-            boolean unique = item.hasAttribute("unique") && Boolean.valueOf(item.getAttribute("unique"));
-            boolean exists = item.hasAttribute("exists") && Boolean.valueOf(item.getAttribute("exists"));
-            boolean index = item.hasAttribute("index") && Boolean.valueOf(item.getAttribute("index"));
-            mapFields.put(name, new Property(column, PropertyTypes.valueOf(type), unique, exists, index));
+            mapFields.put(name, new Property(column, PropertyTypes.valueOf(type)));
           }
           neo4jmapping.setProperties(mapFields);
           Element nodekey = (Element) classElement.getElementsByTagName("nodeKey").item(0);

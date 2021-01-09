@@ -17,20 +17,16 @@
  */
 package org.apache.gora.neo4j;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import org.apache.gora.neo4j.utils.Neo4jStartupLogWaitStrategy;
 import java.time.Duration;
 import org.apache.gora.GoraTestDriver;
 import org.apache.gora.neo4j.store.Neo4jConstants;
 import org.apache.gora.neo4j.store.Neo4jStore;
-import org.apache.gora.util.GoraException;
 import org.testcontainers.containers.GenericContainer;
 
 public class GoraNeo4jTestDriver extends GoraTestDriver {
 
-  private static final String DOCKER_IMAGE = "neo4j:latest";
+  private static final String DOCKER_IMAGE = "neo4j:enterprise";
   private final GenericContainer neo4jContainer;
 
   public GoraNeo4jTestDriver() {
@@ -38,7 +34,8 @@ public class GoraNeo4jTestDriver extends GoraTestDriver {
     GenericContainer container = new GenericContainer(DOCKER_IMAGE)
             .waitingFor(new Neo4jStartupLogWaitStrategy())
             .withStartupTimeout(Duration.ofMinutes(3))
-            .withEnv("NEO4J_AUTH", "neo4j/password");
+            .withEnv("NEO4J_AUTH", "neo4j/password")
+            .withEnv("NEO4J_ACCEPT_LICENSE_AGREEMENT", "yes");
     neo4jContainer = container;
   }
 

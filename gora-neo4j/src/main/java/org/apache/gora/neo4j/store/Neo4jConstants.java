@@ -22,11 +22,29 @@ package org.apache.gora.neo4j.store;
  */
 public class Neo4jConstants {
 
+  /**
+   * IP address or hostname of the neo4j server.
+   */
   public static final String PROPERTY_HOST = "gora.datastore.neo4j.host";
+  /**
+   * Port number of the neo4j server.
+   */
   public static final String PROPERTY_PORT = "gora.datastore.neo4j.port";
+  /**
+   * Username for the JDBC connection.
+   */
   public static final String PROPERTY_USERNAME = "gora.datastore.neo4j.username";
+  /**
+   * Password for the JDBC connection.
+   */
   public static final String PROPERTY_PASSWORD = "gora.datastore.neo4j.password";
+  /**
+   * Access protocol used in the Neo4j JDBC Driver.
+   */
   public static final String PROPERTY_PROTOCOL = "gora.datastore.neo4j.protocol";
-  
+
+  /**
+   * JDBC Driver used by Apache Gora.
+   */
   public static final String DRIVER_NAME = "org.neo4j.jdbc.Driver";
 }

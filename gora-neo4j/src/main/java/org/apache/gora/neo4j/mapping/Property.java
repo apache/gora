@@ -26,21 +26,10 @@ public class Property {
 
   private String name;
   private PropertyTypes sqltype;
-  private boolean unique = false;
-  private boolean exists = false;
-  private boolean index = false;
 
   public Property(String name, PropertyTypes sqltype) {
     this.name = name;
     this.sqltype = sqltype;
-  }
-
-  public Property(String name, PropertyTypes sqltype, boolean unique, boolean exists, boolean index) {
-    this.name = name;
-    this.sqltype = sqltype;
-    this.unique = unique;
-    this.exists = exists;
-    this.index = index;
   }
 
   public String getName() {
@@ -58,29 +47,4 @@ public class Property {
   public void setSqltype(PropertyTypes sqltype) {
     this.sqltype = sqltype;
   }
-
-  public boolean isUnique() {
-    return unique;
-  }
-
-  public void setUnique(boolean unique) {
-    this.unique = unique;
-  }
-
-  public boolean isExists() {
-    return exists;
-  }
-
-  public void setExists(boolean exists) {
-    this.exists = exists;
-  }
-
-  public boolean isIndex() {
-    return index;
-  }
-
-  public void setIndex(boolean index) {
-    this.index = index;
-  }
-
 }
