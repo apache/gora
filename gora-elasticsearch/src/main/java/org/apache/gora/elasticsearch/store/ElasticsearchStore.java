@@ -35,12 +35,14 @@ import org.apache.http.impl.nio.reactor.IOReactorConfig;
 import org.apache.http.message.BasicHeader;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.admin.indices.flush.FlushRequest;
+import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
+import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -204,7 +206,13 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
 
     @Override
     public boolean exists(K key) throws GoraException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        GetRequest getRequest = new GetRequest(elasticsearchMapping.getIndexName(), (String) key);
+        getRequest.fetchSourceContext(new FetchSourceContext(false)).storedFields("_none_");
+        try {
+            return client.exists(getRequest, RequestOptions.DEFAULT);
+        } catch (IOException ex) {
+            throw new GoraException(ex);
+        }
     }
 
     @Override
