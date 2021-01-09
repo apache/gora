@@ -26,17 +26,75 @@ import java.util.Properties;
  */
 public class ElasticsearchParameters {
 
+    /**
+     * Elasticsearch server host.
+     */
     private String host;
+
+    /**
+     * Elasticsearch server port.
+     */
     private int port;
+
+    /**
+     * Elasticsearch server scheme.
+     * Optional. If not provided, defaults to http.
+     */
     private String scheme;
+
+    /**
+     * Authentication method to connect to the server.
+     * Can be BASIC, TOKEN or APIKEY.
+     */
     private String authenticationMethod;
+
+    /**
+     * Username to use for server authentication.
+     * Required for BASIC authentication to connect to the server.
+     */
     private String username;
+
+    /**
+     * Password to use for server authentication.
+     * Required for BASIC authentication to connect to the server.
+     */
     private String password;
+
+    /**
+     * Authorization token to use for server authentication.
+     * Required for TOKEN authentication to connect to the server.
+     */
     private String authorizationToken;
+
+    /**
+     * API Key ID to use for server authentication.
+     * Required for APIKEY authentication to connect to the server.
+     */
     private String apiKeyId;
+
+    /**
+     * API Key Secret to use for server authentication.
+     * Required for APIKEY authentication to connect to the server.
+     */
     private String apiKeySecret;
+
+    /**
+     * Timeout in milliseconds used for establishing the connection to the server.
+     * Optional. If not provided, defaults to 5000s.
+     *
+     */
     private int connectTimeout;
+
+    /**
+     * Timeout in milliseconds used for waiting for data – after establishing the connection to the server.
+     * Optional. If not provided, defaults to 60000s.
+     */
     private int socketTimeout;
+
+    /**
+     * Number of worker threads used by the connection manager.
+     * Optional. If not provided, defaults to 1.
+     */
     private int ioThreadCount;
 
     public ElasticsearchParameters(String host, int port) {
