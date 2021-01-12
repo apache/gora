@@ -115,6 +115,8 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
                             new UsernamePasswordCredentials(parameters.getUsername(), parameters.getPassword()));
                     clientBuilder.setHttpClientConfigCallback(
                             httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
+                } else {
+                    throw new IllegalArgumentException("Missing username or password for BASIC authentication.");
                 }
                 break;
             case "TOKEN":
@@ -122,6 +124,8 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
                     Header[] defaultHeaders = new Header[]{new BasicHeader("Authorization",
                             parameters.getAuthorizationToken())};
                     clientBuilder.setDefaultHeaders(defaultHeaders);
+                } else {
+                    throw new IllegalArgumentException("Missing authorization token for TOKEN authentication.");
                 }
                 break;
             case "APIKEY":
@@ -131,7 +135,8 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
                                     .getBytes(StandardCharsets.UTF_8));
                     Header[] defaultHeaders = new Header[]{new BasicHeader("Authorization", "ApiKey " + apiKeyAuth)};
                     clientBuilder.setDefaultHeaders(defaultHeaders);
-
+                } else {
+                    throw new IllegalArgumentException("Missing API Key ID or API Key Secret for APIKEY authentication.");
                 }
                 break;
         }

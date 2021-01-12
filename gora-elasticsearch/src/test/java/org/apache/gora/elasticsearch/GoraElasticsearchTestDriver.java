@@ -20,7 +20,10 @@ package org.apache.gora.elasticsearch;
 import org.apache.gora.GoraTestDriver;
 import org.apache.gora.elasticsearch.store.ElasticsearchStore;
 import org.apache.gora.elasticsearch.utils.ElasticsearchConstants;
+import org.apache.gora.store.DataStoreFactory;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
+
+import java.util.Properties;
 
 /**
  * Helper class for third part tests using gora-elasticsearch backend.
@@ -37,9 +40,10 @@ public class GoraElasticsearchTestDriver extends GoraTestDriver {
      */
     public GoraElasticsearchTestDriver() {
         super(ElasticsearchStore.class);
+        Properties properties = DataStoreFactory.createProps();
         elasticsearchContainer = new ElasticsearchContainer(DOCKER_IMAGE)
-                .withEnv("ELASTIC_USERNAME", ElasticsearchConstants.PROP_USERNAME)
-                .withEnv("ELASTIC_PASSWORD", ElasticsearchConstants.PROP_PASSWORD);
+                .withEnv("ELASTIC_PASSWORD", properties.getProperty(ElasticsearchConstants.PROP_PASSWORD))
+                .withEnv("xpack.security.enabled", "true");
     }
 
     /**
