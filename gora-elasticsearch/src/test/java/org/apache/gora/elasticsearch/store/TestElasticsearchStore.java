@@ -82,7 +82,18 @@ public class TestElasticsearchStore extends DataStoreTestBase {
         log.info("test method: testInvalidXmlFile");
 
         Properties properties = DataStoreFactory.createProps();
-        properties.setProperty("gora.elasticsearch.mapping.file", "gora-elasticsearch-mapping-invalid.xml");
-        DataStoreTestBase.testDriver.createDataStore(String.class, EmployeeInt.class, properties);
+        properties.setProperty(ElasticsearchStore.PARSE_MAPPING_FILE_KEY, "gora-elasticsearch-mapping-invalid.xml");
+        properties.setProperty(ElasticsearchStore.XSD_VALIDATION, "true");
+        testDriver.createDataStore(String.class, EmployeeInt.class, properties);
+    }
+
+    @Test
+    public void testXsdValidationParameter() throws GoraException {
+        log.info("test method: testXsdValidationParameter");
+
+        Properties properties = DataStoreFactory.createProps();
+        properties.setProperty(ElasticsearchStore.PARSE_MAPPING_FILE_KEY, "gora-elasticsearch-mapping-invalid.xml");
+        properties.setProperty(ElasticsearchStore.XSD_VALIDATION, "false");
+        testDriver.createDataStore(String.class, EmployeeInt.class, properties);
     }
 }

@@ -64,8 +64,9 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
 
     public static final Logger LOG = LoggerFactory.getLogger(ElasticsearchStore.class);
     private static final String DEFAULT_MAPPING_FILE = "gora-elasticsearch-mapping.xml";
-    private static final String PARSE_MAPPING_FILE_KEY = "gora.elasticsearch.mapping.file";
+    public static final String PARSE_MAPPING_FILE_KEY = "gora.elasticsearch.mapping.file";
     private static final String XML_MAPPING_DEFINITION = "gora.mapping";
+    public static final String XSD_VALIDATION = "gora.xsd_validation";
 
     /**
      * Elasticsearch client
@@ -91,9 +92,10 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
                 }
                 mappingStream = org.apache.commons.io.IOUtils.toInputStream(properties.getProperty(XML_MAPPING_DEFINITION), (Charset) null);
             } else {
-                mappingStream = getClass().getClassLoader().getResourceAsStream(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE));
+                mappingStream = getClass().getClassLoader().getResourceAsStream(properties.getProperty(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE));
             }
-            builder.readMappingFile(mappingStream);
+            String xsdValidation = properties.getProperty(XSD_VALIDATION, "false");
+            builder.readMappingFile(mappingStream, Boolean.parseBoolean(xsdValidation));
             elasticsearchMapping = builder.getElasticsearchMapping();
             client = createClient(parameters);
             LOG.info("Elasticsearch store was successfully initialized.");

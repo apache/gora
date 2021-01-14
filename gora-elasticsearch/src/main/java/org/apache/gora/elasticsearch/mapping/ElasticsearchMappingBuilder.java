@@ -106,9 +106,10 @@ public class ElasticsearchMappingBuilder<K, T extends PersistentBase> {
     /**
      * Reads Elasticsearch mappings from file.
      *
-     * @param inputStream Mapping input stream
+     * @param inputStream   Mapping input stream
+     * @param xsdValidation Parameter for enabling XSD validation
      */
-    public void readMappingFile(InputStream inputStream) {
+    public void readMappingFile(InputStream inputStream, boolean xsdValidation) {
         try {
             SAXBuilder saxBuilder = new SAXBuilder();
             if (inputStream == null) {
@@ -120,11 +121,13 @@ public class ElasticsearchMappingBuilder<K, T extends PersistentBase> {
             String mappingStream = IOUtils.toString(inputStream, Charset.defaultCharset());
 
             // XSD validation for XML file
-            Source xmlSource = new StreamSource(IOUtils.toInputStream(mappingStream, Charset.defaultCharset()));
-            Schema schema = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
-                    .newSchema(new StreamSource(getClass().getClassLoader().getResourceAsStream(XSD_MAPPING_FILE)));
-            schema.newValidator().validate(xmlSource);
-            LOG.info(xmlSource.getSystemId() + " is valid.");
+            if (xsdValidation) {
+                Source xmlSource = new StreamSource(IOUtils.toInputStream(mappingStream, Charset.defaultCharset()));
+                Schema schema = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
+                        .newSchema(new StreamSource(getClass().getClassLoader().getResourceAsStream(XSD_MAPPING_FILE)));
+                schema.newValidator().validate(xmlSource);
+                LOG.info("Mapping file is valid.");
+            }
 
             Document document = saxBuilder.build(IOUtils.toInputStream(mappingStream, Charset.defaultCharset()));
             if (document == null) {
