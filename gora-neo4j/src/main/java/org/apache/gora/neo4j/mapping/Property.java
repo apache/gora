@@ -17,14 +17,18 @@
  */
 package org.apache.gora.neo4j.mapping;
 
-import java.sql.Types;
-
 /**
  * Neo4j property class.
  */
 public class Property {
 
+  /**
+   * The name of the property in Neo4j.
+   */
   private String name;
+  /**
+   * The Neo4j Datatype of the property.
+   */
   private PropertyTypes sqltype;
 
   public Property(String name, PropertyTypes sqltype) {

@@ -19,6 +19,9 @@ package org.apache.gora.neo4j.utils;
 
 import org.testcontainers.containers.wait.strategy.LogMessageWaitStrategy;
 
+/**
+ * Wait strategy for Neo4j.
+ */
 public class Neo4jStartupLogWaitStrategy extends LogMessageWaitStrategy {
 
   private static final String REGEX = ".*INFO  Started.*";

@@ -16,9 +16,11 @@
  */
 package org.apache.gora.neo4j.store;
 
+import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -26,17 +28,24 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
-import org.apache.commons.io.IOUtils;
+import java.util.concurrent.ConcurrentHashMap;
+import org.apache.avro.Schema;
+import org.apache.avro.specific.SpecificDatumReader;
+import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.gora.neo4j.mapping.Neo4jMapping;
 import org.apache.gora.neo4j.mapping.Neo4jMappingBuilder;
+import org.apache.gora.neo4j.mapping.Property;
 import org.apache.gora.neo4j.utils.CypherDDL;
+import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.GoraException;
+import org.apache.gora.util.IOUtils;
 import org.neo4j.cypherdsl.core.Cypher;
 import org.neo4j.cypherdsl.core.Literal;
 import org.neo4j.cypherdsl.core.Node;
@@ -62,6 +71,9 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
   private Neo4jMapping neo4jMapping;
   private Connection connection;
 
+  private static final ConcurrentHashMap<Schema, SpecificDatumReader<?>> readerMap = new ConcurrentHashMap<>();
+  private static final ConcurrentHashMap<Schema, SpecificDatumWriter<?>> writerMap = new ConcurrentHashMap<>();
+
   /**
    * Initialize the data store by reading the credentials, setting the client's
    * properties up and reading the mapping file. Initialize is called when then
@@ -84,7 +96,7 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
         if (LOG.isTraceEnabled()) {
           LOG.trace("{} = {}", XML_MAPPING_DEFINITION, properties.getProperty(XML_MAPPING_DEFINITION));
         }
-        mappingStream = IOUtils.toInputStream(properties.getProperty(XML_MAPPING_DEFINITION), (Charset) null);
+        mappingStream = org.apache.commons.io.IOUtils.toInputStream(properties.getProperty(XML_MAPPING_DEFINITION), (Charset) null);
       } else {
         mappingStream = getClass().getClassLoader().getResourceAsStream(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE));
       }
@@ -213,7 +225,44 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
 
   @Override
   public void put(K key, T obj) throws GoraException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    try {
+      if (obj.isDirty()) {
+        // Create a new node
+        Node node = Cypher.node(this.neo4jMapping.getLabel());
+        //Add Node Key property
+        List<Object> props = Lists.newArrayList();
+        props.add(this.neo4jMapping.getNodeKey().getName());
+        props.add(Cypher.literalOf(key));
+        //Add data properties
+        Schema schemaObj = obj.getSchema();
+        List<Schema.Field> fields = schemaObj.getFields();
+        for (Schema.Field field : fields) {
+          Schema schema1 = field.schema();
+          Object fieldValue = obj.get(field.pos());
+          Property get = this.neo4jMapping.getProperties().get(field.name());
+          Object serializeFieldValue = serializeFieldValue(schema1, fieldValue);
+          if (serializeFieldValue == null) {
+            continue;
+          }
+          props.add(get.getName());
+          props.add(Cypher.literalOf(serializeFieldValue));
+        }
+        node = node.withProperties(props.toArray());
+        Statement build = Cypher.merge(node).build();
+        Renderer defaultRenderer = Renderer.getDefaultRenderer();
+        String render = defaultRenderer.render(build);
+        try (PreparedStatement stmt = this.connection.prepareStatement(render)) {
+          stmt.execute();
+        } catch (SQLException ex) {
+          throw new GoraException(ex);
+        }
+      } else {
+        LOG.info("Ignored putting object {} in the store as it is neither "
+                + "new, neither dirty.", new Object[]{obj});
+      }
+    } catch (Exception e) {
+      throw new GoraException(e);
+    }
   }
 
   @Override
@@ -263,6 +312,154 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     } catch (SQLException ex) {
       LOG.error(ex.getMessage(), ex);
     }
+  }
+
+  @SuppressWarnings("unchecked")
+  private Object serializeFieldValue(Schema fieldSchema, Object fieldValue) {
+    Object output = fieldValue;
+    switch (fieldSchema.getType()) {
+      case ARRAY:
+      case MAP:
+      case RECORD:
+        byte[] data = null;
+        try {
+          @SuppressWarnings("rawtypes")
+          SpecificDatumWriter writer = getDatumWriter(fieldSchema);
+          data = IOUtils.serialize(writer, fieldValue);
+        } catch (IOException e) {
+          LOG.error(e.getMessage(), e);
+        }
+        output = new String(data, Charset.defaultCharset());
+        break;
+      case UNION:
+        if (fieldSchema.getTypes().size() == 2 && isNullable(fieldSchema)) {
+          int schemaPos = getUnionSchema(fieldValue, fieldSchema);
+          Schema unionSchema = fieldSchema.getTypes().get(schemaPos);
+          output = serializeFieldValue(unionSchema, fieldValue);
+        } else {
+          data = null;
+          try {
+            @SuppressWarnings("rawtypes")
+            SpecificDatumWriter writer = getDatumWriter(fieldSchema);
+            data = IOUtils.serialize(writer, fieldValue);
+          } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
+          }
+          output = new String(data, Charset.defaultCharset());
+        }
+        break;
+      case FIXED:
+        break;
+      case ENUM:
+      case STRING:
+        output = fieldValue.toString();
+        break;
+      case BYTES:
+        output = ((ByteBuffer) fieldValue).array();
+        break;
+      case INT:
+      case LONG:
+      case FLOAT:
+      case DOUBLE:
+      case BOOLEAN:
+      case NULL:
+        break;
+      default:
+        throw new AssertionError(fieldSchema.getType().name());
+    }
+    return output;
+  }
+
+  @SuppressWarnings("rawtypes")
+  private SpecificDatumReader getDatumReader(Schema fieldSchema) {
+    SpecificDatumReader<?> reader = readerMap.get(fieldSchema);
+    if (reader == null) {
+      reader = new SpecificDatumReader(fieldSchema);// ignore dirty bits
+      SpecificDatumReader localReader;
+      if ((localReader = readerMap.putIfAbsent(fieldSchema, reader)) != null) {
+        reader = localReader;
+      }
+    }
+    return reader;
+  }
+
+  @SuppressWarnings("rawtypes")
+  private SpecificDatumWriter getDatumWriter(Schema fieldSchema) {
+    SpecificDatumWriter writer = writerMap.computeIfAbsent(fieldSchema, (t) -> {
+      return new SpecificDatumWriter(t);// ignore dirty bits
+    });
+    return writer;
+  }
+
+  private boolean isNullable(Schema unionSchema) {
+    for (Schema innerSchema : unionSchema.getTypes()) {
+      if (innerSchema.getType().equals(Schema.Type.NULL)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Method to retrieve the corresponding schema type index of a particular
+   * object having UNION schema. As UNION type can have one or more types and at
+   * a given instance, it holds an object of only one type of the defined types,
+   * this method is used to figure out the corresponding instance's schema type
+   * index.
+   *
+   * @param instanceValue value that the object holds
+   * @param unionSchema union schema containing all of the data types
+   * @return the unionSchemaPosition corresponding schema position
+   */
+  private int getUnionSchema(Object instanceValue, Schema unionSchema) {
+    int unionSchemaPos = 0;
+    for (Schema currentSchema : unionSchema.getTypes()) {
+      Schema.Type schemaType = currentSchema.getType();
+      if (instanceValue instanceof CharSequence && schemaType.equals(Schema.Type.STRING)) {
+        return unionSchemaPos;
+      }
+      if (instanceValue instanceof ByteBuffer && schemaType.equals(Schema.Type.BYTES)) {
+        return unionSchemaPos;
+      }
+      if (instanceValue instanceof byte[] && schemaType.equals(Schema.Type.BYTES)) {
+        return unionSchemaPos;
+      }
+      if (instanceValue instanceof Integer && schemaType.equals(Schema.Type.INT)) {
+        return unionSchemaPos;
+      }
+      if (instanceValue instanceof Long && schemaType.equals(Schema.Type.LONG)) {
+        return unionSchemaPos;
+      }
+      if (instanceValue instanceof Double && schemaType.equals(Schema.Type.DOUBLE)) {
+        return unionSchemaPos;
+      }
+      if (instanceValue instanceof Float && schemaType.equals(Schema.Type.FLOAT)) {
+        return unionSchemaPos;
+      }
+      if (instanceValue instanceof Boolean && schemaType.equals(Schema.Type.BOOLEAN)) {
+        return unionSchemaPos;
+      }
+      if (instanceValue instanceof Map && schemaType.equals(Schema.Type.MAP)) {
+        return unionSchemaPos;
+      }
+      if (instanceValue instanceof List && schemaType.equals(Schema.Type.ARRAY)) {
+        return unionSchemaPos;
+      }
+      if (instanceValue instanceof Persistent && schemaType.equals(Schema.Type.RECORD)) {
+        return unionSchemaPos;
+      }
+      if (instanceValue instanceof byte[] && schemaType.equals(Schema.Type.MAP)) {
+        return unionSchemaPos;
+      }
+      if (instanceValue instanceof byte[] && schemaType.equals(Schema.Type.RECORD)) {
+        return unionSchemaPos;
+      }
+      if (instanceValue instanceof byte[] && schemaType.equals(Schema.Type.ARRAY)) {
+        return unionSchemaPos;
+      }
+      unionSchemaPos++;
+    }
+    return 0;
   }
 
 }

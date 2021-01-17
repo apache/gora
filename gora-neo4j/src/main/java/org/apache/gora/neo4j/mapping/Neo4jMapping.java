@@ -24,8 +24,17 @@ import java.util.Map;
  */
 public class Neo4jMapping {
 
+  /**
+   * Label used for creating new nodes in Neo4j.
+   */
   private String label;
+  /**
+   * The property used as primary key in Neo4j.
+   */
   private Property nodeKey;
+  /**
+   * List of properties used in the Datastore of Neo4j.
+   */
   private Map<String, Property> properties;
 
   public String getLabel() {

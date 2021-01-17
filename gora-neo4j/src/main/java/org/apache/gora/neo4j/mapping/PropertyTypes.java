@@ -18,13 +18,18 @@
 package org.apache.gora.neo4j.mapping;
 
 import java.sql.Types;
+
 /**
- * ENUM for Neo4j data types. 
+ * ENUM for Neo4j data types.
  */
 public enum PropertyTypes {
+
   VARCHAR(Types.VARCHAR), INTEGER(Types.INTEGER), BOOLEAN(Types.BOOLEAN), FLOAT(Types.FLOAT), JAVA_OBJECT(Types.JAVA_OBJECT), ARRAY(Types.ARRAY);
 
-  private int sqltype;
+  /**
+   * Identifier of the datatype used in the JDBC driver of Neo4j.
+   */
+  private final int sqltype;
 
   private PropertyTypes(int sqltype) {
     this.sqltype = sqltype;

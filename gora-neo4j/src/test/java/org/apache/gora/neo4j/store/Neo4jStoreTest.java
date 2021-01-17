@@ -24,6 +24,9 @@ import org.apache.gora.util.GoraException;
 import org.junit.Ignore;
 import org.junit.Test;
 
+/**
+ * Tests for Neo4j Datastore.
+ */
 public class Neo4jStoreTest extends DataStoreTestBase {
 
   static {
@@ -83,11 +86,6 @@ public class Neo4jStoreTest extends DataStoreTestBase {
   @Test
   @Ignore
   public void testUpdate() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testExists() throws Exception {
   }
 
   @Test
