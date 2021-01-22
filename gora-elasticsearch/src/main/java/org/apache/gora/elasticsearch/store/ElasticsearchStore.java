@@ -186,6 +186,15 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
     @Override
     public void createSchema() throws GoraException {
         CreateIndexRequest request = new CreateIndexRequest(elasticsearchMapping.getIndexName());
+        Map<String, Object> properties = new HashMap<>();
+        for (Map.Entry<String, Field> entry : elasticsearchMapping.getFields().entrySet()) {
+            Map<String, Object> fieldType = new HashMap<>();
+            fieldType.put("type", entry.getValue().getDataType().getType().name().toLowerCase(Locale.ROOT));
+            properties.put(entry.getKey(), fieldType);
+        }
+        Map<String, Object> mapping = new HashMap<>();
+        mapping.put("properties", properties);
+        request.mapping(mapping);
         try {
             if (!client.indices().exists(
                     new GetIndexRequest(elasticsearchMapping.getIndexName()), RequestOptions.DEFAULT)) {

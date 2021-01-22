@@ -135,14 +135,14 @@ public class Field {
         /**
          * Constructor for FieldType.
          *
-         * @param type Elasticsearch's Type
+         * @param type Elasticsearch data type
          */
         public FieldType(DataType type) {
             this.type = type;
         }
 
         /**
-         * Constructor for FieldType Implicitly uses scaled_float Elasticsearch Type
+         * Constructor for FieldType Implicitly uses scaled_float Elasticsearch data type
          * with scaling factor parameter.
          *
          * @param scalingFactor scaled_float field's scaling factor
@@ -150,6 +150,22 @@ public class Field {
         public FieldType(int scalingFactor) {
             this.type = DataType.SCALED_FLOAT;
             this.scalingFactor = scalingFactor;
+        }
+
+        /**
+         *
+         * @return Elasticsearch data type
+         */
+        public DataType getType() {
+            return type;
+        }
+
+        /**
+         *
+         * @param type Elasticsearch data type
+         */
+        public void setType(DataType type) {
+            this.type = type;
         }
 
         /**
