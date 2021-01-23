@@ -17,11 +17,14 @@
 package org.apache.gora.elasticsearch.store;
 
 import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericArray;
+import org.apache.avro.util.Utf8;
 import org.apache.gora.elasticsearch.mapping.ElasticsearchMapping;
 import org.apache.gora.elasticsearch.mapping.ElasticsearchMappingBuilder;
 import org.apache.gora.elasticsearch.mapping.Field;
 import org.apache.gora.elasticsearch.utils.ElasticsearchParameters;
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.DirtyListWrapper;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
@@ -345,6 +348,15 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
         }
     }
 
+    /**
+     * Build a new instance of the persisted class from the Document retrieved from the database.
+     *
+     * @param fieldsAndValues Map of field's name and its value from the Document
+     *                        that results from the query to the database
+     * @param requestedFields the list of fields to be mapped to the persistence class instance
+     * @return a persistence class instance which content was deserialized from the Document
+     * @throws IOException
+     */
     public T newInstance(Map<String, Object> fieldsAndValues, String[] requestedFields) throws IOException {
         // Create new empty persistent bean instance
         T persistent = newPersistent();
@@ -364,17 +376,32 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
         return persistent;
     }
 
+    /**
+     * Convert an Elasticsearch Object to a persistent Java Object.
+     *
+     * @param field field in Elasticsearch Document to be deserialized
+     * @param fieldSchema field schema for Java class
+     * @param elasticsearchValue field value of the given Elasticsearch data type
+     * @param persistent given persistent Java Object
+     * @return deserialized Java Object from Elasticsearch Object
+     */
     private Object deserializeFieldValue(Schema.Field field, Schema fieldSchema,
-                                         Object elasticsearchValue, T persistent) {
-        Object fieldValue = null;
+                                         Object elasticsearchValue, T persistent) throws GoraException {
+        Object fieldValue;
         switch (fieldSchema.getType()) {
-            case ARRAY:
-            case BOOLEAN:
-            case BYTES:
-            case FIXED:
             case MAP:
             case RECORD:
                 throw new UnsupportedOperationException();
+            case ARRAY:
+                fieldValue = fromElasticsearchList(field, fieldSchema, elasticsearchValue, persistent);
+                break;
+            case BOOLEAN:
+                fieldValue = Boolean.parseBoolean(elasticsearchValue.toString());
+                break;
+            case BYTES:
+                fieldValue = ByteBuffer.wrap(Base64.getDecoder().decode(elasticsearchValue.toString()));
+                break;
+            case FIXED:
             case NULL:
                 fieldValue = null;
                 break;
@@ -391,8 +418,18 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
                     Schema.Type type2 = fieldSchema.getTypes().get(2).getType();
                     if ((type0.equals(Schema.Type.NULL) || type1.equals(Schema.Type.NULL) || type2.equals(Schema.Type.NULL)) &&
                             (type0.equals(Schema.Type.STRING) || type1.equals(Schema.Type.STRING) || type2.equals(Schema.Type.STRING))) {
-                        //TODO: Deserialize recursively or do another request
+                        if (elasticsearchValue == null) {
+                            fieldValue = null;
+                        } else if (elasticsearchValue instanceof String) {
+                            throw new GoraException("Elasticsearch supports Union data type only represented as Record or Null.");
+                        } else {
+                            // TODO: Record
+                            throw new UnsupportedOperationException();
+                        }
+                    } else {
+                        throw new UnsupportedOperationException();
                     }
+                } else {
                     throw new UnsupportedOperationException();
                 }
                 break;
@@ -412,7 +449,7 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
                 fieldValue = Long.parseLong(elasticsearchValue.toString());
                 break;
             case STRING:
-                fieldValue = elasticsearchValue.toString();
+                fieldValue = new Utf8(elasticsearchValue.toString());
                 break;
             default:
                 fieldValue = elasticsearchValue;
@@ -420,24 +457,87 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
         return fieldValue;
     }
 
-    private Object serializeFieldValue(Schema fieldSchema, Object fieldValue) {
+    /**
+     * Convert an Elasticsearch List to Java Collection as used in Gora generated classes
+     * that can safely be deserialized from Elasticsearch.
+     *
+     * @param field field in Elasticsearch to be deserialized
+     * @param fieldSchema field schema for Java class
+     * @param elasticsearchValue field value of the given Elasticsearch data type
+     * @param persistent given persistent Java class
+     * @return deserialized java collection from Elasticsearch
+     * @throws GoraException
+     */
+    Object fromElasticsearchList(Schema.Field field, Schema fieldSchema, Object elasticsearchValue,
+                                 T persistent) throws GoraException {
+        List<Object> list = new ArrayList<>();
+        for (Object item : (List<Object>) elasticsearchValue) {
+            Object result = deserializeFieldValue(field, fieldSchema, item, persistent);
+            list.add(result);
+        }
+        return new DirtyListWrapper<>(list);
+    }
+
+    /**
+     * Convert a Java Object as used in Gora generated classes to
+     * an Object that can be written in Elasticsearch.
+     *
+     * @param fieldSchema field schema for Java class
+     * @param fieldValue field value in given persistent Java Object
+     * @return serialized field value
+     * @throws GoraException
+     */
+    private Object serializeFieldValue(Schema fieldSchema, Object fieldValue) throws GoraException {
         Object output = fieldValue;
         switch (fieldSchema.getType()) {
             case ARRAY:
-            case BOOLEAN:
-            case BYTES:
-            case ENUM:
-            case FIXED:
+                Schema elementSchema = fieldSchema.getElementType();
+                output = arrayToElasticsearch((List<?>) fieldValue, elementSchema);
+                break;
             case MAP:
             case RECORD:
-            case UNION:
                 throw new UnsupportedOperationException();
+            case BYTES:
+                output = Base64.getEncoder().encodeToString(((ByteBuffer) fieldValue).array());
+                break;
+            case UNION:
+                Schema.Type type0 = fieldSchema.getTypes().get(0).getType();
+                Schema.Type type1 = fieldSchema.getTypes().get(1).getType();
+                if (fieldSchema.getTypes().size() == 2 &&
+                        (type0.equals(Schema.Type.NULL) || type1.equals(Schema.Type.NULL)) &&
+                        !type0.equals(type1)) {
+                    int schemaPos = getUnionSchema(fieldValue, fieldSchema);
+                    Schema unionSchema = fieldSchema.getTypes().get(schemaPos);
+                    output = serializeFieldValue(unionSchema, fieldValue);
+                } else if (fieldSchema.getTypes().size() == 3) {
+                    Schema.Type type2 = fieldSchema.getTypes().get(2).getType();
+                    if ((type0.equals(Schema.Type.NULL) || type1.equals(Schema.Type.NULL) || type2.equals(Schema.Type.NULL)) &&
+                            (type0.equals(Schema.Type.STRING) || type1.equals(Schema.Type.STRING) || type2.equals(Schema.Type.STRING))) {
+                        if (fieldValue == null) {
+                            output = null;
+                        } else if (fieldValue instanceof String) {
+                            throw new GoraException("Elasticsearch supports Union data type only represented as Record or Null.");
+                        } else {
+                            // TODO: Record
+                            throw new UnsupportedOperationException();
+                        }
+                    } else {
+                        throw new UnsupportedOperationException();
+                    }
+                } else {
+                    throw new UnsupportedOperationException();
+                }
+                break;
+            case BOOLEAN:
             case DOUBLE:
+            case ENUM:
             case FLOAT:
             case INT:
             case LONG:
             case STRING:
                 output = fieldValue.toString();
+                break;
+            case FIXED:
                 break;
             case NULL:
                 output = null;
@@ -446,6 +546,34 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
         return output;
     }
 
+    /**
+     * Convert a Java collection as used in Gora generated classes to a
+     * List that can safely be serialized into Elasticsearch.
+     *
+     * @param collection the collection to be serialized
+     * @param fieldSchema field schema underlying type
+     * @return a List version of the collection that can be safely serialized into Elasticsearch.
+     */
+    private List<Object> arrayToElasticsearch(Collection<?> collection, Schema fieldSchema) throws GoraException {
+        List<Object> list = new ArrayList<>();
+        for (Object item : collection) {
+            Object result = serializeFieldValue(fieldSchema, item);
+            list.add(result);
+        }
+        return list;
+    }
+
+    /**
+     * Method to retrieve the corresponding schema type index of a particular
+     * object having UNION schema. As UNION type can have one or more types and at
+     * a given instance, it holds an object of only one type of the defined types,
+     * this method is used to figure out the corresponding instance's schema type
+     * index.
+     *
+     * @param instanceValue value that the object holds
+     * @param unionSchema union schema containing all of the data types
+     * @return the unionSchemaPosition corresponding schema position
+     */
     private int getUnionSchema(Object instanceValue, Schema unionSchema) {
         int unionSchemaPos = 0;
         for (Schema currentSchema : unionSchema.getTypes()) {
