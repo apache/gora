@@ -57,7 +57,7 @@ public class GoraNeo4jTestDriver extends GoraTestDriver {
   /**
    * Docker image of Neo4j.
    */
-  private static final String DOCKER_IMAGE = "neo4j:enterprise";
+  private static final String DOCKER_IMAGE = "neo4j:4.2.2-enterprise";
   private final GenericContainer neo4jContainer;
 
   public GoraNeo4jTestDriver() {

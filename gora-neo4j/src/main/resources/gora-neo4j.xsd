@@ -40,6 +40,7 @@
     <xs:attribute name="name" type="fieldName-types" use="required"/> 
     <xs:attribute name="property" type="xs:string" use="required"/> 
     <xs:attribute name="type" type="xs:string" use="required"/> 
+    <xs:attribute name="exists" type="xs:string" use="required"/> 
   </xs:complexType>
     
   <xs:simpleType name="keyClass-types">

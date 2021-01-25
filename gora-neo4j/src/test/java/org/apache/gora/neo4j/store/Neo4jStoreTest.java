@@ -95,11 +95,6 @@ public class Neo4jStoreTest extends DataStoreTestBase {
 
   @Test
   @Ignore
-  public void testGet() throws Exception {
-  }
-
-  @Test
-  @Ignore
   public void testGetRecursive() throws Exception {
   }
 

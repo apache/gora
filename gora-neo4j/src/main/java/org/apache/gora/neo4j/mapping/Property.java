@@ -31,9 +31,28 @@ public class Property {
    */
   private PropertyTypes sqltype;
 
+  /**
+   * The Neo4j EXISTS constraint of the property.
+   */
+  private boolean exists = false;
+
+  public Property(String name, PropertyTypes sqltype, boolean exists) {
+    this.name = name;
+    this.sqltype = sqltype;
+    this.exists = exists;
+  }
+
   public Property(String name, PropertyTypes sqltype) {
     this.name = name;
     this.sqltype = sqltype;
+  }
+
+  public boolean isExists() {
+    return exists;
+  }
+
+  public void setExists(boolean exists) {
+    this.exists = exists;
   }
 
   public String getName() {

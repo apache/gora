@@ -48,6 +48,31 @@ public class CypherDDL {
   }
 
   /**
+   * Build a CREATE CONSTRAINT statement for EXISTS.
+   *
+   * @param label Label of the nodes.
+   * @param key Property name.
+   * @return Cypher query.
+   */
+  public static String createExistsConstraint(String label, String key) {
+    StringBuilder urlBuilder = new StringBuilder();
+    urlBuilder.append("CREATE CONSTRAINT ");
+    urlBuilder.append(createExistsConstraintName(label, key));
+    urlBuilder.append(" ON ");
+    urlBuilder.append("(");
+    urlBuilder.append("ds:");
+    urlBuilder.append(label);
+    urlBuilder.append(")");
+    urlBuilder.append(" ASSERT ");
+    urlBuilder.append(" EXISTS ");
+    urlBuilder.append("(");
+    urlBuilder.append("ds.");
+    urlBuilder.append(key);
+    urlBuilder.append(")");
+    return urlBuilder.toString();
+  }
+
+  /**
    * Build a DROP CONSTRAINT statement for node key.
    *
    * @param label Label of the nodes.
@@ -62,6 +87,20 @@ public class CypherDDL {
   }
 
   /**
+   * Build a DROP CONSTRAINT statement for exists constraint.
+   *
+   * @param label Label of the nodes.
+   * @param key Property name.
+   * @return Cypher query.
+   */
+  public static String dropExistsConstraint(String label, String key) {
+    StringBuilder urlBuilder = new StringBuilder();
+    urlBuilder.append("DROP CONSTRAINT ");
+    urlBuilder.append(createExistsConstraintName(label, key));
+    return urlBuilder.toString();
+  }
+
+  /**
    * Generate a name for the NODE KEY constraint.
    *
    * @param label Label of the nodes.
@@ -71,6 +110,22 @@ public class CypherDDL {
   public static String createNodeKeyConstraintName(String label, String key) {
     StringBuilder urlBuilder = new StringBuilder();
     urlBuilder.append("gora_nodekey_");
+    urlBuilder.append(label);
+    urlBuilder.append("_");
+    urlBuilder.append(key);
+    return urlBuilder.toString();
+  }
+
+  /**
+   * Generate a name for the EXISTS constraint.
+   *
+   * @param label Label of the nodes.
+   * @param key Property name.
+   * @return Constraint name.
+   */
+  public static String createExistsConstraintName(String label, String key) {
+    StringBuilder urlBuilder = new StringBuilder();
+    urlBuilder.append("gora_exists_");
     urlBuilder.append(label);
     urlBuilder.append("_");
     urlBuilder.append(key);
