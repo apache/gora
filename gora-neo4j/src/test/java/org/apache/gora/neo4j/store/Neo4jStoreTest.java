@@ -35,27 +35,12 @@ public class Neo4jStoreTest extends DataStoreTestBase {
 
   @Test
   @Ignore
-  public void testNewInstance() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testAutoCreateSchema() throws Exception {
-  }
-
-  @Test
-  @Ignore
   public void testTruncateSchema() throws Exception {
   }
 
   @Test
   @Ignore
   public void testDeleteSchema() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testPut() throws Exception {
   }
 
   @Test
@@ -86,11 +71,6 @@ public class Neo4jStoreTest extends DataStoreTestBase {
   @Test
   @Ignore
   public void testUpdate() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testBenchmarkExists() throws Exception {
   }
 
   @Test
@@ -126,11 +106,6 @@ public class Neo4jStoreTest extends DataStoreTestBase {
   @Test
   @Ignore
   public void testGetWebPageDefaultFields() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testGetNonExisting() throws Exception {
   }
 
   @Test
@@ -226,11 +201,6 @@ public class Neo4jStoreTest extends DataStoreTestBase {
   @Test
   @Ignore
   public void testResultSizeKeyRangeWithLimit() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testObjectFieldValue() throws Exception {
   }
 
   /**

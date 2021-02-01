@@ -26,9 +26,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -65,16 +63,20 @@ import org.slf4j.LoggerFactory;
  * @param <T> class to be persisted within the store
  */
 public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
-  
+
   protected static final String PARSE_MAPPING_FILE_KEY = "gora.neo4j.mapping.file";
   protected static final String DEFAULT_MAPPING_FILE = "gora-neo4j-mapping.xml";
   protected static final String XML_MAPPING_DEFINITION = "gora.mapping";
   protected static final String XSD_VALIDATION = "gora.xsd_validation";
-  
+  protected static final String CONSTRAINT_NAME = "name";
+  protected static final String CONSTRAINTS_PROCEDURE = "db.constraints";
+  protected static final String QUERY_NODE_NAME = "r";
+  protected static final String DATASTORE_NODE_NAME = "ds";
+
   public static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private Neo4jMapping neo4jMapping;
   private Connection connection;
-  
+
   private static final ConcurrentHashMap<Schema, SpecificDatumReader<?>> readerMap = new ConcurrentHashMap<>();
   private static final ConcurrentHashMap<Schema, SpecificDatumWriter<?>> writerMap = new ConcurrentHashMap<>();
 
@@ -94,7 +96,7 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
   public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) throws GoraException {
     try {
       super.initialize(keyClass, persistentClass, properties);
-      
+
       InputStream mappingStream;
       if (properties.containsKey(XML_MAPPING_DEFINITION)) {
         if (LOG.isTraceEnabled()) {
@@ -104,7 +106,7 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       } else {
         mappingStream = getClass().getClassLoader().getResourceAsStream(getConf().get(PARSE_MAPPING_FILE_KEY, DEFAULT_MAPPING_FILE));
       }
-      
+
       Neo4jMappingBuilder mappingBuilder = new Neo4jMappingBuilder(this);
       neo4jMapping = mappingBuilder.readMapping(mappingStream, Boolean.valueOf(properties.getProperty(XSD_VALIDATION, "false")));
       Neo4jParameters load = Neo4jParameters.load(properties, getConf());
@@ -117,7 +119,7 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       throw new GoraException(ex);
     }
   }
-  
+
   private Connection connectToServer(Neo4jParameters params) throws ClassNotFoundException, GoraException, SQLException {
     Class.forName(Neo4jConstants.DRIVER_NAME);
     StringBuilder urlBuilder = new StringBuilder();
@@ -142,12 +144,12 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     }
     return DriverManager.getConnection(urlBuilder.toString(), params.getUsername(), params.getPassword());
   }
-  
+
   @Override
   public String getSchemaName() {
     return this.neo4jMapping.getLabel();
   }
-  
+
   @Override
   public void createSchema() throws GoraException {
     if (connection == null) {
@@ -172,7 +174,7 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       }
     }
   }
-  
+
   @Override
   public void deleteSchema() throws GoraException {
     if (connection == null) {
@@ -197,17 +199,17 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       }
     }
   }
-  
+
   @Override
   public boolean schemaExists() throws GoraException {
     boolean exits = false;
-    Statement build = Cypher.call("db.constraints").build();
+    Statement build = Cypher.call(CONSTRAINTS_PROCEDURE).build();
     Renderer defaultRenderer = Renderer.getDefaultRenderer();
     String render = defaultRenderer.render(build);
     try (PreparedStatement stmt = this.connection.prepareStatement(render)) {
       try (ResultSet rs = stmt.executeQuery()) {
         while (rs.next()) {
-          if (rs.getString("name").equals(CypherDDL.createNodeKeyConstraintName(this.neo4jMapping.getLabel(), this.neo4jMapping.getNodeKey().getName()))) {
+          if (rs.getString(CONSTRAINT_NAME).equals(CypherDDL.createNodeKeyConstraintName(this.neo4jMapping.getLabel(), this.neo4jMapping.getNodeKey().getName()))) {
             exits = true;
           }
         }
@@ -217,11 +219,11 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     }
     return exits;
   }
-  
+
   @Override
   public boolean exists(K key) throws GoraException {
     boolean found = false;
-    Node named = Cypher.node(this.neo4jMapping.getLabel()).withProperties(this.neo4jMapping.getNodeKey().getName(), Cypher.literalOf(key)).named("r");
+    Node named = Cypher.node(this.neo4jMapping.getLabel()).withProperties(this.neo4jMapping.getNodeKey().getName(), Cypher.literalOf(key)).named(QUERY_NODE_NAME);
     Literal<Boolean> literalTrue = Cypher.literalTrue();
     Statement build = Cypher.match(named).returning(literalTrue).build();
     Renderer defaultRenderer = Renderer.getDefaultRenderer();
@@ -237,7 +239,7 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     }
     return found;
   }
-  
+
   @Override
   public T get(K key, String[] fields) throws GoraException {
     String[] avFields = getFieldsToQuery(fields);
@@ -247,8 +249,8 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     }
     try {
       T resp = null;
-      
-      Node node = Cypher.node(this.neo4jMapping.getLabel()).named("ds");
+
+      Node node = Cypher.node(this.neo4jMapping.getLabel()).named(DATASTORE_NODE_NAME);
       node = node.withProperties(this.neo4jMapping.getNodeKey().getName(), Cypher.literalOf(key));
       List<org.neo4j.cypherdsl.core.Property> returnProperties = Lists.newArrayList();
       for (String props : dbFields) {
@@ -274,14 +276,24 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       throw new GoraException(ex);
     }
   }
-  
+
+  /**
+   * Creates a new instance from a resultset object.
+   *
+   * @param resultset Input resultset.
+   * @param fields List of fields to be loaded.
+   * @return Return the new instance.
+   * @throws GoraException Unexpected error.
+   * @throws SQLException SQL Error.
+   * @throws IOException Input-Output Error.
+   */
   public T newInstance(ResultSet resultset, String[] fields) throws GoraException, SQLException, IOException {
     fields = getFieldsToQuery(fields);
     T persistent = newPersistent();
     for (String f : fields) {
       Schema.Field field = fieldMap.get(f);
       Schema fieldSchema = field.schema();
-      String dbField = "ds." + this.neo4jMapping.getProperties().get(f).getName();
+      String dbField = DATASTORE_NODE_NAME + "." + this.neo4jMapping.getProperties().get(f).getName();
       Object fieldValue = resultset.getObject(dbField);
       if (fieldValue == null) {
         continue;
@@ -292,7 +304,7 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     }
     return persistent;
   }
-  
+
   @Override
   public void put(K key, T obj) throws GoraException {
     try {
@@ -334,11 +346,11 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       throw new GoraException(e);
     }
   }
-  
+
   @Override
   public boolean delete(K key) throws GoraException {
     boolean response = false;
-    Node named = Cypher.node(this.neo4jMapping.getLabel()).withProperties(this.neo4jMapping.getNodeKey().getName(), Cypher.literalOf(key)).named("r");
+    Node named = Cypher.node(this.neo4jMapping.getLabel()).withProperties(this.neo4jMapping.getNodeKey().getName(), Cypher.literalOf(key)).named(QUERY_NODE_NAME);
     Statement build = Cypher.match(named).delete(named).build();
     Renderer defaultRenderer = Renderer.getDefaultRenderer();
     String render = defaultRenderer.render(build);
@@ -349,31 +361,31 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     }
     return response;
   }
-  
+
   @Override
   public long deleteByQuery(Query<K, T> query) throws GoraException {
     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
-  
+
   @Override
   public Result<K, T> execute(Query<K, T> query) throws GoraException {
     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
-  
+
   @Override
   public Query<K, T> newQuery() {
     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
-  
+
   @Override
   public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query) throws IOException {
     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
-  
+
   @Override
   public void flush() throws GoraException {
   }
-  
+
   @Override
   public void close() {
     try {
@@ -383,7 +395,17 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       LOG.error(ex.getMessage(), ex);
     }
   }
-  
+
+  /**
+   * Deserialize a object from the Neo4j Server.
+   *
+   * @param field The field being deserialized.
+   * @param fieldSchema The schema of the field being deserialized.
+   * @param storeValue The object from the Neo4j Server.
+   * @param persistent The output Persistent object.
+   * @return Deserialized object.
+   * @throws IOException Input-Output error.
+   */
   @SuppressWarnings("unchecked")
   private Object deserializeFieldValue(Schema.Field field, Schema fieldSchema,
           Object storeValue, T persistent) throws IOException {
@@ -393,7 +415,7 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       case ARRAY:
       case RECORD:
         @SuppressWarnings("rawtypes") SpecificDatumReader reader = getDatumReader(fieldSchema);
-        fieldValue = IOUtils.deserialize((byte[]) ((String)storeValue).getBytes(), reader,
+        fieldValue = IOUtils.deserialize((byte[]) ((String) storeValue).getBytes(Charset.defaultCharset()), reader,
                 persistent.get(field.pos()));
         break;
       case ENUM:
@@ -402,7 +424,7 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       case FIXED:
         break;
       case BYTES:
-        fieldValue = ByteBuffer.wrap((byte[]) ((String)storeValue).getBytes());
+        fieldValue = ByteBuffer.wrap((byte[]) ((String) storeValue).getBytes(Charset.defaultCharset()));
         break;
       case STRING:
         fieldValue = new Utf8(storeValue.toString());
@@ -414,7 +436,7 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
           fieldValue = deserializeFieldValue(field, unionSchema, storeValue, persistent);
         } else {
           reader = getDatumReader(fieldSchema);
-          fieldValue = IOUtils.deserialize((byte[]) ((String)storeValue).getBytes(), reader,
+          fieldValue = IOUtils.deserialize((byte[]) ((String) storeValue).getBytes(Charset.defaultCharset()), reader,
                   persistent.get(field.pos()));
         }
         break;
@@ -426,7 +448,14 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     }
     return fieldValue;
   }
-  
+
+  /**
+   * Serialize a object to Neo4j Field.
+   *
+   * @param fieldSchema The schema of the field.
+   * @param fieldValue The persisten object.
+   * @return Serialized object for Neo4j.
+   */
   @SuppressWarnings("unchecked")
   private Object serializeFieldValue(Schema fieldSchema, Object fieldValue) {
     Object output = fieldValue;
@@ -482,7 +511,13 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     }
     return output;
   }
-  
+
+  /**
+   * Return a Datum Reader specific for a schema field of AVRO.
+   *
+   * @param fieldSchema The schema field.
+   * @return The Datum Reader object.
+   */
   @SuppressWarnings("rawtypes")
   private SpecificDatumReader getDatumReader(Schema fieldSchema) {
     SpecificDatumReader<?> reader = readerMap.get(fieldSchema);
@@ -495,7 +530,13 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     }
     return reader;
   }
-  
+
+  /**
+   * Return a Datum Writer specific for a schema field of AVRO
+   *
+   * @param fieldSchema The schema field.
+   * @return The Datum Writer object.
+   */
   @SuppressWarnings("rawtypes")
   private SpecificDatumWriter getDatumWriter(Schema fieldSchema) {
     SpecificDatumWriter writer = writerMap.computeIfAbsent(fieldSchema, (t) -> {
@@ -503,7 +544,13 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     });
     return writer;
   }
-  
+
+  /**
+   * Check if a UNION type is nullable
+   *
+   * @param unionSchema the Schema field.
+   * @return true if it is nullable.
+   */
   private boolean isNullable(Schema unionSchema) {
     for (Schema innerSchema : unionSchema.getTypes()) {
       if (innerSchema.getType().equals(Schema.Type.NULL)) {
@@ -574,5 +621,5 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     }
     return 0;
   }
-  
+
 }

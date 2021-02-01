@@ -79,7 +79,10 @@ public class Neo4jMappingBuilder<K, T extends PersistentBase> {
             String name = item.getAttribute("name");
             String column = item.getAttribute("property");
             String type = item.getAttribute("type");
-            boolean exists = Boolean.valueOf(item.getAttribute("exists"));
+            boolean exists = false;
+            if (item.hasAttribute("exists")) {
+              exists = Boolean.valueOf(item.getAttribute("exists"));
+            }
             mapFields.put(name, new Property(column, PropertyTypes.valueOf(type), exists));
           }
           neo4jmapping.setProperties(mapFields);
