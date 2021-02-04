@@ -253,16 +253,20 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
             // Prepare the Elasticsearch request
             GetRequest getRequest = new GetRequest(elasticsearchMapping.getIndexName(), (String) key);
             GetResponse getResponse = client.get(getRequest, RequestOptions.DEFAULT);
-            Map<String, Object> sourceMap = getResponse.getSourceAsMap();
+            if (getResponse.isExists()) {
+                Map<String, Object> sourceMap = getResponse.getSourceAsMap();
 
-            // Map of field's name and its value from the Document
-            Map<String, Object> fieldsAndValues = new HashMap<>();
-            for (String field : documentFields) {
-                fieldsAndValues.put(field, sourceMap.get(field));
+                // Map of field's name and its value from the Document
+                Map<String, Object> fieldsAndValues = new HashMap<>();
+                for (String field : documentFields) {
+                    fieldsAndValues.put(field, sourceMap.get(field));
+                }
+
+                // Build the corresponding persistent
+                return newInstance(fieldsAndValues, requestedFields);
+            } else {
+                return null;
             }
-
-            // Build the corresponding persistent
-            return newInstance(fieldsAndValues, requestedFields);
         } catch (IOException ex) {
             throw new GoraException(ex);
         }
