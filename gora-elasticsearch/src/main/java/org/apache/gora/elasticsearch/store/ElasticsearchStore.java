@@ -25,6 +25,7 @@ import org.apache.gora.elasticsearch.mapping.Field;
 import org.apache.gora.elasticsearch.utils.ElasticsearchParameters;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.impl.DirtyListWrapper;
+import org.apache.gora.persistency.impl.DirtyMapWrapper;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
@@ -394,6 +395,8 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
         Object fieldValue;
         switch (fieldSchema.getType()) {
             case MAP:
+                fieldValue = fromElasticsearchMap(avroField, avroFieldSchema.getValueType(), (Map<String, Object>) elasticsearchValue);
+                break;
             case RECORD:
                 throw new UnsupportedOperationException();
             case ARRAY:
@@ -482,6 +485,18 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
         return new DirtyListWrapper<>(list);
     }
 
+    // Add javadoc
+    private Object fromElasticsearchMap(Schema.Field field, Schema fieldSchema, Map<String, Object> elasticsearchMap,
+                                T persistent) throws GoraException {
+        Map<Utf8, Object> deserializedMap = new HashMap<>();
+        for (Map.Entry<String, Object> entry : elasticsearchMap.entrySet()) {
+            String mapKey = entry.getKey();
+            Object mapValue = deserializeFieldValue(avroField, avroFieldSchema, entry.getValue());
+            deserializedMap.put(new Utf8(mapKey), mapValue);
+        }
+        return new DirtyMapWrapper<>(deserializedMap);
+    }
+
     /**
      * Convert a Java Object as used in Gora generated classes to
      * an Object that can be written in Elasticsearch.
@@ -495,10 +510,11 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
         Object output = fieldValue;
         switch (fieldSchema.getType()) {
             case ARRAY:
-                Schema elementSchema = fieldSchema.getElementType();
-                output = arrayToElasticsearch((List<?>) fieldValue, elementSchema);
+                output = arrayToElasticsearch((List<?>) fieldValue, fieldSchema.getElementType());
                 break;
             case MAP:
+                output = mapToElasticsearch((Map<CharSequence, ?>) fieldValue, fieldSchema.getValueType());
+                break;
             case RECORD:
                 throw new UnsupportedOperationException();
             case BYTES:
@@ -565,6 +581,18 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
             list.add(result);
         }
         return list;
+    }
+
+    //Add javadoc
+    private Map<CharSequence, ?> mapToElasticsearch(Map<CharSequence, ?> map, Schema fieldSchema) throws GoraException {
+        Map<CharSequence, Object> serializedMap = new HashMap<>();
+        for (Map.Entry<CharSequence, ?> entry : map.entrySet()) {
+            String mapKey = entry.getKey().toString();
+            Object mapValue = entry.getValue();
+            Object result = serializeFieldValue(fieldSchema, mapValue);
+            serializedMap.put(mapKey, result);
+        }
+        return serializedMap;
     }
 
     /**
