@@ -17,13 +17,13 @@
 package org.apache.gora.elasticsearch.store;
 
 import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericArray;
 import org.apache.avro.util.Utf8;
 import org.apache.gora.elasticsearch.mapping.ElasticsearchMapping;
 import org.apache.gora.elasticsearch.mapping.ElasticsearchMappingBuilder;
 import org.apache.gora.elasticsearch.mapping.Field;
 import org.apache.gora.elasticsearch.utils.ElasticsearchParameters;
 import org.apache.gora.persistency.Persistent;
+import org.apache.gora.persistency.impl.BeanFactoryImpl;
 import org.apache.gora.persistency.impl.DirtyListWrapper;
 import org.apache.gora.persistency.impl.DirtyMapWrapper;
 import org.apache.gora.persistency.impl.PersistentBase;
@@ -32,6 +32,7 @@ import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.AvroUtils;
+import org.apache.gora.util.ClassLoadingUtils;
 import org.apache.gora.util.GoraException;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
@@ -374,7 +375,7 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
             String docFieldName = elasticsearchMapping.getFields().get(objField).getName();
             Object fieldValue = fieldsAndValues.get(docFieldName);
 
-            Object result = deserializeFieldValue(field, fieldSchema, fieldValue, persistent);
+            Object result = deserializeFieldValue(field, fieldSchema, fieldValue);
             persistent.put(field.pos(), result);
         }
         persistent.clearDirty();
@@ -382,25 +383,25 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
     }
 
     /**
-     * Convert an Elasticsearch Object to a persistent Java Object.
+     * Deserialize an Elasticsearch object to a persistent Avro object.
      *
-     * @param field field in Elasticsearch Document to be deserialized
-     * @param fieldSchema field schema for Java class
-     * @param elasticsearchValue field value of the given Elasticsearch data type
-     * @param persistent given persistent Java Object
-     * @return deserialized Java Object from Elasticsearch Object
+     * @param avroField          persistent Avro class field to which the value will be deserialized
+     * @param avroFieldSchema    schema for the persistent Avro class field
+     * @param elasticsearchValue Elasticsearch field value to be deserialized
+     * @return deserialized Avro object from the Elasticsearch object
+     * @throws GoraException when the given Elasticsearch value cannot be deserialized
      */
-    private Object deserializeFieldValue(Schema.Field field, Schema fieldSchema,
-                                         Object elasticsearchValue, T persistent) throws GoraException {
+    private Object deserializeFieldValue(Schema.Field avroField, Schema avroFieldSchema,
+                                         Object elasticsearchValue) throws GoraException {
         Object fieldValue;
-        switch (fieldSchema.getType()) {
+        switch (avroFieldSchema.getType()) {
             case MAP:
                 fieldValue = fromElasticsearchMap(avroField, avroFieldSchema.getValueType(), (Map<String, Object>) elasticsearchValue);
                 break;
             case RECORD:
                 throw new UnsupportedOperationException();
             case ARRAY:
-                fieldValue = fromElasticsearchList(field, fieldSchema, elasticsearchValue, persistent);
+                fieldValue = fromElasticsearchList(avroField, avroFieldSchema, elasticsearchValue);
                 break;
             case BOOLEAN:
                 fieldValue = Boolean.parseBoolean(elasticsearchValue.toString());
@@ -413,16 +414,16 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
                 fieldValue = null;
                 break;
             case UNION:
-                Schema.Type type0 = fieldSchema.getTypes().get(0).getType();
-                Schema.Type type1 = fieldSchema.getTypes().get(1).getType();
-                if (fieldSchema.getTypes().size() == 2 &&
+                Schema.Type type0 = avroFieldSchema.getTypes().get(0).getType();
+                Schema.Type type1 = avroFieldSchema.getTypes().get(1).getType();
+                if (avroFieldSchema.getTypes().size() == 2 &&
                         (type0.equals(Schema.Type.NULL) || type1.equals(Schema.Type.NULL)) &&
                         !type0.equals(type1)) {
-                    int schemaPos = getUnionSchema(elasticsearchValue, fieldSchema);
-                    Schema unionSchema = fieldSchema.getTypes().get(schemaPos);
-                    fieldValue = deserializeFieldValue(field, unionSchema, elasticsearchValue, persistent);
-                } else if (fieldSchema.getTypes().size() == 3) {
-                    Schema.Type type2 = fieldSchema.getTypes().get(2).getType();
+                    int schemaPos = getUnionSchema(elasticsearchValue, avroFieldSchema);
+                    Schema unionSchema = avroFieldSchema.getTypes().get(schemaPos);
+                    fieldValue = deserializeFieldValue(avroField, unionSchema, elasticsearchValue);
+                } else if (avroFieldSchema.getTypes().size() == 3) {
+                    Schema.Type type2 = avroFieldSchema.getTypes().get(2).getType();
                     if ((type0.equals(Schema.Type.NULL) || type1.equals(Schema.Type.NULL) || type2.equals(Schema.Type.NULL)) &&
                             (type0.equals(Schema.Type.STRING) || type1.equals(Schema.Type.STRING) || type2.equals(Schema.Type.STRING))) {
                         if (elasticsearchValue == null) {
@@ -444,7 +445,7 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
                 fieldValue = Double.parseDouble(elasticsearchValue.toString());
                 break;
             case ENUM:
-                fieldValue = AvroUtils.getEnumValue(fieldSchema, elasticsearchValue.toString());
+                fieldValue = AvroUtils.getEnumValue(avroFieldSchema, elasticsearchValue.toString());
                 break;
             case FLOAT:
                 fieldValue = Float.parseFloat(elasticsearchValue.toString());
@@ -465,29 +466,28 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
     }
 
     /**
-     * Convert an Elasticsearch List to Java Collection as used in Gora generated classes
-     * that can safely be deserialized from Elasticsearch.
+     * Deserialize an Elasticsearch List to an Avro List as used in Gora generated classes
+     * that can safely be written into Avro persistent object.
      *
-     * @param field field in Elasticsearch to be deserialized
-     * @param fieldSchema field schema for Java class
-     * @param elasticsearchValue field value of the given Elasticsearch data type
-     * @param persistent given persistent Java class
-     * @return deserialized java collection from Elasticsearch
-     * @throws GoraException
+     * @param avroField          persistent Avro class field to which the value will be deserialized
+     * @param avroFieldSchema    schema for the persistent Avro class field
+     * @param elasticsearchValue Elasticsearch field value to be deserialized
+     * @return deserialized Avro List from the given Elasticsearch value
+     * @throws GoraException when one of the underlying values cannot be deserialized
      */
-    Object fromElasticsearchList(Schema.Field field, Schema fieldSchema, Object elasticsearchValue,
-                                 T persistent) throws GoraException {
+    private Object fromElasticsearchList(Schema.Field avroField, Schema avroFieldSchema,
+                                         Object elasticsearchValue) throws GoraException {
         List<Object> list = new ArrayList<>();
         for (Object item : (List<Object>) elasticsearchValue) {
-            Object result = deserializeFieldValue(field, fieldSchema, item, persistent);
+            Object result = deserializeFieldValue(avroField, avroFieldSchema, item);
             list.add(result);
         }
         return new DirtyListWrapper<>(list);
     }
 
     // Add javadoc
-    private Object fromElasticsearchMap(Schema.Field field, Schema fieldSchema, Map<String, Object> elasticsearchMap,
-                                T persistent) throws GoraException {
+    private Object fromElasticsearchMap(Schema.Field avroField, Schema avroFieldSchema,
+                                        Map<String, Object> elasticsearchMap) throws GoraException {
         Map<Utf8, Object> deserializedMap = new HashMap<>();
         for (Map.Entry<String, Object> entry : elasticsearchMap.entrySet()) {
             String mapKey = entry.getKey();
@@ -498,54 +498,54 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
     }
 
     /**
-     * Convert a Java Object as used in Gora generated classes to
-     * an Object that can be written in Elasticsearch.
+     * Serialize a persistent Avro object as used in Gora generated classes to
+     * an object that can be written into Elasticsearch.
      *
-     * @param fieldSchema field schema for Java class
-     * @param fieldValue field value in given persistent Java Object
+     * @param avroFieldSchema schema for the persistent Avro class field
+     * @param avroFieldValue  persistent Avro field value to be serialized
      * @return serialized field value
-     * @throws GoraException
+     * @throws GoraException when the given Avro object cannot be serialized
      */
-    private Object serializeFieldValue(Schema fieldSchema, Object fieldValue) throws GoraException {
-        Object output = fieldValue;
-        switch (fieldSchema.getType()) {
+    private Object serializeFieldValue(Schema avroFieldSchema, Object avroFieldValue) throws GoraException {
+        Object output = avroFieldValue;
+        switch (avroFieldSchema.getType()) {
             case ARRAY:
-                output = arrayToElasticsearch((List<?>) fieldValue, fieldSchema.getElementType());
+                output = arrayToElasticsearch((List<?>) avroFieldValue, avroFieldSchema.getElementType());
                 break;
             case MAP:
-                output = mapToElasticsearch((Map<CharSequence, ?>) fieldValue, fieldSchema.getValueType());
+                output = mapToElasticsearch((Map<CharSequence, ?>) avroFieldValue, avroFieldSchema.getValueType());
                 break;
             case RECORD:
-                throw new UnsupportedOperationException();
+                output = recordToElasticsearch(avroFieldValue, avroFieldSchema);
+                break;
             case BYTES:
-                output = Base64.getEncoder().encodeToString(((ByteBuffer) fieldValue).array());
+                output = Base64.getEncoder().encodeToString(((ByteBuffer) avroFieldValue).array());
                 break;
             case UNION:
-                Schema.Type type0 = fieldSchema.getTypes().get(0).getType();
-                Schema.Type type1 = fieldSchema.getTypes().get(1).getType();
-                if (fieldSchema.getTypes().size() == 2 &&
+                Schema.Type type0 = avroFieldSchema.getTypes().get(0).getType();
+                Schema.Type type1 = avroFieldSchema.getTypes().get(1).getType();
+                if (avroFieldSchema.getTypes().size() == 2 &&
                         (type0.equals(Schema.Type.NULL) || type1.equals(Schema.Type.NULL)) &&
                         !type0.equals(type1)) {
-                    int schemaPos = getUnionSchema(fieldValue, fieldSchema);
-                    Schema unionSchema = fieldSchema.getTypes().get(schemaPos);
-                    output = serializeFieldValue(unionSchema, fieldValue);
-                } else if (fieldSchema.getTypes().size() == 3) {
-                    Schema.Type type2 = fieldSchema.getTypes().get(2).getType();
+                    int schemaPos = getUnionSchema(avroFieldValue, avroFieldSchema);
+                    Schema unionSchema = avroFieldSchema.getTypes().get(schemaPos);
+                    output = serializeFieldValue(unionSchema, avroFieldValue);
+                } else if (avroFieldSchema.getTypes().size() == 3) {
+                    Schema.Type type2 = avroFieldSchema.getTypes().get(2).getType();
                     if ((type0.equals(Schema.Type.NULL) || type1.equals(Schema.Type.NULL) || type2.equals(Schema.Type.NULL)) &&
                             (type0.equals(Schema.Type.STRING) || type1.equals(Schema.Type.STRING) || type2.equals(Schema.Type.STRING))) {
-                        if (fieldValue == null) {
+                        if (avroFieldValue == null) {
                             output = null;
-                        } else if (fieldValue instanceof String) {
-                            throw new GoraException("Elasticsearch supports Union data type only represented as Record or Null.");
+                        } else if (avroFieldValue instanceof String) {
+                            throw new GoraException("Elasticsearch does not support foreign key IDs in Union data type.");
                         } else {
-                            // TODO: Record
-                            throw new UnsupportedOperationException();
+                            output = recordToElasticsearch(avroFieldValue, avroFieldSchema);
                         }
                     } else {
-                        throw new UnsupportedOperationException();
+                        throw new GoraException("Elasticsearch only supports Union of two types field: Record or Null.");
                     }
                 } else {
-                    throw new UnsupportedOperationException();
+                    throw new GoraException("Elasticsearch only supports Union of two types field: Record or Null.");
                 }
                 break;
             case BOOLEAN:
@@ -555,7 +555,7 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
             case INT:
             case LONG:
             case STRING:
-                output = fieldValue.toString();
+                output = avroFieldValue.toString();
                 break;
             case FIXED:
                 break;
@@ -567,29 +567,30 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
     }
 
     /**
-     * Convert a Java collection as used in Gora generated classes to a
-     * List that can safely be serialized into Elasticsearch.
+     * Serialize a Java collection of persistent Avro objects as used in Gora generated classes to a
+     * List that can safely be written into Elasticsearch.
      *
-     * @param collection the collection to be serialized
-     * @param fieldSchema field schema underlying type
-     * @return a List version of the collection that can be safely serialized into Elasticsearch.
+     * @param collection      the collection to be serialized
+     * @param avroFieldSchema field schema for the underlying type
+     * @return a List version of the collection that can be safely written into Elasticsearch
+     * @throws GoraException when one of the underlying values cannot be serialized
      */
-    private List<Object> arrayToElasticsearch(Collection<?> collection, Schema fieldSchema) throws GoraException {
+    private List<Object> arrayToElasticsearch(Collection<?> collection, Schema avroFieldSchema) throws GoraException {
         List<Object> list = new ArrayList<>();
         for (Object item : collection) {
-            Object result = serializeFieldValue(fieldSchema, item);
+            Object result = serializeFieldValue(avroFieldSchema, item);
             list.add(result);
         }
         return list;
     }
 
     //Add javadoc
-    private Map<CharSequence, ?> mapToElasticsearch(Map<CharSequence, ?> map, Schema fieldSchema) throws GoraException {
+    private Map<CharSequence, ?> mapToElasticsearch(Map<CharSequence, ?> map, Schema avroFieldSchema) throws GoraException {
         Map<CharSequence, Object> serializedMap = new HashMap<>();
         for (Map.Entry<CharSequence, ?> entry : map.entrySet()) {
             String mapKey = entry.getKey().toString();
             Object mapValue = entry.getValue();
-            Object result = serializeFieldValue(fieldSchema, mapValue);
+            Object result = serializeFieldValue(avroFieldSchema, mapValue);
             serializedMap.put(mapKey, result);
         }
         return serializedMap;
@@ -603,7 +604,7 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
      * index.
      *
      * @param instanceValue value that the object holds
-     * @param unionSchema union schema containing all of the data types
+     * @param unionSchema   union schema containing all of the data types
      * @return the unionSchemaPosition corresponding schema position
      */
     private int getUnionSchema(Object instanceValue, Schema unionSchema) {
