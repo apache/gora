@@ -402,7 +402,7 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
                 fieldValue = fromElasticsearchRecord(avroFieldSchema, (Map<String, Object>) elasticsearchValue);
                 break;
             case ARRAY:
-                fieldValue = fromElasticsearchList(avroField, avroFieldSchema, elasticsearchValue);
+                fieldValue = fromElasticsearchList(avroField, avroFieldSchema.getElementType(), elasticsearchValue);
                 break;
             case BOOLEAN:
                 fieldValue = Boolean.parseBoolean(elasticsearchValue.toString());
