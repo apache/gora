@@ -415,32 +415,7 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
                 fieldValue = null;
                 break;
             case UNION:
-                Schema.Type type0 = avroFieldSchema.getTypes().get(0).getType();
-                Schema.Type type1 = avroFieldSchema.getTypes().get(1).getType();
-                if (avroFieldSchema.getTypes().size() == 2 &&
-                        (type0.equals(Schema.Type.NULL) || type1.equals(Schema.Type.NULL)) &&
-                        !type0.equals(type1)) {
-                    int schemaPos = getUnionSchema(elasticsearchValue, avroFieldSchema);
-                    Schema unionSchema = avroFieldSchema.getTypes().get(schemaPos);
-                    fieldValue = deserializeFieldValue(avroField, unionSchema, elasticsearchValue);
-                } else if (avroFieldSchema.getTypes().size() == 3) {
-                    Schema.Type type2 = avroFieldSchema.getTypes().get(2).getType();
-                    if ((type0.equals(Schema.Type.NULL) || type1.equals(Schema.Type.NULL) || type2.equals(Schema.Type.NULL)) &&
-                            (type0.equals(Schema.Type.STRING) || type1.equals(Schema.Type.STRING) || type2.equals(Schema.Type.STRING))) {
-                        if (elasticsearchValue == null) {
-                            fieldValue = null;
-                        } else if (elasticsearchValue instanceof String) {
-                            throw new GoraException("Elasticsearch supports Union data type only represented as Record or Null.");
-                        } else {
-                            // TODO: Record
-                            throw new UnsupportedOperationException();
-                        }
-                    } else {
-                        throw new UnsupportedOperationException();
-                    }
-                } else {
-                    throw new UnsupportedOperationException();
-                }
+                fieldValue = fromElasticsearchUnion(avroField, avroFieldSchema, elasticsearchValue);
                 break;
             case DOUBLE:
                 fieldValue = Double.parseDouble(elasticsearchValue.toString());
@@ -516,6 +491,39 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
         return record;
     }
 
+    // Add javadoc
+    private Object fromElasticsearchUnion(Schema.Field avroField, Schema avroFieldSchema, Object elasticsearchUnion) throws GoraException {
+        Object deserializedUnion;
+        Schema.Type type0 = avroFieldSchema.getTypes().get(0).getType();
+        Schema.Type type1 = avroFieldSchema.getTypes().get(1).getType();
+        if (avroFieldSchema.getTypes().size() == 2 &&
+                (type0.equals(Schema.Type.NULL) || type1.equals(Schema.Type.NULL)) &&
+                !type0.equals(type1)) {
+            int schemaPos = getUnionSchema(elasticsearchUnion, avroFieldSchema);
+            Schema unionSchema = avroFieldSchema.getTypes().get(schemaPos);
+            deserializedUnion = deserializeFieldValue(avroField, unionSchema, elasticsearchUnion);
+        } else if (avroFieldSchema.getTypes().size() == 3) {
+            Schema.Type type2 = avroFieldSchema.getTypes().get(2).getType();
+            if ((type0.equals(Schema.Type.NULL) || type1.equals(Schema.Type.NULL) || type2.equals(Schema.Type.NULL)) &&
+                    (type0.equals(Schema.Type.STRING) || type1.equals(Schema.Type.STRING) || type2.equals(Schema.Type.STRING))) {
+                if (elasticsearchUnion == null) {
+                    deserializedUnion = null;
+                } else if (elasticsearchUnion instanceof String) {
+                    throw new GoraException("Elasticsearch supports Union data type only represented as Record or Null.");
+                } else {
+                    int schemaPos = getUnionSchema(elasticsearchUnion, avroFieldSchema);
+                    Schema unionSchema = avroFieldSchema.getTypes().get(schemaPos);
+                    deserializedUnion = fromElasticsearchRecord(unionSchema, (Map<String, Object>) elasticsearchUnion);
+                }
+            } else {
+                throw new GoraException("Elasticsearch only supports Union of two types field: Record or Null.");
+            }
+        } else {
+            throw new GoraException("Elasticsearch only supports Union of two types field: Record or Null.");
+        }
+        return deserializedUnion;
+    }
+
     /**
      * Serialize a persistent Avro object as used in Gora generated classes to
      * an object that can be written into Elasticsearch.
@@ -541,31 +549,7 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
                 output = Base64.getEncoder().encodeToString(((ByteBuffer) avroFieldValue).array());
                 break;
             case UNION:
-                Schema.Type type0 = avroFieldSchema.getTypes().get(0).getType();
-                Schema.Type type1 = avroFieldSchema.getTypes().get(1).getType();
-                if (avroFieldSchema.getTypes().size() == 2 &&
-                        (type0.equals(Schema.Type.NULL) || type1.equals(Schema.Type.NULL)) &&
-                        !type0.equals(type1)) {
-                    int schemaPos = getUnionSchema(avroFieldValue, avroFieldSchema);
-                    Schema unionSchema = avroFieldSchema.getTypes().get(schemaPos);
-                    output = serializeFieldValue(unionSchema, avroFieldValue);
-                } else if (avroFieldSchema.getTypes().size() == 3) {
-                    Schema.Type type2 = avroFieldSchema.getTypes().get(2).getType();
-                    if ((type0.equals(Schema.Type.NULL) || type1.equals(Schema.Type.NULL) || type2.equals(Schema.Type.NULL)) &&
-                            (type0.equals(Schema.Type.STRING) || type1.equals(Schema.Type.STRING) || type2.equals(Schema.Type.STRING))) {
-                        if (avroFieldValue == null) {
-                            output = null;
-                        } else if (avroFieldValue instanceof String) {
-                            throw new GoraException("Elasticsearch does not support foreign key IDs in Union data type.");
-                        } else {
-                            output = recordToElasticsearch(avroFieldValue, avroFieldSchema);
-                        }
-                    } else {
-                        throw new GoraException("Elasticsearch only supports Union of two types field: Record or Null.");
-                    }
-                } else {
-                    throw new GoraException("Elasticsearch only supports Union of two types field: Record or Null.");
-                }
+                output = unionToElasticsearch(avroFieldValue, avroFieldSchema);
                 break;
             case BOOLEAN:
             case DOUBLE:
@@ -623,6 +607,39 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
             serializedRecord.put(member.name(), serializeFieldValue(member.schema(), innerValue));
         }
         return serializedRecord;
+    }
+
+    //Add javadoc
+    private Object unionToElasticsearch(Object union, Schema avroFieldSchema) throws GoraException {
+        Object serializedUnion;
+        Schema.Type type0 = avroFieldSchema.getTypes().get(0).getType();
+        Schema.Type type1 = avroFieldSchema.getTypes().get(1).getType();
+        if (avroFieldSchema.getTypes().size() == 2 &&
+                (type0.equals(Schema.Type.NULL) || type1.equals(Schema.Type.NULL)) &&
+                !type0.equals(type1)) {
+            int schemaPos = getUnionSchema(union, avroFieldSchema);
+            Schema unionSchema = avroFieldSchema.getTypes().get(schemaPos);
+            serializedUnion = serializeFieldValue(unionSchema, union);
+        } else if (avroFieldSchema.getTypes().size() == 3) {
+            Schema.Type type2 = avroFieldSchema.getTypes().get(2).getType();
+            if ((type0.equals(Schema.Type.NULL) || type1.equals(Schema.Type.NULL) || type2.equals(Schema.Type.NULL)) &&
+                    (type0.equals(Schema.Type.STRING) || type1.equals(Schema.Type.STRING) || type2.equals(Schema.Type.STRING))) {
+                if (union == null) {
+                    serializedUnion = null;
+                } else if (union instanceof String) {
+                    throw new GoraException("Elasticsearch does not support foreign key IDs in Union data type.");
+                } else {
+                    int schemaPos = getUnionSchema(union, avroFieldSchema);
+                    Schema unionSchema = avroFieldSchema.getTypes().get(schemaPos);
+                    serializedUnion = recordToElasticsearch(union, unionSchema);
+                }
+            } else {
+                throw new GoraException("Elasticsearch only supports Union of two types field: Record or Null.");
+            }
+        } else {
+            throw new GoraException("Elasticsearch only supports Union of two types field: Record or Null.");
+        }
+        return serializedUnion;
     }
 
     /**
