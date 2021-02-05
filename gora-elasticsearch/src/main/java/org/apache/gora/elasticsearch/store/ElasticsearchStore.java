@@ -666,6 +666,9 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
             if (instanceValue instanceof byte[] && schemaType.equals(Schema.Type.BYTES)) {
                 return unionSchemaPos;
             }
+            if (instanceValue instanceof String && schemaType.equals(Schema.Type.BYTES)) {
+                return unionSchemaPos;
+            }
             if (instanceValue instanceof Integer && schemaType.equals(Schema.Type.INT)) {
                 return unionSchemaPos;
             }
