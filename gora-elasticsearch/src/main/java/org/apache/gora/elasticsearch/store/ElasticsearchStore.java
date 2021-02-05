@@ -399,7 +399,8 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
                 fieldValue = fromElasticsearchMap(avroField, avroFieldSchema.getValueType(), (Map<String, Object>) elasticsearchValue);
                 break;
             case RECORD:
-                throw new UnsupportedOperationException();
+                fieldValue = fromElasticsearchRecord(avroFieldSchema, (Map<String, Object>) elasticsearchValue);
+                break;
             case ARRAY:
                 fieldValue = fromElasticsearchList(avroField, avroFieldSchema, elasticsearchValue);
                 break;
@@ -495,6 +496,24 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
             deserializedMap.put(new Utf8(mapKey), mapValue);
         }
         return new DirtyMapWrapper<>(deserializedMap);
+    }
+
+    // Add javadoc
+    private Object fromElasticsearchRecord(Schema avroFieldSchema,
+                                           Map<String, Object> elasticsearchRecord) throws GoraException {
+        Class<?> clazz;
+        try {
+            clazz = ClassLoadingUtils.loadClass(avroFieldSchema.getFullName());
+        } catch (ClassNotFoundException ex) {
+            throw new GoraException(ex);
+        }
+        PersistentBase record = (PersistentBase) new BeanFactoryImpl(keyClass, clazz).newPersistent();
+        for (Schema.Field recField : avroFieldSchema.getFields()) {
+            Schema innerSchema = recField.schema();
+            Field innerDocField = elasticsearchMapping.getFields().getOrDefault(recField.name(), new Field(recField.name(), null));
+            record.put(recField.pos(), deserializeFieldValue(recField, innerSchema, elasticsearchRecord.get(innerDocField.getName())));
+        }
+        return record;
     }
 
     /**
@@ -596,6 +615,16 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
         return serializedMap;
     }
 
+    //Add javadoc
+    private Map<CharSequence, Object> recordToElasticsearch(Object record, Schema avroFieldSchema) throws GoraException {
+        Map<CharSequence, Object> serializedRecord = new HashMap<>();
+        for (Schema.Field member : avroFieldSchema.getFields()) {
+            Object innerValue = ((PersistentBase) record).get(member.pos());
+            serializedRecord.put(member.name(), serializeFieldValue(member.schema(), innerValue));
+        }
+        return serializedRecord;
+    }
+
     /**
      * Method to retrieve the corresponding schema type index of a particular
      * object having UNION schema. As UNION type can have one or more types and at
@@ -642,6 +671,9 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
                 return unionSchemaPos;
             }
             if (instanceValue instanceof Persistent && schemaType.equals(Schema.Type.RECORD)) {
+                return unionSchemaPos;
+            }
+            if (instanceValue instanceof Map && schemaType.equals(Schema.Type.RECORD)) {
                 return unionSchemaPos;
             }
             if (instanceValue instanceof byte[] && schemaType.equals(Schema.Type.MAP)) {
