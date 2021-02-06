@@ -461,7 +461,16 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
         return new DirtyListWrapper<>(list);
     }
 
-    // Add javadoc
+    /**
+     * Deserialize an Elasticsearch Map to an Avro Map as used in Gora generated classes
+     * that can safely be written into Avro persistent object.
+     *
+     * @param avroField        persistent Avro class field to which the value will be deserialized
+     * @param avroFieldSchema  schema for the persistent Avro class field
+     * @param elasticsearchMap Elasticsearch Map value to be deserialized
+     * @return deserialized Avro Map from the given Elasticsearch Map value
+     * @throws GoraException when one of the underlying values cannot be deserialized
+     */
     private Object fromElasticsearchMap(Schema.Field avroField, Schema avroFieldSchema,
                                         Map<String, Object> elasticsearchMap) throws GoraException {
         Map<Utf8, Object> deserializedMap = new HashMap<>();
@@ -473,7 +482,15 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
         return new DirtyMapWrapper<>(deserializedMap);
     }
 
-    // Add javadoc
+    /**
+     * Deserialize an Elasticsearch Record to an Avro Object as used in Gora generated classes
+     * that can safely be written into Avro persistent object.
+     *
+     * @param avroFieldSchema     schema for the persistent Avro class field
+     * @param elasticsearchRecord Elasticsearch Record value to be deserialized
+     * @return deserialized Avro Object from the given Elasticsearch Record value
+     * @throws GoraException when one of the underlying values cannot be deserialized
+     */
     private Object fromElasticsearchRecord(Schema avroFieldSchema,
                                            Map<String, Object> elasticsearchRecord) throws GoraException {
         Class<?> clazz;
@@ -491,7 +508,16 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
         return record;
     }
 
-    // Add javadoc
+    /**
+     * Deserialize an Elasticsearch Union to an Avro Object as used in Gora generated classes
+     * that can safely be written into Avro persistent object.
+     *
+     * @param avroField          persistent Avro class field to which the value will be deserialized
+     * @param avroFieldSchema    schema for the persistent Avro class field
+     * @param elasticsearchUnion Elasticsearch Union value to be deserialized
+     * @return deserialized Avro Object from the given Elasticsearch Union value
+     * @throws GoraException when one of the underlying values cannot be deserialized
+     */
     private Object fromElasticsearchUnion(Schema.Field avroField, Schema avroFieldSchema, Object elasticsearchUnion) throws GoraException {
         Object deserializedUnion;
         Schema.Type type0 = avroFieldSchema.getTypes().get(0).getType();
@@ -587,7 +613,15 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
         return list;
     }
 
-    //Add javadoc
+    /**
+     * Serialize a Java map of persistent Avro objects as used in Gora generated classes to a
+     * map that can safely be written into Elasticsearch.
+     *
+     * @param map             the map to be serialized
+     * @param avroFieldSchema field schema for the underlying type
+     * @return a Map version of the Java map that can be safely written into Elasticsearch
+     * @throws GoraException when one of the underlying values cannot be serialized
+     */
     private Map<CharSequence, ?> mapToElasticsearch(Map<CharSequence, ?> map, Schema avroFieldSchema) throws GoraException {
         Map<CharSequence, Object> serializedMap = new HashMap<>();
         for (Map.Entry<CharSequence, ?> entry : map.entrySet()) {
@@ -599,7 +633,15 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
         return serializedMap;
     }
 
-    //Add javadoc
+    /**
+     * Serialize a Java object of persistent Avro objects as used in Gora generated classes to a
+     * record that can safely be written into Elasticsearch.
+     *
+     * @param record          the object to be serialized
+     * @param avroFieldSchema field schema for the underlying type
+     * @return a record version of the Java object that can be safely written into Elasticsearch
+     * @throws GoraException when one of the underlying values cannot be serialized
+     */
     private Map<CharSequence, Object> recordToElasticsearch(Object record, Schema avroFieldSchema) throws GoraException {
         Map<CharSequence, Object> serializedRecord = new HashMap<>();
         for (Schema.Field member : avroFieldSchema.getFields()) {
@@ -609,7 +651,15 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
         return serializedRecord;
     }
 
-    //Add javadoc
+    /**
+     * Serialize a Java object of persistent Avro objects as used in Gora generated classes to a
+     * object that can safely be written into Elasticsearch.
+     *
+     * @param union           the object to be serialized
+     * @param avroFieldSchema field schema for the underlying type
+     * @return a object version of the Java object that can be safely written into Elasticsearch
+     * @throws GoraException when one of the underlying values cannot be serialized
+     */
     private Object unionToElasticsearch(Object union, Schema avroFieldSchema) throws GoraException {
         Object serializedUnion;
         Schema.Type type0 = avroFieldSchema.getTypes().get(0).getType();
