@@ -27,6 +27,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -184,8 +185,18 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     if (!schemaExists()) {
       return;
     }
+    // Delete constraints
     List<String> createCQLs = Lists.newArrayList();
     createCQLs.add(CypherDDL.dropNodeKeyConstraint(this.neo4jMapping.getLabel(), this.neo4jMapping.getNodeKey().getName()));
+
+    // Delete existing nodes
+    Node named = Cypher.node(this.neo4jMapping.getLabel()).named(QUERY_NODE_NAME);
+    Statement build = Cypher.match(named).delete(named).build();
+    Renderer defaultRenderer = Renderer.getDefaultRenderer();
+    String render = defaultRenderer.render(build);
+    createCQLs.add(render);
+
+    // Delete exists constraints
     for (Map.Entry<String, Property> it : this.neo4jMapping.getProperties().entrySet()) {
       if (it.getValue().isExists()) {
         createCQLs.add(CypherDDL.dropExistsConstraint(this.neo4jMapping.getLabel(), it.getValue().getName()));
@@ -415,7 +426,7 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       case ARRAY:
       case RECORD:
         @SuppressWarnings("rawtypes") SpecificDatumReader reader = getDatumReader(fieldSchema);
-        fieldValue = IOUtils.deserialize((byte[]) ((String) storeValue).getBytes(Charset.defaultCharset()), reader,
+        fieldValue = IOUtils.deserialize(Base64.getDecoder().decode(((String) storeValue).getBytes()), reader,
                 persistent.get(field.pos()));
         break;
       case ENUM:
@@ -424,7 +435,7 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       case FIXED:
         break;
       case BYTES:
-        fieldValue = ByteBuffer.wrap((byte[]) ((String) storeValue).getBytes(Charset.defaultCharset()));
+        fieldValue = ByteBuffer.wrap(Base64.getDecoder().decode(((String) storeValue).getBytes()));
         break;
       case STRING:
         fieldValue = new Utf8(storeValue.toString());
@@ -436,7 +447,7 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
           fieldValue = deserializeFieldValue(field, unionSchema, storeValue, persistent);
         } else {
           reader = getDatumReader(fieldSchema);
-          fieldValue = IOUtils.deserialize((byte[]) ((String) storeValue).getBytes(Charset.defaultCharset()), reader,
+          fieldValue = IOUtils.deserialize(Base64.getDecoder().decode(((String) storeValue).getBytes()), reader,
                   persistent.get(field.pos()));
         }
         break;
@@ -471,7 +482,7 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
         } catch (IOException e) {
           LOG.error(e.getMessage(), e);
         }
-        output = new String(data, Charset.defaultCharset());
+        output = Base64.getEncoder().encodeToString(data);
         break;
       case UNION:
         if (fieldSchema.getTypes().size() == 2 && isNullable(fieldSchema)) {
@@ -487,7 +498,7 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
           } catch (IOException e) {
             LOG.error(e.getMessage(), e);
           }
-          output = new String(data, Charset.defaultCharset());
+          output = Base64.getEncoder().encodeToString(data);
         }
         break;
       case FIXED:
@@ -497,7 +508,7 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
         output = fieldValue.toString();
         break;
       case BYTES:
-        output = ((ByteBuffer) fieldValue).array();
+        output = Base64.getEncoder().encodeToString(((ByteBuffer) fieldValue).array());
         break;
       case INT:
       case LONG:
@@ -581,6 +592,9 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       if (instanceValue instanceof ByteBuffer && schemaType.equals(Schema.Type.BYTES)) {
         return unionSchemaPos;
       }
+      if (instanceValue instanceof String && schemaType.equals(Schema.Type.BYTES)) {
+        return unionSchemaPos;
+      }
       if (instanceValue instanceof byte[] && schemaType.equals(Schema.Type.BYTES)) {
         return unionSchemaPos;
       }
@@ -612,6 +626,9 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
         return unionSchemaPos;
       }
       if (instanceValue instanceof byte[] && schemaType.equals(Schema.Type.RECORD)) {
+        return unionSchemaPos;
+      }
+      if (instanceValue instanceof String && schemaType.equals(Schema.Type.RECORD)) {
         return unionSchemaPos;
       }
       if (instanceValue instanceof byte[] && schemaType.equals(Schema.Type.ARRAY)) {

@@ -30,7 +30,7 @@
   
   <class name="org.apache.gora.examples.generated.WebPage" keyClass="java.lang.String" label="Webpage">
     <nodeKey property="pkurl" type="VARCHAR" />
-    <field name="url" property="url" type="VARCHAR" exists="true" />
+    <field name="url" property="url" type="VARCHAR" />
     <field name="content" property="content" type="VARCHAR" />
     <field name="parsedContent" property="parsedContent" type="ARRAY" />
     <field name="outlinks" property="outlinks" type="JAVA_OBJECT" />

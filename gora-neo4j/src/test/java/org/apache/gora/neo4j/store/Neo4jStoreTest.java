@@ -45,31 +45,6 @@ public class Neo4jStoreTest extends DataStoreTestBase {
 
   @Test
   @Ignore
-  public void testPutNested() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testPutArray() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testPutBytes() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testPutMap() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testPutMixedMaps() throws Exception {
-  }
-
-  @Test
-  @Ignore
   public void testUpdate() throws Exception {
   }
 
@@ -81,21 +56,6 @@ public class Neo4jStoreTest extends DataStoreTestBase {
   @Test
   @Ignore
   public void testGetDoubleRecursive() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testGetNested() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testGet3UnionField() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testGetWithFields() throws Exception {
   }
 
   @Test
