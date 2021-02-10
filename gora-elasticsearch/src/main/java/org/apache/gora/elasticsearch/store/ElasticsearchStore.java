@@ -21,6 +21,7 @@ import org.apache.avro.util.Utf8;
 import org.apache.gora.elasticsearch.mapping.ElasticsearchMapping;
 import org.apache.gora.elasticsearch.mapping.ElasticsearchMappingBuilder;
 import org.apache.gora.elasticsearch.mapping.Field;
+import org.apache.gora.elasticsearch.query.ElasticsearchQuery;
 import org.apache.gora.elasticsearch.utils.ElasticsearchParameters;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.impl.BeanFactoryImpl;
@@ -327,7 +328,9 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
 
     @Override
     public Query<K, T> newQuery() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        ElasticsearchQuery<K, T> query = new ElasticsearchQuery<>(this);
+        query.setFields(getFieldsToQuery(null));
+        return query;
     }
 
     @Override
