@@ -57,6 +57,10 @@ import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
+import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -318,7 +322,16 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
 
     @Override
     public long deleteByQuery(Query<K, T> query) throws GoraException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        try {
+            DeleteByQueryRequest request = new DeleteByQueryRequest(elasticsearchMapping.getIndexName());
+            QueryBuilder matchDocumentsWithinRange = QueryBuilders
+                    .rangeQuery("_id").from(query.getStartKey()).to(query.getEndKey());
+            request.setQuery(matchDocumentsWithinRange);
+            BulkByScrollResponse bulkResponse = client.deleteByQuery(request, RequestOptions.DEFAULT);
+            return bulkResponse.getDeleted();
+        } catch (IOException ex) {
+            throw new GoraException(ex);
+        }
     }
 
     @Override
