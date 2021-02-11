@@ -20,6 +20,7 @@ package org.apache.gora.elasticsearch.store;
 import org.apache.gora.elasticsearch.GoraElasticsearchTestDriver;
 import org.apache.gora.elasticsearch.mapping.ElasticsearchMapping;
 import org.apache.gora.elasticsearch.mapping.Field;
+import org.apache.gora.elasticsearch.utils.AuthenticationType;
 import org.apache.gora.elasticsearch.utils.ElasticsearchParameters;
 import org.apache.gora.examples.generated.EmployeeInt;
 import org.apache.gora.store.DataStoreFactory;
@@ -73,7 +74,7 @@ public class TestElasticsearchStore extends DataStoreTestBase {
         ElasticsearchParameters parameters = ElasticsearchParameters.load(properties, testDriver.getConfiguration());
 
         Assert.assertEquals("localhost", parameters.getHost());
-        Assert.assertEquals("BASIC", parameters.getAuthenticationMethod());
+        Assert.assertEquals(AuthenticationType.BASIC, parameters.getAuthenticationType());
         Assert.assertEquals("elastic", parameters.getUsername());
         Assert.assertEquals("password", parameters.getPassword());
     }

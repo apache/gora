@@ -43,10 +43,10 @@ public class ElasticsearchParameters {
     private String scheme;
 
     /**
-     * Authentication method to connect to the server.
+     * Authentication type to connect to the server.
      * Can be BASIC, TOKEN or APIKEY.
      */
-    private String authenticationMethod;
+    private AuthenticationType authenticationType;
 
     /**
      * Username to use for server authentication.
@@ -126,12 +126,12 @@ public class ElasticsearchParameters {
         this.scheme = scheme;
     }
 
-    public String getAuthenticationMethod() {
-        return authenticationMethod;
+    public AuthenticationType getAuthenticationType() {
+        return authenticationType;
     }
 
-    public void setAuthenticationMethod(String authenticationMethod) {
-        this.authenticationMethod = authenticationMethod;
+    public void setAuthenticationType(AuthenticationType authenticationType) {
+        this.authenticationType = authenticationType;
     }
 
     public String getUsername() {
@@ -223,9 +223,10 @@ public class ElasticsearchParameters {
             elasticsearchParameters.setScheme(schemeProperty);
         }
 
-        String authenticationMethodProperty = properties.getProperty(ElasticsearchConstants.PROP_AUTHENTICATIONMETHOD);
-        if (authenticationMethodProperty != null) {
-            elasticsearchParameters.setAuthenticationMethod(authenticationMethodProperty);
+        AuthenticationType authenticationTypeProperty =
+                AuthenticationType.valueOf(properties.getProperty(ElasticsearchConstants.PROP_AUTHENTICATIONTYPE));
+        if (authenticationTypeProperty != null) {
+            elasticsearchParameters.setAuthenticationType(authenticationTypeProperty);
         }
 
         String usernameProperty = properties.getProperty(ElasticsearchConstants.PROP_USERNAME);

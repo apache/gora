@@ -127,8 +127,8 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
         RestClientBuilder clientBuilder = RestClient.builder(new HttpHost(parameters.getHost(), parameters.getPort()));
 
         // Choosing the authentication method.
-        switch (parameters.getAuthenticationMethod()) {
-            case "BASIC":
+        switch (parameters.getAuthenticationType()) {
+            case BASIC:
                 if (parameters.getUsername() != null && parameters.getPassword() != null) {
                     final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
                     credentialsProvider.setCredentials(AuthScope.ANY,
@@ -139,7 +139,7 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
                     throw new IllegalArgumentException("Missing username or password for BASIC authentication.");
                 }
                 break;
-            case "TOKEN":
+            case TOKEN:
                 if (parameters.getAuthorizationToken() != null) {
                     Header[] defaultHeaders = new Header[]{new BasicHeader("Authorization",
                             parameters.getAuthorizationToken())};
@@ -148,7 +148,7 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
                     throw new IllegalArgumentException("Missing authorization token for TOKEN authentication.");
                 }
                 break;
-            case "APIKEY":
+            case APIKEY:
                 if (parameters.getApiKeyId() != null && parameters.getApiKeySecret() != null) {
                     String apiKeyAuth = Base64.getEncoder()
                             .encodeToString((parameters.getApiKeyId() + ":" + parameters.getApiKeySecret())
