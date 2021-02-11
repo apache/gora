@@ -183,10 +183,9 @@ public class ElasticsearchMappingBuilder<K, T extends PersistentBase> {
         // docNameFromMapping could be null here
         if (!indexName.equals(indexNameFromMapping)) {
             ElasticsearchStore.LOG
-                    .info("Keyclass and nameclass match but mismatching index names "
-                            + " mappingfile schema is '" + indexNameFromMapping
-                            + "' vs actual schema '" + indexName
-                            + "' , assuming they are the same.");
+                    .info("Keyclass and nameclass match, but mismatching index names. "
+                            + "Mappingfile schema is '{}' vs actual schema '{}', assuming they are the same.",
+                            indexNameFromMapping, indexName);
             if (indexNameFromMapping != null) {
                 elasticsearchMapping.setIndexName(indexName);
             }
