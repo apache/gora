@@ -22,7 +22,9 @@ import org.apache.gora.elasticsearch.mapping.ElasticsearchMapping;
 import org.apache.gora.elasticsearch.mapping.ElasticsearchMappingBuilder;
 import org.apache.gora.elasticsearch.mapping.Field;
 import org.apache.gora.elasticsearch.query.ElasticsearchQuery;
+import org.apache.gora.elasticsearch.query.ElasticsearchResult;
 import org.apache.gora.elasticsearch.utils.ElasticsearchParameters;
+import org.apache.gora.filter.Filter;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.impl.BeanFactoryImpl;
 import org.apache.gora.persistency.impl.DirtyListWrapper;
@@ -51,6 +53,8 @@ import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
@@ -61,6 +65,9 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.FetchSourceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -336,7 +343,41 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
 
     @Override
     public Result<K, T> execute(Query<K, T> query) throws GoraException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        // Set the query range. Commented out for now as Elasticsearch "_id" field does not support range queries.
+        //searchSourceBuilder.query(QueryBuilders.rangeQuery("_id").from(query.getStartKey()).to(query.getEndKey()));
+        // Set the query limit
+        int size = (int) query.getLimit();
+        if (size != -1) {
+            searchSourceBuilder.size(size);
+        }
+
+        try {
+            // Build the actual Elasticsearch query
+            SearchRequest searchRequest = new SearchRequest(elasticsearchMapping.getIndexName());
+            searchRequest.source(searchSourceBuilder);
+            SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+
+            // check filter
+            Filter<K, T> queryFilter = query.getFilter();
+            SearchHits hits = searchResponse.getHits();
+            SearchHit[] searchHits = hits.getHits();
+
+            String[] avroFields = getFieldsToQuery(query.getFields());
+
+            List<K> hitId = new ArrayList<>();
+            List<T> filteredObjects = new ArrayList<>();
+            for (SearchHit hit : searchHits) {
+                Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+                if (queryFilter == null || !queryFilter.filter((K) hit.getId(), newInstance(sourceAsMap, avroFields))) {
+                    filteredObjects.add(newInstance(sourceAsMap, avroFields));
+                    hitId.add((K) hit.getId());
+                }
+            }
+            return new ElasticsearchResult<>(this, query, hitId, filteredObjects);
+        } catch (IOException ex) {
+            throw new GoraException(ex);
+        }
     }
 
     @Override
