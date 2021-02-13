@@ -33,6 +33,7 @@ import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
+import org.apache.gora.query.impl.PartitionQueryImpl;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.AvroUtils;
 import org.apache.gora.util.ClassLoadingUtils;
@@ -389,7 +390,12 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
 
     @Override
     public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        List<PartitionQuery<K, T>> partitions = new ArrayList<>();
+        PartitionQueryImpl<K, T> partitionQuery = new PartitionQueryImpl<>(
+                query);
+        partitionQuery.setConf(getConf());
+        partitions.add(partitionQuery);
+        return partitions;
     }
 
     @Override
