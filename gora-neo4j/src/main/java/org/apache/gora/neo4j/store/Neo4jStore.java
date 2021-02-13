@@ -27,6 +27,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,7 @@ import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
+import org.apache.gora.query.impl.PartitionQueryImpl;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.AvroUtils;
 import org.apache.gora.util.GoraException;
@@ -73,6 +75,7 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
   protected static final String CONSTRAINTS_PROCEDURE = "db.constraints";
   protected static final String QUERY_NODE_NAME = "r";
   protected static final String DATASTORE_NODE_NAME = "ds";
+  protected static final String DOT = ".";
 
   public static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private Neo4jMapping neo4jMapping;
@@ -110,8 +113,8 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
 
       Neo4jMappingBuilder mappingBuilder = new Neo4jMappingBuilder(this);
       neo4jMapping = mappingBuilder.readMapping(mappingStream, Boolean.valueOf(properties.getProperty(XSD_VALIDATION, "false")));
-      Neo4jParameters load = Neo4jParameters.load(properties, getConf());
-      connection = connectToServer(load);
+      Neo4jParameters connectionParameters = Neo4jParameters.load(properties, getConf());
+      connection = connectToServer(connectionParameters);
       LOG.info("Neo4j store was successfully initialized");
       if (autoCreateSchema && !schemaExists()) {
         createSchema();
@@ -121,29 +124,29 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     }
   }
 
-  private Connection connectToServer(Neo4jParameters params) throws ClassNotFoundException, GoraException, SQLException {
+  private Connection connectToServer(Neo4jParameters parameters) throws ClassNotFoundException, GoraException, SQLException {
     Class.forName(Neo4jConstants.DRIVER_NAME);
-    StringBuilder urlBuilder = new StringBuilder();
-    urlBuilder.append("jdbc:neo4j:");
-    switch (params.getProtocol()) {
-      case "Bolt":
-        urlBuilder.append("bolt");
+    StringBuilder jdbcNeo4jUri = new StringBuilder();
+    jdbcNeo4jUri.append("jdbc:neo4j:");
+    switch (parameters.getProtocol()) {
+      case Bolt:
+        jdbcNeo4jUri.append("bolt");
         break;
-      case "Bolt+Routing":
-        urlBuilder.append("bolt+routing");
+      case BoltRouting:
+        jdbcNeo4jUri.append("bolt+routing");
         break;
-      case "HTTP":
-        urlBuilder.append("http");
+      case HTTP:
+        jdbcNeo4jUri.append("http");
         break;
       default:
         throw new GoraException("Incorrect protocol");
     }
-    urlBuilder.append("://");
-    urlBuilder.append(params.getHost());
-    if (params.getPort() != null) {
-      urlBuilder.append(":").append(params.getPort());
+    jdbcNeo4jUri.append("://");
+    jdbcNeo4jUri.append(parameters.getHost());
+    if (parameters.getPort() != null) {
+      jdbcNeo4jUri.append(":").append(parameters.getPort());
     }
-    return DriverManager.getConnection(urlBuilder.toString(), params.getUsername(), params.getPassword());
+    return DriverManager.getConnection(jdbcNeo4jUri.toString(), parameters.getUsername(), parameters.getPassword());
   }
 
   @Override
@@ -162,14 +165,14 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     }
     List<String> createCQLs = Lists.newArrayList();
     createCQLs.add(CypherDDL.createNodeKeyConstraint(this.neo4jMapping.getLabel(), this.neo4jMapping.getNodeKey().getName()));
-    for (Map.Entry<String, Property> it : this.neo4jMapping.getProperties().entrySet()) {
-      if (it.getValue().isExists()) {
-        createCQLs.add(CypherDDL.createExistsConstraint(this.neo4jMapping.getLabel(), it.getValue().getName()));
+    for (Map.Entry<String, Property> propertyConstraint : this.neo4jMapping.getProperties().entrySet()) {
+      if (propertyConstraint.getValue().isExists()) {
+        createCQLs.add(CypherDDL.createExistsConstraint(this.neo4jMapping.getLabel(), propertyConstraint.getValue().getName()));
       }
     }
-    for (String create : createCQLs) {
-      try (PreparedStatement stmt = this.connection.prepareStatement(create)) {
-        stmt.execute();
+    for (String createCQL : createCQLs) {
+      try (PreparedStatement neo4jStatement = this.connection.prepareStatement(createCQL)) {
+        neo4jStatement.execute();
       } catch (SQLException ex) {
         throw new GoraException(ex);
       }
@@ -186,25 +189,25 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       return;
     }
     // Delete constraints
-    List<String> createCQLs = Lists.newArrayList();
-    createCQLs.add(CypherDDL.dropNodeKeyConstraint(this.neo4jMapping.getLabel(), this.neo4jMapping.getNodeKey().getName()));
+    List<String> deleteCQLs = Lists.newArrayList();
+    deleteCQLs.add(CypherDDL.dropNodeKeyConstraint(this.neo4jMapping.getLabel(), this.neo4jMapping.getNodeKey().getName()));
 
     // Delete existing nodes
-    Node named = Cypher.node(this.neo4jMapping.getLabel()).named(QUERY_NODE_NAME);
-    Statement build = Cypher.match(named).delete(named).build();
-    Renderer defaultRenderer = Renderer.getDefaultRenderer();
-    String render = defaultRenderer.render(build);
-    createCQLs.add(render);
+    Node namedNode = Cypher.node(this.neo4jMapping.getLabel()).named(QUERY_NODE_NAME);
+    Statement createStatement = Cypher.match(namedNode).delete(namedNode).build();
+    Renderer renderer = Renderer.getDefaultRenderer();
+    String deleteCQL = renderer.render(createStatement);
+    deleteCQLs.add(deleteCQL);
 
     // Delete exists constraints
-    for (Map.Entry<String, Property> it : this.neo4jMapping.getProperties().entrySet()) {
-      if (it.getValue().isExists()) {
-        createCQLs.add(CypherDDL.dropExistsConstraint(this.neo4jMapping.getLabel(), it.getValue().getName()));
+    for (Map.Entry<String, Property> existConstraints : this.neo4jMapping.getProperties().entrySet()) {
+      if (existConstraints.getValue().isExists()) {
+        deleteCQLs.add(CypherDDL.dropExistsConstraint(this.neo4jMapping.getLabel(), existConstraints.getValue().getName()));
       }
     }
-    for (String delete : createCQLs) {
-      try (PreparedStatement stmt = this.connection.prepareStatement(delete)) {
-        stmt.execute();
+    for (String delete : deleteCQLs) {
+      try (PreparedStatement deleteStatement = this.connection.prepareStatement(delete)) {
+        deleteStatement.execute();
       } catch (SQLException ex) {
         throw new GoraException(ex);
       }
@@ -213,35 +216,35 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
 
   @Override
   public boolean schemaExists() throws GoraException {
-    boolean exits = false;
-    Statement build = Cypher.call(CONSTRAINTS_PROCEDURE).build();
-    Renderer defaultRenderer = Renderer.getDefaultRenderer();
-    String render = defaultRenderer.render(build);
-    try (PreparedStatement stmt = this.connection.prepareStatement(render)) {
-      try (ResultSet rs = stmt.executeQuery()) {
-        while (rs.next()) {
-          if (rs.getString(CONSTRAINT_NAME).equals(CypherDDL.createNodeKeyConstraintName(this.neo4jMapping.getLabel(), this.neo4jMapping.getNodeKey().getName()))) {
-            exits = true;
+    boolean exists = false;
+    Statement callProcedure = Cypher.call(CONSTRAINTS_PROCEDURE).build();
+    Renderer renderer = Renderer.getDefaultRenderer();
+    String callCQL = renderer.render(callProcedure);
+    try (PreparedStatement callStatement = this.connection.prepareStatement(callCQL)) {
+      try (ResultSet existsResultSet = callStatement.executeQuery()) {
+        while (existsResultSet.next()) {
+          if (existsResultSet.getString(CONSTRAINT_NAME).equals(CypherDDL.createNodeKeyConstraintName(this.neo4jMapping.getLabel(), this.neo4jMapping.getNodeKey().getName()))) {
+            exists = true;
           }
         }
       }
     } catch (SQLException ex) {
       throw new GoraException(ex);
     }
-    return exits;
+    return exists;
   }
 
   @Override
   public boolean exists(K key) throws GoraException {
     boolean found = false;
-    Node named = Cypher.node(this.neo4jMapping.getLabel()).withProperties(this.neo4jMapping.getNodeKey().getName(), Cypher.literalOf(key)).named(QUERY_NODE_NAME);
+    Node namedNode = Cypher.node(this.neo4jMapping.getLabel()).withProperties(this.neo4jMapping.getNodeKey().getName(), Cypher.literalOf(key)).named(QUERY_NODE_NAME);
     Literal<Boolean> literalTrue = Cypher.literalTrue();
-    Statement build = Cypher.match(named).returning(literalTrue).build();
-    Renderer defaultRenderer = Renderer.getDefaultRenderer();
-    String render = defaultRenderer.render(build);
-    try (PreparedStatement stmt = this.connection.prepareStatement(render)) {
-      try (ResultSet rs = stmt.executeQuery()) {
-        while (rs.next()) {
+    Statement checkExistStatement = Cypher.match(namedNode).returning(literalTrue).build();
+    Renderer renderer = Renderer.getDefaultRenderer();
+    String existsCheckCQL = renderer.render(checkExistStatement);
+    try (PreparedStatement existsCheckStatement = this.connection.prepareStatement(existsCheckCQL)) {
+      try (ResultSet existsResultSet = existsCheckStatement.executeQuery()) {
+        while (existsResultSet.next()) {
           found = true;
         }
       }
@@ -255,34 +258,34 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
   public T get(K key, String[] fields) throws GoraException {
     String[] avFields = getFieldsToQuery(fields);
     List<String> dbFields = Lists.newArrayList();
-    for (String af : avFields) {
-      dbFields.add(this.neo4jMapping.getProperties().get(af).getName());
+    for (String avroField : avFields) {
+      dbFields.add(this.neo4jMapping.getProperties().get(avroField).getName());
     }
     try {
-      T resp = null;
+      T response = null;
 
-      Node node = Cypher.node(this.neo4jMapping.getLabel()).named(DATASTORE_NODE_NAME);
-      node = node.withProperties(this.neo4jMapping.getNodeKey().getName(), Cypher.literalOf(key));
+      Node namedNode = Cypher.node(this.neo4jMapping.getLabel()).named(DATASTORE_NODE_NAME);
+      namedNode = namedNode.withProperties(this.neo4jMapping.getNodeKey().getName(), Cypher.literalOf(key));
       List<org.neo4j.cypherdsl.core.Property> returnProperties = Lists.newArrayList();
-      for (String props : dbFields) {
-        returnProperties.add(node.property(props));
+      for (String neo4jField : dbFields) {
+        returnProperties.add(namedNode.property(neo4jField));
       }
       org.neo4j.cypherdsl.core.Property[] propertiesArray = returnProperties.toArray(new org.neo4j.cypherdsl.core.Property[0]);
-      Statement build = Cypher.match(node).returning(propertiesArray).build();
-      Renderer defaultRenderer = Renderer.getDefaultRenderer();
-      String render = defaultRenderer.render(build);
-      try (PreparedStatement stmt = this.connection.prepareStatement(render)) {
-        ResultSet rs = stmt.executeQuery();
-        boolean data = rs.next();
-        if (data) {
-          resp = newInstance(rs, fields);
-          if (rs.next()) {
+      Statement getStatement = Cypher.match(namedNode).returning(propertiesArray).build();
+      Renderer renderer = Renderer.getDefaultRenderer();
+      String getCQL = renderer.render(getStatement);
+      try (PreparedStatement getstatement = this.connection.prepareStatement(getCQL)) {
+        ResultSet getResultSet = getstatement.executeQuery();
+        boolean hasData = getResultSet.next();
+        if (hasData) {
+          response = newInstance(getResultSet, fields);
+          if (getResultSet.next()) {
             LOG.warn("Multiple results for primary key {} in the schema {}, ignoring additional rows.", key, this.neo4jMapping.getLabel());
           }
         }
-        rs.close();
+        getResultSet.close();
       }
-      return resp;
+      return response;
     } catch (Exception ex) {
       throw new GoraException(ex);
     }
@@ -301,16 +304,20 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
   public T newInstance(ResultSet resultset, String[] fields) throws GoraException, SQLException, IOException {
     fields = getFieldsToQuery(fields);
     T persistent = newPersistent();
-    for (String f : fields) {
-      Schema.Field field = fieldMap.get(f);
+    for (String avroField : fields) {
+      Schema.Field field = fieldMap.get(avroField);
       Schema fieldSchema = field.schema();
-      String dbField = DATASTORE_NODE_NAME + "." + this.neo4jMapping.getProperties().get(f).getName();
+      StringBuilder dbFieldBuilder = new StringBuilder();
+      dbFieldBuilder.append(DATASTORE_NODE_NAME);
+      dbFieldBuilder.append(DOT);
+      dbFieldBuilder.append(this.neo4jMapping.getProperties().get(avroField).getName());
+      String dbField = dbFieldBuilder.toString();
       Object fieldValue = resultset.getObject(dbField);
       if (fieldValue == null) {
         continue;
       }
-      Object v = deserializeFieldValue(field, fieldSchema, fieldValue, persistent);
-      persistent.put(field.pos(), v);
+      Object deserializedValue = deserializeFieldValue(field, fieldSchema, fieldValue, persistent);
+      persistent.put(field.pos(), deserializedValue);
       persistent.setDirty(field.pos());
     }
     return persistent;
@@ -321,31 +328,40 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     try {
       if (obj.isDirty()) {
         // Create a new node
-        Node node = Cypher.node(this.neo4jMapping.getLabel());
+        Node namedNode = Cypher.node(this.neo4jMapping.getLabel());
+
         //Add Node Key property
-        List<Object> props = Lists.newArrayList();
-        props.add(this.neo4jMapping.getNodeKey().getName());
-        props.add(Cypher.literalOf(key));
+        List<Object> propertiesList = Lists.newArrayList();
+        propertiesList.add(this.neo4jMapping.getNodeKey().getName());
+        propertiesList.add(Cypher.literalOf(key));
+        Node nodeDelete = namedNode.withProperties(propertiesList.toArray());
         //Add data properties
         Schema schemaObj = obj.getSchema();
         List<Schema.Field> fields = schemaObj.getFields();
-        for (Schema.Field field : fields) {
-          Schema schema1 = field.schema();
-          Object fieldValue = obj.get(field.pos());
-          Property get = this.neo4jMapping.getProperties().get(field.name());
-          Object serializeFieldValue = serializeFieldValue(schema1, fieldValue);
+        for (Schema.Field avroField : fields) {
+          Schema schemaField = avroField.schema();
+          Object fieldValue = obj.get(avroField.pos());
+          Property neo4jProperty = this.neo4jMapping.getProperties().get(avroField.name());
+          Object serializeFieldValue = serializeFieldValue(schemaField, fieldValue);
           if (serializeFieldValue == null) {
             continue;
           }
-          props.add(get.getName());
-          props.add(Cypher.literalOf(serializeFieldValue));
+          propertiesList.add(neo4jProperty.getName());
+          propertiesList.add(Cypher.literalOf(serializeFieldValue));
         }
-        node = node.withProperties(props.toArray());
-        Statement build = Cypher.merge(node).build();
-        Renderer defaultRenderer = Renderer.getDefaultRenderer();
-        String render = defaultRenderer.render(build);
-        try (PreparedStatement stmt = this.connection.prepareStatement(render)) {
-          stmt.execute();
+        namedNode = namedNode.withProperties(propertiesList.toArray());
+        Statement deleteCreateStatement = Cypher.match(nodeDelete).detachDelete(nodeDelete).build();
+        Renderer renderer = Renderer.getDefaultRenderer();
+        String deleteCreateNodeCQL = renderer.render(deleteCreateStatement);
+        try (PreparedStatement deletestatement = this.connection.prepareStatement(deleteCreateNodeCQL)) {
+          deletestatement.execute();
+        } catch (SQLException ex) {
+          throw new GoraException(ex);
+        }
+        deleteCreateStatement = Cypher.create(namedNode).build();
+        deleteCreateNodeCQL = renderer.render(deleteCreateStatement);
+        try (PreparedStatement createStatement = this.connection.prepareStatement(deleteCreateNodeCQL)) {
+          createStatement.execute();
         } catch (SQLException ex) {
           throw new GoraException(ex);
         }
@@ -361,12 +377,12 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
   @Override
   public boolean delete(K key) throws GoraException {
     boolean response = false;
-    Node named = Cypher.node(this.neo4jMapping.getLabel()).withProperties(this.neo4jMapping.getNodeKey().getName(), Cypher.literalOf(key)).named(QUERY_NODE_NAME);
-    Statement build = Cypher.match(named).delete(named).build();
-    Renderer defaultRenderer = Renderer.getDefaultRenderer();
-    String render = defaultRenderer.render(build);
-    try (PreparedStatement stmt = this.connection.prepareStatement(render)) {
-      response = stmt.execute();
+    Node deleteNode = Cypher.node(this.neo4jMapping.getLabel()).withProperties(this.neo4jMapping.getNodeKey().getName(), Cypher.literalOf(key)).named(QUERY_NODE_NAME);
+    Statement deleteStatement = Cypher.match(deleteNode).delete(deleteNode).build();
+    Renderer renderer = Renderer.getDefaultRenderer();
+    String deleteCQL = renderer.render(deleteStatement);
+    try (PreparedStatement deletestatement = this.connection.prepareStatement(deleteCQL)) {
+      response = deletestatement.execute();
     } catch (SQLException ex) {
       throw new GoraException(ex);
     }
@@ -390,7 +406,12 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
 
   @Override
   public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query) throws IOException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    List<PartitionQuery<K, T>> partitionsList = new ArrayList<>();
+    PartitionQueryImpl<K, T> partitionQuery = new PartitionQueryImpl<>(
+            query);
+    partitionQuery.setConf(getConf());
+    partitionsList.add(partitionQuery);
+    return partitionsList;
   }
 
   @Override
@@ -426,7 +447,7 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       case ARRAY:
       case RECORD:
         @SuppressWarnings("rawtypes") SpecificDatumReader reader = getDatumReader(fieldSchema);
-        fieldValue = IOUtils.deserialize(Base64.getDecoder().decode(((String) storeValue).getBytes()), reader,
+        fieldValue = IOUtils.deserialize(Base64.getDecoder().decode(((String) storeValue).getBytes(Charset.defaultCharset())), reader,
                 persistent.get(field.pos()));
         break;
       case ENUM:
@@ -435,7 +456,7 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       case FIXED:
         break;
       case BYTES:
-        fieldValue = ByteBuffer.wrap(Base64.getDecoder().decode(((String) storeValue).getBytes()));
+        fieldValue = ByteBuffer.wrap(Base64.getDecoder().decode(((String) storeValue).getBytes(Charset.defaultCharset())));
         break;
       case STRING:
         fieldValue = new Utf8(storeValue.toString());
@@ -447,7 +468,7 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
           fieldValue = deserializeFieldValue(field, unionSchema, storeValue, persistent);
         } else {
           reader = getDatumReader(fieldSchema);
-          fieldValue = IOUtils.deserialize(Base64.getDecoder().decode(((String) storeValue).getBytes()), reader,
+          fieldValue = IOUtils.deserialize(Base64.getDecoder().decode(((String) storeValue).getBytes(Charset.defaultCharset())), reader,
                   persistent.get(field.pos()));
         }
         break;
@@ -474,15 +495,15 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       case ARRAY:
       case MAP:
       case RECORD:
-        byte[] data = null;
+        byte[] binaryData = null;
         try {
           @SuppressWarnings("rawtypes")
           SpecificDatumWriter writer = getDatumWriter(fieldSchema);
-          data = IOUtils.serialize(writer, fieldValue);
+          binaryData = IOUtils.serialize(writer, fieldValue);
         } catch (IOException e) {
           LOG.error(e.getMessage(), e);
         }
-        output = Base64.getEncoder().encodeToString(data);
+        output = Base64.getEncoder().encodeToString(binaryData);
         break;
       case UNION:
         if (fieldSchema.getTypes().size() == 2 && isNullable(fieldSchema)) {
@@ -490,15 +511,15 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
           Schema unionSchema = fieldSchema.getTypes().get(schemaPos);
           output = serializeFieldValue(unionSchema, fieldValue);
         } else {
-          data = null;
+          binaryData = null;
           try {
             @SuppressWarnings("rawtypes")
             SpecificDatumWriter writer = getDatumWriter(fieldSchema);
-            data = IOUtils.serialize(writer, fieldValue);
+            binaryData = IOUtils.serialize(writer, fieldValue);
           } catch (IOException e) {
             LOG.error(e.getMessage(), e);
           }
-          output = Base64.getEncoder().encodeToString(data);
+          output = Base64.getEncoder().encodeToString(binaryData);
         }
         break;
       case FIXED:
@@ -623,6 +644,9 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
         return unionSchemaPos;
       }
       if (instanceValue instanceof byte[] && schemaType.equals(Schema.Type.MAP)) {
+        return unionSchemaPos;
+      }
+      if (instanceValue instanceof String && schemaType.equals(Schema.Type.MAP)) {
         return unionSchemaPos;
       }
       if (instanceValue instanceof byte[] && schemaType.equals(Schema.Type.RECORD)) {

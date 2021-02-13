@@ -45,31 +45,6 @@ public class Neo4jStoreTest extends DataStoreTestBase {
 
   @Test
   @Ignore
-  public void testUpdate() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testGetRecursive() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testGetDoubleRecursive() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testGetWebPage() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testGetWebPageDefaultFields() throws Exception {
-  }
-
-  @Test
-  @Ignore
   public void testQuery() throws Exception {
   }
 

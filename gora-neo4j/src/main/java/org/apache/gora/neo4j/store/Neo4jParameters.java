@@ -43,9 +43,9 @@ public class Neo4jParameters {
   /**
    * Access protocol used in the Neo4j JDBC Driver.
    */
-  private String protocol;
+  private ProtocolType protocol;
 
-  public Neo4jParameters(String host, String port, String username, String password, String protocol) {
+  public Neo4jParameters(String host, String port, String username, String password, ProtocolType protocol) {
     this.host = host;
     this.port = port;
     this.username = username;
@@ -85,11 +85,11 @@ public class Neo4jParameters {
     this.password = password;
   }
 
-  public String getProtocol() {
+  public ProtocolType getProtocol() {
     return protocol;
   }
 
-  public void setProtocol(String protocol) {
+  public void setProtocol(ProtocolType protocol) {
     this.protocol = protocol;
   }
 
@@ -105,7 +105,7 @@ public class Neo4jParameters {
             conf.get(Neo4jConstants.PROPERTY_PORT, properties.getProperty(Neo4jConstants.PROPERTY_PORT)),
             conf.get(Neo4jConstants.PROPERTY_USERNAME, properties.getProperty(Neo4jConstants.PROPERTY_USERNAME)),
             conf.get(Neo4jConstants.PROPERTY_PASSWORD, properties.getProperty(Neo4jConstants.PROPERTY_PASSWORD)),
-            conf.get(Neo4jConstants.PROPERTY_PROTOCOL, properties.getProperty(Neo4jConstants.PROPERTY_PROTOCOL)));
+            ProtocolType.valueOf(conf.get(Neo4jConstants.PROPERTY_PROTOCOL, properties.getProperty(Neo4jConstants.PROPERTY_PROTOCOL))));
   }
 
 }
