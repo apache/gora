@@ -68,6 +68,8 @@ public class ElasticsearchMappingBuilder<K, T extends PersistentBase> {
 
     static final String ATT_DOCFIELD = "docfield";
 
+    static final String ATT_SCALINGFACTOR = "scalingFactor";
+
     /**
      * Mapping instance being built.
      */
@@ -197,7 +199,13 @@ public class ElasticsearchMappingBuilder<K, T extends PersistentBase> {
         for (Element fieldElement : fields) {
             String fieldTypeName = fieldElement.getAttributeValue(ATT_TYPE).toUpperCase(Locale.getDefault());
             Field.FieldType fieldType = new Field.FieldType(Field.DataType.valueOf(fieldTypeName));
-            Field field = new Field(fieldElement.getAttributeValue(ATT_DOCFIELD), fieldType);
+            Field field;
+            if (fieldType.getType() == Field.DataType.SCALED_FLOAT) {
+                int scalingFactor = Integer.parseInt(fieldElement.getAttributeValue(ATT_SCALINGFACTOR));
+                field = new Field(fieldElement.getAttributeValue(ATT_DOCFIELD), new Field.FieldType(scalingFactor));
+            } else {
+                field = new Field(fieldElement.getAttributeValue(ATT_DOCFIELD), fieldType);
+            }
             elasticsearchMapping.addField(fieldElement.getAttributeValue(ATT_NAME), field);
         }
     }

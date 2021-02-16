@@ -208,6 +208,9 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
         for (Map.Entry<String, Field> entry : elasticsearchMapping.getFields().entrySet()) {
             Map<String, Object> fieldType = new HashMap<>();
             fieldType.put("type", entry.getValue().getDataType().getType().name().toLowerCase(Locale.ROOT));
+            if (entry.getValue().getDataType().getType() == Field.DataType.SCALED_FLOAT) {
+                fieldType.put("scaling_factor", entry.getValue().getDataType().getScalingFactor());
+            }
             properties.put(entry.getKey(), fieldType);
         }
         Map<String, Object> mapping = new HashMap<>();

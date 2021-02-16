@@ -37,6 +37,7 @@
         <xs:attribute name="name" type="fieldName-types" use="required"/>
         <xs:attribute name="docfield" type="xs:string" use="required"/>
         <xs:attribute name="type" type="xs:string" use="required"/>
+        <xs:attribute name="scalingFactor" type="xs:string" use="optional"/>
     </xs:complexType>
 
     <xs:simpleType name="keyClass-types">
