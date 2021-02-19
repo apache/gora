@@ -114,8 +114,6 @@ public class Field {
         FLOAT,
         HALF_FLOAT,
         SCALED_FLOAT,
-        DATE,
-        DATE_NANOS,
         OBJECT,
         FLATTENED,
         NESTED,
