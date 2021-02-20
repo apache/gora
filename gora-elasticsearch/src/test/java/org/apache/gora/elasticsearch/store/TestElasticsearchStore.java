@@ -24,16 +24,17 @@ import org.apache.gora.elasticsearch.utils.AuthenticationType;
 import org.apache.gora.elasticsearch.utils.ElasticsearchParameters;
 import org.apache.gora.examples.generated.EmployeeInt;
 import org.apache.gora.store.DataStoreFactory;
+import org.apache.gora.store.DataStoreMetadataFactory;
 import org.apache.gora.store.DataStoreTestBase;
+import org.apache.gora.store.impl.DataStoreMetadataAnalyzer;
 import org.apache.gora.util.GoraException;
+import org.apache.hadoop.conf.Configuration;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * Test case for ElasticsearchStore.
@@ -97,6 +98,70 @@ public class TestElasticsearchStore extends DataStoreTestBase {
         properties.setProperty(ElasticsearchStore.PARSE_MAPPING_FILE_KEY, "gora-elasticsearch-mapping-invalid.xml");
         properties.setProperty(ElasticsearchStore.XSD_VALIDATION, "false");
         testDriver.createDataStore(String.class, EmployeeInt.class, properties);
+    }
+
+    @Test
+    public void testGetType() throws GoraException, ClassNotFoundException {
+        Configuration conf = testDriver.getConfiguration();
+        DataStoreMetadataAnalyzer storeMetadataAnalyzer = DataStoreMetadataFactory.createAnalyzer(conf);
+
+        String actualType = storeMetadataAnalyzer.getType();
+        String expectedType = "ELASTICSEARCH";
+        Assert.assertEquals(expectedType, actualType);
+    }
+
+    @Test
+    public void testGetTablesNames() throws GoraException, ClassNotFoundException {
+        Configuration conf = testDriver.getConfiguration();
+        DataStoreMetadataAnalyzer storeMetadataAnalyzer = DataStoreMetadataFactory.createAnalyzer(conf);
+
+        List<String> actualTablesNames = new ArrayList<>(storeMetadataAnalyzer.getTablesNames());
+        List<String> expectedTablesNames = new ArrayList<String>() {
+            {
+                add("frontier");
+                add("webpage");
+            }
+        };
+        Assert.assertEquals(expectedTablesNames, actualTablesNames);
+    }
+
+    @Test
+    public void testGetTableInfo() throws GoraException, ClassNotFoundException {
+        Configuration conf = testDriver.getConfiguration();
+        DataStoreMetadataAnalyzer storeMetadataAnalyzer = DataStoreMetadataFactory.createAnalyzer(conf);
+
+        ElasticsearchStoreCollectionMetadata actualCollectionMetadata =
+                (ElasticsearchStoreCollectionMetadata) storeMetadataAnalyzer.getTableInfo("frontier");
+
+        List<String> expectedDocumentKeys = new ArrayList<String>() {
+            {
+                add("name");
+                add("dateOfBirth");
+                add("ssn");
+                add("value");
+                add("salary");
+                add("boss");
+                add("webpage");
+            }
+        };
+
+        List<String> expectedDocumentTypes = new ArrayList<String>() {
+            {
+                add("text");
+                add("long");
+                add("text");
+                add("text");
+                add("integer");
+                add("object");
+                add("object");
+            }
+        };
+
+        Assert.assertEquals(expectedDocumentKeys.size(), actualCollectionMetadata.getDocumentTypes().size());
+        Assert.assertTrue(expectedDocumentKeys.containsAll(actualCollectionMetadata.getDocumentKeys()));
+
+        Assert.assertEquals(expectedDocumentTypes.size(), actualCollectionMetadata.getDocumentTypes().size());
+        Assert.assertTrue(expectedDocumentTypes.containsAll(actualCollectionMetadata.getDocumentTypes()));
     }
 
     @Ignore("Elasticsearch doesn't support 3 types union field yet")

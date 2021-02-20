@@ -131,7 +131,7 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
         }
     }
 
-    private RestHighLevelClient createClient(ElasticsearchParameters parameters) {
+    public static RestHighLevelClient createClient(ElasticsearchParameters parameters) {
         RestClientBuilder clientBuilder = RestClient.builder(new HttpHost(parameters.getHost(), parameters.getPort()));
 
         // Choosing the authentication method.
