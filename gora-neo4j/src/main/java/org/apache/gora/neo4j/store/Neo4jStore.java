@@ -33,6 +33,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.sql.rowset.CachedRowSet;
+import javax.sql.rowset.RowSetFactory;
+import javax.sql.rowset.RowSetProvider;
 import org.apache.avro.Schema;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificDatumWriter;
@@ -40,6 +43,8 @@ import org.apache.avro.util.Utf8;
 import org.apache.gora.neo4j.mapping.Neo4jMapping;
 import org.apache.gora.neo4j.mapping.Neo4jMappingBuilder;
 import org.apache.gora.neo4j.mapping.Property;
+import org.apache.gora.neo4j.query.Neo4jQuery;
+import org.apache.gora.neo4j.query.Neo4jResult;
 import org.apache.gora.neo4j.utils.CypherDDL;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.persistency.impl.PersistentBase;
@@ -51,10 +56,15 @@ import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.AvroUtils;
 import org.apache.gora.util.GoraException;
 import org.apache.gora.util.IOUtils;
+import org.neo4j.cypherdsl.core.AliasedExpression;
+import org.neo4j.cypherdsl.core.Condition;
 import org.neo4j.cypherdsl.core.Cypher;
+import org.neo4j.cypherdsl.core.Expression;
+import org.neo4j.cypherdsl.core.Functions;
 import org.neo4j.cypherdsl.core.Literal;
 import org.neo4j.cypherdsl.core.Node;
 import org.neo4j.cypherdsl.core.Statement;
+import org.neo4j.cypherdsl.core.StatementBuilder;
 import org.neo4j.cypherdsl.core.renderer.Renderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -386,7 +396,7 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     } catch (SQLException ex) {
       throw new GoraException(ex);
     }
-    return response;
+    return true;
   }
 
   @Override
@@ -396,12 +406,62 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
 
   @Override
   public Result<K, T> execute(Query<K, T> query) throws GoraException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    String[] fields = getFieldsToQuery(query.getFields());
+    //Avro fields to Ignite fields
+    List<String> dbFields = new ArrayList<>();
+    for (String aField : fields) {
+      dbFields.add(neo4jMapping.getProperties().get(aField).getName());
+    }
+    dbFields.add(neo4jMapping.getNodeKey().getName());
+    Node namedNode = Cypher.node(this.neo4jMapping.getLabel()).named(DATASTORE_NODE_NAME);
+    org.neo4j.cypherdsl.core.Property pkProperty = namedNode.property(this.neo4jMapping.getNodeKey().getName());
+    List<Expression> returnProperties = Lists.newArrayList();
+    for (String neo4jField : dbFields) {
+      returnProperties.add(namedNode.property(neo4jField));
+    }
+    //returnProperties.add(Functions.count(Cypher.asterisk()).as("_total_"));
+    Expression[] propertiesArray = returnProperties.toArray(new Expression[0]);
+    Condition cond = null;
+    if (query.getStartKey() != null) {
+      cond = pkProperty.gte(Cypher.literalOf(query.getStartKey()));
+    }
+    if (query.getEndKey() != null) {
+      Condition cond2 = pkProperty.lte(Cypher.literalOf(query.getEndKey()));
+      if (cond == null) {
+        cond = cond2;
+      } else {
+        cond = cond.and(cond2);
+      }
+    }
+    StatementBuilder.OngoingReadingWithoutWhere match = Cypher.match(namedNode);
+    StatementBuilder.OngoingReadingAndReturn returning;
+    if (cond != null) {
+      returning = match.where(cond).returning(propertiesArray);
+    } else {
+      returning = match.returning(propertiesArray);
+    }
+    Statement build;
+    if (query.getLimit() != -1) {
+      build = returning.limit(query.getLimit()).build();
+    } else {
+      build = returning.build();
+    }
+    Renderer renderer = Renderer.getDefaultRenderer();
+    String getCQL = renderer.render(build);
+    try (PreparedStatement stmt = connection.prepareStatement(getCQL)) {
+      ResultSet executeQuery = stmt.executeQuery();
+      Neo4jResult<K, T> neo4jResult = new Neo4jResult<>(this, query, executeQuery);
+      return neo4jResult;
+    } catch (Exception ex) {
+      throw new GoraException(ex);
+    }
   }
 
   @Override
   public Query<K, T> newQuery() {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    Neo4jQuery<K, T> query = new Neo4jQuery<>(this);
+    query.setFields(getFieldsToQuery(null));
+    return query;
   }
 
   @Override
@@ -661,6 +721,15 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
       unionSchemaPos++;
     }
     return 0;
+  }
+
+  @SuppressWarnings("unchecked")
+  public K extractKey(ResultSet r) throws SQLException {
+    StringBuilder dbFieldBuilder = new StringBuilder();
+    dbFieldBuilder.append(DATASTORE_NODE_NAME);
+    dbFieldBuilder.append(DOT);
+    dbFieldBuilder.append(neo4jMapping.getNodeKey().getName());
+    return (K) r.getObject(dbFieldBuilder.toString());
   }
 
 }

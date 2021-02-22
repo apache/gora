@@ -33,55 +33,7 @@ public class Neo4jStoreTest extends DataStoreTestBase {
     setTestDriver(new GoraNeo4jTestDriver());
   }
 
-  @Test
-  @Ignore
-  public void testTruncateSchema() throws Exception {
-  }
 
-  @Test
-  @Ignore
-  public void testDeleteSchema() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testQuery() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testQueryStartKey() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testQueryEndKey() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testQueryKeyRange() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testQueryWebPageSingleKey() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testQueryWebPageSingleKeyDefaultFields() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testQueryWebPageQueryEmptyResults() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testDelete() throws Exception {
-  }
 
   @Test
   @Ignore
@@ -91,51 +43,6 @@ public class Neo4jStoreTest extends DataStoreTestBase {
   @Test
   @Ignore
   public void testDeleteByQueryFields() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testGetPartitions() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testResultSize() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testResultSizeStartKey() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testResultSizeEndKey() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testResultSizeKeyRange() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testResultSizeWithLimit() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testResultSizeStartKeyWithLimit() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testResultSizeEndKeyWithLimit() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testResultSizeKeyRangeWithLimit() throws Exception {
   }
 
   /**
