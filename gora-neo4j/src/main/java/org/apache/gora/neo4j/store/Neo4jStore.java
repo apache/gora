@@ -33,9 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.sql.rowset.CachedRowSet;
-import javax.sql.rowset.RowSetFactory;
-import javax.sql.rowset.RowSetProvider;
 import org.apache.avro.Schema;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificDatumWriter;
@@ -56,15 +53,14 @@ import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.AvroUtils;
 import org.apache.gora.util.GoraException;
 import org.apache.gora.util.IOUtils;
-import org.neo4j.cypherdsl.core.AliasedExpression;
 import org.neo4j.cypherdsl.core.Condition;
 import org.neo4j.cypherdsl.core.Cypher;
 import org.neo4j.cypherdsl.core.Expression;
-import org.neo4j.cypherdsl.core.Functions;
 import org.neo4j.cypherdsl.core.Literal;
 import org.neo4j.cypherdsl.core.Node;
 import org.neo4j.cypherdsl.core.Statement;
 import org.neo4j.cypherdsl.core.StatementBuilder;
+import org.neo4j.cypherdsl.core.StatementBuilder.BuildableStatement;
 import org.neo4j.cypherdsl.core.renderer.Renderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,7 +130,7 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     }
   }
 
-  private Connection connectToServer(Neo4jParameters parameters) throws ClassNotFoundException, GoraException, SQLException {
+  public static Connection connectToServer(Neo4jParameters parameters) throws ClassNotFoundException, GoraException, SQLException {
     Class.forName(Neo4jConstants.DRIVER_NAME);
     StringBuilder jdbcNeo4jUri = new StringBuilder();
     jdbcNeo4jUri.append("jdbc:neo4j:");
@@ -386,22 +382,55 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
 
   @Override
   public boolean delete(K key) throws GoraException {
-    boolean response = false;
+    int response = -1;
     Node deleteNode = Cypher.node(this.neo4jMapping.getLabel()).withProperties(this.neo4jMapping.getNodeKey().getName(), Cypher.literalOf(key)).named(QUERY_NODE_NAME);
     Statement deleteStatement = Cypher.match(deleteNode).delete(deleteNode).build();
     Renderer renderer = Renderer.getDefaultRenderer();
     String deleteCQL = renderer.render(deleteStatement);
     try (PreparedStatement deletestatement = this.connection.prepareStatement(deleteCQL)) {
-      response = deletestatement.execute();
+      response = deletestatement.executeUpdate();
     } catch (SQLException ex) {
       throw new GoraException(ex);
     }
-    return true;
+    return response > 0;
   }
 
   @Override
   public long deleteByQuery(Query<K, T> query) throws GoraException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    Node namedNode = Cypher.node(this.neo4jMapping.getLabel()).named(DATASTORE_NODE_NAME);
+    org.neo4j.cypherdsl.core.Property pkProperty = namedNode.property(this.neo4jMapping.getNodeKey().getName());
+    Condition cond = null;
+    if (query.getStartKey() != null) {
+      cond = pkProperty.gte(Cypher.literalOf(query.getStartKey()));
+    }
+    if (query.getEndKey() != null) {
+      Condition cond2 = pkProperty.lte(Cypher.literalOf(query.getEndKey()));
+      if (cond == null) {
+        cond = cond2;
+      } else {
+        cond = cond.and(cond2);
+      }
+    }
+    StatementBuilder.OngoingReading match = cond != null ? Cypher.match(namedNode).where(cond) : Cypher.match(namedNode);
+    BuildableStatement delete = null;
+    if (query.getFields() != null && query.getFields().length < this.neo4jMapping.getProperties().size()) {
+      List<org.neo4j.cypherdsl.core.Property> dbFields = new ArrayList<>();
+      for (String af : query.getFields()) {
+        dbFields.add(namedNode.property(af));
+      }
+      org.neo4j.cypherdsl.core.Property[] propertiesArray = dbFields.toArray(new org.neo4j.cypherdsl.core.Property[0]);
+      delete = match.remove(propertiesArray);
+    } else {
+      delete = match.detachDelete(namedNode);
+    }
+    Renderer renderer = Renderer.getDefaultRenderer();
+    String getCQL = renderer.render(delete.build());
+    try (PreparedStatement stmt = connection.prepareStatement(getCQL)) {
+      int executeUpdate = stmt.executeUpdate();
+      return executeUpdate;
+    } catch (SQLException ex) {
+      throw new GoraException(ex);
+    }
   }
 
   @Override
@@ -419,7 +448,6 @@ public class Neo4jStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     for (String neo4jField : dbFields) {
       returnProperties.add(namedNode.property(neo4jField));
     }
-    //returnProperties.add(Functions.count(Cypher.asterisk()).as("_total_"));
     Expression[] propertiesArray = returnProperties.toArray(new Expression[0]);
     Condition cond = null;
     if (query.getStartKey() != null) {

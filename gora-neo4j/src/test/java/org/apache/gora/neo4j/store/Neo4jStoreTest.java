@@ -16,11 +16,16 @@
  */
 package org.apache.gora.neo4j.store;
 
+import avro.shaded.com.google.common.collect.Lists;
+import java.util.HashMap;
 import java.util.Properties;
 import org.apache.gora.examples.generated.EmployeeInt;
 import org.apache.gora.neo4j.GoraNeo4jTestDriver;
+import org.apache.gora.store.DataStoreMetadataFactory;
 import org.apache.gora.store.DataStoreTestBase;
+import org.apache.gora.store.impl.DataStoreMetadataAnalyzer;
 import org.apache.gora.util.GoraException;
+import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -31,18 +36,6 @@ public class Neo4jStoreTest extends DataStoreTestBase {
 
   static {
     setTestDriver(new GoraNeo4jTestDriver());
-  }
-
-
-
-  @Test
-  @Ignore
-  public void testDeleteByQuery() throws Exception {
-  }
-
-  @Test
-  @Ignore
-  public void testDeleteByQueryFields() throws Exception {
   }
 
   /**
@@ -58,4 +51,13 @@ public class Neo4jStoreTest extends DataStoreTestBase {
     DataStoreTestBase.testDriver.createDataStore(String.class, EmployeeInt.class, properties);
   }
 
+  @Test
+  public void neo4jStoreMetadataAnalyzerTest() throws Exception {
+    DataStoreMetadataAnalyzer createAnalyzer = DataStoreMetadataFactory.createAnalyzer(DataStoreTestBase.testDriver.getConfiguration());
+    Assert.assertEquals("Neo4j Store Metadata Type", "NEO4J", createAnalyzer.getType());
+    Assert.assertTrue("Neo4j Store Metadata Table Names", createAnalyzer.getTablesNames().equals(Lists.newArrayList("Employee", "Webpage")));
+    Neo4jTableMetadata tableInfo = (Neo4jTableMetadata) createAnalyzer.getTableInfo("Employee");
+    Assert.assertTrue("Neo4j Node Key", tableInfo.getNodeKey().equals("pkssn"));
+    Assert.assertTrue("Neo4j Properties", tableInfo.getProperties().equals(Lists.newArrayList("ssn")));
+  }
 }
