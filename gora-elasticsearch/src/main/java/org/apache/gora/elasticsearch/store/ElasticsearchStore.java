@@ -49,6 +49,7 @@ import org.apache.http.message.BasicHeader;
 import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.admin.indices.flush.FlushRequest;
+import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequest;
@@ -434,7 +435,8 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
     @Override
     public void flush() throws GoraException {
         try {
-            client.indices().flush(new FlushRequest(), RequestOptions.DEFAULT);
+            client.indices().refresh(new RefreshRequest(elasticsearchMapping.getIndexName()), RequestOptions.DEFAULT);
+            client.indices().flush(new FlushRequest(elasticsearchMapping.getIndexName()), RequestOptions.DEFAULT);
         } catch (IOException ex) {
             throw new GoraException(ex);
         }
