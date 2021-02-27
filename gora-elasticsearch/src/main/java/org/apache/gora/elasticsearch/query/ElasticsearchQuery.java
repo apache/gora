@@ -34,4 +34,8 @@ public class ElasticsearchQuery<K, T extends PersistentBase> extends QueryBase<K
     public ElasticsearchQuery(DataStore<K, T> dataStore) {
         super(dataStore);
     }
+
+    public ElasticsearchQuery() {
+        super(null);
+    }
 }
