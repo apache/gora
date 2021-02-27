@@ -49,7 +49,6 @@ import org.apache.http.message.BasicHeader;
 import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.admin.indices.flush.FlushRequest;
-import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequest;
@@ -65,6 +64,11 @@ import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
+import org.elasticsearch.index.reindex.DeleteByQueryRequest;
+import org.elasticsearch.index.reindex.UpdateByQueryRequest;
+import org.elasticsearch.script.Script;
+import org.elasticsearch.script.ScriptType;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -339,11 +343,31 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
     @Override
     public long deleteByQuery(Query<K, T> query) throws GoraException {
         try {
-            BulkRequest requestTry = new BulkRequest();
-            long startId = Long.parseLong((String) query.getStartKey());
-            long endId = Long.parseLong((String) query.getEndKey());
-            for (long i = startId; i <= endId; i++) {
-                requestTry.add(new DeleteRequest(elasticsearchMapping.getIndexName(), Long.toString(i)));
+            BulkByScrollResponse bulkResponse;
+            if (query.getFields() != null && query.getFields().length < elasticsearchMapping.getFields().size()) {
+                UpdateByQueryRequest updateRequest = new UpdateByQueryRequest(elasticsearchMapping.getIndexName());
+                QueryBuilder matchDocumentsWithinRange = QueryBuilders
+                        .rangeQuery("gora_id").from(query.getStartKey()).to(query.getEndKey());
+                updateRequest.setQuery(matchDocumentsWithinRange);
+
+                // Create a script for deleting fields
+                StringBuilder toDelete = new StringBuilder();
+                String[] fieldsToDelete = query.getFields();
+                for (String field : fieldsToDelete) {
+                    String elasticsearchField = elasticsearchMapping.getFields().get(field).getName();
+                    toDelete.append(String.format("ctx._source.remove('%s');", elasticsearchField));
+                }
+                //toDelete.deleteCharAt(toDelete.length() - 1);
+                updateRequest.setScript(new Script(ScriptType.INLINE, "painless", toDelete.toString(), Collections.emptyMap()));
+                bulkResponse = client.updateByQuery(updateRequest, RequestOptions.DEFAULT);
+                return bulkResponse.getUpdated();
+            } else {
+                DeleteByQueryRequest deleteRequest = new DeleteByQueryRequest(elasticsearchMapping.getIndexName());
+                QueryBuilder matchDocumentsWithinRange = QueryBuilders
+                        .rangeQuery("gora_id").from(query.getStartKey()).to(query.getEndKey());
+                deleteRequest.setQuery(matchDocumentsWithinRange);
+                bulkResponse = client.deleteByQuery(deleteRequest, RequestOptions.DEFAULT);
+                return bulkResponse.getDeleted();
             }
         } catch (IOException ex) {
             throw new GoraException(ex);
@@ -526,9 +550,11 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
     private Object fromElasticsearchList(Schema.Field avroField, Schema avroFieldSchema,
                                          Object elasticsearchValue) throws GoraException {
         List<Object> list = new ArrayList<>();
-        for (Object item : (List<Object>) elasticsearchValue) {
-            Object result = deserializeFieldValue(avroField, avroFieldSchema, item);
-            list.add(result);
+        if (elasticsearchValue != null) {
+            for (Object item : (List<Object>) elasticsearchValue) {
+                Object result = deserializeFieldValue(avroField, avroFieldSchema, item);
+                list.add(result);
+            }
         }
         return new DirtyListWrapper<>(list);
     }
@@ -546,10 +572,12 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
     private Object fromElasticsearchMap(Schema.Field avroField, Schema avroFieldSchema,
                                         Map<String, Object> elasticsearchMap) throws GoraException {
         Map<Utf8, Object> deserializedMap = new HashMap<>();
-        for (Map.Entry<String, Object> entry : elasticsearchMap.entrySet()) {
-            String mapKey = entry.getKey();
-            Object mapValue = deserializeFieldValue(avroField, avroFieldSchema, entry.getValue());
-            deserializedMap.put(new Utf8(mapKey), mapValue);
+        if (elasticsearchMap != null) {
+            for (Map.Entry<String, Object> entry : elasticsearchMap.entrySet()) {
+                String mapKey = entry.getKey();
+                Object mapValue = deserializeFieldValue(avroField, avroFieldSchema, entry.getValue());
+                deserializedMap.put(new Utf8(mapKey), mapValue);
+            }
         }
         return new DirtyMapWrapper<>(deserializedMap);
     }
