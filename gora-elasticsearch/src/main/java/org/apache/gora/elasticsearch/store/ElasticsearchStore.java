@@ -55,8 +55,6 @@ import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.search.MultiSearchRequest;
-import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -65,6 +63,7 @@ import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
@@ -213,6 +212,10 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
             }
             properties.put(entry.getKey(), fieldType);
         }
+        // Special field for range query
+        properties.put("gora_id", new HashMap<String, Object>() {{
+            put("type", "keyword");
+        }});
         Map<String, Object> mapping = new HashMap<>();
         mapping.put("properties", properties);
         request.mapping(mapping);
@@ -307,6 +310,8 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
                     }
                 }
             }
+            // Special field for range query
+            jsonMap.put("gora_id", key);
             // Prepare the Elasticsearch request
             IndexRequest request = new IndexRequest(elasticsearchMapping.getIndexName()).id((String) key).source(jsonMap);
             try {
@@ -340,8 +345,6 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
             for (long i = startId; i <= endId; i++) {
                 requestTry.add(new DeleteRequest(elasticsearchMapping.getIndexName(), Long.toString(i)));
             }
-            client.bulk(requestTry, RequestOptions.DEFAULT);
-            return endId - startId + 1;
         } catch (IOException ex) {
             throw new GoraException(ex);
         }
@@ -349,80 +352,41 @@ public class ElasticsearchStore<K, T extends PersistentBase> extends DataStoreBa
 
     @Override
     public Result<K, T> execute(Query<K, T> query) throws GoraException {
-        String startKey = (String) query.getStartKey();
-        String endKey = (String) query.getEndKey();
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
-        if (startKey != null && endKey != null) {
-            MultiSearchRequest multiSearchRequest = new MultiSearchRequest();
-            long startId = Long.parseLong(startKey);
-            long endId = Long.parseLong(endKey);
-            for (long i = startId; i < endId; i++) {
-                SearchRequest searchRequest = new SearchRequest(elasticsearchMapping.getIndexName());
-                SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-                searchSourceBuilder.query(QueryBuilders.termQuery("_id", Long.toString(i)));
-                searchRequest.source(searchSourceBuilder);
-                multiSearchRequest.add(searchRequest);
-            }
+        // Set the query result limit
+        int size = (int) query.getLimit();
+        if (size != -1) {
+            searchSourceBuilder.size(size);
+        }
+        try {
+            // Build the actual Elasticsearch range query
+            QueryBuilder rangeQueryBuilder = QueryBuilders
+                    .rangeQuery("gora_id").gte(query.getStartKey()).lte(query.getEndKey());
+            searchSourceBuilder.query(rangeQueryBuilder);
+            SearchRequest searchRequest = new SearchRequest(elasticsearchMapping.getIndexName());
+            searchRequest.source(searchSourceBuilder);
+            SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
 
-            try {
-                MultiSearchResponse multiSearchResponse = client.msearch(multiSearchRequest, RequestOptions.DEFAULT);
+            String[] avroFields = getFieldsToQuery(query.getFields());
 
-                Filter<K, T> queryFilter = query.getFilter();
-                String[] avroFields = getFieldsToQuery(query.getFields());
-                List<K> hitId = new ArrayList<>();
-                List<T> filteredObjects = new ArrayList<>();
+            SearchHits hits = searchResponse.getHits();
+            SearchHit[] searchHits = hits.getHits();
+            List<K> hitId = new ArrayList<>();
 
-                for (MultiSearchResponse.Item item : multiSearchResponse.getResponses()) {
-                    for (SearchHit hit : item.getResponse().getHits()) {
-                        Map<String, Object> sourceAsMap = hit.getSourceAsMap();
-                        if (queryFilter == null || !queryFilter.filter((K) hit.getId(), newInstance(sourceAsMap, avroFields))) {
-                            filteredObjects.add(newInstance(sourceAsMap, avroFields));
-                            hitId.add((K) hit.getId());
-                        }
-                    }
+            // Check filter
+            Filter<K, T> queryFilter = query.getFilter();
+            List<T> filteredObjects = new ArrayList<>();
+            for (SearchHit hit : searchHits) {
+                Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+                if (queryFilter == null || !queryFilter.filter((K) hit.getId(), newInstance(sourceAsMap, avroFields))) {
+                    filteredObjects.add(newInstance(sourceAsMap, avroFields));
+                    hitId.add((K) hit.getId());
                 }
-
-                return new ElasticsearchResult<>(this, query, hitId, filteredObjects);
-            } catch (IOException e) {
-                throw new GoraException(e);
             }
-        } else {
-            SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-            int size = (int) query.getLimit();
-            if (size != -1) {
-                searchSourceBuilder.size(size);
-            }
-            System.out.println(size);
-
-            try {
-                // Build the actual Elasticsearch query
-                SearchRequest searchRequest = new SearchRequest(elasticsearchMapping.getIndexName());
-                searchSourceBuilder.query(QueryBuilders.matchAllQuery());
-                searchRequest.source(searchSourceBuilder);
-                System.out.println(searchRequest);
-                SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-                System.out.println(searchResponse);
-
-                // check filter
-                Filter<K, T> queryFilter = query.getFilter();
-                SearchHits hits = searchResponse.getHits();
-                SearchHit[] searchHits = hits.getHits();
-
-                String[] avroFields = getFieldsToQuery(query.getFields());
-
-                List<K> hitId = new ArrayList<>();
-                List<T> filteredObjects = new ArrayList<>();
-                for (SearchHit hit : searchHits) {
-                    Map<String, Object> sourceAsMap = hit.getSourceAsMap();
-                    if (queryFilter == null || !queryFilter.filter((K) hit.getId(), newInstance(sourceAsMap, avroFields))) {
-                        filteredObjects.add(newInstance(sourceAsMap, avroFields));
-                        hitId.add((K) hit.getId());
-                    }
-                }
-                return new ElasticsearchResult<>(this, query, hitId, filteredObjects);
-            } catch (IOException ex) {
-                throw new GoraException(ex);
-            }
+            return new ElasticsearchResult<>(this, query, hitId, filteredObjects);
+        } catch (IOException ex) {
+            throw new GoraException(ex);
         }
     }
 

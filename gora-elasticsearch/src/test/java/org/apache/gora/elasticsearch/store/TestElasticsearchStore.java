@@ -142,6 +142,7 @@ public class TestElasticsearchStore extends DataStoreTestBase {
                 add("salary");
                 add("boss");
                 add("webpage");
+                add("gora_id");
             }
         };
 
@@ -154,6 +155,7 @@ public class TestElasticsearchStore extends DataStoreTestBase {
                 add("integer");
                 add("object");
                 add("object");
+                add("keyword");
             }
         };
 
