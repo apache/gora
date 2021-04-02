@@ -90,5 +90,14 @@ pipeline {
                 }
             }
         }
+
+        stage('Deploy snapshots') {
+            when {
+                branch 'master'
+            }
+            steps {
+                sh "mvn $MAVEN_CLI_OPTS -P deploy-snapshots -DskipTests deploy"
+            }
+        }
     }
 }
