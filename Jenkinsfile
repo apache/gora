@@ -96,7 +96,8 @@ pipeline {
                 branch 'master'
             }
             steps {
-                sh "mvn $MAVEN_CLI_OPTS -P deploy-snapshots -DskipTests deploy"
+                // Use release profile defined in project pom.xml
+                sh "mvn $MAVEN_CLI_OPTS --activate-profiles release -DskipTests deploy"
             }
         }
     }
