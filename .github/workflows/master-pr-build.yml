@@ -32,7 +32,17 @@ jobs:
       matrix:
         java: [ '1.8' ]
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Maven caching
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
       - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v1
         with:
@@ -42,4 +52,11 @@ jobs:
         run: mvn $MAVEN_CLI_OPTS -DskipTests clean install
 
       - name: Test
-        run: mvn $MAVEN_CLI_OPTS verify
+        run: mvn $MAVEN_CLI_OPTS -Dmaven.test.failure.ignore=true verify
+
+      - name: Publish Test Results
+        uses: scacap/action-surefire-report@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          check_name: Test Report (${{ matrix.java }})
+          report_paths: '**/*-reports/TEST-*.xml'
