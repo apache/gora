@@ -884,7 +884,7 @@
 
     <!-- Testing Dependencies -->
     <junit.version>4.10</junit.version>
-    <test.container.version>1.14.3</test.container.version>
+    <testcontainers.version>1.15.2</testcontainers.version>
 
     <!-- gora-benchmark and version dependencies -->
     <site.ycsb.version>0.17.0</site.ycsb.version>
@@ -1830,7 +1830,7 @@
       <dependency>
         <groupId>org.testcontainers</groupId>
         <artifactId>testcontainers-bom</artifactId>
-        <version>${test.container.version}</version>
+        <version>${testcontainers.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
