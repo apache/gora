@@ -52,9 +52,10 @@ jobs:
         run: mvn $MAVEN_CLI_OPTS --fail-at-end -DskipTests clean install
 
       - name: Test
-        run: mvn $MAVEN_CLI_OPTS -Dmaven.test.failure.ignore=true verify
+        run: mvn $MAVEN_CLI_OPTS --fail-at-end verify
 
       - name: Publish Test Results
+        if: ${{ always() }}
         uses: scacap/action-surefire-report@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
