@@ -845,7 +845,7 @@
     <flink.version>1.6.2</flink.version>
 
     <spark.version>2.2.1</spark.version>
-    <aerospike.version>4.2.2</aerospike.version>
+    <aerospike.version>5.0.6</aerospike.version>
     <!-- Misc Dependencies -->
     <guava.version>13.0</guava.version>
     <commons-lang.version>2.6</commons-lang.version>
