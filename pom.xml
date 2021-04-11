@@ -827,7 +827,7 @@
     <cassandra-driver.version>3.9.0</cassandra-driver.version>
     <cassandra.version>3.11.0</cassandra.version>
     <!-- Ignite Dependencies -->
-    <ignite.version>2.9.0</ignite.version>
+    <ignite.version>2.10.0</ignite.version>
     <sqlbuilder.version>2.1.7</sqlbuilder.version>
     <!-- Redis Dependencies -->
     <redisson.version>3.11.0</redisson.version>
