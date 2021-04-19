@@ -105,6 +105,12 @@ pipeline {
         }
 
         stage('Code Quality') {
+            // https://sonarcloud.io/documentation/appendices/move-analysis-java-11/
+            // "continue building in Java 8 but will use Java 11 to scan the code"
+            // https://cwiki.apache.org/confluence/display/INFRA/JDK+Installation+Matrix
+            tools {
+                jdk 'jdk_11_latest'
+            }
             steps {
                 echo 'Checking Code Quality on SonarCloud'
                 // 'drazzib-sonarcloud-token' needs to be defined for this job and contains the user token
