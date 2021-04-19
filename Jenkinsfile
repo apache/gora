@@ -107,10 +107,9 @@ pipeline {
         stage('Code Quality') {
             steps {
                 echo 'Checking Code Quality on SonarCloud'
-                def sonarcloudParams = "${SONARCLOUD_PARAMS} -Dsonar.branch.name=${BRANCH_NAME}"
                 // 'drazzib-sonarcloud-token' needs to be defined for this job and contains the user token
                 withCredentials([string(credentialsId: 'drazzib-sonarcloud-token', variable: 'SONAR_TOKEN')]) {
-                    sh "mvn sonar:sonar ${sonarcloudParams}"
+                    sh "mvn sonar:sonar ${SONARCLOUD_PARAMS} -Dsonar.branch.name=${BRANCH_NAME}"
                 }
             }
         }
