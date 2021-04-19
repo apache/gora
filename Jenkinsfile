@@ -62,6 +62,9 @@ pipeline {
         // --show-version Display version information WITHOUT stopping build
         // --no-transfer-progress Do not display transfer progress when downloading or uploading
         MAVEN_CLI_OPTS = "--batch-mode --errors --fail-at-end --show-version --no-transfer-progress"
+        // https://cwiki.apache.org/confluence/display/INFRA/SonarQube+Analysis
+        // https://sonarcloud.io/documentation/analysis/scan/sonarscanner-for-maven/
+        SONARCLOUD_PARAMS = "-Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=apache -Dsonar.projectKey=apache_gora"
     }
 
     stages {
@@ -98,6 +101,17 @@ pipeline {
             steps {
                 // Use release profile defined in project pom.xml
                 sh "mvn $MAVEN_CLI_OPTS --activate-profiles release -DskipTests deploy"
+            }
+        }
+
+        stage('Code Quality') {
+            steps {
+                echo 'Checking Code Quality on SonarCloud'
+                def sonarcloudParams = "${SONARCLOUD_PARAMS} -Dsonar.branch.name=${BRANCH_NAME}"
+                // 'drazzib-sonarcloud-token' needs to be defined for this job and contains the user token
+                withCredentials([string(credentialsId: 'drazzib-sonarcloud-token', variable: 'SONAR_TOKEN')]) {
+                    sh "mvn sonar:sonar ${sonarcloudParams}"
+                }
             }
         }
     }
