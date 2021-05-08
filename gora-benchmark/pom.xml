@@ -38,7 +38,7 @@
   </issueManagement>
   <ciManagement>
     <system>Jenkins</system>
-    <url>https://builds.apache.org/job/Gora-trunk/</url>
+    <url>https://ci-builds.apache.org/job/Gora/job/gora-pipeline</url>
   </ciManagement>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
