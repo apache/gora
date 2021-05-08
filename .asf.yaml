@@ -18,7 +18,7 @@ github:
     - java
     - persistence
     - object-to-datastore
-    - big data
+    - big-data
 
 notifications:
   commits:      commits@gora.apache.org
