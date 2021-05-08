@@ -385,6 +385,14 @@
     </repository>
   </repositories-->
 
+  <repositories>
+    <repository>
+      <id>maven-restlet</id>
+      <name>Public online Restlet repository</name>
+      <url>https://maven.restlet.talend.com/</url>
+    </repository>
+  </repositories>
+
   <build>
     <defaultGoal>install</defaultGoal>
     <directory>target</directory>
