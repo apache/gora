@@ -66,9 +66,10 @@ public class CassandraStore<K, T extends Persistent> implements DataStore<K, T> 
    * In initializing the cassandra datastore, read the mapping file, creates the basic connection to cassandra cluster,
    * according to the gora properties
    *
-   * @param keyClass        key class
-   * @param persistentClass persistent class
-   * @param properties      properties
+   * @param keyClass the {@link Class} being used to map an entry to object value
+   * @param persistentClass the {@link Class} of the object value being persisted
+   * @param properties datastore initiailization and runtime properties 
+   * @throws GoraException if there is an error during initialization
    */
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) throws GoraException {

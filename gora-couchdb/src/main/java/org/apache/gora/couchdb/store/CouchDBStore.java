@@ -112,10 +112,10 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
    * reading the mapping file. Initialize is called when then the call to
    * {@link org.apache.gora.store.DataStoreFactory#createDataStore} is made.
    *
-   * @param keyClass
-   * @param persistentClass
-   * @param properties
-   * @throws GoraException 
+   * @param keyClass the {@link Class} being used to map an entry to object value
+   * @param persistentClass the {@link Class} of the object value being persisted
+   * @param properties datastore initiailization and runtime properties
+   * @throws GoraException if there is an error during initialization
    */
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) throws GoraException {

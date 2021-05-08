@@ -46,9 +46,9 @@ public class AccumuloResult<K,T extends PersistentBase> extends ResultBase<K,T> 
   }
 
   /**
-   * @param dataStore
-   * @param query
-   * @param scanner
+   * @param dataStore the {@link DataStore} implementation to use.
+   * @param query a initialized {@link Query} to generate results for.
+   * @param scanner a Accumulo-specific {@link Scanner} implementation.
    */
   public AccumuloResult(DataStore<K,T> dataStore, Query<K,T> query, Scanner scanner) {
     super(dataStore, query);

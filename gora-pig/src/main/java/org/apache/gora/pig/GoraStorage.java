@@ -18,6 +18,7 @@
 package org.apache.gora.pig;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -298,7 +299,11 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
       throw new RuntimeException("Error creating instance of key and/or persistent.",e);
     }
     
-    this.persistentSchema = this.persistentClass.newInstance().getSchema() ;
+    try {
+      this.persistentSchema = this.persistentClass.getDeclaredConstructor().newInstance().getSchema();
+    } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+      throw new RuntimeException("Error obtaining schema for persistent class.", e);
+    }
 
     // Populate this.loadQueryFields
     List<String> declaredConstructorFields = new ArrayList<String>() ;
@@ -684,7 +689,12 @@ public class GoraStorage extends LoadFunc implements StoreFuncInterface, LoadMet
       case DataType.TUPLE: // Pig Tuple -> Avro Record
         if (LOG.isTraceEnabled()) LOG.trace("    Writing tuple.") ;
         try {
-          PersistentBase persistentRecord = (PersistentBase) ClassLoadingUtils.loadClass(avroSchema.getFullName()).newInstance();
+          PersistentBase persistentRecord = null;
+          try {
+            persistentRecord = (PersistentBase) ClassLoadingUtils.loadClass(avroSchema.getFullName()).getDeclaredConstructor().newInstance();
+          } catch (IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+            throw new RuntimeException("Error obtaining declared constructor or instance for persistent records.", e);
+          }
           
           ResourceFieldSchema[] tupleFieldSchemas = pigField.getSchema().getFields() ;
           

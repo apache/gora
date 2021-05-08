@@ -46,6 +46,7 @@ public interface Query<K, T extends Persistent> {
   /**
    * Executes the Query on the DataStore and returns the results.
    * @return the {@link Result} for the query.
+   * @throws GoraException if there is (typically) an IO-related exception.
    */
   Result<K, T> execute() throws GoraException;
   

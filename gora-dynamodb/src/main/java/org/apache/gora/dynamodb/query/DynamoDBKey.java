@@ -20,8 +20,6 @@ package org.apache.gora.dynamodb.query;
 
 /**
  * Class abstracting a composed DynamoDB key.
- * @param <H>
- * @param <R>
  */
 public class DynamoDBKey<H, R> {  
   /**

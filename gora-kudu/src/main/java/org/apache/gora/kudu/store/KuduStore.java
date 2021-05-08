@@ -89,6 +89,12 @@ public class KuduStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
   private static final ConcurrentHashMap<Schema, SpecificDatumWriter<?>> writerMap = new ConcurrentHashMap<>();
 
   @Override
+  /**
+   * @param keyClass the {@link Class} being used to map an entry to object value
+   * @param persistentClass the {@link Class} of the object value being persisted
+   * @param properties datastore initiailization and runtime properties
+   * @throws GoraException if there is an error during initialization
+   */
   public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) throws GoraException {
     try {
       super.initialize(keyClass, persistentClass, properties);

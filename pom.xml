@@ -797,7 +797,7 @@
     <module>gora-aerospike</module>
     <module>gora-ignite</module>
     <module>gora-kudu</module>
-    <module>gora-hive</module>
+    <!--module>gora-hive</module-->
     <module>gora-redis</module>
     <module>gora-jet</module>
     <module>gora-rethinkdb</module>
