@@ -385,6 +385,18 @@
     </repository>
   </repositories-->
 
+  <repositories>
+    <repository>
+      <id>conjars</id>
+      <url>https://conjars.org/repo</url>
+    </repository>
+    <repository>
+      <id>maven-restlet</id>
+      <name>Public online Restlet repository</name>
+      <url>https://maven.restlet.talend.com/</url>
+    </repository>
+  </repositories>
+
   <build>
     <defaultGoal>install</defaultGoal>
     <directory>target</directory>
