@@ -64,7 +64,8 @@ public class AerospikeParameters {
    * Constructor to create AerospikeParameters object with the given mapping and properties
    *
    * @param aerospikeMapping aerospike mapping initialized from the mapping file
-   * @param properties       property details
+   * @param properties property details
+   * @param a initialized Hadoop {@link Configuration}
    */
   public AerospikeParameters(AerospikeMapping aerospikeMapping, Properties properties, Configuration conf) {
     this.aerospikeMapping = aerospikeMapping;

@@ -475,7 +475,7 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
    * @param record record retrieved from database
    * @param fields fields
    * @return persistent object created
-   * @throws GoraException 
+   * @throws GoraException if there is an issue executing {@link DataStoreBase#newPersistent()}
    */
   public T createPersistentInstance(Record record, String[] fields) throws GoraException {
 

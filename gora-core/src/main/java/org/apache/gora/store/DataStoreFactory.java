@@ -410,6 +410,7 @@ public class DataStoreFactory{
    * "gora.datastore.&lt;baseKey&gt;" is searched.
    * @param properties which hold keys from which we can obtain values for datastore mappings.
    * @param store {@link org.apache.gora.store.DataStore} object to get the mapping for.
+   * @param baseKey the string properties key to retrieve.
    * @param defaultValue default value for the <code>gora-&lt;classname&gt;-mapping.xml</code>
    * @return the first found value, or defaultValue
    */
@@ -454,6 +455,7 @@ public class DataStoreFactory{
    * "gora.datastore.&lt;baseKey&gt;" is searched.
    * @param properties which hold keys from which we can obtain values for datastore mappings.
    * @param store {@link org.apache.gora.store.DataStore} object to get the mapping for.
+   * @param baseKey the string properties key to retrieve.
    * @return the first found value, or throws IOException
    * @throws IOException of there is an error obtaining the property
    */
@@ -479,6 +481,9 @@ public class DataStoreFactory{
 
   /**
    * Returns the input path as read from the properties for file-backed data stores.
+   * @param properties which hold keys from which we can obtain values for datastore mappings.
+   * @param store {@link org.apache.gora.store.DataStore} object to get the mapping for.
+   * @return the first found value, or throws IOException
    */
   public static String getInputPath(Properties properties, DataStore<?,?> store) {
     return findProperty(properties, store, INPUT_PATH, null);
@@ -486,6 +491,9 @@ public class DataStoreFactory{
 
   /**
    * Returns the output path as read from the properties for file-backed data stores.
+   * @param properties which hold keys from which we can obtain values for datastore mappings.
+   * @param store {@link org.apache.gora.store.DataStore} object to get the mapping for.
+   * @return the first found value, or throws IOException
    */
   public static String getOutputPath(Properties properties, DataStore<?,?> store) {
     return findProperty(properties, store, OUTPUT_PATH, null);
@@ -576,6 +584,7 @@ public class DataStoreFactory{
    *
    * @param properties Properties which hold keys from which we can obtain values for datastore mappings.
    * @param store Data store {@link org.apache.gora.store.DataStore} object to get default schema name.
+   * @return DefaultSchemaName if one is located.
    */
   public static String getDefaultSchemaName(Properties properties, DataStore<?,?> store) {
     return findProperty(properties, store, SCHEMA_NAME, null);
