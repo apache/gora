@@ -112,6 +112,12 @@
             <artifactId>hadoop-common</artifactId>
             <version>2.5.2</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>jdk.tools</groupId>
+                    <artifactId>jdk.tools</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
