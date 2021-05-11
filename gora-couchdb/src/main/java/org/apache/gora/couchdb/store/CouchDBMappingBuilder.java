@@ -53,7 +53,7 @@ public class CouchDBMappingBuilder<K, T extends PersistentBase> {
   /**
    * Constructor for builder to create the mapper.
    *
-   * @param store
+   * @param store the {@link CouchDBStore} instance to associate with the mapping logic.
    */
   public CouchDBMappingBuilder(final CouchDBStore<K, T> store) {
     this.dataStore = store;
@@ -62,6 +62,7 @@ public class CouchDBMappingBuilder<K, T extends PersistentBase> {
 
   /**
    * Return the built mapping if it is in a legal state
+   * @return the instantiated {@link CouchDBMapping}
    */
   public CouchDBMapping build() {
     if (mapping.getDatabaseName() == null) {
@@ -76,7 +77,7 @@ public class CouchDBMappingBuilder<K, T extends PersistentBase> {
    * passed in parameter.
    *
    * @param filename path to the file holding the mapping
-   * @throws java.io.IOException
+   * @throws java.io.IOException if there is an error processing the XML input.
    */
   protected void readMapping(String filename) throws IOException {
     try {

@@ -65,7 +65,13 @@ public class GoraDynamoDBCompiler {
     this.dest = dest;
   }
 
-  /** Generates Java classes for a schema. */
+  /**
+   * Generates Java classes for a schema.
+   * @param src a source schema in XML format
+   * @param dest a output file to write the Java class
+   * @throws IOException if there is an error reading the input source or writing 
+   * to the output destination.
+   * */
   public static void compileSchema(File src, File dest) throws IOException {
     log.info("Compiling {} to {}", src, dest);
     GoraDynamoDBCompiler compiler = new GoraDynamoDBCompiler(dest);

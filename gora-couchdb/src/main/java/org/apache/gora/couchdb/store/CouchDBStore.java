@@ -483,7 +483,7 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
    * @param result result from the query to the database
    * @param fields the list of fields to be mapped to the persistence class instance
    * @return a persistence class instance which content was deserialized
-   * @throws GoraException
+   * @throws GoraException if there is a (typically IO-related) Exception.
    */
   public T newInstance(Map<String, Object> result, String[] fields) throws GoraException {
     if (result == null)

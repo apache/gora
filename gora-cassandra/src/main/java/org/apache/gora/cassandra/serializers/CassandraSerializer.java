@@ -80,11 +80,15 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
    * @param mapping   Cassandra Mapping
    * @param <K>       key class
    * @param <T>       persistent class
-   * @return Serializer
-   * @throws GoraException 
+   * @return CassandraSerializer
+   * @throws GoraException if there is a (typically IO-related) error.
    */
-  public static <K, T extends Persistent> CassandraSerializer getSerializer(CassandraClient cc, String type, final DataStore<K, T> dataStore, CassandraMapping mapping) throws GoraException {
-    CassandraStore.SerializerType serType = type == null || type.isEmpty() ? CassandraStore.SerializerType.NATIVE : CassandraStore.SerializerType.valueOf(type.toUpperCase(Locale.ENGLISH));
+  public static <K, T extends Persistent> CassandraSerializer getSerializer(
+          CassandraClient cc, String type, final DataStore<K, T> dataStore, 
+          CassandraMapping mapping) throws GoraException {
+    CassandraStore.SerializerType serType = type == null || 
+            type.isEmpty() ? CassandraStore.SerializerType.NATIVE : 
+            CassandraStore.SerializerType.valueOf(type.toUpperCase(Locale.ENGLISH));
     CassandraSerializer serializer;
     switch (serType) {
       case AVRO:
@@ -171,6 +175,7 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
    *
    * @param key   key value
    * @param value persistent value
+   * @throws GoraException if there is a (typically IO-related) error.
    */
   public abstract void put(K key, T value) throws GoraException;
 
@@ -179,6 +184,7 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
    *
    * @param key key value
    * @return persistent value
+   * @throws GoraException if there is a (typically IO-related) error.
    */
   public abstract T get(K key) throws GoraException;
 	
@@ -187,6 +193,7 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
    *
    * @param key key value
    * @return true/false
+   * @throws GoraException if there is a (typically IO-related) error.
    */
   public boolean exists(Object key) throws GoraException {
     try {
@@ -213,6 +220,7 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
    *
    * @param key key value
    * @return isDeleted
+   * @throws GoraException if there is a (typically IO-related) error.
    */
   public abstract boolean delete(K key) throws GoraException;
 
@@ -222,6 +230,7 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
    * @param key    key value
    * @param fields fields
    * @return persistent value
+   * @throws GoraException if there is a (typically IO-related) error.
    */
   public abstract T get(K key, String[] fields) throws GoraException;
 
@@ -231,6 +240,7 @@ public abstract class CassandraSerializer<K, T extends Persistent> {
    * @param dataStore Cassandra data store
    * @param query     Cassandra Query
    * @return Cassandra Result
+   * @throws GoraException if there is a (typically IO-related) error.
    */
   public abstract Result<K, T> execute(DataStore<K, T> dataStore, Query<K, T> query) throws GoraException ;
 

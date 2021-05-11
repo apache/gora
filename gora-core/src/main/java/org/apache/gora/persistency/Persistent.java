@@ -128,7 +128,9 @@ public interface Persistent extends Dirtyable, Cloneable {
   /**
    * Returns a deep copy of a Persistent instance. Each generated Persistent's subclass implements the clone with a builder.
    * @return A deep copy of a Persistent instance.
-   * @throws CloneNotSupportedException
+   * @throws CloneNotSupportedException which indicates that the clone method in 
+   * class Object has been called to clone an object, but that the object's 
+   * class does not implement the Cloneable interface.
    */
   public Persistent clone() throws CloneNotSupportedException;
   

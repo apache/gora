@@ -261,7 +261,7 @@ public abstract class QueryWSBase<K, T extends Persistent> implements Query<K,T>
 
   /**
    * Gets the configuration object
-   * @return
+   * @return the user's authentication tokens for webservice database
    */
   public Object getConf() {
     return authentication;
@@ -269,7 +269,7 @@ public abstract class QueryWSBase<K, T extends Persistent> implements Query<K,T>
 
   /**
    * Sets the configuration object
-   * @param auth
+   * @param auth the user's authentication tokens for webservice database
    */
   public void setConf(Object auth) {
     this.authentication = auth;
