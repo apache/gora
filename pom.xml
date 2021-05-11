@@ -813,8 +813,7 @@
     <!-- Dependencies -->
     <osgi.version>4.2.0</osgi.version>
     <!-- Avro Dependencies -->
-    <avro.version>1.8.2</avro.version>
-    <!--     <jackson.version>1.6.9</jackson.version> -->
+    <avro.version>1.10.2</avro.version>
     <!-- Hadoop Dependencies -->
     <hadoop-2.version>2.5.2</hadoop-2.version>
     <hadoop-2.test.version>2.5.2</hadoop-2.test.version>
@@ -848,7 +847,7 @@
     <aerospike.version>4.2.2</aerospike.version>
     <!-- Misc Dependencies -->
     <guava.version>13.0</guava.version>
-    <commons-lang.version>2.6</commons-lang.version>
+    <commons-lang3.version>3.12.0</commons-lang3.version>
     <jdom.version>1.1.3</jdom.version>
     <hsqldb.version>2.2.8</hsqldb.version>
     <mysql.version>5.1.18</mysql.version>
@@ -1649,9 +1648,9 @@
       </dependency>
 
       <dependency>
-        <groupId>commons-lang</groupId>
-        <artifactId>commons-lang</artifactId>
-        <version>${commons-lang.version}</version>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>${commons-lang3.version}</version>
       </dependency>
 
       <dependency>

@@ -57,6 +57,10 @@
       <artifactId>gora-compiler</artifactId>
       <groupId>org.apache.gora</groupId>
     </dependency>
+    <dependency>
+      <artifactId>commons-lang3</artifactId>
+      <groupId>org.apache.commons</groupId>
+    </dependency>
     <!-- Logging Dependencies -->
     <dependency>
       <groupId>org.slf4j</groupId>
