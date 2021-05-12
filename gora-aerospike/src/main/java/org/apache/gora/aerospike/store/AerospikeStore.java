@@ -45,7 +45,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.aerospike.client.AerospikeClient;
-import com.aerospike.client.AerospikeException;
 import com.aerospike.client.Bin;
 import com.aerospike.client.Key;
 import com.aerospike.client.Record;
@@ -77,9 +76,10 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
    * In initializing the aerospike datastore, read the mapping file, sets the basic
    * aerospike specific parameters and creates the client with the user defined policies
    *
-   * @param keyClass        key class
-   * @param persistentClass persistent class
-   * @param properties      properties
+   * @param keyClass the {@link Class} being used to map an entry to object value
+   * @param persistentClass the {@link Class} of the object value being persisted
+   * @param properties datastore initiailization and runtime properties
+   * @throws GoraException if there is an error during initialization
    */
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) throws GoraException {
@@ -475,7 +475,7 @@ public class AerospikeStore<K, T extends PersistentBase> extends DataStoreBase<K
    * @param record record retrieved from database
    * @param fields fields
    * @return persistent object created
-   * @throws GoraException 
+   * @throws GoraException if there is an issue executing {@link DataStoreBase#newPersistent()}
    */
   public T createPersistentInstance(Record record, String[] fields) throws GoraException {
 

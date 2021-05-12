@@ -38,8 +38,7 @@ public class CouchDBParameters {
   private final String port;
 
   /**
-   *
-   *  Initializing for configuration properties
+   * Initializing for configuration properties
    *
    * @param server      server domain or ip for couchDB connection
    * @param port        port for couchDB connection
@@ -52,7 +51,7 @@ public class CouchDBParameters {
   /**
    * Get server domain
    *
-   * @return
+   * @return a string representation of the server address
    */
   public String getServer() {
     return server;
@@ -61,17 +60,17 @@ public class CouchDBParameters {
   /**
    * Get server port
    *
-   * @return
+   * @return a string representation of the server port
    */
   public int getPort() {
     return Integer.parseInt(port);
   }
 
   /**
-   * load configuration values
+   * Load configuration values
    *
-   * @param properties
-   * @return
+   * @param properties populated {@link Properties} containing couchdb config key values.
+   * @return the {@link CouchDBParameters}
    */
   public static CouchDBParameters load(Properties properties) {
     String couchDBServer = properties.getProperty(PROP_COUCHDB_SERVER);

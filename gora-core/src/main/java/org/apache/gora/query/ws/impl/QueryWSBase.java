@@ -77,7 +77,7 @@ public abstract class QueryWSBase<K, T extends Persistent> implements Query<K,T>
 
   /**
    * Constructor
-   * @param dataStore
+   * @param dataStore the {@link DataStore} implementation to query.
    */
   public QueryWSBase(DataStore<K,T> dataStore) {
     this.dataStore = dataStore;
@@ -95,6 +95,7 @@ public abstract class QueryWSBase<K, T extends Persistent> implements Query<K,T>
   @Override
   /**
    * Sets the data store to be used
+   * @param dataStore the {@link DataStore} implementation to query.
    */
   public void setDataStore(DataStore<K, T> dataStore) {
     this.dataStore = dataStore;
@@ -103,6 +104,7 @@ public abstract class QueryWSBase<K, T extends Persistent> implements Query<K,T>
   @Override
   /**
    * Gets the data store used for querying
+   * @return the target {@link DataStore}
    */
   public DataStore<K, T> getDataStore() {
     return dataStore;
@@ -259,7 +261,7 @@ public abstract class QueryWSBase<K, T extends Persistent> implements Query<K,T>
 
   /**
    * Gets the configuration object
-   * @return
+   * @return the user's authentication tokens for webservice database
    */
   public Object getConf() {
     return authentication;
@@ -267,7 +269,7 @@ public abstract class QueryWSBase<K, T extends Persistent> implements Query<K,T>
 
   /**
    * Sets the configuration object
-   * @param auth
+   * @param auth the user's authentication tokens for webservice database
    */
   public void setConf(Object auth) {
     this.authentication = auth;

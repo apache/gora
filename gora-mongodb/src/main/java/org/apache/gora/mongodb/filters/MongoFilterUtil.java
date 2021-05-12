@@ -17,8 +17,8 @@
  */
 package org.apache.gora.mongodb.filters;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.gora.filter.Filter;
 import org.apache.gora.mongodb.store.MongoStore;
 import org.apache.gora.persistency.impl.PersistentBase;
@@ -35,7 +35,7 @@ import java.util.Optional;
  * Manage creation of filtering {@link org.apache.gora.query.Query} using
  * configured factories.
  * <p>
- * You can use <tt>{@value #MONGO_FILTER_FACTORIES_PARAMETER}</tt> parameter to
+ * You can use <code>{@value #MONGO_FILTER_FACTORIES_PARAMETER}</code> parameter to
  * change factories implementations used.
  * </p>
  * 
@@ -57,7 +57,7 @@ public class MongoFilterUtil<K, T extends PersistentBase> {
   /**
    * Logger.
    */
-  private static final Log LOG = LogFactory.getLog(MongoFilterUtil.class);
+  private static final Logger LOG = LoggerFactory.getLogger(MongoFilterUtil.class);
 
   private Map<String, FilterFactory<K, T>> factories = new LinkedHashMap<>();
 

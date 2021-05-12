@@ -21,7 +21,7 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
   <artifactId>gora-benchmark</artifactId>
-  <name>Apache Gora Benchamark Module</name>
+  <name>Apache Gora Benchmark Module</name>
   <url>http://maven.apache.org</url>
   <description>The Apache Gora open source framework provides an in-memory data model and
     persistence for big data. Gora supports persisting to column stores, key value stores,
@@ -38,7 +38,7 @@
   </issueManagement>
   <ciManagement>
     <system>Jenkins</system>
-    <url>https://builds.apache.org/job/Gora-trunk/</url>
+    <url>https://ci-builds.apache.org/job/Gora/job/gora-pipeline</url>
   </ciManagement>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

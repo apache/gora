@@ -72,6 +72,12 @@ public class HiveStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
   private HiveResultParser resultParser;
 
   @Override
+  /**
+   * @param keyClass the {@link Class} being used to map an entry to object value
+   * @param persistentClass the {@link Class} of the object value being persisted
+   * @param properties datastore initiailization and runtime properties
+   * @throws GoraException if there is an error during initialization
+   */
   public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties)
       throws GoraException {
     LOG.debug("Initializing Hive store");

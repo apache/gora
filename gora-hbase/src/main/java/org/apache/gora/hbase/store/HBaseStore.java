@@ -128,9 +128,10 @@ public class HBaseStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
    * The mapping can be passed as a configuration parameter 'gora.mapping' or taken from
    * gora-hbase-mapping.xml (in this order).
    *
-   * @param keyClass
-   * @param persistentClass
-   * @param properties
+   * @param keyClass the {@link Class} being used to map an entry to object value
+   * @param persistentClass the {@link Class} of the object value being persisted
+   * @param properties datastore initiailization and runtime properties
+   * @throws GoraException if there is an error during initialization
    */
   @Override
   public void initialize(Class<K> keyClass, Class<T> persistentClass,

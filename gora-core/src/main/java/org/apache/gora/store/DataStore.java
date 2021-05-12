@@ -34,7 +34,7 @@ import org.apache.gora.util.GoraException;
  * constructed by an instance of {@link DataStoreFactory}.
  *
  * <p> DataStores implementations should be thread safe.</p>
- * <p><a name="visibility"><b>Note:</b></a> Results of updates ({@link #put(Object, Persistent)},
+ * <p><a><b>Note:</b></a> Results of updates ({@link #put(Object, Persistent)},
  * {@link #delete(Object)} and {@link #deleteByQuery(Query)} operations) are
  * guaranteed to be visible to subsequent get / execute operations ONLY
  * after a subsequent call to {@link #flush()}. Additionally, exception
@@ -140,6 +140,7 @@ public interface DataStore<K, T extends Persistent> {
    *
    * @param key the key of the object
    * @return true if the key exists, false otherwise
+   * @throws GoraException If any error occurred.
    */
   boolean exists(K key) throws GoraException;
 

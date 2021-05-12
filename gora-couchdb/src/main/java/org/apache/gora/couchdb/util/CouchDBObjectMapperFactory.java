@@ -36,7 +36,7 @@ public class CouchDBObjectMapperFactory implements ObjectMapperFactory {
   /**
    * Create a object mapper instance
    *
-   * @return
+   * @return the synchornized {@link ObjectMapper} instance.
    */
   public synchronized ObjectMapper createObjectMapper() {
     if (instance == null) {
@@ -49,8 +49,8 @@ public class CouchDBObjectMapperFactory implements ObjectMapperFactory {
   /**
    * Create a object mapper object via couchdb connector
    *
-   * @param connector
-   * @return
+   * @param connector a instantiated {@link CouchDbConnector}
+   * @return  the synchornized {@link ObjectMapper} instance.
    */
   public synchronized ObjectMapper createObjectMapper(CouchDbConnector connector) {
     this.createObjectMapper();
@@ -61,7 +61,7 @@ public class CouchDBObjectMapperFactory implements ObjectMapperFactory {
   /**
    * Apply default configuration
    *
-   * @param om a object mapper object
+   * @param om a instantiated {@link ObjectMapper} object
    */
   private void applyDefaultConfiguration(ObjectMapper om) {
     om.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, this.writeDatesAsTimestamps);

@@ -18,8 +18,18 @@
 package org.apache.gora.mongodb.store;
 
 import com.google.common.base.Splitter;
-import com.mongodb.*;
-import com.mongodb.client.*;
+import com.mongodb.AuthenticationMechanism;
+import com.mongodb.BasicDBList;
+import com.mongodb.MongoClientSettings;
+import com.mongodb.MongoCredential;
+import com.mongodb.ReadPreference;
+import com.mongodb.ServerAddress;
+import com.mongodb.WriteConcern;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.MongoIterable;
 import com.mongodb.client.model.CountOptions;
 import com.mongodb.client.model.CreateCollectionOptions;
 import com.mongodb.client.model.UpdateOptions;
@@ -44,7 +54,6 @@ import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.query.impl.PartitionQueryImpl;
-import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.AvroUtils;
 import org.apache.gora.util.ClassLoadingUtils;
@@ -63,12 +72,22 @@ import java.io.InputStream;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.StreamSupport;
 
-import static com.mongodb.AuthenticationMechanism.*;
 import static com.mongodb.client.model.Filters.and;
 
 /**
@@ -121,6 +140,10 @@ DataStoreBase<K, T> {
   /**
    * Initialize the data store by reading the credentials, setting the client's
    * properties up and reading the mapping file.
+   * @param keyClass the {@link Class} being used to map an entry to object value
+   * @param persistentClass the {@link Class} of the object value being persisted
+   * @param properties datastore initiailization and runtime properties
+   * @throws GoraException if there is an error during initialization
    */
   public void initialize(final Class<K> keyClass,
       final Class<T> pPersistentClass, final Properties properties) throws GoraException {
@@ -233,15 +256,15 @@ DataStoreBase<K, T> {
    */
   private static MongoCredential createCredential(String authenticationType, String username, String database, String password) {
     MongoCredential credential = null;
-    if (PLAIN.getMechanismName().equals(authenticationType)) {
+    if (AuthenticationMechanism.PLAIN.getMechanismName().equals(authenticationType)) {
       credential = MongoCredential.createPlainCredential(username, database, password.toCharArray());
-    } else if (SCRAM_SHA_1.getMechanismName().equals(authenticationType)) {
+    } else if (AuthenticationMechanism.SCRAM_SHA_1.getMechanismName().equals(authenticationType)) {
       credential = MongoCredential.createScramSha1Credential(username, database, password.toCharArray());
-    } else if (SCRAM_SHA_256.getMechanismName().equals(authenticationType)) {
+    } else if (AuthenticationMechanism.SCRAM_SHA_256.getMechanismName().equals(authenticationType)) {
       credential = MongoCredential.createScramSha256Credential(username, database, password.toCharArray());
-    } else if (GSSAPI.getMechanismName().equals(authenticationType)) {
+    } else if (AuthenticationMechanism.GSSAPI.getMechanismName().equals(authenticationType)) {
       credential = MongoCredential.createGSSAPICredential(username);
-    } else if (MONGODB_X509.getMechanismName().equals(authenticationType)) {
+    } else if (AuthenticationMechanism.MONGODB_X509.getMechanismName().equals(authenticationType)) {
       credential = MongoCredential.createMongoX509Credential(username);
     } else {
       credential = MongoCredential.createCredential(username, database, password.toCharArray());

@@ -18,24 +18,11 @@ package org.apache.gora.goraci.rackspace;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Properties;
-import java.util.Set;
-
 import org.apache.gora.memory.store.MemStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.jclouds.ContextBuilder;
-import org.jclouds.chef.config.ChefProperties;
-import org.jclouds.chef.domain.BootstrapConfig;
-import org.jclouds.chef.domain.CookbookVersion;
-import org.jclouds.chef.predicates.CookbookVersionPredicates;
-import org.jclouds.chef.util.RunListBuilder;
-import org.jclouds.compute.ComputeServiceContext;
-import org.jclouds.compute.RunNodesException;
-import org.jclouds.compute.domain.NodeMetadata;
-import org.jclouds.compute.domain.TemplateBuilder;
-import org.jclouds.domain.JsonBall;
 import org.jclouds.openstack.nova.v2_0.NovaApi;
 import org.jclouds.openstack.nova.v2_0.domain.Flavor;
 import org.jclouds.openstack.nova.v2_0.domain.Image;
@@ -47,17 +34,8 @@ import org.jclouds.openstack.nova.v2_0.features.ImageApi;
 import org.jclouds.openstack.nova.v2_0.features.ServerApi;
 import org.jclouds.openstack.nova.v2_0.options.CreateServerOptions;
 import org.jclouds.openstack.nova.v2_0.predicates.ServerPredicates;
-import org.jclouds.scriptbuilder.domain.Statement;
-import org.jclouds.sshj.config.SshjSshClientModule;
-import static org.jclouds.compute.options.TemplateOptions.Builder.runScript; 
-
 import com.google.common.base.Charsets;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Files;
-import com.google.inject.Module;
-
-import static com.google.common.collect.Iterables.any;
-import static com.google.common.collect.Iterables.concat;
 import java.lang.reflect.InvocationTargetException;
 
 import org.slf4j.Logger;
@@ -67,11 +45,9 @@ import org.slf4j.LoggerFactory;
  * <p>This is the main class for initiating Rackspace cloud
  * topography for use within GoraCI jobs. A wealth of settings
  * are configurable from within <code>gora.properties</code>.</p> 
- * <p>For
- * further documentation on the Rackspace Orchestration please see the
+ * <p>For further documentation on the Rackspace Orchestration please see the
  * <a href="http://gora.apache.org/current/index.html#goraci-integration-testsing-suite">
  * current documentation</a>.</p>
- * @param <K>
  *
  */
 public class RackspaceOrchestration<K> {

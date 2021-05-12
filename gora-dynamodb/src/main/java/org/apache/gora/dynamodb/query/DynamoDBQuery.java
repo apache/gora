@@ -114,7 +114,7 @@ public class DynamoDBQuery<K, T extends Persistent> extends QueryWSBase<K, T> {
   /**
    * Constructor
    * 
-   * @param dataStore
+   * @param dataStore 
    */
   public DynamoDBQuery(DataStore<K, T> dataStore) {
     super(dataStore);
