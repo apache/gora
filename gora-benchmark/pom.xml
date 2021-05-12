@@ -21,7 +21,7 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
   <artifactId>gora-benchmark</artifactId>
-  <name>Apache Gora Benchamark Module</name>
+  <name>Apache Gora Benchmark Module</name>
   <url>http://maven.apache.org</url>
   <description>The Apache Gora open source framework provides an in-memory data model and
     persistence for big data. Gora supports persisting to column stores, key value stores,
