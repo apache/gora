@@ -49,9 +49,9 @@ public class ElasticsearchResult<K, T extends PersistentBase> extends ResultBase
     public float getProgress() {
         if (persistentObjects.size() == 0) {
             return 1;
-        } else {
-            return offset / (float) persistentObjects.size();
         }
+
+        return offset / (float) persistentObjects.size();
     }
 
     @Override

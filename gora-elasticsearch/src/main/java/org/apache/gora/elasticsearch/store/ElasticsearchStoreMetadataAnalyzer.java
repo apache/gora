@@ -24,6 +24,8 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.client.indices.GetIndexResponse;
 import org.elasticsearch.cluster.metadata.MappingMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 
 public class ElasticsearchStoreMetadataAnalyzer extends DataStoreMetadataAnalyzer {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ElasticsearchStoreMetadataAnalyzer.class);
 
     private RestHighLevelClient elasticsearchClient;
 
@@ -55,7 +59,10 @@ public class ElasticsearchStoreMetadataAnalyzer extends DataStoreMetadataAnalyze
         } catch (IOException ex) {
             throw new GoraException(ex);
         }
-        assert response != null;
+        if (response == null) {
+            LOG.error("Could not find indices.");
+            throw new GoraException("Could not find indices.");
+        }
         return Arrays.asList(response.getIndices());
     }
 

@@ -150,8 +150,6 @@ public class ElasticsearchMappingBuilder<K, T extends PersistentBase> {
                     break;
                 }
             }
-
-
         } catch (IOException | JDOMException | ConfigurationException | SAXException ex) {
             throw new RuntimeException(ex);
         }
