@@ -385,6 +385,18 @@
     </repository>
   </repositories-->
 
+  <repositories>
+    <repository>
+      <id>conjars</id>
+      <url>https://conjars.org/repo</url>
+    </repository>
+    <repository>
+      <id>maven-restlet</id>
+      <name>Public online Restlet repository</name>
+      <url>https://maven.restlet.talend.com/</url>
+    </repository>
+  </repositories>
+
   <build>
     <defaultGoal>install</defaultGoal>
     <directory>target</directory>
@@ -840,7 +852,7 @@
     <tika.version>1.12</tika.version>
     <httpcomponents.version>4.5.6</httpcomponents.version>
     <commons-io.version>2.5</commons-io.version>
-    <restlet.version>2.3.1</restlet.version>
+    <restlet.version>2.4.0</restlet.version>
     <!-- Flink Dependencies -->
     <flink.version>1.6.2</flink.version>
 
@@ -879,7 +891,7 @@
     <!-- HiveStore Dependencies -->
     <metamodel.version>5.3.0</metamodel.version>
     <json.version>20180813</json.version>
-    <hive.version>2.3.7</hive.version>
+    <hive.version>2.3.8</hive.version>
     <hadoop-common.version>2.6.0</hadoop-common.version>
 
     <!-- Testing Dependencies -->
