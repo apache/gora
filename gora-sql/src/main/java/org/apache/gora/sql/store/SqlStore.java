@@ -1,322 +1,147 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.apache.gora.sql.store;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.sql.Blob;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
-import org.apache.avro.Schema;
-import org.apache.avro.Schema.Field;
-import org.apache.avro.Schema.Type;
-import org.apache.avro.generic.GenericFixed;
-import org.apache.avro.ipc.ByteBufferInputStream;
-import org.apache.avro.ipc.ByteBufferOutputStream;
-import org.apache.avro.specific.SpecificFixed;
-import org.apache.avro.util.Utf8;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.apache.gora.persistency.StateManager;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
-import org.apache.gora.query.impl.PartitionQueryImpl;
-import org.apache.gora.sql.query.SqlQuery;
-import org.apache.gora.sql.query.SqlResult;
-import org.apache.gora.sql.statement.Delete;
-import org.apache.gora.sql.statement.InsertUpdateStatement;
-import org.apache.gora.sql.statement.InsertUpdateStatementFactory;
-import org.apache.gora.sql.statement.SelectStatement;
-import org.apache.gora.sql.statement.Where;
-import org.apache.gora.sql.store.SqlTypeInterface.JdbcType;
-import org.apache.gora.sql.util.SqlUtils;
-import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.impl.DataStoreBase;
-import org.apache.gora.util.AvroUtils;
-import org.apache.gora.util.ClassLoadingUtils;
-import org.apache.gora.util.IOUtils;
-import org.apache.gora.util.StringUtils;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.input.SAXBuilder;
+import org.apache.gora.util.GoraException;
+import org.jooq.DSLContext;
+import org.jooq.SQLDialect;
+import org.jooq.impl.DSL;
 
-/**
- * A DataStore implementation for RDBMS with a SQL interface. SqlStore
- * uses the JOOQ API and various JDBC drivers to communicate with the DB. 
- * Through use of the JOOQ API this SqlStore aims to support numerous SQL 
- * database stores namely;
- * DB2 9.7
- * Derby 10.8
- * H2 1.3.161
- * HSQLDB 2.2.5
- * Ingres 10.1.0
- * MySQL 5.1.41 and 5.5.8
- * Oracle XE 10.2.0.1.0 and 11g
- * PostgreSQL 9.0
- * SQLite with inofficial JDBC driver v056
- * SQL Server 2008 R8
- * Sybase Adaptive Server Enterprise 15.5
- * Sybase SQL Anywhere 12
- *
- * This DataStore is currently in development, and requires a complete
- * re-write as per GORA-86
- * Please see https://issues.apache.org/jira/browse/GORA-86
- */
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.util.List;
+import java.util.Properties;
+
 public class SqlStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
-  /** The vendor of the DB */
-  public static enum DBVendor {
-    MYSQL,
-    HSQL,
-    GENERIC;
+    private DSLContext dslContext;
+    private SqlStoreParameters sqlStoreParameters;
+    private SqlMapping sqlMapping;
 
-    static DBVendor getVendor(String dbProductName) {
-      String name = dbProductName.toLowerCase();
-      if(name.contains("mysql"))
-        return MYSQL;
-      else if(name.contains("hsql"))
-        return HSQL;
-      return GENERIC;
+    @Override
+    public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) throws GoraException {
+        //super.initialize(keyClass, persistentClass, properties);
+
+        try {
+            sqlStoreParameters = SqlStoreParameters.load(properties);
+            Class.forName(sqlStoreParameters.getSqlDriverName());
+            Connection connection = DriverManager.getConnection(sqlStoreParameters.getServerHost(),
+                    sqlStoreParameters.getUserName(), sqlStoreParameters.getUserPassword());
+
+            dslContext = DSL.using(connection, SQLDialect.MYSQL);
+            dslContext.createDatabaseIfNotExists(sqlStoreParameters.getDatabaseName()).execute();
+
+            SqlMappingBuilder<K, T> builder = new SqlMappingBuilder<>(this);
+            sqlMapping = builder.fromFile(sqlStoreParameters.getMappingFile()).build();
+            if (!schemaExists()) {
+                createSchema();
+            }
+
+        } catch (Exception e) {
+            LOG.error("Error while initializing SQL dataStore: {}",
+                    new Object[]{e.getMessage()});
+            throw new RuntimeException(e);
+        }
+
+
     }
-  }
 
-  private static final Logger log = LoggerFactory.getLogger(SqlStore.class);
+    @Override
+    public String getSchemaName() {
+        return null;
+    }
 
-  /** The JDBC Driver class name */
-  protected static final String DRIVER_CLASS_PROPERTY = "jdbc.driver";
+    @Override
+    public String getSchemaName(final String mappingSchemaName,
+                                final Class<?> persistentClass) {
+        return super.getSchemaName(mappingSchemaName, persistentClass);
+    }
 
-  /** JDBC Database access URL */
-  protected static final String URL_PROPERTY = "jdbc.url";
+    @Override
+    public void createSchema() throws GoraException {
+        if (schemaExists()) {
+            return;
+        }
+        try {
+            dslContext.createTableIfNotExists(sqlMapping.getTableClass())
+                    .execute();
+        } catch (Exception e) {
+            throw new GoraException(e);
+        }
 
-  /** User name to access the database */
-  protected static final String USERNAME_PROPERTY = "jdbc.user";
 
-  /** Password to access the database */
-  protected static final String PASSWORD_PROPERTY = "jdbc.password";
+    }
 
-  protected static final String DEFAULT_MAPPING_FILE = "gora-sql-mapping.xml";
+    @Override
+    public void deleteSchema() throws GoraException {
 
-  private String jdbcDriverClass;
-  private String jdbcUrl;
-  private String jdbcUsername;
-  private String jdbcPassword;
+    }
 
-  private SqlMapping mapping;
+    @Override
+    public boolean schemaExists() throws GoraException {
+        String collectionIdentifier = sqlMapping.getTableClass();
+        try {
+            return dslContext
+                    .meta()
+                    .getTables()
+                    .stream()
+                    .anyMatch(table -> table.equals(collectionIdentifier));
+        } catch (Exception e) {
+            throw new GoraException(e);
+        }
+    }
 
-  private Connection connection; //no connection pooling yet
+    @Override
+    public boolean exists(K key) throws GoraException {
+        return false;
+    }
 
-  private DatabaseMetaData metadata;
-  private boolean dbMixedCaseIdentifiers, dbLowerCaseIdentifiers, dbUpperCaseIdentifiers;
-  private HashMap<String, JdbcType> dbTypeMap;
+    @Override
+    public T get(K key, String[] fields) throws GoraException {
+        return null;
+    }
 
-  private HashSet<PreparedStatement> writeCache;
+    @Override
+    public void put(K key, T obj) throws GoraException {
 
-  private int keySqlType;
+    }
 
-  // TODO implement DataBaseTable sqlTable
-  //private DataBaseTable sqlTable;
+    @Override
+    public boolean delete(K key) throws GoraException {
+        return false;
+    }
 
-  private Column primaryColumn;
+    @Override
+    public long deleteByQuery(Query<K, T> query) throws GoraException {
+        return 0;
+    }
 
-  private String dbProductName;
+    @Override
+    public Result<K, T> execute(Query<K, T> query) throws GoraException {
+        return null;
+    }
 
-  private DBVendor dbVendor;
+    @Override
+    public Query<K, T> newQuery() {
+        return null;
+    }
 
-  public void initialize() throws IOException {
-      //TODO
-  }
+    @Override
+    public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query) throws IOException {
+        return null;
+    }
 
-  @Override
-  public String getSchemaName() {
-    return mapping.getTableName();
-  }
+    @Override
+    public void flush() throws GoraException {
 
-  @Override
-  public void close() {
-  //TODO
-  }
+    }
 
-  
-  private void setColumnConstraintForQuery() throws IOException {
-  //TODO
-  }
-  
-  
-  @Override
-  public void createSchema() {
-  }
+    @Override
+    public void close() {
 
-  private void getColumnConstraint() throws IOException {
-  //TODO
-  }
-
-  @Override
-  public void deleteSchema() {
-  //TODO
-  }
-
-  @Override
-  public boolean schemaExists() {
-  //TODO
-  return false;
-  }
-
-  @Override
-  public boolean delete(K key) {
-  //TODO
-  return false;
-  }
-  
-  @Override
-  public long deleteByQuery(Query<K, T> query) {
-  //TODO
-  return 0;
-  }
-
-  public void flush() {
-  //TODO
-  }
-
-  @Override
-  public T get(K key, String[] requestFields) {
-  //TODO
-  return null;
-  }
-
-  @Override
-  public Result<K, T> execute(Query<K, T> query) {
-  //TODO
-  return null;
-  }
-
-  private void constructWhereClause() throws IOException {
-  //TODO
-  }
-
-  private void setParametersForPreparedStatement() throws SQLException, IOException {
-  //TODO
-  }
-
-  @SuppressWarnings("unchecked")
-  public K readPrimaryKey(ResultSet resultSet) throws SQLException {
-    return (K) resultSet.getObject(primaryColumn.getName());
-  }
-
-  public T readObject(ResultSet rs, T persistent
-      , String[] requestFields) throws SQLException, IOException {
-  //TODO
-  return null;
-  }
-
-  protected byte[] getBytes() throws SQLException, IOException {
-    return null;
-  }
-
-  protected Object readField() throws SQLException, IOException {
-  //TODO
-  return null;
-  }
-
-  public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query)
-  throws IOException {
-  //TODO Implement this using Hadoop support
-  return null;
-  }
-
-  @Override
-  public Query<K, T> newQuery() {
-    return new SqlQuery<K, T>(this);
-  }
-
-  @Override
-  public void put(K key, T persistent) {
-  //TODO
-  }
-
-  /**
-   * Sets the object to the preparedStatement by it's schema
-   */
-  public void setObject(PreparedStatement statement, int index, Object object
-      , Schema schema, Column column) throws SQLException, IOException {
-  //TODO
-  }
-  
-  protected <V> void setObject(PreparedStatement statement, int index, V object
-      , int objectType, Column column) throws SQLException, IOException {
-    statement.setObject(index, object, objectType, column.getScaleOrLength());
-  }
-
-  protected void setBytes() throws SQLException   {
-  //TODO
-  }
-
-  /** Serializes the field using Avro to a BLOB field */
-  protected void setField() throws IOException, SQLException {
-  //TODO
-  }
-
-  protected Connection getConnection() throws IOException {
-  //TODO
-  return null;
-  }
-
-  protected void initDbMetadata() throws IOException {
-  //TODO
-  }
-
-  protected String getIdentifier() {
-  //TODO
-  return null;
-  }
-
-  private void addColumn() {
-  //TODO
-  }
-
-  
-  protected void createSqlTable() {
-  //TODO
-  }
-  
-  private void addField() throws IOException {
-  //TODO
-  }
-
-  @SuppressWarnings("unchecked")
-  protected SqlMapping readMapping() throws IOException {
-  //TODO
-  return null;
-  }
+    }
 }

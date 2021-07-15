@@ -19,10 +19,10 @@
 <gora-otd>
   <class name="org.apache.gora.examples.generated.Employee" keyClass="java.lang.String" table="Employee">
     <primarykey column="id" length="16"/>
-    <field name="name" column="name" length="128"/>
-    <field name="dateOfBirth" column="dateOfBirth"/>
-    <field name="ssn" column="ssn" jdbc-type="VARCHAR_IGNORECASE" length="16"/> <!-- jdbc-type is HSQLDB specific for testing -->
-    <field name="salary" column="salary"/>
+    <field name="name" column="name" length="128" type="string"/>
+    <field name="dateOfBirth" column="dateOfBirth" type="string"/>
+    <field name="ssn" column="ssn" length="16" type="string"/> <!-- jdbc-type is HSQLDB specific for testing -->
+    <field name="salary" column="salary" type="integer"/>
   </class>
 
   <class name="org.apache.gora.examples.generated.WebPage" keyClass="java.lang.String" table="WebPage">
