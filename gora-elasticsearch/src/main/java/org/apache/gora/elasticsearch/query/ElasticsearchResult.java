@@ -29,44 +29,44 @@ import java.util.List;
  */
 public class ElasticsearchResult<K, T extends PersistentBase> extends ResultBase<K, T> {
 
-    /**
-     * List of resulting persistent objects.
-     */
-    private List<T> persistentObjects;
+  /**
+   * List of resulting persistent objects.
+   */
+  private List<T> persistentObjects;
 
-    /**
-     * List of resulting objects keys.
-     */
-    private List<K> persistentKeys;
+  /**
+   * List of resulting objects keys.
+   */
+  private List<K> persistentKeys;
 
-    public ElasticsearchResult(DataStore<K, T> dataStore, Query<K, T> query, List<K> persistentKeys, List<T> persistentObjects) {
-        super(dataStore, query);
-        this.persistentKeys = persistentKeys;
-        this.persistentObjects = persistentObjects;
+  public ElasticsearchResult(DataStore<K, T> dataStore, Query<K, T> query, List<K> persistentKeys, List<T> persistentObjects) {
+    super(dataStore, query);
+    this.persistentKeys = persistentKeys;
+    this.persistentObjects = persistentObjects;
+  }
+
+  @Override
+  public float getProgress() {
+    if (persistentObjects.size() == 0) {
+      return 1;
     }
 
-    @Override
-    public float getProgress() {
-        if (persistentObjects.size() == 0) {
-            return 1;
-        }
+    return offset / (float) persistentObjects.size();
+  }
 
-        return offset / (float) persistentObjects.size();
+  @Override
+  public int size() {
+    return persistentObjects.size();
+  }
+
+  @Override
+  protected boolean nextInner() {
+    if ((int) offset == persistentObjects.size()) {
+      return false;
     }
 
-    @Override
-    public int size() {
-        return persistentObjects.size();
-    }
-
-    @Override
-    protected boolean nextInner() {
-        if ((int) offset == persistentObjects.size()) {
-            return false;
-        }
-
-        persistent = persistentObjects.get((int) offset);
-        key = persistentKeys.get((int) offset);
-        return persistent != null;
-    }
+    persistent = persistentObjects.get((int) offset);
+    key = persistentKeys.get((int) offset);
+    return persistent != null;
+  }
 }

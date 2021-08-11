@@ -32,40 +32,40 @@ import java.util.Properties;
  */
 public class GoraElasticsearchTestDriver extends GoraTestDriver {
 
-    private static final String DOCKER_IMAGE = "docker.elastic.co/elasticsearch/elasticsearch:7.10.1";
-    private ElasticsearchContainer elasticsearchContainer;
+  private static final String DOCKER_IMAGE = "docker.elastic.co/elasticsearch/elasticsearch:7.10.1";
+  private ElasticsearchContainer elasticsearchContainer;
 
-    /**
-     * Constructor for this class.
-     */
-    public GoraElasticsearchTestDriver() {
-        super(ElasticsearchStore.class);
-        Properties properties = DataStoreFactory.createProps();
-        elasticsearchContainer = new ElasticsearchContainer(DOCKER_IMAGE)
-                .withEnv("ELASTIC_PASSWORD", properties.getProperty(ElasticsearchConstants.PROP_PASSWORD))
-                .withEnv("xpack.security.enabled", "true");
-    }
+  /**
+   * Constructor for this class.
+   */
+  public GoraElasticsearchTestDriver() {
+    super(ElasticsearchStore.class);
+    Properties properties = DataStoreFactory.createProps();
+    elasticsearchContainer = new ElasticsearchContainer(DOCKER_IMAGE)
+            .withEnv("ELASTIC_PASSWORD", properties.getProperty(ElasticsearchConstants.PROP_PASSWORD))
+            .withEnv("xpack.security.enabled", "true");
+  }
 
-    /**
-     * Initiate the Elasticsearch server on the default port.
-     */
-    @Override
-    public void setUpClass() throws Exception {
-        elasticsearchContainer.start();
-        log.info("Setting up Elasticsearch test driver");
+  /**
+   * Initiate the Elasticsearch server on the default port.
+   */
+  @Override
+  public void setUpClass() throws Exception {
+    elasticsearchContainer.start();
+    log.info("Setting up Elasticsearch test driver");
 
-        int port = elasticsearchContainer.getMappedPort(ElasticsearchConstants.DEFAULT_PORT);
-        String host = elasticsearchContainer.getContainerIpAddress();
-        conf.set(ElasticsearchConstants.PROP_PORT, String.valueOf(port));
-        conf.set(ElasticsearchConstants.PROP_HOST, host);
-    }
+    int port = elasticsearchContainer.getMappedPort(ElasticsearchConstants.DEFAULT_PORT);
+    String host = elasticsearchContainer.getContainerIpAddress();
+    conf.set(ElasticsearchConstants.PROP_PORT, String.valueOf(port));
+    conf.set(ElasticsearchConstants.PROP_HOST, host);
+  }
 
-    /**
-     * Tear the server down.
-     */
-    @Override
-    public void tearDownClass() throws Exception {
-        elasticsearchContainer.close();
-        log.info("Tearing down Elasticsearch test driver");
-    }
+  /**
+   * Tear the server down.
+   */
+  @Override
+  public void tearDownClass() throws Exception {
+    elasticsearchContainer.close();
+    log.info("Tearing down Elasticsearch test driver");
+  }
 }

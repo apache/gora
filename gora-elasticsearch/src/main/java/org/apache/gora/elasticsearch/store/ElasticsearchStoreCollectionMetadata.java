@@ -25,29 +25,29 @@ import java.util.List;
  */
 public class ElasticsearchStoreCollectionMetadata {
 
-    /**
-     * Collection document keys present in a given collection at ElasticsearchStore.
-     */
-    private List<String> documentKeys = new ArrayList<>();
+  /**
+   * Collection document keys present in a given collection at ElasticsearchStore.
+   */
+  private List<String> documentKeys = new ArrayList<>();
 
-    /**
-     * Collection document types present in a given collection at ElasticsearchStore.
-     */
-    private List<String> documentTypes = new ArrayList<>();
+  /**
+   * Collection document types present in a given collection at ElasticsearchStore.
+   */
+  private List<String> documentTypes = new ArrayList<>();
 
-    public List<String> getDocumentKeys() {
-        return documentKeys;
-    }
+  public List<String> getDocumentKeys() {
+    return documentKeys;
+  }
 
-    public void setDocumentKeys(List<String> documentKeys) {
-        this.documentKeys = documentKeys;
-    }
+  public void setDocumentKeys(List<String> documentKeys) {
+    this.documentKeys = documentKeys;
+  }
 
-    public List<String> getDocumentTypes() {
-        return documentTypes;
-    }
+  public List<String> getDocumentTypes() {
+    return documentTypes;
+  }
 
-    public void setDocumentTypes(List<String> documentTypes) {
-        this.documentTypes = documentTypes;
-    }
+  public void setDocumentTypes(List<String> documentTypes) {
+    this.documentTypes = documentTypes;
+  }
 }
