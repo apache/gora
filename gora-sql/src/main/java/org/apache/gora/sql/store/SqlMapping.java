@@ -1,28 +1,37 @@
 package org.apache.gora.sql.store;
 
+import org.jooq.impl.SQLDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 public class SqlMapping {
     public static final Logger log = LoggerFactory.getLogger(SqlMapping.class);
 
     private String tableClass;
-    private HashMap<String, String> classToTable = new HashMap<>();
-    private HashMap<String, String> tableToClass = new HashMap<>();
-    private HashMap<String, ColumnType> tables = new HashMap<>();
+
+    private String primaryKey;
+    private HashMap<String, SQLDataType> classToTable = new HashMap<>();
+    //private HashMap<String, String> tableToClass = new HashMap<>();
+    private HashMap<String, SQLDataType> tables = new HashMap<>();
 
     public String getTableClass() {
         return tableClass;
     }
+    public String getPrimaryKey() { return primaryKey; }
 
     public void setTableClass(String tableClass) {
         this.tableClass = tableClass;
     }
 
-    private void registerTable(String name, ColumnType type) {
+    public void setPrimaryKey(String primaryKey) {
+        this.primaryKey = primaryKey;
+    }
+
+    private void registerTable(String name, SQLDataType type) {
         if (tables.containsKey(name) && (tables.get(name) != type))
             throw new IllegalStateException("The field '" + name + "' is already "
                     + "registered with a different type.");
@@ -32,8 +41,8 @@ public class SqlMapping {
     public void registerTableColumn(String columnName,
                                     String columnTableName, String type) {
         try {
-            registerTable(columnName,
-                    ColumnType.valueOf(type.toUpperCase(Locale.getDefault())));
+            registerTable(columnTableName,
+                    SQLDataType.valueOf(type.toUpperCase(Locale.getDefault())));
         } catch (final IllegalArgumentException e) {
             throw new IllegalStateException("Declared '" + columnName
                     + "' for class field '" + columnTableName
@@ -49,24 +58,28 @@ public class SqlMapping {
                         + " which differs from the new one '" + columnTableName + "'.");
             }
         } else {
-            classToTable.put(columnName, columnTableName);
-            tableToClass.put(columnTableName, columnName);
+            classToTable.put(columnTableName, SQLDataType.valueOf(type.toUpperCase(Locale.getDefault())));
+            //tableToClass.put(type.toUpperCase(Locale.getDefault()), columnName);
         }
     }
 
-    public String[] getTableColumns() {
-        return tableToClass.keySet().toArray(new String[tableToClass.keySet().size()]);
+//    public String[] getTableColumns() {
+//        return tableToClass.keySet().toArray(new String[tableToClass.keySet().size()]);
+//    }
+
+    public Map<String, SQLDataType> getAllColumns() {
+        return classToTable;
     }
 
-    public String getTableColumnName(String field) {
-        return classToTable.get(field);
-    }
+//    public String getTableColumnName(String field) {
+//        return classToTable.get(field);
+//    }
 
-    protected ColumnType getTableColumnType(String field) {
+    protected SQLDataType getTableColumnType(String field) {
         return tables.get(field);
     }
 
-    public static enum ColumnType {
+    public static enum SQLDataType {
 
         BOOLEAN("boolean"),
         INTEGER("integer"),
@@ -74,17 +87,16 @@ public class SqlMapping {
         FLOAT("float"),
         SHORT("short"),
         DOUBLE("double"),
-        STRING("string");
+        VARCHAR("varchar");
 
         private final String stringValue;
 
-        ColumnType(final String s) {
+        SQLDataType(final String s) {
             stringValue = s;
         }
 
         public String toString() {
             return stringValue;
         }
-
     }
 }

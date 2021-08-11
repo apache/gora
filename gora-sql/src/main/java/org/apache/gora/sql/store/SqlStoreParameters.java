@@ -3,7 +3,7 @@ package org.apache.gora.sql.store;
 import java.util.Properties;
 
 public class SqlStoreParameters {
-    public static final String SQL_MAPPING_FILE = "/home/infaz/projects/gora/gora-sql/src/test/resources/gora-sql-mapping.xml";
+    public static final String SQL_MAPPING_FILE = "/gora-sql-mapping.xml";
     public static final String SQL_SERVER_HOST = "gora.sql.server.host";
     public static final String SQL_SERVER_PORT = "gora.sql.server.port";
     public static final String SQL_USER_USERNAME = "gora.sql.user.username";

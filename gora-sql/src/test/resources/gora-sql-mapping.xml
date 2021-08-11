@@ -19,19 +19,19 @@
 <gora-otd>
   <class name="org.apache.gora.examples.generated.Employee" keyClass="java.lang.String" table="Employee">
     <primarykey column="id" length="16"/>
-    <field name="name" column="name" length="128" type="string"/>
-    <field name="dateOfBirth" column="dateOfBirth" type="string"/>
-    <field name="ssn" column="ssn" length="16" type="string"/> <!-- jdbc-type is HSQLDB specific for testing -->
+    <field name="employeeName" column="employeeName" length="128" type="varchar"/>
+    <field name="dateOfBirth" column="dateOfBirth" type="varchar"/>
+    <field name="ssn" column="ssn" length="16" type="varchar"/> <!-- jdbc-type is HSQLDB specific for testing -->
     <field name="salary" column="salary" type="integer"/>
   </class>
 
   <class name="org.apache.gora.examples.generated.WebPage" keyClass="java.lang.String" table="WebPage">
     <primarykey column="id" length="128"/>
-    <field name="url" column="url" length="128" primarykey="true"/>
-    <field name="content" column="content"/>
-    <field name="parsedContent" column="parsedContent"/>
-    <field name="outlinks" column="outlinks"/>
-    <field name="metadata" column="metadata"/>
+    <field name="url" column="url" length="128" primarykey="true" type="varchar"/>
+    <field name="content" column="content" type="varchar"/>
+    <field name="parsedContent" column="parsedContent" type="varchar"/>
+    <field name="outlinks" column="outlinks" type="varchar"/>
+    <field name="metadata" column="metadata" type="varchar"/>
   </class>
 
 <!--

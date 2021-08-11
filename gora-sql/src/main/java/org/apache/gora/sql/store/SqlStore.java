@@ -4,32 +4,44 @@ import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
+import org.apache.gora.sql.query.SqlQuery;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.GoraException;
+import org.jooq.CreateTableColumnStep;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
+import org.jooq.Table;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+
+import static org.jooq.impl.DSL.primaryKey;
 
 public class SqlStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
     private DSLContext dslContext;
     private SqlStoreParameters sqlStoreParameters;
     private SqlMapping sqlMapping;
+    private Connection connection;
 
     @Override
     public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) throws GoraException {
-        //super.initialize(keyClass, persistentClass, properties);
+        super.initialize(keyClass, persistentClass, properties);
 
         try {
             sqlStoreParameters = SqlStoreParameters.load(properties);
-            Class.forName(sqlStoreParameters.getSqlDriverName());
-            Connection connection = DriverManager.getConnection(sqlStoreParameters.getServerHost(),
+            String url = "jdbc:mysql://"+sqlStoreParameters.getServerHost()+":" + sqlStoreParameters.getServerPort()
+                    + "/"+sqlStoreParameters.getDatabaseName();
+
+            connection = DriverManager.getConnection(url,
                     sqlStoreParameters.getUserName(), sqlStoreParameters.getUserPassword());
 
             dslContext = DSL.using(connection, SQLDialect.MYSQL);
@@ -37,22 +49,22 @@ public class SqlStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
             SqlMappingBuilder<K, T> builder = new SqlMappingBuilder<>(this);
             sqlMapping = builder.fromFile(sqlStoreParameters.getMappingFile()).build();
-            if (!schemaExists()) {
-                createSchema();
-            }
 
+        } catch (SQLException e) {
+            LOG.error("Error while initializing SQL dataStore: {}",
+                    new Object[]{e.getMessage()});
+            throw new RuntimeException(e);
         } catch (Exception e) {
             LOG.error("Error while initializing SQL dataStore: {}",
                     new Object[]{e.getMessage()});
             throw new RuntimeException(e);
         }
 
-
     }
 
     @Override
     public String getSchemaName() {
-        return null;
+        return sqlMapping.getTableClass();
     }
 
     @Override
@@ -67,8 +79,24 @@ public class SqlStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
             return;
         }
         try {
-            dslContext.createTableIfNotExists(sqlMapping.getTableClass())
-                    .execute();
+            Map<String, SqlMapping.SQLDataType> allColumns = sqlMapping.getAllColumns();
+            Iterator<Map.Entry<String, SqlMapping.SQLDataType>> iterator = allColumns.entrySet().iterator();
+            CreateTableColumnStep step = dslContext.createTableIfNotExists(sqlMapping.getTableClass());
+            step = step.column(sqlMapping.getPrimaryKey(), org.jooq.impl.SQLDataType.VARCHAR.length(50));
+
+            while (iterator.hasNext()) {
+                Map.Entry<String, SqlMapping.SQLDataType> entry = iterator.next();
+
+                if (entry.getValue() == SqlMapping.SQLDataType.VARCHAR)
+                    step = step.column(entry.getKey(), org.jooq.impl.SQLDataType.VARCHAR);
+                if (entry.getValue() == SqlMapping.SQLDataType.INTEGER)
+                    step = step.column(entry.getKey(), SQLDataType.INTEGER);
+
+            }
+            step.constraints(
+                    primaryKey(sqlMapping.getPrimaryKey())
+            ).execute();
+
         } catch (Exception e) {
             throw new GoraException(e);
         }
@@ -78,6 +106,8 @@ public class SqlStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
     @Override
     public void deleteSchema() throws GoraException {
+        if(schemaExists())
+            dslContext.dropTable(getSchemaName()).execute();
 
     }
 
@@ -89,7 +119,7 @@ public class SqlStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
                     .meta()
                     .getTables()
                     .stream()
-                    .anyMatch(table -> table.equals(collectionIdentifier));
+                    .anyMatch(table -> table.getName().equalsIgnoreCase(collectionIdentifier));
         } catch (Exception e) {
             throw new GoraException(e);
         }
@@ -127,7 +157,7 @@ public class SqlStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
     @Override
     public Query<K, T> newQuery() {
-        return null;
+        return new SqlQuery<>(this);
     }
 
     @Override
@@ -137,11 +167,14 @@ public class SqlStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
     @Override
     public void flush() throws GoraException {
-
     }
 
     @Override
     public void close() {
-
+        try {
+            flush();
+        } catch (Exception ex) {
+            LOG.error("Error occurred while flushing data to RethinkDB : ", ex);
+        }
     }
 }

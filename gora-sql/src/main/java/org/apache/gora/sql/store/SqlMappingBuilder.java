@@ -28,6 +28,7 @@ public class SqlMappingBuilder<K, T extends PersistentBase> {
     public static final String ATT_TABLE = "table";
     public static final String ATT_LENGTH = "length";
     public static final String ATT_COLUMN = "column";
+    public static final String ATT_FIELD = "field";
 
 
     private final SqlStore<K, T> dataStore;
@@ -92,12 +93,11 @@ public class SqlMappingBuilder<K, T extends PersistentBase> {
         String resolvedTableClass = dataStore.getSchemaName(tableClassForMapping,
                 pPersistentClass);
         mapping.setTableClass(resolvedTableClass);
+        Element primaryKey = classElement.getChild(TAG_PRIMARY_KEY);
+        mapping.setPrimaryKey(primaryKey.getAttributeValue(ATT_COLUMN));
 
-//        Element primaryKey = classElement.getChild(TAG_PRIMARY_KEY);
-//        primaryKey.getAttributeValue(ATT_COLUMN), primaryKey.getAttributeValue(ATT_LENGTH)
 
-
-        List<Element> columns = classElement.getChildren(ATT_COLUMN);
+        List<Element> columns = classElement.getChildren(ATT_FIELD);
         for (Element column : columns) {
             mapping.registerTableColumn(column.getAttributeValue(ATT_NAME),
                     column.getAttributeValue(ATT_COLUMN),
