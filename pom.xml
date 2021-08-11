@@ -816,6 +816,7 @@
     <module>gora-redis</module>
     <module>gora-jet</module>
     <module>gora-rethinkdb</module>
+    <module>gora-elasticsearch</module>
     <module>gora-tutorial</module>
     <module>gora-benchmark</module>
     <module>sources-dist</module>
@@ -855,6 +856,8 @@
     <restlet.version>2.4.0</restlet.version>
     <!-- Flink Dependencies -->
     <flink.version>1.6.2</flink.version>
+    <!-- Elasticsearch Dependencies -->
+    <elasticsearch.version>7.10.1</elasticsearch.version>
 
     <spark.version>2.2.1</spark.version>
     <aerospike.version>5.0.6</aerospike.version>
@@ -1199,6 +1202,13 @@
         <groupId>org.redisson</groupId>
         <artifactId>redisson-all</artifactId>
         <version>${redisson.version}</version>
+      </dependency>
+
+      <!-- Elasticsearch dependencies -->
+      <dependency>
+        <groupId>org.elasticsearch.client</groupId>
+        <artifactId>elasticsearch-rest-high-level-client</artifactId>
+        <version>${elasticsearch.version}</version>
       </dependency>
 
       <!--Hadoop dependencies -->
