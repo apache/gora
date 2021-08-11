@@ -26,16 +26,16 @@ import org.apache.gora.store.DataStore;
  */
 public class ElasticsearchQuery<K, T extends PersistentBase> extends QueryBase<K, T> {
 
-    /**
-     * Constructor for the query.
-     *
-     * @param dataStore data store used
-     */
-    public ElasticsearchQuery(DataStore<K, T> dataStore) {
-        super(dataStore);
-    }
+  /**
+   * Constructor for the query.
+   *
+   * @param dataStore data store used
+   */
+  public ElasticsearchQuery(DataStore<K, T> dataStore) {
+    super(dataStore);
+  }
 
-    public ElasticsearchQuery() {
-        super(null);
-    }
+  public ElasticsearchQuery() {
+    super(null);
+  }
 }
