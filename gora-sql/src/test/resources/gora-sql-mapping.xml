@@ -19,19 +19,25 @@
 <gora-otd>
   <class name="org.apache.gora.examples.generated.Employee" keyClass="java.lang.String" table="Employee">
     <primarykey column="id" length="16"/>
-    <field name="employeeName" column="employeeName" length="128" type="varchar"/>
+    <field name="name" column="name" length="128" type="varchar"/>
     <field name="dateOfBirth" column="dateOfBirth" type="varchar"/>
-    <field name="ssn" column="ssn" length="16" type="varchar"/> <!-- jdbc-type is HSQLDB specific for testing -->
+    <field name="ssn" column="ssn" length="16" type="varchar"/>
+    <field name="value" column="value" type="varchar"/>
     <field name="salary" column="salary" type="integer"/>
+    <field name="boss" column="boss" type="blob"/>
+    <field name="webpage" column="webpage" type="blob"/>
   </class>
 
   <class name="org.apache.gora.examples.generated.WebPage" keyClass="java.lang.String" table="WebPage">
     <primarykey column="id" length="128"/>
     <field name="url" column="url" length="128" primarykey="true" type="varchar"/>
-    <field name="content" column="content" type="varchar"/>
-    <field name="parsedContent" column="parsedContent" type="varchar"/>
-    <field name="outlinks" column="outlinks" type="varchar"/>
-    <field name="metadata" column="metadata" type="varchar"/>
+    <field name="content" column="content" type="blob"/>
+    <field name="parsedContent" column="parsedContent" type="blob"/>
+    <field name="outlinks" column="outlinks" type="blob"/>
+    <field name="headers" column="headers" type="blob"/>
+    <field name="metadata" column="metadata" type="blob"/>
+    <field name="byteData" column="byteData" type="blob"/>
+    <field name="stringData" column="stringData" type="blob"/>
   </class>
 
 <!--

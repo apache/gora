@@ -59,13 +59,12 @@ public class SqlMapping {
             }
         } else {
             classToTable.put(columnTableName, SQLDataType.valueOf(type.toUpperCase(Locale.getDefault())));
-            //tableToClass.put(type.toUpperCase(Locale.getDefault()), columnName);
         }
     }
 
-//    public String[] getTableColumns() {
-//        return tableToClass.keySet().toArray(new String[tableToClass.keySet().size()]);
-//    }
+    public String[] getTableColumns() {
+        return classToTable.keySet().toArray(new String[classToTable.keySet().size()]);
+    }
 
     public Map<String, SQLDataType> getAllColumns() {
         return classToTable;
@@ -87,7 +86,8 @@ public class SqlMapping {
         FLOAT("float"),
         SHORT("short"),
         DOUBLE("double"),
-        VARCHAR("varchar");
+        VARCHAR("varchar"),
+        BLOB("blob");
 
         private final String stringValue;
 

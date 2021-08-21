@@ -60,6 +60,6 @@ public class SqlGoraDataStoreTest extends DataStoreTestBase {
         if (schemaName == "Employee")
             assertTrue(employeeStore.schemaExists());
         else
-            assertFalse(webPageStore.schemaExists());
+            assertTrue(webPageStore.schemaExists());
     }
 }
