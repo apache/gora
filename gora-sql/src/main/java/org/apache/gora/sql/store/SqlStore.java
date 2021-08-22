@@ -1,6 +1,8 @@
 package org.apache.gora.sql.store;
 
 import org.apache.avro.Schema;
+import org.apache.avro.util.Utf8;
+import org.apache.gora.persistency.impl.DirtyMapWrapper;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
@@ -9,12 +11,14 @@ import org.apache.gora.query.impl.PartitionQueryImpl;
 import org.apache.gora.sql.query.SqlQuery;
 import org.apache.gora.sql.query.SqlResult;
 import org.apache.gora.store.impl.DataStoreBase;
+import org.apache.gora.util.AvroUtils;
 import org.apache.gora.util.GoraException;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.sql.Blob;
 import java.sql.Connection;
@@ -95,7 +99,6 @@ public class SqlStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
                     step = step.column(entry.getKey(), SQLDataType.BIGINT);
                 if (entry.getValue() == SqlMapping.SQLDataType.BLOB)
                     step = step.column(entry.getKey(), SQLDataType.BLOB);
-
             }
             step.constraints(
                     primaryKey(sqlMapping.getPrimaryKey())
@@ -113,7 +116,6 @@ public class SqlStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
         try {
             if (schemaExists())
                 dslContext.dropTable(getSchemaName()).execute();
-            //dslContext.dropSchema(getSchemaName()).execute();
         } catch (Exception e) {
             throw new GoraException(e);
         }
@@ -172,28 +174,106 @@ public class SqlStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
     public T convertSqlTableToAvroBean(Record record, String[] dbFields) throws GoraException {
         T persistent = newPersistent();
-        Object value;
+        Object value = null;
         byte[] byteStream;
         for (String f : dbFields) {
             Schema.Field field = fieldMap.get(f);
             Schema fieldSchema = field.schema();
-            if (fieldSchema.getType() == Schema.Type.STRING || fieldSchema.getType() == Schema.Type.UNION) {
-                value = record.getValue(field(f));
-            } else {
-                try {
-                    Blob blob = (Blob) record.getValue(field(f));
-                    byteStream = ((Blob) blob).getBytes(1, (int) ((Blob) blob).length());
-                    String b = new String(byteStream, "UTF-8");
-                    value = b;
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+            SqlMapping.SQLDataType storeType = sqlMapping.getTableColumnType(f);
 
-            }
-            persistent.put(field.pos(), value);
+            Object result = convertTableFieldToAvroField(fieldSchema, storeType, field, f, record);
+            persistent.put(field.pos(), result);
         }
         persistent.clearDirty();
         return persistent;
+    }
+
+    private Object convertTableFieldToAvroField(Schema fieldSchema, SqlMapping.SQLDataType storeType, Schema.Field field, String f, Record record) throws GoraException {
+        Object result = null;
+        switch (fieldSchema.getType()) {
+//            case MAP:
+//                result = convertDocFieldToAvroMap(f, fieldSchema, record, field, storeType);
+//                break;
+//            case ARRAY:
+//                result = convertDocFieldToAvroList(f, fieldSchema, record, field, storeType);
+//                break;
+//            case RECORD:
+//                MapObject<String, Object> record = (MapObject<String, Object>)
+//                        decorateMapToODoc((Map<String, Object>) obj.get(docf));
+//                if (record == null) {
+//                    result = null;
+//                    break;
+//                }
+//                result = convertAvroBeanToRethinkDBDoc(fieldSchema, record);
+//                break;
+            case BOOLEAN:
+                result = Boolean.valueOf(record.get(f).toString());
+                break;
+            case DOUBLE:
+                result = Double.valueOf(record.get(f).toString());
+                break;
+            case FLOAT:
+                result = Float.valueOf(record.get(f).toString());
+                break;
+            case INT:
+                result = Integer.valueOf(record.get(f).toString());
+                break;
+            case LONG:
+                result = Long.valueOf(record.get(f).toString());
+                break;
+            case STRING:
+                result = new Utf8(record.get(f).toString());
+                ;
+                break;
+            case ENUM:
+                result = AvroUtils.getEnumValue(fieldSchema, record.get(f).toString());
+                break;
+            case BYTES:
+            case FIXED:
+                if (record.field(f) != null) {
+                    result = null;
+                    break;
+                }
+                result = ByteBuffer.wrap(Base64
+                        .getDecoder()
+                        .decode(record.get(f).toString()));
+                break;
+            case NULL:
+                result = null;
+                break;
+            case UNION:
+                result = convertTableColumnToAvroUnion(fieldSchema, storeType, field, f, record);
+                break;
+            default:
+                LOG.warn("Unable to read {}", f);
+                break;
+        }
+        return result;
+    }
+
+
+    private Object convertTableColumnToAvroUnion(Schema fieldSchema, SqlMapping.SQLDataType storeType, Schema.Field field, String f, Record record) throws GoraException {
+        Object result;
+        Schema.Type type0 = fieldSchema.getTypes().get(0).getType();
+        Schema.Type type1 = fieldSchema.getTypes().get(1).getType();
+
+        if (!type0.equals(type1)
+                && (type0.equals(Schema.Type.NULL) || type1.equals(Schema.Type.NULL))) {
+            Schema innerSchema = null;
+            if (type0.equals(Schema.Type.NULL)) {
+                innerSchema = fieldSchema.getTypes().get(1);
+            } else {
+                innerSchema = fieldSchema.getTypes().get(0);
+            }
+
+            LOG.debug("Load from ODocument (UNION), schemaType:{}, docField:{}, storeType:{}",
+                    new Object[]{innerSchema.getType(), f, storeType});
+
+            result = convertTableFieldToAvroField(innerSchema, storeType, field, f, record);
+        } else {
+            throw new GoraException("RethinkDBStore only supports Union of two types field.");
+        }
+        return result;
     }
 
     @Override
@@ -292,8 +372,12 @@ public class SqlStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
             if (persistent.isDirty(f.pos()) && (persistent.get(f.pos()) != null)) {
                 if (f.schema().getType() == Schema.Type.STRING) {
                     value = persistent.get(f.pos()).toString();
-                } else
+                } else if (f.schema().getType() == Schema.Type.INT || f.schema().getType() == Schema.Type.DOUBLE ||
+                        f.schema().getType() == Schema.Type.FLOAT || f.schema().getType() == Schema.Type.LONG) {
+                    value = persistent.get(f.pos());
+                } else {
                     value = persistent.get(f.pos()).toString().getBytes(StandardCharsets.UTF_8);
+                }
             }
             result.put(f.name(), value);
         }
