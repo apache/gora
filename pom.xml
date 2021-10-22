@@ -1850,6 +1850,20 @@
         </exclusions>
       </dependency>
 
+      <!-- 2.6 version of hadoop-common is defined only for gora-hive
+      as it creates some backward compatibility issues by defining in parent-->
+      <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-common</artifactId>
+        <version>${hadoop-common.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>jdk.tools</groupId>
+            <artifactId>jdk.tools</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
