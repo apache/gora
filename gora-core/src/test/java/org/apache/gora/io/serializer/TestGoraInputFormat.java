@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.gora.mapreduce;
+package org.apache.gora.io.serializer;
 
 import java.io.IOException;
 import java.util.Arrays;

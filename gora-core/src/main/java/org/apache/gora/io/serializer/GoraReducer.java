@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.gora.mapreduce;
+package org.apache.gora.io.serializer;
 
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.store.DataStore;

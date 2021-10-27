@@ -20,7 +20,7 @@ package org.apache.gora.ignite.mapreduce;
 import java.io.IOException;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.ignite.GoraIgniteTestDriver;
-import org.apache.gora.mapreduce.DataStoreMapReduceTestBase;
+import org.apache.gora.io.serializer.DataStoreMapReduceTestBase;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.junit.After;

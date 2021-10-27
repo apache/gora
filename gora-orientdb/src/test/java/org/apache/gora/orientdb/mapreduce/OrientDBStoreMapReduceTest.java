@@ -18,7 +18,7 @@
 
 package org.apache.gora.orientdb.mapreduce;
 
-import org.apache.gora.mapreduce.DataStoreMapReduceTestBase;
+import org.apache.gora.io.serializer.DataStoreMapReduceTestBase;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.orientdb.GoraOrientDBTestDriver;
 import org.apache.gora.store.DataStore;

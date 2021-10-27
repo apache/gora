@@ -18,7 +18,7 @@
 package org.apache.gora.jcache.mapreduce;
 
 import org.apache.gora.jcache.GoraHazelcastTestDriver;
-import org.apache.gora.mapreduce.DataStoreMapReduceTestBase;
+import org.apache.gora.io.serializer.DataStoreMapReduceTestBase;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;

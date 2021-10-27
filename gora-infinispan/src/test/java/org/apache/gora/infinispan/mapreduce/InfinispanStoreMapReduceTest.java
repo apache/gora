@@ -20,7 +20,7 @@ package org.apache.gora.infinispan.mapreduce;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.infinispan.GoraInfinispanTestDriver;
 import org.apache.gora.infinispan.store.InfinispanStore;
-import org.apache.gora.mapreduce.DataStoreMapReduceTestBase;
+import org.apache.gora.io.serializer.DataStoreMapReduceTestBase;
 import org.apache.gora.store.DataStore;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.After;

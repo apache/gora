@@ -19,9 +19,9 @@ package org.apache.gora.spark;
 
 import java.io.IOException;
 
-import org.apache.gora.mapreduce.GoraInputFormat;
-import org.apache.gora.mapreduce.GoraMapReduceUtils;
-import org.apache.gora.mapreduce.GoraOutputFormat;
+import org.apache.gora.io.serializer.GoraInputFormat;
+import org.apache.gora.io.serializer.GoraMapReduceUtils;
+import org.apache.gora.io.serializer.GoraOutputFormat;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.util.IOUtils;
