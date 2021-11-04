@@ -34,140 +34,145 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
 
 /**
  * Test case for ElasticsearchStore.
  */
 public class TestElasticsearchStore extends DataStoreTestBase {
 
-    static {
-        setTestDriver(new GoraElasticsearchTestDriver());
-    }
+  static {
+    setTestDriver(new GoraElasticsearchTestDriver());
+  }
 
-    @Test
-    public void testInitialize() throws GoraException {
-        log.info("test method: testInitialize");
+  @Test
+  public void testInitialize() throws GoraException {
+    log.info("test method: testInitialize");
 
-        ElasticsearchMapping mapping = ((ElasticsearchStore) employeeStore).getMapping();
+    ElasticsearchMapping mapping = ((ElasticsearchStore) employeeStore).getMapping();
 
-        Map<String, Field> fields = new HashMap<String, Field>() {{
-            put("name", new Field("name", new Field.FieldType(Field.DataType.TEXT)));
-            put("dateOfBirth", new Field("dateOfBirth", new Field.FieldType(Field.DataType.LONG)));
-            put("ssn", new Field("ssn", new Field.FieldType(Field.DataType.TEXT)));
-            put("value", new Field("value", new Field.FieldType(Field.DataType.TEXT)));
-            put("salary", new Field("salary", new Field.FieldType(Field.DataType.INTEGER)));
-            put("boss", new Field("boss", new Field.FieldType(Field.DataType.OBJECT)));
-            put("webpage", new Field("webpage", new Field.FieldType(Field.DataType.OBJECT)));
-        }};
+    Map<String, Field> fields = new HashMap<String, Field>() {{
+      put("name", new Field("name", new Field.FieldType(Field.DataType.TEXT)));
+      put("dateOfBirth", new Field("dateOfBirth", new Field.FieldType(Field.DataType.LONG)));
+      put("ssn", new Field("ssn", new Field.FieldType(Field.DataType.TEXT)));
+      put("value", new Field("value", new Field.FieldType(Field.DataType.TEXT)));
+      put("salary", new Field("salary", new Field.FieldType(Field.DataType.INTEGER)));
+      put("boss", new Field("boss", new Field.FieldType(Field.DataType.OBJECT)));
+      put("webpage", new Field("webpage", new Field.FieldType(Field.DataType.OBJECT)));
+    }};
 
-        Assert.assertEquals("frontier", employeeStore.getSchemaName());
-        Assert.assertEquals("frontier", mapping.getIndexName());
-        Assert.assertEquals(fields, mapping.getFields());
-    }
+    Assert.assertEquals("frontier", employeeStore.getSchemaName());
+    Assert.assertEquals("frontier", mapping.getIndexName());
+    Assert.assertEquals(fields, mapping.getFields());
+  }
 
-    @Test
-    public void testLoadElasticsearchParameters() throws IOException {
-        log.info("test method: testLoadElasticsearchParameters");
+  @Test
+  public void testLoadElasticsearchParameters() throws IOException {
+    log.info("test method: testLoadElasticsearchParameters");
 
-        Properties properties = DataStoreFactory.createProps();
+    Properties properties = DataStoreFactory.createProps();
 
-        ElasticsearchParameters parameters = ElasticsearchParameters.load(properties, testDriver.getConfiguration());
+    ElasticsearchParameters parameters = ElasticsearchParameters.load(properties, testDriver.getConfiguration());
 
-        Assert.assertEquals("localhost", parameters.getHost());
-        Assert.assertEquals(AuthenticationType.BASIC, parameters.getAuthenticationType());
-        Assert.assertEquals("elastic", parameters.getUsername());
-        Assert.assertEquals("password", parameters.getPassword());
-    }
+    Assert.assertEquals("localhost", parameters.getHost());
+    Assert.assertEquals(AuthenticationType.BASIC, parameters.getAuthenticationType());
+    Assert.assertEquals("elastic", parameters.getUsername());
+    Assert.assertEquals("password", parameters.getPassword());
+  }
 
-    @Test(expected = GoraException.class)
-    public void testInvalidXmlFile() throws Exception {
-        log.info("test method: testInvalidXmlFile");
+  @Test(expected = GoraException.class)
+  public void testInvalidXmlFile() throws Exception {
+    log.info("test method: testInvalidXmlFile");
 
-        Properties properties = DataStoreFactory.createProps();
-        properties.setProperty(ElasticsearchStore.PARSE_MAPPING_FILE_KEY, "gora-elasticsearch-mapping-invalid.xml");
-        properties.setProperty(ElasticsearchStore.XSD_VALIDATION, "true");
-        testDriver.createDataStore(String.class, EmployeeInt.class, properties);
-    }
+    Properties properties = DataStoreFactory.createProps();
+    properties.setProperty(ElasticsearchStore.PARSE_MAPPING_FILE_KEY, "gora-elasticsearch-mapping-invalid.xml");
+    properties.setProperty(ElasticsearchStore.XSD_VALIDATION, "true");
+    testDriver.createDataStore(String.class, EmployeeInt.class, properties);
+  }
 
-    @Test
-    public void testXsdValidationParameter() throws GoraException {
-        log.info("test method: testXsdValidationParameter");
+  @Test
+  public void testXsdValidationParameter() throws GoraException {
+    log.info("test method: testXsdValidationParameter");
 
-        Properties properties = DataStoreFactory.createProps();
-        properties.setProperty(ElasticsearchStore.PARSE_MAPPING_FILE_KEY, "gora-elasticsearch-mapping-invalid.xml");
-        properties.setProperty(ElasticsearchStore.XSD_VALIDATION, "false");
-        testDriver.createDataStore(String.class, EmployeeInt.class, properties);
-    }
+    Properties properties = DataStoreFactory.createProps();
+    properties.setProperty(ElasticsearchStore.PARSE_MAPPING_FILE_KEY, "gora-elasticsearch-mapping-invalid.xml");
+    properties.setProperty(ElasticsearchStore.XSD_VALIDATION, "false");
+    testDriver.createDataStore(String.class, EmployeeInt.class, properties);
+  }
 
-    @Test
-    public void testGetType() throws GoraException, ClassNotFoundException {
-        Configuration conf = testDriver.getConfiguration();
-        DataStoreMetadataAnalyzer storeMetadataAnalyzer = DataStoreMetadataFactory.createAnalyzer(conf);
+  @Test
+  public void testGetType() throws GoraException, ClassNotFoundException {
+    Configuration conf = testDriver.getConfiguration();
+    DataStoreMetadataAnalyzer storeMetadataAnalyzer = DataStoreMetadataFactory.createAnalyzer(conf);
 
-        String actualType = storeMetadataAnalyzer.getType();
-        String expectedType = "ELASTICSEARCH";
-        Assert.assertEquals(expectedType, actualType);
-    }
+    String actualType = storeMetadataAnalyzer.getType();
+    String expectedType = "ELASTICSEARCH";
+    Assert.assertEquals(expectedType, actualType);
+  }
 
-    @Test
-    public void testGetTablesNames() throws GoraException, ClassNotFoundException {
-        Configuration conf = testDriver.getConfiguration();
-        DataStoreMetadataAnalyzer storeMetadataAnalyzer = DataStoreMetadataFactory.createAnalyzer(conf);
+  @Test
+  public void testGetTablesNames() throws GoraException, ClassNotFoundException {
+    Configuration conf = testDriver.getConfiguration();
+    DataStoreMetadataAnalyzer storeMetadataAnalyzer = DataStoreMetadataFactory.createAnalyzer(conf);
 
-        List<String> actualTablesNames = new ArrayList<>(storeMetadataAnalyzer.getTablesNames());
-        List<String> expectedTablesNames = new ArrayList<String>() {
-            {
-                add("frontier");
-                add("webpage");
-            }
-        };
-        Assert.assertEquals(expectedTablesNames, actualTablesNames);
-    }
+    List<String> actualTablesNames = new ArrayList<>(storeMetadataAnalyzer.getTablesNames());
+    List<String> expectedTablesNames = new ArrayList<String>() {
+      {
+        add("frontier");
+        add("webpage");
+      }
+    };
+    Assert.assertEquals(expectedTablesNames, actualTablesNames);
+  }
 
-    @Test
-    public void testGetTableInfo() throws GoraException, ClassNotFoundException {
-        Configuration conf = testDriver.getConfiguration();
-        DataStoreMetadataAnalyzer storeMetadataAnalyzer = DataStoreMetadataFactory.createAnalyzer(conf);
+  @Test
+  public void testGetTableInfo() throws GoraException, ClassNotFoundException {
+    Configuration conf = testDriver.getConfiguration();
+    DataStoreMetadataAnalyzer storeMetadataAnalyzer = DataStoreMetadataFactory.createAnalyzer(conf);
 
-        ElasticsearchStoreCollectionMetadata actualCollectionMetadata =
-                (ElasticsearchStoreCollectionMetadata) storeMetadataAnalyzer.getTableInfo("frontier");
+    ElasticsearchStoreCollectionMetadata actualCollectionMetadata =
+            (ElasticsearchStoreCollectionMetadata) storeMetadataAnalyzer.getTableInfo("frontier");
 
-        List<String> expectedDocumentKeys = new ArrayList<String>() {
-            {
-                add("name");
-                add("dateOfBirth");
-                add("ssn");
-                add("value");
-                add("salary");
-                add("boss");
-                add("webpage");
-                add("gora_id");
-            }
-        };
+    List<String> expectedDocumentKeys = new ArrayList<String>() {
+      {
+        add("name");
+        add("dateOfBirth");
+        add("ssn");
+        add("value");
+        add("salary");
+        add("boss");
+        add("webpage");
+        add("gora_id");
+      }
+    };
 
-        List<String> expectedDocumentTypes = new ArrayList<String>() {
-            {
-                add("text");
-                add("long");
-                add("text");
-                add("text");
-                add("integer");
-                add("object");
-                add("object");
-                add("keyword");
-            }
-        };
+    List<String> expectedDocumentTypes = new ArrayList<String>() {
+      {
+        add("text");
+        add("long");
+        add("text");
+        add("text");
+        add("integer");
+        add("object");
+        add("object");
+        add("keyword");
+      }
+    };
 
-        Assert.assertEquals(expectedDocumentKeys.size(), actualCollectionMetadata.getDocumentTypes().size());
-        Assert.assertTrue(expectedDocumentKeys.containsAll(actualCollectionMetadata.getDocumentKeys()));
+    Assert.assertEquals(expectedDocumentKeys.size(), actualCollectionMetadata.getDocumentTypes().size());
+    Assert.assertTrue(expectedDocumentKeys.containsAll(actualCollectionMetadata.getDocumentKeys()));
 
-        Assert.assertEquals(expectedDocumentTypes.size(), actualCollectionMetadata.getDocumentTypes().size());
-        Assert.assertTrue(expectedDocumentTypes.containsAll(actualCollectionMetadata.getDocumentTypes()));
-    }
+    Assert.assertEquals(expectedDocumentTypes.size(), actualCollectionMetadata.getDocumentTypes().size());
+    Assert.assertTrue(expectedDocumentTypes.containsAll(actualCollectionMetadata.getDocumentTypes()));
+  }
 
-    @Ignore("Elasticsearch doesn't support 3 types union field yet")
-    @Override
-    public void testGet3UnionField() {
-    }
+  @Ignore("Elasticsearch doesn't support 3 types union field yet")
+  @Override
+  public void testGet3UnionField() {
+  }
 }

@@ -20,30 +20,30 @@ package org.apache.gora.elasticsearch.utils;
  * Constants file for Elasticsearch.
  */
 public class ElasticsearchConstants {
-    /**
-     * Property indicating if the hadoop configuration has priority or not.
-     */
-    public static final String PROP_OVERRIDING = "gora.elasticsearch.override.hadoop.configuration";
+  /**
+   * Property indicating if the hadoop configuration has priority or not.
+   */
+  public static final String PROP_OVERRIDING = "gora.elasticsearch.override.hadoop.configuration";
 
-    /**
-     * Default configurations for Elasticsearch.
-     */
-    public static final String DEFAULT_HOST = "localhost";
-    public static final int DEFAULT_PORT = 9200;
+  /**
+   * Default configurations for Elasticsearch.
+   */
+  public static final String DEFAULT_HOST = "localhost";
+  public static final int DEFAULT_PORT = 9200;
 
-    /**
-     * List of keys used in the configuration file of Elasticsearch.
-     */
-    public static final String PROP_HOST = "gora.datastore.elasticsearch.host";
-    public static final String PROP_PORT = "gora.datastore.elasticsearch.port";
-    public static final String PROP_SCHEME = "gora.datastore.elasticsearch.scheme";
-    public static final String PROP_AUTHENTICATIONTYPE = "gora.datastore.elasticsearch.authenticationType";
-    public static final String PROP_USERNAME = "gora.datastore.elasticsearch.username";
-    public static final String PROP_PASSWORD = "gora.datastore.elasticsearch.password";
-    public static final String PROP_AUTHORIZATIONTOKEN = "gora.datastore.elasticsearch.authorizationToken";
-    public static final String PROP_APIKEYID = "gora.datastore.elasticsearch.apiKeyId";
-    public static final String PROP_APIKEYSECRET = "gora.datastore.elasticsearch.apiKeySecret";
-    public static final String PROP_CONNECTTIMEOUT = "gora.datastore.elasticsearch.connectTimeout";
-    public static final String PROP_SOCKETTIMEOUT = "gora.datastore.elasticsearch.socketTimeout";
-    public static final String PROP_IOTHREADCOUNT = "gora.datastore.elasticsearch.ioThreadCount";
+  /**
+   * List of keys used in the configuration file of Elasticsearch.
+   */
+  public static final String PROP_HOST = "gora.datastore.elasticsearch.host";
+  public static final String PROP_PORT = "gora.datastore.elasticsearch.port";
+  public static final String PROP_SCHEME = "gora.datastore.elasticsearch.scheme";
+  public static final String PROP_AUTHENTICATIONTYPE = "gora.datastore.elasticsearch.authenticationType";
+  public static final String PROP_USERNAME = "gora.datastore.elasticsearch.username";
+  public static final String PROP_PASSWORD = "gora.datastore.elasticsearch.password";
+  public static final String PROP_AUTHORIZATIONTOKEN = "gora.datastore.elasticsearch.authorizationToken";
+  public static final String PROP_APIKEYID = "gora.datastore.elasticsearch.apiKeyId";
+  public static final String PROP_APIKEYSECRET = "gora.datastore.elasticsearch.apiKeySecret";
+  public static final String PROP_CONNECTTIMEOUT = "gora.datastore.elasticsearch.connectTimeout";
+  public static final String PROP_SOCKETTIMEOUT = "gora.datastore.elasticsearch.socketTimeout";
+  public static final String PROP_IOTHREADCOUNT = "gora.datastore.elasticsearch.ioThreadCount";
 }

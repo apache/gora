@@ -20,16 +20,16 @@ package org.apache.gora.elasticsearch.utils;
  * Authentication type to connect to the Elasticsearch server.
  */
 public enum AuthenticationType {
-    /**
-     * Basic authentication requires to provide a username and password.
-     */
-    BASIC,
-    /**
-     * Token authentication requires to provide an Elasticsearch access token.
-     */
-    TOKEN,
-    /**
-     * API Key authentication requires to provide an Elasticsearch API Key ID and Elasticsearch API Key Secret.
-     */
-    APIKEY
+  /**
+   * Basic authentication requires to provide a username and password.
+   */
+  BASIC,
+  /**
+   * Token authentication requires to provide an Elasticsearch access token.
+   */
+  TOKEN,
+  /**
+   * API Key authentication requires to provide an Elasticsearch API Key ID and Elasticsearch API Key Secret.
+   */
+  APIKEY
 }
