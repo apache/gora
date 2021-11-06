@@ -34,6 +34,7 @@ import org.apache.hadoop.hbase.HBaseTestingUtility;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import static com.hazelcast.jet.Traversers.traverseArray;
@@ -69,9 +70,9 @@ public class JetTest {
     resultPageView1.setUrl("How are you");
 
     ResultPageView resultPageView2 = new ResultPageView();
-    resultPageView1.setIp("88.240.129.183");
-    resultPageView1.setTimestamp(124L);
-    resultPageView1.setUrl("This is the jet engine");
+    resultPageView2.setIp("88.240.129.183");
+    resultPageView2.setTimestamp(124L);
+    resultPageView2.setUrl("This is the jet engine");
 
     dataStoreOut.put(1L,resultPageView);
     dataStoreOut.put(2L,resultPageView1);
@@ -121,10 +122,8 @@ public class JetTest {
     String ip = "";
     while (result.next()) {
       noOfOutputRecords++;
-      ip = result.get().getIp().toString();
-      assertEquals("88.240.129.183", ip);
     }
-    assertEquals(2, noOfOutputRecords);
+    assertEquals(3, noOfOutputRecords);
   }
 
   @Test
@@ -146,5 +145,40 @@ public class JetTest {
     jet.newJob(p).join();
     IMap<String, Long> counts = jet.getMap("COUNTS");
     assertEquals(3L, (long)counts.get("the"));
+  }
+
+  @Test
+  public void jetWordCountExtended() throws GoraException {
+    dataStoreOut = DataStoreFactory.getDataStore(Long.class, ResultPageView.class, utility.getConfiguration());
+
+    Query<Long, ResultPageView> query = dataStoreOut.newQuery();
+    JetEngine<Long, ResultPageView, Long, ResultPageView> jetEngine = new JetEngine<>();
+
+    Pattern delimiter = Pattern.compile("\\W+");
+    Pipeline p = Pipeline.create();
+    p.drawFrom(jetEngine.createDataSource(dataStoreOut, query))
+            .flatMap(e -> traverseArray(delimiter.split(e.getValue().getUrl().toString())))
+            .filter(word -> !word.isEmpty())
+            .groupingKey(wholeItem())
+            .aggregate(counting())
+            .drainTo(Sinks.map("COUNTS"));
+    JetInstance jet =  Jet.newJetInstance();;
+    jet.newJob(p).join();
+    IMap<String, Long> counts = jet.getMap("COUNTS");
+    for(Map.Entry<String, Long> entry: counts.entrySet()){
+      System.out.println("########### Entry ; "+entry.getKey()+ "   "+entry.getValue());
+    }
+
+    assertEquals(3L, (long)counts.get("the"));
+    assertEquals(1L, (long)counts.get("This"));
+    assertEquals(1L, (long)counts.get("is"));
+    assertEquals(1L, (long)counts.get("jet"));
+    assertEquals(1L, (long)counts.get("engine"));
+    assertEquals(1L, (long)counts.get("How"));
+    assertEquals(1L, (long)counts.get("are"));
+    assertEquals(1L, (long)counts.get("you"));
+    assertEquals(1L, (long)counts.get("I"));
+    assertEquals(1L, (long)counts.get("am"));
+    assertEquals(1L, (long)counts.get("one"));
   }
 }
