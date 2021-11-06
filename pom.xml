@@ -860,7 +860,7 @@
     <elasticsearch.version>7.10.1</elasticsearch.version>
 
     <spark.version>2.2.1</spark.version>
-    <aerospike.version>5.0.6</aerospike.version>
+    <aerospike.version>5.1.8</aerospike.version>
     <!-- Misc Dependencies -->
     <guava.version>13.0</guava.version>
     <commons-lang.version>2.6</commons-lang.version>
