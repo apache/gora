@@ -165,9 +165,6 @@ public class JetTest {
     JetInstance jet =  Jet.newJetInstance();;
     jet.newJob(p).join();
     IMap<String, Long> counts = jet.getMap("COUNTS");
-    for(Map.Entry<String, Long> entry: counts.entrySet()){
-      System.out.println("########### Entry ; "+entry.getKey()+ "   "+entry.getValue());
-    }
 
     assertEquals(3L, (long)counts.get("the"));
     assertEquals(1L, (long)counts.get("This"));
