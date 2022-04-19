@@ -838,7 +838,7 @@
     <amazon.version>1.10.55</amazon.version>
     <!-- Cassandra Dependencies -->
     <cassandra-driver.version>3.11.1</cassandra-driver.version>
-    <cassandra.version>3.11.0</cassandra.version>
+    <cassandra.version>3.11.12</cassandra.version>
     <!-- Ignite Dependencies -->
     <ignite.version>2.10.0</ignite.version>
     <sqlbuilder.version>2.1.7</sqlbuilder.version>
