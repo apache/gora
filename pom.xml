@@ -829,8 +829,8 @@
     <avro.version>1.8.2</avro.version>
     <!--     <jackson.version>1.6.9</jackson.version> -->
     <!-- Hadoop Dependencies -->
-    <hadoop-2.version>2.5.2</hadoop-2.version>
-    <hadoop-2.test.version>2.5.2</hadoop-2.test.version>
+    <hadoop-3.version>3.3.1</hadoop-3.version>
+    <hadoop-3.test.version>3.3.1</hadoop-3.test.version>
     <hbase.version>2.1.1</hbase.version>
     <hbase.test.version>2.1.1</hbase.test.version>
     <cxf-rt-frontend-jaxrs.version>2.5.2</cxf-rt-frontend-jaxrs.version>
@@ -849,7 +849,7 @@
     <!-- Solr Dependencies -->
     <lucene-solr.version>8.10.1</lucene-solr.version>
     <solr-solrj.version>8.0.0</solr-solrj.version>
-    <jetty.version>9.4.14.v20181114</jetty.version>
+    <jetty.version>9.4.40.v20210413</jetty.version>
     <tika.version>1.12</tika.version>
     <httpcomponents.version>4.5.6</httpcomponents.version>
     <commons-io.version>2.5</commons-io.version>
@@ -895,7 +895,7 @@
     <metamodel.version>5.3.0</metamodel.version>
     <json.version>20180813</json.version>
     <hive.version>2.3.8</hive.version>
-    <hadoop-common.version>2.6.0</hadoop-common.version>
+    <hadoop-common.version>3.3.1</hadoop-common.version>
 
     <!-- Testing Dependencies -->
     <junit.version>4.10</junit.version>
@@ -1215,7 +1215,7 @@
       <dependency>
         <groupId>org.apache.hadoop</groupId>
         <artifactId>hadoop-client</artifactId>
-        <version>${hadoop-2.version}</version>
+        <version>${hadoop-3.version}</version>
         <optional>true</optional>
       </dependency>
 
@@ -1841,7 +1841,7 @@
       <dependency>
         <groupId>org.apache.hadoop</groupId>
         <artifactId>hadoop-minicluster</artifactId>
-        <version>${hadoop-2.test.version}</version>
+        <version>${hadoop-3.test.version}</version>
         <exclusions>
           <exclusion>
             <groupId>jdk.tools</groupId>

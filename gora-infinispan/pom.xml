@@ -175,33 +175,33 @@
       <artifactId>hadoop-mapreduce-client-jobclient</artifactId>
       <type>test-jar</type>
       <scope>test</scope>
-      <version>${hadoop-2.test.version}</version>
+      <version>${hadoop-3.test.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-hdfs</artifactId>
       <scope>test</scope>
       <type>test-jar</type>
-      <version>${hadoop-2.test.version}</version>
+      <version>${hadoop-3.test.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-common</artifactId>
       <scope>test</scope>
       <type>test-jar</type>
-      <version>${hadoop-2.test.version}</version>
+      <version>${hadoop-3.test.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-yarn-server-tests</artifactId>
       <type>test-jar</type>
-      <version>${hadoop-2.test.version}</version>
+      <version>${hadoop-3.test.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-mapreduce-client-hs</artifactId>
-      <version>${hadoop-2.test.version}</version>
+      <version>${hadoop-3.test.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
