@@ -859,7 +859,7 @@
     <!-- Elasticsearch Dependencies -->
     <elasticsearch.version>7.10.1</elasticsearch.version>
 
-    <spark.version>2.2.1</spark.version>
+    <spark.version>2.4.8</spark.version>
     <aerospike.version>5.0.6</aerospike.version>
     <!-- Misc Dependencies -->
     <guava.version>13.0</guava.version>
