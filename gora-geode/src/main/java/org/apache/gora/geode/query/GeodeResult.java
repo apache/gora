@@ -61,13 +61,7 @@ public class GeodeResult<K, T extends PersistentBase> extends ResultBase<K, T> {
     if (cacheKeySet.size() == 0) {
       return 1;
     }
-    float progress = ((float) current / (float) cacheKeySet.size());
-    return progress;
-  }
-
-  @Override
-  public void close() throws IOException {
-
+    return ((float) current / (float) cacheKeySet.size());
   }
 
   @Override
