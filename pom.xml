@@ -817,10 +817,10 @@
     <module>gora-jet</module>
     <module>gora-rethinkdb</module>
     <module>gora-elasticsearch</module>
+    <module>gora-geode</module>
     <module>gora-tutorial</module>
     <module>gora-benchmark</module>
     <module>sources-dist</module>
-    <module>gora-geode</module>
   </modules>
 
   <properties>
