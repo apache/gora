@@ -26,8 +26,6 @@ public class GeodeStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     private ClientCache clientCache;
     private Region<K, T> region;
     private Properties geodeProperties;
-
-
     private CacheFactory cacheFactory;
 
     @Override
@@ -44,7 +42,7 @@ public class GeodeStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
         if (userName != null) {
             clientProperties.setProperty("security-username", userName);
             clientProperties.setProperty("security-password", password);
-        }
+        } else throw new GoraException();
         cacheFactory = new CacheFactory(clientProperties);
     }
 
@@ -65,7 +63,7 @@ public class GeodeStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
         try {
             Cache cache = cacheFactory.create();
             String regionShortCut = geodeProperties.getProperty(GEODE_REGION_SHORTCUT);
-            RegionFactory<K,T> regionFactory;
+            RegionFactory<K, T> regionFactory;
             if (regionShortCut != null) {
                 regionFactory = cache.createRegionFactory(RegionShortcut.valueOf(regionShortCut));
             } else {
@@ -136,7 +134,6 @@ public class GeodeStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
 
     @Override
     public Result<K, T> execute(Query<K, T> query) {
-
         K startKey = query.getStartKey();
         K endKey = query.getEndKey();
         NavigableSet<K> cacheEntrySubList = new ConcurrentSkipListSet<>();
@@ -169,7 +166,7 @@ public class GeodeStore<K, T extends PersistentBase> extends DataStoreBase<K, T>
     }
 
     @Override
-    public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query)throws IOException {
+    public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query) throws IOException {
         List<PartitionQuery<K, T>> partitions = new ArrayList<>();
         PartitionQueryImpl<K, T> partitionQuery = new PartitionQueryImpl<>(
                 query);
