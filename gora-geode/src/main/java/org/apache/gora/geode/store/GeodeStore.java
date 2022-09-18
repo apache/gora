@@ -1,6 +1,10 @@
 package org.apache.gora.geode.store;
 
-import org.apache.geode.cache.*;
+import org.apache.geode.cache.Region;
+import org.apache.geode.cache.CacheFactory;
+import org.apache.geode.cache.RegionFactory;
+import org.apache.geode.cache.RegionShortcut;
+import org.apache.geode.cache.Cache;
 import org.apache.geode.cache.client.ClientCache;
 import org.apache.geode.cache.client.ClientCacheFactory;
 import org.apache.gora.geode.query.GeodeQuery;
@@ -14,11 +18,20 @@ import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.GoraException;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.NavigableSet;
+import java.util.Properties;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 import static org.apache.geode.cache.RegionShortcut.REPLICATE;
-import static org.apache.gora.geode.store.GeodeStoreParameters.*;
+import static org.apache.gora.geode.store.GeodeStoreParameters.GEODE_USERNAME;
+import static org.apache.gora.geode.store.GeodeStoreParameters.GEODE_SERVER_PORT;
+import static org.apache.gora.geode.store.GeodeStoreParameters.GEODE_SERVER_HOST;
+import static org.apache.gora.geode.store.GeodeStoreParameters.GEODE_PASSWORD;
+import static org.apache.gora.geode.store.GeodeStoreParameters.GEODE_REGION_SHORTCUT;
+import static org.apache.gora.geode.store.GeodeStoreParameters.PREFERRED_SCHEMA_NAME;
 
 
 public class GeodeStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
