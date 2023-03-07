@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache</groupId>
     <artifactId>apache</artifactId>
-    <version>22</version>
+    <version>24</version>
   </parent>
 
   <groupId>org.apache.gora</groupId>
@@ -939,6 +939,9 @@
     <assembly.finalName>apache-${project.build.finalName}</assembly.finalName>
     <downloads.url>http://www.apache.org/dist/gora</downloads.url>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <!-- reproduceable builds: https://maven.apache.org/guides/mini/guide-reproducible-builds.html -->
+    <project.build.outputTimestamp>1</project.build.outputTimestamp>
   </properties>
 
   <dependencyManagement>
