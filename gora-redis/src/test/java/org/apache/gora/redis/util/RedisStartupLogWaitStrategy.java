@@ -24,7 +24,7 @@ import org.testcontainers.containers.wait.strategy.LogMessageWaitStrategy;
  */
 public class RedisStartupLogWaitStrategy extends LogMessageWaitStrategy {
 
-  private static final String REGEX = ".*Ready to accept connections.*";
+  private static final String REGEX = ".*Background AOF rewrite finished successfully.*";
   public final int times = 3;
 
   public RedisStartupLogWaitStrategy() {
