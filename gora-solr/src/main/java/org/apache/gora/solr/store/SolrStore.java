@@ -154,17 +154,11 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
 
   private SolrMapping mapping;
 
-  private String SolrClientUrl;
+  private String SolrClientUrl, solrConfig, solrSchema, solrJServerImpl;
 
-  private String solrConfig;
 
-  private String solrSchema;
 
-  private String solrJServerImpl;
-
-  private SolrClient server;
-
-  private SolrClient adminServer;
+  private SolrClient server, adminServer;
 
   private boolean serverUserAuth;
 
