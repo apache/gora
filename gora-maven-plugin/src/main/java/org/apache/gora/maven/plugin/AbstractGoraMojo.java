@@ -89,7 +89,7 @@ public abstract class AbstractGoraMojo extends AbstractMojo {
     }
     if (!changedFiles.isEmpty()) {
       try {
-        File[] schemaFile = changedFiles.toArray(new File[changedFiles.size()]);
+        File[] schemaFile = changedFiles.toArray(new File[0]);
         GoraCompiler.compileSchema(schemaFile, outputDirectory);
       } catch (SchemaParseException e) {
         if (e.getCause() != null && e.getCause() instanceof JsonParseException) {

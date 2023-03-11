@@ -117,7 +117,7 @@ public class OrientDBMapping {
    * @return array of fields in string.
    */
   public String[] getDocumentFields() {
-    return documentToClass.keySet().toArray(new String[documentToClass.keySet().size()]);
+    return documentToClass.keySet().toArray(new String[0]);
   }
 
   /**

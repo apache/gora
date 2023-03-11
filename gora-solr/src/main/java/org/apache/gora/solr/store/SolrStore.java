@@ -154,9 +154,17 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
 
   private SolrMapping mapping;
 
-  private String SolrClientUrl, solrConfig, solrSchema, solrJServerImpl;
+  private String SolrClientUrl;
 
-  private SolrClient server, adminServer;
+  private String solrConfig;
+
+  private String solrSchema;
+
+  private String solrJServerImpl;
+
+  private SolrClient server;
+
+  private SolrClient adminServer;
 
   private boolean serverUserAuth;
 
@@ -579,7 +587,7 @@ public class SolrStore<K, T extends PersistentBase> extends DataStoreBase<K, T> 
   public T newInstance(SolrDocument doc, String[] fields) throws IOException {
     T persistent = newPersistent();
     if (fields == null) {
-      fields = fieldMap.keySet().toArray(new String[fieldMap.size()]);
+      fields = fieldMap.keySet().toArray(new String[0]);
     }
     String pk = mapping.getPrimaryKey();
     for (String f : fields) {

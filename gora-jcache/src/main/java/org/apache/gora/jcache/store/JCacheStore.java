@@ -325,7 +325,7 @@ public class JCacheStore<K, T extends PersistentBase> extends DataStoreBase<K, T
             }
           }
           T newClonedObj = getPersistent(result.get(),
-                  excludedFields.toArray(new String[excludedFields.size()]));
+                  excludedFields.toArray(new String[0]));
           if (delete(result.getKey())) {
             put(result.getKey(), newClonedObj);
             deletedRows++;
