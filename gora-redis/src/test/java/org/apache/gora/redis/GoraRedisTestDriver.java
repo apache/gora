@@ -33,7 +33,7 @@ import java.time.Duration;
  */
 public class GoraRedisTestDriver extends GoraTestDriver {
 
-  private static final String DOCKER_IMAGE = "grokzen/redis-cluster:latest";
+  private static final String DOCKER_IMAGE = "grokzen/redis-cluster:7.0.8";
   private final GenericContainer redisContainer;
 
   private final StorageMode storageMode;
@@ -58,37 +58,44 @@ public class GoraRedisTestDriver extends GoraTestDriver {
     log.info("Setting up Redis test driver");
     conf.set("gora.datastore.redis.storage", storageMode.name());
     conf.set("gora.datastore.redis.mode", serverMode.name());
-    String bridgeIpAddress = redisContainer.getContainerInfo()
-        .getNetworkSettings()
-        .getNetworks()
-        .values()
-        .iterator()
-        .next()
-        .getIpAddress();
+    String redisNetworkAddress = redisContainer.getContainerInfo()
+            .getNetworkSettings()
+            .getNetworks()
+            .values()
+            .iterator()
+            .next()
+            .getIpAddress();
+    int redisDefaultPort = 7000;
     switch (serverMode) {
       case SINGLE:
-        conf.set("gora.datastore.redis.address", bridgeIpAddress + ":" + 7006);
+        conf.set("gora.datastore.redis.address", redisNetworkAddress + ":"
+                + redisContainer.getMappedPort(redisDefaultPort).toString());
         break;
       case CLUSTER:
         conf.set("gora.datastore.redis.address",
-            bridgeIpAddress + ":" + 7000 + ","
-            + bridgeIpAddress + ":" + 7001 + ","
-            + bridgeIpAddress + ":" + 7002
+                redisNetworkAddress + ":" + redisContainer.getMappedPort(redisDefaultPort).toString() + ","
+                        + redisNetworkAddress + ":"
+                        + redisContainer.getMappedPort(redisDefaultPort + 1).toString() + ","
+                        + redisNetworkAddress + ":"
+                        + redisContainer.getMappedPort(redisDefaultPort + 2).toString()
         );
         break;
       case REPLICATED:
         conf.set("gora.datastore.redis.address",
-            bridgeIpAddress + ":" + 7000 + ","
-            + bridgeIpAddress + ":" + 7004
+                redisNetworkAddress + ":" + redisContainer.getMappedPort(redisDefaultPort).toString() + ","
+                        + redisNetworkAddress + ":"
+                        + redisContainer.getMappedPort(redisDefaultPort + 4).toString()
         );
         break;
       case SENTINEL:
         conf.set("gora.datastore.redis.masterName", "sentinel7000");
         conf.set("gora.datastore.redis.readMode", "MASTER");
         conf.set("gora.datastore.redis.address",
-            bridgeIpAddress + ":" + 5000 + ","
-            + bridgeIpAddress + ":" + 5001 + ","
-            + bridgeIpAddress + ":" + 5000
+                redisNetworkAddress + ":" + redisContainer.getMappedPort(redisDefaultPort).toString() + ","
+                        + redisNetworkAddress + ":"
+                        + redisContainer.getMappedPort(redisDefaultPort + 1).toString() + ","
+                        + redisNetworkAddress + ":"
+                        + redisContainer.getMappedPort(redisDefaultPort + 2).toString()
         );
         break;
       default:
