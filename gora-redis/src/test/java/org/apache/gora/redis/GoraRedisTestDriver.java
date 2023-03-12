@@ -33,7 +33,7 @@ import java.time.Duration;
  */
 public class GoraRedisTestDriver extends GoraTestDriver {
 
-  private static final String DOCKER_IMAGE = "grokzen/redis-cluster:latest";
+  private static final String DOCKER_IMAGE = "grokzen/redis-cluster:6.0.0";
   private final GenericContainer redisContainer;
 
   private final StorageMode storageMode;
