@@ -22,7 +22,6 @@ import com.aerospike.client.policy.ReadModeAP;
 import com.aerospike.client.policy.ReadModeSC;
 import com.aerospike.client.policy.RecordExistsAction;
 import com.aerospike.client.policy.CommitLevel;
-import com.aerospike.client.policy.Priority;
 import com.aerospike.client.policy.Replica;
 import com.aerospike.client.policy.WritePolicy;
 import org.jdom.Document;
@@ -285,26 +284,6 @@ public class AerospikeMappingBuilder {
     }
     LOG.warn("Invalid durable delete value provided, using the default durable delete value.");
     return false;
-  }
-
-  /**
-   * Returns the corresponding priority level from the user specified priority level name.
-   * The default value is DEFAULT
-   *
-   * @param priority user specified priority level name
-   * @return corresponding priority level
-   */
-  private Priority getPriority(String priority) {
-    if (priority == null)
-      return Priority.DEFAULT;
-
-    for (Priority priorityEnum : Priority.values()) {
-      if (priority.equalsIgnoreCase(priorityEnum.toString())) {
-        return priorityEnum;
-      }
-    }
-    LOG.warn("Invalid priority level provided, using the default priority level.");
-    return Priority.DEFAULT;
   }
 
   private ReadModeAP getReadModeAP(String readModeAP) {
