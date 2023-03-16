@@ -809,6 +809,7 @@
     <module>gora-maven-plugin</module>
     <module>gora-mongodb</module>
     <module>gora-solr</module>
+    <module>gora-neo4j</module>
     <module>gora-aerospike</module>
     <module>gora-ignite</module>
     <module>gora-kudu</module>
@@ -849,6 +850,8 @@
     <!-- Solr Dependencies -->
     <lucene-solr.version>8.10.1</lucene-solr.version>
     <solr-solrj.version>8.0.0</solr-solrj.version>
+    <!-- Neo4j Dependencies -->
+    <neo4j-neo4j.version>1.0.0</neo4j-neo4j.version>
     <jetty.version>9.4.14.v20181114</jetty.version>
     <tika.version>1.12</tika.version>
     <httpcomponents.version>4.5.6</httpcomponents.version>
@@ -967,6 +970,18 @@
       <dependency>
         <groupId>org.apache.gora</groupId>
         <artifactId>gora-solr</artifactId>
+        <version>${project.version}</version>
+        <classifier>tests</classifier>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-neo4j</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-neo4j</artifactId>
         <version>${project.version}</version>
         <classifier>tests</classifier>
       </dependency>
