@@ -84,6 +84,7 @@ public class GoraBenchmarkClient extends DB {
           GoraBenchmarkUtils.generateMappingFile(dataStoreName);
           GoraBenchmarkUtils.generateDataBeans();
         }
+        properties.putAll(prop);
         String keyClass = prop.getProperty(Constants.KEY_CLASS_KEY, Constants.KEY_CLASS_VALUE);
         String persistentClass = prop.getProperty(Constants.PERSISTENCE_CLASS_KEY, Constants.PERSISTENCE_CLASS_VALUE);
         dataStore = DataStoreFactory.getDataStore(keyClass, persistentClass, properties, new Configuration());

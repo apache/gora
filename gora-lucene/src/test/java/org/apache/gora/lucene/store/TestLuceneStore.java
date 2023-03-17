@@ -17,6 +17,7 @@
  */
 package org.apache.gora.lucene.store;
 
+import java.util.Properties;
 import org.apache.gora.examples.WebPageDataCreator;
 import static org.apache.gora.examples.WebPageDataCreator.SORTED_URLS;
 import static org.apache.gora.examples.WebPageDataCreator.URLS;
@@ -25,6 +26,7 @@ import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.Result;
 import org.apache.gora.store.DataStore;
+import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.DataStoreTestBase;
 import static org.apache.gora.store.DataStoreTestBase.log;
 import org.apache.gora.store.DataStoreTestUtil;
@@ -52,7 +54,7 @@ public class TestLuceneStore extends DataStoreTestBase {
     setTestDriver(new TestLuceneStoreDriver());
     DataStoreTestBase.setUpClass();
   }
-
+  
   @Test(expected = AssertionError.class)
   public void testSchemaExists() throws Exception {
     super.testSchemaExists();
@@ -167,6 +169,19 @@ public class TestLuceneStore extends DataStoreTestBase {
         assertNull(page);
       }
     }
+  }
+  
+  /**
+   * XSD Validation.
+   * 
+   * Validate bad formatted XML Mappings.
+   */
+  @Test(expected = GoraException.class)
+  public void testXSDValidation() throws Exception {
+    Properties properties = new Properties();
+    properties.setProperty("gora.xsd_validation", "true");
+    properties.setProperty("gora.lucenestore.mapping.file", "gora-lucene-mapping-bad.xml");
+    DataStoreTestBase.testDriver.createDataStore(String.class, EmployeeInt.class, properties);
   }
 
 }

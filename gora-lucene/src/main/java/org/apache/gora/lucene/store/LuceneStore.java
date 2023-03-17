@@ -26,8 +26,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.SchemaFactory;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.specific.SpecificDatumReader;
@@ -86,6 +89,8 @@ public class LuceneStore<K, T extends PersistentBase>
   private static final Logger LOG = LoggerFactory.getLogger(LuceneStore.class);
 
   private static final String DEFAULT_MAPPING_FILE = "gora-lucene-mapping.xml";
+  private static final String XSD_MAPPING_FILE = "gora-lucene.xsd";
+  private static final String XSD_VALIDATION = "gora.xsd_validation";
   private static final String LUCENE_VERSION_KEY = "gora.lucene.index.version";
   private static final String DEFAULT_LUCENE_VERSION = "LATEST";
   private static final String LUCENE_RAM_BUFFER_KEY = "gora.lucene.index.writer.rambuffer";
@@ -123,7 +128,8 @@ public class LuceneStore<K, T extends PersistentBase>
     LOG.debug("Lucene index writer RAM buffer size: {}", ramBuffer);
 
     try {
-      mapping = readMapping(mappingFile);
+      String xsdval = properties.getProperty(XSD_VALIDATION, "false");
+      mapping = readMapping(mappingFile, Boolean.valueOf(xsdval));
     } catch (IOException ioe) {
       LOG.error(ioe.getMessage(), ioe);
       throw new GoraException(ioe);
@@ -148,11 +154,15 @@ public class LuceneStore<K, T extends PersistentBase>
     }
   }
 
-  private LuceneMapping readMapping(String filename) throws IOException {
+  private LuceneMapping readMapping(String filename, boolean xsdValidation) throws IOException {
     try {
 
       LuceneMapping mapping = new LuceneMapping();
-
+      if (xsdValidation) {
+        javax.xml.validation.Schema newSchema = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
+                .newSchema(new StreamSource(getClass().getClassLoader().getResourceAsStream(XSD_MAPPING_FILE)));
+        newSchema.newValidator().validate(new StreamSource(getClass().getClassLoader().getResourceAsStream(filename)));
+      }
       DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
       org.w3c.dom.Document dom = db.parse(getClass().getClassLoader().getResourceAsStream(filename));
       Element root = dom.getDocumentElement();

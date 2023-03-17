@@ -21,17 +21,43 @@ on:
   push:
     branches:
       - master
+
+env:
+  MAVEN_CLI_OPTS: "--batch-mode --errors --show-version --no-transfer-progress"
+
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         java: [ '1.8' ]
     steps:
-      - uses: actions/checkout@v1
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Maven caching
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
       - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v1
         with:
           java-version: ${{ matrix.java }}
-      - name: mvn sourcecheck
-        run: mvn clean install
+
+      - name: Build
+        run: mvn $MAVEN_CLI_OPTS --fail-at-end -DskipTests clean install
+
+      - name: Test
+        run: mvn $MAVEN_CLI_OPTS --fail-at-end verify
+
+      - name: Publish Test Results
+        if: ${{ always() }}
+        uses: scacap/action-surefire-report@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          check_name: Test Report (${{ matrix.java }})
+          report_paths: '**/*-reports/TEST-*.xml'

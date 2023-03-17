@@ -377,4 +377,43 @@ public class IgniteSQLBuilder {
     }
   }
 
+  /**
+   * Returns a SQL statement for returning a list of tables
+   */
+  public static String createSelectAllTablesNames(String schemaIgnite) {
+    DbSpec spec = new DbSpec();
+    DbSchema schema = spec.addDefaultSchema();
+    DbTable aTable = schema.addTable("SYS.TABLES");
+    SelectQuery selectQuery = new SelectQuery();
+    DbColumn[] lsColumns = new DbColumn[]{aTable.addColumn("TABLE_NAME")};
+    selectQuery.addColumns(lsColumns);
+    selectQuery.addFromTable(aTable);
+    return selectQuery.validate().toString();
+  }
+
+  /**
+   * Returns a SQL statement for metadata of a table
+   */
+  public static String createSelectAllColumnsOfTable(String schemaIgnite, String table) {
+    DbSpec spec = new DbSpec();
+    DbSchema schema = spec.addDefaultSchema();
+    DbTable aTable = schema.addTable("INFORMATION_SCHEMA.COLUMNS");
+    DbTable aTable2 = schema.addTable("SYS.TABLE_COLUMNS");
+    SelectQuery selectQuery = new SelectQuery();
+    DbColumn[] lsColumns = new DbColumn[]{aTable.addColumn("COLUMN_NAME"),
+      aTable.addColumn("TYPE_NAME"), aTable2.addColumn("PK")};
+    selectQuery.addColumns(lsColumns);
+    selectQuery.addFromTable(aTable);
+    selectQuery.addFromTable(aTable2);
+    selectQuery.addCondition(new BinaryCondition(BinaryCondition.Op.EQUAL_TO,
+            new DbColumn(aTable, "TABLE_SCHEMA", null),
+            schemaIgnite));
+    selectQuery.addCondition(new BinaryCondition(BinaryCondition.Op.EQUAL_TO,
+            new DbColumn(aTable, "TABLE_NAME", null),
+            table));
+    selectQuery.addCondition(new BinaryCondition(BinaryCondition.Op.EQUAL_TO,
+            new DbColumn(aTable, "COLUMN_NAME", null),
+            new DbColumn(aTable2, "COLUMN_NAME", null)));
+    return selectQuery.validate().toString();
+  }
 }

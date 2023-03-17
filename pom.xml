@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache</groupId>
     <artifactId>apache</artifactId>
-    <version>22</version>
+    <version>24</version>
   </parent>
 
   <groupId>org.apache.gora</groupId>
@@ -385,6 +385,18 @@
     </repository>
   </repositories-->
 
+  <repositories>
+    <repository>
+      <id>conjars</id>
+      <url>https://conjars.org/repo</url>
+    </repository>
+    <repository>
+      <id>maven-restlet</id>
+      <name>Public online Restlet repository</name>
+      <url>https://maven.restlet.talend.com/</url>
+    </repository>
+  </repositories>
+
   <build>
     <defaultGoal>install</defaultGoal>
     <directory>target</directory>
@@ -622,6 +634,7 @@
           <argLine>-Xmx512m</argLine>
           <forkMode>always</forkMode>
           <testFailureIgnore>false</testFailureIgnore>
+          <forkedProcessTimeoutInSeconds>2400</forkedProcessTimeoutInSeconds>
         </configuration>
       </plugin>
       <plugin>
@@ -719,7 +732,7 @@
             <artifactId>maven-javadoc-plugin</artifactId>
             <version>${maven-javadoc-plugin.version}</version>
             <configuration>
-              <excludePackageNames>org.apache.gora.tutorial.log.generated;org.apache.gora.goraci.generated</excludePackageNames>
+              <excludePackageNames>org.apache.gora.tutorial.log.generated;org.apache.gora.goraci.generated;org.apache.gora.benchmark.generated</excludePackageNames>
             </configuration>
             <executions>
               <execution>
@@ -796,6 +809,7 @@
     <module>gora-maven-plugin</module>
     <module>gora-mongodb</module>
     <module>gora-solr</module>
+    <module>gora-neo4j</module>
     <module>gora-aerospike</module>
     <module>gora-ignite</module>
     <module>gora-kudu</module>
@@ -803,6 +817,8 @@
     <module>gora-redis</module>
     <module>gora-jet</module>
     <module>gora-arangodb</module>
+    <module>gora-rethinkdb</module>
+    <module>gora-elasticsearch</module>
     <module>gora-tutorial</module>
     <module>gora-benchmark</module>
     <module>sources-dist</module>
@@ -823,28 +839,32 @@
     <!-- Amazon Dependencies -->
     <amazon.version>1.10.55</amazon.version>
     <!-- Cassandra Dependencies -->
-    <cassandra-driver.version>3.9.0</cassandra-driver.version>
+    <cassandra-driver.version>3.11.1</cassandra-driver.version>
     <cassandra.version>3.11.0</cassandra.version>
     <!-- Ignite Dependencies -->
-    <ignite.version>2.6.0</ignite.version>
+    <ignite.version>2.10.0</ignite.version>
     <sqlbuilder.version>2.1.7</sqlbuilder.version>
     <!-- Redis Dependencies -->
-    <redisson.version>3.11.0</redisson.version>
+    <redisson.version>3.20.0</redisson.version>
     <!-- Kudu Dependencies -->
     <kudu.version>1.9.0</kudu.version>
     <!-- Solr Dependencies -->
-    <lucene-solr.version>8.5.0</lucene-solr.version>
+    <lucene-solr.version>8.10.1</lucene-solr.version>
     <solr-solrj.version>8.0.0</solr-solrj.version>
+    <!-- Neo4j Dependencies -->
+    <neo4j-neo4j.version>1.0.0</neo4j-neo4j.version>
     <jetty.version>9.4.14.v20181114</jetty.version>
     <tika.version>1.12</tika.version>
     <httpcomponents.version>4.5.6</httpcomponents.version>
     <commons-io.version>2.5</commons-io.version>
-    <restlet.version>2.3.1</restlet.version>
+    <restlet.version>2.4.0</restlet.version>
     <!-- Flink Dependencies -->
     <flink.version>1.6.2</flink.version>
+    <!-- Elasticsearch Dependencies -->
+    <elasticsearch.version>7.10.1</elasticsearch.version>
 
-    <spark.version>2.2.1</spark.version>
-    <aerospike.version>4.2.2</aerospike.version>
+    <spark.version>2.4.8</spark.version>
+    <aerospike.version>5.1.8</aerospike.version>
     <!-- Misc Dependencies -->
     <guava.version>13.0</guava.version>
     <commons-lang.version>2.6</commons-lang.version>
@@ -868,22 +888,24 @@
     <!-- ArangoDB Dependencies -->
     <arangodb.version>6.6.3</arangodb.version>
 
+    <!-- RethinkDB Dependencies -->
+    <rethinkdb.version>2.4.4</rethinkdb.version>
 
     <!-- CouchDB Dependencies -->
     <couchdb.version>1.5.0</couchdb.version>
 
     <!-- MongoDB Dependencies -->
-    <mongo.driver.version>3.12.4</mongo.driver.version>
+    <mongo.driver.version>3.12.10</mongo.driver.version>
 
     <!-- HiveStore Dependencies -->
     <metamodel.version>5.3.0</metamodel.version>
     <json.version>20180813</json.version>
-    <hive.version>2.3.7</hive.version>
+    <hive.version>2.3.8</hive.version>
     <hadoop-common.version>2.6.0</hadoop-common.version>
 
     <!-- Testing Dependencies -->
     <junit.version>4.10</junit.version>
-    <test.container.version>1.4.2</test.container.version>
+    <testcontainers.version>1.15.2</testcontainers.version>
 
     <!-- gora-benchmark and version dependencies -->
     <site.ycsb.version>0.17.0</site.ycsb.version>
@@ -923,6 +945,9 @@
     <assembly.finalName>apache-${project.build.finalName}</assembly.finalName>
     <downloads.url>http://www.apache.org/dist/gora</downloads.url>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <!-- reproduceable builds: https://maven.apache.org/guides/mini/guide-reproducible-builds.html -->
+    <project.build.outputTimestamp>1</project.build.outputTimestamp>
   </properties>
 
   <dependencyManagement>
@@ -948,6 +973,18 @@
       <dependency>
         <groupId>org.apache.gora</groupId>
         <artifactId>gora-solr</artifactId>
+        <version>${project.version}</version>
+        <classifier>tests</classifier>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-neo4j</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.gora</groupId>
+        <artifactId>gora-neo4j</artifactId>
         <version>${project.version}</version>
         <classifier>tests</classifier>
       </dependency>
@@ -1186,6 +1223,13 @@
         <groupId>org.redisson</groupId>
         <artifactId>redisson-all</artifactId>
         <version>${redisson.version}</version>
+      </dependency>
+
+      <!-- Elasticsearch dependencies -->
+      <dependency>
+        <groupId>org.elasticsearch.client</groupId>
+        <artifactId>elasticsearch-rest-high-level-client</artifactId>
+        <version>${elasticsearch.version}</version>
       </dependency>
 
       <!--Hadoop dependencies -->
@@ -1740,6 +1784,13 @@
         <groupId>com.arangodb</groupId>
         <artifactId>arangodb-java-driver</artifactId>
         <version>${arangodb.version}</version>
+      </dependency>  
+
+      <!-- RethinkDB Dependencies -->
+      <dependency>
+        <groupId>com.rethinkdb</groupId>
+        <artifactId>rethinkdb-driver</artifactId>
+        <version>${rethinkdb.version}</version>
       </dependency>
 
       <!-- OrientDB Dependencies -->
@@ -1806,12 +1857,25 @@
         <artifactId>org.ektorp</artifactId>
         <version>${couchdb.version}</version>
       </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>2.12.1</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
 
       <!-- Testing Dependencies -->
       <dependency>
         <groupId>org.apache.hadoop</groupId>
         <artifactId>hadoop-minicluster</artifactId>
         <version>${hadoop-2.test.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>jdk.tools</groupId>
+            <artifactId>jdk.tools</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
 
       <dependency>
@@ -1828,8 +1892,10 @@
 
       <dependency>
         <groupId>org.testcontainers</groupId>
-        <artifactId>testcontainers</artifactId>
-        <version>${test.container.version}</version>
+        <artifactId>testcontainers-bom</artifactId>
+        <version>${testcontainers.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
 
       <!-- Gora Benchmark Dependencies -->
@@ -1887,6 +1953,10 @@
           <exclusion>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>jdk.tools</groupId>
+            <artifactId>jdk.tools</artifactId>
           </exclusion>
         </exclusions>
       </dependency>

@@ -16,7 +16,8 @@
    limitations under the License.
 -->
 
-<gora-otd>
+<gora-otd xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+          xsi:noNamespaceSchemaLocation="gora-lucene.xsd">
 
   <class name="org.apache.gora.examples.generated.EmployeeInt" keyClass="java.lang.Integer">
     <primarykey column="ssn"/>

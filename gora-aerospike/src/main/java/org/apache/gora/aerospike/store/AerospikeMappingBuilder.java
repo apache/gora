@@ -18,10 +18,10 @@ package org.apache.gora.aerospike.store;
 
 import com.aerospike.client.policy.GenerationPolicy;
 import com.aerospike.client.policy.Policy;
+import com.aerospike.client.policy.ReadModeAP;
+import com.aerospike.client.policy.ReadModeSC;
 import com.aerospike.client.policy.RecordExistsAction;
 import com.aerospike.client.policy.CommitLevel;
-import com.aerospike.client.policy.Priority;
-import com.aerospike.client.policy.ConsistencyLevel;
 import com.aerospike.client.policy.Replica;
 import com.aerospike.client.policy.WritePolicy;
 import org.jdom.Document;
@@ -118,14 +118,13 @@ public class AerospikeMappingBuilder {
           else if (policy.equals(AerospikePolicyConst.READ_POLICY_NAME)) {
 
             Policy readPolicy = new Policy();
-            if (policyElement.getAttributeValue(AerospikePolicyConst.PRIORITY_NAME) != null) {
-              readPolicy.priority = getPriority(
-                      policyElement.getAttributeValue(AerospikePolicyConst.PRIORITY_NAME));
+            if (policyElement.getAttributeValue(AerospikePolicyConst.READ_MODE_AP_NAME) != null) {
+              readPolicy.readModeAP = getReadModeAP(policyElement
+                      .getAttributeValue(AerospikePolicyConst.READ_MODE_AP_NAME));
             }
-            if (policyElement.getAttributeValue(AerospikePolicyConst.CONSISTENCY_LEVEL_NAME)
-                    != null) {
-              readPolicy.consistencyLevel = getConsistencyLevel(
-                      policyElement.getAttributeValue(AerospikePolicyConst.CONSISTENCY_LEVEL_NAME));
+            if (policyElement.getAttributeValue(AerospikePolicyConst.READ_MODE_SC_NAME) != null) {
+              readPolicy.readModeSC = getReadModeSC(policyElement
+                      .getAttributeValue(AerospikePolicyConst.READ_MODE_SC_NAME));
             }
             if (policyElement.getAttributeValue(AerospikePolicyConst.REPLICA_POLICY_NAME) != null) {
               readPolicy.replica = getReplicaPolicy(
@@ -287,44 +286,30 @@ public class AerospikeMappingBuilder {
     return false;
   }
 
-  /**
-   * Returns the corresponding priority level from the user specified priority level name.
-   * The default value is DEFAULT
-   *
-   * @param priority user specified priority level name
-   * @return corresponding priority level
-   */
-  private Priority getPriority(String priority) {
-    if (priority == null)
-      return Priority.DEFAULT;
+  private ReadModeAP getReadModeAP(String readModeAP) {
+    if (readModeAP == null)
+      return ReadModeAP.ONE;
 
-    for (Priority priorityEnum : Priority.values()) {
-      if (priority.equalsIgnoreCase(priorityEnum.toString())) {
-        return priorityEnum;
+    for (ReadModeAP readModeAPEnum : ReadModeAP.values()) {
+      if (readModeAP.equalsIgnoreCase(readModeAPEnum.toString())) {
+        return readModeAPEnum;
       }
     }
-    LOG.warn("Invalid priority level provided, using the default priority level.");
-    return Priority.DEFAULT;
+    LOG.warn("Invalid consistency level provided, using the default ReadModeAP level.");
+    return ReadModeAP.ONE;
   }
 
-  /**
-   * Returns the corresponding consistency level from the user specified consistency level name.
-   * The default value is CONSISTENCY_ONE
-   *
-   * @param consistencyLevel user specified consistency level name
-   * @return corresponding consistency level
-   */
-  private ConsistencyLevel getConsistencyLevel(String consistencyLevel) {
-    if (consistencyLevel == null)
-      return ConsistencyLevel.CONSISTENCY_ONE;
+  private ReadModeSC getReadModeSC(String readModeSC) {
+    if (readModeSC == null)
+      return ReadModeSC.SESSION;
 
-    for (ConsistencyLevel consistencyLevelEnum : ConsistencyLevel.values()) {
-      if (consistencyLevel.equalsIgnoreCase(consistencyLevelEnum.toString())) {
-        return consistencyLevelEnum;
+    for (ReadModeSC readModeSCEnum : ReadModeSC.values()) {
+      if (readModeSC.equalsIgnoreCase(readModeSCEnum.toString())) {
+        return readModeSCEnum;
       }
     }
-    LOG.warn("Invalid consistency level provided, using the default consistency level.");
-    return ConsistencyLevel.CONSISTENCY_ONE;
+    LOG.warn("Invalid consistency level provided, using the default ReadModeSC level.");
+    return ReadModeSC.SESSION;
   }
 
   /**

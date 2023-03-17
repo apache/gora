@@ -22,11 +22,10 @@ import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.mapreduce.MapReduceTestUtils;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.junit.Test;
-import org.junit.Before;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.ClassRule;
-
+import org.junit.Test;
 import org.testcontainers.containers.GenericContainer;
 
 import java.time.Duration;
@@ -36,7 +35,7 @@ import java.time.Duration;
  */
 public class TestAerospikeStoreMapReduceSerialization {
 
-  private static final String DOCKER_CONTAINER_NAME = "aerospike/aerospike-server:4.3.1.4";
+  private static final String DOCKER_CONTAINER_NAME = "aerospike/aerospike-server:5.5.0.7";
 
   @ClassRule
   public static GenericContainer aerospikeContainer = new GenericContainer(DOCKER_CONTAINER_NAME)
@@ -50,7 +49,7 @@ public class TestAerospikeStoreMapReduceSerialization {
   @Before
   public void setUp() throws Exception {
 
-    conf.set("gora.aerospikestore.server.ip", "localhost");
+    conf.set("gora.aerospikestore.server.ip", aerospikeContainer.getContainerIpAddress());
     conf.set("gora.aerospikestore.server.port", aerospikeContainer.getMappedPort(3000).toString());
 
     webPageStore = DataStoreFactory

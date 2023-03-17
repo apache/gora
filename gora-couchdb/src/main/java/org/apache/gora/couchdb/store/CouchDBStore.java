@@ -138,7 +138,7 @@ public class CouchDBStore<K, T extends PersistentBase> extends DataStoreBase<K, 
       mapping = builder.build();
 
       final ObjectMapperFactory myObjectMapperFactory = new CouchDBObjectMapperFactory();
-      myObjectMapperFactory.createObjectMapper().addMixInAnnotations(persistentClass, CouchDbDocument.class);
+      myObjectMapperFactory.createObjectMapper().addMixIn(persistentClass, CouchDbDocument.class);
 
       db = new StdCouchDbConnector(mapping.getDatabaseName(), dbInstance, myObjectMapperFactory);
       db.createDatabaseIfNotExists();

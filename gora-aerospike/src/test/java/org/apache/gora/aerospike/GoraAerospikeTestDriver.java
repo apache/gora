@@ -45,7 +45,7 @@ public class GoraAerospikeTestDriver extends GoraTestDriver {
   @Override
   public void setUpClass() throws Exception {
     log.info("Setting up Aerospike test driver");
-    conf.set("gora.aerospikestore.server.ip", "localhost");
+    conf.set("gora.aerospikestore.server.ip", aerospikeContainer.getContainerIpAddress());
     conf.set("gora.aerospikestore.server.port", aerospikeContainer.getMappedPort(3000).toString());
   }
 

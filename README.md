@@ -3,9 +3,8 @@
 <img src="http://gora.apache.org/resources/img/powered-by-gora.png" align="right" width="300" />
 
 [![build](https://github.com/apache/gora/workflows/build/badge.svg?branch=master)](https://github.com/apache/gora/actions?query=workflow%3Abuild)
+[![Jenkins](https://ci-builds.apache.org/buildStatus/icon?job=Gora%2Fgora-pipeline%2Fmaster)](https://ci-builds.apache.org/job/Gora/job/gora-pipeline/job/master/)
 [![license](https://img.shields.io/github/license/apache/gora.svg?maxAge=2592000?style=plastic)](http://www.apache.org/licenses/LICENSE-2.0)
-[![Jenkins](https://img.shields.io/jenkins/s/https/builds.apache.org/gora-trunk.svg?maxAge=2592000?style=plastic)](https://builds.apache.org/job/gora-trunk/)
-[![Jenkins tests](https://img.shields.io/jenkins/t/https/builds.apache.org/gora-trunk.svg?maxAge=2592000?style=plastic)](https://builds.apache.org/job/gora-trunk)
 [![Maven Central](https://img.shields.io/maven-central/v/org.apache.gora/gora.svg?maxAge=2592000?style=plastic)](http://search.maven.org/#search|ga|1|g%3A%22org.apache.gora%22)
 [![Twitter URL](https://img.shields.io/twitter/url/http/apachegora.svg?style=social&maxAge=2592000?style=plastic)](https://twitter.com/apachegora)
  

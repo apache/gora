@@ -17,9 +17,7 @@
  */
 package org.apache.gora.benchmark;
 
-import com.mongodb.ServerAddress;
 import org.apache.gora.benchmark.generated.User;
-import org.apache.gora.mongodb.MongoContainer;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.util.GoraException;
 import org.junit.After;
@@ -27,6 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.MongoDBContainer;
 import site.ycsb.ByteIterator;
 import site.ycsb.Status;
 import site.ycsb.StringByteIterator;
@@ -35,7 +34,6 @@ import site.ycsb.workloads.CoreWorkload;
 import java.io.File;
 import java.util.*;
 
-import static org.apache.gora.mongodb.MongoContainer.MONGO_PORT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -51,6 +49,7 @@ public class GoraClientTest {
   private static HashMap<String, ByteIterator> DATA_TO_UPDATE;
   private static HashMap<String, ByteIterator> INTEGER_DATA;
   private static boolean isMongoDBSetupDone = false;
+  private static MongoDBContainer mongo;
 
   /**
    * Setup MongoDB embed cluster. This function will auto provision a MongoDB
@@ -59,11 +58,12 @@ public class GoraClientTest {
    */
   private void setupMongoDBCluster() {
     try {
-      MongoContainer mongo = new MongoContainer("3.6")
-              .withFixedExposedPort(MONGO_PORT, MONGO_PORT);
-      mongo.start();
-      ServerAddress address = mongo.getServerAddress();
-      LOG.info("Started MongoDB Server on " + address.getHost() + ":" + address.getPort());
+      if (!isMongoDBSetupDone) {
+        mongo = new MongoDBContainer("mongo:3.6");
+        mongo.start();
+      }
+      LOG.info("Started MongoDB Server on " + mongo.getReplicaSetUrl());
+      isMongoDBSetupDone = true;
     } catch (Exception e) {
       LOG.info("Cannot Start MongoDB Server {}", e.getMessage(), e);
     }
@@ -95,11 +95,11 @@ public class GoraClientTest {
     //Setup and start embedded MongoDB, make sure local mongodb is not running.
     Properties dataStoreProperties = DataStoreFactory.createProps();
     String dataStoreToTest = GoraBenchmarkUtils.getDataBase(dataStoreProperties);
-    if (!isMongoDBSetupDone && dataStoreToTest == Constants.MONGODB) {
+    if (Constants.MONGODB.equals(dataStoreToTest)) {
       setupMongoDBCluster();
-      isMongoDBSetupDone = true;
+      properties.setProperty("gora.mongodb.servers", mongo.getContainerIpAddress() + ":" + mongo.getFirstMappedPort());
     }
-    
+
     benchmarkClient = new GoraBenchmarkClient();
     benchmarkClient.setProperties(properties);
     benchmarkClient.init();

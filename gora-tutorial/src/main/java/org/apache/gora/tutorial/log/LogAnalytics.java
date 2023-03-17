@@ -137,7 +137,7 @@ public class LogAnalytics extends Configured implements Tool {
    */
   public Job createJob(DataStore<Long, Pageview> inStore,
       DataStore<String, MetricDatum> outStore, int numReducer) throws IOException {
-    Job job = new Job(getConf());
+    Job job = Job.getInstance(getConf());
     job.setJobName("Log Analytics");
     log.info("Creating Hadoop Job: {}", job.getJobName());
     job.setNumReduceTasks(numReducer);

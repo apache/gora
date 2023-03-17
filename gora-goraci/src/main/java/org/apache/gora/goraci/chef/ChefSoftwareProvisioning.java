@@ -31,7 +31,8 @@ import org.apache.gora.goraci.rackspace.RackspaceOrchestration;
 import org.apache.gora.memory.store.MemStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.jclouds.ContextBuilder;
-import org.jclouds.chef.ChefContext;
+import org.jclouds.chef.ChefApi;
+import org.jclouds.chef.ChefApiMetadata;
 import org.jclouds.chef.config.ChefProperties;
 import org.jclouds.chef.domain.BootstrapConfig;
 import org.jclouds.chef.domain.CookbookVersion;
@@ -106,11 +107,11 @@ public class ChefSoftwareProvisioning {
     chefConfig.put(ChefProperties.CHEF_VALIDATOR_CREDENTIAL, validatorCredential);
 
     // Create the connection to the Chef server
-    ChefContext chefContext = ContextBuilder.newBuilder("chef")
+    ChefApi chefApi = ContextBuilder.newBuilder(new ChefApiMetadata())
         .endpoint("https://api.opscode.com/organizations/" + organization)
         .credentials(client, credential)
         .overrides(chefConfig)
-        .buildView(ChefContext.class);
+        .buildApi(ChefApi.class);
 
     // Create the connection to the compute provider. Note that ssh will be used to bootstrap chef
     ComputeServiceContext computeContext = ContextBuilder.newBuilder(rsContinent)
@@ -129,7 +130,7 @@ public class ChefSoftwareProvisioning {
     // Check to see if the recipe you want exists
     List<String> runlist = null;
     Iterable< ? extends CookbookVersion> cookbookVersions =
-        chefContext.getChefService().listCookbookVersions();
+        chefApi.chefService().listCookbookVersions();
     if (any(cookbookVersions, CookbookVersionPredicates.containsRecipe(recipe))) {
       runlist = new RunListBuilder().addRecipe(recipe).build();
     }
@@ -141,10 +142,10 @@ public class ChefSoftwareProvisioning {
     // Update the chef service with the run list you wish to apply to all nodes in the group
     // and also provide the json configuration used to customize the desired values
     BootstrapConfig config = BootstrapConfig.builder().runList(runlist).attributes(attributes).build();
-    chefContext.getChefService().updateBootstrapConfigForGroup(group, config);
+    chefApi.chefService().updateBootstrapConfigForGroup(group, config);
 
     // Build the script that will bootstrap the node
-    Statement bootstrap = chefContext.getChefService().createBootstrapScriptForGroup(group);
+    Statement bootstrap = chefApi.chefService().createBootstrapScriptForGroup(group);
 
     TemplateBuilder templateBuilder = computeContext.getComputeService().templateBuilder();
     templateBuilder.options(runScript(bootstrap));
@@ -161,7 +162,7 @@ public class ChefSoftwareProvisioning {
     }
 
     // Release resources
-    chefContext.close();
+    chefApi.close();
     computeContext.close();
 
   }

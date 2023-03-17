@@ -37,9 +37,9 @@ public class AerospikePolicyConst {
 
   public static final String READ_POLICY_NAME = "read";
 
-  public static final String PRIORITY_NAME = "priority";
+  public static final String READ_MODE_AP_NAME = "readModeAP";
 
-  public static final String CONSISTENCY_LEVEL_NAME = "consistencyLevel";
+  public static final String READ_MODE_SC_NAME = "readModeSC";
 
   public static final String REPLICA_POLICY_NAME = "replica";
 

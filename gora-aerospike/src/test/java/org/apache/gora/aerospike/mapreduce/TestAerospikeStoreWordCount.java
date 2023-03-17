@@ -36,7 +36,7 @@ import java.time.Duration;
  */
 public class TestAerospikeStoreWordCount {
 
-  private static final String DOCKER_CONTAINER_NAME = "aerospike/aerospike-server:4.3.1.4";
+  private static final String DOCKER_CONTAINER_NAME = "aerospike/aerospike-server:5.5.0.7";
 
   @ClassRule
   public static GenericContainer aerospikeContainer = new GenericContainer(DOCKER_CONTAINER_NAME)
@@ -52,7 +52,7 @@ public class TestAerospikeStoreWordCount {
   @Before
   public void setUp() throws Exception {
 
-    conf.set("gora.aerospikestore.server.ip", "localhost");
+    conf.set("gora.aerospikestore.server.ip", aerospikeContainer.getContainerIpAddress());
     conf.set("gora.aerospikestore.server.port", aerospikeContainer.getMappedPort(3000).toString());
 
     webPageStore = DataStoreFactory

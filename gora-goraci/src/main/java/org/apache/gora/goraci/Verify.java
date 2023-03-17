@@ -196,7 +196,7 @@ public class Verify extends Configured implements Tool {
     
     DataStore<Long,CINode> store = DataStoreFactory.getDataStore(Long.class, CINode.class, new Configuration());
 
-    job = new Job(getConf());
+    job = Job.getInstance(getConf());
     
     if (!job.getConfiguration().get("io.serializations").contains("org.apache.hadoop.io.serializer.JavaSerialization")) {
       job.getConfiguration().set("io.serializations", job.getConfiguration().get("io.serializations") + ",org.apache.hadoop.io.serializer.JavaSerialization");
