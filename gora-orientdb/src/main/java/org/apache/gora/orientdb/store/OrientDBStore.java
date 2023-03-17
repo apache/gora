@@ -36,10 +36,14 @@ import java.util.Locale;
 
 import com.github.raymanrt.orientqb.query.Parameter;
 import com.gitub.raymanrt.orientqb.delete.Delete;
-import com.orientechnologies.orient.client.remote.OServerAdmin;
+import com.orientechnologies.orient.core.config.OGlobalConfiguration;
+import com.orientechnologies.orient.core.db.ODatabasePool;
+import com.orientechnologies.orient.core.db.ODatabaseSession;
+import com.orientechnologies.orient.core.db.ODatabaseType;
 import com.orientechnologies.orient.core.db.OPartitionedDatabasePool;
-import com.orientechnologies.orient.core.db.OPartitionedDatabasePoolFactory;
-import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
+import com.orientechnologies.orient.core.db.OrientDB;
+import com.orientechnologies.orient.core.db.OrientDBConfig;
+import com.orientechnologies.orient.core.db.OrientDBConfigBuilder;
 import com.orientechnologies.orient.core.db.record.OTrackedList;
 import com.orientechnologies.orient.core.db.record.OTrackedMap;
 import com.orientechnologies.orient.core.db.record.OTrackedSet;
@@ -47,7 +51,7 @@ import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.core.sql.OCommandSQL;
-import com.orientechnologies.orient.core.sql.query.OConcurrentResultSet;
+import com.orientechnologies.orient.core.sql.query.OConcurrentLegacyResultSet;
 import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery;
 import org.apache.avro.Schema;
 import org.apache.avro.util.Utf8;
@@ -82,10 +86,12 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
   private String ROOT_DATABASE_URL;
   private OrientDBStoreParameters orientDbStoreParams;
   private OrientDBMapping orientDBMapping;
-  private OServerAdmin remoteServerAdmin;
-  private OPartitionedDatabasePool connectionPool;
+  private OrientDB remoteServerAdmin;
+  private ODatabasePool connectionPool;
   private List<ODocument> docBatch = Collections.synchronizedList(new ArrayList<>());
   private ReentrantLock flushLock = new ReentrantLock();
+  private int DEFAULT_DB_POOL_MIN_SIZE = 5;
+  private int DEFAULT_DB_POOL_MAX_SIZE = 10;
 
   /**
    * {@inheritDoc}
@@ -103,20 +109,36 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
       ROOT_URL = "remote:".concat(orientDbStoreParams.getServerHost()).concat(":")
               .concat(orientDbStoreParams.getServerPort());
       ROOT_DATABASE_URL = ROOT_URL.concat("/").concat(orientDbStoreParams.getDatabaseName());
-      remoteServerAdmin = new OServerAdmin(ROOT_URL).connect(orientDbStoreParams.getUserName(),
-              orientDbStoreParams.getUserPassword());
-      if (!remoteServerAdmin.existsDatabase(orientDbStoreParams.getDatabaseName(), "memory")) {
-        remoteServerAdmin.createDatabase(orientDbStoreParams.getDatabaseName(), "document", "memory");
+      remoteServerAdmin = new OrientDB(ROOT_URL, orientDbStoreParams.getUserName(),
+              orientDbStoreParams.getUserPassword(), OrientDBConfig.defaultConfig());
+      if (!remoteServerAdmin.exists(orientDbStoreParams.getDatabaseName())) {
+        remoteServerAdmin.create(orientDbStoreParams.getDatabaseName(),
+                ODatabaseType.valueOf(orientDbStoreParams.getStorageType().toUpperCase()));
       }
 
-      if (orientDbStoreParams.getConnectionPoolSize() != null) {
-        int connPoolSize = Integer.valueOf(orientDbStoreParams.getConnectionPoolSize());
-        connectionPool = new OPartitionedDatabasePoolFactory(connPoolSize)
-                .get(ROOT_DATABASE_URL, orientDbStoreParams.getUserName(),
-                        orientDbStoreParams.getUserPassword());
+      if (orientDbStoreParams.getConnectionPoolMinSize() != null &&
+              orientDbStoreParams.getConnectionPoolMaxSize() != null) {
+        OrientDBConfigBuilder poolCfg = OrientDBConfig.builder();
+        poolCfg.addConfig(OGlobalConfiguration.DB_POOL_MIN,
+                orientDbStoreParams.getConnectionPoolMinSize());
+        poolCfg.addConfig(OGlobalConfiguration.DB_POOL_MAX,
+                orientDbStoreParams.getConnectionPoolMaxSize());
+
+        connectionPool = new ODatabasePool(remoteServerAdmin,
+                orientDbStoreParams.getDatabaseName(),
+                orientDbStoreParams.getUserName(),
+                orientDbStoreParams.getUserPassword(), poolCfg.build());
       } else {
-        connectionPool = new OPartitionedDatabasePoolFactory().get(ROOT_DATABASE_URL,
-                orientDbStoreParams.getUserName(), orientDbStoreParams.getUserPassword());
+        OrientDBConfigBuilder poolCfg = OrientDBConfig.builder();
+        poolCfg.addConfig(OGlobalConfiguration.DB_POOL_MIN,
+                DEFAULT_DB_POOL_MIN_SIZE);
+        poolCfg.addConfig(OGlobalConfiguration.DB_POOL_MAX,
+                DEFAULT_DB_POOL_MAX_SIZE);
+
+        connectionPool = new ODatabasePool(remoteServerAdmin,
+                orientDbStoreParams.getDatabaseName(),
+                orientDbStoreParams.getUserName(),
+                orientDbStoreParams.getUserPassword(), poolCfg.build());
       }
 
       OrientDBMappingBuilder<K, T> builder = new OrientDBMappingBuilder<>(this);
@@ -159,7 +181,7 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
       return;
     }
 
-    try (ODatabaseDocumentTx schemaTx = connectionPool.acquire()) {
+    try (ODatabaseSession schemaTx = connectionPool.acquire()) {
       schemaTx.activateOnCurrentThread();
 
       OClass documentClass = schemaTx.getMetadata().getSchema().createClass(orientDBMapping.getDocumentClass());
@@ -181,7 +203,11 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
    */
   @Override
   public void deleteSchema() throws GoraException {
-    try (ODatabaseDocumentTx schemaTx = connectionPool.acquire()) {
+    if (!schemaExists()) {
+      return;
+    }
+
+    try (ODatabaseSession schemaTx = connectionPool.acquire()) {
       schemaTx.activateOnCurrentThread();
       schemaTx.getMetadata().getSchema().dropClass(orientDBMapping.getDocumentClass());
     } catch (Exception e) {
@@ -195,7 +221,7 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
    */
   @Override
   public boolean schemaExists() throws GoraException {
-    try (ODatabaseDocumentTx schemaTx = connectionPool.acquire()) {
+    try (ODatabaseSession schemaTx = connectionPool.acquire()) {
       schemaTx.activateOnCurrentThread();
       return schemaTx.getMetadata().getSchema()
               .existsClass(orientDBMapping.getDocumentClass());
@@ -222,8 +248,8 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("key", key);
     OSQLSynchQuery<ODocument> query = new OSQLSynchQuery<ODocument>(selectQuery.toString());
-    
-    try (ODatabaseDocumentTx selectTx = connectionPool.acquire()) {
+
+    try (ODatabaseSession selectTx = connectionPool.acquire()) {
       selectTx.activateOnCurrentThread();
       List<ODocument> result = selectTx.command(query).execute(params);
       if (result.size() == 1) {
@@ -247,7 +273,7 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
       dataStoreQuery.setEndKey(key);
       dataStoreQuery.populateOrientDBQuery(orientDBMapping, getFieldsToQuery(null), getFields());
 
-      try (ODatabaseDocumentTx selectTx = connectionPool.acquire()) {
+      try (ODatabaseSession selectTx = connectionPool.acquire()) {
         selectTx.activateOnCurrentThread();
         // TODO : further optimize for queries to separate cases update / insert == get rid of select all query
         // TODO : for update
@@ -282,7 +308,7 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
     Map<String, Object> params = new HashMap<String, Object>();
     params.put("key", key);
     OCommandSQL query = new OCommandSQL(delete.toString().replace("DELETE", "DELETE FROM"));
-    try (ODatabaseDocumentTx deleteTx = connectionPool.acquire()) {
+    try (ODatabaseSession deleteTx = connectionPool.acquire()) {
       deleteTx.activateOnCurrentThread();
       int deleteCount = deleteTx.command(query).execute(params);
       if (deleteCount == 1) {
@@ -314,7 +340,7 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
       }
 
       OCommandSQL dbQuery = new OCommandSQL(delete.toString().replace("DELETE", "DELETE FROM"));
-      try (ODatabaseDocumentTx deleteTx = connectionPool.acquire()) {
+      try (ODatabaseSession deleteTx = connectionPool.acquire()) {
         deleteTx.activateOnCurrentThread();
         int deleteCount;
         if (params.isEmpty()) {
@@ -337,7 +363,7 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
       dataStoreQuery.setEndKey(query.getEndKey());
       dataStoreQuery.populateOrientDBQuery(orientDBMapping, getFieldsToQuery(null), getFields());
 
-      try (ODatabaseDocumentTx selectTx = connectionPool.acquire()) {
+      try (ODatabaseSession selectTx = connectionPool.acquire()) {
         selectTx.activateOnCurrentThread();
         List<ODocument> result = selectTx.command(dataStoreQuery.getOrientDBQuery())
                 .execute(dataStoreQuery.getParams());
@@ -373,9 +399,9 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
       dataStoreQuery = (OrientDBQuery) ((PartitionQueryImpl<K, T>) query).getBaseQuery();
     }
     dataStoreQuery.populateOrientDBQuery(orientDBMapping, fields, getFields());
-    try (ODatabaseDocumentTx selectTx = connectionPool.acquire()) {
+    try (ODatabaseSession selectTx = connectionPool.acquire()) {
       selectTx.activateOnCurrentThread();
-      OConcurrentResultSet<ODocument> result = selectTx.command(dataStoreQuery.getOrientDBQuery())
+      OConcurrentLegacyResultSet<ODocument> result = selectTx.command(dataStoreQuery.getOrientDBQuery())
               .execute(dataStoreQuery.getParams());
       result.setLimit((int) query.getLimit());
       return new OrientDBResult<K, T>(this, query, result);
@@ -414,7 +440,7 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
    */
   @Override
   public void flush() throws GoraException {
-    try (ODatabaseDocumentTx updateTx = connectionPool.acquire()) {
+    try (ODatabaseSession updateTx = connectionPool.acquire()) {
       updateTx.activateOnCurrentThread();
       flushLock.lock();
       for (ODocument document : docBatch) {
@@ -449,7 +475,7 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
    *
    * @return {@link OPartitionedDatabasePool} OrientDB client connection pool.
    */
-  public OPartitionedDatabasePool getConnectionPool() {
+  public ODatabasePool getConnectionPool() {
     return connectionPool;
   }
 
@@ -663,7 +689,7 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
       }
       return map;
     } else {
-      ODocument doc = new ODocument();
+      ODocument doc = new ODocument("map" + docf);
       if (value == null)
         return doc;
       for (Map.Entry<CharSequence, ?> e : value.entrySet()) {
@@ -915,7 +941,7 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
   private ODocument convertAvroBeanToOrientDoc(final String docf,
                                                final Schema fieldSchema,
                                                final Object value) {
-    ODocument record = new ODocument();
+    ODocument record = new ODocument("record" + docf);
     for (Schema.Field member : fieldSchema.getFields()) {
       Object innerValue = ((PersistentBase) value).get(member.pos());
       String innerDoc = orientDBMapping.getDocumentField(member.name());

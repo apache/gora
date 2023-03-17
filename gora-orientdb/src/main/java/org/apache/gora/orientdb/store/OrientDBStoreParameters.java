@@ -31,7 +31,8 @@ public class OrientDBStoreParameters {
   public static final String ORIENT_DB_USER_USERNAME = "gora.orientdb.user.username";
   public static final String ORIENT_DB_USER_PASSWORD = "gora.orientdb.user.password";
   public static final String ORIENT_DB_DB_NAME = "gora.orientdb.database.name";
-  public static final String ORIENT_DB_CONNECTION_POOL_SIZE = "gora.orientdb.con.pool.size";
+  public static final String ORIENT_DB_CONNECTION_POOL_MIN_SIZE = "gora.orientdb.con.pool.min.size";
+  public static final String ORIENT_DB_CONNECTION_POOL_MAX_SIZE = "gora.orientdb.con.pool.max.size";
   public static final String ORIENT_DB_STORAGE_TYPE = "gora.orientdb.storage.type";
 
 
@@ -41,7 +42,8 @@ public class OrientDBStoreParameters {
   private String userName;
   private String userPassword;
   private String databaseName;
-  private String connPoolSize;
+  private String connPoolMinSize;
+  private String connPoolMaxSize;
   private String storageType;
 
 
@@ -100,12 +102,21 @@ public class OrientDBStoreParameters {
   }
 
   /**
-   * Return remote OrientDB client connections pool size. Eg:- 80
+   * Return remote OrientDB client connections pool min size. Eg:- 80
    *
-   * @return OrientDB remote server client connections pool size as string.
+   * @return OrientDB remote server client connections pool min size as string.
    */
-  public String getConnectionPoolSize() {
-    return this.connPoolSize;
+  public String getConnectionPoolMinSize() {
+    return this.connPoolMinSize;
+  }
+
+  /**
+   * Return remote OrientDB client connections pool max size. Eg:- 100
+   *
+   * @return OrientDB remote server client connections pool max size as string.
+   */
+  public String getConnectionPoolMaxSize() {
+    return this.connPoolMaxSize;
   }
 
   /**
@@ -123,7 +134,8 @@ public class OrientDBStoreParameters {
                                  String userName,
                                  String userPassword,
                                  String databaseName,
-                                 String connPoolSize,
+                                 String connPoolMinSize,
+                                 String connPoolMaxSize,
                                  String storageType) {
     this.mappingFile = mappingFile;
     this.serverHost = serverHost;
@@ -131,7 +143,8 @@ public class OrientDBStoreParameters {
     this.userName = userName;
     this.userPassword = userPassword;
     this.databaseName = databaseName;
-    this.connPoolSize = connPoolSize;
+    this.connPoolMinSize = connPoolMinSize;
+    this.connPoolMaxSize = connPoolMaxSize;
     this.storageType = storageType;
   }
 
@@ -149,10 +162,11 @@ public class OrientDBStoreParameters {
     String propUserName = properties.getProperty(ORIENT_DB_USER_USERNAME);
     String propUserPassword = properties.getProperty(ORIENT_DB_USER_PASSWORD);
     String propDatabaseName = properties.getProperty(ORIENT_DB_DB_NAME);
-    String propConnPoolSize = properties.getProperty(ORIENT_DB_CONNECTION_POOL_SIZE);
+    String propConnPoolMinSize = properties.getProperty(ORIENT_DB_CONNECTION_POOL_MIN_SIZE);
+    String propConnPoolMaxSize = properties.getProperty(ORIENT_DB_CONNECTION_POOL_MAX_SIZE);
     String propStorageType = properties.getProperty(ORIENT_DB_STORAGE_TYPE);
     return new OrientDBStoreParameters(propMappingFile,
             propServerHost, propServerPort, propUserName,
-            propUserPassword, propDatabaseName, propConnPoolSize, propStorageType);
+            propUserPassword, propDatabaseName, propConnPoolMinSize, propConnPoolMaxSize, propStorageType);
   }
 }

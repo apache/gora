@@ -21,9 +21,9 @@ package org.apache.gora.orientdb.query;
 import java.io.IOException;
 import java.util.Iterator;
 
-import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
+import com.orientechnologies.orient.core.db.ODatabaseSession;
 import com.orientechnologies.orient.core.record.impl.ODocument;
-import com.orientechnologies.orient.core.sql.query.OConcurrentResultSet;
+import com.orientechnologies.orient.core.sql.query.OConcurrentLegacyResultSet;
 import org.apache.gora.orientdb.store.OrientDBStore;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
@@ -41,7 +41,7 @@ public class OrientDBResult<K, T extends PersistentBase> extends ResultBase<K, T
   /**
    * Reference to the OrientDB Results set.
    */
-  private OConcurrentResultSet<ODocument> resultSet;
+  private OConcurrentLegacyResultSet<ODocument> resultSet;
   private int size;
   private static final Logger log = LoggerFactory.getLogger(OrientDBResult.class);
   private Iterator<ODocument> resultSetIterator;
@@ -52,7 +52,7 @@ public class OrientDBResult<K, T extends PersistentBase> extends ResultBase<K, T
 
   public OrientDBResult(DataStore<K, T> dataStore,
                         Query<K, T> query,
-                        OConcurrentResultSet<ODocument> resultSet) {
+                        OConcurrentLegacyResultSet<ODocument> resultSet) {
     super(dataStore, query);
     this.resultSet = resultSet;
     this.size = resultSet.size();
@@ -81,7 +81,7 @@ public class OrientDBResult<K, T extends PersistentBase> extends ResultBase<K, T
 
   @Override
   protected boolean nextInner() throws IOException {
-    ODatabaseDocumentTx loadTx = ((OrientDBStore<K, T>) getDataStore())
+    ODatabaseSession loadTx = ((OrientDBStore<K, T>) getDataStore())
             .getConnectionPool().acquire();
     loadTx.activateOnCurrentThread();
     try {

@@ -881,7 +881,7 @@
     <hazelcast.jet.version>3.1</hazelcast.jet.version>
 
     <!-- OrientDB Dependencies -->
-    <orientdb.version>2.2.22</orientdb.version>
+    <orientdb.version>3.0.30</orientdb.version>
     <orientqb.version>0.2.0</orientqb.version>
 
     <!-- RethinkDB Dependencies -->
