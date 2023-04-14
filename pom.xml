@@ -896,7 +896,7 @@
 
     <!-- HiveStore Dependencies -->
     <metamodel.version>5.3.0</metamodel.version>
-    <json.version>20180813</json.version>
+    <json.version>20230227</json.version>
     <hive.version>2.3.8</hive.version>
     <hadoop-common.version>2.6.0</hadoop-common.version>
 
