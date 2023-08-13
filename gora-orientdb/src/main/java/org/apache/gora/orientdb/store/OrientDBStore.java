@@ -113,7 +113,7 @@ public class OrientDBStore<K, T extends PersistentBase> extends DataStoreBase<K,
               orientDbStoreParams.getUserPassword(), OrientDBConfig.defaultConfig());
       if (!remoteServerAdmin.exists(orientDbStoreParams.getDatabaseName())) {
         remoteServerAdmin.create(orientDbStoreParams.getDatabaseName(),
-                ODatabaseType.valueOf(orientDbStoreParams.getStorageType().toUpperCase()));
+                ODatabaseType.valueOf(orientDbStoreParams.getStorageType().toUpperCase(Locale.ENGLISH)));
       }
 
       if (orientDbStoreParams.getConnectionPoolMinSize() != null &&
