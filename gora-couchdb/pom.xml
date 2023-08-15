@@ -91,13 +91,6 @@
     </plugins>
   </build>
 
-  <repositories>
-    <repository>
-      <id>clojars.org</id>
-      <url>https://clojars.org/repo</url>
-    </repository>
-  </repositories>
-
   <dependencies>
     <!-- Gora Internal Dependencies -->
     <dependency>
