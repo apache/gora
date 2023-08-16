@@ -90,11 +90,13 @@
       </plugin>
     </plugins>
   </build>
+
   <repositories>
+    <!-- Used for transitive org.restlet.jee artifacts -->
     <repository>
       <id>maven-restlet</id>
       <name>Public online Restlet repository</name>
-      <url>https://maven.restlet.org</url>
+      <url>https://maven.restlet.talend.com/</url>
     </repository>
   </repositories>
 

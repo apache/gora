@@ -89,7 +89,7 @@ pipeline {
 
             post {
                 always {
-                    junit testResults: '**/target/surefire-reports/TEST-*.xml', testDataPublishers: [[$class: 'StabilityTestDataPublisher']]
+                    junit testResults: '**/target/surefire-reports/TEST-*.xml'
                 }
             }
         }
