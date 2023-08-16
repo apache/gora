@@ -585,7 +585,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>${maven-surfire-plugin.version}</version><!--$NO-MVN-MAN-VER$ -->
+        <version>${maven-surefire-plugin.version}</version><!--$NO-MVN-MAN-VER$ -->
         <inherited>true</inherited>
         <configuration>
           <systemPropertyVariables>
@@ -877,7 +877,7 @@
     <maven-jar-plugin.version>2.3.2</maven-jar-plugin.version>
     <maven-dependency-plugin.version>2.9</maven-dependency-plugin.version>
     <build-helper-maven-plugin.version>1.7</build-helper-maven-plugin.version>
-    <maven-surfire-plugin.version>2.20</maven-surfire-plugin.version>
+    <maven-surefire-plugin.version>2.20</maven-surefire-plugin.version>
     <maven-release-plugin.version>2.5</maven-release-plugin.version>
     <maven-bundle-plugin.version>2.5.3</maven-bundle-plugin.version>
     <maven-source-plugin.version>2.1.2</maven-source-plugin.version>
