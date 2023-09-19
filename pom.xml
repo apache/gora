@@ -777,6 +777,7 @@
     <module>gora-hive</module>
     <module>gora-redis</module>
     <module>gora-jet</module>
+    <module>gora-arangodb</module>
     <module>gora-rethinkdb</module>
     <module>gora-elasticsearch</module>
     <module>gora-tutorial</module>
@@ -844,6 +845,9 @@
     <!-- OrientDB Dependencies -->
     <orientdb.version>3.0.30</orientdb.version>
     <orientqb.version>0.2.0</orientqb.version>
+
+    <!-- ArangoDB Dependencies -->
+    <arangodb.version>6.6.3</arangodb.version>
 
     <!-- RethinkDB Dependencies -->
     <rethinkdb.version>2.4.4</rethinkdb.version>
@@ -1735,6 +1739,13 @@
         <groupId>javax.cache</groupId>
         <artifactId>cache-api</artifactId>
         <version>${jsr107.api.version}</version>
+      </dependency>
+
+      <!-- ArangoDB Dependencies -->
+      <dependency>
+        <groupId>com.arangodb</groupId>
+        <artifactId>arangodb-java-driver</artifactId>
+        <version>${arangodb.version}</version>
       </dependency>
 
       <!-- RethinkDB Dependencies -->
