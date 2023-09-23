@@ -15,21 +15,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.gora.mapreduce;
+package org.apache.gora.io.serializer;
 
-import org.apache.hadoop.io.RawComparator;
-import org.apache.hadoop.io.Text;
+import org.apache.gora.persistency.impl.PersistentBase;
+import org.apache.hadoop.io.serializer.Deserializer;
+import org.apache.hadoop.io.serializer.Serialization;
+import org.apache.hadoop.io.serializer.Serializer;
 
-public class StringComparator implements RawComparator<String> {
+public class PersistentSerialization implements Serialization<PersistentBase> {
 
   @Override
-  public int compare(byte[] b1, int s1, int l1, byte[] b2, int s2, int l2) {
-    return Text.Comparator.compareBytes(b1, s1, l1, b2, s2, l2);
+  public boolean accept(Class<?> c) {
+    return PersistentBase.class.isAssignableFrom(c);
   }
 
   @Override
-  public int compare(String o1, String o2) {
-    return o1.compareTo(o2);
+  public Deserializer<PersistentBase> getDeserializer(Class<PersistentBase> c) {
+    return new PersistentDeserializer(c, true);
   }
 
+  @Override
+  public Serializer<PersistentBase> getSerializer(Class<PersistentBase> c) {
+    return new PersistentSerializer();
+  }
 }

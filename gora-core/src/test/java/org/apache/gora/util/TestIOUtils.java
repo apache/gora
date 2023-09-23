@@ -29,9 +29,8 @@ import java.util.Arrays;
 
 import org.apache.avro.util.ByteBufferInputStream;
 import org.apache.avro.util.ByteBufferOutputStream;
-import org.apache.gora.mapreduce.GoraMapReduceUtils;
+import org.apache.gora.io.serializer.GoraMapReduceUtils;
 import org.apache.gora.persistency.impl.PersistentBase;
-import org.apache.gora.util.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DataInputBuffer;
 import org.apache.hadoop.io.DataOutputBuffer;

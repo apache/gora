@@ -21,7 +21,7 @@ import java.io.IOException;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.kudu.GoraKuduTestDriver;
 import org.apache.gora.kudu.utils.KuduBackendConstants;
-import org.apache.gora.mapreduce.DataStoreMapReduceTestBase;
+import org.apache.gora.io.serializer.DataStoreMapReduceTestBase;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.apache.hadoop.mapred.JobConf;

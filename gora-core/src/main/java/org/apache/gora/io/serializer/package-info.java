@@ -17,4 +17,4 @@
 /**
  * MapReduce related utilities for Gora.
  */
-package org.apache.gora.mapreduce;
+package org.apache.gora.io.serializer;

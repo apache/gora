@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.gora.avro.store.AvroStore;
-import org.apache.gora.mapreduce.GoraMapReduceUtils;
+import org.apache.gora.io.serializer.GoraMapReduceUtils;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;

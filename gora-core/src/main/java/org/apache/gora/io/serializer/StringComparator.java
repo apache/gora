@@ -15,37 +15,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.gora.mapreduce;
+package org.apache.gora.io.serializer;
 
-import java.io.IOException;
+import org.apache.hadoop.io.RawComparator;
+import org.apache.hadoop.io.Text;
 
-import org.apache.hadoop.mapreduce.JobContext;
-import org.apache.hadoop.mapreduce.OutputCommitter;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
-
-/**
- * An OutputCommitter that does nothing.
- */
-public class NullOutputCommitter extends OutputCommitter {
+public class StringComparator implements RawComparator<String> {
 
   @Override
-  public void abortTask(TaskAttemptContext arg0) throws IOException {
+  public int compare(byte[] b1, int s1, int l1, byte[] b2, int s2, int l2) {
+    return Text.Comparator.compareBytes(b1, s1, l1, b2, s2, l2);
   }
 
   @Override
-  public void commitTask(TaskAttemptContext arg0) throws IOException {
+  public int compare(String o1, String o2) {
+    return o1.compareTo(o2);
   }
 
-  @Override
-  public boolean needsTaskCommit(TaskAttemptContext arg0) throws IOException {
-    return false;
-  }
-
-  @Override
-  public void setupJob(JobContext arg0) throws IOException {
-  }
-
-  @Override
-  public void setupTask(TaskAttemptContext arg0) throws IOException {
-  }
 }

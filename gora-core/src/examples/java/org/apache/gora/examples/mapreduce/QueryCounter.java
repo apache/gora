@@ -20,7 +20,7 @@ package org.apache.gora.examples.mapreduce;
 
 import java.io.IOException;
 
-import org.apache.gora.mapreduce.GoraMapper;
+import org.apache.gora.io.serializer.GoraMapper;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.query.Query;
 import org.apache.gora.store.DataStore;
