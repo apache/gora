@@ -797,7 +797,7 @@
     <hadoop-2.test.version>2.5.2</hadoop-2.test.version>
     <hbase.version>2.1.1</hbase.version>
     <hbase.test.version>2.1.1</hbase.test.version>
-    <cxf-rt-frontend-jaxrs.version>2.5.2</cxf-rt-frontend-jaxrs.version>
+    <cxf-rt-frontend-jaxrs.version>2.6.11</cxf-rt-frontend-jaxrs.version>
     <!-- Amazon Dependencies -->
     <amazon.version>1.10.55</amazon.version>
     <!-- Cassandra Dependencies -->
