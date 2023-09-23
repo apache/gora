@@ -816,7 +816,7 @@
     <!-- Neo4j Dependencies -->
     <neo4j-neo4j.version>1.0.0</neo4j-neo4j.version>
     <jetty.version>9.4.14.v20181114</jetty.version>
-    <tika.version>1.12</tika.version>
+    <tika.version>1.18</tika.version>
     <httpcomponents.version>4.5.6</httpcomponents.version>
     <commons-io.version>2.5</commons-io.version>
     <restlet.version>2.4.0</restlet.version>
