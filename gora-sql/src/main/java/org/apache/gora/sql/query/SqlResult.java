@@ -1,72 +1,72 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.apache.gora.sql.query;
-
-import java.io.IOException;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.Query;
 import org.apache.gora.query.impl.ResultBase;
 import org.apache.gora.sql.store.SqlStore;
-import org.apache.gora.sql.util.SqlUtils;
 import org.apache.gora.store.DataStore;
+import org.jooq.Record;
+import org.jooq.Result;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.Iterator;
 
 public class SqlResult<K, T extends PersistentBase> extends ResultBase<K, T> {
+    private Result<Record> resultSet;
+    private int size;
+    private Iterator<Record> resultSetIterator;
+    private String[] dbFields;
+    private static final Logger log = LoggerFactory.getLogger(SqlResult.class);
 
-  private ResultSet resultSet;
-  private PreparedStatement statement;
-  
-  public SqlResult(DataStore<K, T> dataStore, Query<K, T> query
-      , ResultSet resultSet, PreparedStatement statement) {
-    super(dataStore, query);
-    this.resultSet = resultSet;
-    this.statement = statement;
-  }
-
-  @Override
-  protected boolean nextInner() throws IOException {
-    try {
-      if(!resultSet.next()) { //no matching result
-        close();
-        return false;
-      }
-
-      SqlStore<K, T> sqlStore = ((SqlStore<K,T>)dataStore);
-      key = sqlStore.readPrimaryKey(resultSet);
-      persistent = sqlStore.readObject(resultSet, persistent, query.getFields());
-
-      return true;
-    } catch (Exception ex) {
-      throw new IOException(ex);
+    public SqlResult(DataStore<K, T> dataStore, Query<K, T> query) {
+        super(dataStore, query);
     }
-  }
 
-  @Override
-  public void close() throws IOException {
-    SqlUtils.close(resultSet);
-    SqlUtils.close(statement);
-  }
+    public SqlResult(DataStore<K, T> dataStore,
+                     Query<K, T> query,
+                     Result<Record> resultSet,
+                     String[] dbFields) {
+        super(dataStore, query);
+        this.resultSet = resultSet;
+        this.resultSetIterator = resultSet.iterator();
+        this.size = resultSet.size();
+        this.dbFields = dbFields;
+    }
 
-  @Override
-  public float getProgress() throws IOException {
-    return 0;
-  }
+    public SqlStore<K, T> getDataStore() {
+        return (SqlStore<K, T>) super.getDataStore();
+    }
+    @Override
+    public float getProgress() throws IOException, InterruptedException {
+        if (resultSet == null) {
+            return 0;
+        } else if (size == 0) {
+            return 1;
+        } else {
+            return offset / (float) size;
+        }
+    }
+
+    @Override
+    public int size() {
+        int totalSize = size;
+        int intLimit = (int) this.limit;
+        return intLimit > 0 && totalSize > intLimit ? intLimit : totalSize;
+    }
+
+    @Override
+    protected boolean nextInner() throws IOException {
+        if (!resultSetIterator.hasNext()) {
+            return false;
+        }
+
+        Record obj =resultSetIterator.next();
+        key = (K) obj.getValue("id");
+        persistent = ((SqlStore<K, T>) getDataStore())
+                .convertSqlTableToAvroBean(obj, dbFields);
+        return persistent != null;
+
+    }
 }

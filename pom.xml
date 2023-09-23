@@ -784,6 +784,7 @@
     <module>gora-tutorial</module>
     <module>gora-benchmark</module>
     <module>sources-dist</module>
+    <module>gora-sql</module>
   </modules>
 
   <properties>

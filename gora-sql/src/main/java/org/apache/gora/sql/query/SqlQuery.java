@@ -1,38 +1,93 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.apache.gora.sql.query;
 
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.impl.QueryBase;
+import org.apache.gora.sql.store.SqlMapping;
 import org.apache.gora.sql.store.SqlStore;
+import org.apache.gora.sql.store.SqlStoreParameters;
+import org.apache.gora.store.DataStore;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectField;
+import org.jooq.SelectQuery;
 
-/**
- * Query implementation covering SQL queries
- */
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.jooq.impl.DSL.field;
+import static org.jooq.impl.DSL.table;
+
 public class SqlQuery<K, T extends PersistentBase> extends QueryBase<K, T> {
 
-  public SqlQuery() {
-    super(null);
-  }
+    public SqlQuery(DataStore<K, T> dataStore) {
+        super(dataStore);
+    }
 
-  public SqlQuery(SqlStore<K, T> dataStore) {
-    super(dataStore);
-  }
+    private DSLContext dslContext;
+
+    public SqlQuery() {
+        super(null);
+    }
+
+    private SelectQuery<Record> query;
+    private List<SelectField<?>> selectFields = new ArrayList<>();
+
+    public SelectQuery<Record> populateSqlQuery(final SqlMapping sqlMapping,
+                                                final String[] fields,
+                                                final SqlStoreParameters sqlStoreParameters,
+                                                final String[] schemaFields) {
+
+        dslContext = SqlStore.getJooQConfiguration(sqlStoreParameters);
+        query = dslContext.selectQuery();
+        selectFields.add(field("id"));
+        if (fields.length == schemaFields.length) {
+            for (String k : fields) {
+                String dbFieldName = k;
+                if (dbFieldName != null && dbFieldName.length() > 0) {
+                    selectFields.add(field(dbFieldName));
+                }
+            }
+        } else {
+            for (String k : fields) {
+                String dbFieldName = k;
+                if (dbFieldName != null && dbFieldName.length() > 0) {
+                    selectFields.add(field(dbFieldName));
+                }
+            }
+
+        }
+
+        if ((this.getStartKey() != null) && (this.getEndKey() != null)
+                && this.getStartKey().equals(this.getEndKey())) {
+            query.addFrom(table(sqlMapping.getTableClass()));
+            query.addSelect(selectFields);
+            query.addConditions(field("id").eq(this.getStartKey()));
+
+
+        } else if (this.getStartKey() != null || this.getEndKey() != null) {
+            if (this.getStartKey() != null
+                    && this.getEndKey() == null) {
+                query.addFrom(table(sqlMapping.getTableClass()));
+                query.addSelect(selectFields);
+                query.addConditions(field("id").eq(this.getStartKey()));
+            } else if (this.getEndKey() != null
+                    && this.getStartKey() == null) {
+                query.addFrom(table(sqlMapping.getTableClass()));
+                query.addSelect(selectFields);
+                query.addConditions(field("id").eq(this.getEndKey()));
+            } else {
+
+                query.addFrom(table(sqlMapping.getTableClass()));
+                query.addSelect(selectFields);
+                query.addConditions(field("id").eq(this.getStartKey()));
+                query.addConditions(field("id").eq(this.getEndKey()));
+            }
+        } else {
+            query.addFrom(table(sqlMapping.getTableClass()));
+            query.addSelect(selectFields);
+        }
+
+        return query;
+    }
 
 }
