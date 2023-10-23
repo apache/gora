@@ -37,8 +37,6 @@ import org.apache.avro.Schema.Type;
 import org.apache.avro.SchemaNormalization;
 import org.apache.avro.compiler.specific.SpecificCompiler;
 import org.apache.gora.compiler.utils.LicenseHeaders;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.node.JsonNodeFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

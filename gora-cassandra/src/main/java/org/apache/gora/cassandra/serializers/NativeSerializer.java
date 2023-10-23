@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.gora.cassandra.bean.Field;
 import org.apache.gora.cassandra.query.CassandraResultSet;
 import org.apache.gora.cassandra.store.CassandraClient;

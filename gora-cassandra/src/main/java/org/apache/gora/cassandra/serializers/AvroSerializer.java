@@ -27,7 +27,7 @@ import com.datastax.driver.core.UDTValue;
 import com.datastax.driver.core.UserType;
 import org.apache.avro.Schema;
 import org.apache.avro.specific.SpecificData;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.gora.cassandra.bean.CassandraKey;
 import org.apache.gora.cassandra.bean.Field;
 import org.apache.gora.cassandra.query.CassandraResultSet;
