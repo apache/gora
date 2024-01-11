@@ -43,7 +43,7 @@ public class CassandraMapping {
   /**
    * Constructor of the class
    */
-  CassandraMapping() {
+  public CassandraMapping() {
     this.fieldList = new ArrayList<>();
     this.tableProperties = new HashMap<>();
   }

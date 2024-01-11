@@ -759,6 +759,7 @@
     <module>gora-pig</module>
     <module>gora-accumulo</module>
     <module>gora-cassandra</module>
+    <module>gora-scylladb</module>
     <module>gora-goraci</module>
     <module>gora-hbase</module>
     <module>gora-infinispan</module>
@@ -872,6 +873,10 @@
     <!-- gora-benchmark and version dependencies -->
     <site.ycsb.version>0.17.0</site.ycsb.version>
     <datafactory.version>0.8</datafactory.version>
+
+<!--    gora scylladb and version dependencies-->
+    <scylla.driver.version>4.8.0-scylla-0</scylla.driver.version>
+    <scylla.driver.extras.version>3.10.1-scylla-0</scylla.driver.extras.version>
 
 
     <!-- Maven Plugin Dependencies -->
@@ -1097,6 +1102,27 @@
         <version>${kudu.version}</version>
       </dependency>
 
+      <!--Scylla DB DataStore dependencies -->
+      <dependency>
+        <groupId>com.scylladb</groupId>
+        <artifactId>java-driver-core</artifactId>
+        <version>${scylla.driver.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.scylladb</groupId>
+        <artifactId>java-driver-mapper-runtime</artifactId>
+        <version>${scylla.driver.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.scylladb</groupId>
+        <artifactId>scylla-driver-mapping</artifactId>
+        <version>${scylla.driver.extras.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.scylladb</groupId>
+        <artifactId>scylla-driver-extras</artifactId>
+        <version>${scylla.driver.extras.version}</version>
+      </dependency>
 
       <!--Ignite DataStore dependencies -->
 

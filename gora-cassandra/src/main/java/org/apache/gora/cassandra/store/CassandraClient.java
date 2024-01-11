@@ -84,7 +84,7 @@ public class CassandraClient {
     return cluster;
   }
 
-  void initialize(Properties properties, CassandraMapping mapping) throws Exception {
+  public void initialize(Properties properties, CassandraMapping mapping) throws Exception {
     Cluster.Builder builder = Cluster.builder();
     List<String> codecs = readCustomCodec(properties);
     builder = populateSettings(builder, properties);
