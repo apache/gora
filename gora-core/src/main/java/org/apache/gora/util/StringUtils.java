@@ -42,7 +42,7 @@ public class StringUtils {
     Collections.addAll(set, arr1);
     Collections.addAll(set, arr2);
 
-    return set.toArray(new String[set.size()]);
+    return set.toArray(new String[0]);
   }
 
   public static String join(List<String> strs) {

@@ -133,7 +133,7 @@ public class MemStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
               excludedFields.add(field);
             }
           }
-          T newClonedObj = getPersistent(result.get(),excludedFields.toArray(new String[excludedFields.size()]));
+          T newClonedObj = getPersistent(result.get(),excludedFields.toArray(new String[0]));
           if (delete(result.getKey())) {
             put(result.getKey(),newClonedObj);
             deletedRows++;

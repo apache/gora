@@ -77,7 +77,7 @@ public class RethinkDBMapping {
   }
 
   public String[] getDocumentFields() {
-    return documentToClass.keySet().toArray(new String[documentToClass.keySet().size()]);
+    return documentToClass.keySet().toArray(new String[0]);
   }
 
   public String getDocumentField(String field) {

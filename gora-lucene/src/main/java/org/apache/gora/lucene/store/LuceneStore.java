@@ -405,7 +405,7 @@ public class LuceneStore<K, T extends PersistentBase>
   public T newInstance(Document doc, String[] fields) throws IOException {
     T persistent = newPersistent();
     if (fields == null) {
-      fields = fieldMap.keySet().toArray(new String[fieldMap.size()]);
+      fields = fieldMap.keySet().toArray(new String[0]);
     }
     String pk = mapping.getPrimaryKey();
 
