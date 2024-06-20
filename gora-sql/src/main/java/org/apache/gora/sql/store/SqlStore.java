@@ -1,53 +1,8 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.apache.gora.sql.store;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.sql.Blob;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
 import org.apache.avro.Schema;
-import org.apache.avro.Schema.Field;
-import org.apache.avro.Schema.Type;
-import org.apache.avro.generic.GenericFixed;
-import org.apache.avro.ipc.ByteBufferInputStream;
-import org.apache.avro.ipc.ByteBufferOutputStream;
-import org.apache.avro.specific.SpecificFixed;
 import org.apache.avro.util.Utf8;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.apache.gora.persistency.StateManager;
+import org.apache.gora.persistency.impl.DirtyMapWrapper;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.query.PartitionQuery;
 import org.apache.gora.query.Query;
@@ -55,268 +10,378 @@ import org.apache.gora.query.Result;
 import org.apache.gora.query.impl.PartitionQueryImpl;
 import org.apache.gora.sql.query.SqlQuery;
 import org.apache.gora.sql.query.SqlResult;
-import org.apache.gora.sql.statement.Delete;
-import org.apache.gora.sql.statement.InsertUpdateStatement;
-import org.apache.gora.sql.statement.InsertUpdateStatementFactory;
-import org.apache.gora.sql.statement.SelectStatement;
-import org.apache.gora.sql.statement.Where;
-import org.apache.gora.sql.store.SqlTypeInterface.JdbcType;
-import org.apache.gora.sql.util.SqlUtils;
-import org.apache.gora.store.DataStoreFactory;
 import org.apache.gora.store.impl.DataStoreBase;
 import org.apache.gora.util.AvroUtils;
-import org.apache.gora.util.ClassLoadingUtils;
-import org.apache.gora.util.IOUtils;
-import org.apache.gora.util.StringUtils;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.input.SAXBuilder;
+import org.apache.gora.util.GoraException;
+import org.jooq.*;
+import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 
-/**
- * A DataStore implementation for RDBMS with a SQL interface. SqlStore
- * uses the JOOQ API and various JDBC drivers to communicate with the DB. 
- * Through use of the JOOQ API this SqlStore aims to support numerous SQL 
- * database stores namely;
- * DB2 9.7
- * Derby 10.8
- * H2 1.3.161
- * HSQLDB 2.2.5
- * Ingres 10.1.0
- * MySQL 5.1.41 and 5.5.8
- * Oracle XE 10.2.0.1.0 and 11g
- * PostgreSQL 9.0
- * SQLite with inofficial JDBC driver v056
- * SQL Server 2008 R8
- * Sybase Adaptive Server Enterprise 15.5
- * Sybase SQL Anywhere 12
- *
- * This DataStore is currently in development, and requires a complete
- * re-write as per GORA-86
- * Please see https://issues.apache.org/jira/browse/GORA-86
- */
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.sql.Blob;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.util.*;
+
+import static org.jooq.impl.DSL.*;
+
 public class SqlStore<K, T extends PersistentBase> extends DataStoreBase<K, T> {
 
-  /** The vendor of the DB */
-  public static enum DBVendor {
-    MYSQL,
-    HSQL,
-    GENERIC;
+    private static DSLContext dslContext;
+    private SqlStoreParameters sqlStoreParameters;
+    private SqlMapping sqlMapping;
+    private static Connection connection;
 
-    static DBVendor getVendor(String dbProductName) {
-      String name = dbProductName.toLowerCase();
-      if(name.contains("mysql"))
-        return MYSQL;
-      else if(name.contains("hsql"))
-        return HSQL;
-      return GENERIC;
+    public static DSLContext getJooQConfiguration(SqlStoreParameters sqlStoreParameters) {
+        String url = "jdbc:mysql://" + sqlStoreParameters.getServerHost() + ":" + sqlStoreParameters.getServerPort()
+                + "/" + sqlStoreParameters.getDatabaseName();
+        try {
+            connection = DriverManager.getConnection(url,
+                    sqlStoreParameters.getUserName(), sqlStoreParameters.getUserPassword());
+
+            dslContext = DSL.using(connection, SQLDialect.MYSQL);
+            return dslContext;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
     }
-  }
 
-  private static final Logger log = LoggerFactory.getLogger(SqlStore.class);
+    @Override
+    public void initialize(Class<K> keyClass, Class<T> persistentClass, Properties properties) throws GoraException {
+        super.initialize(keyClass, persistentClass, properties);
 
-  /** The JDBC Driver class name */
-  protected static final String DRIVER_CLASS_PROPERTY = "jdbc.driver";
+        try {
+            sqlStoreParameters = SqlStoreParameters.load(properties);
+            getJooQConfiguration(sqlStoreParameters);
+            dslContext.createDatabaseIfNotExists(sqlStoreParameters.getDatabaseName()).execute();
 
-  /** JDBC Database access URL */
-  protected static final String URL_PROPERTY = "jdbc.url";
+            SqlMappingBuilder<K, T> builder = new SqlMappingBuilder<>(this);
+            sqlMapping = builder.fromFile(sqlStoreParameters.getMappingFile()).build();
+        } catch (Exception e) {
+            LOG.error("Error while initializing SQL dataStore: {}",
+                    new Object[]{e.getMessage()});
+            throw new RuntimeException(e);
+        }
 
-  /** User name to access the database */
-  protected static final String USERNAME_PROPERTY = "jdbc.user";
+    }
 
-  /** Password to access the database */
-  protected static final String PASSWORD_PROPERTY = "jdbc.password";
+    @Override
+    public String getSchemaName() {
+        return sqlMapping.getTableClass();
+    }
 
-  protected static final String DEFAULT_MAPPING_FILE = "gora-sql-mapping.xml";
+    @Override
+    public String getSchemaName(final String mappingSchemaName,
+                                final Class<?> persistentClass) {
+        return super.getSchemaName(mappingSchemaName, persistentClass);
+    }
 
-  private String jdbcDriverClass;
-  private String jdbcUrl;
-  private String jdbcUsername;
-  private String jdbcPassword;
+    @Override
+    public void createSchema() throws GoraException {
+        if (schemaExists()) {
+            return;
+        }
+        try {
+            Map<String, SqlMapping.SQLDataType> allColumns = sqlMapping.getAllColumns();
+            Iterator<Map.Entry<String, SqlMapping.SQLDataType>> iterator = allColumns.entrySet().iterator();
+            CreateTableColumnStep step = dslContext.createTableIfNotExists(sqlMapping.getTableClass());
+            step = step.column(sqlMapping.getPrimaryKey(), org.jooq.impl.SQLDataType.VARCHAR.length(50));
 
-  private SqlMapping mapping;
+            while (iterator.hasNext()) {
+                Map.Entry<String, SqlMapping.SQLDataType> entry = iterator.next();
 
-  private Connection connection; //no connection pooling yet
+                if (entry.getValue() == SqlMapping.SQLDataType.VARCHAR)
+                    step = step.column(entry.getKey(), org.jooq.impl.SQLDataType.VARCHAR);
+                if (entry.getValue() == SqlMapping.SQLDataType.INTEGER)
+                    step = step.column(entry.getKey(), SQLDataType.BIGINT);
+                if (entry.getValue() == SqlMapping.SQLDataType.BLOB)
+                    step = step.column(entry.getKey(), SQLDataType.BLOB);
+            }
+            step.constraints(
+                    primaryKey(sqlMapping.getPrimaryKey())
+            ).execute();
 
-  private DatabaseMetaData metadata;
-  private boolean dbMixedCaseIdentifiers, dbLowerCaseIdentifiers, dbUpperCaseIdentifiers;
-  private HashMap<String, JdbcType> dbTypeMap;
+        } catch (Exception e) {
+            throw new GoraException(e);
+        }
 
-  private HashSet<PreparedStatement> writeCache;
 
-  private int keySqlType;
+    }
 
-  // TODO implement DataBaseTable sqlTable
-  //private DataBaseTable sqlTable;
+    @Override
+    public void deleteSchema() throws GoraException {
+        try {
+            if (schemaExists())
+                dslContext.dropTable(getSchemaName()).execute();
+        } catch (Exception e) {
+            throw new GoraException(e);
+        }
+    }
 
-  private Column primaryColumn;
+    @Override
+    public boolean schemaExists() throws GoraException {
+        String collectionIdentifier = sqlMapping.getTableClass();
+        try {
+            return dslContext
+                    .meta()
+                    .getTables()
+                    .stream()
+                    .anyMatch(table -> table.getName().equalsIgnoreCase(collectionIdentifier));
+        } catch (Exception e) {
+            throw new GoraException(e);
+        }
+    }
 
-  private String dbProductName;
+    @Override
+    public boolean exists(K key) throws GoraException {
+        Boolean isExists = dslContext.fetchExists(dslContext.selectOne()
+                .from(table(sqlMapping.getTableClass()))
+                .where(field("id").eq(key)));
 
-  private DBVendor dbVendor;
+        return isExists;
+    }
 
-  public void initialize() throws IOException {
-      //TODO
-  }
+    @Override
+    public T get(K key, String[] fields) throws GoraException {
+        List<SelectField<?>> selectFields = new ArrayList<>();
+        try {
+            Boolean isExists = dslContext.fetchExists(dslContext.selectOne()
+                    .from(table(sqlMapping.getTableClass()))
+                    .where(field("id").eq(key)));
+            if (isExists) {
+                String[] dbFields = getFieldsToQuery(fields);
+                for (String k : fields) {
+                    String dbFieldName = k;
+                    if (dbFieldName != null && dbFieldName.length() > 0) {
+                        selectFields.add(field(dbFieldName));
+                    }
+                }
+                org.jooq.Result<Record> result = dslContext.select(selectFields)
+                        .from(table(sqlMapping.getTableClass()))
+                        .where(field("id").eq(key)).fetch();
 
-  @Override
-  public String getSchemaName() {
-    return mapping.getTableName();
-  }
+                return convertSqlTableToAvroBean(result.get(0), dbFields);
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            throw new GoraException(e);
+        }
+    }
 
-  @Override
-  public void close() {
-  //TODO
-  }
+    public T convertSqlTableToAvroBean(Record record, String[] dbFields) throws GoraException {
+        T persistent = newPersistent();
+        Object value = null;
+        byte[] byteStream;
+        for (String f : dbFields) {
+            Schema.Field field = fieldMap.get(f);
+            Schema fieldSchema = field.schema();
+            SqlMapping.SQLDataType storeType = sqlMapping.getTableColumnType(f);
 
-  
-  private void setColumnConstraintForQuery() throws IOException {
-  //TODO
-  }
-  
-  
-  @Override
-  public void createSchema() {
-  }
+            Object result = convertTableFieldToAvroField(fieldSchema, storeType, field, f, record);
+            persistent.put(field.pos(), result);
+        }
+        persistent.clearDirty();
+        return persistent;
+    }
 
-  private void getColumnConstraint() throws IOException {
-  //TODO
-  }
+    private Object convertTableFieldToAvroField(Schema fieldSchema, SqlMapping.SQLDataType storeType, Schema.Field field, String f, Record record) throws GoraException {
+        Object result = null;
+        switch (fieldSchema.getType()) {
+//            case MAP:
+//                result = convertDocFieldToAvroMap(f, fieldSchema, record, field, storeType);
+//                break;
+//            case ARRAY:
+//                result = convertDocFieldToAvroList(f, fieldSchema, record, field, storeType);
+//                break;
+//            case RECORD:
+//                MapObject<String, Object> record = (MapObject<String, Object>)
+//                        decorateMapToODoc((Map<String, Object>) obj.get(docf));
+//                if (record == null) {
+//                    result = null;
+//                    break;
+//                }
+//                result = convertAvroBeanToRethinkDBDoc(fieldSchema, record);
+//                break;
+            case BOOLEAN:
+                result = Boolean.valueOf(record.get(f).toString());
+                break;
+            case DOUBLE:
+                result = Double.valueOf(record.get(f).toString());
+                break;
+            case FLOAT:
+                result = Float.valueOf(record.get(f).toString());
+                break;
+            case INT:
+                result = Integer.valueOf(record.get(f).toString());
+                break;
+            case LONG:
+                result = Long.valueOf(record.get(f).toString());
+                break;
+            case STRING:
+                result = new Utf8(record.get(f).toString());
+                ;
+                break;
+            case ENUM:
+                result = AvroUtils.getEnumValue(fieldSchema, record.get(f).toString());
+                break;
+            case BYTES:
+            case FIXED:
+                if (record.field(f) != null) {
+                    result = null;
+                    break;
+                }
+                result = ByteBuffer.wrap(Base64
+                        .getDecoder()
+                        .decode(record.get(f).toString()));
+                break;
+            case NULL:
+                result = null;
+                break;
+            case UNION:
+                result = convertTableColumnToAvroUnion(fieldSchema, storeType, field, f, record);
+                break;
+            default:
+                LOG.warn("Unable to read {}", f);
+                break;
+        }
+        return result;
+    }
 
-  @Override
-  public void deleteSchema() {
-  //TODO
-  }
 
-  @Override
-  public boolean schemaExists() {
-  //TODO
-  return false;
-  }
+    private Object convertTableColumnToAvroUnion(Schema fieldSchema, SqlMapping.SQLDataType storeType, Schema.Field field, String f, Record record) throws GoraException {
+        Object result;
+        Schema.Type type0 = fieldSchema.getTypes().get(0).getType();
+        Schema.Type type1 = fieldSchema.getTypes().get(1).getType();
 
-  @Override
-  public boolean delete(K key) {
-  //TODO
-  return false;
-  }
-  
-  @Override
-  public long deleteByQuery(Query<K, T> query) {
-  //TODO
-  return 0;
-  }
+        if (!type0.equals(type1)
+                && (type0.equals(Schema.Type.NULL) || type1.equals(Schema.Type.NULL))) {
+            Schema innerSchema = null;
+            if (type0.equals(Schema.Type.NULL)) {
+                innerSchema = fieldSchema.getTypes().get(1);
+            } else {
+                innerSchema = fieldSchema.getTypes().get(0);
+            }
 
-  public void flush() {
-  //TODO
-  }
+            LOG.debug("Load from ODocument (UNION), schemaType:{}, docField:{}, storeType:{}",
+                    new Object[]{innerSchema.getType(), f, storeType});
 
-  @Override
-  public T get(K key, String[] requestFields) {
-  //TODO
-  return null;
-  }
+            result = convertTableFieldToAvroField(innerSchema, storeType, field, f, record);
+        } else {
+            throw new GoraException("RethinkDBStore only supports Union of two types field.");
+        }
+        return result;
+    }
 
-  @Override
-  public Result<K, T> execute(Query<K, T> query) {
-  //TODO
-  return null;
-  }
+    @Override
+    public void put(K key, T obj) throws GoraException {
+        if (obj.isDirty()) {
+            org.jooq.Result<Record> result = dslContext.select()
+                    .from(table(sqlMapping.getTableClass()))
+                    .where(field("id").eq(key)).fetch();
+            Map<String, Object> insertFields = convertAvroBeanToSqlTable(key, obj);
+            Iterator<Map.Entry<String, Object>> iterator = insertFields.entrySet().iterator();
+            InsertQuery<?> step = dslContext.insertQuery(DSL.table(sqlMapping.getTableClass()));
+            UpdateQuery<Record> updateStep = dslContext.updateQuery(table(sqlMapping.getTableClass()));
 
-  private void constructWhereClause() throws IOException {
-  //TODO
-  }
+            if (!result.isEmpty()) {
+                while (iterator.hasNext()) {
+                    Map.Entry<String, Object> entry = iterator.next();
+                    updateStep.addValue(field(entry.getKey()), entry.getValue());
+                }
+                updateStep.addConditions(field("id").eq(key));
+                updateStep.execute();
+            } else {
 
-  private void setParametersForPreparedStatement() throws SQLException, IOException {
-  //TODO
-  }
+                while (iterator.hasNext()) {
+                    Map.Entry<String, Object> entry = iterator.next();
+                    step.addValue(field(entry.getKey()), entry.getValue());
+                }
+                step.newRecord();
+                step.execute();
 
-  @SuppressWarnings("unchecked")
-  public K readPrimaryKey(ResultSet resultSet) throws SQLException {
-    return (K) resultSet.getObject(primaryColumn.getName());
-  }
+            }
+        } else {
+            if (LOG.isDebugEnabled()) {
+                LOG.info("Ignored putting persistent bean {} in the store as it is neither "
+                        + "new, neither dirty.", new Object[]{obj});
+            }
+        }
+    }
 
-  public T readObject(ResultSet rs, T persistent
-      , String[] requestFields) throws SQLException, IOException {
-  //TODO
-  return null;
-  }
+    @Override
+    public boolean delete(K key) throws GoraException {
+        dslContext.delete(table(sqlMapping.getTableClass()))
+                .where(field("id").eq(key))
+                .execute();
+        return true;
+    }
 
-  protected byte[] getBytes() throws SQLException, IOException {
-    return null;
-  }
+    @Override
+    public long deleteByQuery(Query<K, T> query) throws GoraException {
+        return 0;
+    }
 
-  protected Object readField() throws SQLException, IOException {
-  //TODO
-  return null;
-  }
+    @Override
+    public Result<K, T> execute(Query<K, T> query) throws GoraException {
+        String[] fields = getFieldsToQuery(query.getFields());
+        SqlQuery dataStoreQuery;
+        if (query instanceof SqlQuery) {
+            dataStoreQuery = ((SqlQuery) query);
+        } else {
+            dataStoreQuery = (SqlQuery) ((PartitionQueryImpl<K, T>) query).getBaseQuery();
+        }
+        try {
+            org.jooq.Result<Record> result = dataStoreQuery.populateSqlQuery(sqlMapping, fields, sqlStoreParameters, getFields()).fetch();
+            return new SqlResult<>(this, query, result, getFields());
+        } catch (Exception e) {
+            throw new GoraException(e);
+        }
+    }
 
-  public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query)
-  throws IOException {
-  //TODO Implement this using Hadoop support
-  return null;
-  }
+    @Override
+    public Query<K, T> newQuery() {
+        return new SqlQuery<>(this);
+    }
 
-  @Override
-  public Query<K, T> newQuery() {
-    return new SqlQuery<K, T>(this);
-  }
+    @Override
+    public List<PartitionQuery<K, T>> getPartitions(Query<K, T> query) throws IOException {
+        return null;
+    }
 
-  @Override
-  public void put(K key, T persistent) {
-  //TODO
-  }
+    @Override
+    public void flush() throws GoraException {
+    }
 
-  /**
-   * Sets the object to the preparedStatement by it's schema
-   */
-  public void setObject(PreparedStatement statement, int index, Object object
-      , Schema schema, Column column) throws SQLException, IOException {
-  //TODO
-  }
-  
-  protected <V> void setObject(PreparedStatement statement, int index, V object
-      , int objectType, Column column) throws SQLException, IOException {
-    statement.setObject(index, object, objectType, column.getScaleOrLength());
-  }
+    @Override
+    public void close() {
+        try {
+            flush();
+        } catch (Exception ex) {
+            LOG.error("Error occurred while flushing data SQL store : ", ex);
+        }
+    }
 
-  protected void setBytes() throws SQLException   {
-  //TODO
-  }
-
-  /** Serializes the field using Avro to a BLOB field */
-  protected void setField() throws IOException, SQLException {
-  //TODO
-  }
-
-  protected Connection getConnection() throws IOException {
-  //TODO
-  return null;
-  }
-
-  protected void initDbMetadata() throws IOException {
-  //TODO
-  }
-
-  protected String getIdentifier() {
-  //TODO
-  return null;
-  }
-
-  private void addColumn() {
-  //TODO
-  }
-
-  
-  protected void createSqlTable() {
-  //TODO
-  }
-  
-  private void addField() throws IOException {
-  //TODO
-  }
-
-  @SuppressWarnings("unchecked")
-  protected SqlMapping readMapping() throws IOException {
-  //TODO
-  return null;
-  }
+    private Map<String, Object> convertAvroBeanToSqlTable(final K key, final T persistent) {
+        Map<String, Object> result = new HashMap<>();
+        Object value = null;
+        for (Schema.Field f : persistent.getSchema().getFields()) {
+            if (persistent.isDirty(f.pos()) && (persistent.get(f.pos()) != null)) {
+                if (f.schema().getType() == Schema.Type.STRING) {
+                    value = persistent.get(f.pos()).toString();
+                } else if (f.schema().getType() == Schema.Type.INT || f.schema().getType() == Schema.Type.DOUBLE ||
+                        f.schema().getType() == Schema.Type.FLOAT || f.schema().getType() == Schema.Type.LONG) {
+                    value = persistent.get(f.pos());
+                } else {
+                    value = persistent.get(f.pos()).toString().getBytes(StandardCharsets.UTF_8);
+                }
+            }
+            result.put(f.name(), value);
+        }
+        result.put("id", key.toString());
+        return result;
+    }
 }

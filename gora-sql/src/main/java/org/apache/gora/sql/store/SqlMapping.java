@@ -1,72 +1,102 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.apache.gora.sql.store;
 
-import java.util.HashMap;
+import org.jooq.impl.SQLDataType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import org.apache.gora.sql.store.SqlTypeInterface.JdbcType;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 public class SqlMapping {
+    public static final Logger log = LoggerFactory.getLogger(SqlMapping.class);
 
-  private String tableName;
-  private HashMap<String, Column> fields;
-  private Column primaryColumn;
+    private String tableClass;
 
-  public SqlMapping() {
-    fields = new HashMap<String, Column>();
-  }
+    private String primaryKey;
+    private HashMap<String, SQLDataType> classToTable = new HashMap<>();
+    //private HashMap<String, String> tableToClass = new HashMap<>();
+    private HashMap<String, SQLDataType> tables = new HashMap<>();
 
-  public void setTableName(String tableName) {
-    this.tableName = tableName;
-  }
+    public String getTableClass() {
+        return tableClass;
+    }
+    public String getPrimaryKey() { return primaryKey; }
 
-  public String getTableName() {
-    return tableName;
-  }
+    public void setTableClass(String tableClass) {
+        this.tableClass = tableClass;
+    }
 
-  public void addField(String fieldname, String column) {
-    fields.put(fieldname, new Column(column));
-  }
+    public void setPrimaryKey(String primaryKey) {
+        this.primaryKey = primaryKey;
+    }
 
-  public void addField(String fieldName, String columnName, JdbcType jdbcType,
-      String sqlType, int length, int scale) {
-    fields.put(fieldName, new Column(columnName, false, jdbcType, sqlType, length, scale));
-  }
+    private void registerTable(String name, SQLDataType type) {
+        if (tables.containsKey(name) && (tables.get(name) != type))
+            throw new IllegalStateException("The field '" + name + "' is already "
+                    + "registered with a different type.");
+        tables.put(name, type);
+    }
 
-  public Column getColumn(String fieldname) {
-    return fields.get(fieldname);
-  }
+    public void registerTableColumn(String columnName,
+                                    String columnTableName, String type) {
+        try {
+            registerTable(columnTableName,
+                    SQLDataType.valueOf(type.toUpperCase(Locale.getDefault())));
+        } catch (final IllegalArgumentException e) {
+            throw new IllegalStateException("Declared '" + columnName
+                    + "' for class field '" + columnTableName
+                    + "' is not supported by JOOQ SQL");
+        }
 
-  public void setPrimaryKey(String columnName, JdbcType jdbcType,
-      int length, int scale) {
-    primaryColumn = new Column(columnName, true, jdbcType, length, scale);
-  }
+        if (classToTable.containsKey(columnName)) {
+            if (!classToTable.get(columnName).equals(columnTableName)) {
+                throw new IllegalStateException("The class field '" + columnName
+                        + "' is already registered in the mapping"
+                        + " with the document field '"
+                        + classToTable.get(columnName)
+                        + " which differs from the new one '" + columnTableName + "'.");
+            }
+        } else {
+            classToTable.put(columnTableName, SQLDataType.valueOf(type.toUpperCase(Locale.getDefault())));
+        }
+    }
 
-  public Column getPrimaryColumn() {
-    return primaryColumn;
-  }
+    public String[] getTableColumns() {
+        return classToTable.keySet().toArray(new String[classToTable.keySet().size()]);
+    }
 
-  public String getPrimaryColumnName() {
-    return primaryColumn.getName();
-  }
+    public Map<String, SQLDataType> getAllColumns() {
+        return classToTable;
+    }
 
-  public HashMap<String, Column> getFields() {
-    return fields;
-  }
+//    public String getTableColumnName(String field) {
+//        return classToTable.get(field);
+//    }
+
+    protected SQLDataType getTableColumnType(String field) {
+        return tables.get(field);
+    }
+
+    public static enum SQLDataType {
+
+        BOOLEAN("boolean"),
+        INTEGER("integer"),
+        LONG("long"),
+        FLOAT("float"),
+        SHORT("short"),
+        DOUBLE("double"),
+        VARCHAR("varchar"),
+        BLOB("blob");
+
+        private final String stringValue;
+
+        SQLDataType(final String s) {
+            stringValue = s;
+        }
+
+        public String toString() {
+            return stringValue;
+        }
+    }
 }
