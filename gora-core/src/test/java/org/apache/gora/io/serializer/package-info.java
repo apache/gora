@@ -17,4 +17,4 @@
 /**
  * This package contains test cases releated mapreduce.
  */
-package org.apache.gora.mapreduce;
+package org.apache.gora.io.serializer;

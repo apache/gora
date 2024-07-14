@@ -17,8 +17,8 @@
  */
 package org.apache.gora.infinispan.store;
 
-import static org.apache.gora.mapreduce.GoraRecordReader.BUFFER_LIMIT_READ_NAME;
-import static org.apache.gora.mapreduce.GoraRecordReader.BUFFER_LIMIT_READ_VALUE;
+import static org.apache.gora.io.serializer.GoraRecordReader.BUFFER_LIMIT_READ_NAME;
+import static org.apache.gora.io.serializer.GoraRecordReader.BUFFER_LIMIT_READ_VALUE;
 
 import java.io.IOException;
 import java.util.ArrayList;

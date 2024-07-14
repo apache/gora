@@ -20,7 +20,7 @@ package org.apache.gora.orientdb.mapreduce;
 import org.apache.gora.GoraTestDriver;
 import org.apache.gora.examples.generated.TokenDatum;
 import org.apache.gora.examples.generated.WebPage;
-import org.apache.gora.mapreduce.MapReduceTestUtils;
+import org.apache.gora.io.serializer.MapReduceTestUtils;
 import org.apache.gora.orientdb.GoraOrientDBTestDriver;
 import org.apache.gora.orientdb.store.OrientDBStore;
 import org.apache.gora.store.DataStoreFactory;

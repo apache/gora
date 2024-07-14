@@ -19,7 +19,7 @@ package org.apache.gora.mongodb.mapreduce;
 
 import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.examples.generated.WebPage;
-import org.apache.gora.mapreduce.MapReduceTestUtils;
+import org.apache.gora.io.serializer.MapReduceTestUtils;
 import org.apache.gora.store.DataStore;
 import org.junit.After;
 import org.junit.Before;

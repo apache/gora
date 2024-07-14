@@ -18,8 +18,8 @@ package org.apache.gora.elasticsearch.mapreduce;
 
 import org.apache.gora.elasticsearch.GoraElasticsearchTestDriver;
 import org.apache.gora.examples.generated.WebPage;
-import org.apache.gora.mapreduce.DataStoreMapReduceTestBase;
-import org.apache.gora.mapreduce.MapReduceTestUtils;
+import org.apache.gora.io.serializer.DataStoreMapReduceTestBase;
+import org.apache.gora.io.serializer.MapReduceTestUtils;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.junit.After;

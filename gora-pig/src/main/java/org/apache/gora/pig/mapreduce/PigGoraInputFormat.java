@@ -21,8 +21,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.gora.mapreduce.GoraInputFormat;
-import org.apache.gora.mapreduce.GoraInputSplit;
+import org.apache.gora.io.serializer.GoraInputFormat;
+import org.apache.gora.io.serializer.GoraInputSplit;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.pig.StorageConfiguration;
 import org.apache.gora.query.PartitionQuery;

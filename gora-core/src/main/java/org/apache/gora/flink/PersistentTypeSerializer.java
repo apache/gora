@@ -24,8 +24,8 @@ import org.apache.flink.api.java.typeutils.runtime.DataInputViewStream;
 import org.apache.flink.api.java.typeutils.runtime.DataOutputViewStream;
 import org.apache.flink.core.memory.DataInputView;
 import org.apache.flink.core.memory.DataOutputView;
-import org.apache.gora.mapreduce.PersistentDeserializer;
-import org.apache.gora.mapreduce.PersistentSerializer;
+import org.apache.gora.io.serializer.PersistentDeserializer;
+import org.apache.gora.io.serializer.PersistentSerializer;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.gora.util.AvroUtils;
 

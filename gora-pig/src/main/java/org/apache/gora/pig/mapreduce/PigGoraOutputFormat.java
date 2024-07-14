@@ -19,8 +19,8 @@ package org.apache.gora.pig.mapreduce;
 
 import java.io.IOException;
 
-import org.apache.gora.mapreduce.GoraRecordWriter;
-import org.apache.gora.mapreduce.NullOutputCommitter;
+import org.apache.gora.io.serializer.GoraRecordWriter;
+import org.apache.gora.io.serializer.NullOutputCommitter;
 import org.apache.gora.persistency.Persistent;
 import org.apache.gora.pig.StorageConfiguration;
 import org.apache.gora.store.DataStore;

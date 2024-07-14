@@ -19,7 +19,7 @@ package org.apache.gora.redis.mapreduce;
 
 import java.io.IOException;
 import org.apache.gora.examples.generated.WebPage;
-import org.apache.gora.mapreduce.DataStoreMapReduceTestBase;
+import org.apache.gora.io.serializer.DataStoreMapReduceTestBase;
 import org.apache.gora.redis.GoraRedisTestDriver;
 import org.apache.gora.redis.util.ServerMode;
 import org.apache.gora.redis.util.StorageMode;

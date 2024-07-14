@@ -21,8 +21,8 @@ package org.apache.gora.examples.mapreduce;
 import java.io.IOException;
 
 import org.apache.gora.examples.generated.WebPage;
-import org.apache.gora.mapreduce.GoraMapper;
-import org.apache.gora.mapreduce.GoraReducer;
+import org.apache.gora.io.serializer.GoraMapper;
+import org.apache.gora.io.serializer.GoraReducer;
 import org.apache.gora.query.Query;
 import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreFactory;

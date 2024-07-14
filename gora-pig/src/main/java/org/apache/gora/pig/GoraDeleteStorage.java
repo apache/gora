@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.gora.mapreduce.GoraRecordWriter;
+import org.apache.gora.io.serializer.GoraRecordWriter;
 import org.apache.gora.persistency.impl.PersistentBase;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.RecordReader;

@@ -15,27 +15,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.gora.mapreduce;
+package org.apache.gora.io.serializer;
 
-import org.apache.gora.persistency.impl.PersistentBase;
-import org.apache.hadoop.io.serializer.Deserializer;
-import org.apache.hadoop.io.serializer.Serialization;
-import org.apache.hadoop.io.serializer.Serializer;
+import java.io.IOException;
 
-public class PersistentSerialization implements Serialization<PersistentBase> {
+import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.hadoop.mapreduce.OutputCommitter;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+
+/**
+ * An OutputCommitter that does nothing.
+ */
+public class NullOutputCommitter extends OutputCommitter {
 
   @Override
-  public boolean accept(Class<?> c) {
-    return PersistentBase.class.isAssignableFrom(c);
+  public void abortTask(TaskAttemptContext arg0) throws IOException {
   }
 
   @Override
-  public Deserializer<PersistentBase> getDeserializer(Class<PersistentBase> c) {
-    return new PersistentDeserializer(c, true);
+  public void commitTask(TaskAttemptContext arg0) throws IOException {
   }
 
   @Override
-  public Serializer<PersistentBase> getSerializer(Class<PersistentBase> c) {
-    return new PersistentSerializer();
+  public boolean needsTaskCommit(TaskAttemptContext arg0) throws IOException {
+    return false;
+  }
+
+  @Override
+  public void setupJob(JobContext arg0) throws IOException {
+  }
+
+  @Override
+  public void setupTask(TaskAttemptContext arg0) throws IOException {
   }
 }

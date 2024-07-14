@@ -21,7 +21,7 @@ package org.apache.gora.hbase.mapreduce;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.hbase.store.HBaseStore;
 import org.apache.gora.hbase.util.HBaseClusterSingleton;
-import org.apache.gora.mapreduce.MapReduceTestUtils;
+import org.apache.gora.io.serializer.MapReduceTestUtils;
 import org.apache.gora.store.DataStoreFactory;
 import org.junit.After;
 import org.junit.Before;

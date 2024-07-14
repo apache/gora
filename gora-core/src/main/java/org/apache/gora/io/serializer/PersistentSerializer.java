@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.gora.mapreduce;
+package org.apache.gora.io.serializer;
 
 import java.io.IOException;
 import java.io.OutputStream;
