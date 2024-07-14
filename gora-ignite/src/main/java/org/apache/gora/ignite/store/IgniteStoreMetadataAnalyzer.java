@@ -17,7 +17,7 @@
  */
 package org.apache.gora.ignite.store;
 
-import avro.shaded.com.google.common.collect.Lists;
+import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;

@@ -20,7 +20,7 @@ package org.apache.gora.compiler.cli;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.gora.compiler.GoraCompiler;
 import org.apache.gora.compiler.utils.LicenseHeaders;
 import org.slf4j.Logger;

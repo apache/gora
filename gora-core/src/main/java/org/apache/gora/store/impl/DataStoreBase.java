@@ -31,7 +31,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificDatumWriter;
-import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.gora.avro.store.AvroStore;
 import org.apache.gora.persistency.BeanFactory;
 import org.apache.gora.persistency.Persistent;

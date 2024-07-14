@@ -33,7 +33,7 @@ import java.util.Properties;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.util.Utf8;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.gora.couchdb.query.CouchDBQuery;
 import org.apache.gora.couchdb.query.CouchDBResult;
 import org.apache.gora.couchdb.util.CouchDBObjectMapperFactory;

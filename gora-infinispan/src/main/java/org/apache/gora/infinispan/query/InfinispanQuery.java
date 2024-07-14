@@ -18,7 +18,7 @@
 package org.apache.gora.infinispan.query;
 
 import org.apache.avro.util.Utf8;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.gora.filter.MapFieldValueFilter;
 import org.apache.gora.filter.SingleFieldValueFilter;
 import org.apache.gora.infinispan.store.InfinispanStore;
