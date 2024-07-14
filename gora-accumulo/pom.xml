@@ -50,7 +50,7 @@
   </ciManagement>
 
   <properties>
-    <accumulo.version>1.7.1</accumulo.version>
+    <accumulo.version>1.10.1</accumulo.version>
     <osgi.import>*</osgi.import>
     <osgi.export>org.apache.gora.accumulo*;version="${project.version}";-noimport:=true</osgi.export>
   </properties>
