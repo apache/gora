@@ -18,6 +18,7 @@
 package org.apache.gora.mongodb.filters;
 
 import com.mongodb.MongoClientSettings;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.avro.util.Utf8;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.filter.FilterList;
@@ -116,8 +117,12 @@ public class DefaultFactoryTest {
     filter.addFilter(urlFilter);
 
     Bson dbObject = filterFactory.createFilter(filter, store);
-    assertEquals(new JSONObject("{ \"h.C·T\" : \"text/html\" , \"url\" : \"http://www.example.com\"}").toString(),
-            new JSONObject(asJson(dbObject)).toString());
+    JSONObject expectedJSON = new JSONObject("{ \"h.C·T\" : \"text/html\" , \"url\" : \"http://www.example.com\"}");
+    JSONObject actualJSON = new JSONObject(asJson(dbObject));
+
+    ObjectMapper mapper = new ObjectMapper();
+
+    assertEquals(mapper.readTree(expectedJSON.toString()), mapper.readTree(actualJSON.toString()));
   }
 
   /**
