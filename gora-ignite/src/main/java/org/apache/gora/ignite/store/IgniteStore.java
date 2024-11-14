@@ -307,9 +307,13 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
         Schema schema = obj.getSchema();
         List<Schema.Field> fields = schema.getFields();
         Map<Column, Object> data = new HashMap<>();
+        List<Column> dataKeyList = new ArrayList<>();
+        List<Object> dataValueList = new ArrayList<>();
         if (igniteMapping.getPrimaryKey().size() == 1) {
           Column getKey = igniteMapping.getPrimaryKey().get(0);
           data.put(getKey, key);
+          dataKeyList.add(getKey);
+          dataValueList.add(key);
         } else {
           //Composite keys pending..
         }
@@ -320,11 +324,13 @@ public class IgniteStore<K, T extends PersistentBase> extends DataStoreBase<K, T
             Schema fieldSchema = field.schema();
             Object serializedObj = serializeFieldValue(fieldSchema, fieldValue);
             data.put(mappedColumn, serializedObj);
+            dataKeyList.add(mappedColumn);
+            dataValueList.add(serializedObj);
           }
         }
-        String baseInsertStatement = IgniteSQLBuilder.createInsertQuery(igniteMapping, data);
+        String baseInsertStatement = IgniteSQLBuilder.createInsertQuery(igniteMapping, dataKeyList);
         try (PreparedStatement stmt = connection.prepareStatement(baseInsertStatement)) {
-          IgniteSQLBuilder.fillInsertQuery(stmt, data);
+          IgniteSQLBuilder.fillInsertQuery(stmt, dataValueList);
           stmt.executeUpdate();
         } catch (SQLException ex) {
           throw new GoraException(ex);

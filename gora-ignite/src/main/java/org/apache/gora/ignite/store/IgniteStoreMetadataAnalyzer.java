@@ -23,6 +23,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
@@ -64,6 +65,7 @@ public class IgniteStoreMetadataAnalyzer extends DataStoreMetadataAnalyzer {
     } catch (SQLException ex) {
       throw new GoraException(ex);
     }
+    Collections.sort(tabs);
     return tabs;
   }
 

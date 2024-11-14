@@ -39,7 +39,7 @@ public class TestIgniteStore extends DataStoreTestBase {
   public void igniteStoreMetadataAnalyzerTest() throws Exception {
     DataStoreMetadataAnalyzer createAnalyzer = DataStoreMetadataFactory.createAnalyzer(DataStoreTestBase.testDriver.getConfiguration());
     Assert.assertEquals("Ignite Store Metadata Type", "IGNITE", createAnalyzer.getType());
-    Assert.assertTrue("Ignite Store Metadata Table Names", createAnalyzer.getTablesNames().equals(Lists.newArrayList("WEBPAGE", "EMPLOYEE")));
+    Assert.assertTrue("Ignite Store Metadata Table Names", createAnalyzer.getTablesNames().equals(Lists.newArrayList("EMPLOYEE", "WEBPAGE")));
     IgniteTableMetadata tableInfo = (IgniteTableMetadata) createAnalyzer.getTableInfo("EMPLOYEE");
     Assert.assertEquals("Ignite Store Metadata Table Primary Key Column", "PKSSN", tableInfo.getPrimaryKey());
     Assert.assertEquals("Ignite Store Metadata Table Primary Key Type", "VARCHAR", tableInfo.getPrimaryKeyType());

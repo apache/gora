@@ -111,15 +111,15 @@ public class IgniteSQLBuilder {
    * @param data A map containing the Column-Value pairs of the new record.
    * @return SQL insert statement
    */
-  public static String createInsertQuery(IgniteMapping mapping, Map<Column, Object> data) {
+  public static String createInsertQuery(IgniteMapping mapping, List<Column> dataKeyList) {
     DbSpec spec = new DbSpec();
     DbSchema schema = spec.addDefaultSchema();
     DbTable aTable = schema.addTable(mapping.getTableName());
     InsertQuery insertQuery = new InsertQuery(aTable);
-    List<Entry<Column, Object>> list = new ArrayList<>(data.entrySet());
-    String[] columns = new String[list.size()];
-    for (int i = 0; i < list.size(); i++) {
-      columns[i] = list.get(i).getKey().getName();
+    // List<Entry<Column, Object>> list = new ArrayList<>(data.entrySet());
+    String[] columns = new String[dataKeyList.size()];
+    for (int i = 0; i < dataKeyList.size(); i++) {
+      columns[i] = dataKeyList.get(i).getName();
     }
     return insertQuery.addCustomPreparedColumns(columns).validate().toString()
         .replaceFirst("INSERT", "MERGE");
@@ -135,11 +135,11 @@ public class IgniteSQLBuilder {
    * @throws SQLException When invalid values are provided as parameters for the
    * insert statement.
    */
-  public static void fillInsertQuery(PreparedStatement statement, Map<Column, Object> insertData) throws SQLException {
-    List<Entry<Column, Object>> list = new ArrayList<>(insertData.entrySet());
-    for (int i = 0; i < list.size(); i++) {
+  public static void fillInsertQuery(PreparedStatement statement, List<Object> insertData) throws SQLException {
+    // List<Entry<Column, Object>> list = new ArrayList<>(insertData.entrySet());
+    for (int i = 0; i < insertData.size(); i++) {
       int j = i + 1;
-      statement.setObject(j, list.get(i).getValue());
+      statement.setObject(j, insertData.get(i));
     }
   }
 
