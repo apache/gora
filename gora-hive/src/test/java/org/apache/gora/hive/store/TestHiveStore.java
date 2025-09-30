@@ -24,6 +24,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import org.apache.avro.util.Utf8;
 import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.examples.generated.Metadata;
@@ -53,7 +54,35 @@ public class TestHiveStore extends DataStoreTestBase {
 
   @Override
   public void assertSchemaExists(String schemaName) throws Exception {
-    assertTrue(employeeStore.schemaExists());
+    if ("Employee".equals(schemaName)) {
+      assertTrue(employeeStore.schemaExists());
+      return;
+    }
+    // Include WebPage because base tests call assertSchemaExists("WebPage") in DataStoreTestBase#testTruncateSchema.
+    if ("WebPage".equals(schemaName)) {
+      assertTrue(webPageStore.schemaExists());
+      return;
+    }
+    throw new AssertionError("unsupported schema name: " + schemaName);
+  }
+
+  @Override
+  public void assertAutoCreateSchema() throws Exception {
+    // Poll briefly for Hive metastore visibility only in the auto-create scenario.
+    final long timeoutNanos = TimeUnit.SECONDS.toNanos(5);
+    final long sleepMillis = 100L;
+    long deadline = System.nanoTime() + timeoutNanos;
+    employeeStore.flush();
+    while (System.nanoTime() < deadline) {
+      if (employeeStore.schemaExists()) {
+        assertSchemaExists(((HiveStore<String, Employee>) employeeStore).getSchemaName());
+        return;
+      }
+      TimeUnit.MILLISECONDS.sleep(sleepMillis);
+      employeeStore.flush();
+    }
+    // If still not visible by timeout, fail via the original assertion.
+    assertSchemaExists(((HiveStore<String, Employee>) employeeStore).getSchemaName());
   }
 
   @Override
