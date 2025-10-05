@@ -30,12 +30,14 @@ import org.apache.gora.examples.generated.Metadata;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.hive.GoraHiveTestDriver;
 import org.apache.gora.persistency.impl.BeanFactoryImpl;
+import org.apache.gora.store.DataStore;
 import org.apache.gora.store.DataStoreTestBase;
 import org.apache.gora.store.DataStoreTestUtil;
 import org.apache.gora.util.GoraException;
 import org.apache.gora.util.StringUtils;
 import org.junit.Ignore;
 import org.junit.Test;
+import java.util.concurrent.TimeUnit;
 
 /**
  * HiveStore Tests extending {@link DataStoreTestBase} which run the base JUnit test suite for
@@ -150,6 +152,37 @@ public class TestHiveStore extends DataStoreTestBase {
   @Override
   public void testUpdate() throws Exception {
     //Hive test server doesn't support deleting and updating entries
+  }
+
+  @Override
+  public void testDeleteSchema() throws Exception {
+    log.info("test method: testDeleteSchema");
+    final long waitMs = TimeUnit.SECONDS.toMillis(10);
+
+    webPageStore.createSchema();
+    awaitSchemaState(webPageStore, true, waitMs);
+
+    webPageStore.deleteSchema();
+    awaitSchemaState(webPageStore, false, waitMs);
+
+    webPageStore.createSchema();
+    awaitSchemaState(webPageStore, true, waitMs);
+  }
+
+  private void awaitSchemaState(DataStore<String, WebPage> store, boolean shouldExist, long timeoutMs) throws Exception {
+    long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeoutMs);
+    while (System.nanoTime() < deadline) {
+      if (shouldExist) {
+        store.createSchema();
+      } else {
+        store.deleteSchema();
+      }
+      boolean exists = store.schemaExists();
+      if (exists == shouldExist) return;
+      Thread.sleep(100);
+    }
+    String msg = shouldExist ? "schema not visible after create" : "schema still exists after delete";
+    assertTrue(msg, shouldExist == store.schemaExists());
   }
 
   @Ignore("Hive datastore doesn't support recursive records")
