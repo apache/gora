@@ -18,7 +18,10 @@
 
 package org.apache.gora.hive.store;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -34,8 +37,8 @@ import org.apache.gora.store.DataStoreTestBase;
 import org.apache.gora.store.DataStoreTestUtil;
 import org.apache.gora.util.GoraException;
 import org.apache.gora.util.StringUtils;
+import org.apache.metamodel.query.parser.QueryParserException;
 import org.junit.Ignore;
-import org.junit.Test;
 
 /**
  * HiveStore Tests extending {@link DataStoreTestBase} which run the base JUnit test suite for
@@ -56,6 +59,25 @@ public class TestHiveStore extends DataStoreTestBase {
     assertTrue(employeeStore.schemaExists());
   }
 
+  private void awaitEmployeeSchema(String key) throws Exception {
+    for (int attempt = 0; attempt < 100; attempt++) {
+      employeeStore.flush();
+      if (!employeeStore.schemaExists()) {
+        Thread.sleep(100L);
+        continue;
+      }
+      if (key == null) return;
+      try {
+        employeeStore.get(key, new String[] {"ssn"});
+        return;
+      } catch (QueryParserException e) {
+        employeeStore.close();
+        employeeStore = testDriver.createDataStore(String.class, Employee.class);
+      }
+    }
+    fail("Hive employee schema or record was not visible");
+  }
+
   @Override
   public void assertPut(Employee employee) throws GoraException {
     employeeStore.put(employee.getSsn().toString(), employee);
@@ -64,12 +86,14 @@ public class TestHiveStore extends DataStoreTestBase {
   @Override
   public void testGetWithFields() throws Exception {
     //Overrides DataStoreTestBase.testGetWithFields to avoid recursive field "boss"
+    awaitEmployeeSchema(null);
     Employee employee = DataStoreTestUtil.createEmployee();
     WebPage webpage = DataStoreTestUtil.createWebPage();
     employee.setWebpage(webpage);
     String ssn = employee.getSsn().toString();
     employeeStore.put(ssn, employee);
     employeeStore.flush();
+    awaitEmployeeSchema(ssn);
 
     String[] fields = ((HiveStore<String, Employee>) employeeStore).getFields();
     for (Set<String> subset : StringUtils.powerset(fields)) {
@@ -92,10 +116,12 @@ public class TestHiveStore extends DataStoreTestBase {
     //Overrides DataStoreTestBase.testGet to avoid recursive field "boss"
     log.info("test method: testGet");
     employeeStore.createSchema();
+    awaitEmployeeSchema(null);
     Employee employee = DataStoreTestUtil.createEmployee();
     String ssn = employee.getSsn().toString();
     employeeStore.put(ssn, employee);
     employeeStore.flush();
+    awaitEmployeeSchema(ssn);
     Employee after = employeeStore.get(ssn, null);
     DataStoreTestUtil.assertEqualEmployeeObjects(employee, after);
   }
@@ -103,6 +129,7 @@ public class TestHiveStore extends DataStoreTestBase {
   @Override
   public void testGetNested() throws Exception {
     //Overrides DataStoreTestBase.testGetNested to avoid recursive field "boss"
+    awaitEmployeeSchema(null);
     Employee employee = DataStoreTestUtil.createEmployee();
 
     WebPage webpage = new BeanFactoryImpl<>(String.class, WebPage.class).newPersistent();
@@ -117,9 +144,35 @@ public class TestHiveStore extends DataStoreTestBase {
 
     employeeStore.put(ssn, employee);
     employeeStore.flush();
+    awaitEmployeeSchema(ssn);
     Employee after = employeeStore.get(ssn, null);
     DataStoreTestUtil.assertEqualEmployeeObjects(employee, after);
     DataStoreTestUtil.assertEqualWebPageObjects(webpage, after.getWebpage());
+  }
+
+  @Override
+  public void testObjectFieldValue() throws Exception {
+    employeeStore.createSchema();
+    awaitEmployeeSchema(null);
+    Employee employee = DataStoreTestUtil.createEmployee();
+    String uuid = "employee-1234567890";
+    employeeStore.put(uuid, employee);
+    employeeStore.flush();
+    awaitEmployeeSchema(uuid);
+    Employee returnedEmployee = employeeStore.get(uuid, null);
+    assertEquals(returnedEmployee.getValue(), new Utf8("random value"));
+  }
+
+  @Override
+  public void testGetNonExisting() throws Exception {
+    employeeStore.createSchema();
+    Employee dummy = DataStoreTestUtil.createEmployee();
+    String uuid = "employee-1234567890";
+    employeeStore.put(uuid, dummy);
+    employeeStore.flush();
+    awaitEmployeeSchema(uuid);
+    Employee employee = employeeStore.get("_NON_EXISTING_SSN_FOR_EMPLOYEE_");
+    assertNull(employee);
   }
 
   @Ignore("Hive test server doesn't support deleting and updating entries")
