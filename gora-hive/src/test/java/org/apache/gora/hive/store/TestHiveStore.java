@@ -19,12 +19,14 @@
 package org.apache.gora.hive.store;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Set;
 import org.apache.avro.util.Utf8;
+import org.apache.gora.examples.WebPageDataCreator;
 import org.apache.gora.examples.generated.Employee;
 import org.apache.gora.examples.generated.Metadata;
 import org.apache.gora.examples.generated.WebPage;
@@ -34,6 +36,7 @@ import org.apache.gora.store.DataStoreTestBase;
 import org.apache.gora.store.DataStoreTestUtil;
 import org.apache.gora.util.GoraException;
 import org.apache.gora.util.StringUtils;
+import org.apache.metamodel.query.parser.QueryParserException;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -54,6 +57,25 @@ public class TestHiveStore extends DataStoreTestBase {
   @Override
   public void assertSchemaExists(String schemaName) throws Exception {
     assertTrue(employeeStore.schemaExists());
+  }
+
+  private void awaitWebPageSchema(String key) throws Exception {
+    for (int attempt = 0; attempt < 100; attempt++) {
+      webPageStore.flush();
+      if (!webPageStore.schemaExists()) {
+        Thread.sleep(100L);
+        continue;
+      }
+      if (key == null) return;
+      try {
+        webPageStore.get(key, new String[] {"url"});
+        return;
+      } catch (QueryParserException e) {
+        webPageStore.close();
+        webPageStore = testDriver.createDataStore(String.class, WebPage.class);
+      }
+    }
+    fail("Hive web page schema or record was not visible");
   }
 
   @Override
@@ -120,6 +142,32 @@ public class TestHiveStore extends DataStoreTestBase {
     Employee after = employeeStore.get(ssn, null);
     DataStoreTestUtil.assertEqualEmployeeObjects(employee, after);
     DataStoreTestUtil.assertEqualWebPageObjects(webpage, after.getWebpage());
+  }
+
+  private void testGetWebPage(String[] fields) throws Exception {
+    WebPageDataCreator.createWebPageData(webPageStore);
+    awaitWebPageSchema(WebPageDataCreator.URLS[0]);
+    for (int i = 0; i < WebPageDataCreator.URLS.length; i++) {
+      WebPage page = webPageStore.get(WebPageDataCreator.URLS[i], fields);
+      DataStoreTestUtil.assertWebPage(page, i);
+    }
+  }
+
+  @Override
+  public void testGetWebPage() throws Exception {
+    testGetWebPage(((HiveStore<String, WebPage>) webPageStore).getFields());
+  }
+
+  @Override
+  public void testGetWebPageDefaultFields() throws Exception {
+    testGetWebPage(null);
+  }
+
+  @Override
+  public void testGetPartitions() throws Exception {
+    WebPageDataCreator.createWebPageData(webPageStore);
+    awaitWebPageSchema(WebPageDataCreator.URLS[0]);
+    DataStoreTestUtil.testGetPartitions(webPageStore, webPageStore.newQuery());
   }
 
   @Ignore("Hive test server doesn't support deleting and updating entries")
