@@ -28,9 +28,11 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.avro.util.Utf8;
 import org.apache.gora.examples.generated.Employee;
@@ -68,6 +70,8 @@ import org.junit.rules.ExpectedException;
 public class TestHBaseStore extends DataStoreTestBase {
 
   private Configuration conf;
+  private static final long METADATA_TIMEOUT_NANOS = TimeUnit.SECONDS.toNanos(5);
+  private static final long METADATA_SLEEP_MILLIS = 100L;
   
   static {
     setTestDriver(new GoraHBaseTestDriver());
@@ -279,13 +283,20 @@ public class TestHBaseStore extends DataStoreTestBase {
       expectedFamilies.put("WebPage", expectedWebPageFamilies);
       
       // Tests
-      List<String> tables = metadataAnalyzer.getTablesNames() ;
-      assertEquals(expectedTables, tables) ;
-      
-      for (String tableName: tables) {
-          Object tableInfo = metadataAnalyzer.getTableInfo(tableName);
-          assertTrue("fieldsInfo expected to be class HBaseTableMetadata", tableInfo instanceof HBaseTableMetadata);
-          assertEquals(expectedFamilies.get(tableName), ((HBaseTableMetadata)tableInfo).getColumnFamilies());
+      try {
+          List<String> tables = awaitTables(metadataAnalyzer, expectedTables);
+          assertEquals(expectedTables, tables) ;
+          
+          for (String tableName: tables) {
+              HBaseTableMetadata tableInfo = awaitTableMetadata(metadataAnalyzer, tableName, expectedFamilies.get(tableName));
+              assertEquals(expectedFamilies.get(tableName), tableInfo.getColumnFamilies());
+          }
+      } finally {
+          try {
+              metadataAnalyzer.close();
+          } catch (IOException e) {
+              throw new AssertionError("Failed to close metadata analyzer", e);
+          }
       }
   }
   
@@ -360,6 +371,62 @@ public class TestHBaseStore extends DataStoreTestBase {
 
     if (value != null) {
       // Test failed, this should be null after the delete row operation.
+    }
+  }
+
+  private List<String> awaitTables(DataStoreMetadataAnalyzer metadataAnalyzer, List<String> expectedTables) throws GoraException {
+    List<String> tables = Collections.emptyList();
+    GoraException lastError = null;
+    long deadline = System.nanoTime() + METADATA_TIMEOUT_NANOS;
+    while (System.nanoTime() < deadline) {
+      try {
+        tables = metadataAnalyzer.getTablesNames();
+        if (expectedTables.equals(tables)) {
+          return tables;
+        }
+      } catch (GoraException e) {
+        lastError = e;
+      }
+      sleepForMetadata();
+    }
+    if (lastError != null) {
+      throw lastError;
+    }
+    return tables;
+  }
+
+  private HBaseTableMetadata awaitTableMetadata(
+      DataStoreMetadataAnalyzer metadataAnalyzer, String tableName, List<String> expectedFamilies)
+      throws GoraException {
+    HBaseTableMetadata metadata = null;
+    GoraException lastError = null;
+    long deadline = System.nanoTime() + METADATA_TIMEOUT_NANOS;
+    while (System.nanoTime() < deadline) {
+      try {
+        Object tableInfo = metadataAnalyzer.getTableInfo(tableName);
+        assertTrue("fieldsInfo expected to be class HBaseTableMetadata", tableInfo instanceof HBaseTableMetadata);
+        metadata = (HBaseTableMetadata) tableInfo;
+        if (expectedFamilies.equals(metadata.getColumnFamilies())) {
+          return metadata;
+        }
+      } catch (GoraException e) {
+        lastError = e;
+      }
+      sleepForMetadata();
+    }
+    if (lastError != null) {
+      throw lastError;
+    }
+    assertNotNull("Metadata analyzer did not return table info for " + tableName, metadata);
+    return metadata;
+  }
+
+  private void sleepForMetadata() {
+    try {
+      TimeUnit.MILLISECONDS.sleep(METADATA_SLEEP_MILLIS);
+    } catch (InterruptedException ie) {
+      Thread.currentThread().interrupt();
+      throw new AssertionError("Interrupted while waiting for HBase metadata", ie);
     }
   }
 }
