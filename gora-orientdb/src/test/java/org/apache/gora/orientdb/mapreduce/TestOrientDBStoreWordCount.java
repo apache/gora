@@ -25,7 +25,9 @@ import org.apache.gora.orientdb.GoraOrientDBTestDriver;
 import org.apache.gora.orientdb.store.OrientDBStore;
 import org.apache.gora.store.DataStoreFactory;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -39,20 +41,29 @@ public class TestOrientDBStoreWordCount  {
 
   protected static GoraTestDriver testDriver = new GoraOrientDBTestDriver();
 
+  @BeforeClass
+  public static void startOrientDb() throws Exception {
+    testDriver.setUpClass();
+  }
+
+  @AfterClass
+  public static void stopOrientDb() throws Exception {
+    testDriver.tearDownClass();
+  }
+
+  @SuppressWarnings("unchecked")
   @Before
   public void setUp() throws Exception {
-    testDriver.setUpClass();
-    webPageStore = DataStoreFactory.getDataStore(OrientDBStore.class,
-        String.class, WebPage.class, testDriver.getConfiguration());
-    tokenStore = DataStoreFactory.getDataStore(OrientDBStore.class, String.class,
-        TokenDatum.class, testDriver.getConfiguration());
+    testDriver.setUp();
+    webPageStore = (OrientDBStore<String, WebPage>) testDriver.createDataStore(String.class, WebPage.class);
+    tokenStore = (OrientDBStore<String, TokenDatum>) testDriver.createDataStore(String.class, TokenDatum.class);
   }
 
   @After
   public void tearDown() throws Exception {
-    webPageStore.close();
-    tokenStore.close();
-    testDriver.tearDownClass();
+    testDriver.tearDown();
+    webPageStore = null;
+    tokenStore = null;
   }
 
   @Test

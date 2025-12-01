@@ -61,8 +61,14 @@ public class GoraOrientDBTestDriver extends GoraTestDriver {
    */
   @Override
   public void tearDownClass() throws Exception {
-    server.shutdown();
-    log.info("OrientDB Embedded Server terminated successfully.");
+    if (server != null) {
+      try {
+        server.shutdown();
+        log.info("OrientDB Embedded Server terminated successfully.");
+      } finally {
+        server = null;
+      }
+    }
   }
 
   @Override
