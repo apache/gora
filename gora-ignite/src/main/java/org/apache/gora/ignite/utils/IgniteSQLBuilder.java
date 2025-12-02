@@ -38,6 +38,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.gora.ignite.store.Column;
@@ -116,7 +117,7 @@ public class IgniteSQLBuilder {
     DbSchema schema = spec.addDefaultSchema();
     DbTable aTable = schema.addTable(mapping.getTableName());
     InsertQuery insertQuery = new InsertQuery(aTable);
-    List<Entry<Column, Object>> list = new ArrayList<>(data.entrySet());
+    List<Entry<Column, Object>> list = sortedEntries(data);
     String[] columns = new String[list.size()];
     for (int i = 0; i < list.size(); i++) {
       columns[i] = list.get(i).getKey().getName();
@@ -136,11 +137,17 @@ public class IgniteSQLBuilder {
    * insert statement.
    */
   public static void fillInsertQuery(PreparedStatement statement, Map<Column, Object> insertData) throws SQLException {
-    List<Entry<Column, Object>> list = new ArrayList<>(insertData.entrySet());
+    List<Entry<Column, Object>> list = sortedEntries(insertData);
     for (int i = 0; i < list.size(); i++) {
       int j = i + 1;
       statement.setObject(j, list.get(i).getValue());
     }
+  }
+
+  private static List<Entry<Column, Object>> sortedEntries(Map<Column, Object> data) {
+    List<Entry<Column, Object>> list = new ArrayList<>(data.entrySet());
+    list.sort(Comparator.comparing(e -> e.getKey().getName()));
+    return list;
   }
 
   /**

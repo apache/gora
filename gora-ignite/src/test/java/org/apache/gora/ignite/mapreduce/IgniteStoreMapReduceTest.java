@@ -20,46 +20,66 @@ package org.apache.gora.ignite.mapreduce;
 import java.io.IOException;
 import org.apache.gora.examples.generated.WebPage;
 import org.apache.gora.ignite.GoraIgniteTestDriver;
-import org.apache.gora.mapreduce.DataStoreMapReduceTestBase;
+import org.apache.gora.mapreduce.MapReduceTestUtils;
 import org.apache.gora.store.DataStore;
-import org.apache.gora.store.DataStoreFactory;
+import org.apache.hadoop.mapred.JobConf;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * Executes tests for MR jobs over Ignite dataStore.
+ * Executes tests for MR jobs over Ignite dataStore using a lightweight local MR runner.
  */
-public class IgniteStoreMapReduceTest extends DataStoreMapReduceTestBase {
+public class IgniteStoreMapReduceTest {
 
-  private GoraIgniteTestDriver driver;
+  private static final Logger LOG = LoggerFactory.getLogger(IgniteStoreMapReduceTest.class);
+  private static final GoraIgniteTestDriver DRIVER = new GoraIgniteTestDriver();
+  private DataStore<String, WebPage> webPageStore;
+  private JobConf jobConf;
 
-  public IgniteStoreMapReduceTest() throws IOException {
-    super();
-    driver = new GoraIgniteTestDriver();
+  @BeforeClass
+  public static void startIgnite() throws Exception {
+    DRIVER.setUpClass();
   }
 
-  @Override
+  @AfterClass
+  public static void stopIgnite() throws Exception {
+    DRIVER.tearDownClass();
+  }
+
   @Before
   public void setUp() throws Exception {
-    driver.setUpClass();
-    super.setUp();
+    DRIVER.setUp();
+    jobConf = new JobConf(DRIVER.getConfiguration());
+    jobConf.set("mapreduce.framework.name", "local");
+    jobConf.set("mapred.job.tracker", "local");
+    jobConf.set("fs.defaultFS", "file:///");
+    jobConf.setInt("mapreduce.job.maps", 1);
+    webPageStore = DRIVER.createDataStore(String.class, WebPage.class);
   }
 
-  @Override
   @After
   public void tearDown() throws Exception {
-    super.tearDown();
-    driver.tearDownClass();
+    if (webPageStore != null) {
+      try {
+        webPageStore.deleteSchema();
+        webPageStore.close();
+      } catch (Exception ignore) {
+        LOG.warn("Failed to clean up Ignite test datastore", ignore);
+      } finally {
+        webPageStore = null;
+      }
+    }
+    DRIVER.tearDown();
   }
 
-  @Override
-  protected DataStore<String, WebPage> createWebPageDataStore() throws IOException {
-    try {
-      return DataStoreFactory.getDataStore(String.class, WebPage.class, driver.getConfiguration());
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+  @Test
+  public void testCountQuery() throws Exception {
+    MapReduceTestUtils.testCountQuery(webPageStore, jobConf);
   }
 
 }
