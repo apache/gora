@@ -20,8 +20,21 @@ github:
     - object-to-datastore
     - big-data
 
+  rulesets:
+    - name: "Default Branch Protection"
+      type: branch
+      branches:
+        includes:
+          - "~DEFAULT_BRANCH"
+          - "release/*"
+          - "rel/*"
+        excludes: []
+      bypass_teams:
+        - root
+      restrict_deletion: true
+      restrict_force_push: true
 notifications:
-  commits:      commits@gora.apache.org
-  issues:       dev@gora.apache.org
+  commits: commits@gora.apache.org
+  issues: dev@gora.apache.org
   pullrequests: dev@gora.apache.org
   jira_options: link label comment
