@@ -411,7 +411,7 @@ public class GoraDynamoDBCompiler {
       log.error("Error while performing xml mapping.", ex.getMessage());
       throw new RuntimeException(ex);
     } catch(Exception ex) {
-      log.error("An error occured whilst reading the xml mapping file!", ex.getMessage());
+      log.error("An error occurred whilst reading the xml mapping file!", ex.getMessage());
       throw new IOException(ex);
     }
 
